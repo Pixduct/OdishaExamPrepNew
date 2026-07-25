@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `1.6.6` (Scheduled Test Live Notifications in Notification Center) |
+| **Current Version** | `1.6.7` (Dynamic Practice Questions Count & Question Bank Separation) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -37,7 +37,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **Current Milestone:** Production Maintenance & User Experience Expansion
 - **Current Priority:** Spotlight Search Portal & Header Trigger Wiring
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Added scheduled test live/upcoming notifications to `NotificationCenter.tsx`. Tests with `scheduled_at <= now` show as LIVE (pinned top, amber, pulsing, clickable). Tests with `scheduled_at > now` show as SOON (grey, countdown text, non-clickable). LIVE items are always sorted above all other notifications.
+- **Last Completed Task:** Dynamically separated Admin Question Bank metadata count (`questionCount`, e.g., 250 for PDF Question Banks) from actual interactive Practice Set question count (`practiceQuestionCount`). Loaded exact question counts directly from the `questions` table in `App.tsx` during `loadDashboardData`, ensuring practice cards display the exact real count of interactive questions available (e.g. 91, 24, 10) instead of falling back to the admin PDF count.
 
 ---
 
@@ -163,6 +163,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **v1.6.4 (2026-07-25):** Fixed the true root cause of the persistent page blur: removed the `sessionStorage` lazy restore from the `selectedBankItem` state initializer so a hard refresh never re-applies the body blur before the modal can mount. Added a startup `useEffect` in `AppContent` to clear any stale `oep_selectedBankItem` from sessionStorage on every page load.
 - **v1.6.5 (2026-07-25):** Fixed `NotificationCenter.tsx` to exclude empty/unpublished question banks from the notification list (must have >0 questions or >0 PDF links to appear). Added a click-time safety guard so clicking a content-less bank notification silently does nothing instead of triggering the blur/scroll-lock with no modal to dismiss it.
 - **v1.6.6 (2026-07-25):** Added scheduled test live/upcoming awareness to `NotificationCenter.tsx`. Tests with `scheduled_at <= now` appear as LIVE (pinned to top, amber/red pulsing badge, clickable to launch). Tests with `scheduled_at > now` appear as SOON (grey badge, countdown message, non-clickable info-only). Both types are computed client-side in the `useMemo` notification builder.
+- **v1.6.7 (2026-07-25):** Separated Question Bank metadata count (`questionCount`, configured by admin for PDF/Bank view) from interactive Practice Set count (`practiceQuestionCount`). In `App.tsx`, `loadDashboardData` now dynamically counts actual practice questions from the `questions` table for each topic/bank, updating `ScheduledPracticeBankCard` to show the exact real number of interactive questions (e.g., 91, 24, 10, 6) and dynamic session minutes.
 
 ---
 

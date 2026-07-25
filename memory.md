@@ -1,6 +1,6 @@
-# Memory — Notification Center Overhaul, Blur Bug Fix & Scheduled Live Alerts (v1.6.6)
+# Memory — Dynamic Practice Question Count & Question Bank Count Separation (v1.6.7)
 
-Last updated: 2026-07-25T18:19:00+05:30
+Last updated: 2026-07-25T18:37:00+05:30
 
 ## What was built
 
@@ -34,7 +34,14 @@ Last updated: 2026-07-25T18:19:00+05:30
   - **No `scheduled_at`** → regular `'new_test'` entry as before.
 - LIVE items are **always sorted to the top** of the notification list, pinned above all others regardless of timestamp (implemented by splitting `liveItems` + `otherItems` in the `useMemo` return).
 
-### 6. Imprinting — `context/ui-registry.md`
+### 6. Dynamic Practice Question Count Calculation & Separation — `src/App.tsx`
+- **Problem:** Admin sets `questionCount` (e.g. 250) on `questionBanks` for PDF / Question Bank metadata. Practice cards were reading `questionCount` and displaying `250 Questions` `250 Mins Session` for every practice set regardless of how many interactive questions actually existed in the `questions` table.
+- **Fix:** In `App.tsx` during `loadDashboardData`, added a dynamic count query from `supabase.from('questions').select('topic')`.
+- Built an in-memory topic count map and assigned `practiceQuestionCount` = real count of interactive questions in DB for that topic/bank (e.g., 91, 24, 10, 6, or 0).
+- Preserved `questionCount` = admin-configured Question Bank metadata count (e.g., 250) for Question Bank view & PDF store.
+- Updated `ScheduledPracticeBankCard` to use `practiceQuestionCount` for displaying `{totalQs} Questions` and `{totalQs} Mins Session` dynamically.
+
+### 7. Imprinting — `context/ui-registry.md`
 - Imprinted **`NotificationCenter`** (entry 18): all row states, icon gradients, badge classes, popover shape (`rounded-3xl`), and 7 pattern notes.
 - Imprinted **`GlobalSearchModal`** (entry 19): backdrop, window shape (`rounded-[2rem]`), per-section accent color system (exams=brand, tests=indigo, banks=emerald), portal pattern, animation direction.
 

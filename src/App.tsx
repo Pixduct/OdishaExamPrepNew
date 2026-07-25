@@ -3125,7 +3125,9 @@ const ScheduledPracticeBankCard = ({ bank, isMobile, hasAccessTo, activities, ha
   );
   const isInProgress = !isScheduledUpcoming && !!incompleteAct;
 
-  const totalQs = bank.questions || bank.questionCount || bank.question_count || bank.questioncount || incompleteAct?.metadata?.totalQuestions || 0;
+  const totalQs = (bank.practiceQuestionCount !== undefined && bank.practiceQuestionCount !== null)
+    ? bank.practiceQuestionCount
+    : (incompleteAct?.metadata?.totalQuestions || bank.questions || 0);
   const currentQuestionIndex = incompleteAct ? (incompleteAct.metadata?.currentQuestionIndex || 0) : 0;
   const progressPercent = totalQs > 0 ? Math.min(100, Math.round((currentQuestionIndex / totalQs) * 100)) : 0;
 
@@ -3197,7 +3199,7 @@ const ScheduledPracticeBankCard = ({ bank, isMobile, hasAccessTo, activities, ha
               ) : (
                 <div className="flex items-center gap-2 mt-2 text-[10px] font-extrabold text-slate-555 flex-wrap">
                   <span className="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-100/60"><FileText className="w-3 h-3 text-slate-400" /> {totalQs} Questions</span>
-                  <span className="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-100/60"><Clock className="w-3 h-3 text-slate-400" /> {totalQs} Mins</span>
+                  <span className="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-100/60"><Clock className="w-3 h-3 text-slate-400" /> {totalQs > 0 ? `${totalQs} Mins` : 'Soon'}</span>
                 </div>
               )}
             </div>
@@ -3280,7 +3282,7 @@ const ScheduledPracticeBankCard = ({ bank, isMobile, hasAccessTo, activities, ha
             <div className="space-y-4 flex-1 relative z-10 pt-2 text-left">
               <div className="flex gap-4 text-xs font-bold text-slate-555 flex-wrap">
                 <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><FileText className="w-3.5 h-3.5 text-slate-400"/> {totalQs} Questions</span>
-                <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><Clock className="w-3.5 h-3.5 text-slate-400"/> {totalQs} Mins Session</span>
+                <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><Clock className="w-3.5 h-3.5 text-slate-400"/> {totalQs > 0 ? `${totalQs} Mins Session` : 'Practice Session Soon'}</span>
               </div>
             </div>
           )}
@@ -5630,6 +5632,24 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           ? fetchedExams
           : [{ id: 'opsc-aio', name: 'OPSC AIO', description: 'Odisha Public Service Commission All In One', icon: '🏛️', category: 'upcoming' }];
 
+        // Fetch actual practice questions counts per topic/bank from questions table
+        let qCountMap: Record<string, number> = {};
+        try {
+          const { data: qData } = await supabase.from('questions').select('topic');
+          if (qData) {
+            qData.forEach((q: any) => {
+              if (q.topic) {
+                const rawTopic = q.topic;
+                qCountMap[rawTopic] = (qCountMap[rawTopic] || 0) + 1;
+                const norm = rawTopic.toLowerCase().replace(/[\s\-_—–:()]+/g, '').trim();
+                qCountMap[norm] = (qCountMap[norm] || 0) + 1;
+              }
+            });
+          }
+        } catch (e) {
+          console.error("Failed to fetch actual practice questions count:", e);
+        }
+
         // Group banks by type
         const groupedBanks: Record<string, any[]> = {};
         fetchedBanks.forEach((bank: any) => {
@@ -5646,14 +5666,38 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               }
             } catch(e) {}
           }
+
+          const normTitle = (bank.title || '').toLowerCase().replace(/[\s\-_—–:()]+/g, '').trim();
+          const normId = (bank.id || '').toLowerCase().replace(/[\s\-_—–:()]+/g, '').trim();
+          
+          let actualPracticeQs = 0;
+          if (qCountMap[bank.id] !== undefined) {
+            actualPracticeQs = qCountMap[bank.id];
+          } else if (qCountMap[bank.title] !== undefined) {
+            actualPracticeQs = qCountMap[bank.title];
+          } else if (qCountMap[normTitle] !== undefined) {
+            actualPracticeQs = qCountMap[normTitle];
+          } else if (qCountMap[normId] !== undefined) {
+            actualPracticeQs = qCountMap[normId];
+          } else {
+            for (const key of Object.keys(qCountMap)) {
+              const normKey = key.toLowerCase().replace(/[\s\-_—–:()]+/g, '').trim();
+              if (normKey === normTitle || (normKey.length > 5 && normTitle.includes(normKey))) {
+                actualPracticeQs = Math.max(actualPracticeQs, qCountMap[key]);
+              }
+            }
+          }
+
+          const adminQuestionCount = bank.questionCount || bank.question_count || bank.questioncount || bank.questions || 0;
+
           groupedBanks[bank.type].push({
             id: bank.id,
             title: bank.title,
             target_mode: bank.target_mode || 'both',
             scheduled_at: bank.scheduled_at || null,
-            questionCount: bank.questionCount || bank.question_count || bank.questioncount || bank.questions || 0,
-            questions: bank.questionCount || bank.question_count || bank.questioncount || bank.questions || 0,
-            practiceQuestionCount: bank.practiceQuestionCount || 0,
+            questionCount: adminQuestionCount,
+            questions: actualPracticeQs,
+            practiceQuestionCount: actualPracticeQs,
             tagline: parsedTagline.text,
             price: parsedTagline.price || 499,
             image: bank.image,

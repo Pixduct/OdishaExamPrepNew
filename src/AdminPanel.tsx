@@ -203,6 +203,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const [grantSelectedContentId, setGrantSelectedContentId] = useState("");
   const [items, setItems] = useState<any[]>([]);
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
+  const [bankSortDirection, setBankSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // Comprehensive Form State
   const initialFormData = {
@@ -516,6 +517,22 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     }
   };
 
+  const handleBankInlineOrderChange = async (bankId: string, newOrder: number) => {
+    try {
+      const { error } = await supabase
+        .from('questionBanks')
+        .update({ sortOrder: newOrder })
+        .eq('id', bankId);
+      if (error) {
+        console.error("Failed to update bank sortOrder:", error);
+      } else {
+        setBanks(prev => prev.map(b => b.id === bankId ? { ...b, sortOrder: newOrder } : b));
+      }
+    } catch (err) {
+      console.error("Error updating bank sortOrder:", err);
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -709,6 +726,11 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           return titleMatch || examNameMatch || catMatch;
         });
       }
+      filtered = [...filtered].sort((a, b) => {
+        const orderA = a.sortOrder ?? 9999;
+        const orderB = b.sortOrder ?? 9999;
+        return bankSortDirection === 'desc' ? orderB - orderA : orderA - orderB;
+      });
       list = filtered;
     } else if (activeTab === 'users') {
       let filtered = users;
@@ -5478,17 +5500,40 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                       </button>
                     </div>
 
-                    <div className="text-xs font-bold text-slate-500 px-3 py-1 bg-white/60 rounded-xl border border-slate-200/50 hidden lg:block">
-                      {bankSubTab === 'banks' && "Showing Question Banks only (Practice-only items hidden)"}
-                      {bankSubTab === 'practice' && "Showing Practice Mode sets only (PDF-only banks hidden)"}
-                      {bankSubTab === 'all' && "Showing all Content Banks & Practice Sets"}
+                    <div className="flex items-center gap-3 w-full sm:w-auto justify-between">
+                      <div className="flex items-center gap-1 bg-white/80 p-1 rounded-xl border border-slate-200/80 shadow-2xs">
+                        <button
+                          onClick={() => setBankSortDirection('asc')}
+                          className={cn(
+                            "px-3 py-1 rounded-lg text-xs font-black transition-all cursor-pointer",
+                            bankSortDirection === 'asc' ? "bg-brand-600 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
+                          )}
+                        >
+                          ↑ Asc
+                        </button>
+                        <button
+                          onClick={() => setBankSortDirection('desc')}
+                          className={cn(
+                            "px-3 py-1 rounded-lg text-xs font-black transition-all cursor-pointer",
+                            bankSortDirection === 'desc' ? "bg-brand-600 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
+                          )}
+                        >
+                          ↓ Desc
+                        </button>
+                      </div>
+
+                      <div className="text-xs font-bold text-slate-500 px-3 py-1 bg-white/60 rounded-xl border border-slate-200/50 hidden lg:block">
+                        {bankSubTab === 'banks' && "Showing Question Banks only (Practice-only items hidden)"}
+                        {bankSubTab === 'practice' && "Showing Practice Mode sets only (PDF-only banks hidden)"}
+                        {bankSubTab === 'all' && "Showing all Content Banks & Practice Sets"}
+                      </div>
                     </div>
                   </div>
                 )}
 
                 <div className="glass rounded-[2rem] border border-slate-200/50 shadow-xl overflow-hidden bg-white/70">
                   <div className="grid grid-cols-12 bg-slate-100/50 border-b border-slate-200/60 px-8 py-5 text-xs font-black uppercase text-slate-500 tracking-widest">
-                      {activeTab === 'tests' ? (
+                      {activeTab === 'tests' || activeTab === 'banks' ? (
                         <>
                           <div className="col-span-1 flex items-center">
                             <input 
@@ -5559,7 +5604,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                       {items.map((item) => (
                         <Reorder.Item key={item.id} value={item} className="bg-white/50">
                            <div className="hover:bg-brand-50/30 transition-colors group px-8 py-6 grid grid-cols-12 items-center">
-                              {activeTab === 'tests' ? (
+                              {activeTab === 'tests' || activeTab === 'banks' ? (
                                  <>
                                     <div className="col-span-1 flex items-center">
                                       <input 
@@ -5591,15 +5636,31 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                         }}
                                         onBlur={(e) => {
                                           const newVal = parseInt(e.target.value);
-                                          if (!isNaN(newVal) && newVal > 0 && newVal !== (mockTests.find(t => t.id === item.id)?.sortOrder || 0)) {
-                                            handleInlineOrderChange(item.id, newVal);
+                                          if (!isNaN(newVal) && newVal > 0) {
+                                            if (activeTab === 'tests') {
+                                              if (newVal !== (mockTests.find(t => t.id === item.id)?.sortOrder || 0)) {
+                                                handleInlineOrderChange(item.id, newVal);
+                                              }
+                                            } else if (activeTab === 'banks') {
+                                              if (newVal !== (banks.find(b => b.id === item.id)?.sortOrder || 0)) {
+                                                handleBankInlineOrderChange(item.id, newVal);
+                                              }
+                                            }
                                           }
                                         }}
                                         onKeyDown={(e) => {
                                           if (e.key === 'Enter') {
                                             const newVal = parseInt((e.target as HTMLInputElement).value);
-                                            if (!isNaN(newVal) && newVal > 0 && newVal !== (mockTests.find(t => t.id === item.id)?.sortOrder || 0)) {
-                                              handleInlineOrderChange(item.id, newVal);
+                                            if (!isNaN(newVal) && newVal > 0) {
+                                              if (activeTab === 'tests') {
+                                                if (newVal !== (mockTests.find(t => t.id === item.id)?.sortOrder || 0)) {
+                                                  handleInlineOrderChange(item.id, newVal);
+                                                }
+                                              } else if (activeTab === 'banks') {
+                                                if (newVal !== (banks.find(b => b.id === item.id)?.sortOrder || 0)) {
+                                                  handleBankInlineOrderChange(item.id, newVal);
+                                                }
+                                              }
                                               (e.target as HTMLInputElement).blur();
                                             }
                                           }

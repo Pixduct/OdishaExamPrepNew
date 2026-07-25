@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `1.6.9` (Fixed Paginated Practice Question Count — All 3219 Questions Now Counted) |
+| **Current Version** | `1.7.0` (Content Banks & Practice Sets Order Number Management) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -37,7 +37,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **Current Milestone:** Production Maintenance & User Experience Expansion
 - **Current Priority:** Spotlight Search Portal & Header Trigger Wiring
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Fixed paginated questions fetch in `loadDashboardData` (App.tsx v1.6.9). The root cause was that the single `supabase.from('questions').select('topic')` call was hard-capped at Supabase's default 1000-row limit, silently truncating 2219 of 3219 questions. Only the first 1000 rows were being counted. Replaced with a paginated while-loop (same pattern as `examService.ts`) that fetches all pages until exhausted, now correctly reporting `100 Questions` for every practice bank.
+- **Last Completed Task:** Added Order Number (`sortOrder`) management to **Content Banks & Practice Sets** in Admin Control Center (`AdminPanel.tsx` v1.7.0). Added editable inline `<input type="number">` column to `Question Banks (Step 1)`, `Practice Mode Sets (Step 2)`, and `All Items` sub-tabs with auto-save to Supabase on `Blur`/`Enter`. Added `Asc` / `Desc` sort toolbar buttons to Content Banks section, and updated `App.tsx` to sort `dynamicQuestionBanks` by `sortOrder` ascending for student view.
 
 ---
 
@@ -165,7 +165,8 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **v1.6.6 (2026-07-25):** Added scheduled test live/upcoming awareness to `NotificationCenter.tsx`. Tests with `scheduled_at <= now` appear as LIVE (pinned to top, amber/red pulsing badge, clickable to launch). Tests with `scheduled_at > now` appear as SOON (grey badge, countdown message, non-clickable info-only). Both types are computed client-side in the `useMemo` notification builder.
 - **v1.6.7 (2026-07-25):** Separated Question Bank metadata count (`questionCount`, configured by admin for PDF/Bank view) from interactive Practice Set count (`practiceQuestionCount`). In `App.tsx`, `loadDashboardData` now dynamically counts actual practice questions from the `questions` table for each topic/bank, updating `ScheduledPracticeBankCard` to show the exact real number of interactive questions (e.g., 91, 24, 10, 6) and dynamic session minutes.
 - **v1.6.8 (2026-07-25):** Resolved root cause where practice sets with 0 uploaded questions in the `questions` table were forcing `totalQs = 0` despite having an admin-configured `questionCount` (e.g., 250). In `ScheduledPracticeBankCard`, `totalQs` now checks `actualQs > 0 ? actualQs : (adminQs > 0 ? adminQs : 0)`. When real questions exist (e.g. 24, 91, 10), the exact added question count is shown; when no questions are in the `questions` table yet, it falls back to the admin's configured set count (250).
-- **v1.6.9 (2026-07-25):** Fixed the true root cause of wrong practice question counts. The `questions` table has 3219 rows but the single `supabase.from('questions').select('topic')` call was silently capped at Supabase's 1000-row default limit. This made every topic count stale (e.g., Med-Surg showed 24 instead of 100, Personal Hygiene 91 instead of 100). Replaced with a paginated `while` loop that fetches all pages sequentially. Also filters out `mockTest__*` topics during count-map build to avoid stale counts from mock test questions polluting practice bank matching.
+- **v1.6.9 (2026-07-25):** Fixed the true root cause of wrong practice question counts. The `questions` table has 3219 rows but the single `supabase.from('questions').select('topic')` call was silently capped at Supabase's 1000-row default limit. Replaced with a paginated `while` loop that fetches all pages sequentially.
+- **v1.7.0 (2026-07-25):** Implemented full Order Number management feature for **Content Banks & Practice Sets** in Admin Control Center (`AdminPanel.tsx`), matching the layout and behavior of Tests Manager. Added editable `ORDER` input column across `Question Banks (Step 1)`, `Practice Mode Sets (Step 2)`, and `All Items` sub-tabs with inline auto-save to Supabase `questionBanks` table on `Blur` / `Enter`. Added `↑ Asc` / `↓ Desc` sort toolbar toggles in sub-header, and enabled `sortOrder` ascending sorting on client dashboard (`App.tsx`).
 
 ---
 

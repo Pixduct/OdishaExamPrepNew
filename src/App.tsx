@@ -5726,8 +5726,18 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                 return [{ title: 'Download PDF', url: bank.pdfUrl }];
               }
             })(),
+            sortOrder: bank.sortOrder ?? bank.sort_order ?? null,
             hasPracticeMode: bank.hasPracticeMode,
             is_archived: bank.is_archived || false
+          });
+        });
+
+        // Sort banks within each category by sortOrder ascending
+        Object.keys(groupedBanks).forEach((type) => {
+          groupedBanks[type].sort((a: any, b: any) => {
+            const orderA = a.sortOrder ?? 9999;
+            const orderB = b.sortOrder ?? 9999;
+            return orderA - orderB;
           });
         });
 

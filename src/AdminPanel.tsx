@@ -152,7 +152,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const [selectedTypeForQuestions, setSelectedTypeForQuestions] = useState<'mock' | 'bank' | null>(() => (sessionStorage.getItem('oep_qs_type') as 'mock' | 'bank' | null) || null);
   const [selectedCategoryForQuestions, setSelectedCategoryForQuestions] = useState<string | null>(() => sessionStorage.getItem('oep_qs_category') || null);
   const [selectedTargetIdForQuestions, setSelectedTargetIdForQuestions] = useState<string | null>(() => sessionStorage.getItem('oep_qs_targetId') || null);
-  const [bankFilter, setBankFilter] = useState<'all' | 'topic-wise' | 'exam-focused' | 'revision-sets' | 'pyq-collections'>('all');
+  const [bankFilter, setBankFilter] = useState<'topic-wise' | 'exam-focused' | 'revision-sets' | 'pyq-collections'>('topic-wise');
   const [bankTargetModeFilter, setBankTargetModeFilter] = useState<'all' | 'bank' | 'practice' | 'both'>('all');
   const [bankSubTab, setBankSubTab] = useState<'banks' | 'practice' | 'all'>('banks');
   const [searchQuery, setSearchQuery] = useState('');
@@ -710,7 +710,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       } else if (bankSubTab === 'practice') {
         filtered = filtered.filter(b => (b.target_mode || 'both') !== 'bank');
       }
-      if (bankFilter !== 'all') filtered = filtered.filter(b => b.type === bankFilter);
+      filtered = filtered.filter(b => b.type === (bankFilter || 'topic-wise'));
       if (bankTargetModeFilter !== 'all') filtered = filtered.filter(b => (b.target_mode || 'both') === bankTargetModeFilter);
       if (searchQuery.trim()) {
         const lowerQ = searchQuery.toLowerCase();
@@ -5537,7 +5537,6 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                         Hierarchy:
                       </span>
                       {[
-                        { id: 'all', label: 'All Categories', icon: '🌟' },
                         { id: 'topic-wise', label: 'Chapter-Wise Practice', icon: '📘' },
                         { id: 'exam-focused', label: 'High-Yield Topic', icon: '🎯' },
                         { id: 'revision-sets', label: 'Daily Speed Quiz', icon: '⚡' },
@@ -5548,7 +5547,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                           const matchSubTab = bankSubTab === 'all' || 
                             (bankSubTab === 'banks' && (b.target_mode || 'both') !== 'practice') ||
                             (bankSubTab === 'practice' && (b.target_mode || 'both') !== 'bank');
-                          const matchCat = cat.id === 'all' || b.type === cat.id;
+                          const matchCat = b.type === cat.id;
                           return matchExam && matchSubTab && matchCat;
                         }).length;
 

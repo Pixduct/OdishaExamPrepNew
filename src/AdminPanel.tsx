@@ -5449,84 +5449,132 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                 )}
 
                 {activeTab === 'banks' && (
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-2 bg-slate-100/90 rounded-2xl border border-slate-200/80 mb-6">
-                    <div className="flex items-center gap-1.5 w-full sm:w-auto">
-                      <button
-                        onClick={() => setBankSubTab('banks')}
-                        className={cn(
-                          "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer",
-                          bankSubTab === 'banks'
-                            ? "bg-amber-500 text-white shadow-md shadow-amber-500/20"
-                            : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
-                        )}
-                      >
-                        <span className="text-base">📦</span> Question Banks (Step 1)
-                        <span className={cn(
-                          "px-2 py-0.5 rounded-lg text-xs font-black",
-                          bankSubTab === 'banks' ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700"
-                        )}>
-                          {banks.filter(b => (!selectedExamIdForBanks || b.examId === selectedExamIdForBanks) && (b.target_mode || 'both') !== 'practice').length}
-                        </span>
-                      </button>
+                  <div className="space-y-4 mb-6">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-2 bg-slate-100/90 rounded-2xl border border-slate-200/80">
+                      <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                        <button
+                          onClick={() => setBankSubTab('banks')}
+                          className={cn(
+                            "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer",
+                            bankSubTab === 'banks'
+                              ? "bg-amber-500 text-white shadow-md shadow-amber-500/20"
+                              : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+                          )}
+                        >
+                          <span className="text-base">📦</span> Question Banks (Step 1)
+                          <span className={cn(
+                            "px-2 py-0.5 rounded-lg text-xs font-black",
+                            bankSubTab === 'banks' ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700"
+                          )}>
+                            {banks.filter(b => (!selectedExamIdForBanks || b.examId === selectedExamIdForBanks) && (b.target_mode || 'both') !== 'practice').length}
+                          </span>
+                        </button>
 
-                      <button
-                        onClick={() => setBankSubTab('practice')}
-                        className={cn(
-                          "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer",
-                          bankSubTab === 'practice'
-                            ? "bg-brand-600 text-white shadow-md shadow-brand-500/20"
-                            : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
-                        )}
-                      >
-                        <span className="text-base">🎯</span> Practice Mode Sets (Step 2)
-                        <span className={cn(
-                          "px-2 py-0.5 rounded-lg text-xs font-black",
-                          bankSubTab === 'practice' ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700"
-                        )}>
-                          {banks.filter(b => (!selectedExamIdForBanks || b.examId === selectedExamIdForBanks) && (b.target_mode || 'both') !== 'bank').length}
-                        </span>
-                      </button>
+                        <button
+                          onClick={() => setBankSubTab('practice')}
+                          className={cn(
+                            "flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer",
+                            bankSubTab === 'practice'
+                              ? "bg-brand-600 text-white shadow-md shadow-brand-500/20"
+                              : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+                          )}
+                        >
+                          <span className="text-base">🎯</span> Practice Mode Sets (Step 2)
+                          <span className={cn(
+                            "px-2 py-0.5 rounded-lg text-xs font-black",
+                            bankSubTab === 'practice' ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700"
+                          )}>
+                            {banks.filter(b => (!selectedExamIdForBanks || b.examId === selectedExamIdForBanks) && (b.target_mode || 'both') !== 'bank').length}
+                          </span>
+                        </button>
 
-                      <button
-                        onClick={() => setBankSubTab('all')}
-                        className={cn(
-                          "hidden md:flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer",
-                          bankSubTab === 'all'
-                            ? "bg-slate-900 text-white shadow-md shadow-slate-900/20"
-                            : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
-                        )}
-                      >
-                        <span className="text-base">🌟</span> All Items
-                      </button>
+                        <button
+                          onClick={() => setBankSubTab('all')}
+                          className={cn(
+                            "hidden md:flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer",
+                            bankSubTab === 'all'
+                              ? "bg-slate-900 text-white shadow-md shadow-slate-900/20"
+                              : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+                          )}
+                        >
+                          <span className="text-base">🌟</span> All Items
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-3 w-full sm:w-auto justify-between">
+                        <div className="flex items-center gap-1 bg-white/80 p-1 rounded-xl border border-slate-200/80 shadow-2xs">
+                          <button
+                            onClick={() => setBankSortDirection('asc')}
+                            className={cn(
+                              "px-3 py-1 rounded-lg text-xs font-black transition-all cursor-pointer",
+                              bankSortDirection === 'asc' ? "bg-brand-600 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
+                            )}
+                          >
+                            ↑ Asc
+                          </button>
+                          <button
+                            onClick={() => setBankSortDirection('desc')}
+                            className={cn(
+                              "px-3 py-1 rounded-lg text-xs font-black transition-all cursor-pointer",
+                              bankSortDirection === 'desc' ? "bg-brand-600 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
+                            )}
+                          >
+                            ↓ Desc
+                          </button>
+                        </div>
+
+                        <div className="text-xs font-bold text-slate-500 px-3 py-1 bg-white/60 rounded-xl border border-slate-200/50 hidden lg:block">
+                          {bankSubTab === 'banks' && "Showing Question Banks only (Practice-only items hidden)"}
+                          {bankSubTab === 'practice' && "Showing Practice Mode sets only (PDF-only banks hidden)"}
+                          {bankSubTab === 'all' && "Showing all Content Banks & Practice Sets"}
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-3 w-full sm:w-auto justify-between">
-                      <div className="flex items-center gap-1 bg-white/80 p-1 rounded-xl border border-slate-200/80 shadow-2xs">
-                        <button
-                          onClick={() => setBankSortDirection('asc')}
-                          className={cn(
-                            "px-3 py-1 rounded-lg text-xs font-black transition-all cursor-pointer",
-                            bankSortDirection === 'asc' ? "bg-brand-600 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
-                          )}
-                        >
-                          ↑ Asc
-                        </button>
-                        <button
-                          onClick={() => setBankSortDirection('desc')}
-                          className={cn(
-                            "px-3 py-1 rounded-lg text-xs font-black transition-all cursor-pointer",
-                            bankSortDirection === 'desc' ? "bg-brand-600 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
-                          )}
-                        >
-                          ↓ Desc
-                        </button>
-                      </div>
+                    {/* Category Hierarchy Filter Pills Bar */}
+                    <div className="flex flex-wrap items-center gap-2 p-2 bg-white/80 rounded-2xl border border-slate-200/80 shadow-2xs">
+                      <span className="text-xs font-black uppercase tracking-wider text-slate-400 px-3 py-1">
+                        Hierarchy:
+                      </span>
+                      {[
+                        { id: 'all', label: 'All Categories', icon: '🌟' },
+                        { id: 'topic-wise', label: 'Chapter-Wise Practice', icon: '📘' },
+                        { id: 'exam-focused', label: 'High-Yield Topic', icon: '🎯' },
+                        { id: 'revision-sets', label: 'Daily Speed Quiz', icon: '⚡' },
+                        { id: 'pyq-collections', label: 'Topic-Wise PYQ', icon: '📜' }
+                      ].map(cat => {
+                        const count = banks.filter(b => {
+                          const matchExam = !selectedExamIdForBanks || b.examId === selectedExamIdForBanks;
+                          const matchSubTab = bankSubTab === 'all' || 
+                            (bankSubTab === 'banks' && (b.target_mode || 'both') !== 'practice') ||
+                            (bankSubTab === 'practice' && (b.target_mode || 'both') !== 'bank');
+                          const matchCat = cat.id === 'all' || b.type === cat.id;
+                          return matchExam && matchSubTab && matchCat;
+                        }).length;
 
-                      <div className="text-xs font-bold text-slate-500 px-3 py-1 bg-white/60 rounded-xl border border-slate-200/50 hidden lg:block">
-                        {bankSubTab === 'banks' && "Showing Question Banks only (Practice-only items hidden)"}
-                        {bankSubTab === 'practice' && "Showing Practice Mode sets only (PDF-only banks hidden)"}
-                        {bankSubTab === 'all' && "Showing all Content Banks & Practice Sets"}
-                      </div>
+                        const isActive = bankFilter === cat.id;
+                        return (
+                          <button
+                            key={cat.id}
+                            onClick={() => setBankFilter(cat.id as any)}
+                            className={cn(
+                              "flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer",
+                              isActive
+                                ? "bg-slate-900 text-white shadow-md shadow-slate-900/10"
+                                : "bg-slate-100/80 text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                            )}
+                          >
+                            <span>{cat.icon}</span>
+                            <span>{cat.label}</span>
+                            <span className={cn(
+                              "px-2 py-0.5 rounded-md text-[10px] font-black",
+                              isActive ? "bg-white/20 text-white" : "bg-slate-200/80 text-slate-700"
+                            )}>
+                              {count}
+                            </span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 )}

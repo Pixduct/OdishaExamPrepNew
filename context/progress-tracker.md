@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `1.7.0` (Content Banks & Practice Sets Order Number Management) |
+| **Current Version** | `1.7.1` (Content Banks & Practice Mode Hierarchy Toolbar) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -37,7 +37,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **Current Milestone:** Production Maintenance & User Experience Expansion
 - **Current Priority:** Spotlight Search Portal & Header Trigger Wiring
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Added Order Number (`sortOrder`) management to **Content Banks & Practice Sets** in Admin Control Center (`AdminPanel.tsx` v1.7.0). Added editable inline `<input type="number">` column to `Question Banks (Step 1)`, `Practice Mode Sets (Step 2)`, and `All Items` sub-tabs with auto-save to Supabase on `Blur`/`Enter`. Added `Asc` / `Desc` sort toolbar buttons to Content Banks section, and updated `App.tsx` to sort `dynamicQuestionBanks` by `sortOrder` ascending for student view.
+- **Last Completed Task:** Added Content Hierarchy Filter Toolbar to **Content Banks & Practice Sets** in Admin Control Center (`AdminPanel.tsx` v1.7.1). Added a 5-pill category filter bar (`All Categories`, `Chapter-Wise Practice`, `High-Yield Topic`, `Daily Speed Quiz`, `Topic-Wise PYQ`) with dynamic item count badges under both Step 1 (Question Banks) and Step 2 (Practice Mode Sets), completely eliminating unorganized mixed lists.
 
 ---
 
@@ -166,7 +166,8 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **v1.6.7 (2026-07-25):** Separated Question Bank metadata count (`questionCount`, configured by admin for PDF/Bank view) from interactive Practice Set count (`practiceQuestionCount`). In `App.tsx`, `loadDashboardData` now dynamically counts actual practice questions from the `questions` table for each topic/bank, updating `ScheduledPracticeBankCard` to show the exact real number of interactive questions (e.g., 91, 24, 10, 6) and dynamic session minutes.
 - **v1.6.8 (2026-07-25):** Resolved root cause where practice sets with 0 uploaded questions in the `questions` table were forcing `totalQs = 0` despite having an admin-configured `questionCount` (e.g., 250). In `ScheduledPracticeBankCard`, `totalQs` now checks `actualQs > 0 ? actualQs : (adminQs > 0 ? adminQs : 0)`. When real questions exist (e.g. 24, 91, 10), the exact added question count is shown; when no questions are in the `questions` table yet, it falls back to the admin's configured set count (250).
 - **v1.6.9 (2026-07-25):** Fixed the true root cause of wrong practice question counts. The `questions` table has 3219 rows but the single `supabase.from('questions').select('topic')` call was silently capped at Supabase's 1000-row default limit. Replaced with a paginated `while` loop that fetches all pages sequentially.
-- **v1.7.0 (2026-07-25):** Implemented full Order Number management feature for **Content Banks & Practice Sets** in Admin Control Center (`AdminPanel.tsx`), matching the layout and behavior of Tests Manager. Added editable `ORDER` input column across `Question Banks (Step 1)`, `Practice Mode Sets (Step 2)`, and `All Items` sub-tabs with inline auto-save to Supabase `questionBanks` table on `Blur` / `Enter`. Added `↑ Asc` / `↓ Desc` sort toolbar toggles in sub-header, and enabled `sortOrder` ascending sorting on client dashboard (`App.tsx`).
+- **v1.7.0 (2026-07-25):** Implemented full Order Number management feature for **Content Banks & Practice Sets** in Admin Control Center (`AdminPanel.tsx`), matching the layout and behavior of Tests Manager.
+- **v1.7.1 (2026-07-25):** Added **Practice Mode Content Hierarchy Toolbar** to Content Banks & Practice Sets in Admin Control Center ([src/AdminPanel.tsx](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx)). Added a sleek category hierarchy pill bar directly below the Step 1 / Step 2 sub-tabs with dynamic count badges for `🌟 All Categories`, `📘 Chapter-Wise Practice`, `🎯 High-Yield Topic`, `⚡ Daily Speed Quiz`, and `📜 Topic-Wise PYQ`. Admins can now instantly filter, view, and organize practice sets by category with zero list clutter.
 
 ---
 

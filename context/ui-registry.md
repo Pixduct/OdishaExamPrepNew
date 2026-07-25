@@ -36,6 +36,10 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`AnimatedRoutes`** | Navigation | [`src/components/AnimatedRoutes.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/AnimatedRoutes.tsx) | Motion Fade Transition | App.tsx | Active |
 | **`ProtectedRoute`** | Guard | [`src/components/ProtectedRoute.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/ProtectedRoute.tsx) | Auth Route Guard | App.tsx | Active |
 | **`VoiceWaveVisualizer`** | Feedback | [`src/components/VoiceWaveVisualizer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/VoiceWaveVisualizer.tsx) | Equalizer waveform animation | AiMentor.tsx, StickyAICompanion.tsx | Active |
+| **`QuestionBankCard`** | Data Display | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L6885-L7080) | Grid Card, Mobile List Item | App.tsx | Active |
+| **`ScheduledPracticeBankCard`** | Data Display | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L3073-L3285) | Desktop Grid, Mobile List Item | App.tsx | Active |
+| **`NotificationCenter`** | Navigation / Overlay | [`src/components/NotificationCenter.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/NotificationCenter.tsx) | Bell Trigger + Floating Popover | App.tsx (Header) | Active |
+| **`GlobalSearchModal`** | Navigation / Overlay | [`src/components/GlobalSearchModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/GlobalSearchModal.tsx) | Spotlight Search Portal (Full-screen portal) | App.tsx (Header) | Active |
 
 ---
 
@@ -131,6 +135,71 @@ import { UniversalMathDiagramEngine } from '../components/UniversalMathDiagramEn
 - **Auto-Scroll on Refresh/Mount**: Chat message lists in `AiMentor` and `StickyAICompanion` MUST place `<div ref={chatEndRef} />` at the bottom and use a mount `useEffect` to scroll directly to the bottom (`behavior: 'auto'`) on initial page load / refresh so users instantly see their latest messages.
 - **Live Voice Control**: Clicking the green `((•))` button or the Red `X` button MUST set `setIsLiveVoiceMode(false)` synchronously to ensure auto-restart hooks cleanly halt.
 - **Multi-Chat Session Manager**: OdishaExamPrep AI in `AiMentor.tsx` uses `ChatSession[]` stored in `localStorage` (`oep_ai_chat_sessions`). `+ New Chat` starts a fresh thread while `History 🕒` toggles a slide-over glassmorphic drawer (`bg-white/95 backdrop-blur-xl z-40`) featuring live search, inline title editing, and deletion.
+- **Fullscreen Workspace Mode**: Fullscreen mode in `AiMentor.tsx` MUST use `fixed inset-0 z-[100] w-screen h-dvh rounded-none border-none shadow-none bg-white` container styling combined with browser HTML5 `requestFullscreen()` and an `ESC` key `fullscreenchange` event listener to ensure seamless enter/exit behavior across desktop viewports.
+- **Smart Auto-Toggle Web Search**: The prompt input box in both `AiMentor.tsx` and `StickyAICompanion.tsx` contains an inline, left-aligned `Globe` button (🌐). As the user types, it automatically triggers a web search query (turns brand-blue) when keywords like "today", "current", "news", or "latest" are matched. The user can click it to manually force active/inactive states.
+- **Multimodal Image Attachment Upload**: Uploaded image files (`.png`, `.jpg`, `.jpeg`, `.webp`) convert to base64 Data URLs (`data:image/...`). Express body parser in `server.ts` enforces `limit: '50mb'` to handle high-resolution image uploads cleanly, routing vision payloads `{ type: 'image_url', image_url: { url } }` to `meta/llama-3.2-11b-vision-instruct` with seamless text-model fallback.
+- **ChatGPT-Inspired Attachment Tray**: Attached files render inside a clean horizontal flex strip (`overflow-x-auto gap-2.5 py-1 px-1`). Images display as square 64x64px rounded thumbnail tiles (`w-16 h-16 rounded-xl border border-slate-200/90 shadow-xs object-cover`) with hover-overlay `✕` close buttons. Documents display as horizontal mini-cards (`rounded-xl bg-slate-50 border border-slate-200/80 max-w-[220px]`) with a red PDF badge icon, filename, size, and close icon. Sitting inside the input container, 1, 2, 3, or more files line up side-by-side without vertical stacking or overlapping Quick/Best mode buttons.
+- **ChatGPT-Style Visual Chat Message Attachment Cards**: Attached images in student chat bubbles render as visual square thumbnail cards (`w-18 h-18 sm:w-22 sm:h-22 rounded-xl border border-white/30 object-cover shadow-md hover:scale-105`) instead of raw filename strings (`[ 📎 Gemini Generated Image... ]`). Clicking any image tile opens an interactive full-screen Lightbox Zoom Modal (`fixed inset-0 z-[300] bg-slate-950/90 backdrop-blur-md`).
+
+---
+
+### `ChatGPTAttachmentTray`
+
+File: `src/pages/AiMentor.tsx`
+Last updated: 2026-07-25
+
+| Property | Class |
+| :--- | :--- |
+| Background — Container | `bg-white/90` |
+| Background — Image Tile | `bg-slate-100` |
+| Background — Doc Card | `bg-slate-50` |
+| Background — PDF Badge | `bg-rose-50` |
+| Border — Container | `border border-slate-200/80` |
+| Border — Tile / Card | `border border-slate-200/90` |
+| Border radius — Container | `rounded-2xl` |
+| Border radius — Tiles / Cards | `rounded-xl` |
+| Text — Primary (Filename) | `text-xs font-bold text-slate-800` |
+| Text — Secondary (File Size) | `text-[10px] text-slate-400 font-medium font-mono` |
+| Spacing — Tray | `mb-2 px-1 py-1` |
+| Spacing — Flex Row | `gap-2.5 px-1 py-1 overflow-x-auto no-scrollbar scroll-smooth` |
+| Hover state — Image Zoom | `group-hover/thumb:scale-105` |
+| Hover state — Dismiss Badge | `bg-slate-950/75 hover:bg-rose-600 text-white` |
+| Shadow | `shadow-xs` |
+
+**Pattern notes:**
+- Attached files sit inside the input wrapper above the prompt textarea, preventing vertical stacking or button misalignment.
+- Image attachments render as 64x64px square thumbnail tiles (`w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover`).
+- Document attachments render as horizontal mini-cards (`max-w-[220px]`) with a red PDF badge icon, filename, and size.
+
+---
+
+### `ChatGPTChatAttachmentCards`
+
+File: `src/pages/AiMentor.tsx`
+Last updated: 2026-07-25
+
+| Property | Class |
+| :--- | :--- |
+| Background — Chat Image Tile | `bg-slate-900/40` |
+| Background — Doc Mini-Card | `bg-white/15 backdrop-blur-xs` |
+| Background — Lightbox Overlay | `bg-slate-950/90 backdrop-blur-md` |
+| Background — Lightbox Modal Card | `bg-slate-900 border border-slate-700/80` |
+| Border — Chat Image Tile | `border border-white/30` |
+| Border — Doc Mini-Card | `border border-white/25` |
+| Border radius — Chat Tile / Card | `rounded-xl` |
+| Border radius — Lightbox Modal | `rounded-2xl` |
+| Text — Doc Filename | `text-xs font-semibold text-white` |
+| Text — Lightbox Header | `text-xs font-bold text-slate-300` |
+| Spacing — Chat Tile Grid | `flex items-center gap-2 flex-wrap mb-2 pt-0.5` |
+| Spacing — Tile Dimensions | `w-18 h-18 sm:w-22 sm:h-22` (72x72px to 88x88px) |
+| Hover state — Tile Zoom | `group/chatimg hover:scale-105 active:scale-95 transition-all` |
+| Hover state — Zoom Overlay Icon | `opacity-0 group-hover/chatimg:opacity-100 transition-opacity` |
+| Shadow | `shadow-md` (tiles), `shadow-2xl` (modal) |
+
+**Pattern notes:**
+- Attached images in student chat bubbles render as visual square thumbnail cards instead of raw text filename strings (`[ 📎 Gemini Generated Image... ]`).
+- Prompt text stays clean and unpolluted by raw file badges.
+- Clicking any image tile opens an interactive full-screen Lightbox Zoom Modal for inspecting uploaded question screenshots.
 
 ---
 
@@ -262,6 +331,58 @@ import { SearchableSelect } from '../components/SearchableSelect';
 
 ---
 
+### 12. `SmartSearchPromptInput`
+- **File Path:** [`src/pages/AiMentor.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/AiMentor.tsx#L4345-L4390) & [`src/components/StickyAICompanion.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/StickyAICompanion.tsx#L2355-L2370)
+- **Category:** Form Control / Interactive Input
+- **Purpose:** Chat prompt input fields utilized by both AiMentor and the floating StickyAICompanion, optimized for inline web search auto-toggle and voice dictation support.
+- **Props:** Input value and state toggles managed locally inside page contexts.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Input Background** | `bg-white` (AiMentor) / `bg-slate-50/70` (StickyAICompanion) |
+| **Input Border** | `border border-slate-200/60 focus:border-slate-300/80` (AiMentor) / `border border-slate-200/60 focus:border-brand-400/80` (StickyAICompanion) |
+| **Border Radius** | `rounded-xl` (AiMentor) / `rounded-2xl` (StickyAICompanion) |
+| **Text — Primary** | `text-slate-800 font-semibold` (AiMentor) / `text-slate-800 font-medium` (StickyAICompanion) |
+| **Text — Secondary** | `placeholder:text-slate-500` (AiMentor) / `placeholder:text-slate-450` (StickyAICompanion) |
+| **Spacing & Padding** | `pl-9 pr-10 py-2.5` (AiMentor) / `pl-7.5 pr-8 py-2 sm:py-2.5` (StickyAICompanion) |
+| **Focus Highlight** | Focus glow overlay: `group-focus-within:opacity-100 blur-sm bg-gradient-to-r from-brand-500/40 to-brand-600/20` (AiMentor) / `focus:bg-white` (StickyAICompanion) |
+| **Globe Button (Active)** | `absolute left-2.5 (or left-2) top-1/2 -translate-y-1/2 p-1 rounded-lg border text-brand-600 bg-brand-50 border-brand-200/50 shadow-xs hover:bg-brand-100/50 animate-pulse` |
+| **Globe Button (Inactive)** | `absolute left-2.5 (or left-2) top-1/2 -translate-y-1/2 p-1 rounded-lg border text-slate-400 border-transparent hover:text-slate-650 hover:bg-slate-100` |
+
+**Pattern notes:**
+- **Symmetric Inline Icons:** Chat input fields MUST place the `Globe` search button (🌐) on the absolute left (`left-2.5` / `left-2`) and the `Mic` dictation button (🎙️) on the absolute right (`right-2.5` / `right-2`).
+- **Grounded Auto-Toggle Feedback:** As the user types, the `Globe` icon MUST automatically turn brand-blue and pulse when matching current affairs query keywords (such as "today", "current", "latest", "news", "2026", "opsc", etc.). Manual clicking allows toggling and overrides auto-detection.
+- **Line Height Prevention:** Parent divs MUST declare `relative flex-1` to prevent flex boundaries from squishing input elements.
+
+---
+
+### 13. `QuestionBankCard`
+- **File Path:** [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L6885-L7080)
+- **Category:** Data Display / Card
+- **Purpose:** Displays individual downloadable Question Banks and PDF collections with question count indicators, premium/free badges, tagline chips, and interactive view details triggers.
+- **Last Updated:** July 25, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Background (Desktop Card)** | `bg-white shadow-sm flex flex-col` |
+| **Background (Mobile Item)** | `bg-white border border-slate-100 rounded-2xl` |
+| **Border & Radius (Desktop)** | `border-slate-200/50 rounded-[2rem]` |
+| **Border & Radius (Mobile)** | `border border-slate-100 rounded-2xl` |
+| **Hero Image Section** | `h-44 overflow-hidden relative shrink-0 border-b border-slate-100` |
+| **Text — Primary Title** | `text-lg font-serif font-extrabold text-slate-900 capitalize tracking-tight leading-snug line-clamp-1` |
+| **Text — Secondary Stat** | `text-xs font-bold text-slate-500` |
+| **Free Badge** | `px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[8px] font-black uppercase tracking-wider rounded border border-emerald-200/40` |
+| **Premium Badge** | `px-2 py-0.5 bg-rose-50 text-[#2563EB] text-[8px] font-black uppercase tracking-wider rounded border border-rose-200/40` |
+| **Tagline Badge** | `bg-gradient-to-r from-brand-50/70 to-indigo-50/40 px-3 py-1.5 rounded-xl border border-brand-100/30 text-brand-650 text-[10px] font-black uppercase tracking-wider` |
+| **Primary Action Button** | `w-full py-3 px-6 rounded-xl font-black text-xs uppercase tracking-wider border border-brand-100 bg-brand-50/40 text-brand-600 shadow-sm` |
+| **Hover State** | `hover:border-brand-300/80 hover:-translate-y-1.5 transition-all duration-500 hover:shadow-xl` |
+
+**Pattern notes:**
+- **Admin `questionCount` Priority**: Question Bank cards MUST prioritize displaying `item.questionCount` (the total number of questions configured by the admin for the downloadable bank) rather than overwriting it with interactive DB practice test counts.
+- **Defensive Tagline Parsing**: Tagline values stored in `questionBanks` table can be either plain strings (`"Concept-Focused Practice"`) or JSON-encoded strings (`{"text": "...", "price": 499}`). Parsers in `App.tsx` and `AdminPanel.tsx` MUST check `trim().startsWith('{')` before parsing JSON to prevent wiping plain text taglines.
+
+---
+
 ## Component Dependency Graph
 
 ```mermaid
@@ -292,3 +413,222 @@ graph TD
 4. NEVER build custom full-screen loading spinners; use `LoadingPortal.tsx`.
 5. NEVER duplicate top navigation header structures; wrap pages in `PageLayout.tsx`.
 6. NEVER create alternative payment unlock overlays outside Razorpay modal handlers in `App.tsx`.
+7. NEVER hardcode Bank Category labels in JSX — always derive from `categoryOptions[tMode]` so labels stay in sync with the selected Display Target.
+
+---
+
+### 14. `ContentBankModal` (Add / Edit Content Bank Form)
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx)
+Last updated: 2026-07-25
+
+| Property | Class |
+| --- | --- |
+| Background — Modal Overlay | `fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center` |
+| Background — Modal Card | `bg-white rounded-[2rem] shadow-2xl` |
+| Background — Bottom Section | `bg-slate-50/40 p-6 rounded-3xl border border-slate-200/60 shadow-sm` |
+| Background — PDF Link Row | `bg-slate-50/30 p-5 rounded-2xl border border-slate-200/60 shadow-sm` |
+| Border — Modal Card | `border border-slate-200/60` |
+| Border radius — Modal | `rounded-[2rem]` |
+| Border radius — Bottom Panel | `rounded-3xl` |
+| Border radius — PDF Row | `rounded-2xl` |
+| Text — Section Label | `text-sm font-black text-slate-800 uppercase tracking-wider` |
+| Text — Field Label | `text-xs font-black text-slate-600 uppercase tracking-wider` (via `labelClass`) |
+| Text — Helper Caption | `text-xs text-slate-400 font-semibold` |
+| Text — Tiny Caption | `text-[10px] font-bold text-slate-400 italic` |
+| Spacing — Form Grid | `grid grid-cols-1 md:grid-cols-2 gap-6` |
+| Spacing — Bottom Section Gap | `flex flex-col gap-5` |
+| Input — Background | `bg-slate-50/50 border border-slate-200/80 rounded-xl` (via `inputClass`) |
+| Input — Focus | `focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400` |
+| Select Wrapper | `relative` with `ChevronDown` icon absolutely positioned `right-3.5 top-1/2 -translate-y-1/2 pointer-events-none` |
+| Hover state — Divider Row | `pt-4 border-t border-slate-200/60` |
+| Toggle — Off | `bg-slate-200` |
+| Toggle — On | `peer-checked:bg-brand-500` |
+| Shadow | `shadow-sm` on bottom section panel |
+| Accent — Banner (Bank Only) | `bg-amber-50 border-amber-200 text-amber-700 rounded-2xl` |
+| Accent — Banner (Practice Only) | `bg-brand-50 border-brand-200 text-brand-700 rounded-2xl` |
+
+**Pattern notes:**
+- The modal `case 'banks'` block MUST open with a `const tMode` declaration block before the `return ()` so all conditional vars (`showPdf`, `showTagline`, `showPracticeToggle`, `activeCategoryOptions`) are derived from `formData.target_mode` — this keeps the entire form reactive in one place.
+- Bank Category labels MUST come from the `categoryOptions[tMode]` lookup table and NEVER be hardcoded in the JSX `<option>` tags, so switching Display Target instantly remaps the labels without requiring a separate state update.
+- The PDF Download Links section, Tagline field, and Image URL field MUST all be conditionally hidden when `tMode === 'practice'` — practice-only banks only need Exam, Title, Category, and Questions Count.
+- The "Enable Practice Now" toggle MUST only appear when `tMode === 'both'` — it is redundant for bank-only (always OFF) and practice-only (always ON), and auto-managed by selecting the Display Target card.
+- Info banners at the top MUST use amber (`bg-amber-50`) for bank-only and brand-blue (`bg-brand-50`) for practice-only to give immediate visual distinction before the user reads any text.
+
+---
+
+### 15. `DisplayTargetSelector` (3-Card Target Picker)
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx)
+Last updated: 2026-07-25
+
+| Property | Class |
+| --- | --- |
+| Background — Card (inactive) | `bg-white` |
+| Background — Card (active) | `bg-brand-50` |
+| Border — Card (inactive) | `border-2 border-slate-200` |
+| Border — Card (active) | `border-2 border-brand-500` |
+| Border radius — Card | `rounded-2xl` |
+| Text — Card Label (inactive) | `text-xs font-black tracking-tight text-slate-700` |
+| Text — Card Label (active) | `text-xs font-black tracking-tight text-brand-700` |
+| Text — Card Sub | `text-[10px] font-semibold text-slate-400 leading-tight` |
+| Spacing — Card Grid | `grid grid-cols-3 gap-3` |
+| Spacing — Card Padding | `p-4` |
+| Hover state | `hover:border-brand-300` |
+| Shadow — active | `shadow-md shadow-brand-500/10` |
+| Icon | `text-xl` emoji, rendered as first item in flex-column |
+
+**Pattern notes:**
+- This 3-card picker pattern MUST always use a `grid grid-cols-3 gap-3` layout — never tabs or a single dropdown — so all three options are visually simultaneously visible and comparable.
+- Clicking a card MUST also auto-set dependent state (e.g., `hasPracticeMode`) in the same `setFormData` call — never in a separate `useEffect`.
+- Active card highlight uses `border-brand-500 bg-brand-50 shadow-md shadow-brand-500/10` (3 properties together) — never just border or background alone.
+- Cards use `type="button"` attribute to prevent accidental form submission when clicked inside a `<form>` element.
+
+---
+
+### 16. `BankSubTabSwitcher` (Content Bank vs Practice Mode Switcher)
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx)
+Last updated: 2026-07-25
+
+| Property | Class |
+| --- | --- |
+| Container | `flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-2 bg-slate-100/90 rounded-2xl border border-slate-200/80 mb-6` |
+| Active Tab (Question Banks) | `bg-amber-500 text-white shadow-md shadow-amber-500/20` |
+| Active Tab (Practice Mode Sets) | `bg-brand-600 text-white shadow-md shadow-brand-500/20` |
+| Active Tab (All Items) | `bg-slate-900 text-white shadow-md shadow-slate-900/20` |
+| Inactive Tab | `text-slate-600 hover:text-slate-900 hover:bg-white/50` |
+| Badge (Active) | `bg-white/20 text-white` |
+| Badge (Inactive) | `bg-slate-200 text-slate-700` |
+
+**Pattern notes:**
+- Main Admin Content Banks section MUST separate Question Banks (`target_mode !== 'practice'`) and Practice Sets (`target_mode !== 'bank'`) into dedicated sub-tabs so admins never see Practice Mode quizes mixed into Question Banks.
+- Switching sub-tabs MUST automatically adjust `formData.target_mode` when clicking "+ Add New" button.
+
+---
+
+### 17. `ScheduledPracticeBankCard` & `ScheduledMockTestCard` (Scheduled Release Cards)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L3073-L3285)
+Last updated: 2026-07-25
+
+| Property | Class |
+| --- | --- |
+| Container (Grid Layout) | `h-full flex flex-col justify-between` |
+| Background — Card (Upcoming) | `bg-amber-50/10 border-amber-200 cursor-not-allowed` |
+| Icon Container (Upcoming) | `bg-gradient-to-br from-amber-400 to-orange-500 shadow-md text-white` |
+| Badge — UPCOMING | `bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-black uppercase tracking-widest` |
+| Countdown Box | `bg-amber-50/80 border border-amber-200/80 rounded-xl p-3.5 space-y-1.5 text-left` |
+| Mono Countdown Badge | `font-mono text-xs tracking-wider font-black text-amber-950 bg-amber-200/60 px-2 py-0.5 rounded-md border border-amber-300/60` |
+| Release Text | `text-[11px] font-semibold text-amber-800` |
+| Unlock Action Button (High-Contrast) | `w-full h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-xs sm:text-sm bg-amber-500/15 border-2 border-amber-400 text-amber-950 shadow-sm cursor-not-allowed mt-auto pointer-events-none` |
+
+**Pattern notes:**
+- Scheduled release cards MUST use `h-full flex flex-col justify-between` wrapper to guarantee equal card heights and baseline button alignment across grid rows.
+- Countdown boxes MUST present a balanced 2-row layout: Row 1 containing the `Release Countdown` title and `font-mono` countdown badge; Row 2 containing `Scheduled for [Date & Time]`.
+- Unlock buttons on scheduled cards MUST use standalone `<button type="button">` with solid `bg-amber-500/15 border-2 border-amber-400 text-amber-950 font-black` (100% opacity) instead of `<Button disabled={true}>` to avoid 50% opacity fading and underlying blue gradient bleed.
+
+---
+
+### `NotificationCenter`
+
+File: [`src/components/NotificationCenter.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/NotificationCenter.tsx)
+Last updated: 2026-07-25
+
+| Property | Class |
+| --- | --- |
+| Background — Popover | `bg-white/95 backdrop-blur-3xl` |
+| Border — Popover | `border border-white/60` |
+| Border radius — Popover | `rounded-3xl` |
+| Shadow — Popover | `shadow-[0_20px_50px_rgba(12,35,64,0.15)] premium-shadow` |
+| Header — Background | `bg-white/70 backdrop-blur-xs` |
+| Header — Border | `border-b border-slate-100` |
+| Header — Spacing | `p-4` |
+| Header — Title text | `font-extrabold text-sm text-slate-900` |
+| Header — Action text | `text-[11px] font-extrabold` (brand-600 for Mark read, slate-500 for Clear) |
+| List row — Spacing | `p-3.5` |
+| List row — Gap | `gap-3.5` |
+| List row — Border | `border-l-2 border-b border-b-slate-100/40` |
+| Row state — Unread | `bg-brand-500/[0.02] hover:bg-brand-500/[0.05] border-l-brand-500` |
+| Row state — Read | `bg-transparent hover:bg-white/40 border-l-transparent hover:border-l-brand-500/40` |
+| Row state — LIVE | `bg-amber-50/60 hover:bg-amber-50 border-l-amber-500` |
+| Row state — SOON | `bg-slate-50/50 border-l-slate-200 opacity-80 cursor-default` |
+| Icon container | `w-9 h-9 rounded-xl text-white mt-0.5` |
+| Icon — new_exam | `bg-gradient-to-br from-indigo-500 to-purple-500 shadow-md shadow-indigo-500/15` |
+| Icon — new_test | `bg-gradient-to-br from-blue-500 to-cyan-500 shadow-md shadow-blue-500/15` |
+| Icon — new_bank | `bg-gradient-to-br from-emerald-500 to-teal-500 shadow-md shadow-emerald-500/15` |
+| Icon — scheduled_live | `bg-gradient-to-br from-amber-500 to-orange-500 shadow-md shadow-amber-500/25 animate-pulse` |
+| Icon — scheduled_upcoming | `bg-gradient-to-br from-slate-400 to-slate-500 shadow-sm` |
+| Title text — default | `font-extrabold text-xs text-slate-900 group-hover:text-brand-600` |
+| Title text — LIVE | `font-extrabold text-xs text-amber-900 group-hover:text-amber-700` |
+| Body text — default | `text-[11px] font-semibold text-slate-500 group-hover:text-slate-600` |
+| Body text — LIVE | `text-[11px] font-semibold text-amber-700 group-hover:text-amber-800` |
+| Badge — Unread dot | `w-2 h-2 rounded-full bg-brand-500 animate-pulse` |
+| Badge — LIVE pill | `px-1.5 py-0.5 bg-rose-500 text-white text-[9px] font-black rounded uppercase tracking-wide animate-pulse` |
+| Badge — SOON pill | `px-1.5 py-0.5 bg-slate-200 text-slate-600 text-[9px] font-black rounded uppercase tracking-wide` |
+| Unread count badge (bell) | `w-4 h-4 bg-rose-500 text-white font-black text-[9px] rounded-full border-2 border-white animate-pulse` |
+| Unread count badge (header) | `px-2 py-0.5 text-[10px] font-black text-rose-700 bg-rose-100 rounded-full border border-rose-200 animate-pulse` |
+| Bell trigger | `p-2 rounded-xl text-slate-600 hover:text-brand-600 hover:bg-slate-100/80 transition-all duration-200` |
+| Scroll container | `max-h-[380px] overflow-y-auto divide-y divide-slate-100/60 premium-scrollbar` |
+| Empty state icon | `w-8 h-8 text-brand-500/60 mx-auto animate-bounce` |
+| Empty state title | `text-xs font-black text-slate-800` |
+| Empty state body | `text-[10px] font-semibold text-slate-400` |
+
+**Pattern notes:**
+- The popover uses `rounded-3xl` (not `rounded-2xl`) to feel deliberately distinct from the card modals (`rounded-[2rem]`).
+- Notification row icons are always `rounded-xl w-9 h-9` with a `bg-gradient-to-br` two-color gradient. Each notification type gets its own gradient pair — do not mix them.
+- LIVE scheduled tests are **always sorted before all other notifications** in the list, regardless of their timestamp. This is enforced in the `useMemo` builder by splitting `liveItems` and `otherItems`.
+- UPCOMING (not-yet-live scheduled) notifications are **non-clickable** (`actionType: 'none'`, `cursor-default`). No chevron is rendered for them.
+- Empty question banks (0 questions AND 0 pdfLinks) must be filtered out before being added to the notification list. The filter is: `hasQuestions || hasPdfs` must be `true`.
+- The bell badge uses `border-2 border-white` to create a cutout effect over the header background.
+- Animation entry uses framer-motion `spring` with `damping: 25, stiffness: 300` — do not change to `ease` or `tween` for this component.
+
+---
+
+### `GlobalSearchModal`
+
+File: [`src/components/GlobalSearchModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/GlobalSearchModal.tsx)
+Last updated: 2026-07-25
+
+| Property | Class |
+| --- | --- |
+| Background — Modal window | `bg-white/80 backdrop-blur-2xl` |
+| Border — Modal | `border border-white/60` |
+| Border radius — Modal | `rounded-[2rem]` |
+| Shadow — Modal | `shadow-[0_25px_60px_-15px_rgba(12,35,64,0.18)] premium-shadow` |
+| Backdrop | `bg-slate-900/60 backdrop-blur-md` |
+| Search input bar — Background | `bg-white/40` (focuses to `bg-white/70`) |
+| Search input bar — Border | `border-b border-slate-100` |
+| Search input bar — Focus ring | `focus-within:ring-2 focus-within:ring-brand-500/8 focus-within:border-brand-500/20` |
+| Input text | `text-slate-900 font-extrabold text-base sm:text-lg` |
+| Input placeholder | `placeholder:text-slate-400` |
+| Section heading | `text-[11px] font-black uppercase tracking-wider text-slate-400` |
+| Result card — Default | `p-3.5 bg-white/40 hover:bg-white border border-slate-200/50 rounded-2xl` |
+| Result card — Exam hover | `hover:border-brand-300 hover:shadow-lg hover:shadow-brand-500/5` |
+| Result card — Test hover | `hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-500/5` |
+| Result card — Bank hover | `hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-500/5` |
+| Result card title | `font-extrabold text-xs sm:text-sm text-slate-900` |
+| Result card title hover — Exam | `group-hover:text-brand-700` |
+| Result card title hover — Test | `group-hover:text-indigo-700` |
+| Result card title hover — Bank | `group-hover:text-emerald-700` |
+| Result card body | `text-[10px] text-slate-500` |
+| Type badge — Mock Test | `bg-indigo-50 text-indigo-700 border border-indigo-100 text-[9px] font-black uppercase` |
+| Type badge — Scheduled | `bg-amber-100 text-amber-800 border border-amber-200 text-[9px] font-black uppercase` |
+| Type badge — Practice | `bg-emerald-100 text-emerald-800 font-extrabold text-[10px] rounded-lg` |
+| CTA button — Start Test | `bg-indigo-600 text-white hover:bg-indigo-700 rounded-xl font-extrabold text-xs` |
+| CTA button — Locked | `bg-amber-50 text-amber-800 border border-amber-200/50 rounded-xl` |
+| View All button | `py-2 bg-white/40 hover:bg-white border border-slate-200/50 rounded-2xl font-extrabold text-[11px]` |
+| Footer bar | `p-3 bg-slate-50 border-t border-slate-100 text-[11px] font-bold text-slate-400` |
+| Kbd shortcut chip | `px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[10px]` |
+| Scroll container | `flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 premium-scrollbar` |
+| Empty state container | `w-12 h-12 rounded-2xl bg-slate-100 text-slate-400` |
+| Empty state title | `font-extrabold text-slate-800 text-base` |
+| Empty state body | `text-xs text-slate-500` |
+
+**Pattern notes:**
+- The modal renders via `createPortal(…, document.body)` so it sits outside the React component tree and always renders above everything. Do not remove the portal.
+- The window uses `rounded-[2rem]` (same as card modals in App.tsx) — **not** `rounded-3xl` like the NotificationCenter popover.
+- Each content section (Exams, Mock Tests, Practice Sets) uses its own accent color for hover states: `brand-*` for exams, `indigo-*` for tests, `emerald-*` for banks. This must remain consistent — do not mix accent colors across sections.
+- The search input has **no visible border** on its container; focus is communicated only via `focus-within:ring-2` and a subtle background shift (`bg-white/40 → bg-white/70`).
+- Upcoming/scheduled tests inside the search results are non-clickable (`cursor-not-allowed opacity-85`) with amber theming, matching the same system as `ScheduledMockTestCard`.
+- Animation: `spring` with `damping: 25, stiffness: 300`, modal enters from `scale: 0.95, y: -20` (drops down from top, not slides up).

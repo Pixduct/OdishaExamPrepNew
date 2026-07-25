@@ -22,6 +22,7 @@ import {
   Play,
   CheckCircle2,
   AlertCircle,
+  Calendar,
   Info,
   X,
   Trash2,
@@ -59,6 +60,7 @@ import { cn, getDirectImageUrl } from './lib/utils';
 import { examService } from './lib/examService';
 import { DEFAULT_ACHIEVERS_JOURNAL } from './lib/defaultAchievers';
 import { useScrollSpy } from './hooks/useScrollSpy';
+import { useCountdown } from './hooks/useCountdown';
 import { scrollToElement, scrollToTop } from './lib/scrollManager';
 import AnimatedRoutes from './components/AnimatedRoutes';
 import { sectionReveal, sectionRevealSimple, sectionRevealScale, fadeSlideRight, scaleIn, barGrow, whileHover, whileTap, modalBackdrop, slideUpPanel, durations, easings } from './lib/animations';
@@ -89,6 +91,8 @@ import PushPermissionPrompt from './components/PushPermissionPrompt';
 import { registerServiceWorker } from './lib/pushNotifications';
 import { WelcomeVideoModal } from './components/WelcomeVideoModal';
 import { OnboardingTour } from './components/OnboardingTour';
+import { GlobalSearchModal } from './components/GlobalSearchModal';
+import { NotificationCenter } from './components/NotificationCenter';
 
 const HistoryView = ({ 
   user, 
@@ -1512,6 +1516,18 @@ export const Navbar = ({
   const scrolled = useScrollSpy(20);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsSearchModalOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
   
   const drawerContainerVariants = {
     hidden: { opacity: 0 },
@@ -1662,118 +1678,89 @@ export const Navbar = ({
         </div>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-4 lg:gap-6">
-          {/* Desktop nav pill group — uses Framer Motion layoutId for the sliding active indicator */}
-          <div className="flex items-center border-2 border-slate-900 bg-white rounded-xl p-0.5 shadow-[3px_3px_0px_#0f172a] relative">
-            {!user && (
-              <>
-                 {/* Exams */}
-                 <a 
-                   href="#exams"
-                   onClick={(e) => scrollToSection(e, 'exams')}
-                   className="relative flex items-center gap-1.5 text-xs font-black uppercase tracking-widest px-4 py-2 rounded-lg group cursor-pointer"
-                 >
-                   {activeSection === 'exams' && (
-                     <motion.div
-                       layoutId="nav-active-pill"
-                       className="absolute inset-0 rounded-lg bg-[#fce7eb]"
-                       transition={{ type: 'spring', stiffness: 420, damping: 38, mass: 0.8 }}
-                     />
-                   )}
-                   <Target className={cn("relative z-10 w-3.5 h-3.5 transition-colors duration-150", activeSection === 'exams' ? "text-[#2563EB]" : "text-slate-400 group-hover:text-[#2563EB]")} />
-                   <span className={cn("relative z-10 transition-colors duration-150", activeSection === 'exams' ? "text-[#2563EB]" : "text-slate-600 group-hover:text-[#2563EB]")}>Exams</span>
-                 </a>
-                 <div className="w-0.5 h-4 bg-slate-200 mx-0.5 shrink-0"></div>
-                 {/* Syllabus */}
-                 <a 
-                   href="#syllabus-paths"
-                   onClick={(e) => scrollToSection(e, 'syllabus-paths')}
-                   className="relative flex items-center gap-1.5 text-xs font-black uppercase tracking-widest px-4 py-2 rounded-lg group cursor-pointer"
-                 >
-                   {activeSection === 'syllabus-paths' && (
-                     <motion.div
-                       layoutId="nav-active-pill"
-                       className="absolute inset-0 rounded-lg bg-[#fce7eb]"
-                       transition={{ type: 'spring', stiffness: 420, damping: 38, mass: 0.8 }}
-                     />
-                   )}
-                   <BookOpen className={cn("relative z-10 w-3.5 h-3.5 transition-colors duration-150", activeSection === 'syllabus-paths' ? "text-[#2563EB]" : "text-slate-400 group-hover:text-[#2563EB]")} />
-                   <span className={cn("relative z-10 transition-colors duration-150", activeSection === 'syllabus-paths' ? "text-[#2563EB]" : "text-slate-600 group-hover:text-[#2563EB]")}>Syllabus</span>
-                 </a>
-                 <div className="w-0.5 h-4 bg-slate-200 mx-0.5 shrink-0"></div>
-                 {/* Registry */}
-                 <a 
-                   href="#exam-registry"
-                   onClick={(e) => scrollToSection(e, 'exam-registry')}
-                   className="relative flex items-center gap-1.5 text-xs font-black uppercase tracking-widest px-4 py-2 rounded-lg group cursor-pointer"
-                 >
-                   {activeSection === 'exam-registry' && (
-                     <motion.div
-                       layoutId="nav-active-pill"
-                       className="absolute inset-0 rounded-lg bg-[#fce7eb]"
-                       transition={{ type: 'spring', stiffness: 420, damping: 38, mass: 0.8 }}
-                     />
-                   )}
-                   <Clock3 className={cn("relative z-10 w-3.5 h-3.5 transition-colors duration-150", activeSection === 'exam-registry' ? "text-[#2563EB]" : "text-slate-400 group-hover:text-[#2563EB]")} />
-                   <span className={cn("relative z-10 transition-colors duration-150", activeSection === 'exam-registry' ? "text-[#2563EB]" : "text-slate-600 group-hover:text-[#2563EB]")}>Notifications</span>
-                 </a>
-                 <div className="w-0.5 h-4 bg-slate-200 mx-0.5 shrink-0"></div>
-                 {/* Achievers */}
-                 <a 
-                   href="#achievers-journal"
-                   onClick={(e) => scrollToSection(e, 'achievers-journal')}
-                   className="relative flex items-center gap-1.5 text-xs font-black uppercase tracking-widest px-4 py-2 rounded-lg group cursor-pointer"
-                 >
-                   {activeSection === 'achievers-journal' && (
-                     <motion.div
-                       layoutId="nav-active-pill"
-                       className="absolute inset-0 rounded-lg bg-[#fce7eb]"
-                       transition={{ type: 'spring', stiffness: 420, damping: 38, mass: 0.8 }}
-                     />
-                   )}
-                   <Award className={cn("relative z-10 w-3.5 h-3.5 transition-colors duration-150", activeSection === 'achievers-journal' ? "text-[#2563EB]" : "text-slate-400 group-hover:text-[#2563EB]")} />
-                   <span className={cn("relative z-10 transition-colors duration-150", activeSection === 'achievers-journal' ? "text-[#2563EB]" : "text-slate-600 group-hover:text-[#2563EB]")}>Achievers</span>
-                 </a>
-                 <div className="w-0.5 h-4 bg-slate-200 mx-0.5 shrink-0"></div>
-              </>
-            )}
-             {/* Blog */}
-             <Link 
-               to="/blog"
-               className="relative flex items-center gap-1.5 text-xs font-black uppercase tracking-widest px-4 py-2 rounded-lg group cursor-pointer"
-             >
-               {isBlogActive && (
-                 <motion.div
-                   layoutId="nav-active-pill"
-                   className="absolute inset-0 rounded-lg bg-[#fce7eb]"
-                   transition={{ type: 'spring', stiffness: 420, damping: 38, mass: 0.8 }}
-                 />
-               )}
-               <FileText className={cn("relative z-10 w-3.5 h-3.5 transition-colors duration-150", isBlogActive ? "text-[#2563EB]" : "text-slate-400 group-hover:text-[#2563EB]")} />
-               <span className={cn("relative z-10 transition-colors duration-150", isBlogActive ? "text-[#2563EB]" : "text-slate-600 group-hover:text-[#2563EB]")}>Blog</span>
-             </Link>
-            {user && (
-              <>
-              <div className="w-0.5 h-4 bg-slate-200 mx-0.5 shrink-0"></div>
-              <button
-                type="button"
-                onClick={() => window.dispatchEvent(new CustomEvent('oep-open-tutorial-video'))}
-                className="relative flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-slate-700 hover:text-brand-600 px-3 py-2 rounded-lg hover:bg-brand-50 transition-all duration-200 group cursor-pointer"
-                title="Watch Website Tutorial Video"
+        <nav className="hidden md:flex items-center gap-3 lg:gap-4">
+          {!user && (
+            <div className="flex items-center border-2 border-slate-900 bg-white rounded-xl p-0.5 shadow-[3px_3px_0px_#0f172a] relative">
+              <a 
+                href="#exams"
+                onClick={(e) => scrollToSection(e, 'exams')}
+                className="relative flex items-center gap-1.5 text-xs font-black uppercase tracking-widest px-4 py-2 rounded-lg group cursor-pointer"
               >
-                <Video className="w-3.5 h-3.5 text-rose-500 group-hover:text-brand-600 transition-colors" />
-                <span>Watch Guide</span>
-              </button>
-              <div className="w-0.5 h-4 bg-slate-200 mx-0.5 shrink-0"></div>
-              <a href={supportUrl} target="_blank" rel="noopener noreferrer" className="relative flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-slate-600 hover:text-[#2563EB] px-4 py-2 rounded-lg hover:bg-slate-50 transition-all duration-200 group">
-                <HelpCircle className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#2563EB] transition-colors" />
-                <span>Support</span>
+                {activeSection === 'exams' && (
+                  <motion.div
+                    layoutId="nav-active-pill"
+                    className="absolute inset-0 rounded-lg bg-[#fce7eb]"
+                    transition={{ type: 'spring', stiffness: 420, damping: 38, mass: 0.8 }}
+                  />
+                )}
+                <Target className={cn("relative z-10 w-3.5 h-3.5 transition-colors duration-150", activeSection === 'exams' ? "text-[#2563EB]" : "text-slate-400 group-hover:text-[#2563EB]")} />
+                <span className={cn("relative z-10 transition-colors duration-150", activeSection === 'exams' ? "text-[#2563EB]" : "text-slate-600 group-hover:text-[#2563EB]")}>Exams</span>
               </a>
-              </>
-            )}
-          </div>
+              <div className="w-0.5 h-4 bg-slate-200 mx-0.5 shrink-0"></div>
+              <a 
+                href="#syllabus-paths"
+                onClick={(e) => scrollToSection(e, 'syllabus-paths')}
+                className="relative flex items-center gap-1.5 text-xs font-black uppercase tracking-widest px-4 py-2 rounded-lg group cursor-pointer"
+              >
+                {activeSection === 'syllabus-paths' && (
+                  <motion.div
+                    layoutId="nav-active-pill"
+                    className="absolute inset-0 rounded-lg bg-[#fce7eb]"
+                    transition={{ type: 'spring', stiffness: 420, damping: 38, mass: 0.8 }}
+                  />
+                )}
+                <BookOpen className={cn("relative z-10 w-3.5 h-3.5 transition-colors duration-150", activeSection === 'syllabus-paths' ? "text-[#2563EB]" : "text-slate-400 group-hover:text-[#2563EB]")} />
+                <span className={cn("relative z-10 transition-colors duration-150", activeSection === 'syllabus-paths' ? "text-[#2563EB]" : "text-slate-600 group-hover:text-[#2563EB]")}>Syllabus</span>
+              </a>
+              <div className="w-0.5 h-4 bg-slate-200 mx-0.5 shrink-0"></div>
+              <a 
+                href="#achievers-journal"
+                onClick={(e) => scrollToSection(e, 'achievers-journal')}
+                className="relative flex items-center gap-1.5 text-xs font-black uppercase tracking-widest px-4 py-2 rounded-lg group cursor-pointer"
+              >
+                {activeSection === 'achievers-journal' && (
+                  <motion.div
+                    layoutId="nav-active-pill"
+                    className="absolute inset-0 rounded-lg bg-[#fce7eb]"
+                    transition={{ type: 'spring', stiffness: 420, damping: 38, mass: 0.8 }}
+                  />
+                )}
+                <Award className={cn("relative z-10 w-3.5 h-3.5 transition-colors duration-150", activeSection === 'achievers-journal' ? "text-[#2563EB]" : "text-slate-400 group-hover:text-[#2563EB]")} />
+                <span className={cn("relative z-10 transition-colors duration-150", activeSection === 'achievers-journal' ? "text-[#2563EB]" : "text-slate-600 group-hover:text-[#2563EB]")}>Achievers</span>
+              </a>
+            </div>
+          )}
+
+          {/* Blog Link */}
+          <Link 
+            to="/blog"
+            className="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest px-3 py-2 rounded-xl text-slate-700 hover:text-brand-600 hover:bg-slate-100/80 transition-all group cursor-pointer"
+          >
+            <FileText className="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-600 transition-colors" />
+            <span>Blog</span>
+          </Link>
           
-          <div className="flex items-center gap-4 pl-4 border-l border-slate-200">
+          <div className="flex items-center gap-2.5 sm:gap-3 pl-2 sm:pl-3 border-l border-slate-200">
+            <button
+              type="button"
+              onClick={() => setIsSearchModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 hover:bg-brand-50 text-slate-600 hover:text-brand-600 transition-all text-xs font-black cursor-pointer border border-slate-200/80 group shrink-0"
+              title="Search exams, tests, practice sets (Ctrl+K)"
+            >
+              <Search className="w-3.5 h-3.5 text-brand-600 group-hover:scale-110 transition-transform" />
+              <span className="hidden md:inline text-slate-700 group-hover:text-brand-600">Search</span>
+              <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[9px] font-black text-slate-400 bg-white rounded border border-slate-200 shadow-2xs">⌘K</kbd>
+            </button>
+
+            <NotificationCenter
+              exams={_dashboardCache.exams || []}
+              mockTests={_dashboardCache.mockTests || []}
+              dynamicQuestionBanks={_dashboardCache.dynamicQuestionBanks || {}}
+              onViewExam={(examId) => window.dispatchEvent(new CustomEvent('oep-view-exam', { detail: examId }))}
+              onLaunchMockTest={(test: any) => window.dispatchEvent(new CustomEvent('oep-launch-mock-test', { detail: test }))}
+              onLaunchBank={(bank: any) => window.dispatchEvent(new CustomEvent('oep-launch-bank', { detail: bank }))}
+            />
+
             {user ? (
                <div className="relative">
                   <div 
@@ -1794,22 +1781,48 @@ export const Navbar = ({
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-[100]"
+                        className="absolute right-0 mt-2 w-60 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-[100]"
                       >
-                         <div className="p-2">
+                         <div className="p-2 space-y-1">
+                           <button
+                             type="button"
+                             onClick={() => {
+                               setShowProfileDropdown(false);
+                               window.dispatchEvent(new CustomEvent('oep-open-tutorial-video'));
+                             }}
+                             className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-slate-700 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-colors cursor-pointer"
+                           >
+                             <Video className="w-4 h-4 text-rose-500" />
+                             <span>Watch Video Guide</span>
+                           </button>
+
+                           <a
+                             href={supportUrl}
+                             target="_blank"
+                             rel="noopener noreferrer"
+                             onClick={() => setShowProfileDropdown(false)}
+                             className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-slate-700 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-colors cursor-pointer"
+                           >
+                             <HelpCircle className="w-4 h-4 text-brand-600" />
+                             <span>Help & Support</span>
+                           </a>
+
                            {isAdmin && (
-                             <Link to="/admin" onClick={() => setShowProfileDropdown(false)} className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-slate-600 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-colors">
-                               <Settings className="w-4 h-4" />
+                             <Link to="/admin" onClick={() => setShowProfileDropdown(false)} className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-slate-600 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-colors">
+                               <Settings className="w-4 h-4 text-slate-500" />
                                Admin Panel
                              </Link>
                            )}
+
+                           <div className="h-px bg-slate-100 my-1" />
+
                            <button 
                              onClick={async () => {
                                setShowProfileDropdown(false);
                                await logout();
                                navigate('/');
                              }}
-                             className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                             className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
                            >
                              <LogOut className="w-4 h-4" />
                              Sign Out
@@ -2070,6 +2083,17 @@ export const Navbar = ({
           </>
         )}
       </AnimatePresence>
+
+      <GlobalSearchModal
+        isOpen={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+        exams={_dashboardCache.exams || []}
+        mockTests={_dashboardCache.mockTests || []}
+        dynamicQuestionBanks={_dashboardCache.dynamicQuestionBanks || {}}
+        onViewExam={(examId) => window.dispatchEvent(new CustomEvent('oep-view-exam', { detail: examId }))}
+        onLaunchMockTest={(test: any) => window.dispatchEvent(new CustomEvent('oep-launch-mock-test', { detail: test }))}
+        onLaunchBank={(bank: any) => window.dispatchEvent(new CustomEvent('oep-launch-bank', { detail: bank }))}
+      />
     </header>
   );
 };
@@ -2965,9 +2989,323 @@ const LandingPage = () => {
           </motion.div>
         )}
       </AnimatePresence>
-
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
     </div>
+  );
+};
+
+const ScheduledMockTestCard = ({ test, onLaunchMockTest }: any) => {
+  const countdown = useCountdown(test?.scheduled_at);
+  const isScheduledUpcoming = !countdown.isLive;
+
+  return (
+    <motion.div 
+      key={test.id}
+      {...scaleIn}
+      whileHover={isScheduledUpcoming ? undefined : whileHover.liftTap}
+      whileTap={isScheduledUpcoming ? undefined : whileTap.press}
+      className="w-full h-full"
+    >
+      <div
+        className={cn(
+          "group premium-shine-container relative bg-white rounded-2xl border p-5 transition-[background-color,border-color,box-shadow] duration-500 flex flex-col justify-between gap-4 overflow-hidden h-full",
+          isScheduledUpcoming
+            ? "border-amber-200/90 bg-amber-50/20 cursor-not-allowed"
+            : "border-slate-200/60 hover:bg-white hover:border-brand-300 hover:shadow-2xl hover:shadow-brand-500/20 cursor-pointer"
+        )}
+        onClick={() => {
+          if (!isScheduledUpcoming) onLaunchMockTest(test);
+        }}
+      >
+        <div className="flex items-start gap-4 relative z-10">
+          <div 
+            className={cn(
+              "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-md transition-shadow duration-300",
+              isScheduledUpcoming ? "bg-gradient-to-br from-amber-500 to-orange-600" : ""
+            )}
+            style={!isScheduledUpcoming ? { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' } : undefined}
+          >
+            {isScheduledUpcoming ? (
+              <Calendar className="w-6 h-6 text-white" />
+            ) : (
+              <Timer className="w-6 h-6 text-white group-hover:rotate-12 transition-transform duration-300" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0 pt-0.5">
+            <div className="flex items-center gap-1.5 flex-wrap mb-1">
+              <span className="text-[10px] font-black uppercase tracking-widest text-brand-600">Mock Test</span>
+              {isScheduledUpcoming ? (
+                <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 bg-amber-100 text-amber-800 rounded border border-amber-200/80">
+                  📅 UPCOMING
+                </span>
+              ) : test.scheduled_at ? (
+                <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded border border-emerald-200 flex items-center gap-1 animate-pulse">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> LIVE NOW
+                </span>
+              ) : null}
+            </div>
+            <h4 className="font-extrabold text-slate-900 text-base leading-tight group-hover:text-brand-700 transition-colors line-clamp-2">
+              {test.title}
+            </h4>
+          </div>
+        </div>
+
+        {isScheduledUpcoming ? (
+          <div className="bg-amber-50/90 border border-amber-200/80 rounded-xl p-3.5 space-y-1.5 relative z-10 text-left">
+            <div className="flex items-center justify-between text-xs font-extrabold text-amber-900">
+              <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" /> Release Countdown</span>
+              <span className="font-mono text-xs tracking-wider font-black text-amber-950 bg-amber-200/60 px-2 py-0.5 rounded-md border border-amber-300/60">{countdown.formattedCountdown}</span>
+            </div>
+            <div className="flex items-center justify-between text-[11px] font-semibold text-amber-800 pt-0.5">
+              <span>Scheduled for {countdown.formattedScheduledDate}</span>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between text-xs text-slate-500 font-medium relative z-10 mt-1">
+            <span className="flex items-center gap-1.5 bg-slate-100/80 px-2.5 py-1 rounded-lg">
+              <Clock3 className="w-3.5 h-3.5 text-slate-600" />{test.durationMinutes || 60} mins
+            </span>
+            <span className="flex items-center gap-1.5 text-emerald-700 font-bold bg-emerald-100/80 border border-emerald-200 px-2.5 py-1 rounded-lg shadow-sm">
+              <CheckCircle2 className="w-3.5 h-3.5" /> Unlocked
+            </span>
+          </div>
+        )}
+
+        {isScheduledUpcoming ? (
+          <button
+            type="button"
+            onClick={(e) => e.stopPropagation()}
+            className="w-full mt-auto py-3 rounded-xl flex items-center justify-center gap-2 font-black text-xs sm:text-sm bg-amber-500/15 border-2 border-amber-400 text-amber-950 shadow-sm cursor-not-allowed pointer-events-none"
+          >
+            <Lock className="w-4 h-4 text-amber-800 shrink-0" />
+            <span className="text-amber-950 font-black tracking-tight">Unlocks {countdown.formattedScheduledDate}</span>
+          </button>
+        ) : (
+          <button
+            className="w-full mt-auto py-3 text-sm font-bold text-white rounded-xl shadow-md transition-all duration-300 relative overflow-hidden"
+            style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
+          >
+            <span className="relative z-10 flex items-center justify-center gap-2 text-white">
+              Start Test <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </span>
+          </button>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
+const ScheduledPracticeBankCard = ({ bank, isMobile, hasAccessTo, activities, handleStartDirectPractice }: any) => {
+  const countdown = useCountdown(bank?.scheduled_at);
+  const isScheduledUpcoming = !countdown.isLive;
+
+  const isLocked = bank.isPremium && !hasAccessTo(bank);
+  const isPremiumUnlocked = bank.isPremium && hasAccessTo(bank);
+
+  const completedAct = activities?.find((act: any) => 
+    (act.type === 'mock_test_completed' || act.type === 'practice_test_completed') && 
+    (act.metadata?.test?.bankId === bank.id || act.metadata?.test?.id === bank.id || act.title === `${bank.title} - Practice Session`)
+  );
+  const isCompleted = !isScheduledUpcoming && !!completedAct;
+
+  const suffixMatch = bank.title.match(/(?:\s+|-\s*)(I{1,3}|IV|V|VI{0,3}|IX|X|\d{1,2})\s*$/i);
+  let mainTitle = bank.title;
+  let suffix = '';
+  if (suffixMatch) {
+    suffix = suffixMatch[1].toUpperCase();
+    mainTitle = bank.title.substring(0, suffixMatch.index).trim();
+    if (mainTitle.endsWith('-')) {
+      mainTitle = mainTitle.substring(0, mainTitle.length - 1).trim();
+    }
+  }
+
+  const incompleteAct = !isCompleted && !isScheduledUpcoming && activities?.find((act: any) => 
+    act.type === 'test_incomplete' && 
+    (act.metadata?.test?.bankId === bank.id || act.metadata?.test?.id === bank.id || act.title === `${bank.title} - Practice Session`)
+  );
+  const isInProgress = !isScheduledUpcoming && !!incompleteAct;
+
+  const totalQs = bank.questions || bank.questionCount || bank.question_count || bank.questioncount || incompleteAct?.metadata?.totalQuestions || 0;
+  const currentQuestionIndex = incompleteAct ? (incompleteAct.metadata?.currentQuestionIndex || 0) : 0;
+  const progressPercent = totalQs > 0 ? Math.min(100, Math.round((currentQuestionIndex / totalQs) * 100)) : 0;
+
+  return (
+    <motion.div
+      key={bank.id}
+      initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+      animate={isMobile ? undefined : { opacity: 1, y: 0 }}
+      exit={isMobile ? undefined : { opacity: 0, scale: 0.95 }}
+      whileHover={isMobile || isScheduledUpcoming ? undefined : whileHover.liftTap}
+      whileTap={isScheduledUpcoming ? undefined : whileTap.press}
+      className="w-full h-full"
+    >
+      {isMobile ? (
+        <div
+          onClick={() => {
+            if (!isScheduledUpcoming) handleStartDirectPractice(bank);
+          }}
+          className={cn(
+            "p-4 bg-white border rounded-2xl flex items-center justify-between gap-4 transition-all duration-300 relative overflow-hidden",
+            isScheduledUpcoming
+              ? "border-amber-200 bg-amber-50/20 cursor-not-allowed opacity-90"
+              : isCompleted
+                ? "border-emerald-250 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.04)] active:border-emerald-350 cursor-pointer"
+                : isInProgress
+                  ? "border-amber-255 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.04)] active:border-amber-360 cursor-pointer"
+                  : isLocked 
+                    ? "border-slate-100 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.03),0_1px_2px_rgba(245,158,11,0.01)] active:border-amber-300 cursor-pointer"
+                    : isPremiumUnlocked
+                      ? "border-slate-100 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.03),0_1px_2px_rgba(16,185,129,0.01)] active:border-emerald-300 cursor-pointer"
+                      : "border-slate-100 shadow-[0_4px_16px_-4px_rgba(79,70,229,0.03),0_1px_2px_rgba(79,70,229,0.01)] active:border-brand-300 cursor-pointer"
+          )}
+        >
+          <div className="flex items-center gap-3.5 min-w-0 flex-1 pl-1">
+            <div className={cn(
+              "w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border relative",
+              isScheduledUpcoming
+                ? "bg-amber-50 border-amber-200 text-amber-700"
+                : isCompleted
+                  ? "bg-emerald-50/60 border-emerald-100/30 text-emerald-600"
+                  : isInProgress
+                    ? "bg-amber-50/60 border-amber-100/30 text-amber-600"
+                    : "bg-indigo-50/60 border-indigo-100/30 text-indigo-650"
+            )}>
+              {isScheduledUpcoming ? (
+                <Calendar className="w-5 h-5" />
+              ) : isCompleted ? (
+                <CheckCircle2 className="w-5 h-5 relative z-10" />
+              ) : (
+                <Play className="w-5 h-5 relative z-10 ml-0.5" />
+              )}
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <h4 className="font-extrabold text-[13.5px] text-slate-900 tracking-tight leading-snug line-clamp-2 uppercase pr-2">{mainTitle}</h4>
+                {isScheduledUpcoming ? (
+                  <span className="px-1.5 py-0.5 bg-amber-100 text-amber-800 text-[8.5px] font-black rounded border border-amber-200 uppercase tracking-wider shrink-0">📅 UPCOMING</span>
+                ) : (
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100 whitespace-nowrap">Practice Set</span>
+                )}
+              </div>
+
+              {isScheduledUpcoming ? (
+                <div className="mt-1.5 text-[11px] font-bold text-amber-800 flex items-center gap-1.5">
+                  <Clock className="w-3 h-3 text-amber-600 shrink-0" />
+                  <span>Starts in <strong className="font-mono text-amber-900">{countdown.formattedCountdown}</strong></span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 mt-2 text-[10px] font-extrabold text-slate-555 flex-wrap">
+                  <span className="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-100/60"><FileText className="w-3 h-3 text-slate-400" /> {totalQs} Questions</span>
+                  <span className="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-100/60"><Clock className="w-3 h-3 text-slate-400" /> {totalQs} Mins</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="w-8 h-8 rounded-full border flex items-center justify-center shrink-0 shadow-2xs">
+            {isScheduledUpcoming ? <Lock className="w-3.5 h-3.5 text-amber-600" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
+          </div>
+        </div>
+      ) : (
+        <Card 
+          className={cn(
+            "p-6 bg-white border shadow-lg shadow-slate-200/30 rounded-[1.5rem] transition-all duration-500 flex flex-col justify-between gap-6 relative overflow-hidden premium-shine-container h-full", 
+            isScheduledUpcoming
+              ? "border-amber-200 bg-amber-50/10 cursor-not-allowed"
+              : isCompleted
+                ? "border-emerald-200 shadow-emerald-500/5 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10 hover:border-emerald-300 cursor-pointer"
+                : isInProgress
+                  ? "border-amber-250 shadow-amber-500/5 hover:-translate-y-2 hover:shadow-2xl hover:shadow-amber-500/10 hover:border-amber-300 cursor-pointer"
+                  : "border-slate-200 bg-white hover:-translate-y-2 hover:shadow-2xl hover:shadow-brand-500/10 hover:border-brand-200 cursor-pointer"
+          )}
+          onClick={() => {
+            if (!isScheduledUpcoming) handleStartDirectPractice(bank);
+          }}
+        >
+          <div className="flex items-start justify-between relative z-10 w-full">
+            <div className="flex items-start gap-4 min-w-0 flex-1">
+              <div className={cn(
+                "w-14 h-14 rounded-xl flex items-center justify-center shrink-0 shadow-md text-white transition-transform relative mt-0.5", 
+                isScheduledUpcoming
+                  ? "bg-gradient-to-br from-amber-400 to-orange-500"
+                  : isCompleted
+                    ? "bg-gradient-to-br from-emerald-500 to-teal-600"
+                    : isInProgress
+                      ? "bg-gradient-to-br from-amber-400 to-orange-500 animate-pulse"
+                      : "bg-gradient-to-br from-indigo-500 to-purple-650 group-hover:scale-110"
+              )}>
+                {isScheduledUpcoming ? (
+                  <Calendar className="w-6 h-6 text-white" />
+                ) : isCompleted ? (
+                  <CheckCircle2 className="w-6 h-6 text-white" />
+                ) : (
+                  <Play className="w-6 h-6 text-white fill-white/10 ml-0.5" />
+                )}
+                <div className="absolute inset-0 border-2 border-white/20 rounded-xl" />
+              </div>
+              <div className="text-left min-w-0 flex-1">
+                <h4 className="font-black text-base sm:text-lg text-slate-950 tracking-tight group-hover:text-brand-600 transition-colors uppercase leading-snug line-clamp-2">{mainTitle}</h4>
+                <div className="flex items-center flex-wrap gap-1.5 mt-1">
+                  {isScheduledUpcoming ? (
+                    <span className="text-[10px] font-black text-amber-800 uppercase tracking-widest bg-amber-100 px-2.5 py-0.5 rounded border border-amber-200 flex items-center gap-1">
+                      📅 UPCOMING
+                    </span>
+                  ) : bank.scheduled_at ? (
+                    <span className="text-[10px] font-black text-emerald-800 uppercase tracking-widest bg-emerald-100 px-2.5 py-0.5 rounded border border-emerald-200 flex items-center gap-1 animate-pulse">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> LIVE NOW
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100">Practice Set</span>
+                  )}
+                  {suffix && (
+                    <span className="text-[10px] font-black text-brand-700 uppercase tracking-widest bg-brand-50 px-2 py-0.5 rounded border border-brand-100/60 shadow-2xs">Set {suffix}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {isScheduledUpcoming ? (
+            <div className="bg-amber-50/80 border border-amber-200/80 rounded-xl p-3.5 space-y-1.5 relative z-10 text-left">
+              <div className="flex items-center justify-between text-xs font-extrabold text-amber-900">
+                <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" /> Release Countdown</span>
+                <span className="font-mono text-xs tracking-wider font-black text-amber-950 bg-amber-200/60 px-2 py-0.5 rounded-md border border-amber-300/60">{countdown.formattedCountdown}</span>
+              </div>
+              <div className="flex items-center justify-between text-[11px] font-semibold text-amber-800 pt-0.5">
+                <span>Scheduled for {countdown.formattedScheduledDate}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4 flex-1 relative z-10 pt-2 text-left">
+              <div className="flex gap-4 text-xs font-bold text-slate-555 flex-wrap">
+                <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><FileText className="w-3.5 h-3.5 text-slate-400"/> {totalQs} Questions</span>
+                <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><Clock className="w-3.5 h-3.5 text-slate-400"/> {totalQs} Mins Session</span>
+              </div>
+            </div>
+          )}
+
+          {isScheduledUpcoming ? (
+            <button
+              type="button"
+              onClick={(e) => e.stopPropagation()}
+              className="w-full h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-xs sm:text-sm bg-amber-500/15 border-2 border-amber-400 text-amber-950 shadow-sm cursor-not-allowed mt-auto pointer-events-none relative z-10"
+            >
+              <Lock className="w-4 h-4 text-amber-800 shrink-0" />
+              <span className="text-amber-950 font-black tracking-tight">Unlocks {countdown.formattedScheduledDate}</span>
+            </button>
+          ) : (
+            <Button 
+              className="w-full h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-sm transition-all shadow-md relative z-10 mt-auto premium-gradient text-white shadow-brand-500/10 hover:shadow-brand-500/30"
+            >
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                Start Practice <ChevronRight className="w-4 h-4 sm:ml-1 group-hover:translate-x-1 transition-transform relative z-10" />
+              </span>
+            </Button>
+          )}
+        </Card>
+      )}
+    </motion.div>
   );
 };
 
@@ -3274,42 +3612,7 @@ const PurchasesView = ({ user, profile, exams, mockTests, testSeries, dynamicQue
                       <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-2">
                         {/* Mock Tests */}
                         {sTests.map((test: any, i: number) => (
-                          <motion.div 
-                            key={test.id}
-                            {...scaleIn}
-                            transition={{ ...scaleIn.transition, delay: 0.1 + (i * 0.05) }}
-                            whileHover={whileHover.liftTap}
-                            whileTap={whileTap.press}
-                            className="group premium-shine-container relative bg-white rounded-2xl border border-slate-200/60 p-5 hover:bg-white hover:border-brand-300 hover:shadow-2xl hover:shadow-brand-500/20 transition-[background-color,border-color,box-shadow] duration-500 cursor-pointer flex flex-col gap-4 overflow-hidden"
-                            onClick={() => onLaunchMockTest(test)}
-                          >
-                            <div className="flex items-start gap-4 relative z-10">
-                              <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-md group-hover:shadow-brand-500/30 transition-shadow duration-300"
-                                style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
-                                <Timer className="w-6 h-6 text-white group-hover:rotate-12 transition-transform duration-300" />
-                              </div>
-                              <div className="flex-1 min-w-0 pt-0.5">
-                                <div className="text-[10px] font-black uppercase tracking-widest text-brand-600 mb-1">Mock Test</div>
-                                <h4 className="font-extrabold text-slate-900 text-base leading-tight group-hover:text-brand-700 transition-colors line-clamp-2">
-                                  {test.title}
-                                </h4>
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-between text-xs text-slate-500 font-medium relative z-10 mt-1">
-                              <span className="flex items-center gap-1.5 bg-slate-100/80 px-2.5 py-1 rounded-lg">
-                                <Clock3 className="w-3.5 h-3.5 text-slate-600" />{test.durationMinutes || 60} mins
-                              </span>
-                              <span className="flex items-center gap-1.5 text-emerald-700 font-bold bg-emerald-100/80 border border-emerald-200 px-2.5 py-1 rounded-lg shadow-sm">
-                                <CheckCircle2 className="w-3.5 h-3.5" /> Unlocked
-                              </span>
-                            </div>
-                            <button className="w-full mt-2 py-2.5 text-sm font-bold text-white rounded-xl shadow-md group-hover:shadow-brand-500/25 transition-[box-shadow] duration-300 relative overflow-hidden"
-                              style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}>
-                              <span className="relative z-10 flex items-center justify-center gap-2">
-                                Start Test <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                              </span>
-                            </button>
-                          </motion.div>
+                          <ScheduledMockTestCard key={test.id} test={test} onLaunchMockTest={onLaunchMockTest} />
                         ))}
 
                         {/* Question Banks */}
@@ -3550,6 +3853,24 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
   const [isBannerDescExpanded, setIsBannerDescExpanded] = useState(false);
   const [isBannerDismissed, setIsBannerDismissed] = useState(false);
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsSearchModalOpen(prev => !prev);
+      }
+    };
+    const handleOpenSearchModal = () => setIsSearchModalOpen(true);
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('oep-open-search-modal', handleOpenSearchModal);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('oep-open-search-modal', handleOpenSearchModal);
+    };
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -3742,45 +4063,36 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
   };
   // Stats for comparisons
   // (Moving these inside the component so activities is in scope)
-  const [selectedBankItem, setSelectedBankItem] = useState<any | null>(() => {
-    const saved = sessionStorage.getItem('oep_selectedBankItem');
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
-    }
-    return null;
-  });
-
-  const [isModalAnimateOpen, setIsModalAnimateOpen] = useState(false);
-
-  useEffect(() => {
-    if (selectedBankItem) {
-      // Defer triggering the transition animation by 60ms to let browser layout/reflow settle
-      const frame = requestAnimationFrame(() => {
-        const timer = setTimeout(() => {
-          setIsModalAnimateOpen(true);
-        }, 60);
-        return () => clearTimeout(timer);
-      });
-      return () => cancelAnimationFrame(frame);
-    } else {
-      setIsModalAnimateOpen(false);
-    }
-  }, [selectedBankItem]);
+  // NOTE: selectedBankItem is intentionally NOT restored from sessionStorage on mount.
+  // Restoring it caused a persistent blur/scroll-lock race condition where the body blur
+  // was applied before renderCommonModals() had a chance to render the modal panel.
+  const [selectedBankItem, setSelectedBankItem] = useState<any | null>(null);
 
   useEffect(() => {
     if (selectedBankItem) sessionStorage.setItem('oep_selectedBankItem', JSON.stringify(selectedBankItem));
     else sessionStorage.removeItem('oep_selectedBankItem');
-    // Hide WhatsApp button on mobile when this modal is open
-    if (window.innerWidth < 768) {
-      if (selectedBankItem) document.body.setAttribute('data-modal-open', 'true');
-      else document.body.removeAttribute('data-modal-open');
-    }
   }, [selectedBankItem]);
 
   const renderCommonModals = () => {
     if (typeof document === 'undefined') return null;
     return createPortal(
       <>
+        <GlobalSearchModal
+          isOpen={isSearchModalOpen}
+          onClose={() => setIsSearchModalOpen(false)}
+          exams={exams}
+          mockTests={mockTests}
+          dynamicQuestionBanks={dynamicQuestionBanks}
+          onViewExam={(examId) => setSelectedExam(examId)}
+          onLaunchMockTest={(test: any) => {
+            const examId = test.examId || test._resolvedExamId;
+            handleStartTest({ ...test, type: 'mock_test', examId, examName: exams.find(e => e.id === examId)?.name });
+          }}
+          onLaunchBank={(bank: any) => {
+            setSelectedBankItem(bank);
+          }}
+        />
+
         {/* Detail View Modal Backdrop */}
         <AnimatePresence>
           {selectedBankItem && (
@@ -3799,7 +4111,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
         {/* Detail View Modal Panel */}
         <AnimatePresence>
-          {selectedBankItem && isModalAnimateOpen && (
+          {selectedBankItem && (
             <div className="fixed inset-0 z-[101] flex items-end md:items-center justify-center pointer-events-none px-3 pb-3 md:p-4" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 56px)' }}>
               <motion.div 
                 key="detail-modal"
@@ -3876,7 +4188,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   <div className="relative hidden md:grid grid-cols-2 gap-3 z-10 w-full mt-auto">
                     <div className="p-3 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md shadow-sm">
                       <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Questions</p>
-                      <p className="text-base font-black text-white">{selectedBankItem.questions}</p>
+                      <p className="text-base font-black text-white">{selectedBankItem.questionCount || selectedBankItem.questions}</p>
                     </div>
                     <div className="p-3 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md shadow-sm">
                       <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Highlight</p>
@@ -3923,7 +4235,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       <div className="grid grid-cols-2 gap-3 md:hidden">
                         <div className="p-3 bg-white border border-slate-200/60 rounded-2xl shadow-sm">
                           <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Questions</p>
-                          <p className="text-base font-black text-slate-900">{selectedBankItem.questions}</p>
+                          <p className="text-base font-black text-slate-900">{selectedBankItem.questionCount || selectedBankItem.questions}</p>
                         </div>
                         <div className="p-3 bg-white border border-slate-200/60 rounded-2xl shadow-sm">
                           <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Highlight</p>
@@ -3979,7 +4291,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                   setPaywallOriginalPrice(selectedBankItem.originalPrice || ((selectedBankItem.price || 499) * 2));
                                   setPaywallItemTitle(selectedBankItem.title || 'Premium Content');
                                   setPaywallFeatures([
-                                    `${selectedBankItem.questions || selectedBankItem.questionCount || selectedBankItem.question_count || selectedBankItem.questioncount || '500+'} Questions`,
+                                    `${selectedBankItem.questionCount || selectedBankItem.questions || '500+'} Questions`,
                                     selectedBankItem.hasPracticeMode !== false ? 'Interactive Practice Mode' : 'Instant PDF Access',
                                     selectedBankItem.tagline || 'Detailed Solutions Provided',
                                     'Advanced Performance Analytics'
@@ -4074,7 +4386,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                             setPaywallOriginalPrice(selectedBankItem.originalPrice || ((selectedBankItem.price || 499) * 2));
                             setPaywallItemTitle(selectedBankItem.title || 'Premium Content');
                             setPaywallFeatures([
-                              `${selectedBankItem.questions || selectedBankItem.questionCount || selectedBankItem.question_count || selectedBankItem.questioncount || '500+'} Questions`,
+                              `${selectedBankItem.questionCount || selectedBankItem.questions || '500+'} Questions`,
                               selectedBankItem.hasPracticeMode !== false ? 'Interactive Practice Mode' : 'Instant PDF Access',
                               selectedBankItem.tagline || 'Detailed Solutions Provided',
                               'Advanced Performance Analytics'
@@ -5323,15 +5635,25 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         fetchedBanks.forEach((bank: any) => {
           if (!groupedBanks[bank.type]) groupedBanks[bank.type] = [];
           let parsedTagline = { text: bank.tagline || '', price: 499 };
-          try { 
-            if (bank.tagline && bank.tagline.includes('{"text"')) {
-               parsedTagline = JSON.parse(bank.tagline);
-            }
-          } catch(e) {}
+          if (bank.tagline && typeof bank.tagline === 'string' && bank.tagline.trim().startsWith('{')) {
+            try { 
+              const parsed = JSON.parse(bank.tagline);
+              if (parsed && typeof parsed === 'object') {
+                parsedTagline = {
+                  text: parsed.text !== undefined ? parsed.text : bank.tagline,
+                  price: parsed.price || 499
+                };
+              }
+            } catch(e) {}
+          }
           groupedBanks[bank.type].push({
             id: bank.id,
             title: bank.title,
-            questions: bank.questions || bank.questionCount || bank.question_count || bank.questioncount || 0,
+            target_mode: bank.target_mode || 'both',
+            scheduled_at: bank.scheduled_at || null,
+            questionCount: bank.questionCount || bank.question_count || bank.questioncount || bank.questions || 0,
+            questions: bank.questionCount || bank.question_count || bank.questioncount || bank.questions || 0,
+            practiceQuestionCount: bank.practiceQuestionCount || 0,
             tagline: parsedTagline.text,
             price: parsedTagline.price || 499,
             image: bank.image,
@@ -5969,6 +6291,43 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       alert('Payment initialization failed: ' + err.message);
     }
   };
+
+  useEffect(() => {
+    const onLaunchTestEvent = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const test = customEvent.detail;
+      if (test) {
+        const examId = test.examId || test._resolvedExamId;
+        handleStartTest({ ...test, type: 'mock_test', examId, examName: exams.find(ex => ex.id === examId)?.name });
+      }
+    };
+
+    const onLaunchBankEvent = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const bank = customEvent.detail;
+      if (bank) {
+        setSelectedBankItem(bank);
+      }
+    };
+
+    const onViewExamEvent = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const examId = customEvent.detail;
+      if (examId) {
+        setSelectedExam(examId);
+      }
+    };
+
+    window.addEventListener('oep-launch-mock-test', onLaunchTestEvent);
+    window.addEventListener('oep-launch-bank', onLaunchBankEvent);
+    window.addEventListener('oep-view-exam', onViewExamEvent);
+
+    return () => {
+      window.removeEventListener('oep-launch-mock-test', onLaunchTestEvent);
+      window.removeEventListener('oep-launch-bank', onLaunchBankEvent);
+      window.removeEventListener('oep-view-exam', onViewExamEvent);
+    };
+  }, [exams]);
 
   if (showAdmin) {
     return (
@@ -6728,7 +7087,11 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
   if (selectedBankType) {
     let items = (dynamicQuestionBanks[selectedBankType] || []).filter(item => {
       if (item.is_archived && !hasAccessTo(item.id, selectedExam)) return false;
-      return item.examId === selectedExam;
+      if (item.examId !== selectedExam) return false;
+      // target_mode filter: 'practice' items are ONLY for Practice Mode (Step 2), not Step 1
+      const mode = item.target_mode || 'both';
+      if (mode === 'practice') return false;
+      return true;
     });
     const bankTitle = selectedBankType.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
@@ -6957,7 +7320,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         <div className="flex items-center gap-1.5 mt-1.5 text-[11px] font-bold text-slate-455 flex-wrap">
                           <span className="flex items-center gap-0.5 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100/50">
                             <FileText className="w-3 h-3 text-slate-400" />
-                            {item.questions} Qs
+                            {item.questionCount || item.questions} Qs
                           </span>
                           
                           {item.tagline && (
@@ -7043,7 +7406,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                             <FileText className="w-3.5 h-3.5" />
                           </div>
                           <span className={cn("text-xs font-bold text-slate-500", !isMobile && "group-hover:text-slate-700 transition-colors")}>
-                            {item.questions} Practice Questions
+                            {item.questionCount || item.questions} Questions
                           </span>
                         </div>
                         
@@ -7296,7 +7659,9 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             ].map((item, i) => {
               const count = (dynamicQuestionBanks[item.id] || []).filter((b: any) => {
                 if (b.is_archived && !hasAccessTo(b.id, selectedExam)) return false;
-                return b.examId === selectedExam;
+                if (b.examId !== selectedExam) return false;
+                const mode = b.target_mode || 'both';
+                return mode !== 'practice';
               }).length;
 
               return (
@@ -7729,10 +8094,10 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   )}
                 >
                   {[
-                    { id: 'topic-wise', title: 'Topic-wise Practice', desc: 'Practice with topic-by-topic structured questions.', icon: <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />, color: 'from-blue-400 to-indigo-500', tag: 'Structured' },
-                    { id: 'exam-focused', title: 'Exam-Focused Practice', desc: 'High-yield banks focused on core exam subjects.', icon: <Target className="w-5 h-5 sm:w-6 sm:h-6" />, color: 'from-rose-450 to-orange-500', tag: 'High Yield' },
-                    { id: 'revision-sets', title: 'Revision Sets', desc: 'Short, curated sets perfect for quick revisions.', icon: <Layers className="w-5 h-5 sm:w-6 sm:h-6" />, color: 'from-emerald-400 to-teal-500', tag: 'Quick Revise' },
-                    { id: 'pyq-collections', title: 'PYQ Collections', desc: 'Practice with real previous year questions.', icon: <History className="w-5 h-5 sm:w-6 sm:h-6" />, color: 'from-purple-400 to-pink-500', tag: 'Real PYQs' },
+                    { id: 'topic-wise', title: 'Chapter-Wise Practice', desc: 'Master individual chapters with structured question sets & instant solutions.', icon: <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />, color: 'from-blue-500 to-indigo-600', tag: 'Structured Drills' },
+                    { id: 'exam-focused', title: 'High-Yield Topic Banks', desc: 'Focus on most frequently asked questions and core exam topics.', icon: <Zap className="w-5 h-5 sm:w-6 sm:h-6" />, color: 'from-amber-400 to-orange-500', tag: 'High Yield' },
+                    { id: 'revision-sets', title: 'Daily Speed & Accuracy Quizzes', desc: '10-minute micro-quizzes to boost solving speed and accuracy.', icon: <Clock className="w-5 h-5 sm:w-6 sm:h-6" />, color: 'from-emerald-400 to-teal-600', tag: 'Daily Boost' },
+                    { id: 'pyq-collections', title: 'Topic-Wise Solved PYQs', desc: 'Previous year exam questions categorized topic-by-topic.', icon: <History className="w-5 h-5 sm:w-6 sm:h-6" />, color: 'from-purple-500 to-pink-600', tag: '10-Yr PYQs' },
                   ].map((test, i) => {
                     const styleMap: Record<string, any> = {
                       'topic-wise': { shadow: 'rgba(79,70,229,0.03)', borderActive: 'active:border-indigo-300', textActive: 'group-active:bg-indigo-50 group-active:border-indigo-100 group-active:text-indigo-600' },
@@ -7743,7 +8108,9 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     const style = styleMap[test.id] || styleMap['topic-wise'];
                     const count = (dynamicQuestionBanks[test.id] || []).filter((b: any) => {
                       if (b.is_archived && !hasAccessTo(b.id, selectedExam)) return false;
-                      return b.examId === selectedExam;
+                      if (b.examId !== selectedExam) return false;
+                      const mode = b.target_mode || 'both';
+                      return mode !== 'bank';
                     }).length;
 
                     return (
@@ -7869,14 +8236,27 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   </Button>
                   <div className="min-w-0 flex-1">
                     <h3 className="text-lg sm:text-2xl md:text-3xl font-black text-slate-900 capitalize tracking-tight leading-tight">
-                      {selectedPracticeCategory.replace('-', ' ')} Practice Sets
+                      {({
+                        'topic-wise': 'Chapter-Wise Practice',
+                        'exam-focused': 'High-Yield Topic Banks',
+                        'revision-sets': 'Daily Speed & Accuracy Quizzes',
+                        'pyq-collections': 'Topic-Wise Solved PYQs'
+                      } as Record<string, string>)[selectedPracticeCategory] || selectedPracticeCategory.replace('-', ' ')}
                     </h3>
                   </div>
                 </div>
 
                 {(() => {
                   const matchingBanks = (dynamicQuestionBanks[selectedPracticeCategory] || [])
-                    .filter((item: any) => item.examId === selectedExam && (!item.is_archived || hasAccessTo(item)) && item.hasPracticeMode !== false);
+                    .filter((item: any) => {
+                      if (item.examId !== selectedExam) return false;
+                      if (item.is_archived && !hasAccessTo(item)) return false;
+                      if (item.hasPracticeMode === false) return false;
+                      // target_mode filter: 'bank' items are ONLY for Step 1 PDF store, NOT Practice Mode
+                      const mode = item.target_mode || 'both';
+                      if (mode === 'bank') return false;
+                      return true;
+                    });
 
                   if (matchingBanks.length === 0) {
                     if (loadingDashboardData) {
@@ -7898,303 +8278,16 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
                   return (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {matchingBanks.map((bank: any) => {
-                        const isLocked = bank.isPremium && !hasAccessTo(bank);
-                        const isPremiumUnlocked = bank.isPremium && hasAccessTo(bank);
-
-                        const completedAct = activities.find(act => 
-                          (act.type === 'mock_test_completed' || act.type === 'practice_test_completed') && 
-                          (act.metadata?.test?.bankId === bank.id || act.metadata?.test?.id === bank.id || act.title === `${bank.title} - Practice Session`)
-                        );
-                        const isCompleted = !!completedAct;
-
-                        const suffixMatch = bank.title.match(/(?:\s+|-\s*)(I{1,3}|IV|V|VI{0,3}|IX|X|\d{1,2})\s*$/i);
-                        let mainTitle = bank.title;
-                        let suffix = '';
-                        if (suffixMatch) {
-                          suffix = suffixMatch[1].toUpperCase();
-                          mainTitle = bank.title.substring(0, suffixMatch.index).trim();
-                          if (mainTitle.endsWith('-')) {
-                            mainTitle = mainTitle.substring(0, mainTitle.length - 1).trim();
-                          }
-                        }
-
-                        const incompleteAct = !isCompleted && activities.find(act => 
-                          act.type === 'test_incomplete' && 
-                          (act.metadata?.test?.bankId === bank.id || act.metadata?.test?.id === bank.id || act.title === `${bank.title} - Practice Session`)
-                        );
-                        const isInProgress = !!incompleteAct;
-
-                        const totalQs = bank.questions || bank.questionCount || bank.question_count || bank.questioncount || incompleteAct?.metadata?.totalQuestions || 0;
-                        const currentQuestionIndex = incompleteAct ? (incompleteAct.metadata?.currentQuestionIndex || 0) : 0;
-                        const progressPercent = totalQs > 0 ? Math.min(100, Math.round((currentQuestionIndex / totalQs) * 100)) : 0;
-
-                        return (
-                          <motion.div
-                            key={bank.id}
-                            initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-                            animate={isMobile ? undefined : { opacity: 1, y: 0 }}
-                            exit={isMobile ? undefined : { opacity: 0, scale: 0.95 }}
-                            whileHover={isMobile ? undefined : whileHover.liftTap}
-                            whileTap={whileTap.press}
-                            className="w-full"
-                          >
-                            {isMobile ? (
-                              <div
-                                onClick={() => handleStartDirectPractice(bank)}
-                                className={cn(
-                                  "p-4 bg-white border rounded-2xl flex items-center justify-between gap-4 cursor-pointer group relative overflow-hidden transition-all duration-300",
-                                  isCompleted
-                                    ? "border-emerald-250 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.04)] active:border-emerald-350"
-                                    : isInProgress
-                                      ? "border-amber-255 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.04)] active:border-amber-360"
-                                      : isLocked 
-                                        ? "border-slate-100 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.03),0_1px_2px_rgba(245,158,11,0.01)] active:border-amber-300"
-                                        : isPremiumUnlocked
-                                          ? "border-slate-100 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.03),0_1px_2px_rgba(16,185,129,0.01)] active:border-emerald-300"
-                                          : "border-slate-100 shadow-[0_4px_16px_-4px_rgba(79,70,229,0.03),0_1px_2px_rgba(79,70,229,0.01)] active:border-brand-300"
-                                )}
-                              >
-                                <div className={cn(
-                                  "absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity pointer-events-none",
-                                  isLocked 
-                                    ? "bg-gradient-to-r from-amber-500/0 via-amber-500/[0.01] to-amber-500/0"
-                                    : isPremiumUnlocked || isCompleted
-                                      ? "bg-gradient-to-r from-emerald-500/0 via-emerald-500/[0.01] to-emerald-500/0"
-                                      : "bg-gradient-to-r from-brand-500/0 via-brand-500/[0.01] to-brand-500/0"
-                                )} />
-                                <div className={cn(
-                                  "absolute left-0 top-0 bottom-0 w-[4px] rounded-r-sm opacity-90",
-                                  isCompleted
-                                    ? "bg-gradient-to-b from-emerald-400 to-teal-500"
-                                    : isInProgress
-                                      ? "bg-gradient-to-b from-amber-450 to-orange-500"
-                                      : isLocked 
-                                        ? "bg-gradient-to-b from-amber-400 to-orange-500" 
-                                        : isPremiumUnlocked 
-                                          ? "bg-gradient-to-b from-emerald-400 to-teal-500" 
-                                          : "bg-gradient-to-b from-indigo-500 to-purple-600"
-                                )} />
-
-                                <div className="flex items-center gap-3.5 min-w-0 flex-1 pl-1">
-                                  <div className={cn(
-                                    "w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border relative",
-                                    isCompleted
-                                      ? "bg-emerald-50/60 border-emerald-100/30 text-emerald-600"
-                                      : isInProgress
-                                        ? "bg-amber-50/60 border-amber-100/30 text-amber-600"
-                                        : isLocked 
-                                          ? "bg-amber-50/60 border-amber-100/30 text-amber-600" 
-                                          : isPremiumUnlocked 
-                                            ? "bg-emerald-50/60 border-emerald-100/30 text-emerald-600" 
-                                            : "bg-indigo-50/60 border-indigo-100/30 text-indigo-650"
-                                  )}>
-                                    {isCompleted ? (
-                                      <CheckCircle2 className="w-5 h-5 relative z-10" />
-                                    ) : isInProgress ? (
-                                      <Play className="w-5 h-5 text-amber-600 fill-amber-500/10 animate-pulse relative z-10 ml-0.5" />
-                                    ) : (
-                                      <Play className="w-5 h-5 relative z-10 ml-0.5" />
-                                    )}
-                                  </div>
-                                  
-                                  <div className="min-w-0 flex-1">
-                                    <div className="flex items-center gap-1.5 flex-wrap">
-                                      <h4 className="font-extrabold text-[13.5px] text-slate-900 tracking-tight leading-snug line-clamp-2 uppercase pr-2" title={bank.title}>{mainTitle}</h4>
-                                      {suffix && (
-                                        <span className="px-1.5 py-0.5 bg-brand-50 text-brand-700 text-[8.5px] font-black rounded border border-brand-100/60 uppercase tracking-wider shrink-0">Set {suffix}</span>
-                                      )}
-                                      {isCompleted ? (
-                                        <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 text-[8.5px] font-black rounded border border-emerald-100 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5" /> Completed</span>
-                                      ) : isInProgress ? (
-                                        <span className="px-1.5 py-0.5 bg-amber-50 text-amber-700 text-[8.5px] font-black rounded border border-amber-100 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><Clock className="w-2.5 h-2.5 animate-pulse" /> {progressPercent}%</span>
-                                      ) : bank.isPremium && (
-                                        isLocked ? (
-                                          <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 text-[8.5px] font-black rounded border border-amber-100 uppercase tracking-wider shrink-0">Premium</span>
-                                        ) : (
-                                          <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 text-[8.5px] font-black rounded border border-emerald-100 uppercase tracking-wider shrink-0">Active</span>
-                                        )
-                                      )}
-                                    </div>
-                                    
-                                    <div className="flex items-center gap-2 mt-2 text-[10px] font-extrabold text-slate-555 flex-wrap">
-                                      <span className="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-100/60"><FileText className="w-3 h-3 text-slate-400" /> {totalQs} Questions</span>
-                                      <span className="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-100/60"><Clock className="w-3 h-3 text-slate-400" /> {totalQs} Mins</span>
-                                      {isCompleted && completedAct && (
-                                        <span className="flex items-center gap-0.5 bg-emerald-50/50 text-emerald-700 px-1.5 py-0.5 rounded-md border border-emerald-100/30 shrink-0">
-                                          Score: {completedAct.score}/{completedAct.totalMarks || totalQs}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className={cn(
-                                  "w-8 h-8 rounded-full border flex items-center justify-center shrink-0 shadow-2xs group-active:translate-x-0.5 transition-all duration-300",
-                                  isCompleted 
-                                    ? "bg-emerald-50 border-emerald-100 text-emerald-600 group-active:bg-emerald-500 group-active:text-white"
-                                    : isInProgress
-                                      ? "bg-amber-50 border-amber-100 text-amber-600 group-active:bg-amber-500 group-active:text-white animate-pulse"
-                                      : isLocked
-                                        ? "bg-amber-50 border-amber-100 text-amber-600 group-active:bg-amber-500 group-active:text-white"
-                                        : isPremiumUnlocked
-                                          ? "bg-emerald-50 border-emerald-100 text-emerald-600 group-active:bg-emerald-500 group-active:text-white"
-                                          : "bg-slate-50 border-slate-100 text-slate-400 group-active:bg-brand-50 group-active:border-brand-100 group-active:text-brand-600"
-                                )}>
-                                  {isCompleted ? (
-                                    <CheckCircle2 className="w-3.5 h-3.5" />
-                                  ) : isInProgress ? (
-                                    <Play className="w-3 h-3 fill-amber-500/10" />
-                                  ) : isLocked ? (
-                                    <Lock className="w-3.5 h-3.5" />
-                                  ) : (
-                                    <ChevronRight className="w-4 h-4" />
-                                  )}
-                                </div>
-                              </div>
-                            ) : (
-                              <Card 
-                                className={cn(
-                                  "p-6 bg-white border shadow-lg shadow-slate-200/30 rounded-[1.5rem] hover:-translate-y-2 hover:shadow-2xl hover:shadow-brand-500/10 hover:border-brand-200 group transition-all duration-500 cursor-pointer flex flex-col gap-6 relative overflow-hidden premium-shine-container", 
-                                  isCompleted
-                                    ? "border-emerald-200 shadow-emerald-500/5 hover:shadow-emerald-500/10 hover:border-emerald-300"
-                                    : isInProgress
-                                      ? "border-amber-250 shadow-amber-500/5 hover:shadow-amber-500/10 hover:border-amber-300"
-                                      : isLocked 
-                                        ? "border-slate-200 bg-white hover:border-slate-400 hover:bg-slate-50/50 hover:shadow-md"
-                                        : isPremiumUnlocked 
-                                          ? "border-slate-200 bg-white hover:border-slate-400 hover:bg-slate-50/50 hover:shadow-md"
-                                          : "border-slate-200 bg-white hover:border-slate-400 hover:bg-slate-50/50"
-                                )}
-                                onClick={() => handleStartDirectPractice(bank)}
-                              >
-                                {isCompleted && <div className="absolute inset-0 bg-emerald-555/2 pointer-events-none" />}
-                                {isInProgress && <div className="absolute inset-0 bg-amber-555/2 pointer-events-none" />}
-                                {isPremiumUnlocked && !isCompleted && !isInProgress && <div className="absolute inset-0 bg-emerald-500/5 pointer-events-none" />}
-                                
-                                <div className="flex items-start justify-between relative z-10 w-full">
-                                  <div className="flex items-start gap-4 min-w-0 flex-1">
-                                    <div className={cn(
-                                      "w-14 h-14 rounded-xl flex items-center justify-center shrink-0 shadow-md text-white transition-transform group-hover:scale-110 relative mt-0.5", 
-                                      isCompleted
-                                        ? "bg-gradient-to-br from-emerald-500 to-teal-600"
-                                        : isInProgress
-                                          ? "bg-gradient-to-br from-amber-400 to-orange-500 animate-pulse"
-                                          : isLocked 
-                                            ? "bg-gradient-to-br from-amber-400 to-orange-500" 
-                                            : isPremiumUnlocked 
-                                              ? "bg-gradient-to-br from-emerald-500 to-teal-650" 
-                                              : "bg-gradient-to-br from-indigo-500 to-purple-650"
-                                    )}>
-                                      {isCompleted ? (
-                                        <CheckCircle2 className="w-6 h-6 text-white" />
-                                      ) : isInProgress ? (
-                                        <Play className="w-6 h-6 text-white fill-white/10 ml-0.5 animate-pulse" />
-                                      ) : (
-                                        <Play className="w-6 h-6 text-white fill-white/10 ml-0.5" />
-                                      )}
-                                      <div className="absolute inset-0 border-2 border-white/20 rounded-xl" />
-                                    </div>
-                                    <div className="text-left min-w-0 flex-1">
-                                      <h4 className="font-black text-base sm:text-lg text-slate-950 tracking-tight group-hover:text-brand-600 transition-colors uppercase leading-snug line-clamp-2" title={bank.title}>{mainTitle}</h4>
-                                      <div className="flex items-center flex-wrap gap-1.5 mt-1">
-                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100 whitespace-nowrap">Practice Set</span>
-                                        {suffix && (
-                                          <span className="text-[10px] font-black text-brand-700 uppercase tracking-widest bg-brand-50 px-2 py-0.5 rounded border border-brand-100/60 shadow-2xs whitespace-nowrap">Set {suffix}</span>
-                                        )}
-                                        {isCompleted && (
-                                          <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-100/60 flex items-center gap-0.5 whitespace-nowrap"><CheckCircle2 className="w-3.5 h-3.5" /> Completed</span>
-                                        )}
-                                        {isInProgress && (
-                                          <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest bg-amber-50 px-2.5 py-0.5 rounded border border-amber-100/60 flex items-center gap-0.5 whitespace-nowrap"><Clock className="w-3.5 h-3.5 animate-pulse" /> In Progress</span>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </div>
-                                  {bank.isPremium && !isCompleted && !isInProgress && (
-                                    <div className="flex shrink-0">
-                                      {isLocked ? (
-                                        <span className="px-2 py-1 bg-amber-50 text-amber-700 text-[10px] font-black rounded-lg border border-amber-100 uppercase tracking-wider">Premium</span>
-                                      ) : (
-                                        <span className="px-2 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-black rounded-lg border border-emerald-100 uppercase tracking-wider">Active</span>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-
-                                <div className="space-y-4 flex-1 relative z-10 pt-2 text-left">
-                                  <div className="flex gap-4 text-xs font-bold text-slate-555 flex-wrap">
-                                    <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><FileText className="w-3.5 h-3.5 text-slate-400"/> {totalQs} Questions</span>
-                                    <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><Clock className="w-3.5 h-3.5 text-slate-400"/> {totalQs} Mins Session</span>
-                                  </div>
-
-                                  {isCompleted && completedAct && (
-                                    <div className="p-3.5 bg-emerald-50/50 rounded-xl border border-emerald-100/40 text-xs space-y-1">
-                                      <div className="flex justify-between text-emerald-800 font-bold">
-                                        <span>Previous Attempt:</span>
-                                        <span>{new Date(completedAct.timestamp).toLocaleDateString()}</span>
-                                      </div>
-                                      <div className="grid grid-cols-2 gap-2 pt-1 border-t border-emerald-100/30 text-emerald-700">
-                                        <div>Score: <strong className="text-emerald-950 font-black">{completedAct.score} / {completedAct.totalMarks || totalQs}</strong></div>
-                                        <div>Accuracy: <strong className="text-emerald-950 font-black">{completedAct.accuracy}%</strong></div>
-                                      </div>
-                                    </div>
-                                  )}
-
-                                  {isInProgress && incompleteAct && (
-                                    <div className="p-3.5 bg-amber-50/50 rounded-xl border border-amber-100/40 text-xs space-y-1.5">
-                                      <div className="flex justify-between text-amber-800 font-bold">
-                                        <span>In Progress:</span>
-                                        <span>Question {incompleteAct.metadata?.currentQuestionIndex + 1} of {incompleteAct.metadata?.totalQuestions || totalQs}</span>
-                                      </div>
-                                      <div className="w-full bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
-                                        <div className="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-
-                                <Button 
-                                  className={cn(
-                                    "w-full h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-sm transition-all shadow-md relative z-10",
-                                    isCompleted
-                                      ? "border-emerald-250 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-350 hover:text-emerald-700 bg-white border"
-                                      : isInProgress
-                                        ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/20 hover:shadow-xl hover:shadow-amber-500/30"
-                                        : isLocked 
-                                          ? "bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-amber-500/10 hover:shadow-amber-500/30" 
-                                          : isPremiumUnlocked 
-                                            ? "bg-gradient-to-r from-emerald-500 to-teal-650 text-white shadow-emerald-500/10 hover:shadow-emerald-500/30" 
-                                            : "premium-gradient text-white shadow-brand-500/10 hover:shadow-brand-500/30"
-                                  )}
-                                >
-                                  {isCompleted ? (
-                                    <>
-                                      <RotateCw className="w-4 h-4" />
-                                      Retake Practice
-                                    </>
-                                  ) : isInProgress ? (
-                                    <>
-                                      <Play className="w-4 h-4 fill-white/20" />
-                                      Resume Practice ({progressPercent}%)
-                                    </>
-                                  ) : isLocked ? (
-                                    <>
-                                      <Lock className="w-4 h-4" />
-                                      Unlock Set
-                                    </>
-                                  ) : (
-                                    <>
-                                      <span>Start Practice</span>
-                                      <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                                    </>
-                                  )}
-                                </Button>
-                              </Card>
-                            )}
-                          </motion.div>
-                        );
-                      })}
+                      {matchingBanks.map((bank: any) => (
+                        <ScheduledPracticeBankCard
+                          key={bank.id}
+                          bank={bank}
+                          isMobile={isMobile}
+                          hasAccessTo={hasAccessTo}
+                          activities={activities}
+                          handleStartDirectPractice={handleStartDirectPractice}
+                        />
+                      ))}
                     </div>
                   );
                 })()}
@@ -9335,6 +9428,13 @@ function AppContent() {
   const { user, loading, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Clear stale bank item modal state on every app load.
+  // This prevents a hard refresh from restoring a sessionStorage key that causes
+  // the body to be blurred/locked before the modal has a chance to render.
+  useEffect(() => {
+    sessionStorage.removeItem('oep_selectedBankItem');
+  }, []);
 
   // Register service worker on app start (for push notifications)
   useEffect(() => {

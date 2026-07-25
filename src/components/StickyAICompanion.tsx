@@ -27,7 +27,8 @@ import {
   Volume2,
   VolumeX,
   Radio,
-  Check
+  Check,
+  Globe
 } from 'lucide-react';
 import { useVoiceInteraction, VoiceLanguage } from '../hooks/useVoiceInteraction';
 import { VoiceWaveVisualizer } from './VoiceWaveVisualizer';
@@ -794,10 +795,14 @@ function RenderMessage({ text }: { text: string }) {
 
 function inlineFormat(text: string): string {
   const formatted = text
+    .replace(/\[([\s\S]+?)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-brand-500 hover:text-brand-600 hover:underline font-bold transition-colors inline-flex items-center gap-0.5">$1</a>')
     .replace(/\*\*(.+?)\*\*/g, '<strong class="font-bold text-slate-800">$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     .replace(/`(.+?)`/g, '<code class="bg-slate-100 text-brand-700 px-1 py-0.5 rounded text-[10px] font-mono">$1</code>');
-  return DOMPurify.sanitize(formatted);
+  return DOMPurify.sanitize(formatted, {
+    ALLOWED_TAGS: ['br', 'b', 'strong', 'i', 'em', 'u', 'span', 'sub', 'sup', 'code', 'p', 'a'],
+    ALLOWED_ATTR: ['class', 'style', 'href', 'target', 'rel']
+  });
 }
 
 /* ─────────────────────────────────────────────
@@ -823,6 +828,21 @@ const StickyAICompanion: React.FC<StickyAICompanionProps> = ({
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
+  const [webSearch, setWebSearch] = useState(false);
+  const [userManuallyToggled, setUserManuallyToggled] = useState(false);
+
+  useEffect(() => {
+    if (userManuallyToggled) return;
+    const searchKeywords = [
+      'today', 'current', 'news', 'latest', 'affairs', '2026', 'recruitment', 'notification',
+      'who is', 'chief minister', 'prime minister', 'president', 'governor', 'minister', 'weather',
+      'recent', 'yesterday', 'update', 'opsc', 'ossc', 'osssc', 'vacancy', 'apply'
+    ];
+    const query = input.toLowerCase();
+    const needsSearch = searchKeywords.some(keyword => query.includes(keyword));
+    setWebSearch(needsSearch);
+  }, [input, userManuallyToggled]);
+
   const [loading, setLoading] = useState(false);
   const [showBadge, setShowBadge] = useState(true);
 
@@ -1763,6 +1783,7 @@ const StickyAICompanion: React.FC<StickyAICompanionProps> = ({
     setMessages(prev => [...prev, { role: 'user', content: userText }, { role: 'assistant', content: '' }]);
     setInput('');
     setLoading(true);
+    setUserManuallyToggled(false);
 
     const controller = new AbortController();
     abortRef.current = controller;
@@ -1788,6 +1809,7 @@ const StickyAICompanion: React.FC<StickyAICompanionProps> = ({
           ],
           temperature: 0.15, // lower = less hallucination
           stream: true,
+          webSearch: webSearch
         }),
         signal: controller.signal,
       });
@@ -2338,6 +2360,28 @@ const StickyAICompanion: React.FC<StickyAICompanionProps> = ({
                       </div>
                     ) : (
                       <div className="flex-1 relative">
+                        {/* Smart Web Search icon */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setWebSearch(prev => !prev);
+                            setUserManuallyToggled(true);
+                          }}
+                          disabled={loading}
+                          className={cn(
+                            "absolute left-2 top-1/2 -translate-y-1/2 p-0.5 rounded-md transition-all duration-300 z-10 cursor-pointer active:scale-95 flex items-center justify-center border",
+                            webSearch 
+                              ? "text-brand-600 bg-brand-50 border-brand-200/50 shadow-xs hover:bg-brand-100/50" 
+                              : "text-slate-400 border-transparent hover:text-slate-650 hover:bg-slate-100",
+                            loading && "opacity-50 cursor-not-allowed"
+                          )}
+                          title={webSearch ? "Web Search Active (Click to disable)" : "Web Search Disabled (Click to enable)"}
+                        >
+                          <Globe className={cn("w-3 h-3 sm:w-3.5 sm:h-3.5", webSearch && "animate-pulse")} />
+                        </button>
+
                         <input
                           ref={inputRef}
                           type="text"
@@ -2346,7 +2390,7 @@ const StickyAICompanion: React.FC<StickyAICompanionProps> = ({
                           placeholder="Ask about exams, pricing, features…"
                           disabled={loading}
                           className={cn(
-                            "w-full text-xs bg-slate-50/70 border rounded-2xl pl-3.5 pr-8 sm:pl-4 sm:pr-9 py-2 sm:py-2.5 text-slate-800 placeholder:text-slate-450 focus:outline-none focus:bg-white transition-all duration-300 font-medium disabled:opacity-60 disabled:cursor-not-allowed",
+                            "w-full text-xs bg-slate-50/70 border rounded-2xl pl-7.5 pr-8 sm:pl-8.5 sm:pr-9 py-2 sm:py-2.5 text-slate-800 placeholder:text-slate-450 focus:outline-none focus:bg-white transition-all duration-300 font-medium disabled:opacity-60 disabled:cursor-not-allowed",
                             "border-slate-200/60 focus:border-brand-400/80"
                           )}
                         />

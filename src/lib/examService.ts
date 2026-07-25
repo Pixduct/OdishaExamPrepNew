@@ -79,6 +79,7 @@ export interface MockTest {
   sortOrder?: number;
   createdAt?: string;
   is_archived?: boolean;
+  scheduled_at?: string | null;
 }
 
 export interface Exam {
@@ -103,14 +104,17 @@ export interface QuestionBank {
   type: string; // 'topic-wise', 'exam-focused', 'revision-sets', 'pyq-collections'
   title: string;
   questionCount: number;
+  practiceQuestionCount?: number;
   tagline: string;
   image: string;
   isPremium: boolean;
   pdfUrl?: string;
   hasPracticeMode?: boolean;
+  target_mode?: 'bank' | 'practice' | 'both';
   sortOrder?: number;
   createdAt?: string;
   is_archived?: boolean;
+  scheduled_at?: string | null;
 }
 
 // --- Services ---
@@ -779,7 +783,11 @@ export const examService = {
             }
           });
           banks.forEach(b => {
-            b.questionCount = countMap[b.title] || 0;
+            b.practiceQuestionCount = countMap[b.title] || 0;
+            // Preserve admin-configured questionCount, fallback to practice count only if questionCount is 0/undefined
+            if (!b.questionCount || b.questionCount === 0) {
+              b.questionCount = countMap[b.title] || 0;
+            }
           });
         }
       } catch (err) {

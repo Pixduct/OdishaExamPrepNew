@@ -209,20 +209,27 @@ const InlineMath: React.FC<{
 // ─────────────────────────────────────────────────────────────
 
 const PlainText: React.FC<{ text: string; index: number }> = ({ text, index }) => {
-  // Safe HTML rendering for basic tags like <br>, <b>, <strong>, <i>, <u>, <sup>, <sub>
-  const hasHtml = /<[a-z/][\s\S]*?>/i.test(text);
+  // Convert markdown links: [Link Text](URL) into HTML anchor tags (supports nested brackets like [[1] Title](URL))
+  const processedText = text.replace(/\[([\s\S]+?)\]\s*\((https?:\/\/[^)]+)\)/g, (match, linkText, url) => {
+    const cleanUrl = url.replace(/\s+/g, '');
+    const cleanLinkText = linkText.replace(/\n\s*/g, ' ').trim();
+    return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="text-brand-500 hover:text-brand-600 hover:underline font-bold transition-colors">${cleanLinkText}</a>`;
+  });
+
+  // Safe HTML rendering for basic tags + anchors
+  const hasHtml = /<[a-z/][\s\S]*?>/i.test(processedText);
   if (hasHtml) {
-    const clean = DOMPurify.sanitize(text, {
-      ALLOWED_TAGS: ['br', 'b', 'strong', 'i', 'em', 'u', 'span', 'sub', 'sup', 'code', 'p'],
-      ALLOWED_ATTR: ['class', 'style']
+    const clean = DOMPurify.sanitize(processedText, {
+      ALLOWED_TAGS: ['br', 'b', 'strong', 'i', 'em', 'u', 'span', 'sub', 'sup', 'code', 'p', 'a'],
+      ALLOWED_ATTR: ['class', 'style', 'href', 'target', 'rel']
     });
     return <span key={index} dangerouslySetInnerHTML={{ __html: clean }} />;
   }
 
-  if (!text.includes('\n')) return <span key={index}>{text}</span>;
+  if (!processedText.includes('\n')) return <span key={index}>{processedText}</span>;
   return (
     <span key={index}>
-      {text.split('\n').map((line, li, arr) => (
+      {processedText.split('\n').map((line, li, arr) => (
         <React.Fragment key={li}>
           {line}
           {li < arr.length - 1 && <br />}
@@ -1077,7 +1084,7 @@ function renderTextAndDiagramsWithAscii(text: string, isOption: boolean, keyPref
     if (isStrictDiagramLine(text)) {
       return <DiagramRenderer content={text} isOption={isOption} />;
     }
-    return <span key={keyPrefix}>{text}</span>;
+    return <PlainText text={text} index={0} key={keyPrefix} />;
   }
 
   const lines = text.split('\n');
@@ -1497,8 +1504,6 @@ export const MathTextRenderer: React.FC<MathTextRendererProps> = React.memo(({
   blockSize = 'md',
   isOption = false,
 }: MathTextRendererProps) => {
-  // Always render the wrapper span to keep hooks consistent;
-  // render nothing inside when text is empty.
   const rawContent = text || '';
 
   // Normalize literal escape sequences (e.g. "\\n" stored as two chars in DB)

@@ -22,7 +22,15 @@ import { aiDiagnosticManager } from './lib/aiDiagnosticManager';
 
 const MarkdownMathRenderer = ({ text, isUser = false }: { text: string; isUser?: boolean }) => {
   if (!text) return null;
-  const lines = text.split('\n');
+
+  // Pre-process markdown links (including those split by newlines/spaces) to HTML anchors
+  const processedLinksText = text.replace(/\[([\s\S]+?)\]\s*\((https?:\/\/[^)]+)\)/g, (match, linkText, url) => {
+    const cleanUrl = url.replace(/\s+/g, '');
+    const cleanLinkText = linkText.replace(/\n\s*/g, ' ').trim();
+    return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="text-brand-500 hover:text-brand-600 hover:underline font-bold transition-colors inline-flex items-center gap-0.5">${cleanLinkText}</a>`;
+  });
+
+  const lines = processedLinksText.split('\n');
   return (
     <div className={cn("text-left w-full", isUser ? "space-y-1.5" : "space-y-3")}>
       {lines.map((line, lineIdx) => {
@@ -39,7 +47,7 @@ const MarkdownMathRenderer = ({ text, isUser = false }: { text: string; isUser?:
 
         let isBullet = false;
         let listContent = trimmed;
-        if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
+        if (trimmed.startsWith('* ') || trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
           isBullet = true;
           listContent = trimmed.substring(2);
         }

@@ -41,9 +41,14 @@ import {
   VolumeX,
   Radio,
   Globe,
+  Paperclip,
+  FileText,
+  Image as ImageIcon,
   History,
   MessageSquare,
-  Edit2
+  Edit2,
+  Maximize2,
+  Minimize2
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import TimePicker from '../components/TimePicker';
@@ -56,10 +61,20 @@ import { VoiceWaveVisualizer } from '../components/VoiceWaveVisualizer';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 
+interface MessageAttachment {
+  id: string;
+  name: string;
+  size: number;
+  type: 'image' | 'pdf';
+  previewUrl?: string;
+  imageDataUrl?: string;
+}
+
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   mode?: 'quick' | 'best';
+  attachments?: MessageAttachment[];
 }
 
 interface ChatSession {
@@ -529,8 +544,15 @@ const GENERATING_STEPS = [
 ];const MarkdownMathRenderer = ({ text, isUser = false }: { text: string; isUser?: boolean }) => {
   if (!text) return null;
 
+  // Pre-process markdown links (including those split by newlines/spaces) to HTML anchors
+  const processedLinksText = text.replace(/\[([\s\S]+?)\]\s*\((https?:\/\/[^)]+)\)/g, (match, linkText, url) => {
+    const cleanUrl = url.replace(/\s+/g, '');
+    const cleanLinkText = linkText.replace(/\n\s*/g, ' ').trim();
+    return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="text-brand-500 hover:text-brand-600 hover:underline font-bold transition-colors">${cleanLinkText}</a>`;
+  });
+
   // Process text to handle math, lists, bold, etc.
-  const lines = text.split('\n');
+  const lines = processedLinksText.split('\n');
 
   return (
     <div className={cn("text-left w-full", isUser ? "space-y-1.5" : "space-y-3")}>
@@ -551,7 +573,7 @@ const GENERATING_STEPS = [
         // Check for bullet lists
         let isBullet = false;
         let listContent = trimmed;
-        if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
+        if (trimmed.startsWith('* ') || trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
           isBullet = true;
           listContent = trimmed.substring(2);
         }
@@ -569,6 +591,9 @@ const GENERATING_STEPS = [
         // Check for option lists (e.g., a) or A. or a-)
         const optionMatch = trimmed.match(/^([a-gA-G])[\)\.\-]\s+(.*)$/);
 
+        // Strip surrounding single *italic* markers (AI sometimes wraps source links in these)
+        const cleanListContent = listContent.replace(/^\*([^*]+)\*$/, '$1').trim();
+
         // Parse bold and other inline formats in listContent
         const renderInline = (str: string) => {
           const parts = str.split(/(\*\*.*?\*\*)/g);
@@ -583,8 +608,8 @@ const GENERATING_STEPS = [
         if (isBullet) {
           return (
             <div key={lineIdx} className="flex items-start gap-2 pl-3 my-0.5">
-              <span className={cn("w-1.5 h-1.5 rounded-full shrink-0 mt-2", isUser ? "bg-brand-200" : "bg-[#2563EB]")} />
-              <span className={cn("leading-relaxed font-medium flex-1 text-sm md:text-[15px]", isUser ? "text-brand-50" : "text-slate-700")}>{renderInline(listContent)}</span>
+              <span className={cn("w-1.5 h-1.5 rounded-full shrink-0 mt-[7px]", isUser ? "bg-brand-200" : "bg-[#2563EB]")} />
+              <span className={cn("leading-relaxed font-medium flex-1 min-w-0 break-words text-sm md:text-[15px]", isUser ? "text-brand-50" : "text-slate-700")}>{renderInline(cleanListContent)}</span>
             </div>
           );
         }
@@ -593,7 +618,7 @@ const GENERATING_STEPS = [
           return (
             <div key={lineIdx} className="flex items-start gap-2 pl-3 my-0.5">
               <span className={cn("font-black text-xs shrink-0 mt-0.5", isUser ? "text-brand-200" : "text-[#2563EB]")}>{numLabel}.</span>
-              <span className={cn("leading-relaxed font-medium flex-1 text-sm md:text-[15px]", isUser ? "text-brand-50" : "text-slate-700")}>{renderInline(listContent)}</span>
+              <span className={cn("leading-relaxed font-medium flex-1 min-w-0 break-words text-sm md:text-[15px]", isUser ? "text-brand-50" : "text-slate-700")}>{renderInline(cleanListContent)}</span>
             </div>
           );
         }
@@ -636,6 +661,42 @@ const GENERATING_STEPS = [
 
 export default function AiMentor({ user }: { user: any }) {
   const { refreshProfile } = useAuth();
+  // Fullscreen mode state for desktop/laptop workspace
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [showToolsDrawerInFullScreen, setShowToolsDrawerInFullScreen] = useState(false);
+
+  const toggleFullScreen = () => {
+    if (!isFullScreen) {
+      setIsFullScreen(true);
+      const elem = document.documentElement;
+      if (elem && elem.requestFullscreen) {
+        elem.requestFullscreen().catch(() => {});
+      }
+      toast.success("Entered Fullscreen Workspace Mode", { id: 'fs-toast' });
+    } else {
+      setIsFullScreen(false);
+      setShowToolsDrawerInFullScreen(false);
+      if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+      toast.success("Exited Fullscreen Workspace", { id: 'fs-toast' });
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && isFullScreen) {
+        setIsFullScreen(false);
+        setShowToolsDrawerInFullScreen(false);
+      }
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [isFullScreen]);
+
   // rotating exam tips index
   const [currentTipIdx, setCurrentTipIdx] = useState(0);
   const [mobileTab, setMobileTab] = useState<'chat' | 'tools'>(() => {
@@ -828,6 +889,21 @@ export default function AiMentor({ user }: { user: any }) {
   };
 
   const [input, setInput] = useState('');
+  const [webSearch, setWebSearch] = useState(false);
+  const [userManuallyToggled, setUserManuallyToggled] = useState(false);
+
+  useEffect(() => {
+    if (userManuallyToggled) return;
+    const searchKeywords = [
+      'today', 'current', 'news', 'latest', 'affairs', '2026', 'recruitment', 'notification',
+      'who is', 'chief minister', 'prime minister', 'president', 'governor', 'minister', 'weather',
+      'recent', 'yesterday', 'update', 'opsc', 'ossc', 'osssc', 'vacancy', 'apply'
+    ];
+    const query = input.toLowerCase();
+    const needsSearch = searchKeywords.some(keyword => query.includes(keyword));
+    setWebSearch(needsSearch);
+  }, [input, userManuallyToggled]);
+
   const [loading, setLoading] = useState(false);
   const [responseMode, setResponseMode] = useState<'quick' | 'best'>(() => {
     const saved = localStorage.getItem('study_coach_response_mode');
@@ -837,6 +913,177 @@ export default function AiMentor({ user }: { user: any }) {
   const [tempVoiceText, setTempVoiceText] = useState('');
   const [isVoiceMuted, setIsVoiceMuted] = useState(() => localStorage.getItem('oep_voice_muted') === 'true');
   const chatEndRef = useRef<HTMLDivElement>(null);
+  
+  // File Attachments State (PDFs, Images, Screenshots)
+  interface AttachmentItem {
+    id: string;
+    file: File;
+    name: string;
+    size: number;
+    type: 'image' | 'pdf';
+    previewUrl?: string;
+    imageDataUrl?: string;
+    extractedText?: string;
+  }
+  const [attachments, setAttachments] = useState<AttachmentItem[]>([]);
+  const [activeLightboxUrl, setActiveLightboxUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const compressImageForVision = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const objectUrl = URL.createObjectURL(file);
+      const img = new Image();
+
+      const fallbackToFileReader = () => {
+        URL.revokeObjectURL(objectUrl);
+        const reader = new FileReader();
+        reader.onload = (e) => resolve((e.target?.result as string) || '');
+        reader.onerror = () => resolve('');
+        reader.readAsDataURL(file);
+      };
+
+      const timeoutId = setTimeout(() => {
+        fallbackToFileReader();
+      }, 2500);
+
+      img.onload = () => {
+        clearTimeout(timeoutId);
+        try {
+          const MAX_DIM = 1024;
+          let width = img.width || 800;
+          let height = img.height || 600;
+
+          if (width > MAX_DIM || height > MAX_DIM) {
+            if (width > height) {
+              height = Math.round((height * MAX_DIM) / width);
+              width = MAX_DIM;
+            } else {
+              width = Math.round((width * MAX_DIM) / height);
+              height = MAX_DIM;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            fallbackToFileReader();
+            return;
+          }
+
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, width, height);
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressedJpeg = canvas.toDataURL('image/jpeg', 0.85);
+          URL.revokeObjectURL(objectUrl);
+          resolve(compressedJpeg);
+        } catch (_) {
+          fallbackToFileReader();
+        }
+      };
+
+      img.onerror = () => {
+        clearTimeout(timeoutId);
+        fallbackToFileReader();
+      };
+
+      img.src = objectUrl;
+    });
+  };
+
+  const checkIsImage = (file: File) => {
+    return file.type.startsWith('image/') || /\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(file.name);
+  };
+
+  const checkIsPdf = (file: File) => {
+    return file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+  };
+
+  const extractFileContent = async (file: File): Promise<{ extractedText?: string; imageDataUrl?: string }> => {
+    if (checkIsImage(file)) {
+      const compressedDataUrl = await compressImageForVision(file);
+      return { imageDataUrl: compressedDataUrl };
+    }
+
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      if (checkIsPdf(file)) {
+        reader.onload = (e) => {
+          const text = (e.target?.result as string) || '';
+          const matches = text.match(/\(([^)]+)\)\s*Tj/g) || text.match(/\[([^\]]+)\]\s*TJ/g);
+          let extracted = '';
+          if (matches && matches.length > 0) {
+            extracted = matches
+              .map(m => m.replace(/[\(\)\[\]]/g, '').replace(/\\/g, ''))
+              .filter(t => t.trim().length > 1)
+              .join(' ');
+          }
+          if (!extracted || extracted.length < 20) {
+            const cleanStrings = text.match(/[\x20-\x7E\s]{4,}/g) || [];
+            extracted = cleanStrings
+              .filter(s => !s.includes('obj') && !s.includes('endobj') && !s.includes('stream') && !s.includes('R /') && s.trim().length > 3)
+              .slice(0, 150)
+              .join(' ')
+              .replace(/\s+/g, ' ');
+          }
+          resolve({ extractedText: `[ATTACHED PDF DOCUMENT: "${file.name}"]\nExtracted PDF Content:\n${extracted.substring(0, 4000) || '(PDF document attached)'}` });
+        };
+        reader.readAsText(file);
+      } else {
+        reader.onload = (e) => {
+          resolve({ extractedText: `[ATTACHED FILE: "${file.name}"]\nContent:\n${((e.target?.result as string) || '').substring(0, 3000)}` });
+        };
+        reader.readAsText(file);
+      }
+    });
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []) as File[];
+    if (!files.length) return;
+
+    if (attachments.length + files.length > 3) {
+      toast.error('Maximum 3 files allowed per query.', { id: 'file-limit' });
+      return;
+    }
+
+    const newItems: AttachmentItem[] = [];
+    for (const file of files) {
+      const isImage = checkIsImage(file);
+      const isPdf = checkIsPdf(file);
+
+      if (!isImage && !isPdf) {
+        toast.error(`"${file.name}" is not supported. Please upload PDFs or images.`, { id: 'file-type' });
+        continue;
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`"${file.name}" exceeds 10MB limit.`, { id: 'file-size' });
+        continue;
+      }
+
+      const previewUrl = isImage ? URL.createObjectURL(file) : undefined;
+      const fileData = await extractFileContent(file);
+
+      newItems.push({
+        id: Math.random().toString(36).substring(2, 9),
+        file,
+        name: file.name,
+        size: file.size,
+        type: isImage ? 'image' : 'pdf',
+        previewUrl,
+        imageDataUrl: fileData.imageDataUrl,
+        extractedText: fileData.extractedText
+      });
+    }
+
+    setAttachments(prev => [...prev, ...newItems]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    toast.success(`${newItems.length} file(s) attached!`, { id: 'file-success' });
+  };
 
   // Auto-scroll to latest chat message on mount, history restore, or message stream updates
   useEffect(() => {
@@ -2160,18 +2407,69 @@ export default function AiMentor({ user }: { user: any }) {
 
   // Chat Submission
   const handleSendMessage = async (textToSend: string) => {
-    if (!textToSend.trim() || loading) return;
+    const hasAttachments = attachments.length > 0;
+    const hasImageAttachment = attachments.some(a => a.type === 'image' && a.imageDataUrl);
+
+    if ((!textToSend.trim() && !hasAttachments) || loading) return;
 
     setMobileTab('chat');
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
-    const userMessage: Message = { role: 'user', content: textToSend };
+    let userDisplayContent = textToSend.trim();
+    let apiPayloadContent = textToSend.trim();
+    let lastUserContent: any = apiPayloadContent;
+    let savedAttachments: MessageAttachment[] | undefined = undefined;
+
+    if (hasAttachments) {
+      savedAttachments = attachments.map(a => ({
+        id: a.id,
+        name: a.name,
+        size: a.size,
+        type: a.type,
+        previewUrl: a.previewUrl || a.imageDataUrl,
+        imageDataUrl: a.imageDataUrl
+      }));
+
+      const pdfTexts = attachments
+        .filter(a => a.type === 'pdf' && a.extractedText)
+        .map(a => a.extractedText)
+        .join('\n\n');
+
+      const promptTextPart = [pdfTexts, apiPayloadContent]
+        .filter(Boolean)
+        .join('\n\n') || 'Please analyze the attached image/file and answer the student request.';
+
+      if (hasImageAttachment) {
+        // Multimodal payload format for Vision Model
+        const contentParts: any[] = [
+          { type: 'text', text: promptTextPart }
+        ];
+        for (const imgAtt of attachments.filter(a => a.type === 'image' && a.imageDataUrl)) {
+          contentParts.push({
+            type: 'image_url',
+            image_url: { url: imgAtt.imageDataUrl }
+          });
+        }
+        lastUserContent = contentParts;
+      } else {
+        lastUserContent = promptTextPart;
+      }
+
+      setAttachments([]);
+    }
+
+    const userMessage: Message = { 
+      role: 'user', 
+      content: userDisplayContent,
+      attachments: savedAttachments
+    };
     // Immediately append user message AND empty assistant message to show bouncing dots (active feedback)
     setMessages(prev => [...prev, userMessage, { role: 'assistant', content: '', mode: responseMode }]);
     setInput('');
     setLoading(true);
+    setUserManuallyToggled(false);
     setTimeout(() => scrollToBottom(true), 30);
 
     let assistantResponse = "";
@@ -2193,18 +2491,19 @@ EXAM-ORIENTED DIRECTIVES:
 - Prioritize high-yield exam concepts, Previous Year Question (PYQ) patterns, syllabus-aware topics, and practical scoring strategies.
 - Avoid generic academic knowledge; focus strictly on what is frequently asked in government recruitment papers.
 - Keep explanations brief, direct, structured with bullet points, and highly preparation-oriented.
+- If an image or document is provided, analyze its visual contents, diagrams, text, or questions carefully and answer based on what is shown.
 - Do NOT mention external AI brands. Introduce yourself only as the OdishaExamPrep AI Model.`;
 
       const apiMessages = [
         { role: 'system', content: systemPrompt },
         ...recentHistory.map(m => ({ role: m.role, content: m.content })),
-        { role: 'user', content: textToSend }
+        { role: 'user', content: lastUserContent }
       ];
 
-      // Map response mode to the optimized NVIDIA NIM model endpoints
-      const modelName = responseMode === 'quick' 
-        ? 'meta/llama-3.1-8b-instruct' 
-        : 'meta/llama-3.3-70b-instruct';
+      // Select vision model if an image is attached, else standard Llama model
+      const modelName = hasImageAttachment
+        ? 'meta/llama-3.2-11b-vision-instruct'
+        : (responseMode === 'quick' ? 'meta/llama-3.1-8b-instruct' : 'meta/llama-3.3-70b-instruct');
 
       // Call local proxy endpoint to bypass CORS and protect API key
       const response = await fetch('/api/chat/completions', {
@@ -2216,7 +2515,8 @@ EXAM-ORIENTED DIRECTIVES:
           model: modelName,
           messages: apiMessages,
           temperature: 0.2,
-          stream: true
+          stream: true,
+          webSearch: webSearch
         }),
         signal: controller.signal
       });
@@ -3756,7 +4056,9 @@ JSON structure:
         
         {/* Left Pane: Chat Interface */}
         <div id="chat-pane" className={cn(
-          "lg:col-span-7 bg-white text-slate-700 border border-slate-200/60 rounded-[2rem] overflow-hidden shadow-2xl flex-col h-[calc(100dvh-12rem)] min-h-[580px] lg:h-[720px] relative",
+          isFullScreen
+            ? "fixed inset-0 z-[100] w-screen h-dvh rounded-none border-none shadow-none bg-white flex flex-col transition-all duration-300"
+            : "lg:col-span-7 bg-white text-slate-700 border border-slate-200/60 rounded-[2rem] overflow-hidden shadow-2xl flex-col h-[calc(100dvh-12rem)] min-h-[580px] lg:h-[720px] relative transition-all duration-300",
           mobileTab === 'chat' ? "flex" : "hidden lg:flex"
         )}>
           {/* Declaring dark color-scheme on the dark chat console to enable dark-themed scrollbars and select default popups */}
@@ -4053,6 +4355,28 @@ JSON structure:
                 >
                   <Trash2 className="w-3.5 h-3.5 text-slate-400 hover:text-rose-500" />
                 </button>
+
+                {/* Fullscreen Workspace Toggle Button */}
+                <button
+                  type="button"
+                  onClick={toggleFullScreen}
+                  className={cn(
+                    "flex items-center gap-1.5 px-2.5 py-1.5 border rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 shrink-0",
+                    isFullScreen
+                      ? "bg-[#2563EB] hover:bg-[#1d4ed8] text-white border-[#2563EB] shadow-md shadow-[#2563EB]/20 font-black"
+                      : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200/80"
+                  )}
+                  title={isFullScreen ? "Exit Fullscreen Workspace" : "Enter Fullscreen Workspace"}
+                >
+                  {isFullScreen ? (
+                    <Minimize2 className="w-3.5 h-3.5 text-white" />
+                  ) : (
+                    <Maximize2 className="w-3.5 h-3.5 text-slate-600" />
+                  )}
+                  <span className="text-[10px] font-black uppercase tracking-wider hidden xs:inline">
+                    {isFullScreen ? "Exit Fullscreen" : "Fullscreen"}
+                  </span>
+                </button>
               </div>
             </div>
 
@@ -4112,6 +4436,39 @@ JSON structure:
                       )}
                     </div>
                   </div>
+                  {/* ChatGPT-Style Visual Attachment Cards in Chat Bubble */}
+                  {m.attachments && m.attachments.length > 0 && (
+                    <div className="flex items-center gap-2 flex-wrap mb-2 pt-0.5">
+                      {m.attachments.map((att, aIdx) => (
+                        <div key={att.id || aIdx} className="shrink-0">
+                          {att.type === 'image' && (att.previewUrl || att.imageDataUrl) ? (
+                            /* ChatGPT Square Image Tile with Hover Lightbox Zoom */
+                            <div
+                              onClick={() => setActiveLightboxUrl(att.previewUrl || att.imageDataUrl || null)}
+                              className="relative w-18 h-18 sm:w-22 sm:h-22 rounded-xl overflow-hidden border border-white/30 shadow-md bg-slate-900/40 group/chatimg cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
+                              title="Click to view high-res image"
+                            >
+                              <img
+                                src={att.previewUrl || att.imageDataUrl}
+                                alt={att.name}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover/chatimg:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-xs">
+                                <Maximize2 className="w-4 h-4 text-white drop-shadow-md" />
+                              </div>
+                            </div>
+                          ) : (
+                            /* Document / PDF Mini Card */
+                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/15 border border-white/25 backdrop-blur-xs text-white text-xs font-semibold max-w-[200px]">
+                              <FileText className="w-4 h-4 text-rose-300 shrink-0" />
+                              <span className="truncate">{att.name}</span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <div className="whitespace-pre-wrap font-sans">
                     {m.content ? <MarkdownMathRenderer text={m.content} isUser={m.role === 'user'} /> : (
                       <span className="inline-flex gap-2 items-center text-xs font-semibold text-slate-500 py-1.5 overflow-visible">
@@ -4197,194 +4554,284 @@ JSON structure:
                     </button>
                   </div>
 
+                  {/* Hidden File Input for PDF/Image Upload */}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileSelect}
+                    accept="image/*,application/pdf"
+                    multiple
+                    className="hidden"
+                  />
+
                   {/* Input Wrapper & Dynamic Action Button Row */}
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    {/* Active ChatGPT-Style Realtime Voice Recording Bar */}
-                    {isListening ? (
-                      <div className="relative flex-1 min-w-0 flex items-center justify-between bg-slate-950/95 backdrop-blur-xl text-white rounded-xl px-2.5 py-2 sm:px-4 sm:py-2.5 border border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.15)] overflow-hidden min-h-[44px]">
-                        <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent pointer-events-none" />
-                        <div className="flex items-center gap-2 min-w-0 flex-1 z-10 px-1">
-                          <VoiceWaveVisualizer
-                            isActive={true}
-                            type="listening"
-                            bars={16}
-                            className="shrink-0 max-w-[100px] sm:max-w-[150px]"
-                          />
-                          <span className="text-xs text-emerald-300 font-semibold italic animate-pulse truncate flex-1 min-w-0 tracking-wide">
-                            {tempVoiceText || voiceTranscript || input || 'Speak now…'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5 z-10 shrink-0 ml-1">
-                          <button
-                            type="button"
-                            onClick={async (e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
+                  <div className="flex flex-col flex-1 min-w-0">
+                    {/* ChatGPT-Inspired Attachment Preview Tray */}
+                    <AnimatePresence>
+                      {attachments.length > 0 && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="mb-2 px-1 py-1 rounded-2xl bg-white/90 border border-slate-200/80 shadow-xs"
+                        >
+                          <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1 px-1 scroll-smooth">
+                            {attachments.map(att => (
+                              <motion.div
+                                key={att.id}
+                                initial={{ scale: 0.85, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.85, opacity: 0 }}
+                                className="shrink-0 relative group"
+                              >
+                                {att.type === 'image' && att.previewUrl ? (
+                                  /* ChatGPT-style Square Image Thumbnail Tile */
+                                  <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border border-slate-200/90 shadow-xs bg-slate-100 group/thumb">
+                                    <img
+                                      src={att.previewUrl}
+                                      alt={att.name}
+                                      className="w-full h-full object-cover transition-transform duration-300 group-hover/thumb:scale-105"
+                                    />
+                                    <div className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover/thumb:opacity-100 transition-opacity duration-200" />
+                                    <button
+                                      type="button"
+                                      onClick={() => setAttachments(prev => prev.filter(a => a.id !== att.id))}
+                                      className="absolute top-1 right-1 w-5 h-5 rounded-full bg-slate-950/75 hover:bg-rose-600 text-white flex items-center justify-center backdrop-blur-xs transition-all duration-200 cursor-pointer shadow-sm active:scale-90"
+                                      title="Remove image"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  /* ChatGPT-style Document / PDF Mini Card */
+                                  <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200/80 shadow-xs max-w-[220px] group/doc">
+                                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 shrink-0">
+                                      <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    </div>
+                                    <div className="flex flex-col min-w-0 flex-1">
+                                      <span className="text-xs font-bold text-slate-800 truncate leading-snug">{att.name}</span>
+                                      <span className="text-[10px] text-slate-400 font-medium font-mono">{(att.size / 1024).toFixed(0)} KB</span>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => setAttachments(prev => prev.filter(a => a.id !== att.id))}
+                                      className="p-1 rounded-full hover:bg-rose-100/80 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer shrink-0"
+                                      title="Remove file"
+                                    >
+                                      <X className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                )}
+                              </motion.div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
 
-                              // Snapshot current text BEFORE stopping (onend clears tempVoiceText in live mode)
-                              const textSnapshot = (tempVoiceText || voiceTranscript || input || '').trim();
+                    <div className="flex items-center gap-2 w-full">
+                      {/* Active ChatGPT-Style Realtime Voice Recording Bar */}
+                      {isListening ? (
+                        <div className="relative flex-1 min-w-0 flex items-center justify-between bg-slate-950/95 backdrop-blur-xl text-white rounded-xl px-2.5 py-2 sm:px-4 sm:py-2.5 border border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.15)] overflow-hidden min-h-[44px]">
+                          <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent pointer-events-none" />
+                          <div className="flex items-center gap-2 min-w-0 flex-1 z-10 px-1">
+                            <VoiceWaveVisualizer
+                              isActive={true}
+                              type="listening"
+                              bars={16}
+                              className="shrink-0 max-w-[100px] sm:max-w-[150px]"
+                            />
+                            <span className="text-xs text-emerald-300 font-semibold italic animate-pulse truncate flex-1 min-w-0 tracking-wide">
+                              {tempVoiceText || voiceTranscript || input || 'Speak now…'}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5 z-10 shrink-0 ml-1">
+                            <button
+                              type="button"
+                              onClick={async (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
 
-                              if (textSnapshot) {
-                                // Text already available — commit immediately
-                                setInput(textSnapshot);
-                                toast.success('Voice dictation inserted into prompt box!', { id: 'voice-success' });
-                                setTempVoiceText('');
-                                stopListening();
-                              } else {
-                                // Text not yet arrived (Google API still processing) — stop mic to flush
-                                stopListening();
-                                // Wait briefly for onSpeechEnd to fire with the buffered result
-                                await new Promise(res => setTimeout(res, 400));
-                                const flushedText = (tempVoiceText || voiceTranscript || input || '').trim();
-                                if (flushedText) {
-                                  setInput(flushedText);
+                                const textSnapshot = (tempVoiceText || voiceTranscript || input || '').trim();
+
+                                if (textSnapshot) {
+                                  setInput(textSnapshot);
                                   toast.success('Voice dictation inserted into prompt box!', { id: 'voice-success' });
+                                  setTempVoiceText('');
+                                  stopListening();
                                 } else {
-                                  // Genuinely nothing captured — show error
-                                  try {
-                                    const isBrave = (navigator as any).brave && typeof (navigator as any).brave.isBrave === 'function'
-                                      ? await (navigator as any).brave.isBrave()
-                                      : false;
-                                    if (isBrave) {
-                                      toast.error('Brave Browser blocks Google Speech API. Enable "Google services for speech recognition" in brave://settings/privacy', { duration: 7000, id: 'brave-err' });
-                                    } else {
-                                      toast.error('No voice speech captured. Please check your microphone and speak clearly.', { id: 'mic-empty' });
-                                    }
-                                  } catch (_) {}
+                                  stopListening();
+                                  await new Promise(res => setTimeout(res, 400));
+                                  const flushedText = (tempVoiceText || voiceTranscript || input || '').trim();
+                                  if (flushedText) {
+                                    setInput(flushedText);
+                                    toast.success('Voice dictation inserted into prompt box!', { id: 'voice-success' });
+                                  } else {
+                                    try {
+                                      const isBrave = (navigator as any).brave && typeof (navigator as any).brave.isBrave === 'function'
+                                        ? await (navigator as any).brave.isBrave()
+                                        : false;
+                                      if (isBrave) {
+                                        toast.error('Brave Browser blocks Google Speech API. Enable "Google services for speech recognition" in brave://settings/privacy', { duration: 7000, id: 'brave-err' });
+                                      } else {
+                                        toast.error('No voice speech captured. Please check your microphone and speak clearly.', { id: 'mic-empty' });
+                                      }
+                                    } catch (_) {}
+                                  }
+                                  setTempVoiceText('');
                                 }
+                              }}
+                              className="flex items-center justify-center w-7 sm:w-7.5 h-7 sm:h-7.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/90 text-emerald-300 hover:text-white border border-emerald-500/40 hover:border-emerald-400 transition-all duration-200 shadow-xs cursor-pointer active:scale-95 group"
+                              title="Confirm Voice Dictation"
+                            >
+                              <Check className="w-4 h-4 stroke-[3] group-hover:scale-110 transition-transform" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setIsLiveVoiceMode(false);
                                 setTempVoiceText('');
-                              }
-                            }}
-                            className="flex items-center justify-center w-7 sm:w-7.5 h-7 sm:h-7.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/90 text-emerald-300 hover:text-white border border-emerald-500/40 hover:border-emerald-400 transition-all duration-200 shadow-xs cursor-pointer active:scale-95 group"
-                            title="Confirm Voice Dictation"
-                          >
-                            <Check className="w-4 h-4 stroke-[3] group-hover:scale-110 transition-transform" />
-                          </button>
+                                setInput('');
+                                stopListening();
+                                stopSpeaking();
+                              }}
+                              className="flex items-center justify-center w-7 sm:w-7.5 h-7 sm:h-7.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/90 text-rose-300 hover:text-white border border-rose-500/40 hover:border-rose-400 transition-all duration-200 shadow-xs cursor-pointer active:scale-95 group"
+                              title="Cancel Voice Dictation"
+                            >
+                              <X className="w-4 h-4 stroke-[2.5] group-hover:scale-110 transition-transform" />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className={cn(
+                          "relative flex-1 group transition-all duration-300",
+                          loading && "opacity-70"
+                        )}>
+                          {/* Ambient glow on focus */}
+                          <div className={cn(
+                            "absolute -inset-px rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 blur-sm pointer-events-none",
+                            responseMode === 'quick'
+                              ? "bg-gradient-to-r from-brand-500/40 to-brand-600/20"
+                              : "bg-gradient-to-r from-indigo-500/40 to-violet-600/20"
+                          )} />
+                          
+                          {/* Smart Web Search icon */}
                           <button
                             type="button"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              setIsLiveVoiceMode(false);
-                              setTempVoiceText('');
-                              setInput('');
-                              stopListening();
-                              stopSpeaking();
+                              setWebSearch(prev => !prev);
+                              setUserManuallyToggled(true);
                             }}
-                            className="flex items-center justify-center w-7 sm:w-7.5 h-7 sm:h-7.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/90 text-rose-300 hover:text-white border border-rose-500/40 hover:border-rose-400 transition-all duration-200 shadow-xs cursor-pointer active:scale-95 group"
-                            title="Cancel Voice Dictation"
+                            disabled={loading}
+                            className={cn(
+                              "absolute left-2.5 top-1/2 -translate-y-1/2 p-1 rounded-lg transition-all duration-300 z-10 cursor-pointer active:scale-95 flex items-center justify-center border",
+                              webSearch 
+                                ? "text-brand-600 bg-brand-50 border-brand-200/50 shadow-xs hover:bg-brand-100/50" 
+                                : "text-slate-400 border-transparent hover:text-slate-600 hover:bg-slate-100",
+                              loading && "opacity-50 cursor-not-allowed"
+                            )}
+                            title={webSearch ? "Web Search Active (Click to disable)" : "Web Search Disabled (Click to enable)"}
                           >
-                            <X className="w-4 h-4 stroke-[2.5] group-hover:scale-110 transition-transform" />
+                            <Globe className={cn("w-3.5 h-3.5", webSearch && "animate-pulse")} />
                           </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className={cn(
-                        "relative flex-1 group transition-all duration-300",
-                        loading && "opacity-70"
-                      )}>
-                        {/* Ambient glow on focus */}
-                        <div className={cn(
-                          "absolute -inset-px rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 blur-sm pointer-events-none",
-                          responseMode === 'quick'
-                            ? "bg-gradient-to-r from-brand-500/40 to-brand-600/20"
-                            : "bg-gradient-to-r from-indigo-500/40 to-violet-600/20"
-                        )} />
-                        <input
-                          type="text"
-                          value={input}
-                          onChange={(e) => setInput(e.target.value)}
-                          placeholder="Ask about Odisha history, GS, math, grammar…"
-                          disabled={loading}
-                          className={cn(
-                            "relative w-full bg-white border rounded-xl pl-3.5 pr-10 sm:pl-4 sm:pr-10 py-2.5 text-xs sm:text-sm text-slate-800 placeholder:text-slate-500 focus:outline-none transition-all duration-300 font-semibold shadow-inner",
-                            "border-slate-200/60 focus:border-slate-300/80",
-                            loading && "cursor-not-allowed"
-                          )}
-                        />
-                        {/* Voice Dictation Mic button inside prompt field (vanishes when typing) */}
-                        <AnimatePresence>
-                          {!input.trim() && (
-                            <motion.button
-                              type="button"
+
+                          <input
+                            type="text"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            placeholder="Ask about Odisha history, GS, math, grammar, or upload file…"
+                            disabled={loading}
+                            className={cn(
+                              "relative w-full bg-white border rounded-xl pl-9 pr-10 sm:pl-10 sm:pr-10 py-2.5 text-xs sm:text-sm text-slate-800 placeholder:text-slate-500 focus:outline-none transition-all duration-300 font-semibold shadow-inner",
+                              "border-slate-200/60 focus:border-slate-300/80",
+                              loading && "cursor-not-allowed"
+                            )}
+                          />
+                          {/* Voice Dictation Mic button inside prompt field (vanishes when typing) */}
+                          <AnimatePresence>
+                            {!input.trim() && (
+                              <motion.button
+                                type="button"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  startListening();
+                                }}
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-slate-100 transition-all cursor-pointer z-10"
+                                title="Voice Dictation (Speech-to-Text)"
+                              >
+                                <Mic className="w-3.5 h-3.5" />
+                              </motion.button>
+                            )}
+                          </AnimatePresence>
+
+                          {/* Character count hint when typing */}
+                          {input.length > 0 && (
+                            <motion.span
                               initial={{ opacity: 0, scale: 0.8 }}
                               animate={{ opacity: 1, scale: 1 }}
-                              exit={{ opacity: 0, scale: 0.8 }}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                startListening();
-                              }}
-                              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-slate-100 transition-all cursor-pointer z-10"
-                              title="Voice Dictation (Speech-to-Text)"
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-600 font-mono pointer-events-none"
                             >
-                              <Mic className="w-3.5 h-3.5" />
-                            </motion.button>
+                              {input.length}
+                            </motion.span>
                           )}
-                        </AnimatePresence>
+                        </div>
+                      )}
 
-                        {/* Character count hint when typing */}
-                        {input.length > 0 && (
-                          <motion.span
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-600 font-mono pointer-events-none"
-                          >
-                            {input.length}
-                          </motion.span>
+                      {/* Paperclip File Upload Button */}
+                      <motion.button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={loading}
+                        whileTap={{ scale: 0.92 }}
+                        className={cn(
+                          "relative flex items-center justify-center w-10 h-10 rounded-xl border transition-all duration-300 shrink-0 cursor-pointer overflow-hidden group shadow-xs",
+                          attachments.length > 0
+                            ? "bg-brand-50 border-brand-300 text-brand-600 shadow-brand-500/10"
+                            : "bg-white hover:bg-slate-100 border-slate-200 text-slate-500 hover:text-slate-800"
                         )}
-                      </div>
-                    )}
+                        title="Upload File (PDF, Image, Screenshot)"
+                      >
+                        <Paperclip className={cn("w-4 h-4 transition-transform duration-200 group-hover:scale-110", attachments.length > 0 && "text-brand-600")} />
+                        {attachments.length > 0 && (
+                          <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-brand-600 animate-pulse" />
+                        )}
+                      </motion.button>
 
-                    {/* Dynamic Action Button: Stop | AI Live Voice | Send */}
-                    <AnimatePresence mode="wait" initial={false}>
-                      {loading ? (
-                        <motion.button
-                          key="stop"
-                          type="button"
-                          onClick={handleCancelGeneration}
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          exit={{ scale: 0.8, opacity: 0 }}
-                          whileTap={{ scale: 0.92 }}
-                          className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white shadow-lg shadow-amber-900/30 transition-colors duration-200 shrink-0 cursor-pointer overflow-hidden group"
-                          title="Stop Generation"
-                        >
-                          <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
-                          <Square className="w-3.5 h-3.5 fill-white text-white" />
-                        </motion.button>
-                      ) : !input.trim() ? (
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          {/* AI Speech Voice Mute Toggle */}
+                      {/* Dynamic Action Button: Stop | AI Live Voice | Send */}
+                      <AnimatePresence mode="wait" initial={false}>
+                        {loading ? (
                           <motion.button
+                            key="stop"
                             type="button"
-                            onClick={toggleVoiceMute}
+                            onClick={handleCancelGeneration}
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            whileTap={{ scale: 0.9 }}
-                            className={cn(
-                              "relative flex items-center justify-center w-10 h-10 rounded-xl border transition-all duration-300 cursor-pointer overflow-hidden group shadow-sm",
-                              isVoiceMuted
-                                ? "bg-slate-100 border-slate-200 text-slate-400"
-                                : "bg-gradient-to-br from-indigo-50 to-indigo-100 hover:from-indigo-100 hover:to-indigo-200 border-indigo-200/80 text-indigo-600"
-                            )}
-                            title={isVoiceMuted ? "AI Speech Muted (Click to unmute)" : "AI Speech Active (Click to mute)"}
+                            exit={{ scale: 0.8, opacity: 0 }}
+                            whileTap={{ scale: 0.92 }}
+                            className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white shadow-lg shadow-amber-900/30 transition-colors duration-200 shrink-0 cursor-pointer overflow-hidden group"
+                            title="Stop Generation"
                           >
-                            {isVoiceMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                            <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
+                            <Square className="w-3.5 h-3.5 fill-white text-white" />
                           </motion.button>
-
-                          {/* AI Live Voice Action Button */}
+                        ) : (!input.trim() && attachments.length === 0) ? (
                           <motion.button
                             key="live-voice"
                             type="button"
                             onClick={() => {
                               if (isLiveVoiceMode || isListening) {
-                                // User clicked active live voice button to STOP/EXIT Live Voice mode
                                 setIsLiveVoiceMode(false);
                                 stopListening();
                                 stopSpeaking();
                               } else {
-                                // First click: atomically set live mode + open mic
                                 startLiveVoice();
                               }
                             }}
@@ -4408,28 +4855,28 @@ JSON structure:
                               (isLiveVoiceMode || isListening) ? "text-white animate-pulse" : "text-slate-700 group-hover:text-emerald-600"
                             )} />
                           </motion.button>
-                        </div>
-                      ) : (
-                        <motion.button
-                          key="send"
-                          type="submit"
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          exit={{ scale: 0.8, opacity: 0 }}
-                          whileTap={{ scale: 0.9 }}
-                          className={cn(
-                            "relative flex items-center justify-center w-10 h-10 rounded-xl text-white shadow-lg transition-all duration-300 shrink-0 overflow-hidden group cursor-pointer",
-                            responseMode === 'quick'
-                              ? "bg-gradient-to-br from-brand-500 to-brand-700 shadow-brand-900/40 hover:shadow-brand-500/30 hover:scale-105"
-                              : "bg-gradient-to-br from-indigo-500 to-violet-700 shadow-indigo-900/40 hover:shadow-indigo-500/30 hover:scale-105"
-                          )}
-                          title="Send Message"
-                        >
-                          <span className="absolute inset-0 bg-white/15 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
-                          <Send className="w-4 h-4 relative z-10" strokeWidth={2.5} />
-                        </motion.button>
-                      )}
-                    </AnimatePresence>
+                        ) : (
+                          <motion.button
+                            key="send"
+                            type="submit"
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.8, opacity: 0 }}
+                            whileTap={{ scale: 0.9 }}
+                            className={cn(
+                              "relative flex items-center justify-center w-10 h-10 rounded-xl text-white shadow-lg transition-all duration-300 shrink-0 overflow-hidden group cursor-pointer",
+                              responseMode === 'quick'
+                                ? "bg-gradient-to-br from-brand-500 to-brand-700 shadow-brand-900/40 hover:shadow-brand-500/30 hover:scale-105"
+                                : "bg-gradient-to-br from-indigo-500 to-violet-700 shadow-indigo-900/40 hover:shadow-indigo-500/30 hover:scale-105"
+                            )}
+                            title="Send Message"
+                          >
+                            <span className="absolute inset-0 bg-white/15 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
+                            <Send className="w-4 h-4 relative z-10" strokeWidth={2.5} />
+                          </motion.button>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
                 </form>
               </div>
@@ -7340,6 +7787,48 @@ JSON structure:
           <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-white via-white/85 to-transparent pointer-events-none z-20 rounded-b-[2rem] lg:hidden" />
 
         </div>
+
+      {/* Fullscreen Image Lightbox Modal for Chat Attachments */}
+      <AnimatePresence>
+        {activeLightboxUrl && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setActiveLightboxUrl(null)}
+            className="fixed inset-0 z-[300] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 cursor-zoom-out"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative max-w-4xl max-h-[90vh] bg-slate-900 border border-slate-700/80 rounded-2xl overflow-hidden shadow-2xl flex flex-col cursor-default"
+            >
+              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-950/60 text-white">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-300">
+                  <ImageIcon className="w-4 h-4 text-brand-400" />
+                  <span>Attached Screenshot Preview</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveLightboxUrl(null)}
+                  className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-2 sm:p-4 flex items-center justify-center overflow-auto max-h-[80vh] bg-slate-950/40">
+                <img
+                  src={activeLightboxUrl}
+                  alt="Enlarged attachment"
+                  className="max-w-full max-h-[75vh] object-contain rounded-xl shadow-lg border border-white/10"
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       </div>
     </div>

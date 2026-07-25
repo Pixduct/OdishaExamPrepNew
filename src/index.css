@@ -69,6 +69,22 @@ body[data-premium-blur="true"] #root {
    ============================================================ */
 @layer utilities {
 
+  /* ---------- Premium Scrollbar ---------- */
+  .premium-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .premium-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .premium-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.28);
+    border-radius: 9999px;
+  }
+  .premium-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.45);
+  }
+
   /* ---------- Glass Variants ---------- */
   .glass {
     background: rgba(255, 255, 255, 0.65);

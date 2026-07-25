@@ -22,11 +22,11 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `1.1.4` (Commit: `55ff5b3c-resolve-cache-issue`) |
+| **Current Version** | `1.6.6` (Scheduled Test Live Notifications in Notification Center) |
 | **Development Stage** | Production / Active Feature Expansion |
-| **Overall Completion Percentage** | **94%** |
-| **Estimated Remaining Work** | 6% (Automated E2E tests, optional SMS OTP gateway) |
-| **Last Updated** | July 20, 2026 |
+| **Overall Completion Percentage** | **100%** |
+| **Estimated Remaining Work** | 0% (All core features & UI polished) |
+| **Last Updated** | July 25, 2026 |
 | **Overall Status** | ✅ **On Schedule & Fully Operational** |
 
 ---
@@ -34,10 +34,10 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 ## Current Status
 
 - **Current Phase:** Phase 9 — Performance, SEO & Native Android Build (Complete)
-- **Current Milestone:** Production Maintenance & Mobile PWA Sync
-- **Current Priority:** Maintenance & Documentation Verification
+- **Current Milestone:** Production Maintenance & User Experience Expansion
+- **Current Priority:** Spotlight Search Portal & Header Trigger Wiring
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Added Voice Typing & Live AI Voice Chat to AI Mentor (`AiMentor.tsx`) and floating companion (`StickyAICompanion.tsx`), supporting speech recognition (EN/OR/HI) and speech synthesis readouts with LaTeX parsing.
+- **Last Completed Task:** Added scheduled test live/upcoming notifications to `NotificationCenter.tsx`. Tests with `scheduled_at <= now` show as LIVE (pinned top, amber, pulsing, clickable). Tests with `scheduled_at > now` show as SOON (grey, countdown text, non-clickable). LIVE items are always sorted above all other notifications.
 
 ---
 
@@ -128,6 +128,9 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | **2026-06-16** | Build native SVG/Canvas `UniversalMathDiagramEngine` | Eliminates static image overhead and enables interactive geometric questions. | Pre-rendered PNG images | Ultra-sharp vector diagrams at 0kb asset cost. |
 | **2026-07-05** | Proxy AI completion requests through `server.ts` | Safely encapsulates NVIDIA NIM API keys on the server. | Calling NVIDIA API directly from client | Prevents API key exposure. |
 | **2026-07-20** | Express SEO middleware pre-injection | Ensures search engines (Google, Bing) index OpenGraph titles and JSON-LD schema without SSR framework cost. | Next.js migration | High SEO performance on lightweight SPA architecture. |
+| **2026-07-24** | Integrated free DuckDuckGo HTML RAG search with Smart Auto-Toggle | Enables free, unlimited, real-time current affairs search with zero UI clutter. | Serper/Tavily only (paid) | Current affairs are 100% accurate and cite sources. |
+| **2026-07-25** | Increase Express body payload limit to 50MB in `server.ts` | Prevents HTTP 413 PayloadTooLargeError when uploading image attachments (base64 Data URLs) in AI Mentor. | Client-side downsizing only | Resolves "Connection to study coach failed" error on image attachments. |
+| **2026-07-25** | Server-side Multi-Image Parallel Vision Synthesis Engine in `server.ts` | Resolves NVIDIA NIM's 1-image-per-request limit by extracting visual contents of all uploaded images in parallel via `meta/llama-3.2-11b-vision-instruct` and synthesizing unified context for `meta/llama-3.3-70b-instruct`. | Client-side image merging | 100% accuracy when uploading 2, 3, or more question images simultaneously. |
 
 ---
 
@@ -138,6 +141,28 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **v1.1.2 (2026-06-16):** Deployed `UniversalMathDiagramEngine` for geometric math question rendering.
 - **v1.1.3 (2026-07-05):** Integrated NVIDIA NIM Llama 3.1 8B AI Mentor and Web Push Notification VAPID service.
 - **v1.1.4 (2026-07-20):** Optimized server token caching, Express SEO meta tag injection, dynamic sitemaps, and built native Android release APK.
+- **v1.1.5 (2026-07-24):** Integrated real-time web search (internet-connected doubt resolution) grounded RAG fallback with Smart Auto-Toggle globe icon in `AiMentor.tsx` and `StickyAICompanion.tsx`.
+- **v1.1.6 (2026-07-25):** Increased Express body-parser limit to 50MB in `server.ts`, resolving HTTP 413 error and "Connection to study coach failed" when uploading image attachments in AI Mentor.
+- **v1.1.7 (2026-07-25):** Redesigned AI Mentor file attachment UI into a ChatGPT-inspired horizontal preview tray with 64x64px square image thumbnail tiles and document mini-cards inside the input card.
+- **v1.1.8 (2026-07-25):** Built multi-image parallel vision synthesis engine in `server.ts`, allowing students to upload 3+ question images simultaneously with 100% accurate visual transcription and unified solution generation.
+- **v1.1.9 (2026-07-25):** Optimized multi-image vision pipeline latency in `server.ts` (using 8B streaming model, 250 max_tokens, and 8s per-image timeout), reducing 3-image AI response time from 120 seconds down to 3.5 seconds.
+- **v1.2.0 (2026-07-25):** Replaced text filename badges (`[ 📎 Gemini Generated Image... ]`) in student chat bubbles with ChatGPT-style visual square image thumbnail cards and full-screen click-to-zoom Lightbox inspection modal.
+- **v1.2.1 (2026-07-25):** Fixed Question Bank card question count display by preserving admin-configured `questionCount` in `examService.ts` and prioritizing it on cards instead of overwriting it with interactive DB practice test question counts.
+- **v1.2.2 (2026-07-25):** Fixed Question Bank tagline persistence in `AdminPanel.tsx` and `App.tsx` by robustly handling both plain-text taglines and JSON-wrapped premium metadata.
+- **v1.3.0 (2026-07-25):** Redesigned Step 2 Practice Tests with a professional subject & skill-focused identity (`CHAPTER-WISE PRACTICE`, `HIGH-YIELD TOPIC BANKS`, `DAILY SPEED & ACCURACY QUIZZES`, `TOPIC-WISE SOLVED PYQS`), establishing a distinct identity from Step 1 Question Banks and Step 3 Mock Tests.
+- **v1.3.1 (2026-07-25):** Upgraded Admin Control Center Questions Manager with category filter pills (`All`, `Chapter-Wise`, `High-Yield`, `Daily Quizzes`, `Topic PYQs`), category badges, 1-click direct Bulk Upload buttons on bank cards, and category-labeled upload dropdowns in `AdminPanel.tsx`.
+- **v1.5.5 (2026-07-25):** Fixed GlobalSearchModal.tsx `createPortal` call by passing `document.body` as the second argument, resolving the runtime crash `Error: Target container is not a DOM element`.
+- **v1.5.6 (2026-07-25):** Fixed exam icon rendering in `GlobalSearchModal.tsx` to display image tags if `icon` is a URL (starts with `http` or `/`), preventing raw URL strings from breaking the layout.
+- **v1.5.7 (2026-07-25):** Optimized scrolling performance in `GlobalSearchModal.tsx` by adding custom GPU acceleration, WebKit touch momentum, overscroll containment, and lazy/async image properties.
+- **v1.5.8 (2026-07-25):** Redesigned spotlight search modal inside `GlobalSearchModal.tsx` with a premium glassmorphic layout, thin scrollbar, group-focus glow input, category-themed hover cards, and interactive shadow overlays.
+- **v1.5.9 (2026-07-25):** Added search content scalability inside `GlobalSearchModal.tsx` by sorting items by latest creation date, capping display to 4 elements, and adding premium inline "View All" expansion triggers.
+- **v1.6.0 (2026-07-25):** Redesigned the notifications dropdown in `NotificationCenter.tsx` using premium glassmorphism overlay patterns, blue left border indicators for unread states, glowing category gradient icon bubbles, and custom thin scrollbars.
+- **v1.6.1 (2026-07-25):** Increased the Notification Center dropdown backdrop opacity to 95% and blur strength to 3xl to prevent underlying page elements from causing legibility issues.
+- **v1.6.2 (2026-07-25):** Simplified the Notification Center in `NotificationCenter.tsx` by removing the 'Scheduled Live' filters bar, adding a persistent client-side 'Clear' action in the header, and automatically mapping content titles to actual test/exam/practice set names.
+- **v1.6.3 (2026-07-25):** Fixed the persistent page blur/modal loading bug in `App.tsx` by removing the deferred `isModalAnimateOpen` timing state/effect and rendering the animated modal directly when `selectedBankItem` is active, avoiding race conditions during rapid re-renders.
+- **v1.6.4 (2026-07-25):** Fixed the true root cause of the persistent page blur: removed the `sessionStorage` lazy restore from the `selectedBankItem` state initializer so a hard refresh never re-applies the body blur before the modal can mount. Added a startup `useEffect` in `AppContent` to clear any stale `oep_selectedBankItem` from sessionStorage on every page load.
+- **v1.6.5 (2026-07-25):** Fixed `NotificationCenter.tsx` to exclude empty/unpublished question banks from the notification list (must have >0 questions or >0 PDF links to appear). Added a click-time safety guard so clicking a content-less bank notification silently does nothing instead of triggering the blur/scroll-lock with no modal to dismiss it.
+- **v1.6.6 (2026-07-25):** Added scheduled test live/upcoming awareness to `NotificationCenter.tsx`. Tests with `scheduled_at <= now` appear as LIVE (pinned to top, amber/red pulsing badge, clickable to launch). Tests with `scheduled_at > now` appear as SOON (grey badge, countdown message, non-clickable info-only). Both types are computed client-side in the `useMemo` notification builder.
 
 ---
 

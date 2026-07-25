@@ -1,6 +1,6 @@
-# Memory — Dynamic Practice Question Count & Question Bank Count Separation (v1.6.7)
+# Memory — Practice Question Count Resolution (Actual Qs + Admin Fallback) (v1.6.8)
 
-Last updated: 2026-07-25T18:37:00+05:30
+Last updated: 2026-07-25T18:42:00+05:30
 
 ## What was built
 
@@ -34,12 +34,12 @@ Last updated: 2026-07-25T18:37:00+05:30
   - **No `scheduled_at`** → regular `'new_test'` entry as before.
 - LIVE items are **always sorted to the top** of the notification list, pinned above all others regardless of timestamp (implemented by splitting `liveItems` + `otherItems` in the `useMemo` return).
 
-### 6. Dynamic Practice Question Count Calculation & Separation — `src/App.tsx`
-- **Problem:** Admin sets `questionCount` (e.g. 250) on `questionBanks` for PDF / Question Bank metadata. Practice cards were reading `questionCount` and displaying `250 Questions` `250 Mins Session` for every practice set regardless of how many interactive questions actually existed in the `questions` table.
-- **Fix:** In `App.tsx` during `loadDashboardData`, added a dynamic count query from `supabase.from('questions').select('topic')`.
-- Built an in-memory topic count map and assigned `practiceQuestionCount` = real count of interactive questions in DB for that topic/bank (e.g., 91, 24, 10, 6, or 0).
-- Preserved `questionCount` = admin-configured Question Bank metadata count (e.g., 250) for Question Bank view & PDF store.
-- Updated `ScheduledPracticeBankCard` to use `practiceQuestionCount` for displaying `{totalQs} Questions` and `{totalQs} Mins Session` dynamically.
+### 6. Dynamic Practice Question Count Calculation & Resolution — `src/App.tsx`
+- **Root cause:** In v1.6.7, `ScheduledPracticeBankCard` was set to strictly prefer `bank.practiceQuestionCount`. For topics where individual question rows haven't been uploaded to the `questions` table yet (e.g. `Fundamentals of Nursing`, `Anatomy & Physiology`, `Psychology`), `practiceQuestionCount` evaluated to `0`, forcing the card to display `0 Questions • Practice Session Soon` even though the Admin configured `questionCount: 250` when creating the practice bank in CMS.
+- **Fix (v1.6.8):** Updated `ScheduledPracticeBankCard` resolution order:
+  1. `actualQs` = questions present in `questions` table for that topic (e.g. 91 for Personal Hygiene, 24 for Med-Surg, 10 for CHN, 6 for Microbiology). If `actualQs > 0`, card displays the exact count of added questions (**`24 Questions`**, **`91 Questions`**, etc.).
+  2. `adminQs` = `bank.questionCount` entered by Admin in CMS (e.g. 250 for Anatomy & Physiology). If `actualQs === 0` but `adminQs > 0`, card displays the Admin's configured set count (**`250 Questions`**).
+  3. `0 Questions` = rendered **only** when both `actualQs` and `adminQs` are `0`.
 
 ### 7. Imprinting — `context/ui-registry.md`
 - Imprinted **`NotificationCenter`** (entry 18): all row states, icon gradients, badge classes, popover shape (`rounded-3xl`), and 7 pattern notes.

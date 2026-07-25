@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `1.6.7` (Dynamic Practice Questions Count & Question Bank Separation) |
+| **Current Version** | `1.6.8` (Fixed Practice Question Count Resolution — Actual Qs + Admin Fallback) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -37,7 +37,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **Current Milestone:** Production Maintenance & User Experience Expansion
 - **Current Priority:** Spotlight Search Portal & Header Trigger Wiring
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Dynamically separated Admin Question Bank metadata count (`questionCount`, e.g., 250 for PDF Question Banks) from actual interactive Practice Set question count (`practiceQuestionCount`). Loaded exact question counts directly from the `questions` table in `App.tsx` during `loadDashboardData`, ensuring practice cards display the exact real count of interactive questions available (e.g. 91, 24, 10) instead of falling back to the admin PDF count.
+- **Last Completed Task:** Fixed Practice Question count resolution in `ScheduledPracticeBankCard` (App.tsx v1.6.8). Priority order: 1) `actualQs` (questions present in `questions` table, e.g. 91, 24, 10), 2) `adminQs` (admin-configured target `questionCount` on `questionBanks` row, e.g. 250), 3) `0 Questions` (only if both are 0). This prevents practice sets with target counts set by admin from wrongly displaying `0 Questions`.
 
 ---
 
@@ -164,6 +164,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **v1.6.5 (2026-07-25):** Fixed `NotificationCenter.tsx` to exclude empty/unpublished question banks from the notification list (must have >0 questions or >0 PDF links to appear). Added a click-time safety guard so clicking a content-less bank notification silently does nothing instead of triggering the blur/scroll-lock with no modal to dismiss it.
 - **v1.6.6 (2026-07-25):** Added scheduled test live/upcoming awareness to `NotificationCenter.tsx`. Tests with `scheduled_at <= now` appear as LIVE (pinned to top, amber/red pulsing badge, clickable to launch). Tests with `scheduled_at > now` appear as SOON (grey badge, countdown message, non-clickable info-only). Both types are computed client-side in the `useMemo` notification builder.
 - **v1.6.7 (2026-07-25):** Separated Question Bank metadata count (`questionCount`, configured by admin for PDF/Bank view) from interactive Practice Set count (`practiceQuestionCount`). In `App.tsx`, `loadDashboardData` now dynamically counts actual practice questions from the `questions` table for each topic/bank, updating `ScheduledPracticeBankCard` to show the exact real number of interactive questions (e.g., 91, 24, 10, 6) and dynamic session minutes.
+- **v1.6.8 (2026-07-25):** Resolved root cause where practice sets with 0 uploaded questions in the `questions` table were forcing `totalQs = 0` despite having an admin-configured `questionCount` (e.g., 250). In `ScheduledPracticeBankCard`, `totalQs` now checks `actualQs > 0 ? actualQs : (adminQs > 0 ? adminQs : 0)`. When real questions exist (e.g. 24, 91, 10), the exact added question count is shown; when no questions are in the `questions` table yet, it falls back to the admin's configured set count (250).
 
 ---
 

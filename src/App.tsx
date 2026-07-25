@@ -3125,9 +3125,9 @@ const ScheduledPracticeBankCard = ({ bank, isMobile, hasAccessTo, activities, ha
   );
   const isInProgress = !isScheduledUpcoming && !!incompleteAct;
 
-  const totalQs = (bank.practiceQuestionCount !== undefined && bank.practiceQuestionCount !== null)
-    ? bank.practiceQuestionCount
-    : (incompleteAct?.metadata?.totalQuestions || bank.questions || 0);
+  const actualQs = bank.practiceQuestionCount || bank.actualQuestionCount || 0;
+  const adminQs = bank.questionCount || bank.question_count || 0;
+  const totalQs = actualQs > 0 ? actualQs : (adminQs > 0 ? adminQs : (bank.questions || incompleteAct?.metadata?.totalQuestions || 0));
   const currentQuestionIndex = incompleteAct ? (incompleteAct.metadata?.currentQuestionIndex || 0) : 0;
   const progressPercent = totalQs > 0 ? Math.min(100, Math.round((currentQuestionIndex / totalQs) * 100)) : 0;
 
@@ -5682,7 +5682,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           } else {
             for (const key of Object.keys(qCountMap)) {
               const normKey = key.toLowerCase().replace(/[\s\-_—–:()]+/g, '').trim();
-              if (normKey === normTitle || (normKey.length > 5 && normTitle.includes(normKey))) {
+              if (normKey === normTitle || (normKey.length > 3 && (normTitle.includes(normKey) || normKey.includes(normTitle)))) {
                 actualPracticeQs = Math.max(actualPracticeQs, qCountMap[key]);
               }
             }

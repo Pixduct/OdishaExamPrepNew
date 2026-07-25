@@ -5632,19 +5632,31 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           ? fetchedExams
           : [{ id: 'opsc-aio', name: 'OPSC AIO', description: 'Odisha Public Service Commission All In One', icon: '🏛️', category: 'upcoming' }];
 
-        // Fetch actual practice questions counts per topic/bank from questions table
+        // Fetch actual practice question counts per topic/bank — paginated to avoid Supabase 1000-row limit
         let qCountMap: Record<string, number> = {};
         try {
-          const { data: qData } = await supabase.from('questions').select('topic');
-          if (qData) {
-            qData.forEach((q: any) => {
-              if (q.topic) {
-                const rawTopic = q.topic;
-                qCountMap[rawTopic] = (qCountMap[rawTopic] || 0) + 1;
-                const norm = rawTopic.toLowerCase().replace(/[\s\-_—–:()]+/g, '').trim();
-                qCountMap[norm] = (qCountMap[norm] || 0) + 1;
-              }
-            });
+          const qPageSize = 1000;
+          let qPage = 0;
+          let keepFetchingQs = true;
+          while (keepFetchingQs) {
+            const { data: qData, error: qErr } = await supabase
+              .from('questions')
+              .select('topic')
+              .range(qPage * qPageSize, (qPage + 1) * qPageSize - 1);
+            if (qErr || !qData || qData.length === 0) {
+              keepFetchingQs = false;
+            } else {
+              qData.forEach((q: any) => {
+                if (q.topic && !q.topic.startsWith('mockTest__')) {
+                  // Only index non-mock topics for practice count matching
+                  qCountMap[q.topic] = (qCountMap[q.topic] || 0) + 1;
+                  const norm = q.topic.toLowerCase().replace(/[\s\-_—–:()]+/g, '').trim();
+                  qCountMap[norm] = (qCountMap[norm] || 0) + 1;
+                }
+              });
+              if (qData.length < qPageSize) keepFetchingQs = false;
+              else qPage++;
+            }
           }
         } catch (e) {
           console.error("Failed to fetch actual practice questions count:", e);

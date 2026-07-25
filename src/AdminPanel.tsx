@@ -5536,27 +5536,30 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                       <span className="text-xs font-black uppercase tracking-wider text-slate-400 px-3 py-1">
                         Hierarchy:
                       </span>
-                      {[
-                        { id: 'all', label: 'All Categories', icon: '🌟' },
-                        { id: 'topic-wise', label: 'Chapter-Wise Practice', icon: '📘' },
-                        { id: 'exam-focused', label: 'High-Yield Topic', icon: '🎯' },
-                        { id: 'revision-sets', label: 'Daily Speed Quiz', icon: '⚡' },
-                        { id: 'pyq-collections', label: 'Topic-Wise PYQ', icon: '📜' }
-                      ].map(cat => {
+                      {([
+                        { id: 'all',             label: 'All Categories',      icon: '🌟', autoTab: 'all'      as const },
+                        { id: 'topic-wise',      label: 'Chapter-Wise Practice', icon: '📘', autoTab: 'banks'    as const },
+                        { id: 'exam-focused',    label: 'High-Yield Topic',    icon: '🎯', autoTab: 'practice' as const },
+                        { id: 'revision-sets',   label: 'Daily Speed Quiz',    icon: '⚡', autoTab: 'practice' as const },
+                        { id: 'pyq-collections', label: 'Topic-Wise PYQ',      icon: '📜', autoTab: 'practice' as const },
+                      ] as { id: 'all' | 'topic-wise' | 'exam-focused' | 'revision-sets' | 'pyq-collections'; label: string; icon: string; autoTab: 'all' | 'banks' | 'practice' }[]).map(cat => {
+                        // Count is ALWAYS across all sub-tabs — not filtered by bankSubTab
+                        // This ensures High-Yield shows 6 even when on Question Banks tab
                         const count = banks.filter(b => {
                           const matchExam = !selectedExamIdForBanks || b.examId === selectedExamIdForBanks;
-                          const matchSubTab = bankSubTab === 'all' || 
-                            (bankSubTab === 'banks' && (b.target_mode || 'both') !== 'practice') ||
-                            (bankSubTab === 'practice' && (b.target_mode || 'both') !== 'bank');
                           const matchCat = cat.id === 'all' || b.type === cat.id;
-                          return matchExam && matchSubTab && matchCat;
+                          return matchExam && matchCat;
                         }).length;
 
                         const isActive = bankFilter === cat.id;
                         return (
                           <button
                             key={cat.id}
-                            onClick={() => setBankFilter(cat.id as any)}
+                            onClick={() => {
+                              setBankFilter(cat.id);
+                              // Auto-switch sub-tab to the right view for this category
+                              setBankSubTab(cat.autoTab);
+                            }}
                             className={cn(
                               "flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer",
                               isActive

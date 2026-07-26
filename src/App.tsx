@@ -3186,6 +3186,10 @@ const ScheduledPracticeBankCard = ({ bank, isMobile, hasAccessTo, activities, ha
                 <h4 className="font-extrabold text-[13.5px] text-slate-900 tracking-tight leading-snug line-clamp-2 uppercase pr-2">{mainTitle}</h4>
                 {isScheduledUpcoming ? (
                   <span className="px-1.5 py-0.5 bg-amber-100 text-amber-800 text-[8.5px] font-black rounded border border-amber-200 uppercase tracking-wider shrink-0">📅 UPCOMING</span>
+                ) : isCompleted ? (
+                  <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 text-[8.5px] font-black rounded border border-emerald-200 uppercase tracking-wider shrink-0 flex items-center gap-1"><CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" /> COMPLETED</span>
+                ) : isInProgress ? (
+                  <span className="px-1.5 py-0.5 bg-amber-100 text-amber-800 text-[8.5px] font-black rounded border border-amber-200 uppercase tracking-wider shrink-0">IN PROGRESS ({progressPercent}%)</span>
                 ) : (
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100 whitespace-nowrap">Practice Set</span>
                 )}
@@ -3206,7 +3210,15 @@ const ScheduledPracticeBankCard = ({ bank, isMobile, hasAccessTo, activities, ha
           </div>
 
           <div className="w-8 h-8 rounded-full border flex items-center justify-center shrink-0 shadow-2xs">
-            {isScheduledUpcoming ? <Lock className="w-3.5 h-3.5 text-amber-600" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
+            {isScheduledUpcoming ? (
+              <Lock className="w-3.5 h-3.5 text-amber-600" />
+            ) : isCompleted ? (
+              <RotateCw className="w-3.5 h-3.5 text-emerald-600" />
+            ) : isInProgress ? (
+              <Play className="w-3.5 h-3.5 text-amber-600 fill-amber-600/20" />
+            ) : (
+              <ChevronRight className="w-4 h-4 text-slate-400" />
+            )}
           </div>
         </div>
       ) : (
@@ -3257,6 +3269,14 @@ const ScheduledPracticeBankCard = ({ bank, isMobile, hasAccessTo, activities, ha
                     <span className="text-[10px] font-black text-emerald-800 uppercase tracking-widest bg-emerald-100 px-2.5 py-0.5 rounded border border-emerald-200 flex items-center gap-1 animate-pulse">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> LIVE NOW
                     </span>
+                  ) : isCompleted ? (
+                    <span className="text-[10px] font-black text-emerald-800 uppercase tracking-widest bg-emerald-100 px-2.5 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-600" /> COMPLETED
+                    </span>
+                  ) : isInProgress ? (
+                    <span className="text-[10px] font-black text-amber-800 uppercase tracking-widest bg-amber-100 px-2.5 py-0.5 rounded border border-amber-200 flex items-center gap-1 animate-pulse">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" /> IN PROGRESS ({progressPercent}%)
+                    </span>
                   ) : (
                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100">Practice Set</span>
                   )}
@@ -3296,9 +3316,25 @@ const ScheduledPracticeBankCard = ({ bank, isMobile, hasAccessTo, activities, ha
               <Lock className="w-4 h-4 text-amber-800 shrink-0" />
               <span className="text-amber-950 font-black tracking-tight">Unlocks {countdown.formattedScheduledDate}</span>
             </button>
+          ) : isCompleted ? (
+            <Button 
+              className="w-full h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-sm transition-all shadow-md relative z-10 mt-auto bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-emerald-500/20 hover:shadow-emerald-500/40 cursor-pointer"
+            >
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                <RotateCw className="w-4 h-4" /> Retake Practice
+              </span>
+            </Button>
+          ) : isInProgress ? (
+            <Button 
+              className="w-full h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-sm transition-all shadow-md relative z-10 mt-auto bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-amber-500/20 hover:shadow-amber-500/40 cursor-pointer"
+            >
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                <Play className="w-4 h-4 fill-white/20" /> Continue Practice ({progressPercent}%)
+              </span>
+            </Button>
           ) : (
             <Button 
-              className="w-full h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-sm transition-all shadow-md relative z-10 mt-auto premium-gradient text-white shadow-brand-500/10 hover:shadow-brand-500/30"
+              className="w-full h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-sm transition-all shadow-md relative z-10 mt-auto premium-gradient text-white shadow-brand-500/10 hover:shadow-brand-500/30 cursor-pointer"
             >
               <span className="relative z-10 flex items-center justify-center gap-2">
                 Start Practice <ChevronRight className="w-4 h-4 sm:ml-1 group-hover:translate-x-1 transition-transform relative z-10" />

@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `1.7.2` (Per-Category Content Ordering & Removal of All Categories Section) |
+| **Current Version** | `1.7.3` (Dynamic Practice Action Button & Progress Badging System) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -37,7 +37,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **Current Milestone:** Production Maintenance & User Experience Expansion
 - **Current Priority:** Spotlight Search Portal & Header Trigger Wiring
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Enforced **Per-Category Content Ordering** and removed the `All Categories` pill from Content Banks & Practice Sets in Admin Control Center (`AdminPanel.tsx` v1.7.2). Default view now lands directly on `Chapter-Wise Practice` (`topic-wise`). Each category (`Chapter-Wise Practice`, `High-Yield Topic`, `Daily Speed Quiz`, `Topic-Wise PYQ`) maintains its own clean, isolated content list starting with order numbers `1, 2, 3, 4...`.
+- **Last Completed Task:** Added Dynamic Practice Action Button & Progress Badging System to `ScheduledPracticeBankCard` in `App.tsx` (v1.7.3). Replaced static `Start Practice` text with status-aware buttons and card badges: `Retake Practice` (Emerald theme + `RotateCw` icon) for completed tests, `Continue Practice` (Amber theme + `Play` icon + progress %) for in-progress tests, and `Start Practice` (Brand Blue gradient) for unattempted tests. Applied across both desktop cards and mobile list view rows.
 
 ---
 
@@ -168,7 +168,8 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **v1.6.9 (2026-07-25):** Fixed the true root cause of wrong practice question counts. The `questions` table has 3219 rows but the single `supabase.from('questions').select('topic')` call was silently capped at Supabase's 1000-row default limit. Replaced with a paginated `while` loop that fetches all pages sequentially.
 - **v1.7.0 (2026-07-25):** Implemented full Order Number management feature for **Content Banks & Practice Sets** in Admin Control Center (`AdminPanel.tsx`), matching the layout and behavior of Tests Manager.
 - **v1.7.1 (2026-07-25):** Added Practice Mode Content Hierarchy Toolbar to Content Banks & Practice Sets in Admin Control Center (`AdminPanel.tsx`).
-- **v1.7.2 (2026-07-25):** Implemented **Per-Category Content Ordering & Removal of All Categories Pill** in Admin Control Center ([src/AdminPanel.tsx](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx)). Completely removed the global `🌟 All Categories` option from the Hierarchy toolbar so items are managed exclusively in their respective category scopes. Defaulted `bankFilter` state to `'topic-wise'` (`📘 Chapter-Wise Practice`). Admins can now assign independent order numbers (`1, 2, 3, 4...`) per category cleanly without overlapping global counts.
+- **v1.7.2 (2026-07-25):** Implemented Per-Category Content Ordering & Removal of All Categories Pill in Admin Control Center (`AdminPanel.tsx`).
+- **v1.7.3 (2026-07-26):** Implemented **Dynamic Practice Action Button & Progress Badging System** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx). Replaced static `Start Practice` buttons on practice set cards with status-aware action buttons: **`Retake Practice`** (Emerald theme with `RotateCw` icon and `COMPLETED` green badge) when finished, **`Continue Practice`** (Amber theme with `Play` icon and `IN PROGRESS` percentage badge) when partially attempted, and **`Start Practice`** (Brand Blue gradient) when unattempted. Applied across desktop cards and mobile list rows.
 
 ---
 

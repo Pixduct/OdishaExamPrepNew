@@ -43,6 +43,7 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`AdminSortDirectionToggle`** | Admin / Toolbar | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx) | Asc/Desc pill toggle in Content Banks sub-header | AdminPanel.tsx | Active |
 | **`InlineOrderInput`** | Admin / Table Row | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx) | Editable numeric ORDER field in table rows | AdminPanel.tsx | Active |
 | **`CategoryHierarchyPillBar`** | Admin / Toolbar | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx) | Hierarchy pill toolbar with auto tab switcher | AdminPanel.tsx | Active |
+| **`AttemptPerformanceModal`** | Overlay / Modal | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) | Glassmorphic score count-up & progress modal | App.tsx | Active |
 
 ---
 
@@ -715,3 +716,29 @@ Last updated: 2026-07-26
   - `⚡ Daily Speed Quiz` → `autoTab: 'practice'`
   - `📜 Topic-Wise PYQ` → `autoTab: 'practice'`
 - This prevents admins from seeing a 0-item empty view when selecting a category that only has practice-mode items while sitting on the Question Banks sub-tab.
+
+---
+
+### 21. `AttemptPerformanceModal` (Attempt Performance & Progress Detail Overlay)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
+Last updated: 2026-07-27
+
+| Property | Class |
+| :--- | :--- |
+| Container — Backdrop | `fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm` |
+| Container — Card | `bg-white rounded-3xl border border-slate-200/80 shadow-2xl max-w-md w-full p-6 space-y-5 relative overflow-hidden text-left` |
+| Score Stat Tile | `p-4 bg-gradient-to-br from-emerald-50/90 to-emerald-100/40 rounded-2xl border border-emerald-200/60 text-center shadow-xs` |
+| Accuracy Stat Tile | `p-4 bg-gradient-to-br from-teal-50/90 to-teal-100/40 rounded-2xl border border-teal-200/60 text-center shadow-xs` |
+| Progress Bar Container | `w-full bg-slate-200/70 rounded-full h-2.5 overflow-hidden p-0.5 relative` |
+| Progress Bar Fill | `bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 h-1.5 rounded-full relative overflow-hidden shadow-xs` |
+| Text — Score Counter | `text-2xl sm:text-3xl font-black text-emerald-950 font-mono tracking-tight` |
+| Text — Accuracy Counter | `text-2xl sm:text-3xl font-black text-teal-950 font-mono tracking-tight` |
+| Motion Entrance | `initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: "spring", damping: 25, stiffness: 350 }}` |
+
+**Pattern notes:**
+- **React Portal Isolation**: Modal MUST use `createPortal(..., document.body)` so it mounts directly to `document.body` outside parent component DOM trees, preventing card scale/opacity blinks.
+- **Dynamic Count-Up Counters**: Uses `useEffect` with `requestAnimationFrame` and cubic-easing (`1 - Math.pow(1 - progress, 3)`) over 600ms to animate score (`0` ➔ `score`) and accuracy (`0%` ➔ `accuracy%`).
+- **Synchronized 1-Indexed Progress Formula**: In-progress tests compute progress percentage as `Math.min(100, Math.round(((currentQuestionIndex + 1) / totalQs) * 100))`, matching the card badge and button (`1%` on Question 1 of 200).
+- **Side-by-Side Action Bar Integration**: Triggered from 48px side-by-side action buttons (`[ 📊 Score ]` + `[ 🔄 Retake ]` / `[ 📊 Progress ]` + `[ ⏯ Resume ]`) on cards, maintaining zero height drift across grid rows.
+

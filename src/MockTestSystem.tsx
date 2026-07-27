@@ -1235,7 +1235,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                             <FileText className="w-3.5 h-3.5 animate-pulse-soft" />
                             Question {currentQuestionIndex + 1} of {test.questions.length}
                           </span>
-                          {mathHeavy && (
+                          {(countMathBlocks(currentQuestion.questionText) >= 1 || /(\$\$|\\\[|\\\(|\$)/.test(currentQuestion.questionText || '')) && (
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg">
                               <span className="text-sm leading-none select-none">∑</span> Math
                             </span>

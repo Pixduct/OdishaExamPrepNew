@@ -29,8 +29,15 @@ type MathPart = {
 // ─────────────────────────────────────────────────────────────
 
 /** Returns true if the string contains operators/symbols → likely LaTeX */
-const looksLikeMath = (s: string): boolean =>
-  /[=^_\\+\-*/]/.test(s) && /[a-zA-Z0-9]/.test(s);
+const looksLikeMath = (s: string): boolean => {
+  if (!s || s.length < 2) return false;
+  // If it contains LaTeX commands like \frac, \sqrt, \times, ^, _, =
+  if (/\\[a-zA-Z]+|[\^=_]/.test(s)) return true;
+  // If it has math operators between numbers/variables e.g. "x + 2" or "5 / 10" or "a * b"
+  if (/([0-9a-zA-Z]\s*[\+*/=]\s*[0-9a-zA-Z])/.test(s)) return true;
+  // Plain text labels with hyphens e.g. "Error Correction - Phrase in Bold" are NOT math
+  return false;
+};
 
 /**
  * Master regex that captures ALL supported math delimiters in one pass.
@@ -209,14 +216,19 @@ const InlineMath: React.FC<{
 // ─────────────────────────────────────────────────────────────
 
 const PlainText: React.FC<{ text: string; index: number }> = ({ text, index }) => {
+  // Convert Markdown bold (**text** or __text__) to <strong>text</strong>
+  let processedText = text
+    .replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/__([\s\S]+?)__/g, '<strong>$1</strong>');
+
   // Convert markdown links: [Link Text](URL) into HTML anchor tags (supports nested brackets like [[1] Title](URL))
-  const processedText = text.replace(/\[([\s\S]+?)\]\s*\((https?:\/\/[^)]+)\)/g, (match, linkText, url) => {
+  processedText = processedText.replace(/\[([\s\S]+?)\]\s*\((https?:\/\/[^)]+)\)/g, (match, linkText, url) => {
     const cleanUrl = url.replace(/\s+/g, '');
     const cleanLinkText = linkText.replace(/\n\s*/g, ' ').trim();
     return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="text-brand-500 hover:text-brand-600 hover:underline font-bold transition-colors">${cleanLinkText}</a>`;
   });
 
-  // Safe HTML rendering for basic tags + anchors
+  // Safe HTML rendering for basic tags + anchors + strong/em
   const hasHtml = /<[a-z/][\s\S]*?>/i.test(processedText);
   if (hasHtml) {
     const clean = DOMPurify.sanitize(processedText, {

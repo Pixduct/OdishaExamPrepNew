@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `1.7.17` (Predictive Universal LaTeX Backslash Repair Engine) |
+| **Current Version** | `1.7.18` (Markdown Bold & English Bracket Text Disambiguation Engine) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -37,7 +37,10 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **Current Milestone:** Production Maintenance & User Experience Expansion
 - **Current Priority:** Spotlight Search Portal & Header Trigger Wiring
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Built predictive universal LaTeX repair engine in `MathTextRenderer.tsx` (v1.7.17). Added 32 exhaustive control character (`\x08`, `\x09`, `\x0a`, `\x0b`, `\x0c`, `\x0d`) and literal corruption regex rules covering all possible LaTeX commands (`\times`, `\text`, `\frac`, `\right`, `\theta`, `\triangle`, `\tan`, `\tau`, `\tiny`, `\today`, `\forall`, `\frown`, `\flat`, `\footnote`, `\beta`, `\bar`, `\box`, `\bullet`, `\rho`, `\rangle`, `\neq`, `\nabla`, `\neg`, `\node`, `\nu`, `\notin`, `\vec`). Prevents future control-character backslash stripping across all past, present, and future question banks.
+- **Last Completed Task:** Resolved 3 UI rendering issues in `MathTextRenderer.tsx` and `MockTestSystem.tsx` (v1.7.18):
+  1. Refined `looksLikeMath` to prevent plain English bracket labels (`[Error Correction - Phrase in Bold]`) from being misclassified as LaTeX equations.
+  2. Added Markdown bold (`**text**` / `__text__`) parsing in `PlainText`, rendering `**bold phrase**` as crisp bold text (`<strong>`) instead of showing literal raw asterisks.
+  3. Updated `MockTestSystem` header to display `∑ MATH` badge ONLY when a question actually contains math equations/LaTeX, removing it from long English prose questions.
 
 ---
 
@@ -178,7 +181,8 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **v1.7.14 (2026-07-27):** Guarded `tryParseJsonDiagram` with `KNOWN_DIAGRAM_TYPES.has(type)` validation in [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx).
 - **v1.7.15 (2026-07-27):** Implemented **Global Option & Diagram Safeguard Architecture** in [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx).
 - **v1.7.16 (2026-07-27):** Resolved **LaTeX Command Corruption (`\imes` ➔ `\times` & `\ext` ➔ `\text`)** in [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx).
-- **v1.7.17 (2026-07-27):** Built **Predictive Universal LaTeX Repair Engine** in [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx). Added 32 exhaustive control character and literal corruption repair rules covering `\times`, `\text`, `\frac`, `\right`, `\theta`, `\beta`, `\bar`, `\nabla`, `\neq`, `\vec`, `\rho`, `\forall`, `\tan`, `\tau`, `\tiny`, `\today`, and `\notin`, permanently protecting all existing and future database questions against backslash escaping bugs.
+- **v1.7.17 (2026-07-27):** Built **Predictive Universal LaTeX Repair Engine** in [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx).
+- **v1.7.18 (2026-07-27):** Resolved **Markdown Bold Parsing & English Bracket Label Disambiguation** in [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx) and [`src/MockTestSystem.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/MockTestSystem.tsx). Converts `**bold**` strings to `<strong>` elements, prevents English bracket labels (`[Error Correction - Phrase in Bold]`) from converting into math mode, and shows `∑ MATH` badge strictly for genuine math questions.
 
 ---
 

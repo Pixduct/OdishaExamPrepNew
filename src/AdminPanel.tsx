@@ -1016,7 +1016,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         durationDays: item.durationDays || 30
       };
     } else if (activeTab === 'tests') {
-      let parsedMockConfig = { examId: '', category: 'full-length', subject: '', isPremium: false, price: 499, originalPrice: 999 };
+      let parsedMockConfig: any = { examId: '', category: 'full-length', subject: '', isPremium: false, price: 499, originalPrice: 999, scheduled_at: null };
       try {
         if (item.seriesId) parsedMockConfig = JSON.parse(item.seriesId);
       } catch(e) {}
@@ -1035,8 +1035,9 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         totalMarks: item.totalMarks || 100,
         negativeMarking: item.negativeMarking || 0,
         sortOrder: item.sortOrder || '',
-        scheduled_at: item.scheduled_at ? (() => {
-          const d = new Date(item.scheduled_at);
+        scheduled_at: (item.scheduled_at || parsedMockConfig.scheduled_at) ? (() => {
+          const raw = item.scheduled_at || parsedMockConfig.scheduled_at;
+          const d = new Date(raw);
           if (isNaN(d.getTime())) return '';
           const pad = (n: number) => n.toString().padStart(2, '0');
           return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
@@ -1113,7 +1114,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
            subject: formData.mockCategory === 'sectional' ? formData.mockSubject : null,
            isPremium: formData.isPremium,
            price: Number(formData.price) || 499,
-           originalPrice: Number(formData.originalPrice) || ((Number(formData.price) || 499) * 2)
+           originalPrice: Number(formData.originalPrice) || ((Number(formData.price) || 499) * 2),
+           scheduled_at: formData.scheduled_at ? new Date(formData.scheduled_at).toISOString() : null
         });
 
         const targetExamId = formData.examId;

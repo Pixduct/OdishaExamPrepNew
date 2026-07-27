@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `1.7.5` (Scheduled Mock Tests Unlock Recovery in ExamDetail View) |
+| **Current Version** | `1.7.6` (Dual-Location Scheduled Mock Release & Dynamic Fallback Engine) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -37,7 +37,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **Current Milestone:** Production Maintenance & User Experience Expansion
 - **Current Priority:** Spotlight Search Portal & Header Trigger Wiring
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Fixed Scheduled Mock Test unlock countdown and question count display (`0 Qs` -> true count) in `ExamDetail` view in `App.tsx` (v1.7.5). Converted inline mock card renderer into `ExamDetailMockTestCard` React component that invokes `useCountdown` hook to handle scheduled future releases (`scheduled_at`). Upcoming scheduled tests now render `🔒 Unlocks [Date]` disabled amber buttons with live countdown timers, preventing unreleased 0-question test launches. Accurately calculates total question count across `actualQuestionCount`, `questionCount`, `question_count`, and `totalQuestions`.
+- **Last Completed Task:** Implemented Dual-Location Scheduled Mock Release Engine in `AdminPanel.tsx`, `App.tsx`, and `NotificationCenter.tsx` (v1.7.6). Mock test scheduled release dates (`scheduled_at`) are now persisted both in the top-level database column AND inside the `seriesId` JSON config payload. `ExamDetailMockTestCard`, `ScheduledMockTestCard`, and `NotificationCenter` extract the release date using multi-layer fallback (`test.scheduled_at || test.scheduledAt || JSON.parse(test.seriesId).scheduled_at`), guaranteeing unlock countdown timers render on student portals regardless of schema column variances.
 
 ---
 
@@ -166,7 +166,8 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **v1.6.7 (2026-07-25):** Separated Question Bank metadata count (`questionCount`, configured by admin for PDF/Bank view) from interactive Practice Set count (`practiceQuestionCount`). In `App.tsx`, `loadDashboardData` now dynamically counts actual practice questions from the `questions` table for each topic/bank, updating `ScheduledPracticeBankCard` to show the exact real number of interactive questions (e.g., 91, 24, 10, 6) and dynamic session minutes.
 - **v1.6.8 (2026-07-25):** Resolved root cause where practice sets with 0 uploaded questions in the `questions` table were forcing `totalQs = 0` despite having an admin-configured `questionCount` (e.g., 250). In `ScheduledPracticeBankCard`, `totalQs` now checks `actualQs > 0 ? actualQs : (adminQs > 0 ? adminQs : 0)`. When real questions exist (e.g. 24, 91, 10), the exact added question count is shown; when no questions are in the `questions` table yet, it falls back to the admin's configured set count (250).
 - **v1.7.3 (2026-07-26):** Implemented **Dynamic Practice Action Button & Progress Badging System** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx). Replaced static `Start Practice` buttons on practice set cards with status-aware action buttons.
-- **v1.7.5 (2026-07-27):** Fixed **Scheduled Mock Tests Unlock Countdown & Question Count (`0 Qs`) Recovery** in ExamDetail view ([`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)). Extracted `ExamDetailMockTestCard` component to invoke `useCountdown(test?.scheduled_at)` for future-scheduled test releases. Upcoming tests now display `🔒 Unlocks [Date]` disabled amber buttons with release countdowns and `📅 UPCOMING` badges, preventing premature test execution. Fixed question count logic (`totalQs`) so true question counts display instead of `0 Qs`.
+- **v1.7.5 (2026-07-27):** Fixed **Scheduled Mock Tests Unlock Countdown & Question Count (`0 Qs`) Recovery** in ExamDetail view ([`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)). Extracted `ExamDetailMockTestCard` component to invoke `useCountdown(test?.scheduled_at)` for future-scheduled test releases.
+- **v1.7.6 (2026-07-27):** Implemented **Dual-Location Scheduled Mock Release Engine** across [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx), [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx), and [`src/components/NotificationCenter.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/NotificationCenter.tsx). Admin Panel saves `scheduled_at` both as a direct payload key and inside `seriesId` JSON. Components read `scheduled_at` using a multi-layer fallback so countdown timers and lock states render consistently.
 
 ---
 

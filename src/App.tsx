@@ -2995,7 +2995,12 @@ const LandingPage = () => {
 };
 
 const ScheduledMockTestCard = ({ test, onLaunchMockTest }: any) => {
-  const countdown = useCountdown(test?.scheduled_at);
+  let parsedSchedule = null;
+  if (test?.seriesId && typeof test.seriesId === 'string' && test.seriesId.startsWith('{')) {
+    try { parsedSchedule = JSON.parse(test.seriesId).scheduled_at || JSON.parse(test.seriesId).scheduledAt || null; } catch (e) {}
+  }
+  const rawScheduledAt = test?.scheduled_at || test?.scheduledAt || parsedSchedule;
+  const countdown = useCountdown(rawScheduledAt);
   const isScheduledUpcoming = !countdown.isLive;
 
   return (
@@ -8424,20 +8429,23 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
         {(() => {
           const ExamDetailMockTestCard = ({ test, isMobile, hasAccessTo, activities, handleStartTest }: any) => {
-            const countdown = useCountdown(test?.scheduled_at || test?.scheduledAt);
-            const isScheduledUpcoming = !countdown.isLive;
-
             let isPremium = test.isPremium;
             let price = test.price || 499;
             let testExamId = '';
-            if (isPremium === undefined || test.seriesId) {
+            let parsedSchedule = null;
+            if (test.seriesId && typeof test.seriesId === 'string' && test.seriesId.startsWith('{')) {
               try { 
                 const parsed = JSON.parse(test.seriesId);
-                isPremium = parsed.isPremium || false; 
+                isPremium = parsed.isPremium !== undefined ? parsed.isPremium : isPremium; 
                 price = parsed.price || 499;
                 testExamId = parsed.examId || '';
+                parsedSchedule = parsed.scheduled_at || parsed.scheduledAt || null;
               } catch(e) {}
             }
+
+            const rawScheduledAt = test?.scheduled_at || test?.scheduledAt || parsedSchedule;
+            const countdown = useCountdown(rawScheduledAt);
+            const isScheduledUpcoming = !countdown.isLive;
             const isLocked = !isScheduledUpcoming && isPremium && !hasAccessTo(test, testExamId);
             const isPremiumUnlocked = !isScheduledUpcoming && isPremium && hasAccessTo(test, testExamId);
 

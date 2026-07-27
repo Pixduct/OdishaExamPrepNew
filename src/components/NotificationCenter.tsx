@@ -72,10 +72,15 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
 
     // 1. Mock Tests — both regular and scheduled
     mockTests.forEach((test: any) => {
-      const hasSchedule = !!test.scheduled_at;
-      const scheduleTime = hasSchedule ? new Date(test.scheduled_at).getTime() : 0;
-      const isScheduleLive = hasSchedule && scheduleTime <= now;
-      const isScheduleUpcoming = hasSchedule && scheduleTime > now;
+      let parsedSchedule = null;
+      if (test?.seriesId && typeof test.seriesId === 'string' && test.seriesId.startsWith('{')) {
+        try { parsedSchedule = JSON.parse(test.seriesId).scheduled_at || JSON.parse(test.seriesId).scheduledAt || null; } catch (e) {}
+      }
+      const rawScheduled = test?.scheduled_at || test?.scheduledAt || parsedSchedule;
+      const hasSchedule = !!rawScheduled;
+      const scheduleTime = hasSchedule ? new Date(rawScheduled).getTime() : 0;
+      const isScheduleLive = hasSchedule && !isNaN(scheduleTime) && scheduleTime <= now;
+      const isScheduleUpcoming = hasSchedule && !isNaN(scheduleTime) && scheduleTime > now;
 
       if (isScheduleLive) {
         // Test just went live — show a special LIVE NOW alert (pinned at top)

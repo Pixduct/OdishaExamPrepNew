@@ -3352,6 +3352,395 @@ const ScheduledPracticeBankCard = ({ bank, isMobile, hasAccessTo, activities, ha
   );
 };
 
+const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activities, handleStartTest }: any) => {
+  let isPremium = test.isPremium;
+  let price = test.price || 499;
+  let testExamId = '';
+  let parsedSchedule = null;
+  if (test.seriesId && typeof test.seriesId === 'string' && test.seriesId.startsWith('{')) {
+    try { 
+      const parsed = JSON.parse(test.seriesId);
+      isPremium = parsed.isPremium !== undefined ? parsed.isPremium : isPremium; 
+      price = parsed.price || 499;
+      testExamId = parsed.examId || '';
+      parsedSchedule = parsed.scheduled_at || parsed.scheduledAt || null;
+    } catch(e) {}
+  }
+
+  const rawScheduledAt = test?.scheduled_at || test?.scheduledAt || parsedSchedule;
+  const countdown = useCountdown(rawScheduledAt);
+  const isScheduledUpcoming = !countdown.isLive;
+  const isLocked = !isScheduledUpcoming && isPremium && !hasAccessTo(test, testExamId);
+  const isPremiumUnlocked = !isScheduledUpcoming && isPremium && hasAccessTo(test, testExamId);
+
+  const completedAct = !isScheduledUpcoming && activities?.find((act: any) => 
+    (act.type === 'mock_test_completed' || act.type === 'practice_test_completed') && 
+    act.metadata?.test?.id === test.id
+  );
+  const isCompleted = !isScheduledUpcoming && !!completedAct;
+
+  const incompleteAct = !isCompleted && !isScheduledUpcoming && activities?.find((act: any) => 
+    act.type === 'test_incomplete' && 
+    act.metadata?.test?.id === test.id
+  );
+  const isInProgress = !isScheduledUpcoming && !!incompleteAct;
+
+  const actualQs = test.practiceQuestionCount || test.actualQuestionCount || 0;
+  const adminQs = test.questionCount || test.question_count || test.totalQuestions || 0;
+  const totalQs = actualQs > 0 ? actualQs : (adminQs > 0 ? adminQs : (test.questions?.length || test._questionCount || 0));
+
+  const suffixMatch = test.title.match(/(?:\s+|-\s*)(I{1,3}|IV|V|VI{0,3}|IX|X|\d{1,2})\s*$/i);
+  let mainTitle = test.title;
+  let suffix = '';
+  if (suffixMatch) {
+    suffix = suffixMatch[1].toUpperCase();
+    mainTitle = test.title.substring(0, suffixMatch.index).trim();
+    if (mainTitle.endsWith('-')) {
+      mainTitle = mainTitle.substring(0, mainTitle.length - 1).trim();
+    }
+  }
+  const currentQuestionIndex = incompleteAct ? (incompleteAct.metadata?.currentQuestionIndex || 0) : 0;
+  const progressPercent = totalQs > 0 ? Math.min(100, Math.round((currentQuestionIndex / totalQs) * 100)) : 0;
+
+  return (
+    <motion.div
+      initial={false}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      whileHover={isMobile || isScheduledUpcoming ? undefined : whileHover.liftTap}
+      whileTap={isScheduledUpcoming ? undefined : whileTap.press}
+      className="w-full"
+    >
+      {isMobile ? (
+        <div
+          onClick={() => {
+            if (!isScheduledUpcoming) handleStartTest({ ...test, isPremium, price });
+          }}
+          className={cn(
+            "px-3 py-2.5 sm:p-4 bg-white border rounded-xl sm:rounded-2xl flex items-center justify-between gap-3 group relative overflow-hidden transition-all duration-300",
+            isScheduledUpcoming
+              ? "border-amber-200 bg-amber-50/20 cursor-not-allowed opacity-90"
+              : isCompleted
+                ? "border-emerald-250 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.04)] active:border-emerald-350 cursor-pointer"
+                : isInProgress
+                  ? "border-amber-250 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.04)] active:border-amber-355 cursor-pointer"
+                  : isLocked 
+                    ? "border-slate-100 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.03),0_1px_2px_rgba(245,158,11,0.01)] active:border-amber-300 cursor-pointer"
+                    : isPremiumUnlocked
+                      ? "border-slate-100 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.03),0_1px_2px_rgba(16,185,129,0.01)] active:border-emerald-300 cursor-pointer"
+                      : "border-slate-100 shadow-[0_4px_16px_-4px_rgba(79,70,229,0.03),0_1px_2px_rgba(79,70,229,0.01)] active:border-brand-300 cursor-pointer"
+          )}
+        >
+          <div className={cn(
+            "absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity pointer-events-none",
+            isScheduledUpcoming
+              ? "bg-amber-500/0"
+              : isLocked 
+                ? "bg-gradient-to-r from-amber-500/0 via-amber-500/[0.01] to-amber-500/0"
+                : isPremiumUnlocked || isCompleted
+                  ? "bg-gradient-to-r from-emerald-500/0 via-emerald-500/[0.01] to-emerald-500/0"
+                  : "bg-gradient-to-r from-brand-500/0 via-brand-500/[0.01] to-brand-500/0"
+          )} />
+          <div className={cn(
+            "absolute left-0 top-0 bottom-0 w-[4px] rounded-r-sm opacity-90",
+            isScheduledUpcoming
+              ? "bg-gradient-to-b from-amber-400 to-orange-500"
+              : isCompleted
+                ? "bg-gradient-to-b from-emerald-400 to-teal-500"
+                : isInProgress
+                  ? "bg-gradient-to-b from-amber-450 to-orange-500"
+                  : isLocked 
+                    ? "bg-gradient-to-b from-amber-400 to-orange-500" 
+                    : isPremiumUnlocked 
+                      ? "bg-gradient-to-b from-emerald-400 to-teal-500" 
+                      : "bg-gradient-to-b from-indigo-500 to-purple-600"
+          )} />
+
+          <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1 pl-1">
+            <div className={cn(
+              "w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border relative",
+              isScheduledUpcoming
+                ? "bg-amber-50 border-amber-200 text-amber-700"
+                : isCompleted
+                  ? "bg-emerald-50/60 border-emerald-100/30 text-emerald-600"
+                  : isInProgress
+                    ? "bg-amber-50/60 border-amber-100/30 text-amber-600"
+                    : isLocked 
+                      ? "bg-amber-50/60 border-amber-100/30 text-amber-600" 
+                      : isPremiumUnlocked 
+                        ? "bg-emerald-50/60 border-emerald-100/30 text-emerald-600" 
+                        : "bg-indigo-50/60 border-indigo-100/30 text-indigo-650"
+            )}>
+              {isScheduledUpcoming ? (
+                <Calendar className="w-4.5 h-4.5 text-amber-700" />
+              ) : isCompleted ? (
+                <CheckCircle2 className="w-4.5 h-4.5 relative z-10" />
+              ) : isInProgress ? (
+                <Play className="w-4 h-4 text-amber-600 fill-amber-500/10 animate-pulse relative z-10" />
+              ) : (
+                <Target className="w-4 h-4 sm:w-5 sm:h-5 relative z-10" />
+              )}
+            </div>
+            
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <h4 className="font-extrabold text-[12.5px] sm:text-[13.5px] text-slate-900 tracking-tight leading-snug line-clamp-1 sm:line-clamp-2 uppercase pr-1" title={test.title}>{mainTitle}</h4>
+                {suffix && (
+                  <span className="px-1.5 py-0.5 bg-brand-50 text-brand-700 text-[8.5px] font-black rounded border border-brand-100/60 uppercase tracking-wider shrink-0">Set {suffix}</span>
+                )}
+                {isScheduledUpcoming ? (
+                  <span className="px-1.5 py-0.5 bg-amber-100 text-amber-800 text-[8.5px] font-black rounded border border-amber-200 uppercase tracking-wider shrink-0">📅 UPCOMING</span>
+                ) : isCompleted ? (
+                  <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 text-[8.5px] font-black rounded border border-emerald-100 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5" /> Completed</span>
+                ) : isInProgress ? (
+                  <span className="px-1.5 py-0.5 bg-amber-50 text-amber-700 text-[8.5px] font-black rounded border border-amber-100 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><Clock className="w-2.5 h-2.5 animate-pulse" /> {progressPercent}%</span>
+                ) : isPremium && (
+                  isLocked ? (
+                    <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 text-[8.5px] font-black rounded border border-amber-100 uppercase tracking-wider shrink-0">Premium</span>
+                  ) : (
+                    <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 text-[8.5px] font-black rounded border border-emerald-100 uppercase tracking-wider shrink-0">Active</span>
+                  )
+                )}
+              </div>
+              
+              {isScheduledUpcoming ? (
+                <div className="mt-1 text-[10px] font-bold text-amber-800 flex items-center gap-1">
+                  <Clock className="w-3 h-3 text-amber-600 shrink-0" />
+                  <span>Starts in <strong className="font-mono text-amber-900">{countdown.formattedCountdown}</strong></span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 mt-1.5 sm:mt-2 text-[9.5px] sm:text-[10px] font-extrabold text-slate-500 flex-nowrap overflow-hidden">
+                  <span className="flex items-center gap-0.5 bg-slate-50 px-1.5 py-0.5 rounded-md border border-slate-100/60 shrink-0"><Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {test.durationMinutes}m</span>
+                  <span className="flex items-center gap-0.5 bg-slate-50 px-1.5 py-0.5 rounded-md border border-slate-100/60 shrink-0"><Award className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {test.totalMarks}M</span>
+                  <span className="flex items-center gap-0.5 bg-slate-50 px-1.5 py-0.5 rounded-md border border-slate-100/60 shrink-0"><FileText className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {totalQs}Q</span>
+                  {isCompleted && completedAct && (
+                    <span className="flex items-center gap-0.5 bg-emerald-50/50 text-emerald-700 px-1.5 py-0.5 rounded-md border border-emerald-100/30 shrink-0">
+                      Score: {completedAct.score}/{completedAct.totalMarks || test.totalMarks}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className={cn(
+            "w-7 h-7 sm:w-8 sm:h-8 rounded-full border flex items-center justify-center shrink-0 shadow-2xs group-active:translate-x-0.5 transition-all duration-300",
+            isScheduledUpcoming
+              ? "bg-amber-50 border-amber-200 text-amber-700"
+              : isCompleted 
+                ? "bg-emerald-50 border-emerald-100 text-emerald-600 group-active:bg-emerald-500 group-active:text-white"
+                : isInProgress
+                  ? "bg-amber-50 border-amber-100 text-amber-600 group-active:bg-amber-500 group-active:text-white animate-pulse"
+                  : isLocked
+                    ? "bg-amber-50 border-amber-100 text-amber-600 group-active:bg-amber-500 group-active:text-white"
+                    : isPremiumUnlocked
+                      ? "bg-emerald-50 border-emerald-100 text-emerald-600 group-active:bg-emerald-500 group-active:text-white"
+                      : "bg-slate-50 border-slate-100 text-slate-400 group-active:bg-brand-50 group-active:border-brand-100 group-active:text-brand-600"
+          )}>
+            {isScheduledUpcoming ? (
+              <Lock className="w-3.5 h-3.5 text-amber-700" />
+            ) : isCompleted ? (
+              <CheckCircle2 className="w-3.5 h-3.5" />
+            ) : isInProgress ? (
+              <Play className="w-3 h-3 fill-amber-500/10" />
+            ) : isLocked ? (
+              <Lock className="w-3 h-3" />
+            ) : (
+              <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            )}
+          </div>
+        </div>
+      ) : (
+        <Card 
+          key={test.id} 
+          className={cn(
+            "p-6 bg-white border shadow-lg shadow-slate-200/30 rounded-[1.5rem] group transition-all duration-500 flex flex-col justify-between gap-6 relative overflow-hidden premium-shine-container h-full", 
+            isScheduledUpcoming
+              ? "border-amber-200 bg-amber-50/10 cursor-not-allowed"
+              : isCompleted
+                ? "border-emerald-200 shadow-emerald-500/5 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10 hover:border-emerald-300 cursor-pointer"
+                : isInProgress
+                  ? "border-amber-250 shadow-amber-500/5 hover:-translate-y-2 hover:shadow-2xl hover:shadow-amber-500/10 hover:border-amber-300 cursor-pointer"
+                  : isLocked 
+                    ? "border-slate-200 bg-white hover:-translate-y-2 hover:border-slate-400 hover:bg-slate-50/50 hover:shadow-md cursor-pointer"
+                    : isPremiumUnlocked 
+                      ? "border-slate-200 bg-white hover:-translate-y-2 hover:border-slate-400 hover:bg-slate-50/50 hover:shadow-md cursor-pointer"
+                      : "border-slate-200 bg-white hover:-translate-y-2 hover:border-slate-400 hover:bg-slate-50/50 hover:shadow-2xl hover:shadow-brand-500/10 hover:border-brand-200 cursor-pointer"
+          )}
+          onClick={() => {
+            if (!isScheduledUpcoming) handleStartTest({ ...test, isPremium, price });
+          }}
+        >
+          {isCompleted && <div className="absolute inset-0 bg-emerald-550/2 pointer-events-none" />}
+          {isInProgress && <div className="absolute inset-0 bg-amber-550/2 pointer-events-none" />}
+          {isPremiumUnlocked && !isCompleted && !isInProgress && <div className="absolute inset-0 bg-emerald-500/5 pointer-events-none" />}
+          
+          <div className="flex items-start justify-between relative z-10 w-full">
+            <div className="flex items-start gap-4 min-w-0 flex-1">
+              <div className={cn(
+                "w-14 h-14 rounded-xl flex items-center justify-center shrink-0 shadow-md text-white transition-transform group-hover:scale-110 relative mt-0.5", 
+                isScheduledUpcoming
+                  ? "bg-gradient-to-br from-amber-400 to-orange-500"
+                  : isCompleted
+                    ? "bg-gradient-to-br from-emerald-500 to-teal-600"
+                    : isInProgress
+                      ? "bg-gradient-to-br from-amber-400 to-orange-500 animate-pulse"
+                      : isLocked 
+                        ? "bg-gradient-to-br from-amber-400 to-orange-500" 
+                        : isPremiumUnlocked 
+                          ? "bg-gradient-to-br from-emerald-500 to-teal-600" 
+                          : "bg-gradient-to-br from-indigo-500 to-purple-650"
+              )}>
+                {isScheduledUpcoming ? (
+                  <Calendar className="w-6 h-6 text-white" />
+                ) : isCompleted ? (
+                  <CheckCircle2 className="w-6 h-6 text-white" />
+                ) : isInProgress ? (
+                  <Play className="w-6 h-6 text-white fill-white/10 ml-0.5 animate-pulse" />
+                ) : (
+                  <Target className="w-6 h-6" />
+                )}
+                <div className="absolute inset-0 border-2 border-white/20 rounded-xl" />
+              </div>
+              <div className="text-left min-w-0 flex-1">
+                <h4 className="font-black text-base sm:text-lg text-slate-955 tracking-tight group-hover:text-brand-600 transition-colors uppercase leading-snug line-clamp-2" title={test.title}>{mainTitle}</h4>
+                <div className="flex items-center flex-wrap gap-1.5 mt-1">
+                  {isScheduledUpcoming ? (
+                    <span className="text-[10px] font-black text-amber-800 uppercase tracking-widest bg-amber-100 px-2.5 py-0.5 rounded border border-amber-200 flex items-center gap-1">
+                      📅 UPCOMING
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100 whitespace-nowrap">Official Mock</span>
+                  )}
+                  {suffix && (
+                    <span className="text-[10px] font-black text-brand-700 uppercase tracking-widest bg-brand-50 px-2 py-0.5 rounded border border-brand-100/60 shadow-2xs whitespace-nowrap">Set {suffix}</span>
+                  )}
+                  {!isScheduledUpcoming && isCompleted && (
+                    <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-100/60 flex items-center gap-0.5 whitespace-nowrap"><CheckCircle2 className="w-3.5 h-3.5" /> Completed</span>
+                  )}
+                  {!isScheduledUpcoming && isInProgress && (
+                    <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest bg-amber-50 px-2.5 py-0.5 rounded border border-amber-100/60 flex items-center gap-0.5 whitespace-nowrap"><Clock className="w-3.5 h-3.5 animate-pulse" /> In Progress ({progressPercent}%)</span>
+                  )}
+                </div>
+              </div>
+            </div>
+            {!isScheduledUpcoming && isPremium && !isCompleted && !isInProgress && (
+              <div className="flex shrink-0">
+                {isLocked ? (
+                  <div className="bg-amber-50 text-amber-600 p-2.5 rounded-xl border border-amber-100 flex items-center justify-center shadow-sm" aria-label="Premium Locked">
+                    <Lock className="w-5 h-5 fill-amber-500/20" />
+                  </div>
+                ) : (
+                  <div className="bg-emerald-50 text-emerald-600 px-2.5 py-1 flex items-center gap-1.5 rounded-lg border border-emerald-100 text-[10px] font-black uppercase tracking-widest shadow-sm" aria-label="Premium Unlocked">
+                    <CheckCircle2 className="w-3 h-3" />
+                    Premium Active
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          
+          {isScheduledUpcoming ? (
+            <div className="bg-amber-50/80 border border-amber-200/80 rounded-xl p-3.5 space-y-1.5 relative z-10 text-left">
+              <div className="flex items-center justify-between text-xs font-extrabold text-amber-900">
+                <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" /> Release Countdown</span>
+                <span className="font-mono text-xs tracking-wider font-black text-amber-950 bg-amber-200/60 px-2 py-0.5 rounded-md border border-amber-300/60">{countdown.formattedCountdown}</span>
+              </div>
+              <div className="flex items-center justify-between text-[11px] font-semibold text-amber-800 pt-0.5">
+                <span>Scheduled for {countdown.formattedScheduledDate}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4 flex-1 relative z-10 pt-2 text-left">
+              <div className="flex gap-4 text-xs font-bold text-slate-500 flex-wrap">
+                <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><Clock className="w-3.5 h-3.5 text-slate-400"/> {test.durationMinutes} Mins</span>
+                <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><Award className="w-3.5 h-3.5 text-slate-400"/> {test.totalMarks} Marks</span>
+                <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><FileText className="w-3.5 h-3.5 text-slate-400"/> {totalQs} Qs</span>
+              </div>
+
+              {isCompleted && completedAct && (
+                <div className="p-3.5 bg-emerald-50/50 rounded-xl border border-emerald-100/40 text-xs space-y-1">
+                  <div className="flex justify-between text-emerald-800 font-bold">
+                    <span>Previous Attempt:</span>
+                    <span>{new Date(completedAct.timestamp).toLocaleDateString()}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 pt-1 border-t border-emerald-100/30 text-emerald-700">
+                    <div>Score: <strong className="text-emerald-950 font-black">{completedAct.score} / {completedAct.totalMarks || test.totalMarks}</strong></div>
+                    <div>Accuracy: <strong className="text-emerald-950 font-black">{completedAct.accuracy}%</strong></div>
+                  </div>
+                </div>
+              )}
+
+              {isInProgress && incompleteAct && (
+                <div className="p-3.5 bg-amber-50/50 rounded-xl border border-amber-100/40 text-xs space-y-1.5">
+                  <div className="flex justify-between text-amber-800 font-bold">
+                    <span>In Progress:</span>
+                    <span>Question {incompleteAct.metadata?.currentQuestionIndex + 1} of {incompleteAct.metadata?.totalQuestions || totalQs}</span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
+                    <div className="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {isScheduledUpcoming ? (
+            <button
+              type="button"
+              onClick={(e) => e.stopPropagation()}
+              className="w-full h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-xs sm:text-sm bg-amber-500/15 border-2 border-amber-400 text-amber-950 shadow-sm cursor-not-allowed mt-auto pointer-events-none relative z-10"
+            >
+              <Lock className="w-4 h-4 text-amber-800 shrink-0" />
+              <span className="text-amber-950 font-black tracking-tight">Unlocks {countdown.formattedScheduledDate}</span>
+            </button>
+          ) : (
+            <Button 
+              variant={isLocked ? "outline" : isCompleted ? "outline" : "primary"}
+              className={cn(
+                "w-full h-[48px] rounded-xl font-black text-sm relative z-10 transition-all overflow-hidden group/btn mt-auto", 
+                isCompleted
+                  ? "border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 bg-white"
+                  : isInProgress
+                    ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/20 hover:shadow-xl hover:shadow-amber-500/30"
+                    : !isLocked 
+                      ? "premium-gradient text-white shadow-lg shadow-brand-500/20 group-hover:premium-glow" 
+                      : "border-amber-200 text-amber-600 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700"
+              )}
+            >
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 z-10" />
+
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                {isCompleted ? (
+                  <>
+                    <RotateCw className="w-4 h-4 mr-2" />
+                    Retake Test
+                  </>
+                ) : isInProgress ? (
+                  <>
+                    <Play className="w-4 h-4 mr-2 fill-white/20" />
+                    Resume Test ({progressPercent}%)
+                  </>
+                ) : isLocked ? (
+                  <>
+                    <Lock className="w-4 h-4 mr-2" />
+                    Unlock to Access
+                  </>
+                ) : (
+                  <>
+                    Start Test Now
+                    <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 duration-300" />
+                  </>
+                )}
+              </span>
+            </Button>
+          )}
+        </Card>
+      )}
+    </motion.div>
+  );
+});
+
 const PurchasesView = ({ user, profile, exams, mockTests, testSeries, dynamicQuestionBanks, hasAccessTo, onLaunchMockTest, onLaunchBank, onViewExam, loadingExams }: any) => {
   const { refreshProfile } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
@@ -8428,395 +8817,6 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         </div>
 
         {(() => {
-          const ExamDetailMockTestCard = ({ test, isMobile, hasAccessTo, activities, handleStartTest }: any) => {
-            let isPremium = test.isPremium;
-            let price = test.price || 499;
-            let testExamId = '';
-            let parsedSchedule = null;
-            if (test.seriesId && typeof test.seriesId === 'string' && test.seriesId.startsWith('{')) {
-              try { 
-                const parsed = JSON.parse(test.seriesId);
-                isPremium = parsed.isPremium !== undefined ? parsed.isPremium : isPremium; 
-                price = parsed.price || 499;
-                testExamId = parsed.examId || '';
-                parsedSchedule = parsed.scheduled_at || parsed.scheduledAt || null;
-              } catch(e) {}
-            }
-
-            const rawScheduledAt = test?.scheduled_at || test?.scheduledAt || parsedSchedule;
-            const countdown = useCountdown(rawScheduledAt);
-            const isScheduledUpcoming = !countdown.isLive;
-            const isLocked = !isScheduledUpcoming && isPremium && !hasAccessTo(test, testExamId);
-            const isPremiumUnlocked = !isScheduledUpcoming && isPremium && hasAccessTo(test, testExamId);
-
-            const completedAct = !isScheduledUpcoming && activities.find((act: any) => 
-              (act.type === 'mock_test_completed' || act.type === 'practice_test_completed') && 
-              act.metadata?.test?.id === test.id
-            );
-            const isCompleted = !isScheduledUpcoming && !!completedAct;
-
-            const incompleteAct = !isCompleted && !isScheduledUpcoming && activities.find((act: any) => 
-              act.type === 'test_incomplete' && 
-              act.metadata?.test?.id === test.id
-            );
-            const isInProgress = !isScheduledUpcoming && !!incompleteAct;
-
-            const actualQs = test.practiceQuestionCount || test.actualQuestionCount || 0;
-            const adminQs = test.questionCount || test.question_count || test.totalQuestions || 0;
-            const totalQs = actualQs > 0 ? actualQs : (adminQs > 0 ? adminQs : (test.questions?.length || test._questionCount || 0));
-
-            const suffixMatch = test.title.match(/(?:\s+|-\s*)(I{1,3}|IV|V|VI{0,3}|IX|X|\d{1,2})\s*$/i);
-            let mainTitle = test.title;
-            let suffix = '';
-            if (suffixMatch) {
-              suffix = suffixMatch[1].toUpperCase();
-              mainTitle = test.title.substring(0, suffixMatch.index).trim();
-              if (mainTitle.endsWith('-')) {
-                mainTitle = mainTitle.substring(0, mainTitle.length - 1).trim();
-              }
-            }
-            const currentQuestionIndex = incompleteAct ? (incompleteAct.metadata?.currentQuestionIndex || 0) : 0;
-            const progressPercent = totalQs > 0 ? Math.min(100, Math.round((currentQuestionIndex / totalQs) * 100)) : 0;
-
-            return (
-              <motion.div
-                initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-                animate={isMobile ? undefined : { opacity: 1, y: 0 }}
-                exit={isMobile ? undefined : { opacity: 0, scale: 0.95 }}
-                whileHover={isMobile || isScheduledUpcoming ? undefined : whileHover.liftTap}
-                whileTap={isScheduledUpcoming ? undefined : whileTap.press}
-                className="w-full"
-              >
-                {isMobile ? (
-                  <div
-                    onClick={() => {
-                      if (!isScheduledUpcoming) handleStartTest({ ...test, isPremium, price });
-                    }}
-                    className={cn(
-                      "px-3 py-2.5 sm:p-4 bg-white border rounded-xl sm:rounded-2xl flex items-center justify-between gap-3 group relative overflow-hidden transition-all duration-300",
-                      isScheduledUpcoming
-                        ? "border-amber-200 bg-amber-50/20 cursor-not-allowed opacity-90"
-                        : isCompleted
-                          ? "border-emerald-250 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.04)] active:border-emerald-350 cursor-pointer"
-                          : isInProgress
-                            ? "border-amber-250 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.04)] active:border-amber-355 cursor-pointer"
-                            : isLocked 
-                              ? "border-slate-100 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.03),0_1px_2px_rgba(245,158,11,0.01)] active:border-amber-300 cursor-pointer"
-                              : isPremiumUnlocked
-                                ? "border-slate-100 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.03),0_1px_2px_rgba(16,185,129,0.01)] active:border-emerald-300 cursor-pointer"
-                                : "border-slate-100 shadow-[0_4px_16px_-4px_rgba(79,70,229,0.03),0_1px_2px_rgba(79,70,229,0.01)] active:border-brand-300 cursor-pointer"
-                    )}
-                  >
-                    <div className={cn(
-                      "absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity pointer-events-none",
-                      isScheduledUpcoming
-                        ? "bg-amber-500/0"
-                        : isLocked 
-                          ? "bg-gradient-to-r from-amber-500/0 via-amber-500/[0.01] to-amber-500/0"
-                          : isPremiumUnlocked || isCompleted
-                            ? "bg-gradient-to-r from-emerald-500/0 via-emerald-500/[0.01] to-emerald-500/0"
-                            : "bg-gradient-to-r from-brand-500/0 via-brand-500/[0.01] to-brand-500/0"
-                    )} />
-                    <div className={cn(
-                      "absolute left-0 top-0 bottom-0 w-[4px] rounded-r-sm opacity-90",
-                      isScheduledUpcoming
-                        ? "bg-gradient-to-b from-amber-400 to-orange-500"
-                        : isCompleted
-                          ? "bg-gradient-to-b from-emerald-400 to-teal-500"
-                          : isInProgress
-                            ? "bg-gradient-to-b from-amber-450 to-orange-500"
-                            : isLocked 
-                              ? "bg-gradient-to-b from-amber-400 to-orange-500" 
-                              : isPremiumUnlocked 
-                                ? "bg-gradient-to-b from-emerald-400 to-teal-500" 
-                                : "bg-gradient-to-b from-indigo-500 to-purple-600"
-                    )} />
-
-                    <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1 pl-1">
-                      <div className={cn(
-                        "w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border relative",
-                        isScheduledUpcoming
-                          ? "bg-amber-50 border-amber-200 text-amber-700"
-                          : isCompleted
-                            ? "bg-emerald-50/60 border-emerald-100/30 text-emerald-600"
-                            : isInProgress
-                              ? "bg-amber-50/60 border-amber-100/30 text-amber-600"
-                              : isLocked 
-                                ? "bg-amber-50/60 border-amber-100/30 text-amber-600" 
-                                : isPremiumUnlocked 
-                                  ? "bg-emerald-50/60 border-emerald-100/30 text-emerald-600" 
-                                  : "bg-indigo-50/60 border-indigo-100/30 text-indigo-650"
-                      )}>
-                        {isScheduledUpcoming ? (
-                          <Calendar className="w-4.5 h-4.5 text-amber-700" />
-                        ) : isCompleted ? (
-                          <CheckCircle2 className="w-4.5 h-4.5 relative z-10" />
-                        ) : isInProgress ? (
-                          <Play className="w-4 h-4 text-amber-600 fill-amber-500/10 animate-pulse relative z-10" />
-                        ) : (
-                          <Target className="w-4 h-4 sm:w-5 sm:h-5 relative z-10" />
-                        )}
-                      </div>
-                      
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <h4 className="font-extrabold text-[12.5px] sm:text-[13.5px] text-slate-900 tracking-tight leading-snug line-clamp-1 sm:line-clamp-2 uppercase pr-1" title={test.title}>{mainTitle}</h4>
-                          {suffix && (
-                            <span className="px-1.5 py-0.5 bg-brand-50 text-brand-700 text-[8.5px] font-black rounded border border-brand-100/60 uppercase tracking-wider shrink-0">Set {suffix}</span>
-                          )}
-                          {isScheduledUpcoming ? (
-                            <span className="px-1.5 py-0.5 bg-amber-100 text-amber-800 text-[8.5px] font-black rounded border border-amber-200 uppercase tracking-wider shrink-0">📅 UPCOMING</span>
-                          ) : isCompleted ? (
-                            <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 text-[8.5px] font-black rounded border border-emerald-100 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5" /> Completed</span>
-                          ) : isInProgress ? (
-                            <span className="px-1.5 py-0.5 bg-amber-50 text-amber-700 text-[8.5px] font-black rounded border border-amber-100 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><Clock className="w-2.5 h-2.5 animate-pulse" /> {progressPercent}%</span>
-                          ) : isPremium && (
-                            isLocked ? (
-                              <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 text-[8.5px] font-black rounded border border-amber-100 uppercase tracking-wider shrink-0">Premium</span>
-                            ) : (
-                              <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 text-[8.5px] font-black rounded border border-emerald-100 uppercase tracking-wider shrink-0">Active</span>
-                            )
-                          )}
-                        </div>
-                        
-                        {isScheduledUpcoming ? (
-                          <div className="mt-1 text-[10px] font-bold text-amber-800 flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-amber-600 shrink-0" />
-                            <span>Starts in <strong className="font-mono text-amber-900">{countdown.formattedCountdown}</strong></span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-1.5 mt-1.5 sm:mt-2 text-[9.5px] sm:text-[10px] font-extrabold text-slate-500 flex-nowrap overflow-hidden">
-                            <span className="flex items-center gap-0.5 bg-slate-50 px-1.5 py-0.5 rounded-md border border-slate-100/60 shrink-0"><Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {test.durationMinutes}m</span>
-                            <span className="flex items-center gap-0.5 bg-slate-50 px-1.5 py-0.5 rounded-md border border-slate-100/60 shrink-0"><Award className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {test.totalMarks}M</span>
-                            <span className="flex items-center gap-0.5 bg-slate-50 px-1.5 py-0.5 rounded-md border border-slate-100/60 shrink-0"><FileText className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {totalQs}Q</span>
-                            {isCompleted && completedAct && (
-                              <span className="flex items-center gap-0.5 bg-emerald-50/50 text-emerald-700 px-1.5 py-0.5 rounded-md border border-emerald-100/30 shrink-0">
-                                Score: {completedAct.score}/{completedAct.totalMarks || test.totalMarks}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className={cn(
-                      "w-7 h-7 sm:w-8 sm:h-8 rounded-full border flex items-center justify-center shrink-0 shadow-2xs group-active:translate-x-0.5 transition-all duration-300",
-                      isScheduledUpcoming
-                        ? "bg-amber-50 border-amber-200 text-amber-700"
-                        : isCompleted 
-                          ? "bg-emerald-50 border-emerald-100 text-emerald-600 group-active:bg-emerald-500 group-active:text-white"
-                          : isInProgress
-                            ? "bg-amber-50 border-amber-100 text-amber-600 group-active:bg-amber-500 group-active:text-white animate-pulse"
-                            : isLocked
-                              ? "bg-amber-50 border-amber-100 text-amber-600 group-active:bg-amber-500 group-active:text-white"
-                              : isPremiumUnlocked
-                                ? "bg-emerald-50 border-emerald-100 text-emerald-600 group-active:bg-emerald-500 group-active:text-white"
-                                : "bg-slate-50 border-slate-100 text-slate-400 group-active:bg-brand-50 group-active:border-brand-100 group-active:text-brand-600"
-                    )}>
-                      {isScheduledUpcoming ? (
-                        <Lock className="w-3.5 h-3.5 text-amber-700" />
-                      ) : isCompleted ? (
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                      ) : isInProgress ? (
-                        <Play className="w-3 h-3 fill-amber-500/10" />
-                      ) : isLocked ? (
-                        <Lock className="w-3 h-3" />
-                      ) : (
-                        <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <Card 
-                    key={test.id} 
-                    className={cn(
-                      "p-6 bg-white border shadow-lg shadow-slate-200/30 rounded-[1.5rem] group transition-all duration-500 flex flex-col justify-between gap-6 relative overflow-hidden premium-shine-container h-full", 
-                      isScheduledUpcoming
-                        ? "border-amber-200 bg-amber-50/10 cursor-not-allowed"
-                        : isCompleted
-                          ? "border-emerald-200 shadow-emerald-500/5 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10 hover:border-emerald-300 cursor-pointer"
-                          : isInProgress
-                            ? "border-amber-250 shadow-amber-500/5 hover:-translate-y-2 hover:shadow-2xl hover:shadow-amber-500/10 hover:border-amber-300 cursor-pointer"
-                            : isLocked 
-                              ? "border-slate-200 bg-white hover:-translate-y-2 hover:border-slate-400 hover:bg-slate-50/50 hover:shadow-md cursor-pointer"
-                              : isPremiumUnlocked 
-                                ? "border-slate-200 bg-white hover:-translate-y-2 hover:border-slate-400 hover:bg-slate-50/50 hover:shadow-md cursor-pointer"
-                                : "border-slate-200 bg-white hover:-translate-y-2 hover:border-slate-400 hover:bg-slate-50/50 hover:shadow-2xl hover:shadow-brand-500/10 hover:border-brand-200 cursor-pointer"
-                    )}
-                    onClick={() => {
-                      if (!isScheduledUpcoming) handleStartTest({ ...test, isPremium, price });
-                    }}
-                  >
-                    {isCompleted && <div className="absolute inset-0 bg-emerald-550/2 pointer-events-none" />}
-                    {isInProgress && <div className="absolute inset-0 bg-amber-550/2 pointer-events-none" />}
-                    {isPremiumUnlocked && !isCompleted && !isInProgress && <div className="absolute inset-0 bg-emerald-500/5 pointer-events-none" />}
-                    
-                    <div className="flex items-start justify-between relative z-10 w-full">
-                      <div className="flex items-start gap-4 min-w-0 flex-1">
-                        <div className={cn(
-                          "w-14 h-14 rounded-xl flex items-center justify-center shrink-0 shadow-md text-white transition-transform group-hover:scale-110 relative mt-0.5", 
-                          isScheduledUpcoming
-                            ? "bg-gradient-to-br from-amber-400 to-orange-500"
-                            : isCompleted
-                              ? "bg-gradient-to-br from-emerald-500 to-teal-600"
-                              : isInProgress
-                                ? "bg-gradient-to-br from-amber-400 to-orange-500 animate-pulse"
-                                : isLocked 
-                                  ? "bg-gradient-to-br from-amber-400 to-orange-500" 
-                                  : isPremiumUnlocked 
-                                    ? "bg-gradient-to-br from-emerald-500 to-teal-600" 
-                                    : "bg-gradient-to-br from-indigo-500 to-purple-650"
-                        )}>
-                          {isScheduledUpcoming ? (
-                            <Calendar className="w-6 h-6 text-white" />
-                          ) : isCompleted ? (
-                            <CheckCircle2 className="w-6 h-6 text-white" />
-                          ) : isInProgress ? (
-                            <Play className="w-6 h-6 text-white fill-white/10 ml-0.5 animate-pulse" />
-                          ) : (
-                            <Target className="w-6 h-6" />
-                          )}
-                          <div className="absolute inset-0 border-2 border-white/20 rounded-xl" />
-                        </div>
-                        <div className="text-left min-w-0 flex-1">
-                          <h4 className="font-black text-base sm:text-lg text-slate-950 tracking-tight group-hover:text-brand-600 transition-colors uppercase leading-snug line-clamp-2" title={test.title}>{mainTitle}</h4>
-                          <div className="flex items-center flex-wrap gap-1.5 mt-1">
-                            {isScheduledUpcoming ? (
-                              <span className="text-[10px] font-black text-amber-800 uppercase tracking-widest bg-amber-100 px-2.5 py-0.5 rounded border border-amber-200 flex items-center gap-1">
-                                📅 UPCOMING
-                              </span>
-                            ) : (
-                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100 whitespace-nowrap">Official Mock</span>
-                            )}
-                            {suffix && (
-                              <span className="text-[10px] font-black text-brand-700 uppercase tracking-widest bg-brand-50 px-2 py-0.5 rounded border border-brand-100/60 shadow-2xs whitespace-nowrap">Set {suffix}</span>
-                            )}
-                            {!isScheduledUpcoming && isCompleted && (
-                              <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-100/60 flex items-center gap-0.5 whitespace-nowrap"><CheckCircle2 className="w-3.5 h-3.5" /> Completed</span>
-                            )}
-                            {!isScheduledUpcoming && isInProgress && (
-                              <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest bg-amber-50 px-2.5 py-0.5 rounded border border-amber-100/60 flex items-center gap-0.5 whitespace-nowrap"><Clock className="w-3.5 h-3.5 animate-pulse" /> In Progress ({progressPercent}%)</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      {!isScheduledUpcoming && isPremium && !isCompleted && !isInProgress && (
-                        <div className="flex shrink-0">
-                          {isLocked ? (
-                            <div className="bg-amber-50 text-amber-600 p-2.5 rounded-xl border border-amber-100 flex items-center justify-center shadow-sm" aria-label="Premium Locked">
-                              <Lock className="w-5 h-5 fill-amber-500/20" />
-                            </div>
-                          ) : (
-                            <div className="bg-emerald-50 text-emerald-600 px-2.5 py-1 flex items-center gap-1.5 rounded-lg border border-emerald-100 text-[10px] font-black uppercase tracking-widest shadow-sm" aria-label="Premium Unlocked">
-                              <CheckCircle2 className="w-3 h-3" />
-                              Premium Active
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    
-                    {isScheduledUpcoming ? (
-                      <div className="bg-amber-50/80 border border-amber-200/80 rounded-xl p-3.5 space-y-1.5 relative z-10 text-left">
-                        <div className="flex items-center justify-between text-xs font-extrabold text-amber-900">
-                          <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" /> Release Countdown</span>
-                          <span className="font-mono text-xs tracking-wider font-black text-amber-950 bg-amber-200/60 px-2 py-0.5 rounded-md border border-amber-300/60">{countdown.formattedCountdown}</span>
-                        </div>
-                        <div className="flex items-center justify-between text-[11px] font-semibold text-amber-800 pt-0.5">
-                          <span>Scheduled for {countdown.formattedScheduledDate}</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-4 flex-1 relative z-10 pt-2 text-left">
-                        <div className="flex gap-4 text-xs font-bold text-slate-500 flex-wrap">
-                          <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><Clock className="w-3.5 h-3.5 text-slate-400"/> {test.durationMinutes} Mins</span>
-                          <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><Award className="w-3.5 h-3.5 text-slate-400"/> {test.totalMarks} Marks</span>
-                          <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><FileText className="w-3.5 h-3.5 text-slate-400"/> {totalQs} Qs</span>
-                        </div>
-
-                        {isCompleted && completedAct && (
-                          <div className="p-3.5 bg-emerald-50/50 rounded-xl border border-emerald-100/40 text-xs space-y-1">
-                            <div className="flex justify-between text-emerald-800 font-bold">
-                              <span>Previous Attempt:</span>
-                              <span>{new Date(completedAct.timestamp).toLocaleDateString()}</span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2 pt-1 border-t border-emerald-100/30 text-emerald-700">
-                              <div>Score: <strong className="text-emerald-950 font-black">{completedAct.score} / {completedAct.totalMarks || test.totalMarks}</strong></div>
-                              <div>Accuracy: <strong className="text-emerald-950 font-black">{completedAct.accuracy}%</strong></div>
-                            </div>
-                          </div>
-                        )}
-
-                        {isInProgress && incompleteAct && (
-                          <div className="p-3.5 bg-amber-50/50 rounded-xl border border-amber-100/40 text-xs space-y-1.5">
-                            <div className="flex justify-between text-amber-800 font-bold">
-                              <span>In Progress:</span>
-                              <span>Question {incompleteAct.metadata?.currentQuestionIndex + 1} of {incompleteAct.metadata?.totalQuestions || totalQs}</span>
-                            </div>
-                            <div className="w-full bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
-                              <div className="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    
-                    {isScheduledUpcoming ? (
-                      <button
-                        type="button"
-                        onClick={(e) => e.stopPropagation()}
-                        className="w-full h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-xs sm:text-sm bg-amber-500/15 border-2 border-amber-400 text-amber-950 shadow-sm cursor-not-allowed mt-auto pointer-events-none relative z-10"
-                      >
-                        <Lock className="w-4 h-4 text-amber-800 shrink-0" />
-                        <span className="text-amber-950 font-black tracking-tight">Unlocks {countdown.formattedScheduledDate}</span>
-                      </button>
-                    ) : (
-                      <Button 
-                        variant={isLocked ? "outline" : isCompleted ? "outline" : "primary"}
-                        className={cn(
-                          "w-full h-[48px] rounded-xl font-black text-sm relative z-10 transition-all overflow-hidden group/btn mt-auto", 
-                          isCompleted
-                            ? "border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 bg-white"
-                            : isInProgress
-                              ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/20 hover:shadow-xl hover:shadow-amber-500/30"
-                              : !isLocked 
-                                ? "premium-gradient text-white shadow-lg shadow-brand-500/20 group-hover:premium-glow" 
-                                : "border-amber-200 text-amber-600 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700"
-                        )}
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 z-10" />
-
-                        <span className="relative z-10 flex items-center justify-center gap-2">
-                          {isCompleted ? (
-                            <>
-                              <RotateCw className="w-4 h-4 mr-2" />
-                              Retake Test
-                            </>
-                          ) : isInProgress ? (
-                            <>
-                              <Play className="w-4 h-4 mr-2 fill-white/20" />
-                              Resume Test ({progressPercent}%)
-                            </>
-                          ) : isLocked ? (
-                            <>
-                              <Lock className="w-4 h-4 mr-2" />
-                              Unlock to Access
-                            </>
-                          ) : (
-                            <>
-                              Start Test Now
-                              <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 duration-300" />
-                            </>
-                          )}
-                        </span>
-                      </Button>
-                    )}
-                  </Card>
-                )}
-              </motion.div>
-            );
-          };
-
           if (!selectedMockCategory) return (
               <motion.div 
                 initial={isMobile ? "show" : "hidden"}

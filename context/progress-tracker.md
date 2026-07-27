@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `1.7.6` (Dual-Location Scheduled Mock Release & Dynamic Fallback Engine) |
+| **Current Version** | `1.7.7` (ExamDetailMockTestCard Stability & Flicker Recovery) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -37,7 +37,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **Current Milestone:** Production Maintenance & User Experience Expansion
 - **Current Priority:** Spotlight Search Portal & Header Trigger Wiring
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Implemented Dual-Location Scheduled Mock Release Engine in `AdminPanel.tsx`, `App.tsx`, and `NotificationCenter.tsx` (v1.7.6). Mock test scheduled release dates (`scheduled_at`) are now persisted both in the top-level database column AND inside the `seriesId` JSON config payload. `ExamDetailMockTestCard`, `ScheduledMockTestCard`, and `NotificationCenter` extract the release date using multi-layer fallback (`test.scheduled_at || test.scheduledAt || JSON.parse(test.seriesId).scheduled_at`), guaranteeing unlock countdown timers render on student portals regardless of schema column variances.
+- **Last Completed Task:** Fixed Scheduled Mock Test card flickering/blinking loop on localhost in `App.tsx` (v1.7.7). Extracted `ExamDetailMockTestCard` out of the render body of `DashboardContent` into a top-level `React.memo` component, establishing permanent React component identity. Replaced re-animating Framer Motion entrance props with `initial={false}`, preventing timer tick state updates (every 1000ms) from unmounting/re-mounting or triggering fade-in animations on scheduled test cards.
 
 ---
 
@@ -168,6 +168,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **v1.7.3 (2026-07-26):** Implemented **Dynamic Practice Action Button & Progress Badging System** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx). Replaced static `Start Practice` buttons on practice set cards with status-aware action buttons.
 - **v1.7.5 (2026-07-27):** Fixed **Scheduled Mock Tests Unlock Countdown & Question Count (`0 Qs`) Recovery** in ExamDetail view ([`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)). Extracted `ExamDetailMockTestCard` component to invoke `useCountdown(test?.scheduled_at)` for future-scheduled test releases.
 - **v1.7.6 (2026-07-27):** Implemented **Dual-Location Scheduled Mock Release Engine** across [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx), [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx), and [`src/components/NotificationCenter.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/NotificationCenter.tsx). Admin Panel saves `scheduled_at` both as a direct payload key and inside `seriesId` JSON. Components read `scheduled_at` using a multi-layer fallback so countdown timers and lock states render consistently.
+- **v1.7.7 (2026-07-27):** Resolved **Scheduled Mock Test Card Flickering / Blinking Loop** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx). Promoted `ExamDetailMockTestCard` to a top-level `React.memo` component and disabled mount animations (`initial={false}`). Countdowns now tick down smoothly without triggering visual resets or opacity flashes.
 
 ---
 

@@ -3512,7 +3512,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
               <Button 
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleStartDirectPractice(bank);
+                  handleStartDirectPractice(bank, incompleteAct);
                 }}
                 className="flex-1 h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-xs sm:text-sm transition-all shadow-md bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-amber-500/20 hover:shadow-amber-500/40 cursor-pointer"
               >
@@ -3538,7 +3538,13 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
         activity={completedAct || incompleteAct}
         totalQs={totalQs}
         totalMarks={totalQs}
-        onAction={() => handleStartDirectPractice(bank)}
+        onAction={() => {
+          if (isInProgress && incompleteAct) {
+            handleStartDirectPractice(bank, incompleteAct);
+          } else {
+            handleStartDirectPractice(bank);
+          }
+        }}
       />
     </motion.div>
   );
@@ -3904,7 +3910,7 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
               <Button 
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleStartTest({ ...test, isPremium, price });
+                  handleStartTest({ ...test, isPremium, price }, incompleteAct);
                 }}
                 className="flex-1 h-[48px] rounded-xl font-black text-xs sm:text-sm bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/20 hover:shadow-xl hover:shadow-amber-500/30 transition-all overflow-hidden group/btn"
               >
@@ -3954,7 +3960,13 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
         activity={completedAct || incompleteAct}
         totalQs={totalQs}
         totalMarks={test.totalMarks}
-        onAction={() => handleStartTest({ ...test, isPremium, price })}
+        onAction={() => {
+          if (isInProgress && incompleteAct) {
+            handleStartTest({ ...test, isPremium, price }, incompleteAct);
+          } else {
+            handleStartTest({ ...test, isPremium, price });
+          }
+        }}
       />
     </motion.div>
   );
@@ -6598,9 +6610,23 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     return Array.from(resumeMap.values()); // Since incompletes are newest-first, Map maintains newest first
   }, [allActivities]);
 
-  const handleStartTest = async (test: any) => {
+  const handleStartTest = async (test: any, resumeState?: any) => {
     if (isGuest) {
       setShowLoginPrompt(true);
+      return;
+    }
+
+    const actMeta = resumeState?.metadata || resumeState;
+    if (actMeta && (actMeta.isStarted || actMeta.answers || actMeta.currentQuestionIndex !== undefined)) {
+      const resumeTest = actMeta.test || test;
+      setActiveTestState({
+        ...actMeta,
+        isStarted: true
+      });
+      setActiveTest({
+        ...resumeTest,
+        durationMinutes: resumeTest.durationMinutes || 60,
+      });
       return;
     }
     
@@ -6784,11 +6810,25 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     }
   };
 
-  const handleStartDirectPractice = async (topicBank: any) => {
+  const handleStartDirectPractice = async (topicBank: any, resumeState?: any) => {
     if (isGuest) {
       setShowLoginPrompt(true);
       return;
     }
+
+    const actMeta = resumeState?.metadata || resumeState;
+    if (actMeta && (actMeta.isStarted || actMeta.answers || actMeta.currentQuestionIndex !== undefined)) {
+      const resumeTest = actMeta.test || {
+        id: `practice-${Date.now()}`,
+        bankId: topicBank?.id,
+        title: `${topicBank?.title || 'Practice'} - Practice Session`,
+        durationMinutes: topicBank?.practiceQuestionCount || 50,
+        questions: []
+      };
+      handleStartTest(resumeTest, { ...actMeta, isStarted: true });
+      return;
+    }
+
     setLoadingPractice(true);
     try {
       const effectiveExamId = selectedExam || topicBank?.examId;

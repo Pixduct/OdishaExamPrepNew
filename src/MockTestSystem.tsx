@@ -322,9 +322,10 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
   const [isStarted, setIsStarted] = useState(() => {
     if (!mappedInitialState) return false;
     if (mappedInitialState.isStarted) return true;
-    const hasAnswers = Object.keys(mappedInitialState.answers || {}).length > 0;
+    const hasAnswers = Object.keys(mappedInitialState.answers || mappedInitialState.answersById || {}).length > 0;
+    const hasProgress = mappedInitialState.currentQuestionIndex !== undefined || !!mappedInitialState.currentQuestionId;
     const hasPartialTime = mappedInitialState.timeLeft !== undefined && mappedInitialState.timeLeft < test.durationMinutes * 60;
-    return hasAnswers || hasPartialTime;
+    return hasAnswers || hasProgress || hasPartialTime;
   });
 
   // Synchronize active test state to sessionStorage on any progress/change

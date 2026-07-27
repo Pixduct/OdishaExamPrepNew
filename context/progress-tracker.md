@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `1.7.12` (Attempt Performance Modal Micro-Animations & Dynamic Count-Up System) |
+| **Current Version** | `1.7.13` (Direct In-Progress Test Resume & Briefing Bypass Engine) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -37,7 +37,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **Current Milestone:** Production Maintenance & User Experience Expansion
 - **Current Priority:** Spotlight Search Portal & Header Trigger Wiring
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Implemented spring-assisted pop-in entrance (`framer-motion`), dynamic score/accuracy count-up counters (`requestAnimationFrame`), and animated shimmering progress bar expansion in `AttemptPerformanceModal` in `App.tsx` (v1.7.12). When opening attempt details, score numbers count up smoothly from 0 and progress bars animate fill width seamlessly over 800ms.
+- **Last Completed Task:** Resolved `Resume` button workflow bug in `App.tsx` and `MockTestSystem.tsx` (v1.7.13). Clicking `[ ⏯ Resume (X%) ]` on cards or inside `AttemptPerformanceModal` now passes `incompleteAct` (`resumeState`) with `isStarted: true`. `MockTestSystem` detects existing progress and bypasses the `Initiate Session` / General Briefing screen, opening the test player directly at the active question with all saved answers restored.
 
 ---
 
@@ -173,7 +173,8 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **v1.7.9 (2026-07-27):** Implemented **Zero Layout Drift Grid System** with **Side-by-Side Action Buttons** (`[ 📊 Score ]` + `[ 🔄 Retake ]` / `[ 📊 Progress ]` + `[ ⏯ Resume ]`) and **Attempt Performance Modal** (`AttemptPerformanceModal`) in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx).
 - **v1.7.10 (2026-07-27):** Resolved **Modal Blinking / Motion Card Re-render Loop** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx).
 - **v1.7.11 (2026-07-27):** Fixed **In-Progress Progress Percentage Mismatch (`0%` vs `1%`)** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx).
-- **v1.7.12 (2026-07-27):** Added **Attempt Details Modal Micro-Animations** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx). Added spring pop-in entrance (`type: "spring"`), cubic-eased score & accuracy count-up counters (`0` ➔ `score`/`accuracy`), and animated progress bar fill expansion with a glossy shimmer gradient effect.
+- **v1.7.12 (2026-07-27):** Added **Attempt Details Modal Micro-Animations** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx).
+- **v1.7.13 (2026-07-27):** Resolved **In-Progress Test Resume Briefing Bypass** across [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) and [`src/MockTestSystem.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/MockTestSystem.tsx). Passed `incompleteAct` (`resumeState`) to `handleStartTest` / `handleStartDirectPractice`. When resuming, `isStarted` is forced to `true`, directly resuming the question player without showing the initial briefing screen.
 
 ---
 

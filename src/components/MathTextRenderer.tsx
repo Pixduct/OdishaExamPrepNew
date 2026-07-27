@@ -315,11 +315,17 @@ const isDiagramLabelLine = (line: string): boolean => {
 export const repairJSStringLatex = (str: string): string => {
   if (!str) return '';
   return str
-    .replace(/\x0c(rac|orall|rown|lat|otnote)(?![a-zA-Z])/g, '\\$1')
-    .replace(/\x08(eta|ar|ox|ullet|igcap|igcup|igsqcup|iguplus|igodot|mod|owtie)(?![a-zA-Z])/g, '\\$1')
-    .replace(/\x09(heta|imes|riangle|an|tilde|ext|tfrac|tau|o|op|hickspace|iny|today|binom|extbf|extit|exttt|extsf)(?![a-zA-Z])/g, '\\$1')
-    .replace(/\x0d(ight|ho|angle|ightarrow|ightharpoonup|ightharpoondown|brace|floor|ceil)(?![a-zA-Z])/g, '\\$1')
-    .replace(/\x0a(eq|earrow|abla|eg|ode|u|otin|olimits|ormalsize|obreak|cong|parallel|exists|geq|leq|sub|sube|supe|sup|mid|succ|prec|sim|simeq|um)(?![a-zA-Z])/g, '\\$1');
+    .replace(/\x0c(rac|orall|rown|lat|otnote)(?![a-zA-Z])/g, '\\f$1')
+    .replace(/\x08(eta|ar|ox|ullet|igcap|igcup|igsqcup|iguplus|igodot|mod|owtie)(?![a-zA-Z])/g, '\\b$1')
+    .replace(/\x09(heta|imes|riangle|an|tilde|ext|tfrac|tau|o|op|hickspace|iny|today|binom|extbf|extit|exttt|extsf)(?![a-zA-Z])/g, '\\t$1')
+    .replace(/\x0d(ight|ho|angle|ightarrow|ightharpoonup|ightharpoondown|brace|floor|ceil)(?![a-zA-Z])/g, '\\r$1')
+    .replace(/\x0a(eq|earrow|abla|eg|ode|u|otin|olimits|ormalsize|obreak|cong|parallel|exists|geq|leq|sub|sube|supe|sup|mid|succ|prec|sim|simeq|um)(?![a-zA-Z])/g, '\\n$1')
+    .replace(/\\imes(?![a-zA-Z])/g, '\\times')
+    .replace(/\\ext(?![a-zA-Z])/g, '\\text')
+    .replace(/\\rac(?![a-zA-Z])/g, '\\frac')
+    .replace(/\\ight(?![a-zA-Z])/g, '\\right')
+    .replace(/\\heta(?![a-zA-Z])/g, '\\theta')
+    .replace(/\\riangle(?![a-zA-Z])/g, '\\triangle');
 };
 
 export const repairLatexBackslashes = (str: string): string => {
@@ -330,7 +336,11 @@ export const repairLatexBackslashes = (str: string): string => {
     .replace(/\x08(eta|ar|ox|ullet|igcap|igcup|igsqcup|iguplus|igodot|mod|owtie)(?![a-zA-Z])/g, '\\\\b$1') // Backspace (\b) -> \\b
     .replace(/\x09(heta|imes|riangle|an|tilde|ext|tfrac|tau|o|op|hickspace|iny|today|binom|extbf|extit|exttt|extsf)(?![a-zA-Z])/g, '\\\\t$1') // Tab (\t) -> \\t
     .replace(/\x0d(ight|ho|angle|ightarrow|ightharpoonup|ightharpoondown|brace|floor|ceil)(?![a-zA-Z])/g, '\\\\r$1') // Carriage Return (\r) -> \\r
-    .replace(/\x0a(eq|earrow|abla|eg|ode)(?![a-zA-Z])/g, '\\\\n$1'); // Newline (\n) -> \\n
+    .replace(/\x0a(eq|earrow|abla|eg|ode)(?![a-zA-Z])/g, '\\\\n$1') // Newline (\n) -> \\n
+    .replace(/\\imes(?![a-zA-Z])/g, '\\\\times')
+    .replace(/\\ext(?![a-zA-Z])/g, '\\\\text')
+    .replace(/\\rac(?![a-zA-Z])/g, '\\\\frac')
+    .replace(/\\ight(?![a-zA-Z])/g, '\\\\right');
 
   // 1. Escape backslash if followed by a character that is NOT a valid JSON escape char, consuming double backslashes first
   preCleaned = preCleaned.replace(/\\\\|\\([^bfnrtu"\\/])/g, (match, p1) => {

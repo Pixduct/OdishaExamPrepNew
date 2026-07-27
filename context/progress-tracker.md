@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `1.7.15` (Global Diagram & Option Renderer Bulletproof Safeguard Engine) |
+| **Current Version** | `1.7.16` (LaTeX Backslash Escape & Control Character Repair Engine) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -37,7 +37,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **Current Milestone:** Production Maintenance & User Experience Expansion
 - **Current Priority:** Spotlight Search Portal & Header Trigger Wiring
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Implemented global diagram and option rendering safeguards in `MathTextRenderer.tsx` (v1.7.15). Short-circuited `renderTextAndDiagrams` for option elements (`isOption = true`) to directly render `<PlainText />`, guaranteeing 100% of multiple-choice options across all exams render clean readable text with zero possibility of diagram error boxes. Updated `DiagramRenderer` to return `null` when diagram data is empty/missing, completely eliminating yellow warning banners across question views.
+- **Last Completed Task:** Resolved LaTeX backslash character corruption bug (`\imes` instead of `\times` and `\ext` instead of `\text`) in `MathTextRenderer.tsx` (v1.7.16). Fixed regular expression replacement typo in `repairJSStringLatex` to properly restore `\t` prefixes (`\times`, `\text`, `\theta`, `\tan`, `\triangle`). Added automatic repair for literal corrupted `\imes`, `\ext`, `\rac`, and `\ight` strings stored in database explanations.
 
 ---
 
@@ -176,7 +176,8 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **v1.7.12 (2026-07-27):** Added **Attempt Details Modal Micro-Animations** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx).
 - **v1.7.13 (2026-07-27):** Resolved **In-Progress Test Resume Briefing Bypass** across [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) and [`src/MockTestSystem.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/MockTestSystem.tsx).
 - **v1.7.14 (2026-07-27):** Guarded `tryParseJsonDiagram` with `KNOWN_DIAGRAM_TYPES.has(type)` validation in [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx).
-- **v1.7.15 (2026-07-27):** Implemented **Global Option & Diagram Safeguard Architecture** in [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx). Guaranteed `PlainText` rendering for 100% of option buttons (`isOption = true`) and made `DiagramRenderer` return `null` for missing/empty data, eliminating diagram warning boxes across the entire website.
+- **v1.7.15 (2026-07-27):** Implemented **Global Option & Diagram Safeguard Architecture** in [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx).
+- **v1.7.16 (2026-07-27):** Resolved **LaTeX Command Corruption (`\imes` ➔ `\times` & `\ext` ➔ `\text`)** in [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx). Restored missing leading letters in `repairJSStringLatex` and `repairLatexBackslashes`, cleanly rendering KaTeX multiplication operators (`×`) and text blocks (`₹3,84,000`).
 
 ---
 

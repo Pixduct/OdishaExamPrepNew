@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `1.7.19` (Math Subject Badge Disambiguation Engine) |
+| **Current Version** | `1.7.20` (Long Solution Explanation Overflow & Scrolling Fix) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -37,7 +37,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **Current Milestone:** Production Maintenance & User Experience Expansion
 - **Current Priority:** Spotlight Search Portal & Header Trigger Wiring
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Completely eliminated false `∑ MATH` subject badge on non-math questions in `MockTestSystem.tsx` (v1.7.19). Fixed `countMathBlocks` filter in `MockTestSystem.tsx` to stop matching hyphens inside plain text bracket tags (`[Error Correction - Phrase in Bold]`), guaranteeing English and General Studies questions no longer display the math badge.
+- **Last Completed Task:** Fixed long explanation card text clipping bug in `MockTestSystem.tsx` (v1.7.20). Enabled `overflow-y-auto` scrolling on `<main>` and the options container when `showExplanation` is active, added `shrink-0 mb-6` to the explanation card, and added `pb-6` bottom padding so explanations of any length render completely without being cut off at the bottom.
 
 ---
 
@@ -180,7 +180,8 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **v1.7.16 (2026-07-27):** Resolved **LaTeX Command Corruption (`\imes` ➔ `\times` & `\ext` ➔ `\text`)** in [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx).
 - **v1.7.17 (2026-07-27):** Built **Predictive Universal LaTeX Repair Engine** in [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx).
 - **v1.7.18 (2026-07-27):** Resolved **Markdown Bold Parsing & English Bracket Label Disambiguation** in [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx) and [`src/MockTestSystem.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/MockTestSystem.tsx).
-- **v1.7.19 (2026-07-27):** Fixed **False `∑ MATH` Badge Trigger** in [`src/MockTestSystem.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/MockTestSystem.tsx). Updated `countMathBlocks` to ignore plain text hyphens in bracket labels, permanently removing the math badge from English & GS questions.
+- **v1.7.19 (2026-07-27):** Fixed **False `∑ MATH` Badge Trigger** in [`src/MockTestSystem.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/MockTestSystem.tsx).
+- **v1.7.20 (2026-07-27):** Resolved **Long Explanation Card Text Clipping** in [`src/MockTestSystem.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/MockTestSystem.tsx). Activated dynamic scroll behavior and bottom container padding when solution explanations are expanded, guaranteeing long paragraphs are 100% visible and scrollable.
 
 ---
 

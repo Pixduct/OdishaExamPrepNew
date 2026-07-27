@@ -1208,7 +1208,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
             return (
               <main className={cn(
                 "flex-1 px-3 py-3 sm:p-5 lg:p-6 relative bg-[#FBF9F6] flex flex-col",
-                mathHeavy ? "overflow-y-auto no-scrollbar" : "overflow-hidden"
+                (mathHeavy || showExplanation) ? "overflow-y-auto no-scrollbar" : "overflow-hidden"
               )}>
                 <div className={cn(
                   "w-full flex flex-col space-y-2.5 sm:space-y-3 lg:space-y-4 mx-auto transition-all duration-300",
@@ -1278,9 +1278,9 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
 
                       {/* ── Options & Explanation ── */}
                       <div className={cn(
-                        "space-y-3 lg:space-y-4 px-1.5",
-                        !mathHeavy && "flex-1 overflow-y-auto no-scrollbar min-h-0 py-1 lg:h-full flex flex-col justify-start",
-                        mathHeavy && "py-1"
+                        "space-y-3 lg:space-y-4 px-1.5 pb-6",
+                        (!mathHeavy && !showExplanation) && "flex-1 overflow-y-auto no-scrollbar min-h-0 py-1 lg:h-full flex flex-col justify-start",
+                        (mathHeavy || showExplanation) && "py-1 overflow-y-auto no-scrollbar flex-1"
                       )}>
                         <div className={cn(
                           "grid gap-2 lg:gap-2.5",
@@ -1344,7 +1344,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
 
                         {showExplanation && (
                           <motion.div {...fadeSlideUp}
-                            className="math-explanation rounded-2xl border border-slate-200/60 bg-white p-5 sm:p-6 space-y-3 relative overflow-hidden shadow-sm"
+                            className="math-explanation rounded-2xl border border-slate-200/60 bg-white p-5 sm:p-6 space-y-3 relative shadow-sm shrink-0 mb-6"
                           >
                             <div className="absolute top-0 right-0 w-32 h-32 bg-[#2563EB]/3 rounded-full blur-2xl pointer-events-none" />
                             <div className="flex items-center gap-2.5">

@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `1.7.7` (ExamDetailMockTestCard Stability & Flicker Recovery) |
+| **Current Version** | `1.7.8` (Collapsible Attempt Stats & Uniform Card Grid System) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -37,7 +37,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **Current Milestone:** Production Maintenance & User Experience Expansion
 - **Current Priority:** Spotlight Search Portal & Header Trigger Wiring
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Fixed Scheduled Mock Test card flickering/blinking loop on localhost in `App.tsx` (v1.7.7). Extracted `ExamDetailMockTestCard` out of the render body of `DashboardContent` into a top-level `React.memo` component, establishing permanent React component identity. Replaced re-animating Framer Motion entrance props with `initial={false}`, preventing timer tick state updates (every 1000ms) from unmounting/re-mounting or triggering fade-in animations on scheduled test cards.
+- **Last Completed Task:** Implemented Collapsible Attempt Stats & Uniform Card Grid System across Mock Tests (`ExamDetailMockTestCard`) and Practice Sets (`ScheduledPracticeBankCard`) in `App.tsx` (v1.7.8). Replaced static multi-line attempt summary boxes with a compact **`📊 View Attempt Stats ▾`** toggle button and Framer Motion expandable drawer (`AnimatePresence`). All cards across the 3-column grid maintain the exact same uniform height without vertical stretching or row misalignment.
 
 ---
 
@@ -169,6 +169,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **v1.7.5 (2026-07-27):** Fixed **Scheduled Mock Tests Unlock Countdown & Question Count (`0 Qs`) Recovery** in ExamDetail view ([`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)). Extracted `ExamDetailMockTestCard` component to invoke `useCountdown(test?.scheduled_at)` for future-scheduled test releases.
 - **v1.7.6 (2026-07-27):** Implemented **Dual-Location Scheduled Mock Release Engine** across [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx), [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx), and [`src/components/NotificationCenter.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/NotificationCenter.tsx). Admin Panel saves `scheduled_at` both as a direct payload key and inside `seriesId` JSON. Components read `scheduled_at` using a multi-layer fallback so countdown timers and lock states render consistently.
 - **v1.7.7 (2026-07-27):** Resolved **Scheduled Mock Test Card Flickering / Blinking Loop** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx). Promoted `ExamDetailMockTestCard` to a top-level `React.memo` component and disabled mount animations (`initial={false}`). Countdowns now tick down smoothly without triggering visual resets or opacity flashes.
+- **v1.7.8 (2026-07-27):** Implemented **Collapsible Attempt Stats & Uniform Card Grid System** across [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) for both `ExamDetailMockTestCard` and `ScheduledPracticeBankCard`. Tucked score, accuracy, and progress details into an interactive `BarChart3` expandable drawer (`AnimatePresence`). All cards maintain an identical compact height.
 
 ---
 

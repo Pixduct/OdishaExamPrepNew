@@ -3100,8 +3100,14 @@ const ScheduledMockTestCard = ({ test, onLaunchMockTest }: any) => {
   );
 };
 
-const ScheduledPracticeBankCard = ({ bank, isMobile, hasAccessTo, activities, handleStartDirectPractice }: any) => {
-  const countdown = useCountdown(bank?.scheduled_at);
+const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, handleStartDirectPractice, isMobile }: any) => {
+  const [showStats, setShowStats] = useState(false);
+  let parsedSchedule = null;
+  if (bank?.seriesId && typeof bank.seriesId === 'string' && bank.seriesId.startsWith('{')) {
+    try { parsedSchedule = JSON.parse(bank.seriesId).scheduled_at || JSON.parse(bank.seriesId).scheduledAt || null; } catch (e) {}
+  }
+  const rawScheduledAt = bank?.scheduled_at || bank?.scheduledAt || parsedSchedule;
+  const countdown = useCountdown(rawScheduledAt);
   const isScheduledUpcoming = !countdown.isLive;
 
   const isLocked = bank.isPremium && !hasAccessTo(bank);
@@ -3304,11 +3310,62 @@ const ScheduledPracticeBankCard = ({ bank, isMobile, hasAccessTo, activities, ha
               </div>
             </div>
           ) : (
-            <div className="space-y-4 flex-1 relative z-10 pt-2 text-left">
+            <div className="space-y-2 flex-1 relative z-10 pt-2 text-left">
               <div className="flex gap-4 text-xs font-bold text-slate-555 flex-wrap">
                 <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><FileText className="w-3.5 h-3.5 text-slate-400"/> {totalQs} Questions</span>
                 <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><Clock className="w-3.5 h-3.5 text-slate-400"/> {totalQs > 0 ? `${totalQs} Mins Session` : 'Practice Session Soon'}</span>
               </div>
+
+              {(isCompleted || isInProgress) && (
+                <div className="pt-0.5">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowStats(prev => !prev);
+                    }}
+                    className="text-[11px] font-extrabold text-brand-600 hover:text-brand-700 flex items-center gap-1 transition-colors cursor-pointer py-1 px-1.5 rounded-md hover:bg-brand-50/60"
+                  >
+                    <BarChart3 className="w-3.5 h-3.5 text-brand-500" />
+                    <span>{showStats ? "Hide Attempt Details" : "View Attempt Stats"}</span>
+                    <ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-300", showStats && "rotate-180")} />
+                  </button>
+
+                  <AnimatePresence>
+                    {showStats && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        {isCompleted && (
+                          <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-100/50 text-xs space-y-1 mt-2">
+                            <div className="flex items-center justify-between text-emerald-800 font-bold">
+                              <span>Status:</span>
+                              <span className="text-emerald-700 font-black">100% Completed</span>
+                            </div>
+                            <p className="text-[11px] text-emerald-700/80 font-medium">Practice set completed. Click retake to practice again.</p>
+                          </div>
+                        )}
+
+                        {isInProgress && (
+                          <div className="p-3 bg-amber-50/60 rounded-xl border border-amber-100/50 text-xs space-y-1.5 mt-2">
+                            <div className="flex justify-between text-amber-800 font-bold">
+                              <span>In Progress:</span>
+                              <span>{progressPercent}% Complete</span>
+                            </div>
+                            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                              <div className="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
+                            </div>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
             </div>
           )}
 
@@ -3350,9 +3407,10 @@ const ScheduledPracticeBankCard = ({ bank, isMobile, hasAccessTo, activities, ha
       )}
     </motion.div>
   );
-};
+});
 
 const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activities, handleStartTest }: any) => {
+  const [showStats, setShowStats] = useState(false);
   let isPremium = test.isPremium;
   let price = test.price || 499;
   let testExamId = '';
@@ -3651,35 +3709,64 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
               </div>
             </div>
           ) : (
-            <div className="space-y-4 flex-1 relative z-10 pt-2 text-left">
+            <div className="space-y-2 flex-1 relative z-10 pt-2 text-left">
               <div className="flex gap-4 text-xs font-bold text-slate-500 flex-wrap">
                 <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><Clock className="w-3.5 h-3.5 text-slate-400"/> {test.durationMinutes} Mins</span>
                 <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><Award className="w-3.5 h-3.5 text-slate-400"/> {test.totalMarks} Marks</span>
                 <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><FileText className="w-3.5 h-3.5 text-slate-400"/> {totalQs} Qs</span>
               </div>
 
-              {isCompleted && completedAct && (
-                <div className="p-3.5 bg-emerald-50/50 rounded-xl border border-emerald-100/40 text-xs space-y-1">
-                  <div className="flex justify-between text-emerald-800 font-bold">
-                    <span>Previous Attempt:</span>
-                    <span>{new Date(completedAct.timestamp).toLocaleDateString()}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 pt-1 border-t border-emerald-100/30 text-emerald-700">
-                    <div>Score: <strong className="text-emerald-950 font-black">{completedAct.score} / {completedAct.totalMarks || test.totalMarks}</strong></div>
-                    <div>Accuracy: <strong className="text-emerald-950 font-black">{completedAct.accuracy}%</strong></div>
-                  </div>
-                </div>
-              )}
+              {(isCompleted || isInProgress) && (
+                <div className="pt-0.5">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowStats(prev => !prev);
+                    }}
+                    className="text-[11px] font-extrabold text-brand-600 hover:text-brand-700 flex items-center gap-1 transition-colors cursor-pointer py-1 px-1.5 rounded-md hover:bg-brand-50/60"
+                  >
+                    <BarChart3 className="w-3.5 h-3.5 text-brand-500" />
+                    <span>{showStats ? "Hide Attempt Details" : "View Attempt Stats"}</span>
+                    <ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-300", showStats && "rotate-180")} />
+                  </button>
 
-              {isInProgress && incompleteAct && (
-                <div className="p-3.5 bg-amber-50/50 rounded-xl border border-amber-100/40 text-xs space-y-1.5">
-                  <div className="flex justify-between text-amber-800 font-bold">
-                    <span>In Progress:</span>
-                    <span>Question {incompleteAct.metadata?.currentQuestionIndex + 1} of {incompleteAct.metadata?.totalQuestions || totalQs}</span>
-                  </div>
-                  <div className="w-full bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
-                    <div className="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
-                  </div>
+                  <AnimatePresence>
+                    {showStats && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        {isCompleted && completedAct && (
+                          <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-100/50 text-xs space-y-1 mt-2">
+                            <div className="flex justify-between text-emerald-800 font-bold">
+                              <span>Previous Attempt:</span>
+                              <span>{new Date(completedAct.timestamp).toLocaleDateString()}</span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 pt-1 border-t border-emerald-100/40 text-emerald-700">
+                              <div>Score: <strong className="text-emerald-950 font-black">{completedAct.score} / {completedAct.totalMarks || test.totalMarks}</strong></div>
+                              <div>Accuracy: <strong className="text-emerald-950 font-black">{completedAct.accuracy}%</strong></div>
+                            </div>
+                          </div>
+                        )}
+
+                        {isInProgress && incompleteAct && (
+                          <div className="p-3 bg-amber-50/60 rounded-xl border border-amber-100/50 text-xs space-y-1.5 mt-2">
+                            <div className="flex justify-between text-amber-800 font-bold">
+                              <span>In Progress:</span>
+                              <span>Question {incompleteAct.metadata?.currentQuestionIndex + 1} of {incompleteAct.metadata?.totalQuestions || totalQs}</span>
+                            </div>
+                            <div className="w-full bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
+                              <div className="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
+                            </div>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               )}
             </div>

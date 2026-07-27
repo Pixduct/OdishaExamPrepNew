@@ -3004,12 +3004,18 @@ const AttemptPerformanceModal = ({ isOpen, onClose, title, activity, totalQs, to
   const currentQ = (activity?.metadata?.currentQuestionIndex || 0) + 1;
   const progressPercent = totalQs > 0 ? Math.min(100, Math.round((currentQ / totalQs) * 100)) : 0;
 
-  return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-2xl max-w-md w-full p-6 space-y-5 relative overflow-hidden text-left">
+  return createPortal(
+    <div 
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fadeIn"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div 
+        className="bg-white rounded-3xl border border-slate-200/80 shadow-2xl max-w-md w-full p-6 space-y-5 relative overflow-hidden text-left"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
+          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors cursor-pointer z-10"
         >
           <X className="w-5 h-5" />
         </button>
@@ -3077,7 +3083,8 @@ const AttemptPerformanceModal = ({ isOpen, onClose, title, activity, totalQs, to
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -3232,7 +3239,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
   return (
     <motion.div
       key={bank.id}
-      initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+      initial={false}
       animate={isMobile ? undefined : { opacity: 1, y: 0 }}
       exit={isMobile ? undefined : { opacity: 0, scale: 0.95 }}
       whileHover={isMobile || isScheduledUpcoming ? undefined : whileHover.liftTap}

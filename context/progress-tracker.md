@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `1.7.9` (Zero Layout Drift Grid with Side-by-Side Action Buttons & Attempt Modal) |
+| **Current Version** | `1.7.10` (React Portal Modal Isolation & Motion Flicker Elimination) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -37,7 +37,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **Current Milestone:** Production Maintenance & User Experience Expansion
 - **Current Priority:** Spotlight Search Portal & Header Trigger Wiring
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Implemented Zero Layout Drift Grid System with Side-by-Side Action Buttons (`[ 📊 Score ]` + `[ 🔄 Retake ]`) and Attempt Performance Modal across `App.tsx` (v1.7.9). Eliminates all internal card height drift and vertical space stretching across Mock Tests and Practice Sets. All cards across grid rows maintain the exact same pixel-perfect 3-row layout and 48px bottom action bar.
+- **Last Completed Task:** Resolved Attempt Performance Modal blinking/flashing bug by wrapping `AttemptPerformanceModal` in `createPortal(..., document.body)` and setting `initial={false}` on `ScheduledPracticeBankCard`'s `motion.div` in `App.tsx` (v1.7.10). Isolates modal rendering directly to `document.body`, preventing state toggles from re-triggering parent motion card entrance animations or card scale blinks.
 
 ---
 
@@ -170,7 +170,8 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **v1.7.6 (2026-07-27):** Implemented **Dual-Location Scheduled Mock Release Engine** across [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx), [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx), and [`src/components/NotificationCenter.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/NotificationCenter.tsx). Admin Panel saves `scheduled_at` both as a direct payload key and inside `seriesId` JSON. Components read `scheduled_at` using a multi-layer fallback so countdown timers and lock states render consistently.
 - **v1.7.7 (2026-07-27):** Resolved **Scheduled Mock Test Card Flickering / Blinking Loop** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx). Promoted `ExamDetailMockTestCard` to a top-level `React.memo` component and disabled mount animations (`initial={false}`). Countdowns now tick down smoothly without triggering visual resets or opacity flashes.
 - **v1.7.8 (2026-07-27):** Implemented **Collapsible Attempt Stats & Uniform Card Grid System** across [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) for both `ExamDetailMockTestCard` and `ScheduledPracticeBankCard`.
-- **v1.7.9 (2026-07-27):** Implemented **Zero Layout Drift Grid System** with **Side-by-Side Action Buttons** (`[ 📊 Score ]` + `[ 🔄 Retake ]` / `[ 📊 Progress ]` + `[ ⏯ Resume ]`) and **Attempt Performance Modal** (`AttemptPerformanceModal`) in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx). Restored clean 3-line card body structure. Every card in the 3-column grid is 100% pixel-perfect equal in height with zero layout distortion.
+- **v1.7.9 (2026-07-27):** Implemented **Zero Layout Drift Grid System** with **Side-by-Side Action Buttons** (`[ 📊 Score ]` + `[ 🔄 Retake ]` / `[ 📊 Progress ]` + `[ ⏯ Resume ]`) and **Attempt Performance Modal** (`AttemptPerformanceModal`) in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx).
+- **v1.7.10 (2026-07-27):** Resolved **Modal Blinking / Motion Card Re-render Loop** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx). Wrapped `AttemptPerformanceModal` in `createPortal(..., document.body)` and updated `ScheduledPracticeBankCard` with `initial={false}`. Clicking `[ 📊 Score ]` or `[ 📊 Progress ]` now smoothly opens the modal over `document.body` without triggering parent card scale or opacity blinks.
 
 ---
 

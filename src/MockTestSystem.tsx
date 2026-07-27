@@ -481,9 +481,14 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
     }
   }, [currentQuestionIndex]);
 
-
-
-
+  // Automatically sync explanation visibility when navigating to an already answered question in Practice Mode
+  useEffect(() => {
+    if (currentMode === 'practice' && answers[currentQuestionIndex] !== undefined) {
+      setShowExplanation(true);
+    } else {
+      setShowExplanation(false);
+    }
+  }, [currentQuestionIndex, currentMode, answers]);
 
   const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -492,7 +497,10 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
   }, []);
 
   const handleAnswer = useCallback((optionIndex: number) => {
-    if (currentMode === 'practice' && answersRef.current[currentQuestionIndex] !== undefined) return;
+    if (currentMode === 'practice' && answersRef.current[currentQuestionIndex] !== undefined) {
+      setShowExplanation(true);
+      return;
+    }
     
     setAnswers(prev => ({ ...prev, [currentQuestionIndex]: optionIndex }));
     if (currentMode === 'practice') {
@@ -514,7 +522,10 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
       delete copy[currentQuestionIndex];
       return copy;
     });
-  }, [currentQuestionIndex]);
+    if (currentMode === 'practice') {
+      setShowExplanation(false);
+    }
+  }, [currentMode, currentQuestionIndex]);
 
   const topicDistribution = useMemo(() => {
     let polity = 0;
@@ -1237,11 +1248,22 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                           : "px-2.5 py-3 sm:p-5 flex-shrink-0 lg:flex-1 lg:h-full lg:max-h-none overflow-hidden"
                       )}>
                         {/* Question label + Math badge */}
-                        <div className="flex items-center justify-between flex-shrink-0">
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-[#2563EB] bg-[#2563EB]/5 rounded-lg border border-[#2563EB]/15">
-                            <FileText className="w-3.5 h-3.5 animate-pulse-soft" />
-                            Question {currentQuestionIndex + 1} of {test.questions.length}
-                          </span>
+                        <div className="flex items-center justify-between flex-shrink-0 gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-[#2563EB] bg-[#2563EB]/5 rounded-lg border border-[#2563EB]/15">
+                              <FileText className="w-3.5 h-3.5 animate-pulse-soft" />
+                              Question {currentQuestionIndex + 1} of {test.questions.length}
+                            </span>
+                            {currentMode === 'practice' && answers[currentQuestionIndex] !== undefined && (
+                              <button
+                                onClick={() => setShowExplanation(prev => !prev)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold text-amber-700 bg-amber-50 hover:bg-amber-100/80 border border-amber-200 rounded-lg transition-all cursor-pointer active:scale-95"
+                              >
+                                <AlertCircle className="w-3 h-3 text-amber-600 shrink-0" />
+                                <span>{showExplanation ? 'Hide Explanation' : 'Solution Breakdown'}</span>
+                              </button>
+                            )}
+                          </div>
                           {((/(\$\$[\s\S]*?\$\$|\\\\?\[[\s\S]*?\\\\?\]|\\\\?\([\s\S]*?\\\\?\))/).test(currentQuestion.questionText || '') || countMathBlocks(currentQuestion.questionText) >= 1) && (
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg">
                               <span className="text-sm leading-none select-none">∑</span> Math

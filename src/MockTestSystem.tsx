@@ -36,7 +36,14 @@ import { fadeSlideUp, modalContent } from './lib/animations';
 const countMathBlocks = (text: string): number => {
   if (!text) return 0;
   const matches = text.match(/\[[^\[\]\n]{2,120}\]/g) || [];
-  return matches.filter(m => /[=^_\\+\-*/]/.test(m) && /[a-zA-Z0-9]/.test(m)).length;
+  return matches.filter(m => {
+    const inner = m.slice(1, -1).trim();
+    if (!inner || inner.length < 2) return false;
+    // Must contain LaTeX commands e.g. \frac, \sqrt or math syntax ^, _, = or arithmetic operators between numbers/vars
+    if (/\\[a-zA-Z]+|[\^=_]/.test(inner)) return true;
+    if (/([0-9a-zA-Z]\s*[\+*/=]\s*[0-9a-zA-Z])/.test(inner)) return true;
+    return false;
+  }).length;
 };
 
 /** 
@@ -1235,7 +1242,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                             <FileText className="w-3.5 h-3.5 animate-pulse-soft" />
                             Question {currentQuestionIndex + 1} of {test.questions.length}
                           </span>
-                          {(countMathBlocks(currentQuestion.questionText) >= 1 || /(\$\$|\\\[|\\\(|\$)/.test(currentQuestion.questionText || '')) && (
+                          {((/(\$\$[\s\S]*?\$\$|\\\\?\[[\s\S]*?\\\\?\]|\\\\?\([\s\S]*?\\\\?\))/).test(currentQuestion.questionText || '') || countMathBlocks(currentQuestion.questionText) >= 1) && (
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg">
                               <span className="text-sm leading-none select-none">∑</span> Math
                             </span>

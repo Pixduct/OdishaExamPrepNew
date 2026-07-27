@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `1.7.18` (Markdown Bold & English Bracket Text Disambiguation Engine) |
+| **Current Version** | `1.7.19` (Math Subject Badge Disambiguation Engine) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -37,10 +37,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **Current Milestone:** Production Maintenance & User Experience Expansion
 - **Current Priority:** Spotlight Search Portal & Header Trigger Wiring
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Resolved 3 UI rendering issues in `MathTextRenderer.tsx` and `MockTestSystem.tsx` (v1.7.18):
-  1. Refined `looksLikeMath` to prevent plain English bracket labels (`[Error Correction - Phrase in Bold]`) from being misclassified as LaTeX equations.
-  2. Added Markdown bold (`**text**` / `__text__`) parsing in `PlainText`, rendering `**bold phrase**` as crisp bold text (`<strong>`) instead of showing literal raw asterisks.
-  3. Updated `MockTestSystem` header to display `∑ MATH` badge ONLY when a question actually contains math equations/LaTeX, removing it from long English prose questions.
+- **Last Completed Task:** Completely eliminated false `∑ MATH` subject badge on non-math questions in `MockTestSystem.tsx` (v1.7.19). Fixed `countMathBlocks` filter in `MockTestSystem.tsx` to stop matching hyphens inside plain text bracket tags (`[Error Correction - Phrase in Bold]`), guaranteeing English and General Studies questions no longer display the math badge.
 
 ---
 
@@ -182,7 +179,8 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **v1.7.15 (2026-07-27):** Implemented **Global Option & Diagram Safeguard Architecture** in [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx).
 - **v1.7.16 (2026-07-27):** Resolved **LaTeX Command Corruption (`\imes` ➔ `\times` & `\ext` ➔ `\text`)** in [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx).
 - **v1.7.17 (2026-07-27):** Built **Predictive Universal LaTeX Repair Engine** in [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx).
-- **v1.7.18 (2026-07-27):** Resolved **Markdown Bold Parsing & English Bracket Label Disambiguation** in [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx) and [`src/MockTestSystem.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/MockTestSystem.tsx). Converts `**bold**` strings to `<strong>` elements, prevents English bracket labels (`[Error Correction - Phrase in Bold]`) from converting into math mode, and shows `∑ MATH` badge strictly for genuine math questions.
+- **v1.7.18 (2026-07-27):** Resolved **Markdown Bold Parsing & English Bracket Label Disambiguation** in [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx) and [`src/MockTestSystem.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/MockTestSystem.tsx).
+- **v1.7.19 (2026-07-27):** Fixed **False `∑ MATH` Badge Trigger** in [`src/MockTestSystem.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/MockTestSystem.tsx). Updated `countMathBlocks` to ignore plain text hyphens in bracket labels, permanently removing the math badge from English & GS questions.
 
 ---
 

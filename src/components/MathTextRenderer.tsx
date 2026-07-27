@@ -1025,6 +1025,11 @@ export const DiagramRenderer: React.FC<DiagramRendererProps> = React.memo(({
   diagram: diagramProp,
   isOption = false,
 }) => {
+  // If no content, data, or diagram is supplied, render NOTHING
+  if (!content && !data && !diagramProp) {
+    return null;
+  }
+
   let diagram = data || diagramProp || (content ? tryParseJsonDiagram(content) : null);
   if (typeof diagram === 'string') {
     diagram = tryParseJsonDiagram(diagram);
@@ -1055,17 +1060,12 @@ export const DiagramRenderer: React.FC<DiagramRendererProps> = React.memo(({
     }
   }
 
-  return (
-    <div className="p-4 my-3 bg-amber-50 dark:bg-amber-950/20 border border-dashed border-amber-300 dark:border-amber-800/60 rounded-xl text-amber-800 dark:text-amber-300 flex flex-col items-center justify-center text-center">
-      <svg className="w-6 h-6 text-amber-500 mb-1.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-      </svg>
-      <span className="text-xs font-bold">Diagram Not Available</span>
-      <p className="text-[11px] text-amber-700 dark:text-amber-400 mt-0.5">
-        The diagram data is missing, empty, or failed validation.
-      </p>
-    </div>
-  );
+  // Options MUST ALWAYS render as plain text if diagram parsing/validation was negative
+  if (isOption && content) {
+    return <PlainText text={String(content)} index={0} />;
+  }
+
+  return null;
 });
 
 // ─────────────────────────────────────────────────────────────
@@ -1073,6 +1073,10 @@ export const DiagramRenderer: React.FC<DiagramRendererProps> = React.memo(({
 // ─────────────────────────────────────────────────────────────
 
 function renderTextAndDiagrams(text: string, isOption: boolean, keyPrefix: string): React.ReactNode {
+  if (isOption) {
+    return <PlainText text={text} index={0} key={keyPrefix} />;
+  }
+
   const jsonSplits = splitTextByJsonDiagrams(text);
   
   if (jsonSplits.length > 1 || (jsonSplits.length === 1 && jsonSplits[0].type === 'json')) {

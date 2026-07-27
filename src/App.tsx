@@ -3233,7 +3233,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
   const actualQs = bank.practiceQuestionCount || bank.actualQuestionCount || 0;
   const adminQs = bank.questionCount || bank.question_count || 0;
   const totalQs = actualQs > 0 ? actualQs : (adminQs > 0 ? adminQs : (bank.questions || incompleteAct?.metadata?.totalQuestions || 0));
-  const currentQuestionIndex = incompleteAct ? (incompleteAct.metadata?.currentQuestionIndex || 0) : 0;
+  const currentQuestionIndex = incompleteAct ? ((incompleteAct.metadata?.currentQuestionIndex || 0) + 1) : 0;
   const progressPercent = totalQs > 0 ? Math.min(100, Math.round((currentQuestionIndex / totalQs) * 100)) : 0;
 
   return (
@@ -3540,7 +3540,7 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
       mainTitle = mainTitle.substring(0, mainTitle.length - 1).trim();
     }
   }
-  const currentQuestionIndex = incompleteAct ? (incompleteAct.metadata?.currentQuestionIndex || 0) : 0;
+  const currentQuestionIndex = incompleteAct ? ((incompleteAct.metadata?.currentQuestionIndex || 0) + 1) : 0;
   const progressPercent = totalQs > 0 ? Math.min(100, Math.round((currentQuestionIndex / totalQs) * 100)) : 0;
 
   return (

@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `1.7.10` (React Portal Modal Isolation & Motion Flicker Elimination) |
+| **Current Version** | `1.7.11` (In-Progress Test Progress Percentage Synchronization) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -37,7 +37,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **Current Milestone:** Production Maintenance & User Experience Expansion
 - **Current Priority:** Spotlight Search Portal & Header Trigger Wiring
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Resolved Attempt Performance Modal blinking/flashing bug by wrapping `AttemptPerformanceModal` in `createPortal(..., document.body)` and setting `initial={false}` on `ScheduledPracticeBankCard`'s `motion.div` in `App.tsx` (v1.7.10). Isolates modal rendering directly to `document.body`, preventing state toggles from re-triggering parent motion card entrance animations or card scale blinks.
+- **Last Completed Task:** Synchronized in-progress test progress percentage calculations between cards (`ScheduledPracticeBankCard`, `ExamDetailMockTestCard`) and `AttemptPerformanceModal` in `App.tsx` (v1.7.11). Both card badges/buttons (`IN PROGRESS (1%)`, `Resume (1%)`) and modal details (`Question 1 of 200 (1%)`) now evaluate 1-indexed question positions consistently, eliminating any discrepancy between 0% and 1%.
 
 ---
 
@@ -171,7 +171,8 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **v1.7.7 (2026-07-27):** Resolved **Scheduled Mock Test Card Flickering / Blinking Loop** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx). Promoted `ExamDetailMockTestCard` to a top-level `React.memo` component and disabled mount animations (`initial={false}`). Countdowns now tick down smoothly without triggering visual resets or opacity flashes.
 - **v1.7.8 (2026-07-27):** Implemented **Collapsible Attempt Stats & Uniform Card Grid System** across [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) for both `ExamDetailMockTestCard` and `ScheduledPracticeBankCard`.
 - **v1.7.9 (2026-07-27):** Implemented **Zero Layout Drift Grid System** with **Side-by-Side Action Buttons** (`[ 📊 Score ]` + `[ 🔄 Retake ]` / `[ 📊 Progress ]` + `[ ⏯ Resume ]`) and **Attempt Performance Modal** (`AttemptPerformanceModal`) in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx).
-- **v1.7.10 (2026-07-27):** Resolved **Modal Blinking / Motion Card Re-render Loop** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx). Wrapped `AttemptPerformanceModal` in `createPortal(..., document.body)` and updated `ScheduledPracticeBankCard` with `initial={false}`. Clicking `[ 📊 Score ]` or `[ 📊 Progress ]` now smoothly opens the modal over `document.body` without triggering parent card scale or opacity blinks.
+- **v1.7.10 (2026-07-27):** Resolved **Modal Blinking / Motion Card Re-render Loop** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx).
+- **v1.7.11 (2026-07-27):** Fixed **In-Progress Progress Percentage Mismatch (`0%` vs `1%`)** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx). Unified 1-indexed question progress formula across `ScheduledPracticeBankCard`, `ExamDetailMockTestCard`, and `AttemptPerformanceModal`. Card badges and action buttons now display the exact same progress percentage (`1%`) as the attempt details modal.
 
 ---
 

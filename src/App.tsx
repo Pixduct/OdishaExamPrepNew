@@ -2994,6 +2994,93 @@ const LandingPage = () => {
   );
 };
 
+const AttemptPerformanceModal = ({ isOpen, onClose, title, activity, totalQs, totalMarks, onAction }: any) => {
+  if (!isOpen) return null;
+  const isCompleted = activity?.type === 'mock_test_completed' || activity?.type === 'practice_test_completed';
+  const score = activity?.score || 0;
+  const maxMarks = activity?.totalMarks || totalMarks || 100;
+  const accuracy = activity?.accuracy || 0;
+  const timestamp = activity?.timestamp ? new Date(activity.timestamp).toLocaleDateString() : 'Recent';
+  const currentQ = (activity?.metadata?.currentQuestionIndex || 0) + 1;
+  const progressPercent = totalQs > 0 ? Math.min(100, Math.round((currentQ / totalQs) * 100)) : 0;
+
+  return (
+    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-2xl max-w-md w-full p-6 space-y-5 relative overflow-hidden text-left">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        <div className="flex items-center gap-3 pr-8">
+          <div className={cn(
+            "w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-md shrink-0",
+            isCompleted ? "bg-gradient-to-br from-emerald-500 to-teal-600" : "bg-gradient-to-br from-amber-400 to-orange-500"
+          )}>
+            {isCompleted ? <CheckCircle2 className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
+          </div>
+          <div className="min-w-0 flex-1">
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Attempt Details</span>
+            <h3 className="font-extrabold text-slate-900 text-base sm:text-lg leading-tight uppercase truncate">{title}</h3>
+          </div>
+        </div>
+
+        {isCompleted ? (
+          <div className="space-y-3.5">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-4 bg-emerald-50/80 rounded-2xl border border-emerald-100/60 text-center space-y-1">
+                <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Score</span>
+                <p className="text-2xl font-black text-emerald-950">{score} <span className="text-sm text-emerald-700 font-semibold">/ {maxMarks}</span></p>
+              </div>
+              <div className="p-4 bg-teal-50/80 rounded-2xl border border-teal-100/60 text-center space-y-1">
+                <span className="text-[11px] font-bold text-teal-700 uppercase tracking-wider">Accuracy</span>
+                <p className="text-2xl font-black text-teal-950">{accuracy}%</p>
+              </div>
+            </div>
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs flex justify-between font-medium text-slate-600">
+              <span>Attempted Date:</span>
+              <span className="font-bold text-slate-900">{timestamp}</span>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3.5">
+            <div className="p-4 bg-amber-50/80 rounded-2xl border border-amber-100/60 space-y-2 text-left">
+              <div className="flex justify-between text-amber-900 text-xs font-extrabold">
+                <span>Current Progress:</span>
+                <span>Question {currentQ} of {totalQs} ({progressPercent}%)</span>
+              </div>
+              <div className="w-full bg-amber-200/60 rounded-full h-2 overflow-hidden">
+                <div className="bg-amber-500 h-2 rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-3 pt-2">
+          <button
+            onClick={onClose}
+            className="flex-1 py-3 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
+          >
+            Close
+          </button>
+          <button
+            onClick={() => {
+              onClose();
+              if (onAction) onAction();
+            }}
+            className="flex-1 py-3 text-sm font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer"
+          >
+            {isCompleted ? <RotateCw className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            <span>{isCompleted ? 'Retake Now' : 'Resume Now'}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ScheduledMockTestCard = ({ test, onLaunchMockTest }: any) => {
   let parsedSchedule = null;
   if (test?.seriesId && typeof test.seriesId === 'string' && test.seriesId.startsWith('{')) {
@@ -3101,7 +3188,7 @@ const ScheduledMockTestCard = ({ test, onLaunchMockTest }: any) => {
 };
 
 const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, handleStartDirectPractice, isMobile }: any) => {
-  const [showStats, setShowStats] = useState(false);
+  const [showAttemptModal, setShowAttemptModal] = useState(false);
   let parsedSchedule = null;
   if (bank?.seriesId && typeof bank.seriesId === 'string' && bank.seriesId.startsWith('{')) {
     try { parsedSchedule = JSON.parse(bank.seriesId).scheduled_at || JSON.parse(bank.seriesId).scheduledAt || null; } catch (e) {}
@@ -3310,62 +3397,11 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
               </div>
             </div>
           ) : (
-            <div className="space-y-2 flex-1 relative z-10 pt-2 text-left">
+            <div className="space-y-4 flex-1 relative z-10 pt-2 text-left">
               <div className="flex gap-4 text-xs font-bold text-slate-555 flex-wrap">
                 <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><FileText className="w-3.5 h-3.5 text-slate-400"/> {totalQs} Questions</span>
                 <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><Clock className="w-3.5 h-3.5 text-slate-400"/> {totalQs > 0 ? `${totalQs} Mins Session` : 'Practice Session Soon'}</span>
               </div>
-
-              {(isCompleted || isInProgress) && (
-                <div className="pt-0.5">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowStats(prev => !prev);
-                    }}
-                    className="text-[11px] font-extrabold text-brand-600 hover:text-brand-700 flex items-center gap-1 transition-colors cursor-pointer py-1 px-1.5 rounded-md hover:bg-brand-50/60"
-                  >
-                    <BarChart3 className="w-3.5 h-3.5 text-brand-500" />
-                    <span>{showStats ? "Hide Attempt Details" : "View Attempt Stats"}</span>
-                    <ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-300", showStats && "rotate-180")} />
-                  </button>
-
-                  <AnimatePresence>
-                    {showStats && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden"
-                      >
-                        {isCompleted && (
-                          <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-100/50 text-xs space-y-1 mt-2">
-                            <div className="flex items-center justify-between text-emerald-800 font-bold">
-                              <span>Status:</span>
-                              <span className="text-emerald-700 font-black">100% Completed</span>
-                            </div>
-                            <p className="text-[11px] text-emerald-700/80 font-medium">Practice set completed. Click retake to practice again.</p>
-                          </div>
-                        )}
-
-                        {isInProgress && (
-                          <div className="p-3 bg-amber-50/60 rounded-xl border border-amber-100/50 text-xs space-y-1.5 mt-2">
-                            <div className="flex justify-between text-amber-800 font-bold">
-                              <span>In Progress:</span>
-                              <span>{progressPercent}% Complete</span>
-                            </div>
-                            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                              <div className="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
-                            </div>
-                          </div>
-                        )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )}
             </div>
           )}
 
@@ -3379,21 +3415,51 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
               <span className="text-amber-950 font-black tracking-tight">Unlocks {countdown.formattedScheduledDate}</span>
             </button>
           ) : isCompleted ? (
-            <Button 
-              className="w-full h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-sm transition-all shadow-md relative z-10 mt-auto bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-emerald-500/20 hover:shadow-emerald-500/40 cursor-pointer"
-            >
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                <RotateCw className="w-4 h-4" /> Retake Practice
-              </span>
-            </Button>
+            <div className="flex items-center gap-2 w-full mt-auto relative z-10">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAttemptModal(true);
+                }}
+                className="w-1/3 h-[48px] rounded-xl flex items-center justify-center gap-1.5 font-black text-xs sm:text-sm bg-emerald-50 text-emerald-700 border border-emerald-200/90 hover:bg-emerald-100 hover:border-emerald-300 transition-all cursor-pointer shadow-xs shrink-0"
+              >
+                <BarChart3 className="w-4 h-4 text-emerald-600" />
+                <span className="truncate">Score</span>
+              </button>
+              <Button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleStartDirectPractice(bank);
+                }}
+                className="flex-1 h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-xs sm:text-sm transition-all shadow-md bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-emerald-500/20 hover:shadow-emerald-500/40 cursor-pointer"
+              >
+                <RotateCw className="w-4 h-4" /> Retake
+              </Button>
+            </div>
           ) : isInProgress ? (
-            <Button 
-              className="w-full h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-sm transition-all shadow-md relative z-10 mt-auto bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-amber-500/20 hover:shadow-amber-500/40 cursor-pointer"
-            >
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                <Play className="w-4 h-4 fill-white/20" /> Continue Practice ({progressPercent}%)
-              </span>
-            </Button>
+            <div className="flex items-center gap-2 w-full mt-auto relative z-10">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAttemptModal(true);
+                }}
+                className="w-1/3 h-[48px] rounded-xl flex items-center justify-center gap-1.5 font-black text-xs sm:text-sm bg-amber-50 text-amber-700 border border-amber-200/90 hover:bg-amber-100 hover:border-amber-300 transition-all cursor-pointer shadow-xs shrink-0"
+              >
+                <BarChart3 className="w-4 h-4 text-amber-600" />
+                <span className="truncate">Progress</span>
+              </button>
+              <Button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleStartDirectPractice(bank);
+                }}
+                className="flex-1 h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-xs sm:text-sm transition-all shadow-md bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-amber-500/20 hover:shadow-amber-500/40 cursor-pointer"
+              >
+                <Play className="w-4 h-4 fill-white/20" /> Resume ({progressPercent}%)
+              </Button>
+            </div>
           ) : (
             <Button 
               className="w-full h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-sm transition-all shadow-md relative z-10 mt-auto premium-gradient text-white shadow-brand-500/10 hover:shadow-brand-500/30 cursor-pointer"
@@ -3405,12 +3471,22 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
           )}
         </Card>
       )}
+
+      <AttemptPerformanceModal
+        isOpen={showAttemptModal}
+        onClose={() => setShowAttemptModal(false)}
+        title={bank.title}
+        activity={completedAct || incompleteAct}
+        totalQs={totalQs}
+        totalMarks={totalQs}
+        onAction={() => handleStartDirectPractice(bank)}
+      />
     </motion.div>
   );
 });
 
 const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activities, handleStartTest }: any) => {
-  const [showStats, setShowStats] = useState(false);
+  const [showAttemptModal, setShowAttemptModal] = useState(false);
   let isPremium = test.isPremium;
   let price = test.price || 499;
   let testExamId = '';
@@ -3709,66 +3785,12 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
               </div>
             </div>
           ) : (
-            <div className="space-y-2 flex-1 relative z-10 pt-2 text-left">
+            <div className="space-y-4 flex-1 relative z-10 pt-2 text-left">
               <div className="flex gap-4 text-xs font-bold text-slate-500 flex-wrap">
                 <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><Clock className="w-3.5 h-3.5 text-slate-400"/> {test.durationMinutes} Mins</span>
                 <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><Award className="w-3.5 h-3.5 text-slate-400"/> {test.totalMarks} Marks</span>
                 <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><FileText className="w-3.5 h-3.5 text-slate-400"/> {totalQs} Qs</span>
               </div>
-
-              {(isCompleted || isInProgress) && (
-                <div className="pt-0.5">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowStats(prev => !prev);
-                    }}
-                    className="text-[11px] font-extrabold text-brand-600 hover:text-brand-700 flex items-center gap-1 transition-colors cursor-pointer py-1 px-1.5 rounded-md hover:bg-brand-50/60"
-                  >
-                    <BarChart3 className="w-3.5 h-3.5 text-brand-500" />
-                    <span>{showStats ? "Hide Attempt Details" : "View Attempt Stats"}</span>
-                    <ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-300", showStats && "rotate-180")} />
-                  </button>
-
-                  <AnimatePresence>
-                    {showStats && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden"
-                      >
-                        {isCompleted && completedAct && (
-                          <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-100/50 text-xs space-y-1 mt-2">
-                            <div className="flex justify-between text-emerald-800 font-bold">
-                              <span>Previous Attempt:</span>
-                              <span>{new Date(completedAct.timestamp).toLocaleDateString()}</span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2 pt-1 border-t border-emerald-100/40 text-emerald-700">
-                              <div>Score: <strong className="text-emerald-950 font-black">{completedAct.score} / {completedAct.totalMarks || test.totalMarks}</strong></div>
-                              <div>Accuracy: <strong className="text-emerald-950 font-black">{completedAct.accuracy}%</strong></div>
-                            </div>
-                          </div>
-                        )}
-
-                        {isInProgress && incompleteAct && (
-                          <div className="p-3 bg-amber-50/60 rounded-xl border border-amber-100/50 text-xs space-y-1.5 mt-2">
-                            <div className="flex justify-between text-amber-800 font-bold">
-                              <span>In Progress:</span>
-                              <span>Question {incompleteAct.metadata?.currentQuestionIndex + 1} of {incompleteAct.metadata?.totalQuestions || totalQs}</span>
-                            </div>
-                            <div className="w-full bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
-                              <div className="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
-                            </div>
-                          </div>
-                        )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )}
             </div>
           )}
           
@@ -3781,34 +3803,75 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
               <Lock className="w-4 h-4 text-amber-800 shrink-0" />
               <span className="text-amber-950 font-black tracking-tight">Unlocks {countdown.formattedScheduledDate}</span>
             </button>
+          ) : isCompleted ? (
+            <div className="flex items-center gap-2 w-full mt-auto relative z-10">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAttemptModal(true);
+                }}
+                className="w-1/3 h-[48px] rounded-xl flex items-center justify-center gap-1.5 font-black text-xs sm:text-sm bg-emerald-50 text-emerald-700 border border-emerald-200/90 hover:bg-emerald-100 hover:border-emerald-300 transition-all cursor-pointer shadow-xs shrink-0"
+              >
+                <BarChart3 className="w-4 h-4 text-emerald-600" />
+                <span className="truncate">Score</span>
+              </button>
+              <Button 
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleStartTest({ ...test, isPremium, price });
+                }}
+                className="flex-1 h-[48px] rounded-xl font-black text-xs sm:text-sm border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 bg-white transition-all overflow-hidden group/btn"
+              >
+                <span className="relative z-10 flex items-center justify-center gap-1.5">
+                  <RotateCw className="w-4 h-4" /> Retake
+                </span>
+              </Button>
+            </div>
+          ) : isInProgress ? (
+            <div className="flex items-center gap-2 w-full mt-auto relative z-10">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAttemptModal(true);
+                }}
+                className="w-1/3 h-[48px] rounded-xl flex items-center justify-center gap-1.5 font-black text-xs sm:text-sm bg-amber-50 text-amber-700 border border-amber-200/90 hover:bg-amber-100 hover:border-amber-300 transition-all cursor-pointer shadow-xs shrink-0"
+              >
+                <BarChart3 className="w-4 h-4 text-amber-600" />
+                <span className="truncate">Progress</span>
+              </button>
+              <Button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleStartTest({ ...test, isPremium, price });
+                }}
+                className="flex-1 h-[48px] rounded-xl font-black text-xs sm:text-sm bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/20 hover:shadow-xl hover:shadow-amber-500/30 transition-all overflow-hidden group/btn"
+              >
+                <span className="relative z-10 flex items-center justify-center gap-1.5">
+                  <Play className="w-4 h-4 fill-white/20" /> Resume ({progressPercent}%)
+                </span>
+              </Button>
+            </div>
           ) : (
             <Button 
-              variant={isLocked ? "outline" : isCompleted ? "outline" : "primary"}
+              variant={isLocked ? "outline" : "primary"}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleStartTest({ ...test, isPremium, price });
+              }}
               className={cn(
                 "w-full h-[48px] rounded-xl font-black text-sm relative z-10 transition-all overflow-hidden group/btn mt-auto", 
-                isCompleted
-                  ? "border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 bg-white"
-                  : isInProgress
-                    ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/20 hover:shadow-xl hover:shadow-amber-500/30"
-                    : !isLocked 
-                      ? "premium-gradient text-white shadow-lg shadow-brand-500/20 group-hover:premium-glow" 
-                      : "border-amber-200 text-amber-600 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700"
+                !isLocked 
+                  ? "premium-gradient text-white shadow-lg shadow-brand-500/20 group-hover:premium-glow" 
+                  : "border-amber-200 text-amber-600 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700"
               )}
             >
               <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 z-10" />
 
               <span className="relative z-10 flex items-center justify-center gap-2">
-                {isCompleted ? (
-                  <>
-                    <RotateCw className="w-4 h-4 mr-2" />
-                    Retake Test
-                  </>
-                ) : isInProgress ? (
-                  <>
-                    <Play className="w-4 h-4 mr-2 fill-white/20" />
-                    Resume Test ({progressPercent}%)
-                  </>
-                ) : isLocked ? (
+                {isLocked ? (
                   <>
                     <Lock className="w-4 h-4 mr-2" />
                     Unlock to Access
@@ -3824,6 +3887,16 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
           )}
         </Card>
       )}
+
+      <AttemptPerformanceModal
+        isOpen={showAttemptModal}
+        onClose={() => setShowAttemptModal(false)}
+        title={test.title}
+        activity={completedAct || incompleteAct}
+        totalQs={totalQs}
+        totalMarks={test.totalMarks}
+        onAction={() => handleStartTest({ ...test, isPremium, price })}
+      />
     </motion.div>
   );
 });

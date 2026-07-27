@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `1.7.11` (In-Progress Test Progress Percentage Synchronization) |
+| **Current Version** | `1.7.12` (Attempt Performance Modal Micro-Animations & Dynamic Count-Up System) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -37,7 +37,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **Current Milestone:** Production Maintenance & User Experience Expansion
 - **Current Priority:** Spotlight Search Portal & Header Trigger Wiring
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Synchronized in-progress test progress percentage calculations between cards (`ScheduledPracticeBankCard`, `ExamDetailMockTestCard`) and `AttemptPerformanceModal` in `App.tsx` (v1.7.11). Both card badges/buttons (`IN PROGRESS (1%)`, `Resume (1%)`) and modal details (`Question 1 of 200 (1%)`) now evaluate 1-indexed question positions consistently, eliminating any discrepancy between 0% and 1%.
+- **Last Completed Task:** Implemented spring-assisted pop-in entrance (`framer-motion`), dynamic score/accuracy count-up counters (`requestAnimationFrame`), and animated shimmering progress bar expansion in `AttemptPerformanceModal` in `App.tsx` (v1.7.12). When opening attempt details, score numbers count up smoothly from 0 and progress bars animate fill width seamlessly over 800ms.
 
 ---
 
@@ -172,7 +172,8 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **v1.7.8 (2026-07-27):** Implemented **Collapsible Attempt Stats & Uniform Card Grid System** across [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) for both `ExamDetailMockTestCard` and `ScheduledPracticeBankCard`.
 - **v1.7.9 (2026-07-27):** Implemented **Zero Layout Drift Grid System** with **Side-by-Side Action Buttons** (`[ 📊 Score ]` + `[ 🔄 Retake ]` / `[ 📊 Progress ]` + `[ ⏯ Resume ]`) and **Attempt Performance Modal** (`AttemptPerformanceModal`) in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx).
 - **v1.7.10 (2026-07-27):** Resolved **Modal Blinking / Motion Card Re-render Loop** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx).
-- **v1.7.11 (2026-07-27):** Fixed **In-Progress Progress Percentage Mismatch (`0%` vs `1%`)** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx). Unified 1-indexed question progress formula across `ScheduledPracticeBankCard`, `ExamDetailMockTestCard`, and `AttemptPerformanceModal`. Card badges and action buttons now display the exact same progress percentage (`1%`) as the attempt details modal.
+- **v1.7.11 (2026-07-27):** Fixed **In-Progress Progress Percentage Mismatch (`0%` vs `1%`)** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx).
+- **v1.7.12 (2026-07-27):** Added **Attempt Details Modal Micro-Animations** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx). Added spring pop-in entrance (`type: "spring"`), cubic-eased score & accuracy count-up counters (`0` ➔ `score`/`accuracy`), and animated progress bar fill expansion with a glossy shimmer gradient effect.
 
 ---
 

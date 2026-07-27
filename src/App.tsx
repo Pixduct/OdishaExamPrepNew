@@ -2995,7 +2995,9 @@ const LandingPage = () => {
 };
 
 const AttemptPerformanceModal = ({ isOpen, onClose, title, activity, totalQs, totalMarks, onAction }: any) => {
-  if (!isOpen) return null;
+  const [animatedScore, setAnimatedScore] = useState(0);
+  const [animatedAccuracy, setAnimatedAccuracy] = useState(0);
+
   const isCompleted = activity?.type === 'mock_test_completed' || activity?.type === 'practice_test_completed';
   const score = activity?.score || 0;
   const maxMarks = activity?.totalMarks || totalMarks || 100;
@@ -3004,86 +3006,136 @@ const AttemptPerformanceModal = ({ isOpen, onClose, title, activity, totalQs, to
   const currentQ = (activity?.metadata?.currentQuestionIndex || 0) + 1;
   const progressPercent = totalQs > 0 ? Math.min(100, Math.round((currentQ / totalQs) * 100)) : 0;
 
+  useEffect(() => {
+    if (!isOpen) {
+      setAnimatedScore(0);
+      setAnimatedAccuracy(0);
+      return;
+    }
+
+    const duration = 600;
+    const startTime = performance.now();
+
+    const updateCounters = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+      setAnimatedScore(Math.round(score * easeProgress));
+      setAnimatedAccuracy(Math.round(accuracy * easeProgress));
+
+      if (progress < 1) {
+        requestAnimationFrame(updateCounters);
+      }
+    };
+
+    requestAnimationFrame(updateCounters);
+  }, [isOpen, score, accuracy]);
+
+  if (!isOpen) return null;
+
   return createPortal(
-    <div 
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fadeIn"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div 
-        className="bg-white rounded-3xl border border-slate-200/80 shadow-2xl max-w-md w-full p-6 space-y-5 relative overflow-hidden text-left"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors cursor-pointer z-10"
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
         >
-          <X className="w-5 h-5" />
-        </button>
-
-        <div className="flex items-center gap-3 pr-8">
-          <div className={cn(
-            "w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-md shrink-0",
-            isCompleted ? "bg-gradient-to-br from-emerald-500 to-teal-600" : "bg-gradient-to-br from-amber-400 to-orange-500"
-          )}>
-            {isCompleted ? <CheckCircle2 className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
-          </div>
-          <div className="min-w-0 flex-1">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Attempt Details</span>
-            <h3 className="font-extrabold text-slate-900 text-base sm:text-lg leading-tight uppercase truncate">{title}</h3>
-          </div>
-        </div>
-
-        {isCompleted ? (
-          <div className="space-y-3.5">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-4 bg-emerald-50/80 rounded-2xl border border-emerald-100/60 text-center space-y-1">
-                <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Score</span>
-                <p className="text-2xl font-black text-emerald-950">{score} <span className="text-sm text-emerald-700 font-semibold">/ {maxMarks}</span></p>
-              </div>
-              <div className="p-4 bg-teal-50/80 rounded-2xl border border-teal-100/60 text-center space-y-1">
-                <span className="text-[11px] font-bold text-teal-700 uppercase tracking-wider">Accuracy</span>
-                <p className="text-2xl font-black text-teal-950">{accuracy}%</p>
-              </div>
-            </div>
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs flex justify-between font-medium text-slate-600">
-              <span>Attempted Date:</span>
-              <span className="font-bold text-slate-900">{timestamp}</span>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-3.5">
-            <div className="p-4 bg-amber-50/80 rounded-2xl border border-amber-100/60 space-y-2 text-left">
-              <div className="flex justify-between text-amber-900 text-xs font-extrabold">
-                <span>Current Progress:</span>
-                <span>Question {currentQ} of {totalQs} ({progressPercent}%)</span>
-              </div>
-              <div className="w-full bg-amber-200/60 rounded-full h-2 overflow-hidden">
-                <div className="bg-amber-500 h-2 rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="flex gap-3 pt-2">
-          <button
-            onClick={onClose}
-            className="flex-1 py-3 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ type: "spring", damping: 25, stiffness: 350 }}
+            className="bg-white rounded-3xl border border-slate-200/80 shadow-2xl max-w-md w-full p-6 space-y-5 relative overflow-hidden text-left"
+            onClick={(e) => e.stopPropagation()}
           >
-            Close
-          </button>
-          <button
-            onClick={() => {
-              onClose();
-              if (onAction) onAction();
-            }}
-            className="flex-1 py-3 text-sm font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer"
-          >
-            {isCompleted ? <RotateCw className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-            <span>{isCompleted ? 'Retake Now' : 'Resume Now'}</span>
-          </button>
-        </div>
-      </div>
-    </div>,
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors cursor-pointer z-10"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3 pr-8">
+              <div className={cn(
+                "w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-md shrink-0 transition-transform duration-500 scale-100 hover:scale-105",
+                isCompleted ? "bg-gradient-to-br from-emerald-500 to-teal-600" : "bg-gradient-to-br from-amber-400 to-orange-500"
+              )}>
+                {isCompleted ? <CheckCircle2 className="w-6 h-6 animate-pulse" /> : <Clock className="w-6 h-6 animate-pulse" />}
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Attempt Details</span>
+                <h3 className="font-extrabold text-slate-900 text-base sm:text-lg leading-tight uppercase truncate">{title}</h3>
+              </div>
+            </div>
+
+            {isCompleted ? (
+              <div className="space-y-3.5">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-4 bg-gradient-to-br from-emerald-50/90 to-emerald-100/40 rounded-2xl border border-emerald-200/60 text-center space-y-1 shadow-xs">
+                    <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Score</span>
+                    <p className="text-2xl sm:text-3xl font-black text-emerald-950 font-mono tracking-tight">{animatedScore} <span className="text-xs text-emerald-700 font-semibold font-sans">/ {maxMarks}</span></p>
+                  </div>
+                  <div className="p-4 bg-gradient-to-br from-teal-50/90 to-teal-100/40 rounded-2xl border border-teal-200/60 text-center space-y-1 shadow-xs">
+                    <span className="text-[11px] font-bold text-teal-700 uppercase tracking-wider">Accuracy</span>
+                    <p className="text-2xl sm:text-3xl font-black text-teal-950 font-mono tracking-tight">{animatedAccuracy}%</p>
+                  </div>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs flex justify-between font-medium text-slate-600">
+                  <span>Attempted Date:</span>
+                  <span className="font-bold text-slate-900">{timestamp}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3.5">
+                <div className="p-4 bg-amber-50/80 rounded-2xl border border-amber-100/60 space-y-2.5 text-left">
+                  <div className="flex justify-between text-amber-900 text-xs font-extrabold">
+                    <span>Current Progress:</span>
+                    <span className="font-mono text-amber-950">Question {currentQ} of {totalQs} ({progressPercent}%)</span>
+                  </div>
+                  <div className="w-full bg-slate-200/70 rounded-full h-2.5 overflow-hidden p-0.5 relative">
+                    <motion.div 
+                      initial={{ width: "0%" }}
+                      animate={{ width: `${progressPercent}%` }}
+                      transition={{ duration: 0.8, ease: "easeOut" }}
+                      className="bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 h-1.5 rounded-full relative overflow-hidden shadow-xs"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" />
+                    </motion.div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={onClose}
+                className="flex-1 py-3 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  onClose();
+                  if (onAction) onAction();
+                }}
+                className="flex-1 py-3 text-sm font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-md transition-all hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {isCompleted ? <RotateCw className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                <span>{isCompleted ? 'Retake Now' : 'Resume Now'}</span>
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>,
     document.body
   );
 };

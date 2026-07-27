@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `1.7.13` (Direct In-Progress Test Resume & Briefing Bypass Engine) |
+| **Current Version** | `1.7.14` (Diagram Parser False-Positive Misclassification Guard) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -37,7 +37,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **Current Milestone:** Production Maintenance & User Experience Expansion
 - **Current Priority:** Spotlight Search Portal & Header Trigger Wiring
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Resolved `Resume` button workflow bug in `App.tsx` and `MockTestSystem.tsx` (v1.7.13). Clicking `[ ⏯ Resume (X%) ]` on cards or inside `AttemptPerformanceModal` now passes `incompleteAct` (`resumeState`) with `isStarted: true`. `MockTestSystem` detects existing progress and bypasses the `Initiate Session` / General Briefing screen, opening the test player directly at the active question with all saved answers restored.
+- **Last Completed Task:** Resolved `Diagram Not Available` false-positive error box bug in `MathTextRenderer.tsx` (v1.7.14). Added `KNOWN_DIAGRAM_TYPES` set validation to `tryParseJsonDiagram` so non-diagram JSON objects (like option text JSON strings) are never misidentified as geometric diagrams. Added graceful `PlainText` fallback in `DiagramRenderer` to cleanly render option text strings if diagram validation fails.
 
 ---
 
@@ -174,7 +174,8 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **v1.7.10 (2026-07-27):** Resolved **Modal Blinking / Motion Card Re-render Loop** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx).
 - **v1.7.11 (2026-07-27):** Fixed **In-Progress Progress Percentage Mismatch (`0%` vs `1%`)** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx).
 - **v1.7.12 (2026-07-27):** Added **Attempt Details Modal Micro-Animations** in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx).
-- **v1.7.13 (2026-07-27):** Resolved **In-Progress Test Resume Briefing Bypass** across [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) and [`src/MockTestSystem.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/MockTestSystem.tsx). Passed `incompleteAct` (`resumeState`) to `handleStartTest` / `handleStartDirectPractice`. When resuming, `isStarted` is forced to `true`, directly resuming the question player without showing the initial briefing screen.
+- **v1.7.13 (2026-07-27):** Resolved **In-Progress Test Resume Briefing Bypass** across [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) and [`src/MockTestSystem.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/MockTestSystem.tsx).
+- **v1.7.14 (2026-07-27):** Resolved **"Diagram Not Available" False-Positive Misclassification** in [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx). Guarded `tryParseJsonDiagram` with `KNOWN_DIAGRAM_TYPES.has(type)` validation and added graceful `PlainText` fallback in `DiagramRenderer`. Option buttons and prose text containing JSON formatting or `{` `}` characters now render cleanly as readable option text instead of showing yellow diagram error boxes.
 
 ---
 

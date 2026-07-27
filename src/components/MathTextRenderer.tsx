@@ -403,6 +403,14 @@ export const cleanJsonString = (str: string): string => {
   return cleaned;
 };
 
+const KNOWN_DIAGRAM_TYPES = new Set([
+  'circle', 'coordinate', 'plot', 'triangle', 'polygon', 'rectangle', 'geometry',
+  'matrix', 'grid', 'distance', 'cone', 'probability', 'sequence', 'equation',
+  'quadratic', 'sphereDivision', 'boatStream', 'ratio', 'statistics', 'profitLoss',
+  'cylinder', 'numberTheory', 'square', 'rightTriangle', 'parallelogram', 'cube',
+  'trapezium', 'semicircle', 'cuboid', 'equilateralTriangle', 'vector', 'universal'
+]);
+
 /**
  * Try parsing the text as JSON to see if it represents a structured diagram definition.
  */
@@ -412,7 +420,9 @@ const tryParseJsonDiagram = (text: string): any | null => {
     try {
       const parsed = JSON.parse(cleaned);
       if (parsed && typeof parsed === 'object' && parsed.type) {
-        return parsed;
+        if (KNOWN_DIAGRAM_TYPES.has(String(parsed.type))) {
+          return parsed;
+        }
       }
     } catch (_) {
       // ignore
@@ -446,14 +456,6 @@ export const extractEmbeddedDiagram = (questionText: string): { cleanedText: str
     diagram
   };
 };
-
-const KNOWN_DIAGRAM_TYPES = new Set([
-  'circle', 'coordinate', 'plot', 'triangle', 'polygon', 'rectangle', 'geometry',
-  'matrix', 'grid', 'distance', 'cone', 'probability', 'sequence', 'equation',
-  'quadratic', 'sphereDivision', 'boatStream', 'ratio', 'statistics', 'profitLoss',
-  'cylinder', 'numberTheory', 'square', 'rightTriangle', 'parallelogram', 'cube',
-  'trapezium', 'semicircle', 'cuboid', 'equilateralTriangle', 'vector', 'universal'
-]);
 
 const repairObjectStrings = (val: any): any => {
   if (typeof val === 'string') {
@@ -1037,13 +1039,29 @@ export const DiagramRenderer: React.FC<DiagramRendererProps> = React.memo(({
     );
   }
 
+  // Graceful Fallback: If content is string text or non-diagram JSON, extract text instead of rendering error box
+  if (content && typeof content === 'string') {
+    try {
+      const parsed = JSON.parse(cleanJsonString(content));
+      if (parsed && typeof parsed === 'object') {
+        const textVal = parsed.text || parsed.label || parsed.content || parsed.value || parsed.option;
+        if (textVal && typeof textVal === 'string') {
+          return <PlainText text={textVal} index={0} />;
+        }
+      }
+    } catch (_) {}
+    if (isOption || !content.trim().startsWith('{')) {
+      return <PlainText text={content} index={0} />;
+    }
+  }
+
   return (
-    <div className="p-5 my-4 bg-amber-50 dark:bg-amber-950/20 border border-dashed border-amber-300 dark:border-amber-800/60 rounded-xl text-amber-800 dark:text-amber-300 flex flex-col items-center justify-center text-center">
-      <svg className="w-8 h-8 text-amber-500 mb-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <div className="p-4 my-3 bg-amber-50 dark:bg-amber-950/20 border border-dashed border-amber-300 dark:border-amber-800/60 rounded-xl text-amber-800 dark:text-amber-300 flex flex-col items-center justify-center text-center">
+      <svg className="w-6 h-6 text-amber-500 mb-1.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
       </svg>
-      <span className="text-sm font-bold">Diagram Not Available</span>
-      <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+      <span className="text-xs font-bold">Diagram Not Available</span>
+      <p className="text-[11px] text-amber-700 dark:text-amber-400 mt-0.5">
         The diagram data is missing, empty, or failed validation.
       </p>
     </div>

@@ -341,6 +341,34 @@ graph TD
 
 ---
 
+### 9. `SolutionBreakdownCard` & `PracticeSolutionToggleHeader`
+- **File Path:** [`src/MockTestSystem.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/MockTestSystem.tsx)
+- **Category:** Data Display / Interactive Feedback
+- **Last Updated:** 2026-07-28 (v1.7.21)
+
+| Property | Class |
+| :--- | :--- |
+| Background — Card | `bg-white` |
+| Background — Header Icon | `bg-amber-500/10` |
+| Background — Toggle Button | `bg-amber-50 hover:bg-amber-100/80` |
+| Border — Card | `border border-slate-200/60` |
+| Border — Accent Accent | `border-l-4 border-[#2563EB]` |
+| Border — Toggle Button | `border border-amber-200` |
+| Border radius — Card | `rounded-2xl` |
+| Border radius — Icon / Button | `rounded-xl` (icon) / `rounded-lg` (button) |
+| Text — Heading | `font-serif font-black text-slate-900 text-base leading-none` |
+| Text — Subtitle | `text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1 block` |
+| Text — Explanation Prose | `text-slate-700 text-sm sm:text-base leading-relaxed font-serif font-medium pl-4 py-1` |
+| Text — Toggle Button | `text-[10px] font-bold text-amber-700` |
+| Spacing & Layout | `p-5 sm:p-6 space-y-3 relative shadow-sm shrink-0 mb-6` |
+
+**Pattern notes:**
+- **Auto-Sync Visibility:** In Practice mode, navigating to an answered question automatically displays the `SolutionBreakdownCard` without requiring answer clearing or re-selecting options.
+- **Scroll & Overflow Safety:** Whenever `showExplanation` is active, `<main>` and the Options/Explanation container switch to `overflow-y-auto no-scrollbar` with `pb-6` bottom padding, ensuring long multi-paragraph solution text is 100% visible without bottom clipping.
+- **Header Action Button:** Positioned directly in the question header next to "Question X of Y" as a responsive `[Solution Breakdown / Hide Explanation]` toggle button.
+
+---
+
 ## Duplicate Prevention Rules
 
 1. NEVER create another equation renderer; always use `MathTextRenderer.tsx`.
@@ -351,3 +379,4 @@ graph TD
 6. NEVER create alternative payment unlock overlays outside Razorpay modal handlers in `App.tsx`.
 7. NEVER render raw `<span>{htmlString}</span>` in `MathTextRenderer` — always route through `PlainText` so `dangerouslySetInnerHTML` handles HTML anchors correctly.
 8. NEVER build a custom markdown link pre-processor for AI chat — `MarkdownMathRenderer` already handles `[text](url)` → `<a>` conversion before passing to `MathTextRenderer`.
+

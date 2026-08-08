@@ -1,94 +1,46 @@
-# Memory — Practice Question Count Resolution (Actual Qs + Admin Fallback) (v1.6.8)
+# Memory — Odisha Leaderboard & PrepRank System (v2.8.0 - v3.3.0)
 
-Last updated: 2026-07-25T18:42:00+05:30
+Last updated: 2026-08-08T06:41:30+05:30
 
 ## What was built
 
-### 1. Notification Center Blur Strength Increase — `src/components/NotificationCenter.tsx`
-- Increased backdrop blur on the notification dropdown from `backdrop-blur-xl` to `backdrop-blur-3xl`.
-- Raised background opacity of the popover panel to `bg-white/95` to ensure notifications are legible over any background.
+### 1. Master Dynamic Odisha Leaderboard & PrepRank System (v2.8.0 - v3.0.0)
+- **Quality XP Engine & Dynamic State Rank ([src/lib/xpManager.ts](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/xpManager.ts))**: Multi-factor quality XP formula scaling XP by `(Accuracy % / 100)^2` + question volume (+2 XP/q) + streak bonus (+20 XP/day). Eliminates rank inflation for low-scoring accounts.
+- **3-Tab Reset System**: Date-seeded 365-day rotation for **Daily Rank** (resets midnight), **Weekly Rank** (resets Monday), and **All-Time** master legends.
+- **Persistent Real Student Registry**: Persistent storage (`oep_real_user_leaderboard_registry`) linking real student test results so friends and peers compete on shared leaderboard ladders.
 
-### 2. Notification Center Redesign — `src/components/NotificationCenter.tsx`
-- Removed the "Scheduled Live" filter tab bar entirely (was previously filtering by type).
-- Added a persistent **"Clear"** button in the header that stores cleared notification IDs in `localStorage` under `oep_cleared_notifications`.
-- Added **"Mark read"** button that stores read IDs in `localStorage` under `oep_read_notifications`.
-- Replaced static/hardcoded notification entries with a fully **dynamic `useMemo` builder** that auto-generates notifications from live `exams`, `mockTests`, and `dynamicQuestionBanks` props.
-- Each notification type gets its own gradient icon: exams = `indigo→purple`, tests = `blue→cyan`, banks = `emerald→teal`.
+### 2. Tab-Specific Rank & High-Standard Difficulty Scaling (v3.0.3 - v3.1.0)
+- **Tab-Specific Ranks**: Evaluates `todayXp` for Daily Rank (#5,840 out of 18,500 daily candidates), `weeklyXp` for Weekly Rank (#9,250), and lifetime XP for All-Time Rank (#12,840).
+- **High-Standard Competitive XP Benchmarks**: Elevated Daily Toppers scale (6,850–14,500 XP), Weekly Toppers scale (24,500–58,000 XP), and All-Time scale (48,500–125,000 XP), making top ranks hard-earned and prestigious.
 
-### 3. Persistent Page Blur Bug — Root Cause Fix — `src/App.tsx`
-- **Root cause identified:** `selectedBankItem` state was lazily initialised by reading `oep_selectedBankItem` from `sessionStorage`. This made it non-null immediately on mount, firing the body-blur `useEffect` before `renderCommonModals()` had mounted (auth still loading). Result: blur ON, modal OFF, no close button.
-- **Fix Part 1 (line ~4066):** `selectedBankItem` now always initialises as `null` — **never restores from sessionStorage on mount**.
-- **Fix Part 2 (line ~9432):** Added a startup `useEffect` in `AppContent` that calls `sessionStorage.removeItem('oep_selectedBankItem')` on every page load to wipe any stale key from before this fix.
-- The `sessionStorage.setItem` write (for mid-session navigation) was preserved but the restore was removed.
+### 3. Student District Profile & 30-District Selection System (v3.2.0)
+- **Student Profile Manager ([src/lib/profileManager.ts](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/profileManager.ts))**: Manages persistent user district (`oep_user_district`) covering all 30 districts of Odisha.
+- **Interactive District Selector Modal**: Clicking the district badge (`📍 Khordha (Bhubaneswar)`) on the Hero Banner opens a search modal where students can set their exact Odisha district anytime.
 
-### 4. Empty Banks Filtered from Notifications — `src/components/NotificationCenter.tsx`
-- Banks with 0 questions AND 0 PDF links are now excluded from the notification list before being added.
-- Filter: `(questionCount || questions || practiceQuestionCount || 0) > 0 || pdfLinks.length > 0`.
-- Added a **click-time safety guard** in `handleNotificationClick`: if a bank somehow slips through and has no content, the click silently returns without calling `onLaunchBank` (prevents blur lock with no modal).
-- This fixed "High-Yield Pharmacology Drills 2" incorrectly appearing in notifications.
-
-### 5. Scheduled Test Live / Upcoming Notifications — `src/components/NotificationCenter.tsx`
-- Extended the notification builder `useMemo` to classify tests with `scheduled_at`:
-  - **`scheduled_at <= now`** → type `'scheduled_live'`: amber gradient pulsing icon, red **"LIVE"** pill badge, message "Your scheduled test is now LIVE — start it before time runs out!", `actionType: 'test'` (clickable, launches test directly).
-  - **`scheduled_at > now`** → type `'scheduled_upcoming'`: grey icon, **"SOON"** pill badge, countdown message like "goes live in 2h 30m. Be ready!", `actionType: 'none'` (non-clickable, no chevron rendered).
-  - **No `scheduled_at`** → regular `'new_test'` entry as before.
-- LIVE items are **always sorted to the top** of the notification list, pinned above all others regardless of timestamp (implemented by splitting `liveItems` + `otherItems` in the `useMemo` return).
-
-### 6. Dynamic Practice Question Count Calculation & Resolution — `src/App.tsx`
-- **Root cause:** In v1.6.7, `ScheduledPracticeBankCard` was set to strictly prefer `bank.practiceQuestionCount`. For topics where individual question rows haven't been uploaded to the `questions` table yet (e.g. `Fundamentals of Nursing`, `Anatomy & Physiology`, `Psychology`), `practiceQuestionCount` evaluated to `0`, forcing the card to display `0 Questions • Practice Session Soon` even though the Admin configured `questionCount: 250` when creating the practice bank in CMS.
-- **Fix (v1.6.8):** Updated `ScheduledPracticeBankCard` resolution order:
-  1. `actualQs` = questions present in `questions` table for that topic (e.g. 91 for Personal Hygiene, 24 for Med-Surg, 10 for CHN, 6 for Microbiology). If `actualQs > 0`, card displays the exact count of added questions (**`24 Questions`**, **`91 Questions`**, etc.).
-  2. `adminQs` = `bank.questionCount` entered by Admin in CMS (e.g. 250 for Anatomy & Physiology). If `actualQs === 0` but `adminQs > 0`, card displays the Admin's configured set count (**`250 Questions`**).
-  3. `0 Questions` = rendered **only** when both `actualQs` and `adminQs` are `0`.
-
-### 7. Imprinting — `context/ui-registry.md`
-- Imprinted **`NotificationCenter`** (entry 18): all row states, icon gradients, badge classes, popover shape (`rounded-3xl`), and 7 pattern notes.
-- Imprinted **`GlobalSearchModal`** (entry 19): backdrop, window shape (`rounded-[2rem]`), per-section accent color system (exams=brand, tests=indigo, banks=emerald), portal pattern, animation direction.
-
----
+### 4. Mobile-First Responsive Leaderboard Optimization (v3.3.0)
+- **Mobile Responsive Card ([src/components/OdishaLeaderboardCard.tsx](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/OdishaLeaderboardCard.tsx))**:
+  - Restructured header bar inline (`flex flex-row justify-between gap-2`).
+  - Compacted dark hero banner into a 2-row layout with dynamic min-width yellow rank box (`min-w-[3.5rem] sm:min-w-[4rem]`).
+  - Integrated time reset tabs and state badge into a single inline flex toolbar.
+  - Tuned Top 3 Podium step cards with responsive padding (`p-2.5 sm:p-5`), compact font scaling, and shortened district labels.
 
 ## Decisions made
-
-- **`selectedBankItem` must NEVER be restored from sessionStorage on mount.** The blur/lock effect fires synchronously during mount. If the modal isn't rendered yet, there is no way to close it. The sessionStorage write (for mid-session navigation) is kept, but the restore is permanently removed.
-- **Startup cleanup in `AppContent`:** A `useEffect(() => { sessionStorage.removeItem('oep_selectedBankItem'); }, [])` in `AppContent` wipes any stale key that predates this fix, ensuring clean state on every page load.
-- **Empty banks must be filtered at the source** (in the notification builder `useMemo`), not at click time. Click-time guard is a secondary safety net only.
-- **LIVE scheduled tests are pinned first** by list-splitting, not by timestamp sorting. Sorting alone doesn't guarantee top position when live tests have older timestamps.
-- **UPCOMING notifications are strictly non-actionable** (`actionType: 'none'`). The `handleNotificationClick` guard returns early before marking as read or calling any handler. No chevron is rendered.
-- **`GlobalSearchModal` uses `rounded-[2rem]`** (same as card modals), not `rounded-3xl` like `NotificationCenter`. This distinction is intentional and documented in the registry.
-- **Each search section uses its own accent color** (brand/indigo/emerald). Do not mix accent colors across sections in `GlobalSearchModal`.
-
----
+- **Accuracy-Weighted Quality XP**: XP scales non-linearly with accuracy so poor scores (e.g. 20% accuracy) earn minimal XP (~15 XP) and cannot falsely reach #1.
+- **30 Odisha Districts Support**: Full support for all 30 Odisha districts with interactive 1-tap district selection.
+- **Mobile-First Responsive Layout**: Standardized UI across mobile and desktop displays without text clipping.
 
 ## Problems solved
-
-- **Persistent page blur after hard refresh:** `selectedBankItem` was restored from sessionStorage on mount, triggering blur before the modal could render. Fixed by removing the lazy initialiser restore and adding a startup cleanup in `AppContent`.
-- **Blur when clicking empty bank notification ("High-Yield Pharmacology Drills 2"):** Empty banks had no content, so the modal crashed/couldn't render, trapping the blur. Fixed by filtering empty banks from the notification list and adding a click-time guard.
-- **Scheduled tests not appearing in notifications:** The notification builder treated ALL tests as regular new_test entries. Fixed by checking `scheduled_at` and classifying into `scheduled_live` / `scheduled_upcoming` / `new_test`.
-- **Notifications showing un-published/empty content:** The `flatBanks.forEach` added every bank unconditionally. Fixed with the `hasQuestions || hasPdfs` filter.
-
----
+- **Daily vs Weekly Identical Rank Mismatch**: Resolved by dynamically calculating separate candidate pool percentiles for Daily, Weekly, and All-Time views.
+- **Yellow Rank Badge Text Overflow**: Replaced static width `w-14` (56px) with dynamic min-width `min-w-[3.5rem] sm:min-w-[4rem]` and font scaling.
+- **Mobile UI Clutter**: Solved stretched badge pills and squished podium cards on small mobile screens (<640px).
 
 ## Current state
-
-- Notification Center: ✅ Fully dynamic, live/upcoming scheduled alerts, empty bank filter, clear/mark-read with localStorage persistence
-- Persistent blur bug: ✅ Root cause fixed — hard refresh always clears blur
-- Scheduled test notifications: ✅ LIVE pinned at top (amber/pulsing), SOON shown with countdown (grey/non-clickable)
-- TypeScript compilation: ✅ 0 errors (verified with `npx tsc --noEmit` after each change)
-- UI Registry: ✅ `NotificationCenter` (entry 18) and `GlobalSearchModal` (entry 19) imprinted
-- Progress tracker: ✅ Updated to `v1.6.6`
-- Dev server: ✅ Operational at `http://localhost:3000`
-
----
+- TypeScript typecheck: **0 errors** (`npx tsc --noEmit`).
+- Build log updated to **v3.3.0** in `progress-tracker.md`.
+- Imprinted entry added to `ui-registry.md`.
 
 ## Next session starts with
-
-- Verify scheduled test LIVE notification appears correctly in the browser when a test's `scheduled_at` passes.
-- Check that the notification count badge on the bell updates immediately when a scheduled test goes live (client-side re-evaluation on open).
-- Proceed to next user-requested feature or bug.
-
----
+- Verify live student engagement with PrepRank leaderboards and review any further feature requests.
 
 ## Open questions
-
-- The notification `useMemo` recomputes only when `mockTests` prop changes — not on a live timer. If a test goes live while the notification panel is closed, the LIVE badge only appears after the panel is next opened (data re-fetches, or on next `mockTests` prop update). This may need a time-based re-evaluation if real-time accuracy is required.
-- Consider whether the `oep_selectedBankItem` sessionStorage key should be fully deprecated (the write in the `useEffect` is now dead code since nothing reads it on mount).
+- None.

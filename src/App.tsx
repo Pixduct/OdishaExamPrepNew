@@ -47,16 +47,25 @@ import {
   Receipt,
   Sparkles,
   ArrowRight,
+  Compass,
   RotateCw,
   Timer,
   Clock3,
   MessageSquare,
-  Video
+  Video,
+  Flame
 } from 'lucide-react';
 import { Toaster, toast, useToasterStore } from 'react-hot-toast';
 import { useAuth } from './lib/AuthContext';
 import { supabase } from './lib/supabase';
 import { cn, getDirectImageUrl } from './lib/utils';
+import { getStreakState, recordQuestionSolved, completeDailyGoalDirectly, StreakState } from './lib/streakManager';
+import { StreakDetailModal } from './components/StreakDetailModal';
+import { ExamReadinessCard } from './components/ExamReadinessCard';
+import { SmartRecommendationCard } from './components/SmartRecommendationCard';
+import { AIStudyPlanCard } from './components/AIStudyPlanCard';
+import { StudyPlanView } from './StudyPlanView';
+import { getInstantQuestionsForTopic } from './lib/instantQuestionCompiler';
 import { examService } from './lib/examService';
 import { DEFAULT_ACHIEVERS_JOURNAL } from './lib/defaultAchievers';
 import { useScrollSpy } from './hooks/useScrollSpy';
@@ -1518,6 +1527,31 @@ export const Navbar = ({
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
+  const [streakState, setStreakState] = useState<StreakState>(() => getStreakState(user?.id));
+  const [isStreakModalOpen, setIsStreakModalOpen] = useState(false);
+
+  useEffect(() => {
+    setStreakState(getStreakState(user?.id));
+  }, [user?.id]);
+
+  useEffect(() => {
+    const handleStreakUpdate = (e: any) => {
+      if (e.detail) setStreakState(e.detail);
+      else setStreakState(getStreakState(user?.id));
+    };
+    const handleOpenStreakModal = () => setIsStreakModalOpen(true);
+
+    window.addEventListener('oep-streak-updated', handleStreakUpdate);
+    window.addEventListener('oep-streak-goal-completed', handleStreakUpdate);
+    window.addEventListener('oep-open-streak-modal', handleOpenStreakModal);
+
+    return () => {
+      window.removeEventListener('oep-streak-updated', handleStreakUpdate);
+      window.removeEventListener('oep-streak-goal-completed', handleStreakUpdate);
+      window.removeEventListener('oep-open-streak-modal', handleOpenStreakModal);
+    };
+  }, [user?.id]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
@@ -1761,6 +1795,33 @@ export const Navbar = ({
               onLaunchBank={(bank: any) => window.dispatchEvent(new CustomEvent('oep-launch-bank', { detail: bank }))}
             />
 
+            {/* Header Streak Flame Pill Button */}
+            <button
+              type="button"
+              onClick={() => setIsStreakModalOpen(true)}
+              className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 border border-amber-500/30 shadow-2xs transition-all text-xs font-black cursor-pointer group shrink-0"
+              title="Daily Preparation Streak — Click for details"
+            >
+              <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 fill-current animate-pulse group-hover:scale-110 transition-transform" />
+              <span className="font-mono text-[11px] sm:text-xs text-amber-700 font-extrabold">
+                <span className="sm:hidden">{streakState.currentStreak}d</span>
+                <span className="hidden sm:inline">{streakState.currentStreak} {streakState.currentStreak === 1 ? 'Day' : 'Days'}</span>
+              </span>
+            </button>
+
+            <StreakDetailModal
+              isOpen={isStreakModalOpen}
+              onClose={() => setIsStreakModalOpen(false)}
+              streakState={streakState}
+              onSolveMoreClick={() => {
+                if (window.location.pathname === '/') {
+                  scrollToElement('exams', { block: 'start', delay: 50 });
+                } else {
+                  navigate('/');
+                }
+              }}
+            />
+
             {user ? (
                <div className="relative">
                   <div 
@@ -1845,8 +1906,21 @@ export const Navbar = ({
           </div>
         </nav>
 
-        {/* Mobile Menu Toggle */}
+        {/* Mobile Menu Toggle & Controls */}
         <div className="md:hidden flex items-center gap-2 sm:gap-3">
+          {/* Mobile Header Streak Flame Pill Button */}
+          <button
+            type="button"
+            onClick={() => setIsStreakModalOpen(true)}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 border border-amber-500/30 shadow-2xs transition-all text-xs font-black cursor-pointer group shrink-0"
+            title="Daily Preparation Streak"
+          >
+            <Flame className="w-3.5 h-3.5 text-amber-500 fill-current animate-pulse group-hover:scale-110 transition-transform" />
+            <span className="font-mono text-[11px] text-amber-700 font-extrabold">
+              {streakState.currentStreak}d
+            </span>
+          </button>
+
           {!user && onSignIn && (
             <button 
               onClick={onSignIn}
@@ -1888,6 +1962,33 @@ export const Navbar = ({
             >
               {/* Content Container */}
               <div className="p-4 flex flex-col gap-1.5">
+                {/* Mobile Drawer Streak Goal Card */}
+                <div 
+                  className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-850 to-amber-950/50 border border-amber-500/30 text-white shadow-md cursor-pointer mb-2 flex items-center justify-between gap-3"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setIsStreakModalOpen(true);
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+                      <Flame className="w-5 h-5 fill-current animate-pulse text-amber-400" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-extrabold text-white">Daily Study Streak</span>
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber-500/20 text-amber-300">
+                          {streakState.currentStreak} Days
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-medium">
+                        Goal: {streakState.todayQuestionsSolved}/20 Qs Solved Today
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-amber-400 shrink-0" />
+                </div>
+
                 {!user && onSignIn && (
                   <div className="p-3.5 rounded-2xl border-2 border-slate-900 bg-gradient-to-br from-slate-50 to-white shadow-[4px_4px_0px_#0f172a] mb-1">
                     <p className="text-[10px] font-black text-[#2563EB] uppercase tracking-widest mb-1">Welcome Aspirant</p>
@@ -2689,6 +2790,26 @@ const LandingPage = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    const handleGoalCompleted = (e: any) => {
+      const state: StreakState = e.detail || getStreakState(user?.id);
+      toast.custom((t) => (
+        <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-slate-900 border border-amber-500/40 text-white rounded-2xl shadow-2xl p-4 flex items-center gap-3.5 pointer-events-auto`}>
+          <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+            <Flame className="w-7 h-7 text-amber-400 fill-current animate-bounce" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="text-sm font-black text-amber-400">🔥 Streak Goal Completed!</h4>
+            <p className="text-xs text-slate-300 font-medium">You solved 20 questions today! You're on a <strong className="text-amber-300 font-mono">{state.currentStreak}-day roll!</strong></p>
+          </div>
+        </div>
+      ), { duration: 5000 });
+    };
+
+    window.addEventListener('oep-streak-goal-completed', handleGoalCompleted);
+    return () => window.removeEventListener('oep-streak-goal-completed', handleGoalCompleted);
+  }, [user?.id]);
+
   // Hide WhatsApp button on mobile when auth modal is open
   useEffect(() => {
     if (window.innerWidth < 768) {
@@ -2905,6 +3026,113 @@ const LandingPage = () => {
               </motion.div>
             </div>
           </div>
+        </section>
+
+        {/* Home Dashboard Exam Readiness, Smart Recommendation & AI Study Plan System */}
+        <section className="relative z-10 -mt-6 sm:-mt-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <ExamReadinessCard userId={user?.id} onStartPracticeClick={() => scrollToElement('exams', { block: 'start', delay: 50 })} />
+          <AIStudyPlanCard userId={user?.id} />
+          <SmartRecommendationCard userId={user?.id} onLaunchPractice={(topic) => scrollToElement('exams', { block: 'start', delay: 50 })} />
+
+          {(() => {
+            const streak = getStreakState(user?.id);
+            const progressPct = Math.min(100, Math.round((streak.todayQuestionsSolved / 20) * 100));
+            const remainingQs = Math.max(0, 20 - streak.todayQuestionsSolved);
+
+            return (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-slate-900 border border-slate-800 text-white rounded-2xl p-3.5 sm:p-5 shadow-xl shadow-slate-950/20 relative overflow-hidden group"
+              >
+                <div className="absolute -right-16 -top-16 w-48 h-48 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+
+                {/* Mobile View: Thin 44px 1-line bar */}
+                <div 
+                  className="sm:hidden flex items-center justify-between gap-3 text-xs cursor-pointer"
+                  onClick={() => window.dispatchEvent(new CustomEvent('oep-open-streak-modal'))}
+                >
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span className="flex items-center gap-1 font-mono font-black text-amber-400 shrink-0 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20">
+                      <Flame className="w-3.5 h-3.5 text-amber-400 fill-current animate-pulse" />
+                      {streak.currentStreak}d
+                    </span>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
+                        <div 
+                          className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500" 
+                          style={{ width: `${progressPct}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <span className="text-[10px] font-mono text-slate-300 shrink-0">
+                      {streak.todayQuestionsSolved}/20 Qs
+                    </span>
+                  </div>
+
+                  <span className="text-[10px] font-black text-amber-400 hover:text-amber-300 uppercase tracking-wider shrink-0">
+                    {streak.todayGoalCompleted ? 'Goal Done ✓' : `+${remainingQs} Qs →`}
+                  </span>
+                </div>
+
+                {/* Desktop View: Full Stat Banner */}
+                <div className="hidden sm:flex items-center justify-between gap-6">
+                  <div 
+                    className="flex items-center gap-3.5 cursor-pointer group/title"
+                    onClick={() => window.dispatchEvent(new CustomEvent('oep-open-streak-modal'))}
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 shrink-0 shadow-inner group-hover/title:scale-105 transition-transform">
+                      <Flame className="w-7 h-7 text-amber-500 fill-current animate-bounce" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-extrabold text-sm text-white tracking-tight leading-tight group-hover/title:text-amber-400 transition-colors">
+                          Daily Study Streak
+                        </h3>
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                          {streak.currentStreak} Day Streak
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400 font-medium mt-0.5">
+                        Longest Record: <strong className="text-slate-200 font-mono">{streak.highestStreak} Days</strong>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 max-w-md space-y-1.5">
+                    <div className="flex items-center justify-between text-xs font-bold">
+                      <span className="text-slate-300 text-[11px]">Today's Goal ({streak.todayQuestionsSolved}/20 Questions)</span>
+                      <span className="text-amber-400 font-mono text-[11px]">{progressPct}%</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progressPct}%` }}
+                        transition={{ duration: 0.6 }}
+                        className="h-full rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-400"
+                      />
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={() => {
+                      if (streak.todayGoalCompleted) {
+                        window.dispatchEvent(new CustomEvent('oep-open-streak-modal'));
+                      } else {
+                        scrollToElement('exams', { block: 'start', delay: 50 });
+                      }
+                    }}
+                    className="h-10 px-5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shadow-md shadow-amber-500/20 shrink-0 cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Flame className="w-3.5 h-3.5 fill-current" />
+                    <span>{streak.todayGoalCompleted ? 'View Streak Grid' : `Solve ${remainingQs} More Qs →`}</span>
+                  </Button>
+                </div>
+              </motion.div>
+            );
+          })()}
         </section>
 
         {/* 1. Practice Core (Explore Exams) */}
@@ -6013,7 +6241,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
   const [showPracticeConfig, setShowPracticeConfig] = useState<boolean>(false);
   const [selectedBankType, setSelectedBankType] = useState<string | null>(() => sessionStorage.getItem('oep_selectedBankType') || null);
   const [mobileExamTab, setMobileExamTab] = useState<'learn' | 'practice' | 'mock'>(() => {
-    return (sessionStorage.getItem('oep_mobileExamTab') as 'learn' | 'practice' | 'mock') || 'learn';
+    return (sessionStorage.getItem('oep_mobileExamTab') as 'learn' | 'practice' | 'mock') || 'practice';
   });
 
   useEffect(() => {
@@ -6810,33 +7038,32 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     }
   };
 
-  const handleStartDirectPractice = async (topicBank: any, resumeState?: any) => {
+  const handleStartDirectPractice = async (topicBankInput: any, resumeState?: any) => {
     if (isGuest) {
       setShowLoginPrompt(true);
       return;
     }
 
+    const topicBank = typeof topicBankInput === 'string'
+      ? { id: `practice-${Date.now()}`, title: topicBankInput, name: topicBankInput }
+      : topicBankInput || { id: `practice-${Date.now()}`, title: 'General Practice', name: 'General Practice' };
+
     const actMeta = resumeState?.metadata || resumeState;
     if (actMeta && (actMeta.isStarted || actMeta.answers || actMeta.currentQuestionIndex !== undefined)) {
-      const resumeTest = actMeta.test || {
-        id: `practice-${Date.now()}`,
-        bankId: topicBank?.id,
-        title: `${topicBank?.title || 'Practice'} - Practice Session`,
-        durationMinutes: topicBank?.practiceQuestionCount || 50,
-        questions: []
-      };
-      handleStartTest(resumeTest, { ...actMeta, isStarted: true });
-      return;
+      const resumeTest = actMeta.test || topicBank;
+      if (resumeTest && Array.isArray(resumeTest.questions) && resumeTest.questions.length > 0) {
+        if (resumeTest.title) {
+          const cleanT = resumeTest.title.replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
+          resumeTest.title = `${cleanT} - Practice Session`;
+        }
+        handleStartTest(resumeTest, { ...actMeta, isStarted: true });
+        return;
+      }
     }
 
     setLoadingPractice(true);
     try {
-      const effectiveExamId = selectedExam || topicBank?.examId;
-      if (!effectiveExamId) {
-        alert("Could not determine the exam ID.");
-        setLoadingPractice(false);
-        return;
-      }
+      const effectiveExamId = selectedExam || topicBank?.examId || (exams && exams.length > 0 ? exams[0].id : 'osssc-nursing-2026') || 'default-exam';
 
       if (topicBank?.isPremium && !hasAccessTo(topicBank)) {
         setPaywallPrice(topicBank.price || 499);
@@ -6855,77 +7082,47 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         return;
       }
 
-      const bankTopicName = topicBank.title;
+      const rawBankTopic = topicBank.title || topicBank.name || '';
+      const bankTopicName = rawBankTopic.replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
 
-      let { data, error } = await supabase
-        .from('questions')
-        .select('*')
-        .eq('examId', effectiveExamId)
-        .ilike('topic', bankTopicName);
+      // Check if questions are already present in memory
+      let finalQuestions: any[] = [];
+      const targetCount = topicBank.questionCount || topicBank.totalQuestions || 15;
+      const targetDuration = topicBank.estimatedMinutes || topicBank.durationMinutes || 15;
 
-      if (!error && (!data || data.length === 0)) {
-        const fallbackRes = await supabase
-          .from('questions')
-          .select('*')
-          .eq('examId', effectiveExamId);
-        if (!fallbackRes.error) {
-          data = fallbackRes.data;
-          error = null;
-        }
+      if (Array.isArray(topicBank?.questions) && topicBank.questions.length >= targetCount) {
+        finalQuestions = topicBank.questions;
+      } else {
+        // Fast instant question retrieval (<10ms) with exact target question count
+        const instantQs = getInstantQuestionsForTopic(bankTopicName, targetCount);
+        finalQuestions = instantQs.map(q => ({
+          id: q.id,
+          questionText: q.questionText,
+          options: q.options,
+          correctAnswerIndex: q.correctAnswerIndex,
+          explanation: q.explanation
+        }));
       }
-      if (error) throw error;
-
-      let matchedQs = data || [];
-      if (bankTopicName) {
-        const normBank = bankTopicName.toLowerCase().replace(/[\s\-_—–:()]+/g, '').trim();
-        matchedQs = matchedQs.filter((q: any) => {
-           if (!q.topic) return false;
-           const normQ = q.topic.toLowerCase().replace(/[\s\-_—–:()]+/g, '').trim();
-           return normQ.includes(normBank) || normBank.includes(normQ);
-        });
-      }
-
-      if (matchedQs.length === 0) {
-        showPremiumAlert(
-          "Questions Coming Soon",
-          "We are currently compiling high-yield exam questions for this specific topic. Our subject matter experts update the database daily. Please check back shortly or explore other practice sets!"
-        );
-        setLoadingPractice(false);
-        return;
-      }
-
-      const limit = matchedQs.length;
-      const duration = limit; 
-      const shuffled = matchedQs.sort(() => 0.5 - Math.random());
-      const finalQuestions = shuffled.slice(0, limit);
 
       const practiceTest = {
         id: `practice-${Date.now()}`,
-        bankId: topicBank.id,
-        title: `${bankTopicName} - Practice Session`,
-        durationMinutes: duration,
+        bankId: topicBank.id || `bank-${Date.now()}`,
+        title: topicBank.title || `${bankTopicName} - Practice Session`,
+        durationMinutes: targetDuration,
+        totalMarks: finalQuestions.length,
+        totalQuestions: finalQuestions.length,
+        questions: finalQuestions,
+        isPracticeMode: true,
         isPremium: false,
-        examId: topicBank?.examId || effectiveExamId,
-        questions: finalQuestions.map(q => {
-          const item: any = {
-            id: q.id,
-            questionText: q.questionText,
-            options: q.options,
-            correctAnswerIndex: q.correctAnswerIndex,
-            explanation: q.explanation || 'No explanation provided.'
-          };
-          if (q.diagram !== undefined && q.diagram !== null) {
-            item.diagram = q.diagram;
-          }
-          return item;
-        })
+        examId: topicBank?.examId || effectiveExamId
       };
 
       setActiveTestState({ resumeSessionId: `session-${Date.now()}` });
       handleStartTest(practiceTest);
+      setLoadingPractice(false);
     } catch (err) {
       console.error(err);
-      alert("Failed to compile practice session.");
+      toast.error("Failed to compile practice session.");
     } finally {
       setLoadingPractice(false);
     }
@@ -7073,14 +7270,55 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       }
     };
 
+    const onLaunchTopicDrillEvent = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const topicName = customEvent.detail || 'Practice Session';
+      const effectiveExamId = selectedExam || exams[0]?.id || 'osssc-nursing-2026';
+
+      // Check for saved incomplete session for this topic
+      const userActivities = activityTracker.getActivities(user?.id);
+      const incompleteActivity = userActivities.find(act => 
+        act.type === 'test_incomplete' && 
+        act.title && 
+        (act.title.toLowerCase().includes(topicName.toLowerCase()) || topicName.toLowerCase().includes(act.title.toLowerCase()))
+      );
+
+      if (incompleteActivity && incompleteActivity.metadata) {
+        toast.success(`Resuming test session for ${topicName}...`, {
+          icon: '⏱️',
+          duration: 3000
+        });
+        const resumeTest = incompleteActivity.metadata.test || {
+          id: `bank-topic-${Date.now()}`,
+          title: `${topicName} - Practice Session`,
+          examId: effectiveExamId,
+          isPremium: false
+        };
+        handleStartDirectPractice(resumeTest, incompleteActivity.metadata);
+      } else {
+        toast.success(`Compiling practice drill for ${topicName}...`, {
+          icon: '⚡',
+          duration: 3000
+        });
+        handleStartDirectPractice({
+          id: `bank-topic-${Date.now()}`,
+          title: topicName,
+          examId: effectiveExamId,
+          isPremium: false
+        });
+      }
+    };
+
     window.addEventListener('oep-launch-mock-test', onLaunchTestEvent);
     window.addEventListener('oep-launch-bank', onLaunchBankEvent);
     window.addEventListener('oep-view-exam', onViewExamEvent);
+    window.addEventListener('oep-launch-topic-drill', onLaunchTopicDrillEvent);
 
     return () => {
       window.removeEventListener('oep-launch-mock-test', onLaunchTestEvent);
       window.removeEventListener('oep-launch-bank', onLaunchBankEvent);
       window.removeEventListener('oep-view-exam', onViewExamEvent);
+      window.removeEventListener('oep-launch-topic-drill', onLaunchTopicDrillEvent);
     };
   }, [exams]);
 
@@ -7207,16 +7445,14 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
   const renderActiveTabContent = () => {
     if (mainTab === 'courses') {
-    return (
-      <div className="flex flex-col items-center justify-center py-24 text-center space-y-4">
-        <div className="w-20 h-20 bg-brand-100 rounded-full flex items-center justify-center mb-4">
-          <BookOpen className="w-10 h-10 text-brand-600" />
-        </div>
-        <h2 className="text-3xl font-bold tracking-tight text-slate-900">Premium Courses</h2>
-        <p className="text-slate-500 font-medium text-lg">Top-tier video courses are coming very soon. Stay tuned!</p>
-      </div>
-    );
-  }
+      return (
+        <StudyPlanView
+          user={user}
+          onNavigate={onNavigate}
+          onLaunchTopicPractice={(topic) => handleStartDirectPractice(topic)}
+        />
+      );
+    }
 
   if (mainTab === 'analytics') {
     return <AnalyticsView user={user} activities={activities} onNavigate={onNavigate} />;
@@ -8231,7 +8467,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
     return (
       <ErrorBoundary>
-      <div className="space-y-12">
+      <div className="space-y-12 pb-28 sm:pb-12">
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between">
             <div className="flex items-start gap-3 sm:gap-4">
@@ -8322,24 +8558,6 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               <div className="flex bg-slate-100 p-1 rounded-xl relative shadow-inner">
                 <button
                   type="button"
-                  onClick={() => setMobileExamTab('learn')}
-                  className={cn(
-                    "flex-grow flex-shrink-0 flex-1 py-2 text-[11px] font-black rounded-lg transition-all flex items-center justify-center gap-1.5 relative cursor-pointer",
-                    mobileExamTab === 'learn' ? "text-brand-700 font-extrabold" : "text-slate-500"
-                  )}
-                >
-                  {mobileExamTab === 'learn' && (
-                    <motion.div
-                      layoutId="mobileActiveSubTabIndicator"
-                      className="absolute inset-0 bg-white rounded-lg shadow-sm z-0"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                  <Layers className="w-3.5 h-3.5 relative z-10" />
-                  <span className="relative z-10">Question Bank</span>
-                </button>
-                <button
-                  type="button"
                   onClick={() => setMobileExamTab('practice')}
                   className={cn(
                     "flex-grow flex-shrink-0 flex-1 py-2 text-[11px] font-black rounded-lg transition-all flex items-center justify-center gap-1.5 relative cursor-pointer",
@@ -8374,137 +8592,305 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   <Award className="w-3.5 h-3.5 relative z-10" />
                   <span className="relative z-10">Mock Tests</span>
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setMobileExamTab('learn')}
+                  className={cn(
+                    "flex-grow flex-shrink-0 flex-1 py-2 text-[11px] font-black rounded-lg transition-all flex items-center justify-center gap-1.5 relative cursor-pointer",
+                    mobileExamTab === 'learn' ? "text-brand-700 font-extrabold" : "text-slate-500"
+                  )}
+                >
+                  {mobileExamTab === 'learn' && (
+                    <motion.div
+                      layoutId="mobileActiveSubTabIndicator"
+                      className="absolute inset-0 bg-white rounded-lg shadow-sm z-0"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                  <Layers className="w-3.5 h-3.5 relative z-10" />
+                  <span className="relative z-10">Question Bank</span>
+                </button>
               </div>
             </div>
           )}
         </div>
 
-      {/* Section 1: Download Question Bank */}
-      {(!isMobile || mobileExamTab === 'learn') && (
-        <section id="question-bank-section" className="space-y-8 scroll-mt-24">
-          <div className="relative pl-4">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand-500 rounded-full" />
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Step 1: Question Banks</h2>
-            <p className="text-slate-500 font-medium mt-1">Premium resources for your preparation</p>
-          </div>
-          
-          <motion.div 
-            initial={isMobile ? "show" : "hidden"}
-            animate={isMobile ? "show" : undefined}
-            whileInView={isMobile ? undefined : "show"}
-            viewport={isMobile ? undefined : { once: true }}
-            variants={{
-              hidden: { opacity: 0 },
-              show: {
-                opacity: 1,
-                transition: { staggerChildren: isMobile ? 0.05 : 0.1 }
-              }
-            }}
-            className={cn(
-              isMobile 
-                ? "flex flex-col gap-3.5" 
-                : "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6"
-            )}
-          >
-            {[
-              { id: 'topic-wise', title: 'Topic-wise Question Bank', desc: 'Master specific subjects with curated questions.', icon: <Layers className="w-5.5 h-5.5 text-brand-600" />, iconDesktop: <Layers className="w-6 h-6 sm:w-7 sm:h-7" /> },
-              { id: 'exam-focused', title: 'Exam-Focused Bank', desc: 'High-yield questions tailored for this exam.', icon: <Target className="w-5.5 h-5.5 text-brand-600" />, iconDesktop: <Target className="w-6 h-6 sm:w-7 sm:h-7" /> },
-              { id: 'revision-sets', title: 'Revision Sets', desc: 'Quick revision modules for last-minute prep.', icon: <BookMarked className="w-5.5 h-5.5 text-brand-600" />, iconDesktop: <BookMarked className="w-6 h-6 sm:w-7 sm:h-7" /> },
-              { id: 'pyq-collections', title: 'PYQ Collections', desc: 'Previous Year Questions with detailed solutions.', icon: <History className="w-5.5 h-5.5 text-brand-600" />, iconDesktop: <History className="w-6 h-6 sm:w-7 sm:h-7" /> },
-            ].map((item, i) => {
-              const count = (dynamicQuestionBanks[item.id] || []).filter((b: any) => {
-                if (b.is_archived && !hasAccessTo(b.id, selectedExam)) return false;
-                if (b.examId !== selectedExam) return false;
-                const mode = b.target_mode || 'both';
-                return mode !== 'practice';
-              }).length;
+      {/* Tier 1: Guided Next Step Hero Module */}
+      {(!isMobile || mobileExamTab === 'practice') && (() => {
+        const incompleteActivity = activities?.find((act: any) => {
+          if (act.type !== 'test_incomplete') return false;
 
-              return (
-                <motion.div
-                  key={i}
-                  variants={{
-                    hidden: { y: 15, opacity: 0 },
-                    show: { y: 0, opacity: 1 }
-                  }}
-                  whileHover={isMobile ? undefined : whileHover.liftTap}
-                  whileTap={isMobile ? { scale: 0.98 } : whileTap.press}
-                  className="w-full"
-                >
-                  {isMobile ? (
-                    <div
-                      onClick={() => setSelectedBankType(item.id)}
-                      className="p-4 bg-white border border-slate-100 hover:border-brand-200/50 shadow-[0_4px_16px_-4px_rgba(37,99,235,0.03),0_1px_2px_rgba(37,99,235,0.01)] active:scale-[0.98] active:border-brand-300 active:shadow-md rounded-2xl flex items-center justify-between gap-4 cursor-pointer group relative overflow-hidden transition-all duration-300"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-brand-500/0 via-brand-500/[0.01] to-brand-500/0 opacity-0 group-active:opacity-100 transition-opacity pointer-events-none" />
-                      <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-gradient-to-b from-brand-500 to-brand-650 rounded-r-sm opacity-90" />
-                      <div className="flex items-center gap-3.5 min-w-0 flex-1 pl-1">
-                        <div className="w-11 h-11 bg-brand-50/60 rounded-xl flex items-center justify-center shrink-0 border border-brand-100/30 relative">
-                          {React.cloneElement(item.icon, { className: "w-5 h-5 text-brand-700 relative z-10" })}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <h4 className="font-extrabold text-[14.5px] text-slate-855 tracking-tight leading-snug">{item.title}</h4>
-                            <span className="px-1.5 py-0.5 bg-slate-100/80 text-slate-500 text-[8.5px] font-black uppercase tracking-wider rounded border border-slate-200/50 shrink-0">
-                              {count} {count === 1 ? 'Bank' : 'Banks'}
-                            </span>
-                            {hasNewUnreadContent('bank', item.id) && (
-                              <span className="px-1.5 py-0.5 bg-brand-500 text-white text-[8.5px] font-black uppercase tracking-wider rounded-md shrink-0 flex items-center gap-1 animate-pulse">
-                                <span className="w-1 h-1 rounded-full bg-white animate-ping shrink-0" />
-                                New
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[11.5px] text-slate-500 font-medium leading-relaxed mt-0.5 line-clamp-2 pr-1">{item.desc}</p>
-                        </div>
-                      </div>
-                      <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 shrink-0 shadow-2xs group-active:bg-brand-50 group-active:border-brand-100 group-active:text-brand-600 group-active:translate-x-0.5 transition-all duration-300">
-                        <ChevronRight className="w-4 h-4" />
-                      </div>
+          // 1. Direct examId match on metadata or test object
+          const actExamId = act.metadata?.test?.examId || act.metadata?.examId;
+          if (actExamId && selectedExam && actExamId === selectedExam) return true;
+
+          // 2. Match bankId against question banks of current exam
+          const bankId = act.metadata?.test?.bankId || act.metadata?.bankId;
+          if (bankId) {
+            const allExamBanks = (dynamicQuestionBanks['topic-wise'] || [])
+              .concat(dynamicQuestionBanks['exam-focused'] || [])
+              .concat(dynamicQuestionBanks['revision-sets'] || [])
+              .concat(dynamicQuestionBanks['pyq-collections'] || []);
+            const matchingBank = allExamBanks.find((b: any) => b.id === bankId);
+            if (matchingBank && matchingBank.examId === selectedExam) return true;
+          }
+
+          // 3. Match title against topic banks of current exam
+          if (act.title) {
+            const cleanActTitle = act.title.replace(/(\s*-\s*Practice Session)+$/gi, '').trim().toLowerCase();
+            const allExamBanks = (dynamicQuestionBanks['topic-wise'] || [])
+              .concat(dynamicQuestionBanks['exam-focused'] || [])
+              .concat(dynamicQuestionBanks['revision-sets'] || [])
+              .concat(dynamicQuestionBanks['pyq-collections'] || []);
+            const matchesTitle = allExamBanks.some((b: any) => b.examId === selectedExam && b.title.toLowerCase().includes(cleanActTitle));
+            if (matchesTitle) return true;
+          }
+
+          // 4. Fallback if no explicit examId is set: match if selectedExam is active
+          if (!actExamId && selectedExam) return true;
+
+          return false;
+        });
+        
+        const firstTopicBank = (dynamicQuestionBanks['topic-wise'] || []).find((b: any) => b.examId === selectedExam && !b.is_archived);
+        
+        // Calculate user performance stats for selectedExam
+        const completedExamActs = (activities || []).filter((act: any) => 
+          (act.type === 'mock_test_completed' || act.type === 'practice_test_completed') &&
+          (act.metadata?.test?.examId === selectedExam || act.metadata?.examId === selectedExam || act.metadata?.test?.id?.includes(selectedExam))
+        );
+        const totalCompleted = completedExamActs.length;
+        const avgAcc = totalCompleted > 0
+          ? Math.round(completedExamActs.reduce((acc: number, act: any) => acc + (act.accuracy || act.score || 0), 0) / totalCompleted)
+          : 0;
+
+        let recTitle = "Start Chapter 1 Practice Drill";
+        let recDesc = "Begin with core fundamental questions to assess your base score and build topic accuracy.";
+        let recBadge = "RECOMMENDED STARTING POINT";
+        let recButtonText = "Start Diagnostic Practice";
+        let recTargetScore = avgAcc > 0 ? `Your Avg: ${avgAcc}% | Goal: 85%+` : "85% Qualifying Target";
+        let recDurationText = "~15 Mins Drill";
+        let recCategoryPill = "Step-by-Step Guidance";
+        let recAction = () => {
+          setSelectedPracticeCategory('topic-wise');
+          scrollToElement('practice-mode-section', { block: 'start', delay: 50 });
+        };
+
+        if (incompleteActivity) {
+          const rawTitle = incompleteActivity.title || incompleteActivity.metadata?.test?.title || 'In-Progress Session';
+          const testTitle = rawTitle.replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
+          const solvedCount = incompleteActivity.metadata?.answers 
+            ? Object.keys(incompleteActivity.metadata.answers).length 
+            : (incompleteActivity.metadata?.currentQuestionIndex || 0);
+          
+          const actualQsCount = Array.isArray(incompleteActivity.metadata?.test?.questions)
+            ? incompleteActivity.metadata.test.questions.length
+            : 0;
+
+          const totalCount = actualQsCount > 0 
+            ? actualQsCount 
+            : (incompleteActivity.metadata?.totalQuestions || 0);
+
+          // Calculate exact remaining time for in-progress session (minutes & seconds)
+          let leftSeconds = 0;
+          if (incompleteActivity.metadata?.timeLeft !== undefined && incompleteActivity.metadata.timeLeft > 0) {
+            leftSeconds = Math.max(0, Math.floor(incompleteActivity.metadata.timeLeft));
+          } else if (incompleteActivity.metadata?.timeSpentSeconds !== undefined && totalCount > 0) {
+            const totalSecs = (incompleteActivity.metadata?.test?.durationMinutes || totalCount) * 60;
+            leftSeconds = Math.max(0, totalSecs - Math.floor(incompleteActivity.metadata.timeSpentSeconds));
+          } else {
+            leftSeconds = (incompleteActivity.metadata?.test?.durationMinutes || totalCount || 10) * 60;
+          }
+
+          const remMins = Math.floor(leftSeconds / 60);
+          const remSecs = leftSeconds % 60;
+          const exactTimeStr = remSecs > 0 
+            ? `${remMins}m ${remSecs}s`
+            : `${remMins} Mins`;
+
+          // Calculate real-time session accuracy if answers exist
+          let sessionAcc: number | null = null;
+          if (incompleteActivity.metadata?.answers && typeof incompleteActivity.metadata.answers === 'object') {
+            const answersMap = incompleteActivity.metadata.answers;
+            const testQuestions = incompleteActivity.metadata.test?.questions || [];
+            const answeredIds = Object.keys(answersMap);
+            if (answeredIds.length > 0 && testQuestions.length > 0) {
+              let correctCnt = 0;
+              answeredIds.forEach((qId) => {
+                const qObj = testQuestions.find((item: any) => String(item.id) === String(qId));
+                if (qObj && qObj.correctAnswerIndex !== undefined && Number(answersMap[qId]) === Number(qObj.correctAnswerIndex)) {
+                  correctCnt++;
+                }
+              });
+              sessionAcc = Math.round((correctCnt / answeredIds.length) * 100);
+            }
+          }
+
+          recTitle = `Resume: ${testTitle}`;
+          recDesc = `You have an unfinished practice session for "${testTitle}" (${solvedCount}${totalCount ? ` / ${totalCount}` : ''} questions solved). Jump back in to finish!`;
+          recBadge = "IN PROGRESS SESSION";
+          recButtonText = "Resume Practice Now";
+          recTargetScore = sessionAcc !== null
+            ? `${sessionAcc}% Session Accuracy (${solvedCount}/${totalCount} Solved)`
+            : (avgAcc > 0 ? `Your Avg: ${avgAcc}% | Goal: 85%+` : "85% Target Goal");
+          recDurationText = `${exactTimeStr} Remaining`;
+          recCategoryPill = incompleteActivity.metadata?.testCategory || 'In-Progress Practice';
+
+          let recMobileDesc = `${solvedCount}${totalCount ? ` of ${totalCount}` : ''} questions completed. Tap to continue session.`;
+          let recMobileTargetScore = sessionAcc !== null
+            ? `${sessionAcc}% Accuracy`
+            : (avgAcc > 0 ? `Avg: ${avgAcc}%` : "85% Goal");
+          let recMobileDurationText = `${exactTimeStr} Left`;
+          
+          recAction = () => {
+            const targetTest = incompleteActivity.metadata?.test || {
+              id: incompleteActivity.metadata?.testId || `practice-${Date.now()}`,
+              title: `${testTitle} - Practice Session`
+            };
+            handleStartDirectPractice(targetTest, incompleteActivity);
+          };
+
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="relative overflow-hidden rounded-2xl sm:rounded-[2.2rem] bg-gradient-to-br from-brand-950 via-slate-900 to-indigo-950 text-white p-4 sm:p-8 md:p-10 shadow-2xl shadow-brand-950/20 border border-brand-500/20 card-3d-deep group mb-6 sm:mb-10"
+            >
+              <div className="absolute -right-16 -top-16 w-64 h-64 bg-brand-500/20 rounded-full blur-3xl group-hover:bg-brand-500/30 transition-all duration-700 pointer-events-none" />
+              <div className="absolute -left-16 -bottom-16 w-64 h-64 bg-indigo-500/15 rounded-full blur-3xl group-hover:bg-indigo-500/25 transition-all duration-700 pointer-events-none" />
+              
+              <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-8">
+                <div className="space-y-2 sm:space-y-4 max-w-2xl">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="badge-recommended flex items-center gap-1.5 shadow-sm text-[9px] sm:text-xs py-0.5 sm:py-1 px-2.5 sm:px-3">
+                      <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-500 animate-pulse shrink-0" />
+                      {recBadge}
+                    </span>
+                    <span className="px-2.5 py-0.5 sm:px-3 sm:py-1 bg-white/10 text-white/80 text-[8.5px] sm:text-[10px] font-black uppercase tracking-widest rounded-full border border-white/10 backdrop-blur-md">
+                      {recCategoryPill}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h2 className="text-base sm:text-2xl md:text-3xl font-black tracking-tight text-white leading-snug">
+                      {recTitle}
+                    </h2>
+                    <p className="text-slate-300 font-medium text-xs sm:text-sm md:text-base leading-relaxed mt-1 sm:mt-2">
+                      <span className="sm:hidden">{recMobileDesc}</span>
+                      <span className="hidden sm:inline">{recDesc}</span>
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 sm:gap-6 pt-1 sm:pt-0.5 text-[11px] sm:text-xs font-bold text-slate-300 flex-wrap">
+                    <div className="flex items-center gap-1.5 bg-emerald-950/40 sm:bg-transparent px-2.5 py-1 sm:p-0 rounded-lg border border-emerald-500/20 sm:border-0">
+                      <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400 shrink-0" />
+                      <span className="sm:hidden">{recMobileTargetScore}</span>
+                      <span className="hidden sm:inline">{recTargetScore}</span>
                     </div>
-                  ) : (
-                    <Card 
-                      onClick={() => setSelectedBankType(item.id)}
-                      className={cn(
-                        "p-5 sm:p-6 lg:p-8 flex flex-col justify-between bg-gradient-to-br from-white to-slate-50/50 border border-white/20 shadow-sm rounded-[1.5rem] cursor-pointer group relative overflow-hidden h-full",
-                        "hover:shadow-2xl hover:shadow-brand-500/10 transition-all duration-500 premium-shine-container"
-                      )}
-                    >
-                      <div className="absolute -right-6 -top-6 w-24 h-24 bg-brand-500/5 rounded-full blur-2xl group-hover:bg-brand-500/10 transition-colors" />
-                      
-                      <div className="flex-1 pb-6 relative z-10">
-                        <div className="flex justify-between items-start mb-4 sm:mb-6">
-                          <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 premium-gradient rounded-xl sm:rounded-2xl flex items-center justify-center text-white shadow-lg shadow-brand-500/20 shrink-0 relative group-hover:scale-110 group-hover:premium-glow transition-all duration-500">
-                            {item.iconDesktop}
-                            <div className="absolute inset-0 border-2 border-white/20 rounded-xl sm:rounded-2xl animate-pulse" />
-                          </div>
-                        </div>
-                        <h4 className="font-extrabold text-base sm:text-lg lg:text-xl text-slate-900 mb-2 group-hover:text-brand-650 transition-colors tracking-tight line-clamp-2 md:line-clamp-none leading-snug flex items-center gap-2 flex-wrap">
-                          {item.title}
-                          <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] font-bold rounded-md shrink-0 border border-slate-200/40">
-                            {count} {count === 1 ? 'Bank' : 'Banks'}
-                          </span>
-                          {hasNewUnreadContent('bank', item.id) && (
-                            <span className="px-1.5 py-0.5 bg-brand-500 text-white text-[8.5px] font-black uppercase tracking-wider rounded-md shrink-0 flex items-center gap-1 animate-pulse">
-                              <span className="w-1 h-1 rounded-full bg-white animate-ping shrink-0" />
-                              New
-                            </span>
-                          )}
-                        </h4>
-                        <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">{item.desc}</p>
-                      </div>
-                      
-                      <Button className="w-full py-3 sm:py-3.5 mt-auto rounded-xl flex items-center justify-center text-xs sm:text-sm font-black premium-gradient border-none shadow-md shadow-brand-500/10 pointer-events-none relative overflow-hidden group-hover:shadow-lg group-hover:shadow-brand-500/30 transition-all">
-                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 z-10" />
-                        <span className="relative z-10">View Collection</span>
-                      </Button>
-                    </Card>
-                  )}
-                </motion.div>
-              );
-            })}
-        </motion.div>
-      </section>
-      )}
+                    <div className="flex items-center gap-1.5 bg-amber-950/40 sm:bg-transparent px-2.5 py-1 sm:p-0 rounded-lg border border-amber-500/20 sm:border-0">
+                      <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0" />
+                      <span className="sm:hidden">{recMobileDurationText}</span>
+                      <span className="hidden sm:inline">{recDurationText}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row lg:flex-col shrink-0 items-stretch sm:items-center lg:items-end gap-3 pt-1 sm:pt-0">
+                  <Button
+                    onClick={recAction}
+                    className="h-11 sm:h-16 px-5 sm:px-8 rounded-xl sm:rounded-2xl bg-gradient-to-r from-brand-500 via-indigo-600 to-brand-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-xs sm:text-base shadow-lg shadow-brand-500/25 hover:shadow-brand-500/50 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 sm:gap-3 group/btn relative overflow-hidden cursor-pointer w-full sm:w-auto"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 z-10" />
+                    <span className="relative z-10">{recButtonText}</span>
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover/btn:translate-x-1.5 transition-transform relative z-10" />
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          );
+        } else if (firstTopicBank) {
+          const cleanBankTitle = (firstTopicBank.title || '').replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
+          const qsCount = firstTopicBank.practiceQuestionCount || firstTopicBank.actualQuestionCount || firstTopicBank.questionCount || 20;
+          const durMins = firstTopicBank.durationMinutes || firstTopicBank.duration || qsCount;
+
+          recTitle = `Recommended Drill: ${cleanBankTitle}`;
+          recDesc = `Master high-yield questions for "${cleanBankTitle}" (${qsCount} questions). Complete instant practice drills with step-by-step explanations.`;
+          recBadge = "WHAT TO STUDY NEXT";
+          recButtonText = "Begin Practice Set";
+          recTargetScore = avgAcc > 0 ? `Your Avg: ${avgAcc}% | Goal: 85%+` : "85% Pass Benchmark";
+          recDurationText = `~${durMins} Mins Drill`;
+          recCategoryPill = "Chapter-Wise Practice";
+
+          let recMobileDesc = `Practice ${qsCount} core questions for "${cleanBankTitle}" with step-by-step explanations.`;
+          let recMobileTargetScore = avgAcc > 0 ? `Avg: ${avgAcc}%` : "85% Target";
+          let recMobileDurationText = `~${durMins}m Drill`;
+
+          recAction = () => {
+            handleStartDirectPractice(firstTopicBank);
+          };
+
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="relative overflow-hidden rounded-2xl sm:rounded-[2.2rem] bg-gradient-to-br from-brand-950 via-slate-900 to-indigo-950 text-white p-4 sm:p-8 md:p-10 shadow-2xl shadow-brand-950/20 border border-brand-500/20 card-3d-deep group mb-6 sm:mb-10"
+            >
+              <div className="absolute -right-16 -top-16 w-64 h-64 bg-brand-500/20 rounded-full blur-3xl group-hover:bg-brand-500/30 transition-all duration-700 pointer-events-none" />
+              <div className="absolute -left-16 -bottom-16 w-64 h-64 bg-indigo-500/15 rounded-full blur-3xl group-hover:bg-indigo-500/25 transition-all duration-700 pointer-events-none" />
+              
+              <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-8">
+                <div className="space-y-2 sm:space-y-4 max-w-2xl">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="badge-recommended flex items-center gap-1.5 shadow-sm text-[9px] sm:text-xs py-0.5 sm:py-1 px-2.5 sm:px-3">
+                      <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-500 animate-pulse shrink-0" />
+                      {recBadge}
+                    </span>
+                    <span className="px-2.5 py-0.5 sm:px-3 sm:py-1 bg-white/10 text-white/80 text-[8.5px] sm:text-[10px] font-black uppercase tracking-widest rounded-full border border-white/10 backdrop-blur-md">
+                      {recCategoryPill}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h2 className="text-base sm:text-2xl md:text-3xl font-black tracking-tight text-white leading-snug">
+                      {recTitle}
+                    </h2>
+                    <p className="text-slate-300 font-medium text-xs sm:text-sm md:text-base leading-relaxed mt-1 sm:mt-2">
+                      <span className="sm:hidden">{recMobileDesc}</span>
+                      <span className="hidden sm:inline">{recDesc}</span>
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 sm:gap-6 pt-1 sm:pt-0.5 text-[11px] sm:text-xs font-bold text-slate-300 flex-wrap">
+                    <div className="flex items-center gap-1.5 bg-emerald-950/40 sm:bg-transparent px-2.5 py-1 sm:p-0 rounded-lg border border-emerald-500/20 sm:border-0">
+                      <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400 shrink-0" />
+                      <span className="sm:hidden">{recMobileTargetScore}</span>
+                      <span className="hidden sm:inline">{recTargetScore}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-amber-950/40 sm:bg-transparent px-2.5 py-1 sm:p-0 rounded-lg border border-amber-500/20 sm:border-0">
+                      <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0" />
+                      <span className="sm:hidden">{recMobileDurationText}</span>
+                      <span className="hidden sm:inline">{recDurationText}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row lg:flex-col shrink-0 items-stretch sm:items-center lg:items-end gap-3 pt-1 sm:pt-0">
+                  <Button
+                    onClick={recAction}
+                    className="h-11 sm:h-16 px-5 sm:px-8 rounded-xl sm:rounded-2xl bg-gradient-to-r from-brand-500 via-indigo-600 to-brand-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-xs sm:text-base shadow-lg shadow-brand-500/25 hover:shadow-brand-500/50 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 sm:gap-3 group/btn relative overflow-hidden cursor-pointer w-full sm:w-auto"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 z-10" />
+                    <span className="relative z-10">{recButtonText}</span>
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover/btn:translate-x-1.5 transition-transform relative z-10" />
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          );
+        }
+
+        return null;
+      })()}
 
       {/* Mobile Premium Unlock Modal Popup */}
       {isMobile && (
@@ -8819,14 +9205,17 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         </motion.div>
       )}
 
-      {/* Section 2: Practice Tests */}
+      {/* Section 1: Practice Tests */}
       {(!isMobile || mobileExamTab === 'practice') && (
         <section id="practice-mode-section" className="space-y-6 scroll-mt-24">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center border border-indigo-100">
               <Dumbbell className="w-5 h-5 text-indigo-600" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Step 2: Practice Tests</h2>
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Step 1: Practice Tests</h2>
+              <p className="text-slate-500 font-medium text-xs sm:text-sm mt-0.5">Master topics with instant answers, explanations & interactive drills.</p>
+            </div>
           </div>
 
           {(() => {
@@ -9063,7 +9452,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           </div>
           <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4 sm:gap-6">
             <div>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-955 tracking-tight">Step 3: Mock Tests</h2>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-955 tracking-tight">Step 2: Mock Tests</h2>
               <p className="text-slate-500 text-sm sm:text-lg font-medium mt-1 sm:mt-2 leading-relaxed">Simulate the real exam environment with our expert-curated test series.</p>
             </div>
             <div className="flex items-center gap-2.5 sm:gap-3 bg-white px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full border border-slate-200/50 shadow-sm w-fit text-xs sm:text-sm">
@@ -9371,6 +9760,95 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           );
         })()}
       </section>
+      )}
+
+      {/* Section 3: Reference Library & Downloadable Question Banks */}
+      {(!isMobile || mobileExamTab === 'learn') && (
+        <section id="question-bank-section" className="space-y-6 scroll-mt-24 pt-6 border-t border-slate-200/60">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center border border-slate-200/50">
+              <BookMarked className="w-5 h-5 text-slate-700" />
+            </div>
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Step 3: Reference Library & Question Banks</h2>
+              <p className="text-slate-500 font-medium text-xs sm:text-sm mt-0.5">Downloadable PDF question modules, revision sets, and past paper collections.</p>
+            </div>
+          </div>
+          
+          <motion.div 
+            initial={isMobile ? "show" : "hidden"}
+            animate={isMobile ? "show" : undefined}
+            whileInView={isMobile ? undefined : "show"}
+            viewport={isMobile ? undefined : { once: true }}
+            variants={{
+              hidden: { opacity: 0 },
+              show: {
+                opacity: 1,
+                transition: { staggerChildren: isMobile ? 0.05 : 0.1 }
+              }
+            }}
+            className={cn(
+              isMobile 
+                ? "flex flex-col gap-3" 
+                : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+            )}
+          >
+            {[
+              { id: 'topic-wise', title: 'Topic-wise Question Bank', desc: 'Curated PDF modules categorized by subject topic.', icon: <Layers className="w-5 h-5 text-slate-700" /> },
+              { id: 'exam-focused', title: 'Exam-Focused High Yield', desc: 'Targeted high-yield questions for fast revision.', icon: <Target className="w-5 h-5 text-slate-700" /> },
+              { id: 'revision-sets', title: 'Last-Minute Revision Sets', desc: 'Compact formula & key concept quick summaries.', icon: <BookMarked className="w-5 h-5 text-slate-700" /> },
+              { id: 'pyq-collections', title: 'PYQ Question Archives', desc: 'Previous year paper PDF archives with solutions.', icon: <History className="w-5 h-5 text-slate-700" /> },
+            ].map((item, i) => {
+              const count = (dynamicQuestionBanks[item.id] || []).filter((b: any) => {
+                if (b.is_archived && !hasAccessTo(b.id, selectedExam)) return false;
+                if (b.examId !== selectedExam) return false;
+                const mode = b.target_mode || 'both';
+                return mode !== 'practice';
+              }).length;
+
+              return (
+                <motion.div
+                  key={i}
+                  variants={{
+                    hidden: { y: 10, opacity: 0 },
+                    show: { y: 0, opacity: 1 }
+                  }}
+                  whileHover={isMobile ? undefined : { y: -3 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full"
+                >
+                  <div
+                    onClick={() => setSelectedBankType(item.id)}
+                    className="p-4 sm:p-5 bg-white border border-slate-200/80 hover:border-slate-300 shadow-xs hover:shadow-md rounded-2xl flex flex-col justify-between gap-4 cursor-pointer group transition-all duration-300 relative overflow-hidden"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200/60 flex items-center justify-center shrink-0 group-hover:bg-brand-50 group-hover:border-brand-100 group-hover:text-brand-600 transition-colors">
+                        {item.icon}
+                      </div>
+                      <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-md border border-slate-200/50">
+                        {count} {count === 1 ? 'Resource' : 'Resources'}
+                      </span>
+                    </div>
+
+                    <div className="space-y-1">
+                      <h4 className="font-extrabold text-sm sm:text-base text-slate-900 group-hover:text-brand-600 transition-colors leading-tight">
+                        {item.title}
+                      </h4>
+                      <p className="text-xs text-slate-500 font-medium leading-relaxed line-clamp-2">
+                        {item.desc}
+                      </p>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-600 group-hover:text-brand-600">
+                      <span>Browse PDF Library</span>
+                      <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        </section>
       )}
 
       {/* Common View Elements */}
@@ -9785,9 +10263,9 @@ const ExamDetailPage = () => {
                 transition={{ type: "spring", stiffness: 380, damping: 25 }}
               />
             )}
-            <BookOpen className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
+            <Target className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
           </div>
-          <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'courses' ? 'font-black' : 'font-extrabold'}`}>Courses</span>
+          <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'courses' ? 'font-black' : 'font-extrabold'}`}>Study Plan</span>
         </button>
         <button onClick={() => handleTabClick('analytics')} className={`flex flex-col items-center gap-1 sm:gap-1.5 group ${mainTab === 'analytics' ? 'text-brand-650' : 'text-slate-500 hover:text-slate-800'}`}>
           <div className="relative p-1.5 sm:p-2 rounded-xl group-hover:scale-115 transition-all duration-300 border border-transparent flex items-center justify-center">
@@ -10310,9 +10788,9 @@ function AppContent() {
                     transition={{ type: "spring", stiffness: 380, damping: 25 }}
                   />
                 )}
-                <BookOpen className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
+                <Target className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
               </div>
-              <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'courses' ? 'font-black' : 'font-extrabold'}`}>Courses</span>
+              <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'courses' ? 'font-black' : 'font-extrabold'}`}>Study Plan</span>
             </button>
             <button data-tour="bottom-nav-analytics" onClick={() => handleTabClick('analytics')} className={`flex flex-col items-center gap-1 sm:gap-1.5 group ${mainTab === 'analytics' ? 'text-brand-650' : 'text-slate-500 hover:text-slate-800'}`}>
               <div className="relative p-1.5 sm:p-2 rounded-xl group-hover:scale-115 transition-all duration-300 border border-transparent flex items-center justify-center">
@@ -10488,9 +10966,9 @@ function AppContent() {
                           transition={{ type: "spring", stiffness: 380, damping: 25 }}
                         />
                       )}
-                      <BookOpen className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
+                      <Target className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
                     </div>
-                    <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'courses' ? 'font-black' : 'font-extrabold'}`}>Courses</span>
+                    <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'courses' ? 'font-black' : 'font-extrabold'}`}>Study Plan</span>
                   </button>
                   <button onClick={() => handleTabClick('analytics')} className={`flex flex-col items-center gap-1 sm:gap-1.5 group ${mainTab === 'analytics' ? 'text-brand-650' : 'text-slate-500 hover:text-slate-800'}`}>
                     <div className="relative p-1.5 sm:p-2 rounded-xl group-hover:scale-115 transition-all duration-300 border border-transparent flex items-center justify-center">

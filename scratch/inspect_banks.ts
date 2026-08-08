@@ -15,12 +15,20 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function run() {
-  const { data: banks, error } = await supabase.from('questionBanks').select('*').limit(3);
+  const { data: banks, error } = await supabase.from('questionBanks').select('id, title, type, target_mode, is_archived');
   if (error) {
     console.error('Error fetching question banks:', error);
     return;
   }
-  console.log(JSON.stringify(banks, null, 2));
+  console.log('--- QUESTION BANKS IN DATABASE ---');
+  banks.forEach(b => {
+    console.log(`ID: ${b.id}`);
+    console.log(`Title: ${b.title}`);
+    console.log(`Type: ${b.type}`);
+    console.log(`Target Mode: ${b.target_mode}`);
+    console.log(`Archived: ${b.is_archived}`);
+    console.log('----------------------------------');
+  });
 }
 
 run();

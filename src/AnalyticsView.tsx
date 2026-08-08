@@ -18,6 +18,10 @@ import { cn } from './lib/utils';
 import { stagger } from './lib/animations';
 import { MathTextRenderer } from './components/MathTextRenderer';
 import { aiDiagnosticManager } from './lib/aiDiagnosticManager';
+import { ExamReadinessCard } from './components/ExamReadinessCard';
+import { TopicConfidenceMatrix } from './components/TopicConfidenceMatrix';
+import { PersonalBestCard } from './components/PersonalBestCard';
+import { AIStudyPlanCard } from './components/AIStudyPlanCard';
 
 
 const MarkdownMathRenderer = ({ text, isUser = false }: { text: string; isUser?: boolean }) => {
@@ -1364,6 +1368,9 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
         animate="show"
         className="w-full mx-auto px-4 sm:px-0 pt-4 sm:pt-6 space-y-6 sm:space-y-8 pb-32 sm:pb-24 relative z-10"
       >
+        {/* Exam Readiness & Goal Progress System Card */}
+        <ExamReadinessCard userId={user?.id} />
+
         {/* Redesigned Stat Cards Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
           <StatCard 

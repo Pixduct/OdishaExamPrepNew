@@ -1,0 +1,399 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Trophy, Crown, Flame, Target, ChevronDown, ShieldCheck, MapPin, Zap, Award, Target as TargetIcon, Edit2, Check, X } from 'lucide-react';
+import {
+  getUserXpState,
+  getOdishaLeaderboard,
+  UserXpState,
+  StudentRankEntry
+} from '../lib/xpManager';
+import {
+  getUserDistrict,
+  setUserDistrict,
+  getUserStudentName,
+  setUserStudentName,
+  ALL_30_ODISHA_DISTRICTS
+} from '../lib/profileManager';
+
+interface OdishaLeaderboardCardProps {
+  userId?: string;
+}
+
+export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ userId }) => {
+  const [timeFilter, setTimeFilter] = useState<'daily' | 'weekly' | 'allTime'>('weekly');
+  const [xpState, setXpState] = useState<UserXpState>(() => getUserXpState(userId));
+  const [isDistrictModalOpen, setIsDistrictModalOpen] = useState(false);
+  const [selectedDistrict, setSelectedDistrict] = useState<string>(() => getUserDistrict());
+  const [districtSearch, setDistrictSearch] = useState('');
+
+  useEffect(() => {
+    setXpState(getUserXpState(userId));
+  }, [userId]);
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setXpState(getUserXpState(userId));
+      setSelectedDistrict(getUserDistrict());
+    };
+    window.addEventListener('oep-activity-logged', handleUpdate);
+    window.addEventListener('oep-streak-updated', handleUpdate);
+    window.addEventListener('oep-study-plan-updated', handleUpdate);
+    window.addEventListener('oep-profile-updated', handleUpdate);
+
+    return () => {
+      window.removeEventListener('oep-activity-logged', handleUpdate);
+      window.removeEventListener('oep-streak-updated', handleUpdate);
+      window.removeEventListener('oep-study-plan-updated', handleUpdate);
+      window.removeEventListener('oep-profile-updated', handleUpdate);
+    };
+  }, [userId]);
+
+  const { podium, rankList, userEntry, nearbyBracket, resetNotice } = getOdishaLeaderboard(userId, timeFilter, 'All Odisha');
+  const { currentLeague, xpProgressPct, xpToNextTier, totalXp, userRank, percentileText, accuracyPct } = xpState;
+
+  const handleSelectDistrict = (dist: string) => {
+    setUserDistrict(dist);
+    setSelectedDistrict(dist);
+    setIsDistrictModalOpen(false);
+  };
+
+  const filteredDistricts = ALL_30_ODISHA_DISTRICTS.filter(d =>
+    d.toLowerCase().includes(districtSearch.toLowerCase())
+  );
+
+  return (
+    <div className="bg-white p-3.5 sm:p-7 rounded-2xl sm:rounded-[2.25rem] shadow-xs border border-slate-200/80 space-y-4 sm:space-y-5 mb-6 sm:mb-8 relative overflow-hidden">
+      {/* Top Header Bar (Inline on Mobile & Desktop) */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="p-1.5 sm:p-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 shrink-0">
+            <Trophy className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
+          </span>
+          <div className="min-w-0">
+            <h3 className="text-xs sm:text-base font-black text-slate-900 tracking-tight leading-tight truncate">
+              Odisha Rank & Student Leagues
+            </h3>
+            <p className="text-slate-500 text-[10px] sm:text-xs font-medium truncate hidden sm:block">
+              Earn effort XP points, unlock league tiers, and compete among 18,500 Odisha aspirants
+            </p>
+          </div>
+        </div>
+
+        {/* Current League Badge (Compact Inline) */}
+        <div className={`inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-extrabold border ${currentLeague.badgeBg} ${currentLeague.badgeBorder} ${currentLeague.badgeTextColor} shrink-0 font-mono shadow-2xs`}>
+          <span>{currentLeague.badgeIcon}</span>
+          <span className="truncate">{currentLeague.name}</span>
+        </div>
+      </div>
+
+      {/* Pinned Student Dynamic Rank & League Progress Hero Banner (Mobile-Optimized Layout) */}
+      <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 text-white shadow-sm relative overflow-hidden space-y-3">
+        <div className="absolute right-0 top-0 w-48 h-48 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 relative z-10">
+          {/* User Dynamic State Rank Details */}
+          <div className="flex items-center gap-3">
+            {(() => {
+              const rankStr = `#${userEntry.rank.toLocaleString()}`;
+              const fontClass = rankStr.length > 6 ? 'text-[10px] sm:text-xs' : rankStr.length > 4 ? 'text-xs sm:text-sm' : 'text-sm sm:text-lg';
+              return (
+                <div className="min-w-[3.5rem] sm:min-w-[4rem] w-auto h-12 sm:h-14 px-2 py-1 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950 font-black flex flex-col items-center justify-center font-mono shadow-xs shrink-0 leading-none">
+                  <span className="text-[9px] sm:text-[10px] uppercase font-sans tracking-wider opacity-75 pb-0.5">Rank</span>
+                  <span className={`${fontClass} font-black tracking-tight`}>{rankStr}</span>
+                </div>
+              );
+            })()}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-extrabold text-xs sm:text-base text-white truncate">{userEntry.name}</span>
+
+                {/* Interactive District Badge */}
+                <button
+                  type="button"
+                  onClick={() => setIsDistrictModalOpen(true)}
+                  className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold text-amber-300 bg-amber-400/15 hover:bg-amber-400/25 px-2 py-0.5 rounded border border-amber-400/30 transition-all cursor-pointer group shrink-0"
+                  title="Click to set your exact Odisha district"
+                >
+                  <MapPin className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                  <span className="truncate max-w-[110px] sm:max-w-none">{userEntry.district}</span>
+                  <Edit2 className="w-2 h-2 opacity-60 group-hover:opacity-100 transition-opacity ml-0.5" />
+                </button>
+              </div>
+
+              <p className="text-[10px] sm:text-xs text-amber-300 font-mono font-bold pt-0.5 truncate">
+                {percentileText} • Acc: {accuracyPct}%
+              </p>
+              <span className="text-[9px] sm:text-[10px] text-slate-300 font-medium block pt-0.5 truncate">
+                {timeFilter === 'daily' ? 'Today' : timeFilter === 'weekly' ? 'Weekly' : 'Total'}: <strong className="text-white font-bold">{userEntry.xp.toLocaleString()} XP</strong> • {userEntry.streakDays} Day Streak 🔥
+              </span>
+            </div>
+          </div>
+
+          {/* League Tier Progress Bar (Compact Mobile Width) */}
+          <div className="w-full md:w-64 space-y-1 bg-slate-800/80 p-2.5 sm:p-3 rounded-xl border border-slate-700/70 shrink-0">
+            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold text-slate-200">
+              <span>{currentLeague.name}</span>
+              <span className="text-amber-400 font-mono">{xpProgressPct}%</span>
+            </div>
+            <div className="w-full h-1.5 sm:h-2 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-700">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 transition-all duration-500"
+                style={{ width: `${xpProgressPct}%` }}
+              />
+            </div>
+            {currentLeague.nextTierName && (
+              <span className="text-[9px] sm:text-[10px] text-slate-400 font-medium block text-right truncate">
+                Need {xpToNextTier.toLocaleString()} XP for {currentLeague.nextTierName}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Integrated Inline Filter Toolbar (Single Row on Mobile) */}
+      <div className="space-y-1.5 pt-1">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          {/* Time Reset Tabs */}
+          <div className="flex items-center bg-slate-100 p-0.5 sm:p-1 rounded-xl border border-slate-200 shrink-0">
+            <button
+              type="button"
+              onClick={() => setTimeFilter('daily')}
+              className={`px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-extrabold transition-all cursor-pointer ${
+                timeFilter === 'daily'
+                  ? 'bg-white text-slate-900 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Daily
+            </button>
+            <button
+              type="button"
+              onClick={() => setTimeFilter('weekly')}
+              className={`px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-extrabold transition-all cursor-pointer ${
+                timeFilter === 'weekly'
+                  ? 'bg-white text-slate-900 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Weekly
+            </button>
+            <button
+              type="button"
+              onClick={() => setTimeFilter('allTime')}
+              className={`px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-extrabold transition-all cursor-pointer ${
+                timeFilter === 'allTime'
+                  ? 'bg-white text-slate-900 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              All-Time
+            </button>
+          </div>
+
+          {/* All Odisha State Leaderboard Badge */}
+          <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] sm:text-xs font-extrabold text-slate-700 bg-slate-100/80 border border-slate-200 shrink-0 font-mono">
+            <MapPin className="w-3 h-3 text-rose-500 shrink-0" />
+            <span>All Odisha</span>
+          </div>
+        </div>
+
+        {/* Reset Notice Subtext */}
+        <p className="text-[10px] sm:text-[11px] font-medium text-slate-500 pl-0.5 truncate">
+          {resetNotice}
+        </p>
+      </div>
+
+      {/* Top 3 Visual Podium (Mobile-Optimized Cards) */}
+      {podium.length >= 3 && (
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-4 pt-1 pb-1 items-end text-center">
+          {/* 2nd Place (Silver) */}
+          <div className="p-2 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-b from-slate-100 to-slate-200/70 border border-slate-300/80 space-y-0.5 relative">
+            <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-base sm:text-xl">🥈</span>
+            <div className="w-7 h-7 sm:w-10 sm:h-10 mx-auto rounded-full bg-slate-300 text-slate-800 font-bold text-[10px] sm:text-xs flex items-center justify-center border-2 border-white shadow-2xs">
+              {podium[1].name.charAt(0)}
+            </div>
+            <span className="font-extrabold text-slate-900 text-[11px] sm:text-sm block truncate pt-0.5">{podium[1].name}</span>
+            <span className="text-[9px] sm:text-[10px] text-slate-500 font-medium block truncate">{podium[1].district.split(' ')[0]}</span>
+            <span className="inline-block px-1.5 py-0.5 rounded-md bg-white text-slate-800 font-mono font-black text-[10px] sm:text-xs border border-slate-200">
+              {podium[1].xp.toLocaleString()}
+            </span>
+          </div>
+
+          {/* 1st Place (Gold Podium - Elevated) */}
+          <div className="p-2.5 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-b from-amber-100 via-amber-50 to-orange-100/80 border-2 border-amber-300 space-y-0.5 relative -mt-2 shadow-xs">
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-lg sm:text-2xl">👑</span>
+            <div className="w-8 h-8 sm:w-12 sm:h-12 mx-auto rounded-full bg-amber-400 text-amber-950 font-black text-xs sm:text-sm flex items-center justify-center border-2 border-white shadow-2xs">
+              {podium[0].name.charAt(0)}
+            </div>
+            <span className="font-black text-slate-900 text-[11px] sm:text-sm block truncate pt-0.5">{podium[0].name}</span>
+            <span className="text-[9px] sm:text-[10px] text-amber-800 font-bold block truncate">{podium[0].district.split(' ')[0]}</span>
+            <span className="inline-block px-2 py-0.5 rounded-md bg-amber-500 text-slate-950 font-mono font-black text-[10px] sm:text-xs shadow-2xs">
+              {podium[0].xp.toLocaleString()}
+            </span>
+          </div>
+
+          {/* 3rd Place (Bronze) */}
+          <div className="p-2 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-b from-amber-50 to-orange-100/50 border border-amber-200/80 space-y-0.5 relative">
+            <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-base sm:text-xl">🥉</span>
+            <div className="w-7 h-7 sm:w-10 sm:h-10 mx-auto rounded-full bg-amber-200 text-amber-900 font-bold text-[10px] sm:text-xs flex items-center justify-center border-2 border-white shadow-2xs">
+              {podium[2].name.charAt(0)}
+            </div>
+            <span className="font-extrabold text-slate-900 text-[11px] sm:text-sm block truncate pt-0.5">{podium[2].name}</span>
+            <span className="text-[9px] sm:text-[10px] text-slate-500 font-medium block truncate">{podium[2].district.split(' ')[0]}</span>
+            <span className="inline-block px-1.5 py-0.5 rounded-md bg-white text-amber-900 font-mono font-black text-[10px] sm:text-xs border border-amber-200">
+              {podium[2].xp.toLocaleString()}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Master State Toppers List */}
+      <div className="space-y-1.5 pt-1">
+        <h4 className="text-[10px] sm:text-xs font-extrabold text-slate-500 uppercase tracking-wider pl-0.5">
+          {timeFilter === 'daily' ? "Today's Active Daily Toppers" : timeFilter === 'weekly' ? 'Weekly Sprint Leaders' : 'All-Time Master State Toppers'}
+        </h4>
+        {rankList.map((entry) => (
+          <div
+            key={entry.userId}
+            className={`p-2.5 sm:p-3 rounded-xl border flex items-center justify-between text-xs transition-all ${
+              entry.isCurrentUser
+                ? 'bg-amber-50/80 border-amber-300 ring-2 ring-amber-400/30 font-bold'
+                : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-100/70'
+            }`}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="w-5 font-mono font-black text-slate-700 text-center shrink-0 text-[11px] sm:text-xs">#{entry.rank}</span>
+              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full ${entry.avatarBg} text-white font-bold flex items-center justify-center shrink-0 text-xs`}>
+                {entry.name.charAt(0)}
+              </div>
+              <div className="min-w-0 pr-1">
+                <span className="font-bold text-slate-900 block truncate text-xs">{entry.name}</span>
+                <span className="text-[9px] sm:text-[10px] text-slate-500 font-medium block truncate">{entry.district} • {entry.league}</span>
+              </div>
+            </div>
+
+            <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-white border border-slate-200 text-slate-800 font-mono font-black text-[10px] sm:text-xs shrink-0 shadow-2xs">
+              {entry.xp.toLocaleString()} XP
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Your Nearby Rivals Bracket (Shown if student rank > #10) */}
+      {userEntry.rank > 10 && nearbyBracket.length > 0 && (
+        <div className="space-y-1.5 pt-2.5 border-t border-slate-200/80">
+          <div className="flex items-center justify-between pl-0.5">
+            <h4 className="text-[10px] sm:text-xs font-extrabold text-brand-700 uppercase tracking-wider flex items-center gap-1">
+              <TargetIcon className="w-3 h-3 text-brand-600" />
+              <span>Nearby Rivals (Rank #{Math.max(11, userEntry.rank - 2)} to #{userEntry.rank + 2})</span>
+            </h4>
+            <span className="text-[9px] text-slate-400 font-medium hidden sm:inline">Overtake +20 XP to jump rank!</span>
+          </div>
+
+          {nearbyBracket.map((entry) => (
+            <div
+              key={entry.userId}
+              className={`p-2.5 sm:p-3 rounded-xl border flex items-center justify-between text-xs transition-all ${
+                entry.isCurrentUser
+                  ? 'bg-amber-100/90 border-amber-300 ring-2 ring-amber-400/40 shadow-xs'
+                  : 'bg-white border-slate-200/90 hover:border-slate-300'
+              }`}
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className={`w-8 sm:w-10 font-mono font-black text-center shrink-0 text-[10px] sm:text-xs ${entry.isCurrentUser ? 'text-amber-900 text-xs sm:text-sm' : 'text-slate-600'}`}>
+                  #{entry.rank.toLocaleString()}
+                </span>
+                <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full ${entry.avatarBg} text-white font-bold flex items-center justify-center shrink-0 text-xs`}>
+                  {entry.name.charAt(0)}
+                </div>
+                <div className="min-w-0 pr-1">
+                  <span className={`font-bold block truncate text-xs ${entry.isCurrentUser ? 'text-slate-950 font-black' : 'text-slate-900'}`}>
+                    {entry.isCurrentUser ? '👉 YOU (Aspirant)' : entry.name}
+                  </span>
+                  <span className="text-[9px] sm:text-[10px] text-slate-500 font-medium block truncate">
+                    {entry.district} • Acc: {entry.accuracyPct}%
+                  </span>
+                </div>
+              </div>
+
+              <span className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg border font-mono font-black text-[10px] sm:text-xs shrink-0 ${
+                entry.isCurrentUser ? 'bg-amber-400 text-slate-950 border-amber-500 shadow-xs' : 'bg-slate-50 text-slate-800 border-slate-200'
+              }`}>
+                {entry.xp.toLocaleString()} XP
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Interactive Select Your Odisha District Modal */}
+      <AnimatePresence>
+        {isDistrictModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-3xl p-4 sm:p-6 max-w-lg w-full shadow-2xl border border-slate-200 space-y-3.5 max-h-[85vh] flex flex-col"
+            >
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="p-1.5 sm:p-2 bg-rose-50 rounded-xl text-rose-600 border border-rose-100 shrink-0">
+                    <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="font-extrabold text-sm sm:text-base text-slate-900 truncate">Select Your Odisha District</h3>
+                    <p className="text-[10px] sm:text-xs text-slate-500 truncate">Pick from all 30 districts of Odisha</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsDistrictModalOpen(false)}
+                  className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 cursor-pointer shrink-0"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* District Search Bar */}
+              <input
+                type="text"
+                placeholder="Search district (e.g. Cuttack, Ganjam...)"
+                value={districtSearch}
+                onChange={(e) => setDistrictSearch(e.target.value)}
+                className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl text-xs font-bold bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-slate-800 placeholder-slate-400"
+              />
+
+              {/* District List Grid */}
+              <div className="overflow-y-auto flex-1 pr-1 space-y-1.5 max-h-[50vh]">
+                {filteredDistricts.map((dist) => {
+                  const isSelected = selectedDistrict === dist;
+                  return (
+                    <button
+                      key={dist}
+                      type="button"
+                      onClick={() => handleSelectDistrict(dist)}
+                      className={`w-full p-2.5 sm:p-3 rounded-xl border flex items-center justify-between text-xs font-bold text-left transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-amber-50 border-amber-400 text-amber-950 shadow-2xs font-extrabold'
+                          : 'bg-white border-slate-200/80 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                      }`}
+                    >
+                      <span className="flex items-center gap-2 truncate">
+                        <span>📍</span>
+                        <span className="truncate">{dist}</span>
+                      </span>
+                      {isSelected && (
+                        <Check className="w-4 h-4 text-amber-600 stroke-[3] shrink-0" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};

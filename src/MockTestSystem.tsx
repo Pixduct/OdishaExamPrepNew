@@ -27,6 +27,7 @@ import { Button } from './components/Button';
 import { useAuth } from './lib/AuthContext';
 import { MathTextRenderer, DiagramRenderer } from './components/MathTextRenderer';
 import { fadeSlideUp, modalContent } from './lib/animations';
+import { recordQuestionSolved, completeDailyGoalDirectly } from './lib/streakManager';
 
 // ─────────────────────────────────────────────────────────────
 // Layout Detection Helpers
@@ -497,16 +498,28 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
   }, []);
 
   const handleAnswer = useCallback((optionIndex: number) => {
+    const isNewAnswer = answers[currentQuestionIndex] === undefined;
+    
     if (currentMode === 'practice' && answersRef.current[currentQuestionIndex] !== undefined) {
       setShowExplanation(true);
       return;
     }
     
     setAnswers(prev => ({ ...prev, [currentQuestionIndex]: optionIndex }));
+    
+    if (isNewAnswer) {
+      const res = recordQuestionSolved(1, user?.id);
+      if (res.goalJustCompleted) {
+        window.dispatchEvent(new CustomEvent('oep-streak-goal-completed', { detail: res.newState }));
+      } else {
+        window.dispatchEvent(new CustomEvent('oep-streak-updated', { detail: res.newState }));
+      }
+    }
+
     if (currentMode === 'practice') {
       setShowExplanation(true);
     }
-  }, [currentMode, currentQuestionIndex]);
+  }, [currentMode, currentQuestionIndex, answers, user?.id]);
 
   const toggleMarkForReview = useCallback(() => {
     setMarkedForReview(prev => 
@@ -586,6 +599,13 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
     const totalAttempted = correctCount + incorrectCount;
     const accuracy = totalAttempted > 0 ? Math.round((correctCount / totalAttempted) * 100) : 0;
 
+    const streakRes = completeDailyGoalDirectly(user?.id);
+    if (streakRes.goalJustCompleted) {
+      window.dispatchEvent(new CustomEvent('oep-streak-goal-completed', { detail: streakRes.newState }));
+    } else {
+      window.dispatchEvent(new CustomEvent('oep-streak-updated', { detail: streakRes.newState }));
+    }
+
     onComplete({
       score: finalScore,
       totalMarks: totalMarks,
@@ -606,7 +626,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
       mode: currentMode,
       isComplete: true
     });
-  }, [test, answers, timeLeft, timeSpent, markedForReview, currentMode, untimedPractice, onComplete]);
+  }, [test, answers, timeLeft, timeSpent, markedForReview, currentMode, untimedPractice, onComplete, user?.id]);
 
   const handleExit = useCallback(() => {
     const questions = test.questions || [];

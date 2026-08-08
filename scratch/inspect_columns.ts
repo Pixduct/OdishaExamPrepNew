@@ -10,17 +10,12 @@ const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function run() {
-  const { data: questions, error } = await supabase.from('questions').select('*').limit(1);
+  const { data: banks, error } = await supabase.from('questionBanks').select('*').limit(1);
   if (error) {
-    console.error('Error fetching questions:', error);
+    console.error('Error fetching questionBanks:', error);
     return;
   }
-  if (questions && questions.length > 0) {
-    console.log('Columns in questions table:', Object.keys(questions[0]));
-    console.log('Sample question:', JSON.stringify(questions[0], null, 2));
-  } else {
-    console.log('No questions found in the table.');
-  }
+  console.log(JSON.stringify(banks[0], null, 2));
 }
 
 run();

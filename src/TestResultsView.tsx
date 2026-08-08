@@ -6,10 +6,35 @@ import { Button } from './components/Button';
 import { fadeSlideUpSm } from './lib/animations';
 import { MathTextRenderer, DiagramRenderer } from './components/MathTextRenderer';
 
+import { evaluatePersonalBestImprovements, PersonalBestImprovement } from './lib/personalBestManager';
+import { getUserXpState } from './lib/xpManager';
+
 export default function TestResultsView({ results, onClose }: { results: any, onClose: () => void }) {
   const resultsTestId = results?.test?.id || '';
   const savedTestId = sessionStorage.getItem('oep_reviewTestId');
   const isSameTest = savedTestId === resultsTestId;
+
+  // Evaluate Personal Best improvements
+  const pbImprovements: PersonalBestImprovement[] = React.useMemo(() => {
+    try {
+      const correctCountVal = (results?.test?.questions || []).reduce((acc: number, q: any, i: number) => {
+        return acc + ((results?.answers && results.answers[i]) === q.correctAnswerIndex ? 1 : 0);
+      }, 0);
+      const totalQs = (results?.test?.questions || []).length || 1;
+      const scorePctVal = Math.round((correctCountVal / totalQs) * 100);
+      const accuracyPctVal = results?.accuracy || Math.round((correctCountVal / Math.max(1, results?.answers ? Object.keys(results.answers).length : totalQs)) * 100);
+
+      return evaluatePersonalBestImprovements(undefined, {
+        scorePct: scorePctVal,
+        accuracyPct: accuracyPctVal,
+        timeSpentSecs: results?.timeTaken || 300,
+        questionsSolved: totalQs,
+        testTitle: results?.test?.title || 'Practice Test'
+      });
+    } catch (e) {
+      return [];
+    }
+  }, [results]);
 
   const [currentIdx, setCurrentIdx] = useState(() => {
     if (isSameTest) {
@@ -408,6 +433,33 @@ export default function TestResultsView({ results, onClose }: { results: any, on
         <Button onClick={onClose} variant="outline" className="px-4 sm:px-6 py-1.5 sm:py-2 text-sm sm:text-base border-2 border-slate-200 rounded-xl font-extrabold hover:bg-slate-100">Back</Button>
       </header>
 
+      {/* Personal Best Celebration Banner */}
+      {pbImprovements && pbImprovements.length > 0 && (
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mb-4 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-3.5 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 shadow-xl shadow-amber-500/20 border border-amber-300 flex flex-col sm:flex-row items-center justify-between gap-3"
+          >
+            <div className="flex items-center gap-3 text-center sm:text-left">
+              <span className="text-2xl sm:text-3xl p-2 rounded-xl bg-slate-950/15 shrink-0">🏆</span>
+              <div>
+                <h4 className="font-black text-sm sm:text-base tracking-tight text-slate-950 uppercase flex items-center gap-1.5 justify-center sm:justify-start">
+                  <span>New Personal Best Record!</span>
+                  <span className="text-[10px] bg-slate-950 text-amber-300 px-2 py-0.5 rounded-md font-mono">Record Broken</span>
+                </h4>
+                <p className="text-xs sm:text-sm font-bold text-slate-900/90 mt-0.5">
+                  {pbImprovements.map(imp => `${imp.title}: ${imp.oldFormatted} ➔ ${imp.newFormatted} (${imp.improvementText})`).join(' • ')}
+                </p>
+              </div>
+            </div>
+            <span className="text-xs font-black bg-slate-950 text-amber-400 px-3 py-1.5 rounded-xl uppercase tracking-wider shrink-0 shadow-sm">
+              Keep It Up! 🔥
+            </span>
+          </motion.div>
+        </div>
+      )}
+
       {/* TOP SECTION: Overall Performance & Results (Overview) */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mb-5 sm:mb-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8 lg:gap-6">
@@ -425,8 +477,18 @@ export default function TestResultsView({ results, onClose }: { results: any, on
                 <span className="text-xl sm:text-2xl font-sans font-extrabold text-slate-400"> / {totalMarks}</span>
               </div>
               
-              <div className="flex items-center justify-center gap-1.5 text-xs font-black text-emerald-700 bg-emerald-50/70 border border-emerald-100/60 px-3.5 py-1.5 rounded-2xl w-fit mx-auto mt-3 sm:mt-4 shadow-sm">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500"/> {accuracy}% Accuracy
+              <div className="flex flex-wrap items-center justify-center gap-2 mt-3 sm:mt-4">
+                <div className="flex items-center gap-1.5 text-xs font-black text-emerald-700 bg-emerald-50/70 border border-emerald-100/60 px-3.5 py-1.5 rounded-2xl shadow-sm">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500"/> {accuracy}% Accuracy
+                </div>
+                {(() => {
+                  const xpState = getUserXpState();
+                  return (
+                    <div className="flex items-center gap-1.5 text-xs font-black text-amber-900 bg-amber-100/80 border border-amber-300 px-3.5 py-1.5 rounded-2xl shadow-sm font-mono">
+                      <span>🏆 Rank #{xpState.userRank.toLocaleString()} in Odisha</span>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
 

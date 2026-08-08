@@ -151,8 +151,31 @@ export const activityTracker = {
         timestamp: new Date().toISOString(),
       } as UserActivity;
 
+      let filteredExisting = existing;
+      if (activity.type === 'mock_test_completed' || activity.type === 'practice_test_completed') {
+        const completedBankId = activity.metadata?.test?.bankId || activity.metadata?.bankId || activity.metadata?.test?.id;
+        const completedTitle = activity.title;
+        filteredExisting = existing.filter(act => {
+          if (act.type !== 'test_incomplete') return true;
+          const actBankId = act.metadata?.test?.bankId || act.metadata?.bankId || act.metadata?.test?.id;
+          if (completedBankId && actBankId && completedBankId === actBankId) return false;
+          if (completedTitle && (act.title === completedTitle || act.title === `${completedTitle} - Practice Session` || completedTitle.startsWith(act.title?.replace(' - Practice Session', '')))) return false;
+          return true;
+        });
+      } else if (activity.type === 'test_incomplete') {
+        const newBankId = activity.metadata?.test?.bankId || activity.metadata?.bankId || activity.metadata?.test?.id;
+        const newTitle = activity.title;
+        filteredExisting = existing.filter(act => {
+          if (act.type !== 'test_incomplete') return true;
+          const actBankId = act.metadata?.test?.bankId || act.metadata?.bankId || act.metadata?.test?.id;
+          if (newBankId && actBankId && newBankId === actBankId) return false;
+          if (newTitle && act.title === newTitle) return false;
+          return true;
+        });
+      }
+
       // Keep full data (with questions) in localStorage for resume functionality
-      const updated = sanitizeActivities([newActivity, ...existing]).slice(0, LOCAL_MAX);
+      const updated = sanitizeActivities([newActivity, ...filteredExisting]).slice(0, LOCAL_MAX);
       try {
         localStorage.setItem(localKey, JSON.stringify(updated));
         window.dispatchEvent(new CustomEvent('oep-activity-changed'));

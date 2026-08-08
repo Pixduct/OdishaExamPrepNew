@@ -100,10 +100,12 @@ async function startServer() {
                          fs.existsSync(path.join(distPath, 'index.html')));
 
   app.use(express.json({
+    limit: '50mb',
     verify: (req: any, res, buf) => {
       req.rawBody = buf;
     }
   }));
+  app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
   // CORS middleware for Web and App access
   app.use((req, res, next) => {
@@ -258,9 +260,9 @@ async function startServer() {
   // App Version Diagnostic Endpoint
   app.get("/api/version", (req, res) => {
     res.json({
-      version: "1.1.4",
+      version: "1.1.7",
       buildDate: new Date().toISOString(),
-      commit: "55ff5b3c-resolve-cache-issue",
+      commit: "55ff5b3c-resolve-cache-issue-v4",
       description: "OdishaExamPrep diagnostics endpoint"
     });
   });
@@ -1498,17 +1500,136 @@ async function startServer() {
     }
   });
 
+  interface SearchResult {
+    title: string;
+    url: string;
+    snippet: string;
+  }
+
+  async function performWebSearch(query: string): Promise<SearchResult[]> {
+    const results: SearchResult[] = [];
+    
+    // 1. Tavily API Override
+    const tavilyKey = process.env.TAVILY_API_KEY;
+    if (tavilyKey) {
+      try {
+        console.log(`[Search] Querying Tavily for: "${query}"`);
+        const response = await fetch("https://api.tavily.com/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            api_key: tavilyKey,
+            query,
+            max_results: 5,
+            search_depth: "basic"
+          })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data && Array.isArray(data.results)) {
+            return data.results.map((r: any) => ({
+              title: r.title || "Web Resource",
+              url: r.url || "",
+              snippet: r.content || r.snippet || ""
+            }));
+          }
+        }
+      } catch (e: any) {
+        console.error("[Search] Tavily query failed, falling back:", e.message);
+      }
+    }
+
+    // 2. Serper API Override
+    const serperKey = process.env.SERPER_API_KEY;
+    if (serperKey) {
+      try {
+        console.log(`[Search] Querying Serper for: "${query}"`);
+        const response = await fetch("https://google.serper.dev/search", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-KEY": serperKey
+          },
+          body: JSON.stringify({ q: query, num: 5 })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data && Array.isArray(data.organic)) {
+            return data.organic.map((r: any) => ({
+              title: r.title || "Web Resource",
+              url: r.link || "",
+              snippet: r.snippet || ""
+            }));
+          }
+        }
+      } catch (e: any) {
+        console.error("[Search] Serper query failed, falling back:", e.message);
+      }
+    }
+
+    // 3. Free & Unlimited DuckDuckGo HTML Fallback
+    try {
+      console.log(`[Search] Fetching free DuckDuckGo HTML results for: "${query}"`);
+      const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+      const response = await fetch(ddgUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+      });
+
+      if (response.ok) {
+        const html = await response.text();
+        const blocks = html.split(/<div[^>]*class="[^"]*(?:web-result|results_links)[^"]*"/g);
+        
+        for (let i = 1; i < blocks.length; i++) {
+          const block = blocks[i];
+          const linkMatch = block.match(/<a[^>]*class="result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]+?)<\/a>/);
+          if (!linkMatch) continue;
+          
+          let url = linkMatch[1];
+          let title = linkMatch[2].replace(/<[^>]*>/g, "").trim();
+          
+          if (url.startsWith("//")) {
+            url = "https:" + url;
+          }
+          if (url.includes("uddg=")) {
+            try {
+              const urlObj = new URL("https://duckduckgo.com" + url);
+              const uddg = urlObj.searchParams.get("uddg");
+              if (uddg) url = decodeURIComponent(uddg);
+            } catch (e) {}
+          }
+          
+          const snippetMatch = block.match(/<a[^>]*class="result__snippet"[^>]*>([\s\S]+?)<\/a>/) ||
+                               block.match(/<td[^>]*class="result-snippet"[^>]*>([\s\S]+?)<\/td>/);
+          const snippet = snippetMatch ? snippetMatch[1].replace(/<[^>]*>/g, "").trim() : "";
+          
+          results.push({ title, url, snippet });
+          if (results.length >= 5) break;
+        }
+      }
+    } catch (e: any) {
+      console.error("[Search] DuckDuckGo fallback scraping failed:", e.message);
+    }
+
+    return results;
+  }
+
   // AI Chat completions proxy route (optimized for Nvidia NIM / DeepSeek)
   app.post("/api/chat/completions", checkAiRateLimit, async (req, res) => {
     try {
-      const { model, messages, temperature, max_tokens, stream, response_format } = req.body;
+      const { model, messages, temperature, max_tokens, stream, response_format, webSearch } = req.body;
 
       if (!messages || !Array.isArray(messages)) {
         return res.status(400).json({ error: "Messages must be an array" });
       }
 
-      const totalContentLength = messages.reduce((acc: number, m: any) => acc + (m.content?.length || 0), 0);
-      if (totalContentLength > 150000) {
+      const totalContentLength = messages.reduce((acc: number, m: any) => {
+        if (typeof m.content === 'string') return acc + m.content.length;
+        if (Array.isArray(m.content)) return acc + JSON.stringify(m.content).length;
+        return acc;
+      }, 0);
+      if (totalContentLength > 20000000) {
         return res.status(400).json({ error: "Request content too large" });
       }
 
@@ -1523,9 +1644,126 @@ async function startServer() {
         return res.status(500).json({ error: "NVIDIA NIM API key is not configured on server." });
       }
 
+      let apiMessages = [...messages];
+
+      if (webSearch) {
+        const lastUserMessage = [...messages].reverse().find(m => m.role === 'user');
+        if (lastUserMessage && lastUserMessage.content) {
+          const searchQuery = typeof lastUserMessage.content === 'string'
+            ? lastUserMessage.content
+            : (Array.isArray(lastUserMessage.content) ? (lastUserMessage.content.find((c: any) => c.type === 'text')?.text || '') : '');
+          try {
+            const searchResults = await performWebSearch(searchQuery);
+            if (searchResults.length > 0) {
+              const resultsContext = searchResults.map((r, index) => 
+                `[${index + 1}] Title: ${r.title}\nURL: ${r.url}\nSnippet: ${r.snippet}`
+              ).join('\n\n');
+              
+              const currentLocDate = new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', year: 'numeric', month: 'long', day: 'numeric' });
+              
+              const systemInstructions = `You have access to real-time search results for the user's query. Use the search results below to answer the query accurately. 
+              
+IMPORTANT CITATION RULES:
+1. At the end of your response, always provide a "Sources:" section listing all the references used.
+2. Every item in the sources list MUST be a clickable Markdown link structured exactly as: * [[Index] Source Title](URL) (e.g., * [[1] Wikipedia: Jantar Mantar](https://en.wikipedia.org/wiki/Jantar_Mantar)).
+3. Inside your main response text, you can reference these sources using brackets containing the index link, e.g., [[1]](URL).
+4. Do NOT output plain text URLs or leave links out of the Sources section. Every source must have its exact URL.
+5. Do not mention that you used a search engine or tool unless asked; just answer naturally as an expert assistant. If the search results do not contain the answer, use your pre-existing knowledge but prioritize the search results for recent events.
+6. CRITICAL: Do NOT wrap source links in asterisks or italic markers. Write exactly: * [[1] Title](URL) — never: * *[[1] Title](URL)* or * _[[1] Title](URL)_.
+
+Current Date: ${currentLocDate}
+Search Results:
+${resultsContext}`;
+
+              const systemMsgIndex = apiMessages.findIndex(m => m.role === 'system');
+              if (systemMsgIndex > -1) {
+                apiMessages[systemMsgIndex] = {
+                  role: 'system',
+                  content: `${apiMessages[systemMsgIndex].content}\n\n${systemInstructions}`
+                };
+              } else {
+                apiMessages.unshift({ role: 'system', content: systemInstructions });
+              }
+            }
+          } catch (searchErr: any) {
+            console.error("[Search Engine Error] Failed to fetch or inject search results:", searchErr.message);
+          }
+        }
+      }
+
+      // Handle multi-image requests (>1 image attached)
+      const allImageUrls: string[] = [];
+      apiMessages.forEach((m: any) => {
+        if (Array.isArray(m.content)) {
+          m.content.forEach((part: any) => {
+            if (part?.type === 'image_url' && part?.image_url?.url) {
+              allImageUrls.push(part.image_url.url);
+            }
+          });
+        }
+      });
+
+      if (allImageUrls.length > 1) {
+        console.log(`[Multi-Image Processor] Detected ${allImageUrls.length} images. Transcribing visual contents in parallel...`);
+        try {
+          const imageDescriptions = await Promise.all(
+            allImageUrls.map(async (imgUrl, idx) => {
+              try {
+                const imgRes = await fetch(`${baseUrl}/chat/completions`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${apiKey}`,
+                  },
+                  body: JSON.stringify({
+                    model: 'meta/llama-3.2-11b-vision-instruct',
+                    messages: [
+                      {
+                        role: 'user',
+                        content: [
+                          { type: 'text', text: `Briefly transcribe and describe all text, questions, multiple choice options, diagrams, formulas, and visual content shown in Image #${idx + 1}:` },
+                          { type: 'image_url', image_url: { url: imgUrl } }
+                        ]
+                      }
+                    ],
+                    temperature: 0.1,
+                    max_tokens: 250
+                  }),
+                  signal: AbortSignal.timeout(8000)
+                });
+
+                if (imgRes.ok) {
+                  const imgData: any = await imgRes.json();
+                  const content = imgData.choices?.[0]?.message?.content || '';
+                  return `[Extracted Visual Content & Questions from Attached Image #${idx + 1}]:\n${content}`;
+                }
+              } catch (e: any) {
+                console.error(`[Multi-Image Error for Image ${idx + 1}]:`, e.message);
+              }
+              return `[Attached Image #${idx + 1}]: (Image analysis unavailable)`;
+            })
+          );
+
+          const combinedImageContext = imageDescriptions.join('\n\n');
+
+          apiMessages = apiMessages.map((m: any) => {
+            if (Array.isArray(m.content)) {
+              const textPart = m.content.find((c: any) => c.type === 'text')?.text || 'Analyze the attached images.';
+              return {
+                role: m.role,
+                content: `${textPart}\n\nTHE STUDENT ATTACHED ${allImageUrls.length} IMAGES. HERE IS THE EXTRACTED VISUAL CONTENT AND QUESTIONS FROM ALL ATTACHED IMAGES:\n\n${combinedImageContext}`
+              };
+            }
+            return m;
+          });
+        } catch (multiErr: any) {
+          console.error("[Multi-Image Pre-Processor Error]:", multiErr.message);
+        }
+      }
+
       const requestBody: any = {
-        model: model || 'meta/llama-3.1-8b-instruct',
-        messages,
+        model: (model && model !== 'meta/llama-3.2-11b-vision-instruct') ? model : 'meta/llama-3.1-8b-instruct',
+        messages: apiMessages,
         temperature: temperature !== undefined ? temperature : 0.2,
         stream,
       };
@@ -1539,7 +1777,7 @@ async function startServer() {
       }
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
+      const timeoutId = setTimeout(() => controller.abort(), 120000); // 120s timeout for vision model inference
 
       const abortHandler = () => {
         controller.abort();
@@ -1562,6 +1800,54 @@ async function startServer() {
         if (!response.ok) {
           const errorText = await response.text();
           console.error("NIM API error status:", response.status, errorText);
+
+          // If Vision model fails, retry seamlessly with standard text model
+          if (requestBody.model === 'meta/llama-3.2-11b-vision-instruct') {
+            console.log("[Vision Fallback] Retrying with meta/llama-3.1-8b-instruct text model...");
+            const fallbackMessages = requestBody.messages.map((m: any) => {
+              if (Array.isArray(m.content)) {
+                const textPart = m.content.find((c: any) => c.type === 'text')?.text || 'Analyze the uploaded file.';
+                return { role: m.role, content: textPart };
+              }
+              return m;
+            });
+
+            const fallbackBody = {
+              ...requestBody,
+              model: 'meta/llama-3.1-8b-instruct',
+              messages: fallbackMessages
+            };
+
+            try {
+              const fallbackRes = await fetch(`${baseUrl}/chat/completions`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${apiKey}`,
+                },
+                body: JSON.stringify(fallbackBody),
+                signal: controller.signal
+              });
+
+              if (fallbackRes.ok && stream) {
+                res.setHeader("Content-Type", "text/event-stream");
+                res.setHeader("Cache-Control", "no-cache");
+                res.setHeader("Connection", "keep-alive");
+                const reader = fallbackRes.body?.getReader();
+                if (reader) {
+                  while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    res.write(value);
+                  }
+                }
+                return res.end();
+              }
+            } catch (fallbackErr: any) {
+              console.error("[Vision Fallback Failed]:", fallbackErr.message);
+            }
+          }
+
           if (!res.headersSent) {
             return res.status(response.status).json({ error: errorText });
           }

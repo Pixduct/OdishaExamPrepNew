@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `3.7.2` (Mobile-Refined Layout for Dark User Rank Card & Leaderboard Banner) |
+| **Current Version** | `3.7.2` (Mobile-Refined Layout for Odisha Rank & Student Leagues Component) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -35,9 +35,9 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 
 - **Current Phase:** Phase 9 — Performance, SEO & Native Android Build (Complete)
 - **Current Milestone:** Production Maintenance & Mobile UX Optimization
-- **Current Priority:** Mobile View Refinements & Touch Target Calibration
+- **Current Priority:** Mobile View Refinements & Podium Formatting
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Refined mobile layout for the dark user rank banner in `OdishaLeaderboardCard.tsx` (v3.7.2). Resolved text truncation on percentiles (`(19.7th Percentile)`) and header titles (`Odisha Rank & Student Leagues`), aligned user details on the top left with a compact top-right yellow rank badge (`RANK #13,017`), and streamlined the league progress bar container on mobile while leaving the desktop/laptop layout 100% untouched.
+- **Last Completed Task:** Refined mobile layout for `OdishaLeaderboardCard.tsx` (v3.7.2). Fixed header title truncation on mobile (`Odisha Rank & Leagues`), added smart mobile name formatting on 3-tile podium cards (`Jagannath S.`, `Anwesha M.`, `Amresh S.`) to eliminate ugly ellipsis truncation (`Jagannath ...`), simplified subtext & district badges on mobile list items (`Khordha • Diamond`), and preserved desktop/laptop layout 100% untouched.
 
 ---
 

@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `3.7.0` (Database-Driven Exam Context Selector & Professional Empty States) |
+| **Current Version** | `3.7.1` (Mobile-Refined Layout for Today's AI Study Plan Component) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -34,10 +34,10 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 ## Current Status
 
 - **Current Phase:** Phase 9 — Performance, SEO & Native Android Build (Complete)
-- **Current Milestone:** Production Maintenance & User Experience Expansion
-- **Current Priority:** Multi-Exam Syllabus Scoping & Database-Driven Context Selector
+- **Current Milestone:** Production Maintenance & Mobile UX Optimization
+- **Current Priority:** Mobile View Refinements & Touch Target Calibration
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Eliminated hardcoded placeholder exams (v3.7.0). Transformed `ExamContextSelectorModal` to build dynamic categories strictly from live published exams in the database (`buildCategorizedExamsFromDb`). Implemented professional `Content Coming Soon for <Exam Name>` empty state card in `AIStudyPlanCard.tsx` when a target exam currently has 0 active mock tests or question banks, replacing random placeholder tasks with clear guidance and `[ Switch Target Exam ]` CTA button.
+- **Last Completed Task:** Refined mobile layout for `AIStudyPlanCard.tsx` (v3.7.1). Eliminated title clipping/truncation on mobile so task titles wrap naturally, made header pills horizontal-scrollable with compact padding, simplified mobile progress bar text (`50% (2/4 Done)`), and added a sleek mobile task card footer row (`💡 Rationale` + compact `[ Start → ]` button) while leaving the desktop/laptop view 100% untouched.
 
 ---
 

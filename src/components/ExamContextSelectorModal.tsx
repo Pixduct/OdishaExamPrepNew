@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Layers, CheckCircle2, ChevronRight, ChevronDown, Sparkles, Target, Trophy } from 'lucide-react';
 import { useActiveExamContext, CategorizedExams, buildCategorizedExamsFromDb } from '../lib/activeExamStore';
@@ -106,16 +107,16 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-[120] overflow-hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="fixed inset-0 z-[99999] overflow-hidden flex items-end sm:items-center justify-center p-0 sm:p-4 pointer-events-none">
         {/* Ambient Glassmorphic Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-slate-950/75 backdrop-blur-md transition-opacity"
+          className="fixed inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity pointer-events-auto z-[99998]"
         />
 
         {/* Modal / Sliding Bottom Sheet Panel */}
@@ -124,7 +125,7 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-          className="w-full sm:max-w-xl md:max-w-2xl bg-white/95 sm:bg-white/90 backdrop-blur-2xl rounded-t-[2.5rem] sm:rounded-[2.5rem] border border-white/50 sm:border-slate-200/80 shadow-2xl shadow-slate-950/30 overflow-hidden relative text-left flex flex-col max-h-[90vh] sm:max-h-[85vh] z-10 my-0 sm:my-auto"
+          className="w-full sm:max-w-xl md:max-w-2xl bg-white rounded-t-[2.5rem] sm:rounded-[2.5rem] border border-slate-200/80 shadow-2xl shadow-slate-950/40 overflow-hidden relative text-left flex flex-col max-h-[85vh] sm:max-h-[80vh] z-[99999] my-0 sm:my-auto pointer-events-auto"
         >
           {/* Top Drag Indicator for Mobile */}
           <div className="sm:hidden pt-3 pb-1 shrink-0 bg-white/95 backdrop-blur-md">
@@ -392,6 +393,7 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
             </div>
           </motion.div>
         </div>
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
     );
   };

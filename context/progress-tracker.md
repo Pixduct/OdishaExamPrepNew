@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `3.6.0` (Scalable Multi-Exam Context & Filtering Architecture) |
+| **Current Version** | `3.7.0` (Database-Driven Exam Context Selector & Professional Empty States) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -35,9 +35,9 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 
 - **Current Phase:** Phase 9 — Performance, SEO & Native Android Build (Complete)
 - **Current Milestone:** Production Maintenance & User Experience Expansion
-- **Current Priority:** Multi-Exam Syllabus Scoping & In-Page Target Context Switcher
+- **Current Priority:** Multi-Exam Syllabus Scoping & Database-Driven Context Selector
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Fixed AI Study Plan target exam switching bug (v3.6.1). Updated `studyPlannerEngine.ts` and `recommendationEngine.ts` to scope weak topic analysis, fallback syllabus subjects, and task generation strictly to the active target exam (`targetExam.examId`). When switching targets (e.g., from OSSSC Nursing to OSSC CGL), daily study plan tasks instantly refresh to generate subjects belonging strictly to the newly selected exam syllabus (`Computer Awareness & IT`, `General English Grammar`, `Arithmetic & Reasoning`).
+- **Last Completed Task:** Eliminated hardcoded placeholder exams (v3.7.0). Transformed `ExamContextSelectorModal` to build dynamic categories strictly from live published exams in the database (`buildCategorizedExamsFromDb`). Implemented professional `Content Coming Soon for <Exam Name>` empty state card in `AIStudyPlanCard.tsx` when a target exam currently has 0 active mock tests or question banks, replacing random placeholder tasks with clear guidance and `[ Switch Target Exam ]` CTA button.
 
 ---
 

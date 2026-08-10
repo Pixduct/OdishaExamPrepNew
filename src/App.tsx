@@ -6817,19 +6817,33 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     
     const incompletes = allActivities.filter(a => a.type === 'test_incomplete');
     
-    // Filter out any where a completed test exists for the same session id
+    // Filter out any where a completed test exists for the same session id, bank id, or topic title
     const completedSessionIds = new Set(
-      allActivities.filter(a => a.type === 'mock_test_completed').map(a => a.metadata?.resumeSessionId)
+      allActivities.filter(a => a.type === 'mock_test_completed' || a.type === 'practice_test_completed').map(a => a.metadata?.resumeSessionId)
+    );
+
+    const completedBankIds = new Set(
+      allActivities.filter(a => a.type === 'mock_test_completed' || a.type === 'practice_test_completed').map(a => a.metadata?.bankId || a.metadata?.test?.bankId || a.metadata?.test?.id)
+    );
+
+    const completedTitles = new Set(
+      allActivities.filter(a => a.type === 'mock_test_completed' || a.type === 'practice_test_completed').map(a => (a.title || '').toLowerCase().replace(/(\s*-\s*Practice Session)+$/gi, '').trim())
     );
     
-    // Deduplicate so we only show the LATEST incomplete state for a given session ID
+    // Deduplicate so we only show the LATEST incomplete state for a given topic/session
     const resumeMap = new Map();
     incompletes.forEach(a => {
        const sessionId = a.metadata?.resumeSessionId || a.metadata?.test?.id;
-       if (sessionId && !completedSessionIds.has(sessionId)) {
-          if (!resumeMap.has(sessionId)) {
-              resumeMap.set(sessionId, a);
-          }
+       const bankId = a.metadata?.bankId || a.metadata?.test?.bankId || a.metadata?.test?.id;
+       const cleanTitle = (a.title || a.metadata?.test?.title || '').toLowerCase().replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
+
+       if (sessionId && completedSessionIds.has(sessionId)) return;
+       if (bankId && completedBankIds.has(bankId)) return;
+       if (cleanTitle && completedTitles.has(cleanTitle)) return;
+
+       const dedupKey = bankId || cleanTitle || sessionId;
+       if (dedupKey && !resumeMap.has(dedupKey)) {
+          resumeMap.set(dedupKey, a);
        }
     });
     
@@ -7612,9 +7626,19 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                 {incompleteTests.slice(0, 6).map((a: any, i: number) => {
                   // Support both full-question activities (local) and lite cloud-synced ones
                   const answeredCount = (() => {
-                    try { return Object.keys(a.metadata?.answers || {}).length; } catch { return 0; }
+                    try {
+                      if (a.metadata?.answers && typeof a.metadata.answers === 'object') {
+                        const k = Object.keys(a.metadata.answers).length;
+                        if (k > 0) return k;
+                      }
+                      if (typeof a.metadata?.currentQuestionIndex === 'number' && a.metadata.currentQuestionIndex > 0) {
+                        return a.metadata.currentQuestionIndex;
+                      }
+                      return 0;
+                    } catch { return 0; }
                   })();
                   const totalCount =
+                    a.metadata?.totalQuestions ||
                     a.metadata?.test?.questions?.length ||
                     a.metadata?.test?._questionCount ||
                     1;
@@ -7631,9 +7655,11 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     } catch { return 'recently'; }
                   })();
 
-                  // Can resume locally or across devices if test ID or questions array is present
+                  // Can resume locally or across devices if test ID or title is present
                   const canResume = !!(
                     a.metadata?.test?.id ||
+                    a.metadata?.test?.title ||
+                    a.title ||
                     (Array.isArray(a.metadata?.test?.questions) && a.metadata.test.questions.length > 0)
                   );
 
@@ -7649,10 +7675,25 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         if (!canResume) return;
                         
                         let testToResume = { ...a.metadata?.test };
+                        if (!testToResume.title && a.title) {
+                          testToResume.title = a.title;
+                        }
                         if (!Array.isArray(testToResume.questions) || testToResume.questions.length === 0) {
-                          if (testToResume.id && !testToResume.id.startsWith('practice-')) {
+                          const testId = testToResume.id || '';
+                          if (testId.startsWith('practice-') || !testId) {
+                            const topicName = (testToResume.title || a.title || '').replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
+                            const reqCount = a.metadata?.totalQuestions || 20;
+                            const instantQs = getInstantQuestionsForTopic(topicName, reqCount);
+                            testToResume.questions = instantQs.map(q => ({
+                              id: q.id,
+                              questionText: q.questionText,
+                              options: q.options,
+                              correctAnswerIndex: q.correctAnswerIndex,
+                              explanation: q.explanation
+                            }));
+                          } else {
                             try {
-                              const freshQs = await examService.getQuestionsForMockTest(testToResume.id);
+                              const freshQs = await examService.getQuestionsForMockTest(testId);
                               if (freshQs && freshQs.length > 0) {
                                 testToResume.questions = freshQs;
                               }

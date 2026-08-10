@@ -20,6 +20,18 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
   const [dbExams, setDbExams] = useState<any[]>(availableExamsFromDb);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
 
+  // Lock background body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   useEffect(() => {
     if (Array.isArray(availableExamsFromDb) && availableExamsFromDb.length > 0) {
       setDbExams(availableExamsFromDb);
@@ -96,34 +108,36 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[120] overflow-y-auto no-scrollbar">
-        {/* Backdrop */}
+      <div className="fixed inset-0 z-[120] overflow-hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        {/* Ambient Glassmorphic Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-slate-950/65 backdrop-blur-md transition-opacity"
+          className="fixed inset-0 bg-slate-950/75 backdrop-blur-md transition-opacity"
         />
 
-        {/* Modal Outer Layout Container */}
-        <div className="min-h-screen flex items-end sm:items-center justify-center p-0 sm:p-4 text-center">
-          {/* Modal / Bottom Sheet Panel */}
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-            className="w-full sm:max-w-2xl bg-white rounded-t-[2.5rem] sm:rounded-[2.25rem] border-t sm:border border-slate-200 shadow-2xl overflow-hidden relative text-left flex flex-col max-h-[85vh] sm:max-h-[80vh] z-10"
-          >
-            {/* Top Drag Pill for Mobile */}
-            <div className="sm:hidden w-12 h-1.5 bg-slate-200 rounded-full mx-auto my-3 shrink-0" />
+        {/* Modal / Sliding Bottom Sheet Panel */}
+        <motion.div
+          initial={{ y: '100%', opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: '100%', opacity: 0 }}
+          transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+          className="w-full sm:max-w-xl md:max-w-2xl bg-white/95 sm:bg-white/90 backdrop-blur-2xl rounded-t-[2.5rem] sm:rounded-[2.5rem] border border-white/50 sm:border-slate-200/80 shadow-2xl shadow-slate-950/30 overflow-hidden relative text-left flex flex-col max-h-[90vh] sm:max-h-[85vh] z-10 my-0 sm:my-auto"
+        >
+          {/* Top Drag Indicator for Mobile */}
+          <div className="sm:hidden pt-3 pb-1 shrink-0 bg-white/95 backdrop-blur-md">
+            <div className="w-12 h-1.5 bg-slate-300 rounded-full mx-auto" />
+          </div>
 
-            {/* Header */}
-            <div className="p-5 sm:p-6 pb-4 border-b border-slate-100 flex items-center justify-between gap-4 shrink-0 bg-white">
+          {/* Sticky Header Section (Title + Subtitle + Close Button + Search Input) */}
+          <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-slate-100/90 shrink-0">
+            {/* Header Title Row */}
+            <div className="p-4 sm:p-6 pb-3 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 shrink-0">
-                  <Target className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 shrink-0 shadow-inner">
+                  <Target className="w-5 h-5 text-brand-600" />
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-snug">
@@ -135,15 +149,16 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
                 </div>
               </div>
               <button
+                type="button"
                 onClick={onClose}
-                className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors shrink-0"
+                className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-all shrink-0 active:scale-95 cursor-pointer border-none"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Quick Search Input Control */}
-            <div className="p-4 sm:p-5 pb-3 bg-slate-50/70 border-b border-slate-100 shrink-0">
+            {/* Quick Search Bar */}
+            <div className="px-4 sm:px-6 pb-4">
               <div className="relative">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
@@ -151,10 +166,11 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Search exams, e.g., OSSC, Nursing, Police, Civil Services..."
-                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200/90 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200/90 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-2xs"
                 />
                 {searchQuery && (
                   <button
+                    type="button"
                     onClick={() => setSearchQuery('')}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                   >
@@ -163,18 +179,20 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
                 )}
               </div>
             </div>
+          </div>
 
             {/* Scrollable Content Body */}
-            <div className="p-4 sm:p-6 overflow-y-auto no-scrollbar space-y-6 flex-1">
+            <div className="p-4 sm:p-6 overflow-y-auto overscroll-contain space-y-5 flex-1 premium-scrollbar max-h-[55vh] sm:max-h-[60vh]">
               
               {/* Option 1: Global All Exams Combined Card */}
               <div>
                 <button
+                  type="button"
                   onClick={() => handleSelectExam('all', 'All Exams Combined')}
-                  className={`w-full p-4 rounded-2xl border text-left transition-all duration-200 flex items-center justify-between gap-4 ${
+                  className={`w-full p-4 rounded-2xl border text-left transition-all duration-200 flex items-center justify-between gap-4 cursor-pointer hover:scale-[1.008] ${
                     context.activeExamId === 'all'
-                      ? 'bg-brand-50/80 border-brand-300 shadow-md shadow-brand-500/10 ring-2 ring-brand-500/20'
-                      : 'bg-gradient-to-r from-slate-50 to-indigo-50/30 border-slate-200/80 hover:border-brand-200 hover:bg-white'
+                      ? 'bg-gradient-to-r from-brand-50/90 via-indigo-50/40 to-white border-brand-400 shadow-md shadow-brand-500/10 ring-2 ring-brand-500/30 text-brand-900'
+                      : 'bg-gradient-to-r from-slate-50 to-indigo-50/30 border-slate-200/80 hover:border-brand-300 hover:bg-white text-slate-800'
                   }`}
                 >
                   <div className="flex items-center gap-3.5">
@@ -187,8 +205,8 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-extrabold text-slate-900">All Exams Combined</span>
-                        <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-brand-100 text-brand-700">
+                        <span className="text-sm font-black text-slate-900">All Exams Combined</span>
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-brand-100 text-brand-700 border border-brand-200/60">
                           Aggregated View
                         </span>
                       </div>
@@ -222,16 +240,17 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
                       const isSelected = context.activeExamId === exam.id;
                       return (
                         <button
+                          type="button"
                           key={exam.id}
                           onClick={() => handleSelectExam(exam.id, exam.name)}
-                          className={`p-3.5 rounded-xl border text-left transition-all flex items-center justify-between gap-3 ${
+                          className={`p-3.5 rounded-xl border text-left transition-all duration-200 flex items-center justify-between gap-3 cursor-pointer hover:scale-[1.01] ${
                             isSelected
-                              ? 'bg-emerald-50/80 border-emerald-300 ring-2 ring-emerald-500/20'
-                              : 'bg-white border-slate-200/80 hover:border-brand-200 hover:bg-slate-50/50'
+                              ? 'bg-emerald-50/90 border-emerald-400 ring-2 ring-emerald-500/30 shadow-2xs'
+                              : 'bg-white border-slate-200/80 hover:border-brand-300 hover:bg-slate-50/50'
                           }`}
                         >
                           <div className="min-w-0 flex-1">
-                            <h5 className="text-xs font-extrabold text-slate-900 truncate">
+                            <h5 className="text-xs font-black text-slate-900 truncate">
                               {exam.name}
                             </h5>
                             <div className="flex items-center gap-2 mt-1">
@@ -268,8 +287,9 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
                   <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
                     <p className="text-xs font-bold text-slate-500">No exams matched your search "{searchQuery}"</p>
                     <button
+                      type="button"
                       onClick={() => setSearchQuery('')}
-                      className="mt-2 text-xs font-black text-brand-600 hover:underline"
+                      className="mt-2 text-xs font-black text-brand-600 hover:underline cursor-pointer"
                     >
                       Clear search filter
                     </button>
@@ -281,19 +301,20 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
                     return (
                       <div
                         key={cat.categoryName}
-                        className="border border-slate-200/90 rounded-2xl overflow-hidden bg-white shadow-xs"
+                        className="border border-slate-200/90 rounded-2xl overflow-hidden bg-white shadow-2xs"
                       >
                         {/* Category Header Bar */}
                         <button
+                          type="button"
                           onClick={() => toggleCategory(cat.categoryName)}
-                          className="w-full p-3.5 bg-slate-50/80 hover:bg-slate-100/70 flex items-center justify-between gap-3 text-left transition-colors border-b border-slate-100"
+                          className="w-full p-3.5 bg-slate-50/80 hover:bg-slate-100/70 flex items-center justify-between gap-3 text-left transition-colors border-b border-slate-100 cursor-pointer"
                         >
                           <div className="flex items-center gap-2.5">
-                            <span className="text-base">{cat.categoryIcon || '📂'}</span>
-                            <span className="text-xs sm:text-sm font-extrabold text-slate-900">
+                            <span className="text-base">{cat.categoryIcon || '📚'}</span>
+                            <span className="text-xs sm:text-sm font-black text-slate-900">
                               {cat.categoryName}
                             </span>
-                            <span className="px-2 py-0.5 bg-white border border-slate-200 rounded-full text-[10px] font-bold text-slate-600">
+                            <span className="px-2 py-0.5 bg-white border border-slate-200 rounded-full text-[10px] font-extrabold text-slate-600">
                               {cat.exams.length}
                             </span>
                           </div>
@@ -312,26 +333,28 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
 
                               return (
                                 <button
+                                  type="button"
                                   key={exam.id}
                                   onClick={() => handleSelectExam(exam.id, exam.name)}
-                                  className={`w-full p-3 rounded-xl flex items-center justify-between gap-3 text-left transition-all ${
+                                  className={`w-full p-3 rounded-xl flex items-center justify-between gap-3 text-left transition-all cursor-pointer hover:scale-[1.005] ${
                                     isSelected
-                                      ? 'bg-brand-50/90 font-bold text-brand-700'
+                                      ? 'bg-brand-50/90 font-bold text-brand-700 border border-brand-200/70'
                                       : 'hover:bg-slate-50 text-slate-800'
                                   }`}
                                 >
                                   <div className="flex items-center gap-2.5 min-w-0">
                                     <div className={`w-2 h-2 rounded-full shrink-0 ${
-                                      isSelected ? 'bg-brand-600' : 'bg-slate-300'
+                                      isSelected ? 'bg-brand-600 ring-2 ring-brand-300' : 'bg-slate-300'
                                     }`} />
-                                    <span className="text-xs sm:text-sm font-bold truncate">
+                                    <span className="text-xs sm:text-sm font-extrabold truncate">
                                       {exam.name}
                                     </span>
                                   </div>
 
                                   <div className="flex items-center gap-2 shrink-0">
                                     {isSelected ? (
-                                      <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase bg-brand-600 text-white">
+                                      <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-brand-600 text-white shadow-2xs inline-flex items-center gap-1">
+                                        <CheckCircle2 className="w-3 h-3 text-white" />
                                         Active Target
                                       </span>
                                     ) : (
@@ -351,19 +374,24 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
 
             </div>
 
-            {/* Modal Footer */}
-            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-500 shrink-0">
-              <span>Active: <strong className="text-slate-800">{context.activeExamName}</strong></span>
+            {/* Sticky Bottom Footer */}
+            <div className="sticky bottom-0 z-20 bg-slate-50/95 backdrop-blur-md border-t border-slate-200/80 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3 text-xs font-semibold text-slate-500 shrink-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <span className="truncate">
+                  Active Target: <strong className="text-slate-900 font-bold">{context.activeExamName}</strong>
+                </span>
+              </div>
               <button
+                type="button"
                 onClick={onClose}
-                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-colors"
+                className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-black text-xs uppercase tracking-wider transition-all duration-200 shadow-2xs hover:shadow-md active:scale-95 shrink-0 cursor-pointer border-none"
               >
                 Close
               </button>
             </div>
           </motion.div>
         </div>
-      </div>
-    </AnimatePresence>
-  );
-};
+      </AnimatePresence>
+    );
+  };

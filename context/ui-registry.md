@@ -1046,3 +1046,30 @@ Last updated: 2026-08-10
 - **Synchronized Questions & Duration**: Topic Cards MUST compute `targetCount` and `targetDuration` consistently (`practiceQuestionCount || actualQuestionCount || questionCount`), ensuring card labels, pre-test briefing modals, and session launch logic match 100%.
 - **Case-Insensitive Title & ID Matching**: `completedAct` and `incompleteAct` matching algorithms MUST case-normalize title strings (`.toLowerCase()`) and remove session suffixes (`"- Practice Session"`) to handle uppercase/mixed-case title variations cleanly.
 - **Egress-Safe Fallback Resume**: When resuming stripped cloud-synced practice activities (`toCloudSafe()`), cards MUST fallback to instant topic question compilation (`getInstantQuestionsForTopic`) to launch sessions in <10ms without throwing missing payload alerts.
+
+---
+
+### 35. `ExamContextSelectorModal` (Glassmorphic Multi-Exam Target Selector)
+
+File: [`src/components/ExamContextSelectorModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/ExamContextSelectorModal.tsx)
+Last updated: 2026-08-10
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Backdrop Overlay** | `fixed inset-0 bg-slate-950/75 backdrop-blur-md transition-opacity z-[120]` |
+| **Modal Container (Desktop)** | `sm:max-w-xl md:max-w-2xl bg-white/95 sm:bg-white/90 backdrop-blur-2xl rounded-[2.5rem] border border-white/50 sm:border-slate-200/80 shadow-2xl shadow-slate-950/30 overflow-hidden relative text-left flex flex-col max-h-[85vh]` |
+| **Bottom Sheet Panel (Mobile)** | `w-full bg-white rounded-t-[2.5rem] border-t border-slate-200 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col` |
+| **Sticky Header** | `sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-slate-100/90 shrink-0` |
+| **Quick Search Bar** | `w-full pl-10 pr-4 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200/90 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500` |
+| **Scrollable Body** | `p-4 sm:p-6 overflow-y-auto overscroll-contain space-y-5 flex-1 premium-scrollbar max-h-[55vh] sm:max-h-[60vh]` |
+| **All-Exams Combined Card** | `w-full p-4 rounded-2xl border text-left bg-gradient-to-r from-brand-50/90 via-indigo-50/40 to-white border-brand-400 shadow-md ring-2 ring-brand-500/30 hover:scale-[1.008]` |
+| **Target Exam Item (Active)**| `bg-brand-50/90 font-bold text-brand-700 border border-brand-200/70 hover:scale-[1.005]` |
+| **Target Exam Item (Inactive)**| `hover:bg-slate-50 text-slate-800 border-none` |
+| **Active Target Badge** | `px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-brand-600 text-white shadow-2xs inline-flex items-center gap-1` |
+| **Sticky Footer Bar** | `sticky bottom-0 z-20 bg-slate-50/95 backdrop-blur-md border-t border-slate-200/80 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3 text-xs` |
+
+**Pattern notes:**
+- **Sticky Header & Footer Locks**: Title, close icon, and search bar are fixed at top (`sticky top-0 z-20`). Status bar and close button are fixed at bottom (`sticky bottom-0 z-20`). Only the middle body container (`premium-scrollbar max-h-[55vh]`) scrolls.
+- **Body Scroll Lock**: Background page scrolling is locked (`document.body.style.overflow = 'hidden'`) while modal is active to eliminate background jank.
+- **Database-Driven Category Builder**: All categories and exam list options are generated dynamically from active platform database records (`buildCategorizedExamsFromDb`).
+

@@ -4727,13 +4727,17 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
   const [selectedSectionalSubject, setSelectedSectionalSubject] = useState<string>('All');
   const [internalSelectedExam, setInternalSelectedExam] = useState<string | null>(() => sessionStorage.getItem('oep_selectedExam') || null);
   
-  const selectedExam = propsSelectedExam !== undefined && propsSelectedExam !== null
+  const selectedExam = propsSelectedExam !== undefined
     ? propsSelectedExam
-    : (internalSelectedExam || (exams && exams.length > 0 ? exams[0].id : null));
+    : internalSelectedExam;
 
   const setSelectedExam = (val: string | null) => {
     if (val === null) {
       sessionStorage.setItem('oep_auto_navigated_dismissed', 'true');
+      sessionStorage.removeItem('oep_selectedExam');
+      sessionStorage.removeItem('oep_selectedExamName');
+    } else {
+      sessionStorage.setItem('oep_selectedExam', val);
     }
     setSelectedMockCategory(null);
     setSelectedPracticeCategory(null);
@@ -4743,6 +4747,16 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       setInternalSelectedExam(val);
     }
   };
+
+  useEffect(() => {
+    if (!selectedExam) {
+      const scrollTarget = sessionStorage.getItem('oep_scroll_target');
+      if (scrollTarget) {
+        sessionStorage.removeItem('oep_scroll_target');
+        scrollToElement(scrollTarget, { block: 'start', delay: 100 });
+      }
+    }
+  }, [selectedExam]);
 
 
   const [showAdmin, setShowAdmin] = useState(false);
@@ -10078,6 +10092,8 @@ const ExamDetailPage = () => {
 
   const handleSetSelectedExam = (val: string | null) => {
     if (val === null) {
+      sessionStorage.removeItem('oep_selectedExam');
+      sessionStorage.removeItem('oep_selectedExamName');
       sessionStorage.setItem('oep_scroll_target', 'exams');
       navigate('/');
     } else {

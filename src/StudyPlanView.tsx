@@ -8,6 +8,8 @@ import { OdishaLeaderboardCard } from './components/OdishaLeaderboardCard';
 import { PersonalBestCard } from './components/PersonalBestCard';
 import { stagger } from './lib/animations';
 
+import { ActiveExamContextBar } from './components/ActiveExamContextBar';
+
 interface StudyPlanViewProps {
   user?: any;
   onNavigate?: (tab: string) => void;
@@ -51,6 +53,9 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
             Personalized Hub
           </span>
         </div>
+
+        {/* Hero Context Bar for Multi-Exam Selection */}
+        <ActiveExamContextBar />
 
         {/* 1. Today's AI Study Plan Card */}
         <AIStudyPlanCard userId={user?.id} onLaunchTask={onLaunchTopicPractice} />

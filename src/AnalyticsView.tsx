@@ -22,6 +22,8 @@ import { ExamReadinessCard } from './components/ExamReadinessCard';
 import { TopicConfidenceMatrix } from './components/TopicConfidenceMatrix';
 import { PersonalBestCard } from './components/PersonalBestCard';
 import { AIStudyPlanCard } from './components/AIStudyPlanCard';
+import { useActiveExamContext } from './lib/activeExamStore';
+import { ActiveExamContextBar } from './components/ActiveExamContextBar';
 
 
 const MarkdownMathRenderer = ({ text, isUser = false }: { text: string; isUser?: boolean }) => {
@@ -718,8 +720,22 @@ function AnalyticsViewInner({ user, activities: propActivities, onNavigate }: { 
     return () => window.removeEventListener('oep-activity-changed', load);
   }, [user?.id, propActivities]);
 
+  const [activeContext] = useActiveExamContext();
+
+  const scopedActivities = useMemo(() => {
+    if (!activities || activities.length === 0) return [];
+    if (activeContext.activeExamId === 'all') return activities;
+
+    const targetKey = activeContext.activeExamId.toLowerCase().replace(/[\s\-_]+/g, '');
+    return activities.filter(a => {
+      if (!a) return false;
+      const rawExam = (a.metadata?.examId || a.metadata?.examName || a.metadata?.testCategory || a.title || '').toLowerCase().replace(/[\s\-_]+/g, '');
+      return rawExam.includes(targetKey) || targetKey.includes(rawExam);
+    });
+  }, [activities, activeContext.activeExamId]);
+
   const stats = useMemo(() => {
-    if (activities.length === 0) return null;
+    if (scopedActivities.length === 0) return null;
 
     let totalCorrect = 0;
     let totalWrong = 0;
@@ -728,7 +744,7 @@ function AnalyticsViewInner({ user, activities: propActivities, onNavigate }: { 
     let totalTimeTaken = 0;
     let totalCalculatedScore = 0;
 
-    const recalculatedActivities = activities.filter(Boolean).map(a => {
+    const recalculatedActivities = scopedActivities.filter(Boolean).map(a => {
       const rawAnswers = a.metadata?.answers || {};
       const questions = a.metadata?.test?.questions || [];
       const hasRawData = questions.length > 0 && Object.keys(rawAnswers).length > 0;
@@ -1036,7 +1052,7 @@ function AnalyticsViewInner({ user, activities: propActivities, onNavigate }: { 
       examAnalysis: parsedExamAnalysis,
       attempts: lightAttempts
     };
-  }, [activities]);
+  }, [scopedActivities]);
 
   const assistantChips = useMemo(() => {
     const defaultChips = [
@@ -1368,6 +1384,9 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
         animate="show"
         className="w-full mx-auto px-4 sm:px-0 pt-4 sm:pt-6 space-y-6 sm:space-y-8 pb-32 sm:pb-24 relative z-10"
       >
+        {/* Sticky Active Context Bar for Target Exam Switching */}
+        <ActiveExamContextBar />
+
         {/* Exam Readiness & Goal Progress System Card */}
         <ExamReadinessCard userId={user?.id} />
 

@@ -1023,12 +1023,26 @@ Last updated: 2026-08-08
 | **Action Button** | `w-full sm:w-auto h-12 px-6 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/20` |
 | **Mobile 1-Line Bar** | `sm:hidden flex items-center justify-between gap-3 text-xs cursor-pointer` |
 
+---
+
+### 34. `TopicBankCard & ContinuePracticeCard` (Practice Mode & Resume Cards)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L3494-L3780)
+Last updated: 2026-08-10
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Topic Bank Container** | `p-6 bg-white border border-slate-200 shadow-lg shadow-slate-200/30 rounded-[1.5rem] flex flex-col justify-between gap-6 relative overflow-hidden h-full` |
+| **Continue Practice Container** | `w-[76vw] sm:w-[300px] lg:w-[340px] rounded-2xl border border-slate-100/90 sm:border-white/40 bg-white sm:glass shadow-[0_4px_16px_rgba(0,0,0,0.035)] p-3.5 sm:p-5 flex flex-col gap-2.5` |
+| **Topic Title Typography** | `font-black text-base sm:text-lg text-slate-950 tracking-tight uppercase leading-snug line-clamp-2` |
+| **Card Stat Badges** | `flex items-center gap-1 bg-slate-50 px-2 py-1 rounded text-xs font-bold text-slate-555` (`{totalQs} Questions`, `{totalQs} Mins Session`) |
+| **Completed Status Badge** | `px-1.5 py-0.5 bg-emerald-100 text-emerald-800 text-[8.5px] font-black rounded border border-emerald-200 uppercase tracking-wider flex items-center gap-1` |
+| **In-Progress Status Badge** | `px-1.5 py-0.5 bg-amber-100 text-amber-800 text-[8.5px] font-black rounded border border-amber-200 uppercase tracking-wider animate-pulse` |
+| **Action Button — Unattempted** | `w-full h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-sm premium-gradient text-white shadow-md shadow-brand-500/10 hover:shadow-brand-500/30` |
+| **Action Button — Completed** | `bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-emerald-500/20 hover:shadow-emerald-500/40` (`Retake` + `<RotateCw />`) |
+| **Action Button — In-Progress** | `bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-amber-500/20 hover:shadow-amber-500/40` (`Resume (X%)` + `<Play />`) |
+
 **Pattern notes:**
-- **Dual Viewport Adaptability**: On mobile (<640px), renders as a 44px 1-line interactive bar (`Weak Area • Topic (40%) → Launch Drill`). On desktop, renders as a full dark backdrop banner.
-- **Smart Rationale**: Explains marks weightage and accuracy percentage in beginner-friendly natural language.
-
-
-
-
-
-
+- **Synchronized Questions & Duration**: Topic Cards MUST compute `targetCount` and `targetDuration` consistently (`practiceQuestionCount || actualQuestionCount || questionCount`), ensuring card labels, pre-test briefing modals, and session launch logic match 100%.
+- **Case-Insensitive Title & ID Matching**: `completedAct` and `incompleteAct` matching algorithms MUST case-normalize title strings (`.toLowerCase()`) and remove session suffixes (`"- Practice Session"`) to handle uppercase/mixed-case title variations cleanly.
+- **Egress-Safe Fallback Resume**: When resuming stripped cloud-synced practice activities (`toCloudSafe()`), cards MUST fallback to instant topic question compilation (`getInstantQuestionsForTopic`) to launch sessions in <10ms without throwing missing payload alerts.

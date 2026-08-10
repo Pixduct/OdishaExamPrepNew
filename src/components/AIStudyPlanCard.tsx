@@ -9,13 +9,16 @@ import {
 } from '../lib/studyPlannerEngine';
 
 
+import { useActiveExamContext } from '../lib/activeExamStore';
+
 interface AIStudyPlanCardProps {
   userId?: string;
   onLaunchTask?: (task: StudyPlanTask) => void;
 }
 
 export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaunchTask }) => {
-  const [plan, setPlan] = useState<DailyStudyPlan>(() => getTodayStudyPlan(userId));
+  const [activeContext] = useActiveExamContext();
+  const [plan, setPlan] = useState<DailyStudyPlan>(() => getTodayStudyPlan(userId, activeContext.activeExamId, activeContext.activeExamName));
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [scanMessage, setScanMessage] = useState<string | null>(null);
 
@@ -23,7 +26,7 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
     setIsRefreshing(true);
     setScanMessage('🔍 Scanning latest test attempts & recalculating accuracy gaps...');
     setTimeout(() => {
-      setPlan(getTodayStudyPlan(userId));
+      setPlan(getTodayStudyPlan(userId, activeContext.activeExamId, activeContext.activeExamName));
       setIsRefreshing(false);
       setScanMessage('✅ AI Study Plan updated from your latest test attempts!');
       setTimeout(() => setScanMessage(null), 3000);
@@ -31,21 +34,23 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
   };
 
   useEffect(() => {
-    setPlan(getTodayStudyPlan(userId));
-  }, [userId]);
+    setPlan(getTodayStudyPlan(userId, activeContext.activeExamId, activeContext.activeExamName));
+  }, [userId, activeContext.activeExamId, activeContext.activeExamName]);
 
   useEffect(() => {
     const handleUpdate = () => {
-      setPlan(getTodayStudyPlan(userId));
+      setPlan(getTodayStudyPlan(userId, activeContext.activeExamId, activeContext.activeExamName));
     };
     window.addEventListener('oep-study-plan-updated', handleUpdate);
     window.addEventListener('oep-activity-logged', handleUpdate);
+    window.addEventListener('oep-active-exam-changed', handleUpdate);
 
     return () => {
       window.removeEventListener('oep-study-plan-updated', handleUpdate);
       window.removeEventListener('oep-activity-logged', handleUpdate);
+      window.removeEventListener('oep-active-exam-changed', handleUpdate);
     };
-  }, [userId]);
+  }, [userId, activeContext.activeExamId, activeContext.activeExamName]);
 
   const handleToggle = (taskId: string, e: React.MouseEvent) => {
     e.stopPropagation();

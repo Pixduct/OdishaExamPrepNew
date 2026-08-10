@@ -65,6 +65,8 @@ import { ExamReadinessCard } from './components/ExamReadinessCard';
 import { SmartRecommendationCard } from './components/SmartRecommendationCard';
 import { AIStudyPlanCard } from './components/AIStudyPlanCard';
 import { StudyPlanView } from './StudyPlanView';
+import { useActiveExamContext } from './lib/activeExamStore';
+import { ActiveExamContextBar } from './components/ActiveExamContextBar';
 import { getInstantQuestionsForTopic } from './lib/instantQuestionCompiler';
 import { examService } from './lib/examService';
 import { DEFAULT_ACHIEVERS_JOURNAL } from './lib/defaultAchievers';
@@ -117,6 +119,7 @@ const HistoryView = ({
   onActivityDeleted?: () => void,
   onNavigate?: (tab: string) => void
 }) => {
+  const [activeContext] = useActiveExamContext();
   const [activities, setActivities] = useState<any[]>([]);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [confirmClearAll, setConfirmClearAll] = useState(false);
@@ -132,6 +135,18 @@ const HistoryView = ({
     window.addEventListener('oep-activity-changed', loadActivities);
     return () => window.removeEventListener('oep-activity-changed', loadActivities);
   }, [loadActivities]);
+
+  const examFilteredActivities = useMemo(() => {
+    if (!activities || activities.length === 0) return [];
+    if (activeContext.activeExamId === 'all') return activities;
+
+    const targetKey = activeContext.activeExamId.toLowerCase().replace(/[\s\-_]+/g, '');
+    return activities.filter(a => {
+      if (!a) return false;
+      const rawExam = (a.metadata?.examId || a.metadata?.examName || a.metadata?.testCategory || a.title || '').toLowerCase().replace(/[\s\-_]+/g, '');
+      return rawExam.includes(targetKey) || targetKey.includes(rawExam);
+    });
+  }, [activities, activeContext.activeExamId]);
 
   const handleDeleteActivity = async (activityId: string) => {
     if (!user?.id) return;
@@ -151,42 +166,48 @@ const HistoryView = ({
     onActivityDeleted?.();
   };
 
-  if (!activities || activities.length === 0) {
+  if (!examFilteredActivities || examFilteredActivities.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 sm:p-16 text-center space-y-6 bg-gradient-to-b from-white to-slate-50/40 rounded-[2.5rem] border border-slate-200/40 shadow-[0_20px_50px_rgba(0,0,0,0.02),inset_0_1px_0_rgba(255,255,255,1)] relative overflow-hidden py-16">
-        <div className="absolute inset-0 grid-bg opacity-[0.01]" />
-        <div className="relative flex items-center justify-center w-24 h-24 rounded-full bg-brand-50/50 mb-2">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-100 to-brand-50 flex items-center justify-center shadow-inner">
-            <History className="w-8 h-8 text-brand-600 animate-float-sm" />
+      <div className="space-y-5">
+        <ActiveExamContextBar />
+        <div className="flex flex-col items-center justify-center p-12 sm:p-16 text-center space-y-6 bg-gradient-to-b from-white to-slate-50/40 rounded-[2.5rem] border border-slate-200/40 shadow-[0_20px_50px_rgba(0,0,0,0.02),inset_0_1px_0_rgba(255,255,255,1)] relative overflow-hidden py-16">
+          <div className="absolute inset-0 grid-bg opacity-[0.01]" />
+          <div className="relative flex items-center justify-center w-24 h-24 rounded-full bg-brand-50/50 mb-2">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-100 to-brand-50 flex items-center justify-center shadow-inner">
+              <History className="w-8 h-8 text-brand-600 animate-float-sm" />
+            </div>
           </div>
-        </div>
-        <div className="space-y-2 relative z-10 max-w-sm">
-          <h2 className="text-2xl font-serif font-extrabold bg-gradient-to-r from-brand-700 to-brand-500 bg-clip-text text-transparent">No History Yet</h2>
-          <p className="text-slate-500 font-semibold text-xs sm:text-sm leading-relaxed">
-            Start taking mock tests, practicing custom quizzes, or analyzing your stats to see your detailed progress logs here.
-          </p>
-        </div>
-        <button
-          onClick={() => {
-            if (onNavigate) {
-              onNavigate('home');
-              setTimeout(() => {
+          <div className="space-y-2 relative z-10 max-w-sm">
+            <h2 className="text-2xl font-serif font-extrabold bg-gradient-to-r from-brand-700 to-brand-500 bg-clip-text text-transparent">No History For This Exam</h2>
+            <p className="text-slate-500 font-semibold text-xs sm:text-sm leading-relaxed">
+              No test attempts recorded under <strong className="text-slate-800">{activeContext.activeExamName}</strong>. Switch to "All Exams Combined" or take a test for this target exam.
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              if (onNavigate) {
+                onNavigate('home');
+                setTimeout(() => {
+                  scrollToElement('exams', { block: 'start' });
+                }, 100);
+              } else {
                 scrollToElement('exams', { block: 'start' });
-              }, 100);
-            } else {
-              scrollToElement('exams', { block: 'start' });
-            }
-          }}
-          className="relative z-10 premium-gradient text-white flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-widest hover:premium-glow hover:scale-[1.02] active:scale-98 transition-all duration-300 shadow-md cursor-pointer border-none"
-        >
-          Explore Mock Tests
-        </button>
+              }
+            }}
+            className="relative z-10 premium-gradient text-white flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-widest hover:premium-glow hover:scale-[1.02] active:scale-98 transition-all duration-300 shadow-md cursor-pointer border-none"
+          >
+            Explore Mock Tests
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-5">
+      {/* Hero Context Bar for Multi-Exam Context Selection */}
+      <ActiveExamContextBar />
+
       {/* ── Section header ── */}
       <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-100">
         <div className="flex items-center gap-2.5 min-w-0">
@@ -203,7 +224,7 @@ const HistoryView = ({
           </div>
         </div>
 
-        {activities.length > 0 && (
+        {examFilteredActivities.length > 0 && (
           <div className="shrink-0">
             {confirmClearAll ? (
               <div className="flex items-center gap-1.5 animate-in fade-in duration-200">
@@ -234,13 +255,13 @@ const HistoryView = ({
       </div>
 
       {/* ── Filter Pills ── */}
-      {activities.length > 0 && (() => {
+      {examFilteredActivities.length > 0 && (() => {
         const filterCounts = {
-          all:        activities.length,
-          completed:  activities.filter(a => !!a.metadata && a.type !== 'question_bank_accessed' && a.type !== 'test_incomplete' && a.type !== 'practice_test_completed').length,
-          incomplete: activities.filter(a => a.type === 'test_incomplete').length,
-          ai_quiz:    activities.filter(a => a.type === 'practice_test_completed').length,
-          download:   activities.filter(a => a.type === 'question_bank_accessed').length,
+          all:        examFilteredActivities.length,
+          completed:  examFilteredActivities.filter(a => !!a.metadata && a.type !== 'question_bank_accessed' && a.type !== 'test_incomplete' && a.type !== 'practice_test_completed').length,
+          incomplete: examFilteredActivities.filter(a => a.type === 'test_incomplete').length,
+          ai_quiz:    examFilteredActivities.filter(a => a.type === 'practice_test_completed').length,
+          download:   examFilteredActivities.filter(a => a.type === 'question_bank_accessed').length,
         };
         const filters: { id: typeof activeFilter; label: string; icon: React.ReactNode }[] = [
           { id: 'all',        label: 'All',        icon: <LayoutDashboard className="w-3 h-3" /> },
@@ -293,7 +314,7 @@ const HistoryView = ({
 
       {/* ── Activity cards ── */}
       {(() => {
-        const filteredActivities = activities.filter(a => {
+        const filteredActivities = examFilteredActivities.filter(a => {
           if (activeFilter === 'all')        return true;
           if (activeFilter === 'completed')  return !!a.metadata && a.type !== 'question_bank_accessed' && a.type !== 'test_incomplete' && a.type !== 'practice_test_completed';
           if (activeFilter === 'incomplete') return a.type === 'test_incomplete';

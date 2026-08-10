@@ -1762,6 +1762,13 @@ Allow: /blog
 Allow: /blog/*
 Disallow: /admin
 Disallow: /admin-login
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: GoogleFavicon
+Allow: /
+
 Sitemap: ${sitemapUrl}
 `;
     res.setHeader("Content-Type", "text/plain");

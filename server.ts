@@ -2157,7 +2157,21 @@ ${resultsContext}`;
     const protocol = req.protocol || 'https';
     const sitemapUrl = `${protocol}://${host}/sitemap.xml`;
 
-    const txt = `User-agent: *\nAllow: /\nAllow: /blog\nAllow: /blog/*\nDisallow: /admin\nDisallow: /admin-login\nSitemap: ${sitemapUrl}\n`;
+    const txt = `User-agent: *
+Allow: /
+Allow: /blog
+Allow: /blog/*
+Disallow: /admin
+Disallow: /admin-login
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: GoogleFavicon
+Allow: /
+
+Sitemap: ${sitemapUrl}
+`;
     res.setHeader('Content-Type', 'text/plain');
     res.send(txt);
   });

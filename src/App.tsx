@@ -2832,7 +2832,13 @@ const LandingPage = () => {
     };
 
     window.addEventListener('oep-streak-goal-completed', handleGoalCompleted);
-    return () => window.removeEventListener('oep-streak-goal-completed', handleGoalCompleted);
+    const handleOpenAuth = () => setShowAuthModal(true);
+    window.addEventListener('oep-open-auth-modal', handleOpenAuth);
+
+    return () => {
+      window.removeEventListener('oep-streak-goal-completed', handleGoalCompleted);
+      window.removeEventListener('oep-open-auth-modal', handleOpenAuth);
+    };
   }, [user?.id]);
 
   // Hide WhatsApp button on mobile when auth modal is open
@@ -3053,112 +3059,141 @@ const LandingPage = () => {
           </div>
         </section>
 
-        {/* Home Dashboard Exam Readiness, Smart Recommendation & AI Study Plan System */}
-        <section className="relative z-10 -mt-6 sm:-mt-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-          <ExamReadinessCard userId={user?.id} onStartPracticeClick={() => scrollToElement('exams', { block: 'start', delay: 50 })} />
-          <AIStudyPlanCard userId={user?.id} />
-          <SmartRecommendationCard userId={user?.id} onLaunchPractice={(topic) => scrollToElement('exams', { block: 'start', delay: 50 })} />
+        {/* Home Dashboard Exam Readiness, Smart Recommendation & AI Study Plan System — Only render for LOGGED-IN users */}
+        {user ? (
+          <section className="relative z-10 -mt-6 sm:-mt-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+            <ExamReadinessCard userId={user?.id} onStartPracticeClick={() => scrollToElement('exams', { block: 'start', delay: 50 })} />
+            <AIStudyPlanCard userId={user?.id} />
+            <SmartRecommendationCard userId={user?.id} onLaunchPractice={(topic) => scrollToElement('exams', { block: 'start', delay: 50 })} />
 
-          {(() => {
-            const streak = getStreakState(user?.id);
-            const progressPct = Math.min(100, Math.round((streak.todayQuestionsSolved / 20) * 100));
-            const remainingQs = Math.max(0, 20 - streak.todayQuestionsSolved);
+            {(() => {
+              const streak = getStreakState(user?.id);
+              const progressPct = Math.min(100, Math.round((streak.todayQuestionsSolved / 20) * 100));
+              const remainingQs = Math.max(0, 20 - streak.todayQuestionsSolved);
 
-            return (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-slate-900 border border-slate-800 text-white rounded-2xl p-3.5 sm:p-5 shadow-xl shadow-slate-950/20 relative overflow-hidden group"
-              >
-                <div className="absolute -right-16 -top-16 w-48 h-48 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
-
-                {/* Mobile View: Thin 44px 1-line bar */}
-                <div 
-                  className="sm:hidden flex items-center justify-between gap-3 text-xs cursor-pointer"
-                  onClick={() => window.dispatchEvent(new CustomEvent('oep-open-streak-modal'))}
+              return (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-slate-900 border border-slate-800 text-white rounded-2xl p-3.5 sm:p-5 shadow-xl shadow-slate-950/20 relative overflow-hidden group"
                 >
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <span className="flex items-center gap-1 font-mono font-black text-amber-400 shrink-0 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20">
-                      <Flame className="w-3.5 h-3.5 text-amber-400 fill-current animate-pulse" />
-                      {streak.currentStreak}d
+                  <div className="absolute -right-16 -top-16 w-48 h-48 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+
+                  {/* Mobile View: Thin 44px 1-line bar */}
+                  <div 
+                    className="sm:hidden flex items-center justify-between gap-3 text-xs cursor-pointer"
+                    onClick={() => window.dispatchEvent(new CustomEvent('oep-open-streak-modal'))}
+                  >
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <span className="flex items-center gap-1 font-mono font-black text-amber-400 shrink-0 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20">
+                        <Flame className="w-3.5 h-3.5 text-amber-400 fill-current animate-pulse" />
+                        {streak.currentStreak}d
+                      </span>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
+                          <div 
+                            className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500" 
+                            style={{ width: `${progressPct}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <span className="text-[10px] font-mono text-slate-300 shrink-0">
+                        {streak.todayQuestionsSolved}/20 Qs
+                      </span>
+                    </div>
+
+                    <span className="text-[10px] font-black text-amber-400 hover:text-amber-300 uppercase tracking-wider shrink-0">
+                      {streak.todayGoalCompleted ? 'Goal Done ✓' : `+${remainingQs} Qs →`}
                     </span>
-                    
-                    <div className="flex-1 min-w-0">
+                  </div>
+
+                  {/* Desktop View: Full Stat Banner */}
+                  <div className="hidden sm:flex items-center justify-between gap-6">
+                    <div 
+                      className="flex items-center gap-3.5 cursor-pointer group/title"
+                      onClick={() => window.dispatchEvent(new CustomEvent('oep-open-streak-modal'))}
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 shrink-0 shadow-inner group-hover/title:scale-105 transition-transform">
+                        <Flame className="w-7 h-7 text-amber-500 fill-current animate-bounce" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-extrabold text-sm text-white tracking-tight leading-tight group-hover/title:text-amber-400 transition-colors">
+                            Daily Study Streak
+                          </h3>
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                            {streak.currentStreak} Day Streak
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-400 font-medium mt-0.5">
+                          Longest Record: <strong className="text-slate-200 font-mono">{streak.highestStreak} Days</strong>
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex-1 max-w-md space-y-1.5">
+                      <div className="flex items-center justify-between text-xs font-bold">
+                        <span className="text-slate-300 text-[11px]">Today's Goal ({streak.todayQuestionsSolved}/20 Questions)</span>
+                        <span className="text-amber-400 font-mono text-[11px]">{progressPct}%</span>
+                      </div>
                       <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
-                        <div 
-                          className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500" 
-                          style={{ width: `${progressPct}%` }}
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${progressPct}%` }}
+                          transition={{ duration: 0.6 }}
+                          className="h-full rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-400"
                         />
                       </div>
                     </div>
 
-                    <span className="text-[10px] font-mono text-slate-300 shrink-0">
-                      {streak.todayQuestionsSolved}/20 Qs
-                    </span>
+                    <Button
+                      onClick={() => {
+                        if (streak.todayGoalCompleted) {
+                          window.dispatchEvent(new CustomEvent('oep-open-streak-modal'));
+                        } else {
+                          scrollToElement('exams', { block: 'start', delay: 50 });
+                        }
+                      }}
+                      className="h-10 px-5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shadow-md shadow-amber-500/20 shrink-0 cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Flame className="w-3.5 h-3.5 fill-current" />
+                      <span>{streak.todayGoalCompleted ? 'View Streak Grid' : `Solve ${remainingQs} More Qs →`}</span>
+                    </Button>
                   </div>
-
-                  <span className="text-[10px] font-black text-amber-400 hover:text-amber-300 uppercase tracking-wider shrink-0">
-                    {streak.todayGoalCompleted ? 'Goal Done ✓' : `+${remainingQs} Qs →`}
-                  </span>
+                </motion.div>
+              );
+            })()}
+          </section>
+        ) : (
+          <section className="relative z-10 -mt-6 sm:-mt-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="bg-gradient-to-r from-slate-900 via-brand-950 to-slate-900 border border-slate-800 rounded-2xl sm:rounded-[2.25rem] p-6 sm:p-8 text-white shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
+              <div className="space-y-2 text-center sm:text-left max-w-2xl">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-brand-500/20 text-brand-300 border border-brand-500/30">
+                  <Sparkles className="w-3.5 h-3.5 text-brand-400" />
+                  Personalized Preparation Engine
                 </div>
+                <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+                  Sign In to Access Your Personal AI Study Plan & Score Tracker
+                </h3>
+                <p className="text-xs sm:text-sm font-medium text-slate-300 leading-relaxed">
+                  Your readiness score, daily weak-topic drills, streak goals, and personal performance matrix are securely tied to your user account.
+                </p>
+              </div>
 
-                {/* Desktop View: Full Stat Banner */}
-                <div className="hidden sm:flex items-center justify-between gap-6">
-                  <div 
-                    className="flex items-center gap-3.5 cursor-pointer group/title"
-                    onClick={() => window.dispatchEvent(new CustomEvent('oep-open-streak-modal'))}
-                  >
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 shrink-0 shadow-inner group-hover/title:scale-105 transition-transform">
-                      <Flame className="w-7 h-7 text-amber-500 fill-current animate-bounce" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-extrabold text-sm text-white tracking-tight leading-tight group-hover/title:text-amber-400 transition-colors">
-                          Daily Study Streak
-                        </h3>
-                        <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                          {streak.currentStreak} Day Streak
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-400 font-medium mt-0.5">
-                        Longest Record: <strong className="text-slate-200 font-mono">{streak.highestStreak} Days</strong>
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex-1 max-w-md space-y-1.5">
-                    <div className="flex items-center justify-between text-xs font-bold">
-                      <span className="text-slate-300 text-[11px]">Today's Goal ({streak.todayQuestionsSolved}/20 Questions)</span>
-                      <span className="text-amber-400 font-mono text-[11px]">{progressPct}%</span>
-                    </div>
-                    <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${progressPct}%` }}
-                        transition={{ duration: 0.6 }}
-                        className="h-full rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-400"
-                      />
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={() => {
-                      if (streak.todayGoalCompleted) {
-                        window.dispatchEvent(new CustomEvent('oep-open-streak-modal'));
-                      } else {
-                        scrollToElement('exams', { block: 'start', delay: 50 });
-                      }
-                    }}
-                    className="h-10 px-5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shadow-md shadow-amber-500/20 shrink-0 cursor-pointer flex items-center gap-1.5"
-                  >
-                    <Flame className="w-3.5 h-3.5 fill-current" />
-                    <span>{streak.todayGoalCompleted ? 'View Streak Grid' : `Solve ${remainingQs} More Qs →`}</span>
-                  </Button>
-                </div>
-              </motion.div>
-            );
-          })()}
-        </section>
+              <div className="shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowAuthModal(true)}
+                  className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-indigo-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-xs sm:text-sm shadow-lg shadow-brand-500/25 transition-all duration-200 active:scale-95 cursor-pointer border-none"
+                >
+                  Sign In / Register Free →
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* 1. Practice Core (Explore Exams) */}
         <section id="exams" className="py-12 md:py-16 scroll-mt-24 border-b border-slate-200/50">

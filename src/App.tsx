@@ -1819,32 +1819,36 @@ export const Navbar = ({
               onLaunchBank={(bank: any) => window.dispatchEvent(new CustomEvent('oep-launch-bank', { detail: bank }))}
             />
 
-            {/* Header Streak Flame Pill Button */}
-            <button
-              type="button"
-              onClick={() => setIsStreakModalOpen(true)}
-              className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 border border-amber-500/30 shadow-2xs transition-all text-xs font-black cursor-pointer group shrink-0"
-              title="Daily Preparation Streak — Click for details"
-            >
-              <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 fill-current animate-pulse group-hover:scale-110 transition-transform" />
-              <span className="font-mono text-[11px] sm:text-xs text-amber-700 font-extrabold">
-                <span className="sm:hidden">{streakState.currentStreak}d</span>
-                <span className="hidden sm:inline">{streakState.currentStreak} {streakState.currentStreak === 1 ? 'Day' : 'Days'}</span>
-              </span>
-            </button>
+            {/* Header Streak Flame Pill Button — Only visible when LOGGED IN */}
+            {user && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsStreakModalOpen(true)}
+                  className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 border border-amber-500/30 shadow-2xs transition-all text-xs font-black cursor-pointer group shrink-0"
+                  title="Daily Preparation Streak — Click for details"
+                >
+                  <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 fill-current animate-pulse group-hover:scale-110 transition-transform" />
+                  <span className="font-mono text-[11px] sm:text-xs text-amber-700 font-extrabold">
+                    <span className="sm:hidden">{streakState.currentStreak}d</span>
+                    <span className="hidden sm:inline">{streakState.currentStreak} {streakState.currentStreak === 1 ? 'Day' : 'Days'}</span>
+                  </span>
+                </button>
 
-            <StreakDetailModal
-              isOpen={isStreakModalOpen}
-              onClose={() => setIsStreakModalOpen(false)}
-              streakState={streakState}
-              onSolveMoreClick={() => {
-                if (window.location.pathname === '/') {
-                  scrollToElement('exams', { block: 'start', delay: 50 });
-                } else {
-                  navigate('/');
-                }
-              }}
-            />
+                <StreakDetailModal
+                  isOpen={isStreakModalOpen}
+                  onClose={() => setIsStreakModalOpen(false)}
+                  streakState={streakState}
+                  onSolveMoreClick={() => {
+                    if (window.location.pathname === '/') {
+                      scrollToElement('exams', { block: 'start', delay: 50 });
+                    } else {
+                      navigate('/');
+                    }
+                  }}
+                />
+              </>
+            )}
 
             {user ? (
                <div className="relative">
@@ -1868,52 +1872,34 @@ export const Navbar = ({
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         className="absolute right-0 mt-2 w-60 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-[100]"
                       >
-                         <div className="p-2 space-y-1">
-                           <button
-                             type="button"
-                             onClick={() => {
-                               setShowProfileDropdown(false);
-                               window.dispatchEvent(new CustomEvent('oep-open-tutorial-video'));
-                             }}
-                             className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-slate-700 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-colors cursor-pointer"
-                           >
-                             <Video className="w-4 h-4 text-rose-500" />
-                             <span>Watch Video Guide</span>
-                           </button>
+                        <div className="p-3 bg-slate-50 border-b border-slate-100">
+                          <p className="text-xs font-black text-slate-800 truncate">{profile?.displayName || 'Student Aspirant'}</p>
+                          <p className="text-[10px] font-medium text-slate-500 truncate">{user?.email}</p>
+                        </div>
 
-                           <a
-                             href={supportUrl}
-                             target="_blank"
-                             rel="noopener noreferrer"
-                             onClick={() => setShowProfileDropdown(false)}
-                             className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-slate-700 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-colors cursor-pointer"
-                           >
-                             <HelpCircle className="w-4 h-4 text-brand-600" />
-                             <span>Help & Support</span>
-                           </a>
+                        <div className="p-1 space-y-0.5">
+                          {isAdmin && (
+                            <Link to="/admin" onClick={() => setShowProfileDropdown(false)} className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-xl transition-colors">
+                              <Settings className="w-4 h-4 text-slate-500" />
+                              Admin Panel
+                            </Link>
+                          )}
 
-                           {isAdmin && (
-                             <Link to="/admin" onClick={() => setShowProfileDropdown(false)} className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-slate-600 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-colors">
-                               <Settings className="w-4 h-4 text-slate-500" />
-                               Admin Panel
-                             </Link>
-                           )}
+                          <div className="h-px bg-slate-100 my-1" />
 
-                           <div className="h-px bg-slate-100 my-1" />
-
-                           <button 
-                             onClick={async () => {
-                               setShowProfileDropdown(false);
-                               await logout();
-                               navigate('/');
-                             }}
-                             className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
-                           >
-                             <LogOut className="w-4 h-4" />
-                             Sign Out
-                           </button>
-                         </div>
-                       </motion.div>
+                          <button 
+                            onClick={async () => {
+                              setShowProfileDropdown(false);
+                              await logout();
+                              navigate('/');
+                            }}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                          >
+                            <LogOut className="w-4 h-4" />
+                            Sign Out
+                          </button>
+                        </div>
+                      </motion.div>
                     )}
                   </AnimatePresence>
                </div>
@@ -1933,18 +1919,20 @@ export const Navbar = ({
         {/* Mobile Menu Toggle & Controls */}
         <div className="md:hidden flex items-center gap-2 sm:gap-3">
 
-          {/* Mobile Header Streak Flame Pill Button */}
-          <button
-            type="button"
-            onClick={() => setIsStreakModalOpen(true)}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 border border-amber-500/30 shadow-2xs transition-all text-xs font-black cursor-pointer group shrink-0"
-            title="Daily Preparation Streak"
-          >
-            <Flame className="w-3.5 h-3.5 text-amber-500 fill-current animate-pulse group-hover:scale-110 transition-transform" />
-            <span className="font-mono text-[11px] text-amber-700 font-extrabold">
-              {streakState.currentStreak}d
-            </span>
-          </button>
+          {/* Mobile Header Streak Flame Pill Button — Only visible when LOGGED IN */}
+          {user && (
+            <button
+              type="button"
+              onClick={() => setIsStreakModalOpen(true)}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 border border-amber-500/30 shadow-2xs transition-all text-xs font-black cursor-pointer group shrink-0"
+              title="Daily Preparation Streak"
+            >
+              <Flame className="w-3.5 h-3.5 text-amber-500 fill-current animate-pulse group-hover:scale-110 transition-transform" />
+              <span className="font-mono text-[11px] text-amber-700 font-extrabold">
+                {streakState.currentStreak}d
+              </span>
+            </button>
+          )}
 
           {!user && onSignIn && (
             <button 

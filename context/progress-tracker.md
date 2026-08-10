@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `3.8.0` (Real-Time Dynamic Daily Leaderboard Progression Engine) |
+| **Current Version** | `3.8.2` (Mobile-Refined Layout for Your Personal Records & Milestones Component) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -34,10 +34,10 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 ## Current Status
 
 - **Current Phase:** Phase 9 — Performance, SEO & Native Android Build (Complete)
-- **Current Milestone:** Production Maintenance & Real-Time Gamification
-- **Current Priority:** Dynamic Real-Time Daily Leaderboard Simulation
+- **Current Milestone:** Production Maintenance & Mobile UX Optimization
+- **Current Priority:** Mobile View Tile Layout Refinements
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Built deterministic 15-minute time-seeded progression engine for `getDailyLeaderboardSeed()` in `src/lib/xpManager.ts` (v3.8.0). Peer scores now dynamically accumulate along an organic daily study curve (peak study hours 06:00-11:00 and 16:00-22:00 IST), featuring subtle rank swaps between close competitors within 15-minute slots while keeping page refreshes within the same window 100% stable. Automatically recalculates the logged-in student's live rank position instantly upon completing practice drills or tests.
+- **Last Completed Task:** Refined mobile tile layout for `PersonalBestCard.tsx` (v3.8.2). Fixed tag pill collisions on mobile tiles by hiding redundant category pills (`Score`, `Accuracy`, `Speed`, `Streak`) on mobile screens (`sm:hidden`), formatted empty states into clean 1-line labels (`No Record Yet`), formatted streak values (`1 Day Streak`), and eliminated redundant stacked subtext lines, while leaving desktop/laptop layout 100% untouched.
 
 ---
 

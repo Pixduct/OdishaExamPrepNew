@@ -46,6 +46,7 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`AttemptPerformanceModal`** | Overlay / Modal | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) | Glassmorphic score count-up & progress modal | App.tsx | Active |
 | **`GuidedRecommendationHero`** | Navigation / Hero | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) | Dynamic "What to Study Next" Recommendation Module | App.tsx (Exam Details) | Active |
 | **`AIStudyPlanCard`** | Data Display / Plan | [`src/components/AIStudyPlanCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/AIStudyPlanCard.tsx) | Desktop Grid, Mobile Compact Item | StudyPlanView.tsx, AnalyticsView.tsx, App.tsx | Active |
+| **`OdishaLeaderboardCard`** | Gamification / Social | [`src/components/OdishaLeaderboardCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/OdishaLeaderboardCard.tsx) | Pinned Hero, 3-Podium, Master List, Nearby Rivals | StudyPlanView.tsx, AnalyticsView.tsx, App.tsx | Active |
 
 
 
@@ -1094,3 +1095,73 @@ Last updated: 2026-08-10
 - **Strict User Auth Guard**: Rendered ONLY when `!user` (unauthenticated visitors). Completely hides private readiness scores, study plan tasks, weak topic matrices, and daily streak counters until a user logs in.
 - **Event-Driven Sign-In Trigger**: Clicking the CTA button dispatches `oep-open-auth-modal` or sets `showAuthModal(true)`, opening the instant login dialog cleanly.
 - **Header Flame Removal**: Header streak flame pill buttons (`🔥 X Days` / `🔥 Xd`) are wrapped in `{user && ( ... )}` on desktop and mobile, ensuring zero dummy metrics appear for signed-out guests.
+
+---
+
+### 37. `OdishaLeaderboardCard` (Gamification & Student Leagues Engine)
+
+File: [`src/components/OdishaLeaderboardCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/OdishaLeaderboardCard.tsx)
+Last updated: 2026-08-10
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Container Card** | `bg-white p-3.5 sm:p-7 rounded-2xl sm:rounded-[2.25rem] shadow-xs border border-slate-200/80 space-y-4 sm:space-y-5 mb-6 sm:mb-8 relative overflow-hidden` |
+| **Header Title** | `text-xs sm:text-base font-black text-slate-900 tracking-tight leading-tight block` |
+| **League Badge** | `inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-extrabold border shrink-0 font-mono shadow-2xs` |
+| **Pinned Dark Hero Banner** | `p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 text-white shadow-sm relative overflow-hidden space-y-3` |
+| **Rank Badge (Hero)** | `min-w-[3.5rem] sm:min-w-[4rem] w-auto h-12 sm:h-14 px-2 py-1 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950 font-black flex flex-col items-center justify-center font-mono shadow-xs shrink-0 leading-none` |
+| **Top 3 Podium (Gold #1)** | `p-2.5 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-b from-amber-100 via-amber-50 to-orange-100/80 border-2 border-amber-300 space-y-0.5 relative -mt-2 shadow-xs` |
+| **Master List Item (Topper)** | `p-2.5 sm:p-3 rounded-xl border flex items-center justify-between text-xs transition-all bg-slate-50/60 border-slate-200/80 hover:bg-slate-100/70` |
+| **Nearby Rival Item (User)** | `p-2.5 sm:p-3 rounded-xl border flex items-center justify-between text-xs transition-all bg-amber-100/90 border-amber-300 ring-2 ring-amber-400/40 shadow-xs` |
+| **Rank Number Container** | `w-14 sm:w-16 font-mono font-black text-left shrink-0 text-[10px] sm:text-xs` |
+| **Avatar Circle** | `w-7 h-7 sm:w-8 sm:h-8 rounded-full text-white font-bold flex items-center justify-center shrink-0 text-xs overflow-hidden` |
+| **XP Score Pill** | `px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-white border border-slate-200 text-slate-800 font-mono font-black text-[10px] sm:text-xs shrink-0 shadow-2xs` |
+
+---
+
+### 38. `TopicConfidenceMatrix` (Your Weak Topics & Practice Plan Engine)
+
+File: [`src/components/TopicConfidenceMatrix.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/TopicConfidenceMatrix.tsx)
+Last updated: 2026-08-10
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Container Card** | `bg-white p-4 sm:p-7 rounded-2xl sm:rounded-[2.25rem] shadow-sm border border-slate-200/80 space-y-3 sm:space-y-4` |
+| **Header Icon Pill** | `p-1.5 sm:p-2 rounded-xl bg-amber-50 border border-amber-100 text-amber-600 shrink-0` |
+| **Item Card Container** | `p-3 sm:p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-2.5 hover:border-slate-300 transition-colors` |
+| **Status Badge (Needs Practice)**| `bg-rose-50 text-rose-700 border-rose-200 px-2 py-0.5 rounded-full text-[8.5px] sm:text-[9px] font-bold uppercase tracking-wider border` |
+| **Status Badge (Strong Area)**| `bg-emerald-50 text-emerald-700 border-emerald-200 px-2 py-0.5 rounded-full text-[8.5px] sm:text-[9px] font-bold uppercase tracking-wider border` |
+| **Status Badge (In Progress)**| `bg-amber-50 text-amber-700 border-amber-200 px-2 py-0.5 rounded-full text-[8.5px] sm:text-[9px] font-bold uppercase tracking-wider border` |
+| **Progress Bar Track** | `w-full h-1.5 sm:h-2 bg-slate-200/80 rounded-full overflow-hidden p-0.5` |
+| **Mobile Action CTA Button**| `w-full py-2 rounded-lg text-xs font-black inline-flex items-center justify-center gap-1.5 shadow-2xs bg-amber-500 text-slate-950` |
+
+**Pattern notes:**
+- **Dedicated Mobile Card Architecture**: On mobile viewports (`<640px`), uses a structured 2-line header layout (full-width topic title on line 1, status badge and accuracy metadata sub-row on line 2) to eliminate text squishing and truncation.
+- **Full-Width Touch CTAs**: Mobile action buttons render full-width (`w-full py-2`) with explicit state labels (`Resume Practice (Q16/100)` or `Start Practice Drill →`), eliminating cramped vertical text wrapping.
+- **Desktop/Laptop Layout Lock**: Desktop header (`hidden sm:flex`) and inline CTA buttons remain 100% untouched.
+
+---
+
+### 39. `PersonalBestCard` (Your Personal Records & Milestones Engine)
+
+File: [`src/components/PersonalBestCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/PersonalBestCard.tsx)
+Last updated: 2026-08-10
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Container Card** | `bg-white p-4 sm:p-7 rounded-2xl sm:rounded-[2.25rem] shadow-sm border border-slate-200/80 space-y-4` |
+| **Data Audit Badge** | `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 shrink-0` |
+| **Tile (Best Score)** | `p-3 sm:p-4 rounded-xl bg-gradient-to-br from-amber-50/70 to-orange-50/40 border border-amber-200/70 space-y-1` |
+| **Tile (Best Accuracy)** | `p-3 sm:p-4 rounded-xl bg-gradient-to-br from-emerald-50/70 to-teal-50/40 border border-emerald-200/70 space-y-1` |
+| **Tile (Fastest Speed)** | `p-3 sm:p-4 rounded-xl bg-gradient-to-br from-cyan-50/70 to-blue-50/40 border border-cyan-200/70 space-y-1` |
+| **Tile (Best Streak)** | `p-3 sm:p-4 rounded-xl bg-gradient-to-br from-orange-50/70 to-amber-50/40 border border-orange-200/70 space-y-1` |
+| **Tile Main Value** | `text-xs sm:text-xl font-black text-slate-900 font-mono pt-0.5 tracking-tight leading-snug` |
+
+**Pattern notes:**
+- **Mobile Header Pill Lock**: On mobile viewports (`<640px`), redundant category tag pills (`Score`, `Accuracy`, `Speed`, `Streak`) are hidden (`hidden sm:inline-block`), giving tile headers 100% width with zero badge-title collisions.
+- **Clean Empty State Formatting**: Empty states render as 1 single clean line (`No Record Yet` in `text-slate-400 font-sans font-bold`), preventing words from wrapping line-by-line across 3 vertical lines (`No \n Record \n Yet`).
+- **Single Subtext Line**: Eliminates duplicate subtext stacks on mobile to maintain clean tile proportions.
+- **Desktop/Laptop View Lock**: Desktop tag pills, large font sizing (`sm:text-xl`), and full titles remain 100% untouched.
+
+
+

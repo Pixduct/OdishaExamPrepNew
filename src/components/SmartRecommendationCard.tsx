@@ -50,25 +50,31 @@ export const SmartRecommendationCard: React.FC<SmartRecommendationCardProps> = (
       <div className="absolute -left-20 -top-20 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Mobile View: Thin 44px 1-line bar */}
+      {/* Mobile View: Structured 2-Row Compact Banner */}
       <div
-        className="sm:hidden flex items-center justify-between gap-3 text-xs cursor-pointer"
+        className="sm:hidden space-y-2 cursor-pointer relative z-10"
         onClick={() => onLaunchPractice?.(primaryRecommendation.topicName)}
       >
-        <div className="flex items-center gap-2 min-w-0 flex-1">
-          <span className="flex items-center gap-1 font-mono font-black text-amber-400 shrink-0 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20">
-            <Zap className="w-3.5 h-3.5 text-amber-400 fill-current animate-pulse" />
+        <div className="flex items-center justify-between gap-2">
+          <span className="flex items-center gap-1 font-mono font-black text-amber-400 text-[10px] uppercase tracking-wider bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20">
+            <Zap className="w-3 h-3 text-amber-400 fill-current animate-pulse" />
             Weak Area
           </span>
 
-          <span className="text-xs font-bold text-white truncate min-w-0">
-            {primaryRecommendation.topicName} ({primaryRecommendation.accuracy}%)
+          <span className="text-[10px] font-black text-brand-400 hover:text-brand-300 uppercase tracking-wider shrink-0 flex items-center gap-1">
+            <span>Launch Drill</span>
+            <ArrowRight className="w-3 h-3 text-brand-400" />
           </span>
         </div>
 
-        <span className="text-[10px] font-black text-brand-400 hover:text-brand-300 uppercase tracking-wider shrink-0">
-          Launch Drill →
-        </span>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xs font-bold text-white truncate min-w-0">
+            {primaryRecommendation.topicName}
+          </span>
+          <span className="text-[10px] font-mono font-extrabold text-amber-300 bg-slate-800 px-2 py-0.5 rounded border border-slate-700 shrink-0">
+            {primaryRecommendation.accuracy}% Accuracy
+          </span>
+        </div>
       </div>
 
       {/* Desktop View: Full Spacious Smart Recommendation Banner */}

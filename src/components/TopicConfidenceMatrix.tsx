@@ -100,23 +100,41 @@ export const TopicConfidenceMatrix: React.FC<TopicConfidenceMatrixProps> = ({
           return (
             <div
               key={idx}
-              className={`p-3 sm:p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-2 hover:border-slate-300 transition-colors ${
+              className={`p-3 sm:p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-2.5 hover:border-slate-300 transition-colors ${
                 isHiddenOnMobile ? 'hidden md:block' : 'block'
               }`}
             >
-              {/* Header: Title, Badge, Accuracy % */}
-              <div className="flex items-center justify-between text-xs gap-2">
+              {/* Desktop Header (>= sm) */}
+              <div className="hidden sm:flex items-center justify-between text-xs gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="font-bold text-slate-800 text-[11px] sm:text-xs truncate">{topic.topicName}</span>
-                  <span className={`px-2 py-0.5 rounded-full text-[8.5px] sm:text-[9px] font-bold uppercase tracking-wider border flex items-center gap-1 shrink-0 ${badgeBg}`}>
+                  <span className="font-bold text-slate-800 text-xs truncate">{topic.topicName}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border flex items-center gap-1 shrink-0 ${badgeBg}`}>
                     {statusIcon}
                     {badgeLabel}
                   </span>
                 </div>
 
-                <span className="font-bold text-slate-700 text-[11px] sm:text-xs shrink-0">
+                <span className="font-bold text-slate-700 text-xs shrink-0">
                   {topic.accuracy}% Correct • {topic.totalQuestions} Questions
                 </span>
+              </div>
+
+              {/* Mobile Header (< sm): Structured 2-Line Title & Status Bar */}
+              <div className="sm:hidden space-y-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <h4 className="font-extrabold text-slate-900 text-xs tracking-tight leading-snug truncate pr-1">
+                    {topic.topicName}
+                  </h4>
+                  <span className={`px-2 py-0.5 rounded-full text-[8.5px] font-extrabold uppercase tracking-wider border flex items-center gap-1 shrink-0 ${badgeBg}`}>
+                    {statusIcon}
+                    {badgeLabel}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium">
+                  <span>{topic.accuracy}% Accuracy Rate</span>
+                  <span className="font-mono font-semibold">{topic.totalQuestions} Questions</span>
+                </div>
               </div>
 
               {/* Progress Bar */}
@@ -129,8 +147,8 @@ export const TopicConfidenceMatrix: React.FC<TopicConfidenceMatrixProps> = ({
                 />
               </div>
 
-              {/* Bottom Row: Simple Attempts Info & Practice Button */}
-              <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-slate-500 font-medium pt-0.5">
+              {/* Desktop Bottom Row (>= sm) */}
+              <div className="hidden sm:flex items-center justify-between text-[11px] text-slate-500 font-medium pt-0.5">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span>{topic.attemptCount} {topic.attemptCount === 1 ? 'practice session' : 'practice sessions'}</span>
                   {hasIncomplete && (
@@ -151,7 +169,7 @@ export const TopicConfidenceMatrix: React.FC<TopicConfidenceMatrixProps> = ({
                       onLaunchTopicPractice(topic.topicName);
                     }
                   }}
-                  className={`font-bold inline-flex items-center gap-1 cursor-pointer px-2.5 py-1 rounded-lg text-xs transition-colors shadow-sm shrink-0 ${
+                  className={`font-bold inline-flex items-center gap-1 cursor-pointer px-2.5 py-1 rounded-lg text-xs transition-colors shadow-2xs shrink-0 ${
                     hasIncomplete
                       ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 font-black'
                       : 'bg-brand-50 hover:bg-brand-100 text-brand-600 font-bold'
@@ -166,6 +184,48 @@ export const TopicConfidenceMatrix: React.FC<TopicConfidenceMatrixProps> = ({
                     <>
                       <span>Start Practice</span>
                       <ArrowRight className="w-3 h-3" />
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Mobile Bottom Row (< sm): Clean Touch-Friendly Stacked Layout */}
+              <div className="sm:hidden space-y-2 pt-0.5">
+                <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium">
+                  <span>{topic.attemptCount} {topic.attemptCount === 1 ? 'practice session' : 'practice sessions'}</span>
+                  {hasIncomplete && (
+                    <span className="text-amber-800 font-bold text-[9.5px] flex items-center gap-1">
+                      <Clock className="w-2.5 h-2.5 text-amber-700 shrink-0" />
+                      <span>Q{topic.completedQuestionsCount}/{topic.totalQuestionsCount} Incomplete</span>
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.dispatchEvent(new CustomEvent('oep-launch-topic-drill', { detail: topic.topicName }));
+                    if (onLaunchTopicPractice) {
+                      onLaunchTopicPractice(topic.topicName);
+                    }
+                  }}
+                  className={`w-full py-2 rounded-lg text-xs font-black inline-flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer ${
+                    hasIncomplete
+                      ? 'bg-amber-500 active:bg-amber-600 text-slate-950 border border-amber-600/40'
+                      : 'bg-brand-50 active:bg-brand-100 text-brand-700 border border-brand-200/60'
+                  }`}
+                >
+                  {hasIncomplete ? (
+                    <>
+                      <PlayCircle className="w-3.5 h-3.5 text-slate-950 fill-current shrink-0" />
+                      <span>Resume Practice (Q{topic.completedQuestionsCount}/{topic.totalQuestionsCount})</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Start Practice Drill</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-brand-600 shrink-0" />
                     </>
                   )}
                 </button>

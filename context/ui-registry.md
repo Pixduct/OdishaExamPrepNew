@@ -1073,3 +1073,22 @@ Last updated: 2026-08-10
 - **Body Scroll Lock**: Background page scrolling is locked (`document.body.style.overflow = 'hidden'`) while modal is active to eliminate background jank.
 - **Database-Driven Category Builder**: All categories and exam list options are generated dynamically from active platform database records (`buildCategorizedExamsFromDb`).
 
+---
+
+### 36. `GuestSignInCalloutBanner` (Auth Guard & Guest CTA Banner)
+
+Files: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L3160-L3185), [`src/StudyPlanView.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/StudyPlanView.tsx#L76-L102)
+Last updated: 2026-08-10
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Banner Container** | `bg-gradient-to-r from-slate-900 via-brand-950 to-slate-900 border border-slate-800 rounded-2xl sm:rounded-[2.25rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6` |
+| **Feature Tag Badge** | `inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-brand-500/20 text-brand-300 border border-brand-500/30` |
+| **Headline Typography** | `text-xl sm:text-2xl font-black tracking-tight text-white` |
+| **Subtext Typography** | `text-xs sm:text-sm font-medium text-slate-300 leading-relaxed` |
+| **CTA Action Button** | `px-6 py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-indigo-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-xs sm:text-sm shadow-lg shadow-brand-500/25 transition-all duration-200 active:scale-95 cursor-pointer border-none` |
+
+**Pattern notes:**
+- **Strict User Auth Guard**: Rendered ONLY when `!user` (unauthenticated visitors). Completely hides private readiness scores, study plan tasks, weak topic matrices, and daily streak counters until a user logs in.
+- **Event-Driven Sign-In Trigger**: Clicking the CTA button dispatches `oep-open-auth-modal` or sets `showAuthModal(true)`, opening the instant login dialog cleanly.
+- **Header Flame Removal**: Header streak flame pill buttons (`🔥 X Days` / `🔥 Xd`) are wrapped in `{user && ( ... )}` on desktop and mobile, ensuring zero dummy metrics appear for signed-out guests.

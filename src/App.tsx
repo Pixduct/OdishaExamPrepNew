@@ -7048,13 +7048,19 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       const rawBankTopic = topicBank.title || topicBank.name || '';
       const bankTopicName = rawBankTopic.replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
 
-      // Check if questions are already present in memory
+      // Consistently calculate question count & duration to match card display
+      const actualQs = topicBank.practiceQuestionCount || topicBank.actualQuestionCount || 0;
+      const adminQs = topicBank.questionCount || topicBank.question_count || topicBank.questioncount || 0;
+      const targetCount = actualQs > 0 
+        ? actualQs 
+        : (adminQs > 0 ? adminQs : (Array.isArray(topicBank.questions) ? topicBank.questions.length : (topicBank.totalQuestions || 20)));
+
+      const targetDuration = topicBank.estimatedMinutes || topicBank.durationMinutes || topicBank.duration || targetCount;
+
       let finalQuestions: any[] = [];
-      const targetCount = topicBank.questionCount || topicBank.totalQuestions || 15;
-      const targetDuration = topicBank.estimatedMinutes || topicBank.durationMinutes || 15;
 
       if (Array.isArray(topicBank?.questions) && topicBank.questions.length >= targetCount) {
-        finalQuestions = topicBank.questions;
+        finalQuestions = topicBank.questions.slice(0, targetCount);
       } else {
         // Fast instant question retrieval (<10ms) with exact target question count
         const instantQs = getInstantQuestionsForTopic(bankTopicName, targetCount);

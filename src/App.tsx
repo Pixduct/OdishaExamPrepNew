@@ -3491,10 +3491,25 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
   const isLocked = bank.isPremium && !hasAccessTo(bank);
   const isPremiumUnlocked = bank.isPremium && hasAccessTo(bank);
 
-  const completedAct = activities?.find((act: any) => 
-    (act.type === 'mock_test_completed' || act.type === 'practice_test_completed') && 
-    (act.metadata?.test?.bankId === bank.id || act.metadata?.test?.id === bank.id || act.title === `${bank.title} - Practice Session`)
-  );
+  const cleanBankTitle = bank.title ? bank.title.toLowerCase().replace(/(\s*-\s*Practice Session)+$/gi, '').trim() : '';
+
+  const completedAct = activities?.find((act: any) => {
+    if (act.type !== 'mock_test_completed' && act.type !== 'practice_test_completed') return false;
+    
+    const actBankId = act.metadata?.bankId || act.metadata?.test?.bankId;
+    if (actBankId && bank.id && actBankId === bank.id) return true;
+    
+    const actTestId = act.metadata?.test?.id || act.id;
+    if (actTestId && bank.id && actTestId === bank.id) return true;
+
+    if (act.title) {
+      const cleanActTitle = act.title.toLowerCase().replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
+      if (cleanActTitle && cleanBankTitle && (cleanActTitle === cleanBankTitle || cleanActTitle.includes(cleanBankTitle) || cleanBankTitle.includes(cleanActTitle))) {
+        return true;
+      }
+    }
+    return false;
+  });
   const isCompleted = !isScheduledUpcoming && !!completedAct;
 
   const suffixMatch = bank.title.match(/(?:\s+|-\s*)(I{1,3}|IV|V|VI{0,3}|IX|X|\d{1,2})\s*$/i);
@@ -3508,10 +3523,23 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
     }
   }
 
-  const incompleteAct = !isCompleted && !isScheduledUpcoming && activities?.find((act: any) => 
-    act.type === 'test_incomplete' && 
-    (act.metadata?.test?.bankId === bank.id || act.metadata?.test?.id === bank.id || act.title === `${bank.title} - Practice Session`)
-  );
+  const incompleteAct = !isCompleted && !isScheduledUpcoming && activities?.find((act: any) => {
+    if (act.type !== 'test_incomplete') return false;
+
+    const actBankId = act.metadata?.bankId || act.metadata?.test?.bankId;
+    if (actBankId && bank.id && actBankId === bank.id) return true;
+
+    const actTestId = act.metadata?.test?.id || act.id;
+    if (actTestId && bank.id && actTestId === bank.id) return true;
+
+    if (act.title) {
+      const cleanActTitle = act.title.toLowerCase().replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
+      if (cleanActTitle && cleanBankTitle && (cleanActTitle === cleanBankTitle || cleanActTitle.includes(cleanBankTitle) || cleanBankTitle.includes(cleanActTitle))) {
+        return true;
+      }
+    }
+    return false;
+  });
   const isInProgress = !isScheduledUpcoming && !!incompleteAct;
 
   const actualQs = bank.practiceQuestionCount || bank.actualQuestionCount || 0;
@@ -6970,6 +6998,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
       const practiceTest = {
         id: `practice-${Date.now()}`,
+        bankId: topicBank?.id,
         title: `${bankTopicName} - Practice Session`,
         durationMinutes: duration,
         // Access was already verified above — mark as non-premium here so
@@ -8598,6 +8627,26 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       {(!isMobile || mobileExamTab === 'practice') && (() => {
         const incompleteActivity = activities?.find((act: any) => {
           if (act.type !== 'test_incomplete') return false;
+
+          // Check if a completed test activity already exists for this same session/topic/bank
+          const sessionId = act.metadata?.resumeSessionId || act.metadata?.test?.id;
+          const actTitle = (act.title || act.metadata?.test?.title || '').replace(/(\s*-\s*Practice Session)+$/gi, '').trim().toLowerCase();
+          const actBankId = act.metadata?.test?.bankId || act.metadata?.bankId;
+
+          const isAlreadyCompleted = activities.some((comp: any) => {
+            if (comp.type !== 'mock_test_completed' && comp.type !== 'practice_test_completed') return false;
+            
+            if (sessionId && comp.metadata?.resumeSessionId === sessionId) return true;
+            if (actBankId && (comp.metadata?.bankId === actBankId || comp.metadata?.test?.bankId === actBankId)) return true;
+            
+            if (actTitle && comp.title) {
+              const compTitle = comp.title.replace(/(\s*-\s*Practice Session)+$/gi, '').trim().toLowerCase();
+              if (compTitle && (compTitle === actTitle || compTitle.includes(actTitle) || actTitle.includes(compTitle))) return true;
+            }
+            return false;
+          });
+
+          if (isAlreadyCompleted) return false;
 
           // 1. Direct examId match on metadata or test object
           const actExamId = act.metadata?.test?.examId || act.metadata?.examId;

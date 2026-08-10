@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { Zap, AlertTriangle, CheckCircle2, ArrowRight, ChevronDown, Clock, PlayCircle, BookOpen } from 'lucide-react';
 import { getSmartWeakTopicRecommendations, SmartRecommendationResult } from '../lib/recommendationEngine';
 
+import { useActiveExamContext } from '../lib/activeExamStore';
+
 interface TopicConfidenceMatrixProps {
   userId?: string;
   onLaunchTopicPractice?: (topicName: string) => void;
@@ -12,25 +14,28 @@ export const TopicConfidenceMatrix: React.FC<TopicConfidenceMatrixProps> = ({
   userId,
   onLaunchTopicPractice
 }) => {
+  const [activeContext] = useActiveExamContext();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [data, setData] = useState<SmartRecommendationResult>(() => getSmartWeakTopicRecommendations(userId));
+  const [data, setData] = useState<SmartRecommendationResult>(() => getSmartWeakTopicRecommendations(userId, activeContext.activeExamId));
 
   useEffect(() => {
-    setData(getSmartWeakTopicRecommendations(userId));
-  }, [userId]);
+    setData(getSmartWeakTopicRecommendations(userId, activeContext.activeExamId));
+  }, [userId, activeContext.activeExamId]);
 
   useEffect(() => {
-    const handleUpdate = () => setData(getSmartWeakTopicRecommendations(userId));
+    const handleUpdate = () => setData(getSmartWeakTopicRecommendations(userId, activeContext.activeExamId));
     window.addEventListener('oep-streak-updated', handleUpdate);
     window.addEventListener('oep-streak-goal-completed', handleUpdate);
     window.addEventListener('oep-readiness-updated', handleUpdate);
+    window.addEventListener('oep-active-exam-changed', handleUpdate);
 
     return () => {
       window.removeEventListener('oep-streak-updated', handleUpdate);
       window.removeEventListener('oep-streak-goal-completed', handleUpdate);
       window.removeEventListener('oep-readiness-updated', handleUpdate);
+      window.removeEventListener('oep-active-exam-changed', handleUpdate);
     };
-  }, [userId]);
+  }, [userId, activeContext.activeExamId]);
 
   const { allTopicConfidence } = data;
 

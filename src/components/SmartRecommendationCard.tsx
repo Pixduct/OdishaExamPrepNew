@@ -5,6 +5,8 @@ import { getSmartWeakTopicRecommendations, SmartRecommendationResult, TopicWeakn
 import { Button } from './Button';
 
 
+import { useActiveExamContext } from '../lib/activeExamStore';
+
 interface SmartRecommendationCardProps {
   userId?: string;
   onLaunchPractice?: (topicName: string) => void;
@@ -14,22 +16,25 @@ export const SmartRecommendationCard: React.FC<SmartRecommendationCardProps> = (
   userId,
   onLaunchPractice
 }) => {
-  const [data, setData] = useState<SmartRecommendationResult>(() => getSmartWeakTopicRecommendations(userId));
+  const [activeContext] = useActiveExamContext();
+  const [data, setData] = useState<SmartRecommendationResult>(() => getSmartWeakTopicRecommendations(userId, activeContext.activeExamId));
 
   useEffect(() => {
-    setData(getSmartWeakTopicRecommendations(userId));
-  }, [userId]);
+    setData(getSmartWeakTopicRecommendations(userId, activeContext.activeExamId));
+  }, [userId, activeContext.activeExamId]);
 
   useEffect(() => {
-    const handleUpdate = () => setData(getSmartWeakTopicRecommendations(userId));
+    const handleUpdate = () => setData(getSmartWeakTopicRecommendations(userId, activeContext.activeExamId));
     window.addEventListener('oep-streak-updated', handleUpdate);
     window.addEventListener('oep-streak-goal-completed', handleUpdate);
+    window.addEventListener('oep-active-exam-changed', handleUpdate);
 
     return () => {
       window.removeEventListener('oep-streak-updated', handleUpdate);
       window.removeEventListener('oep-streak-goal-completed', handleUpdate);
+      window.removeEventListener('oep-active-exam-changed', handleUpdate);
     };
-  }, [userId]);
+  }, [userId, activeContext.activeExamId]);
 
   const { primaryRecommendation, secondaryRecommendations } = data;
 

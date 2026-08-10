@@ -54,7 +54,7 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
 
   const handleToggle = (taskId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    toggleTaskCompletion(taskId);
+    toggleTaskCompletion(taskId, activeContext.activeExamId);
   };
 
   const handleTaskClick = (task: StudyPlanTask) => {

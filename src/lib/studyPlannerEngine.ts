@@ -103,10 +103,11 @@ const getUserTargetExam = (examIdInput?: string, examNameInput?: string): { exam
 };
 
 /** Retrieve completed task IDs stored for today */
-const getCompletedTaskIds = (): string[] => {
+const getCompletedTaskIds = (examId?: string): string[] => {
   try {
     const todayStr = new Date().toISOString().split('T')[0];
-    const raw = localStorage.getItem(`${STORAGE_KEY_PLAN}_${todayStr}`);
+    const key = examId && examId !== 'all' ? `${STORAGE_KEY_PLAN}_${examId.toLowerCase().replace(/[\s\-_]+/g, '')}_${todayStr}` : `${STORAGE_KEY_PLAN}_${todayStr}`;
+    const raw = localStorage.getItem(key);
     return raw ? JSON.parse(raw) : [];
   } catch (e) {
     return [];
@@ -114,14 +115,17 @@ const getCompletedTaskIds = (): string[] => {
 };
 
 /** Automatically mark task completed */
-export const markTaskCompleted = (taskId: string): void => {
+export const markTaskCompleted = (taskId: string, examId?: string): void => {
   try {
     const todayStr = new Date().toISOString().split('T')[0];
-    const current = getCompletedTaskIds();
+    const key = examId && examId !== 'all' ? `${STORAGE_KEY_PLAN}_${examId.toLowerCase().replace(/[\s\-_]+/g, '')}_${todayStr}` : `${STORAGE_KEY_PLAN}_${todayStr}`;
+    const current = getCompletedTaskIds(examId);
     if (!current.includes(taskId)) {
       const next = [...current, taskId];
-      localStorage.setItem(`${STORAGE_KEY_PLAN}_${todayStr}`, JSON.stringify(next));
-      window.dispatchEvent(new CustomEvent('oep-study-plan-updated'));
+      localStorage.setItem(key, JSON.stringify(next));
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('oep-study-plan-updated'));
+      }
     }
   } catch (e) {
     // Fallback
@@ -129,16 +133,19 @@ export const markTaskCompleted = (taskId: string): void => {
 };
 
 /** Toggle task completion status */
-export const toggleTaskCompletion = (taskId: string): string[] => {
+export const toggleTaskCompletion = (taskId: string, examId?: string): string[] => {
   try {
     const todayStr = new Date().toISOString().split('T')[0];
-    const current = getCompletedTaskIds();
+    const key = examId && examId !== 'all' ? `${STORAGE_KEY_PLAN}_${examId.toLowerCase().replace(/[\s\-_]+/g, '')}_${todayStr}` : `${STORAGE_KEY_PLAN}_${todayStr}`;
+    const current = getCompletedTaskIds(examId);
     const next = current.includes(taskId)
       ? current.filter(id => id !== taskId)
       : [...current, taskId];
     
-    localStorage.setItem(`${STORAGE_KEY_PLAN}_${todayStr}`, JSON.stringify(next));
-    window.dispatchEvent(new CustomEvent('oep-study-plan-updated'));
+    localStorage.setItem(key, JSON.stringify(next));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('oep-study-plan-updated'));
+    }
     return next;
   } catch (e) {
     return [];
@@ -161,12 +168,12 @@ export const getTodayStudyPlan = (userId?: string, activeExamIdInput?: string, a
   try {
     const todayStr = new Date().toISOString().split('T')[0];
     const targetExam = getUserTargetExam(activeExamIdInput, activeExamNameInput);
-    const weakTopicsData = getSmartWeakTopicRecommendations(userId);
+    const weakTopicsData = getSmartWeakTopicRecommendations(userId, targetExam.examId);
     const streakState = getStreakState(userId);
-    const completedIds = getCompletedTaskIds();
+    const completedIds = getCompletedTaskIds(targetExam.examId);
     const isPersonalizedFromAttempts = weakTopicsData.hasAttempts && (weakTopicsData.allTopicConfidence?.length || 0) > 0;
 
-    // Scan today's activities for automatic task completion
+    // Scan today's activities for automatic task completion for target exam
     const activities: UserActivity[] = activityTracker.getActivities(userId);
     const todayActivities = activities.filter(a => a.timestamp.startsWith(todayStr));
     const todayCompletedTests = todayActivities.filter(a => a.type === 'mock_test_completed' || a.type === 'practice_test_completed');
@@ -184,20 +191,20 @@ export const getTodayStudyPlan = (userId?: string, activeExamIdInput?: string, a
     let tertiaryReason = '';
 
     if (isPersonalizedFromAttempts && weakTopicsData.allTopicConfidence.length > 0) {
-      // Real Data Personalization from student's actual test attempts
+      // Real Data Personalization from student's actual test attempts in this target exam
       const topics = weakTopicsData.allTopicConfidence;
       primaryWeak = cleanSubjectTitle(topics[0]?.topicName || targetExam.subjects[0]);
       primaryReason = `Based on your low ${topics[0]?.accuracy || 35}% accuracy in recent practice attempts`;
 
-      secondaryWeak = cleanSubjectTitle(topics[1]?.topicName || targetExam.subjects[1]);
+      secondaryWeak = cleanSubjectTitle(topics[1]?.topicName || targetExam.subjects[1] || targetExam.subjects[0]);
       secondaryReason = `Identified as a high-yield weakness from your test history (${topics[1]?.accuracy || 45}% accuracy)`;
 
-      tertiaryWeak = cleanSubjectTitle(topics[2]?.topicName || targetExam.subjects[2]);
+      tertiaryWeak = cleanSubjectTitle(topics[2]?.topicName || targetExam.subjects[2] || targetExam.subjects[0]);
       tertiaryReason = `Recommended error review based on recent missed questions`;
     } else {
-      // Date-seeded dynamic rotation for new students based on target exam syllabus
+      // Date-seeded dynamic rotation for target exam syllabus
       const seed1 = getSeededNumber(todayStr, 1) % targetExam.subjects.length;
-      const seed2 = (seed1 + 1 + (getSeededNumber(todayStr, 2) % (targetExam.subjects.length - 1))) % targetExam.subjects.length;
+      const seed2 = (seed1 + 1 + (getSeededNumber(todayStr, 2) % Math.max(1, targetExam.subjects.length - 1))) % targetExam.subjects.length;
       const seed3 = (seed2 + 1) % targetExam.subjects.length;
 
       primaryWeak = cleanSubjectTitle(targetExam.subjects[seed1]);
@@ -210,10 +217,10 @@ export const getTodayStudyPlan = (userId?: string, activeExamIdInput?: string, a
     }
 
     // Auto-complete logic based on real test completions
-    const autoTask1Done = completedIds.includes('task-weak-1') || todayCompletedTests.some(a => (a.title || '').toLowerCase().includes(primaryWeak.toLowerCase()) || todayCompletedTests.length >= 1);
-    const autoTask2Done = completedIds.includes('task-weak-2') || todayCompletedTests.some(a => (a.title || '').toLowerCase().includes(secondaryWeak.toLowerCase()) || todayCompletedTests.length >= 2);
-    const autoTask3Done = completedIds.includes('task-review-errors') || todayCompletedTests.some(a => (a.title || '').toLowerCase().includes(tertiaryWeak.toLowerCase()) || todayCompletedTests.length >= 3);
-    const autoTask4Done = streakState.todayGoalCompleted || completedIds.includes('task-daily-streak') || todaySolvedQuestions >= 20 || todayCompletedTests.length >= 1;
+    const autoTask1Done = completedIds.includes('task-weak-1') || todayCompletedTests.some(a => (a.title || '').toLowerCase().includes(primaryWeak.toLowerCase()));
+    const autoTask2Done = completedIds.includes('task-weak-2') || todayCompletedTests.some(a => (a.title || '').toLowerCase().includes(secondaryWeak.toLowerCase()));
+    const autoTask3Done = completedIds.includes('task-review-errors') || todayCompletedTests.some(a => (a.title || '').toLowerCase().includes(tertiaryWeak.toLowerCase()));
+    const autoTask4Done = streakState.todayGoalCompleted || completedIds.includes('task-daily-streak') || todaySolvedQuestions >= 20;
 
     const tasks: StudyPlanTask[] = [
       {

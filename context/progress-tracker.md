@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `3.7.3` (Rank Spacing & Real User Profile Sync in Odisha Leaderboard) |
+| **Current Version** | `3.8.0` (Real-Time Dynamic Daily Leaderboard Progression Engine) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -34,10 +34,10 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 ## Current Status
 
 - **Current Phase:** Phase 9 — Performance, SEO & Native Android Build (Complete)
-- **Current Milestone:** Production Maintenance & Mobile UX Optimization
-- **Current Priority:** Leaderboard Spacing & Real Login Account Sync
+- **Current Milestone:** Production Maintenance & Real-Time Gamification
+- **Current Priority:** Dynamic Real-Time Daily Leaderboard Simulation
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Fixed rank number spacing in `OdishaLeaderboardCard.tsx` (v3.7.3). Expanded rank number container (`w-14 sm:w-16`) and gap (`gap-3.5`) to eliminate rank number collisions with student avatar circles (`#13,017` vs avatar circle). Connected live Supabase Auth / Google login metadata to resolve the real user's actual profile name (e.g. `Naresh Samal`) and avatar photo/initial across the hero banner, podium cards, master list, and nearby rivals bracket instead of displaying generic fallback values (`👉 YOU (Aspirant)` / `Y`).
+- **Last Completed Task:** Built deterministic 15-minute time-seeded progression engine for `getDailyLeaderboardSeed()` in `src/lib/xpManager.ts` (v3.8.0). Peer scores now dynamically accumulate along an organic daily study curve (peak study hours 06:00-11:00 and 16:00-22:00 IST), featuring subtle rank swaps between close competitors within 15-minute slots while keeping page refreshes within the same window 100% stable. Automatically recalculates the logged-in student's live rank position instantly upon completing practice drills or tests.
 
 ---
 

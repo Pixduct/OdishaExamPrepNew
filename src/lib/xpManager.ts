@@ -167,9 +167,44 @@ const getSeededHash = (seedStr: string, index: number): number => {
   return Math.abs(hash);
 };
 
-/** Generate Date-Seeded Daily Leaderboard Toppers (High Difficulty Scale: 6,850 - 14,500 XP) */
+/** Calculate Organic Daily Time Progression Weighting (0.0 at 00:00 to 1.0 at 23:59) */
+const getDailyTimeProgressionWeight = (now: Date = new Date()): { slotIndex: number; progressFactor: number } => {
+  const hour = now.getHours();
+  const minute = now.getMinutes();
+  const slotIndex = hour * 4 + Math.floor(minute / 15); // 0 to 95 15-minute slots per day
+
+  // Pre-calculate cumulative activity curve weights across 96 slots:
+  // Slots 0-23 (00:00-06:00): Night/Off-peak (0.15 weight)
+  // Slots 24-43 (06:00-11:00): Morning Study Peak (1.25 weight)
+  // Slots 44-63 (11:00-16:00): Midday Steady (0.65 weight)
+  // Slots 64-87 (16:00-22:00): Evening Practice Surge (1.40 weight)
+  // Slots 88-95 (22:00-23:59): Late Night Wind Down (0.35 weight)
+  let totalWeight = 0;
+  let currentWeight = 0;
+
+  for (let s = 0; s < 96; s++) {
+    let w = 0.15;
+    if (s >= 24 && s < 44) w = 1.25;
+    else if (s >= 44 && s < 64) w = 0.65;
+    else if (s >= 64 && s < 88) w = 1.40;
+    else if (s >= 88) w = 0.35;
+
+    totalWeight += w;
+    if (s <= slotIndex) {
+      currentWeight += w;
+    }
+  }
+
+  const progressFactor = Math.min(1, Math.max(0.04, currentWeight / totalWeight));
+  return { slotIndex, progressFactor };
+};
+
+/** Generate Date-Seeded Dynamic Daily Leaderboard Toppers with Real-Time Organic Progression */
 export const getDailyLeaderboardSeed = (): StudentRankEntry[] => {
-  const todayStr = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
+  const { slotIndex, progressFactor } = getDailyTimeProgressionWeight(now);
+
   const dailyNames = [
     'Subhranshu Sekhar', 'Rashmita Priyadarshini', 'Prabhat Mohanty', 'Swati Sucharita',
     'Chandan Jena', 'Sonali Mohapatra', 'Devashish Tripathy', 'Monika Sahoo',
@@ -178,31 +213,45 @@ export const getDailyLeaderboardSeed = (): StudentRankEntry[] => {
   const dailyDistricts = ['Khordha (Bhubaneswar)', 'Cuttack', 'Ganjam (Berhampur)', 'Balasore', 'Sambalpur', 'Puri', 'Bhadrak', 'Mayurbhanj'];
   const dailyColors = ['bg-[#2563EB]', 'bg-emerald-600', 'bg-indigo-600', 'bg-rose-600', 'bg-cyan-600', 'bg-amber-600', 'bg-purple-600', 'bg-teal-600'];
 
-  const toppers: StudentRankEntry[] = [];
-  let baseDailyXp = 14500;
+  const rawEntries: StudentRankEntry[] = [];
 
   for (let i = 0; i < 10; i++) {
     const nameIdx = (getSeededHash(todayStr, i * 3) + i) % dailyNames.length;
     const distIdx = (getSeededHash(todayStr, i * 7) + i) % dailyDistricts.length;
     const colorIdx = (getSeededHash(todayStr, i * 11) + i) % dailyColors.length;
-    const stepXp = 680 + (getSeededHash(todayStr, i) % 250);
-    baseDailyXp = Math.max(6850, baseDailyXp - stepXp);
 
-    toppers.push({
+    // Stable Daily Target XP range (650 to 1,450 XP for daily toppers)
+    const maxTargetXp = 1450 - i * 75 - (getSeededHash(todayStr, i * 13) % 40);
+    const minStartXp = Math.max(40, 120 - i * 8);
+
+    // Time-progressed score up to current 15-minute slot
+    let currentXp = Math.round(minStartXp + (maxTargetXp - minStartXp) * progressFactor);
+
+    // Subtle 15-minute slot micro-fluctuations (creates natural rank shifts between close rivals)
+    const slotShift = (getSeededHash(`${todayStr}-slot-${slotIndex}`, i * 17) % 35) - 15;
+    currentXp = Math.max(minStartXp, currentXp + slotShift);
+
+    rawEntries.push({
       rank: i + 1,
       userId: `daily-peer-${i + 1}`,
       name: dailyNames[nameIdx],
       district: dailyDistricts[distIdx],
-      xp: baseDailyXp,
-      league: getLeagueTierInfo(baseDailyXp).tier,
+      xp: currentXp,
+      league: getLeagueTierInfo(currentXp).tier,
       avatarBg: dailyColors[colorIdx],
       isCurrentUser: false,
-      accuracyPct: Math.max(82, 99 - i * 1.5),
+      accuracyPct: Math.max(82, Math.min(99, Math.round(97 - i * 1.5 + (slotIndex % 3)))),
       streakDays: Math.max(5, 25 - i)
     });
   }
 
-  return toppers;
+  // Sort dynamically by current XP and re-assign rank 1 to 10
+  rawEntries.sort((a, b) => b.xp - a.xp);
+  rawEntries.forEach((entry, idx) => {
+    entry.rank = idx + 1;
+  });
+
+  return rawEntries;
 };
 
 /** Generate Week-Seeded Weekly Leaderboard Toppers (High Difficulty Scale: 24,500 - 58,000 XP) */
@@ -471,10 +520,10 @@ export const getOdishaLeaderboard = (
   } else {
     if (timeFilter === 'daily') {
       const dailyAspirants = 18500;
-      const topDailyXp = masterTopList[9]?.xp || 6850;
-      let calculatedDailyRank = Math.round(11 + Math.pow(Math.max(1, topDailyXp - displayXp) / 2.8, 1.18));
-      if (userXpInfo.accuracyPct < 30 || displayXp < 500) calculatedDailyRank = Math.max(calculatedDailyRank, 5840);
-      updatedUserEntry.rank = Math.min(dailyAspirants, calculatedDailyRank);
+      const topDailyXp = masterTopList[9]?.xp || 400;
+      let calculatedDailyRank = Math.round(11 + Math.pow(Math.max(1, topDailyXp - displayXp) / 0.85, 1.12));
+      if (displayXp < 50) calculatedDailyRank = Math.max(calculatedDailyRank, 6500);
+      updatedUserEntry.rank = Math.min(dailyAspirants, Math.max(1, calculatedDailyRank));
     } else if (timeFilter === 'weekly') {
       const weeklyAspirants = 18500;
       const topWeeklyXp = masterTopList[9]?.xp || 24500;

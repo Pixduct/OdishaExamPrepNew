@@ -1163,5 +1163,28 @@ Last updated: 2026-08-10
 - **Single Subtext Line**: Eliminates duplicate subtext stacks on mobile to maintain clean tile proportions.
 - **Desktop/Laptop View Lock**: Desktop tag pills, large font sizing (`sm:text-xl`), and full titles remain 100% untouched.
 
+---
+
+### 40. `ActiveExamContextBar` & `ExamContextSelectorModal` (Target Exam Context Engine)
+
+Files: [`src/components/ActiveExamContextBar.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/ActiveExamContextBar.tsx) & [`src/components/ExamContextSelectorModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/ExamContextSelectorModal.tsx)
+Last updated: 2026-08-10
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Bar Container** | `w-full bg-gradient-to-r from-slate-50/90 via-white to-brand-50/30 sm:bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-3 sm:p-4 shadow-xs mb-6 sm:mb-8` |
+| **Active Target Icon** | `w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0 shadow-2xs bg-brand-600 text-white border border-brand-500` |
+| **Mobile Trigger Pill** | `inline-flex items-center gap-1 sm:gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-brand-50 hover:bg-brand-100 sm:bg-slate-900 border border-brand-200/80 text-brand-700 font-black text-xs` |
+| **Modal Drag Handle** | `w-12 h-1.5 bg-slate-300 rounded-full mx-auto` |
+| **Modal Sheet Panel** | `w-full sm:max-w-xl md:max-w-2xl bg-white rounded-t-[2.5rem] sm:rounded-[2.5rem] border border-slate-200/80 shadow-2xl overflow-hidden text-left flex flex-col max-h-[85vh]` |
+| **All Exams Card Badge**| `px-2 py-0.5 rounded-full text-[8.5px] sm:text-[9px] font-black uppercase tracking-wider bg-brand-100 text-brand-700 border border-brand-200/60 shrink-0` |
+
+**Pattern notes:**
+- **Sleek Mobile Bar Design**: On mobile (`<640px`), active target bar renders a subtle gradient background card with a sleek brand glassmorphic pill button (`[ Switch ⌄ ]`), replacing heavy solid black buttons.
+- **Stacked Badge Sub-Row**: On mobile screens, the `AGGREGATED VIEW` badge renders on Line 2 (`flex flex-col sm:flex-row`), avoiding horizontal collisions with checkmark icons.
+- **Compact Selected Indicators**: Selected items render a compact checkmark icon on mobile (`CheckCircle2`), preventing exam titles (`OSSSC Nursing Officer`) from truncating.
+- **Desktop/Laptop View Lock**: Desktop dark button (`bg-slate-900`), full titles, and inline badges remain 100% untouched.
+
+
 
 

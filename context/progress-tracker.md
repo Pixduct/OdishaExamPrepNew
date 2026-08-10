@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `3.8.2` (Mobile-Refined Layout for Your Personal Records & Milestones Component) |
+| **Current Version** | `3.8.3` (Mobile-Refined Layout for Target Exam Context & Switch Target Modal Components) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -35,9 +35,9 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 
 - **Current Phase:** Phase 9 — Performance, SEO & Native Android Build (Complete)
 - **Current Milestone:** Production Maintenance & Mobile UX Optimization
-- **Current Priority:** Mobile View Tile Layout Refinements
+- **Current Priority:** Target Exam Context Mobile UX Optimization
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Refined mobile tile layout for `PersonalBestCard.tsx` (v3.8.2). Fixed tag pill collisions on mobile tiles by hiding redundant category pills (`Score`, `Accuracy`, `Speed`, `Streak`) on mobile screens (`sm:hidden`), formatted empty states into clean 1-line labels (`No Record Yet`), formatted streak values (`1 Day Streak`), and eliminated redundant stacked subtext lines, while leaving desktop/laptop layout 100% untouched.
+- **Last Completed Task:** Refined mobile layout for `ActiveExamContextBar.tsx` and `ExamContextSelectorModal.tsx` (v3.8.3). Replaced harsh solid black button on mobile target bar with a sleek brand pill (`[ Switch ⌄ ]`), fixed badge collision on the "All Exams Combined" card by placing the `AGGREGATED VIEW` badge on a new line on mobile, formatted modal subtitle/search placeholder concise text, and simplified the `Active Target` checkmark indicator in list items to prevent title truncation on mobile, while leaving desktop/laptop view 100% untouched.
 
 ---
 

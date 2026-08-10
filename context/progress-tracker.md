@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `3.8.3` (Mobile-Refined Layout for Target Exam Context & Switch Target Modal Components) |
+| **Current Version** | `3.8.4` (Authenticated-Only Onboarding Modals & Notification Permission Guard Engine) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -34,10 +34,10 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 ## Current Status
 
 - **Current Phase:** Phase 9 — Performance, SEO & Native Android Build (Complete)
-- **Current Milestone:** Production Maintenance & Mobile UX Optimization
-- **Current Priority:** Target Exam Context Mobile UX Optimization
+- **Current Milestone:** Production Maintenance & Visitor Privacy Protection
+- **Current Priority:** Unauthenticated Visitor Popup Guarding
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Refined mobile layout for `ActiveExamContextBar.tsx` and `ExamContextSelectorModal.tsx` (v3.8.3). Replaced harsh solid black button on mobile target bar with a sleek brand pill (`[ Switch ⌄ ]`), fixed badge collision on the "All Exams Combined" card by placing the `AGGREGATED VIEW` badge on a new line on mobile, formatted modal subtitle/search placeholder concise text, and simplified the `Active Target` checkmark indicator in list items to prevent title truncation on mobile, while leaving desktop/laptop view 100% untouched.
+- **Last Completed Task:** Enforced strict authentication and per-account completion guards for `WelcomeVideoModal.tsx`, `OnboardingTour.tsx`, and `PushPermissionPrompt.tsx` (v3.8.4). Fixed issue where onboarding video modals and push notification permission popups were appearing to unauthenticated/logged-out visitors. Now, guest/incognito visitors browsing the site will never see onboarding modals or push prompts. The welcome video modal & tour ONLY trigger for newly registered users upon their first login and permanently persist completion state per account ID (`oep_welcome_video_seen_${userId}`), while notification prompts strictly check user authentication, browser blocked/granted state (`permissionState !== 'default'`), and dismissal flags (`oep_push_prompt_dismissed_${userId}`).
 
 ---
 

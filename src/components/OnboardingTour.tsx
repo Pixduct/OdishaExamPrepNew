@@ -16,6 +16,7 @@ export interface TourStep {
 }
 
 interface OnboardingTourProps {
+  userId?: string;
   mainTab?: string;
   onNavigate?: (tab: 'home' | 'courses' | 'analytics' | 'history' | 'library' | 'ai_mentor') => void;
   isOpenManual?: boolean;
@@ -74,6 +75,7 @@ export const TOUR_STEPS: TourStep[] = [
 ];
 
 export const OnboardingTour: React.FC<OnboardingTourProps> = ({
+  userId,
   mainTab = 'home',
   onNavigate,
   isOpenManual = false,
@@ -97,14 +99,19 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Auto-start for new users
+  // Auto-start for newly authenticated users ONLY
   useEffect(() => {
-    const isCompleted = localStorage.getItem('oep_tour_completed');
+    if (!userId) {
+      setIsActive(false);
+      return;
+    }
+    const userTourKey = `oep_tour_completed_${userId}`;
+    const isCompleted = localStorage.getItem(userTourKey) || localStorage.getItem('oep_tour_completed');
     if (!isCompleted) {
       setIsActive(true);
       setCurrentStep(-1);
     }
-  }, []);
+  }, [userId]);
 
   // Monitor manual opening
   useEffect(() => {
@@ -122,6 +129,9 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
     setIsActive(false);
     setCurrentStep(-1);
     localStorage.setItem('oep_tour_completed', 'true');
+    if (userId) {
+      localStorage.setItem(`oep_tour_completed_${userId}`, 'true');
+    }
     if (onCloseManual) onCloseManual();
     if (onNavigate) onNavigate('home');
   };

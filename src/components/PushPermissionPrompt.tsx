@@ -28,29 +28,42 @@ const PushPermissionPrompt: React.FC<PushPermissionPromptProps> = ({
   } = usePushNotifications(userId);
 
   useEffect(() => {
-    if (!userId || isSubscribed) return;
+    if (!userId || userId === 'guest' || isSubscribed) {
+      setVisible(false);
+      return;
+    }
 
-    // For normal devices, don't show if already granted
+    // Check per-account dismissal flag
+    const dismissedKey = `oep_push_prompt_dismissed_${userId}`;
+    if (localStorage.getItem(dismissedKey) === 'true') {
+      setVisible(false);
+      return;
+    }
+
+    // For normal devices, don't show if already granted OR blocked/denied
     const isIOSNotInstalled = isIOSDevice && !isIOSInstalled;
     if (!isIOSNotInstalled) {
       if (!isSupported) return;
-      if (permissionState === 'granted') return;
+      if (permissionState === 'granted' || permissionState === 'denied') {
+        setVisible(false);
+        return;
+      }
     }
 
     if (trigger !== 'auto') return;
 
-    // Show after 3 seconds (only if user is logged in and hasn't subscribed)
+    // Show after 3 seconds (only if user is logged in and hasn't subscribed or dismissed)
     const timer = setTimeout(() => setVisible(true), 3000);
     return () => clearTimeout(timer);
   }, [isSupported, isIOSDevice, isIOSInstalled, isSubscribed, userId, permissionState, trigger]);
 
   // For manual trigger — show immediately
   useEffect(() => {
-    if (trigger === 'manual' && userId && !isSubscribed) {
+    if (trigger === 'manual' && userId && userId !== 'guest' && !isSubscribed) {
       const isIOSNotInstalled = isIOSDevice && !isIOSInstalled;
       if (isIOSNotInstalled) {
         setVisible(true);
-      } else if (isSupported && permissionState !== 'granted') {
+      } else if (isSupported && permissionState === 'default') {
         setVisible(true);
       }
     }
@@ -71,11 +84,18 @@ const PushPermissionPrompt: React.FC<PushPermissionPromptProps> = ({
   }, [isSubscribed, permissionState, isIOSDevice, isIOSInstalled]);
 
   const handleDismiss = () => {
+    if (userId) {
+      localStorage.setItem(`oep_push_prompt_dismissed_${userId}`, 'true');
+    }
     setVisible(false);
     onClose?.();
   };
 
   const handleAllow = async () => {
+    if (userId) {
+      localStorage.setItem(`oep_push_prompt_dismissed_${userId}`, 'true');
+    }
+
     let permission: NotificationPermission = 'default';
     try {
       if (typeof window !== 'undefined' && 'Notification' in window) {

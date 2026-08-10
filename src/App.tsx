@@ -10537,13 +10537,26 @@ function AppContent() {
   const [showWelcomeVideoModal, setShowWelcomeVideoModal] = useState(false);
   const [showOnboardingTourModal, setShowOnboardingTourModal] = useState(false);
 
-  // Auto show tutorial video for new users / first-time visit
+  // Auto show tutorial video for newly registered logged-in users ONLY
   useEffect(() => {
-    const hasSeenVideo = localStorage.getItem('oep_welcome_video_seen');
+    if (!user || loading) {
+      setShowWelcomeVideoModal(false);
+      return;
+    }
+    const userKey = `oep_welcome_video_seen_${user.id}`;
+    const hasSeenVideo = localStorage.getItem(userKey) || localStorage.getItem('oep_welcome_video_seen');
     if (!hasSeenVideo) {
       setShowWelcomeVideoModal(true);
     }
-  }, []);
+  }, [user, loading]);
+
+  const handleCloseWelcomeVideo = () => {
+    setShowWelcomeVideoModal(false);
+    localStorage.setItem('oep_welcome_video_seen', 'true');
+    if (user?.id) {
+      localStorage.setItem(`oep_welcome_video_seen_${user.id}`, 'true');
+    }
+  };
 
   // Listen for custom event to open video tutorial anytime on demand
   useEffect(() => {
@@ -11337,17 +11350,25 @@ function AppContent() {
         )}
       </AnimatePresence>
 
-      <WelcomeVideoModal 
-        isOpen={showWelcomeVideoModal} 
-        onClose={() => setShowWelcomeVideoModal(false)} 
-        onStartTour={() => setShowOnboardingTourModal(true)} 
-      />
-      <OnboardingTour 
-        mainTab={mainTab}
-        onNavigate={(tab) => handleTabClick(tab)}
-        isOpenManual={showOnboardingTourModal} 
-        onCloseManual={() => setShowOnboardingTourModal(false)} 
-      />
+      {user && (
+        <>
+          <WelcomeVideoModal 
+            isOpen={showWelcomeVideoModal} 
+            onClose={handleCloseWelcomeVideo} 
+            onStartTour={() => {
+              handleCloseWelcomeVideo();
+              setShowOnboardingTourModal(true);
+            }} 
+          />
+          <OnboardingTour 
+            userId={user.id}
+            mainTab={mainTab}
+            onNavigate={(tab) => handleTabClick(tab)}
+            isOpenManual={showOnboardingTourModal} 
+            onCloseManual={() => setShowOnboardingTourModal(false)} 
+          />
+        </>
+      )}
     </div>
   );
 }

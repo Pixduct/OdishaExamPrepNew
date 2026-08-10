@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `3.7.1` (Mobile-Refined Layout for Today's AI Study Plan Component) |
+| **Current Version** | `3.7.2` (Mobile-Refined Layout for Dark User Rank Card & Leaderboard Banner) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
@@ -37,7 +37,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **Current Milestone:** Production Maintenance & Mobile UX Optimization
 - **Current Priority:** Mobile View Refinements & Touch Target Calibration
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Refined mobile layout for `AIStudyPlanCard.tsx` (v3.7.1). Eliminated title clipping/truncation on mobile so task titles wrap naturally, made header pills horizontal-scrollable with compact padding, simplified mobile progress bar text (`50% (2/4 Done)`), and added a sleek mobile task card footer row (`💡 Rationale` + compact `[ Start → ]` button) while leaving the desktop/laptop view 100% untouched.
+- **Last Completed Task:** Refined mobile layout for the dark user rank banner in `OdishaLeaderboardCard.tsx` (v3.7.2). Resolved text truncation on percentiles (`(19.7th Percentile)`) and header titles (`Odisha Rank & Student Leagues`), aligned user details on the top left with a compact top-right yellow rank badge (`RANK #13,017`), and streamlined the league progress bar container on mobile while leaving the desktop/laptop layout 100% untouched.
 
 ---
 

@@ -70,7 +70,7 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
             <Trophy className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
           </span>
           <div className="min-w-0">
-            <h3 className="text-xs sm:text-base font-black text-slate-900 tracking-tight leading-tight truncate">
+            <h3 className="text-xs sm:text-base font-black text-slate-900 tracking-tight leading-tight block sm:truncate">
               Odisha Rank & Student Leagues
             </h3>
             <p className="text-slate-500 text-[10px] sm:text-xs font-medium truncate hidden sm:block">
@@ -90,7 +90,8 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
       <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 text-white shadow-sm relative overflow-hidden space-y-3">
         <div className="absolute right-0 top-0 w-48 h-48 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 relative z-10">
+        {/* Desktop Layout (md:flex) - 100% Intact & Unchanged */}
+        <div className="hidden md:flex md:items-center justify-between gap-3 relative z-10">
           {/* User Dynamic State Rank Details */}
           <div className="flex items-center gap-3">
             {(() => {
@@ -129,7 +130,7 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
             </div>
           </div>
 
-          {/* League Tier Progress Bar (Compact Mobile Width) */}
+          {/* League Tier Progress Bar */}
           <div className="w-full md:w-64 space-y-1 bg-slate-800/80 p-2.5 sm:p-3 rounded-xl border border-slate-700/70 shrink-0">
             <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold text-slate-200">
               <span>{currentLeague.name}</span>
@@ -146,6 +147,77 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
                 Need {xpToNextTier.toLocaleString()} XP for {currentLeague.nextTierName}
               </span>
             )}
+          </div>
+        </div>
+
+        {/* Mobile Dedicated Refined Layout (md:hidden) */}
+        <div className="flex md:hidden flex-col gap-2.5 relative z-10">
+          {/* Top Row: Name + District on Left, Rank Badge on Right */}
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1 space-y-1">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-extrabold text-sm text-white">{userEntry.name}</span>
+                <button
+                  type="button"
+                  onClick={() => setIsDistrictModalOpen(true)}
+                  className="inline-flex items-center gap-1 text-[9px] font-bold text-amber-300 bg-amber-400/15 active:bg-amber-400/25 px-2 py-0.5 rounded border border-amber-400/30 shrink-0"
+                >
+                  <MapPin className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                  <span className="truncate max-w-[120px]">{userEntry.district}</span>
+                  <Edit2 className="w-2 h-2 opacity-60 ml-0.5" />
+                </button>
+              </div>
+
+              {/* Percentiles Subtext - Clean, NO truncation cutoff */}
+              <p className="text-[11px] text-amber-300 font-mono font-bold leading-snug">
+                {percentileText}
+              </p>
+
+              {/* XP & Accuracy Stats Subtext */}
+              <div className="flex items-center gap-1.5 text-[10px] text-slate-300 font-medium flex-wrap pt-0.5">
+                <span>Acc: <strong className="text-white font-bold">{accuracyPct}%</strong></span>
+                <span>•</span>
+                <span>{timeFilter === 'daily' ? 'Today' : timeFilter === 'weekly' ? 'Weekly' : 'Total'}: <strong className="text-white font-bold">{userEntry.xp.toLocaleString()} XP</strong></span>
+                <span>•</span>
+                <span>{userEntry.streakDays}d Streak 🔥</span>
+              </div>
+            </div>
+
+            {/* Rank Badge Box - Top Right Aligned */}
+            {(() => {
+              const rankStr = `#${userEntry.rank.toLocaleString()}`;
+              const fontClass = rankStr.length > 6 ? 'text-[10px]' : rankStr.length > 4 ? 'text-xs' : 'text-sm';
+              return (
+                <div className="min-w-[3.25rem] px-2 py-1.5 rounded-xl bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950 font-black flex flex-col items-center justify-center font-mono shadow-xs shrink-0 leading-none">
+                  <span className="text-[8px] uppercase font-sans tracking-wider opacity-75 pb-0.5">Rank</span>
+                  <span className={`${fontClass} font-black tracking-tight`}>{rankStr}</span>
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* Bottom Compact Progress Bar */}
+          <div className="space-y-1 bg-slate-800/90 p-2.5 rounded-xl border border-slate-700/70">
+            <div className="flex items-center justify-between text-[10px] font-bold text-slate-200">
+              <span className="flex items-center gap-1">
+                <span>{currentLeague.badgeIcon}</span>
+                <span>{currentLeague.name}</span>
+              </span>
+              <div className="flex items-center gap-1">
+                <span className="text-amber-400 font-mono font-black">{xpProgressPct}%</span>
+                {currentLeague.nextTierName && (
+                  <span className="text-[9px] text-slate-400 font-medium">
+                    ({xpToNextTier.toLocaleString()} XP to {currentLeague.nextTierName})
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-700">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 transition-all duration-500"
+                style={{ width: `${xpProgressPct}%` }}
+              />
+            </div>
           </div>
         </div>
       </div>

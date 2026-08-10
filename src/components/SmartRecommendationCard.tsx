@@ -4,6 +4,7 @@ import { Zap, Target, ArrowRight, Sparkles, AlertTriangle, CheckCircle2, Lock } 
 import { getSmartWeakTopicRecommendations, SmartRecommendationResult, TopicWeakness } from '../lib/recommendationEngine';
 import { Button } from './Button';
 
+
 interface SmartRecommendationCardProps {
   userId?: string;
   onLaunchPractice?: (topicName: string) => void;

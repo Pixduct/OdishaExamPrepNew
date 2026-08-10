@@ -64,6 +64,7 @@ export const getSmartWeakTopicRecommendations = (userId?: string): SmartRecommen
     }> = {};
 
     activities.forEach(act => {
+
       const correct = typeof act.correct === 'number' ? act.correct : (act.metadata?.correctCount || act.metadata?.correct || 0);
       const incorrect = typeof act.incorrect === 'number' ? act.incorrect : (act.metadata?.incorrectCount || act.metadata?.incorrect || 0);
       const solved = correct + incorrect;
@@ -100,32 +101,21 @@ export const getSmartWeakTopicRecommendations = (userId?: string): SmartRecommen
     const topicKeys = Object.keys(topicStats);
 
     if (topicKeys.length === 0) {
-      const defaultTopics: TopicWeakness[] = [
-        {
-          subjectName: 'Medical Surgical Nursing I',
-          topicName: 'Medical Surgical Nursing I',
-          accuracy: 45,
-          totalQuestions: 20,
-          attemptCount: 0,
-          totalCorrect: 9,
-          totalAttempted: 20,
-          status: 'critical',
-          rationale: 'High-priority subject. Completing practice drills improves overall exam readiness.',
-          incompleteActivity: null
-        },
-        {
-          subjectName: 'Community Health Nursing I',
-          topicName: 'Community Health Nursing I',
-          accuracy: 50,
-          totalQuestions: 20,
-          attemptCount: 0,
-          totalCorrect: 10,
-          totalAttempted: 20,
-          status: 'critical',
-          rationale: 'Core nursing subject requiring focused review.',
-          incompleteActivity: null
-        }
-      ];
+      // Dynamic fallback topics when no activity exists yet
+      const defaultNames = ['General Core', 'Reasoning & Aptitude', 'Subject Knowledge'];
+
+      const defaultTopics: TopicWeakness[] = defaultNames.map((name, idx) => ({
+        subjectName: name,
+        topicName: name,
+        accuracy: 45 + idx * 5,
+        totalQuestions: 20,
+        attemptCount: 0,
+        totalCorrect: 9,
+        totalAttempted: 20,
+        status: 'critical',
+        rationale: 'High-priority subject. Completing practice drills improves overall exam readiness.',
+        incompleteActivity: null
+      }));
 
       return {
         primaryRecommendation: defaultTopics[0],

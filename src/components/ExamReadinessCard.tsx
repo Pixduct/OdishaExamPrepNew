@@ -5,6 +5,7 @@ import { calculateExamReadiness, ReadinessResult } from '../lib/readinessEngine'
 import { ReadinessDetailModal } from './ReadinessDetailModal';
 import { Button } from './Button';
 
+
 interface ExamReadinessCardProps {
   userId?: string;
   onStartPracticeClick?: () => void;

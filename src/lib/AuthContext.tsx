@@ -90,7 +90,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   grantFullAccess: () => Promise<void>;
   unlockItem: (itemId: string) => Promise<void>;
-  hasAccessTo: (itemId: string | { id: string; isPremium?: boolean; examId?: string; seriesId?: string | any }, examId?: string) => boolean;
+  hasAccessTo: (itemOrId: string | { id: string; isPremium?: boolean; examId?: string; seriesId?: string | any }, examId?: string) => boolean;
   guestUsage: { questions: number; tests: number };
   incrementGuestUsage: (type: 'questions' | 'tests') => void;
   refreshProfile: () => Promise<void>;
@@ -118,6 +118,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [manualAdmin, setManualAdmin] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [guestUsage, setGuestUsage] = useState({ questions: 0, tests: 0 });
+
 
   const fetchProfile = async (sessionUser: User, forceRefresh = false) => {
     try {

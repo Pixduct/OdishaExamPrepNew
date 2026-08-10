@@ -46,6 +46,7 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`AttemptPerformanceModal`** | Overlay / Modal | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) | Glassmorphic score count-up & progress modal | App.tsx | Active |
 | **`GuidedRecommendationHero`** | Navigation / Hero | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) | Dynamic "What to Study Next" Recommendation Module | App.tsx (Exam Details) | Active |
 
+
 ---
 
 ## Component Details
@@ -980,6 +981,54 @@ Last updated: 2026-08-08
 - **Mobile-First Compact Hero**: Header title & league badge remain inline across all viewports.
 - **Interactive District Selector**: Tapping the district badge pill opens a modal covering all 30 districts of Odisha with instant profile sync.
 - **No Overflowing Badges**: Yellow Rank badge uses `min-w-[3.5rem] sm:min-w-[4rem]` with responsive font scaling to guarantee 5-digit ranks like `#12,891` fit cleanly without border overflow.
+
+---
+
+### 32. `PersonalBestCard` (Personal Records & Milestones Display Card)
+
+File: [`src/components/PersonalBestCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/PersonalBestCard.tsx)
+Last updated: 2026-08-08
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Container** | `bg-white p-4 sm:p-7 rounded-2xl sm:rounded-[2.25rem] shadow-sm border border-slate-200/80 space-y-4` |
+| **Header Title** | `text-xs sm:text-base font-black text-slate-900 tracking-tight leading-tight` (**Your Personal Records & Milestones**) |
+| **Header Subtitle** | `text-slate-500 text-[10px] sm:text-xs font-medium` (*Track your best achievements and beat your own records*) |
+| **Tile 1 (Score)** | `p-3 sm:p-4 rounded-xl bg-gradient-to-br from-amber-50/70 to-orange-50/40 border border-amber-200/70 space-y-1` |
+| **Tile 2 (Accuracy)**| `p-3 sm:p-4 rounded-xl bg-gradient-to-br from-emerald-50/70 to-teal-50/40 border border-emerald-200/70 space-y-1` |
+| **Tile 3 (Speed)**   | `p-3 sm:p-4 rounded-xl bg-gradient-to-br from-cyan-50/70 to-blue-50/40 border border-cyan-200/70 space-y-1` |
+| **Tile 4 (Streak)**  | `p-3 sm:p-4 rounded-xl bg-gradient-to-br from-orange-50/70 to-amber-50/40 border border-orange-200/70 space-y-1` |
+| **Value Typography** | `text-base sm:text-xl font-black text-slate-900 font-mono pt-0.5` |
+| **Audit Badge Pill** | `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 shrink-0` |
+| **Expandable Drawer Button**| `w-full py-2.5 px-4 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 text-slate-700 text-xs font-bold flex items-center justify-between transition-colors` |
+
+**Pattern notes:**
+- **Color-Coded Achievement Gradients**: Score uses Amber/Orange, Accuracy uses Emerald/Teal, Speed uses Cyan/Blue, Streak uses Orange/Amber.
+- **Subject-Wise Drawer**: Expandable framer-motion drawer lists subject accuracy badges (`% Correct`) with 1-click visibility toggle.
+
+---
+
+### 33. `SmartRecommendationCard` (AI Target Practice & Weak Area Banner)
+
+File: [`src/components/SmartRecommendationCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/SmartRecommendationCard.tsx)
+Last updated: 2026-08-08
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Container** | `bg-slate-900 border border-slate-800 text-white rounded-2xl sm:rounded-[2.2rem] p-4 sm:p-7 shadow-xl shadow-slate-950/20 relative overflow-hidden group mb-6 sm:mb-8` |
+| **Background Glows** | `absolute -left-20 -top-20 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl` & `bg-brand-500/10` |
+| **Header Badge** | `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30` |
+| **Marks Weight Pill**| `px-2.5 py-0.5 rounded-full text-[10px] font-mono font-extrabold bg-slate-800 text-slate-300 border border-slate-700` |
+| **Focus Topic Title**| `text-lg font-black text-white tracking-tight leading-tight` (with `text-amber-400` highlight) |
+| **Action Button** | `w-full sm:w-auto h-12 px-6 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/20` |
+| **Mobile 1-Line Bar** | `sm:hidden flex items-center justify-between gap-3 text-xs cursor-pointer` |
+
+**Pattern notes:**
+- **Dual Viewport Adaptability**: On mobile (<640px), renders as a 44px 1-line interactive bar (`Weak Area • Topic (40%) → Launch Drill`). On desktop, renders as a full dark backdrop banner.
+- **Smart Rationale**: Explains marks weightage and accuracy percentage in beginner-friendly natural language.
+
+
+
 
 
 

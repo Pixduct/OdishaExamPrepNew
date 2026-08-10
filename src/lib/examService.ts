@@ -369,35 +369,21 @@ export const examService = {
       .order('sortOrder', { ascending: true });
     if (error) throw error;
 
-    // Fast query to get question counts by fetching only the topic string
-    const testIds = (tests ?? []).map(t => `mockTest__${t.id}`);
-    
-    // Fetch all topics in batches to avoid Supabase's 1000-row limit
+    // Fast single query to get question counts by fetching only topic strings
+    const testIds = (tests ?? []).map(t => `mockTest__${t.id}`).filter(Boolean);
     let qTopics: any[] = [];
-    let page = 0;
-    const pageSize = 1000;
-    let keepFetching = true;
-    while (keepFetching) {
-      const { data, error } = await supabase
-        .from('questions')
-        .select('topic')
-        .in('topic', testIds)
-        .range(page * pageSize, (page + 1) * pageSize - 1);
-        
-      if (error) {
-        console.error("Error fetching question topics", error);
-        break;
-      }
-      
-      if (!data || data.length === 0) {
-        keepFetching = false;
-      } else {
-        qTopics = qTopics.concat(data);
-        if (data.length < pageSize) {
-          keepFetching = false;
-        } else {
-          page++;
+    if (testIds.length > 0) {
+      try {
+        const { data, error: qErr } = await supabase
+          .from('questions')
+          .select('topic')
+          .in('topic', testIds)
+          .limit(2000);
+        if (!qErr && data) {
+          qTopics = data;
         }
+      } catch (e) {
+        console.error("Error fetching question topics for mock tests", e);
       }
     }
       
@@ -462,29 +448,21 @@ export const examService = {
   },
 
   async getQuestionsForMockTest(mockTestId: string) {
-    let allQuestions: Question[] = [];
-    let page = 0;
-    const pageSize = 1000;
-    let keepFetching = true;
-    while (keepFetching) {
+    if (!mockTestId) return [];
+    try {
       const { data, error } = await supabase
         .from('questions')
-        .select('*')
+        .select('id, examId, topic, difficulty, questionText, options, correctAnswerIndex, explanation, diagram, sortOrder')
         .eq('topic', `mockTest__${mockTestId}`)
-        .range(page * pageSize, (page + 1) * pageSize - 1);
+        .order('sortOrder', { ascending: true })
+        .limit(200);
+
       if (error) throw error;
-      if (!data || data.length === 0) {
-        keepFetching = false;
-      } else {
-        allQuestions = allQuestions.concat(data as Question[]);
-        if (data.length < pageSize) {
-          keepFetching = false;
-        } else {
-          page++;
-        }
-      }
+      return (data || []) as Question[];
+    } catch (e) {
+      console.error(`Error fetching questions for mock test ${mockTestId}:`, e);
+      return [];
     }
-    return allQuestions;
   },
 
   async addQuestionsToMockTest(mockTestId: string, examId: string, questions: Partial<Question>[]) {
@@ -744,38 +722,20 @@ export const examService = {
 
     if (banks && banks.length > 0) {
       try {
-        const bankTitles = banks.map(b => b.title);
+        const bankTitles = banks.map(b => b.title).filter(Boolean);
         let qCounts: any[] = [];
-        let page = 0;
-        const pageSize = 1000;
-        let keepFetching = true;
-        let qError = null;
-
-        while (keepFetching) {
-          const { data, error } = await supabase
+        if (bankTitles.length > 0) {
+          const { data, error: qErr } = await supabase
             .from('questions')
             .select('topic')
             .in('topic', bankTitles)
-            .range(page * pageSize, (page + 1) * pageSize - 1);
-
-          if (error) {
-            qError = error;
-            break;
-          }
-
-          if (!data || data.length === 0) {
-            keepFetching = false;
-          } else {
-            qCounts = qCounts.concat(data);
-            if (data.length < pageSize) {
-              keepFetching = false;
-            } else {
-              page++;
-            }
+            .limit(2000);
+          if (!qErr && data) {
+            qCounts = data;
           }
         }
 
-        if (!qError && qCounts) {
+        if (qCounts && qCounts.length > 0) {
           const countMap: Record<string, number> = {};
           qCounts.forEach(q => {
             if (q.topic) {

@@ -103,6 +103,7 @@ import { OnboardingTour } from './components/OnboardingTour';
 import { GlobalSearchModal } from './components/GlobalSearchModal';
 import { NotificationCenter } from './components/NotificationCenter';
 
+
 const HistoryView = ({ 
   user, 
   onViewResults, 
@@ -1775,6 +1776,8 @@ export const Navbar = ({
           </Link>
           
           <div className="flex items-center gap-2.5 sm:gap-3 pl-2 sm:pl-3 border-l border-slate-200">
+
+
             <button
               type="button"
               onClick={() => setIsSearchModalOpen(true)}
@@ -1908,6 +1911,7 @@ export const Navbar = ({
 
         {/* Mobile Menu Toggle & Controls */}
         <div className="md:hidden flex items-center gap-2 sm:gap-3">
+
           {/* Mobile Header Streak Flame Pill Button */}
           <button
             type="button"
@@ -4722,7 +4726,11 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
   const [selectedPracticeCategory, setSelectedPracticeCategory] = useState<string | null>(() => sessionStorage.getItem('oep_selectedPracticeCategory') || null);
   const [selectedSectionalSubject, setSelectedSectionalSubject] = useState<string>('All');
   const [internalSelectedExam, setInternalSelectedExam] = useState<string | null>(() => sessionStorage.getItem('oep_selectedExam') || null);
-  const selectedExam = propsSelectedExam !== undefined ? propsSelectedExam : internalSelectedExam;
+  
+  const selectedExam = propsSelectedExam !== undefined && propsSelectedExam !== null
+    ? propsSelectedExam
+    : (internalSelectedExam || (exams && exams.length > 0 ? exams[0].id : null));
+
   const setSelectedExam = (val: string | null) => {
     if (val === null) {
       sessionStorage.setItem('oep_auto_navigated_dismissed', 'true');
@@ -4735,6 +4743,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       setInternalSelectedExam(val);
     }
   };
+
+
   const [showAdmin, setShowAdmin] = useState(false);
   const [infoModal, setInfoModal] = useState<{ isOpen: boolean; title: string; message: string } | null>(null);
   const showPremiumAlert = (title: string, message: string) => {
@@ -4936,18 +4946,14 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       return;
     }
     let finalResults = { ...results };
-    if (finalResults.test && finalResults.test.id && !finalResults.test.id.startsWith('practice-')) {
+    if ((!finalResults.test?.questions || finalResults.test.questions.length === 0) && finalResults.test?.id && !finalResults.test.id.startsWith('practice-')) {
       try {
         const freshQs = await examService.getQuestionsForMockTest(finalResults.test.id);
         if (freshQs && freshQs.length > 0) {
-          const freshMap = new Map(freshQs.map(q => [q.id, q]));
-          finalResults.test.questions = (finalResults.test.questions || []).map((q: any) => {
-            const fresh = freshMap.get(q.id);
-            return fresh ? { ...q, ...fresh } : q;
-          });
+          finalResults.test.questions = freshQs;
         }
       } catch (e) {
-        console.error("Failed to merge fresh questions for results review:", e);
+        console.error("Failed to fetch questions for results review:", e);
       }
     }
     setTestResults(finalResults);
@@ -6521,37 +6527,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           ? fetchedExams
           : [{ id: 'opsc-aio', name: 'OPSC AIO', description: 'Odisha Public Service Commission All In One', icon: '🏛️', category: 'upcoming' }];
 
-        // Fetch actual practice question counts per topic/bank — paginated to avoid Supabase 1000-row limit
-        let qCountMap: Record<string, number> = {};
-        try {
-          const qPageSize = 1000;
-          let qPage = 0;
-          let keepFetchingQs = true;
-          while (keepFetchingQs) {
-            const { data: qData, error: qErr } = await supabase
-              .from('questions')
-              .select('topic')
-              .range(qPage * qPageSize, (qPage + 1) * qPageSize - 1);
-            if (qErr || !qData || qData.length === 0) {
-              keepFetchingQs = false;
-            } else {
-              qData.forEach((q: any) => {
-                if (q.topic && !q.topic.startsWith('mockTest__')) {
-                  // Only index non-mock topics for practice count matching
-                  qCountMap[q.topic] = (qCountMap[q.topic] || 0) + 1;
-                  const norm = q.topic.toLowerCase().replace(/[\s\-_—–:()]+/g, '').trim();
-                  qCountMap[norm] = (qCountMap[norm] || 0) + 1;
-                }
-              });
-              if (qData.length < qPageSize) keepFetchingQs = false;
-              else qPage++;
-            }
-          }
-        } catch (e) {
-          console.error("Failed to fetch actual practice questions count:", e);
-        }
-
-        // Group banks by type
+        // Group banks by type using practiceQuestionCount pre-computed by getAllQuestionBanks()
         const groupedBanks: Record<string, any[]> = {};
         fetchedBanks.forEach((bank: any) => {
           if (!groupedBanks[bank.type]) groupedBanks[bank.type] = [];
@@ -6568,28 +6544,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             } catch(e) {}
           }
 
-          const normTitle = (bank.title || '').toLowerCase().replace(/[\s\-_—–:()]+/g, '').trim();
-          const normId = (bank.id || '').toLowerCase().replace(/[\s\-_—–:()]+/g, '').trim();
-          
-          let actualPracticeQs = 0;
-          if (qCountMap[bank.id] !== undefined) {
-            actualPracticeQs = qCountMap[bank.id];
-          } else if (qCountMap[bank.title] !== undefined) {
-            actualPracticeQs = qCountMap[bank.title];
-          } else if (qCountMap[normTitle] !== undefined) {
-            actualPracticeQs = qCountMap[normTitle];
-          } else if (qCountMap[normId] !== undefined) {
-            actualPracticeQs = qCountMap[normId];
-          } else {
-            for (const key of Object.keys(qCountMap)) {
-              const normKey = key.toLowerCase().replace(/[\s\-_—–:()]+/g, '').trim();
-              if (normKey === normTitle || (normKey.length > 3 && (normTitle.includes(normKey) || normKey.includes(normTitle)))) {
-                actualPracticeQs = Math.max(actualPracticeQs, qCountMap[key]);
-              }
-            }
-          }
-
-          const adminQuestionCount = bank.questionCount || bank.question_count || bank.questioncount || bank.questions || 0;
+          const actualPracticeQs = bank.practiceQuestionCount || bank.questionCount || 0;
+          const adminQuestionCount = bank.questionCount || bank.question_count || bank.questioncount || bank.questions || actualPracticeQs;
 
           groupedBanks[bank.type].push({
             id: bank.id,
@@ -6897,18 +6853,6 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             return;
           }
         }
-      } else {
-        // Questions are pre-loaded, let's refresh them entirely to catch any recently added/updated questions
-        if (!finalTest.id.startsWith('practice-')) {
-          try {
-            const freshQs = await examService.getQuestionsForMockTest(finalTest.id);
-            if (freshQs && freshQs.length > 0) {
-              finalTest.questions = freshQs;
-            }
-          } catch (e) {
-            console.error("Failed to refresh questions on start:", e);
-          }
-        }
       }
 
       if (isGuest) incrementGuestUsage('tests'); // This could be removed since we block guests entirely, but to avoid TS errors
@@ -6963,17 +6907,22 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         return;
       }
 
+      const reqCount = Number(practiceSettings.questions) || 20;
+      const fetchLimit = Math.max(reqCount * 5, 100);
+
       let { data, error } = await supabase
         .from('questions')
-        .select('*')
+        .select('id, examId, topic, difficulty, questionText, options, correctAnswerIndex, explanation, diagram, sortOrder')
         .eq('examId', effectiveExamId)
-        .ilike('topic', bankTopicName);
+        .ilike('topic', bankTopicName)
+        .limit(fetchLimit);
 
       if (!error && (!data || data.length === 0)) {
         const fallbackRes = await supabase
           .from('questions')
-          .select('*')
-          .eq('examId', effectiveExamId);
+          .select('id, examId, topic, difficulty, questionText, options, correctAnswerIndex, explanation, diagram, sortOrder')
+          .eq('examId', effectiveExamId)
+          .limit(Math.max(reqCount * 10, 300));
         if (!fallbackRes.error) {
           data = fallbackRes.data;
           error = null;
@@ -7633,8 +7582,11 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     } catch { return 'recently'; }
                   })();
 
-                  // Can only resume if full question data is available locally
-                  const canResume = Array.isArray(a.metadata?.test?.questions) && a.metadata.test.questions.length > 0;
+                  // Can resume locally or across devices if test ID or questions array is present
+                  const canResume = !!(
+                    a.metadata?.test?.id ||
+                    (Array.isArray(a.metadata?.test?.questions) && a.metadata.test.questions.length > 0)
+                  );
 
                   return (
                     <motion.div
@@ -7647,16 +7599,23 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       onClick={async () => {
                         if (!canResume) return;
                         
-                        let testToResume = { ...a.metadata.test };
-                        if (testToResume.id && !testToResume.id.startsWith('practice-')) {
-                          try {
-                            const freshQs = await examService.getQuestionsForMockTest(testToResume.id);
-                            if (freshQs && freshQs.length > 0) {
-                              testToResume.questions = freshQs;
+                        let testToResume = { ...a.metadata?.test };
+                        if (!Array.isArray(testToResume.questions) || testToResume.questions.length === 0) {
+                          if (testToResume.id && !testToResume.id.startsWith('practice-')) {
+                            try {
+                              const freshQs = await examService.getQuestionsForMockTest(testToResume.id);
+                              if (freshQs && freshQs.length > 0) {
+                                testToResume.questions = freshQs;
+                              }
+                            } catch (e) {
+                              console.error("Failed to fetch fresh questions on Continue resume:", e);
                             }
-                          } catch (e) {
-                            console.error("Failed to fetch fresh questions on Continue resume:", e);
                           }
+                        }
+
+                        if (!Array.isArray(testToResume.questions) || testToResume.questions.length === 0) {
+                          alert("Could not load test questions to resume. Please select the test from Mock Tests or Practice Mode.");
+                          return;
                         }
                         
                         setActiveTestState({ ...a.metadata, resumeSessionId: a.metadata?.resumeSessionId || a.metadata?.test?.id });
@@ -10535,24 +10494,44 @@ function AppContent() {
   const [dashboardKey, setDashboardKey] = useState(0);
   const [activities, setActivities] = useState<any[]>([]);
 
-  // Fetch activities from DB asynchronously
+  // Fetch activities from DB asynchronously (lightweight metadata, bounded limit)
   const fetchActivitiesFromDB = useCallback(async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('activities')
-        .select('*')
+        .select('id, userId, type, title, timestamp, score, totalMarks, accuracy, timeSpent, metadata')
         .eq('userId', userId)
-        .order('timestamp', { ascending: false });
+        .order('timestamp', { ascending: false })
+        .limit(50);
 
       if (error) throw error;
 
       if (data) {
-        // Save to localStorage so that synchronous getActivities reads the fresh database state
         const localKey = `oep_activities_${userId}`;
-        localStorage.setItem(localKey, JSON.stringify(data));
+        let localActivities: any[] = [];
+        try {
+          const raw = localStorage.getItem(localKey);
+          if (raw) localActivities = JSON.parse(raw);
+        } catch { /* ignore */ }
+
+        const localMap = new Map((Array.isArray(localActivities) ? localActivities : []).map(a => [a.id, a]));
+
+        // Merge DB rows while preserving any local heavy test questions for offline resume
+        const merged = data.map(dbItem => {
+          const localItem = localMap.get(dbItem.id);
+          if (localItem && Array.isArray(localItem.metadata?.test?.questions) && localItem.metadata.test.questions.length > 0) {
+            return localItem; // Preserve local heavy version for resume
+          }
+          return dbItem;
+        });
+
+        // Save merged list to localStorage so synchronous getActivities reads fresh state
+        try {
+          localStorage.setItem(localKey, JSON.stringify(merged));
+        } catch { /* ignore storage errors */ }
         
         // Update state in App.tsx
-        setActivities(data);
+        setActivities(merged);
         
         // Dispatch event to notify AnalyticsView and other listeners
         window.dispatchEvent(new CustomEvent('oep-activity-changed'));
@@ -10582,6 +10561,7 @@ function AppContent() {
     fetchActivitiesFromDB(user.id);
 
     // Set up Realtime subscription to receive updates from other devices instantly
+    // Update local state directly without re-downloading the entire DB table
     const channel = supabase
       .channel(`realtime-activities-${user.id}`)
       .on(
@@ -10594,7 +10574,20 @@ function AppContent() {
         },
         (payload) => {
           console.log('[Realtime] Activity change received:', payload);
-          fetchActivitiesFromDB(user.id);
+          if (payload.eventType === 'INSERT' && payload.new) {
+            setActivities(prev => {
+              const exists = prev.some(a => a.id === payload.new.id);
+              if (exists) return prev;
+              return [payload.new, ...prev].slice(0, 50);
+            });
+            window.dispatchEvent(new CustomEvent('oep-activity-changed'));
+          } else if (payload.eventType === 'UPDATE' && payload.new) {
+            setActivities(prev => prev.map(a => a.id === payload.new.id ? { ...a, ...payload.new } : a));
+            window.dispatchEvent(new CustomEvent('oep-activity-changed'));
+          } else if (payload.eventType === 'DELETE' && payload.old) {
+            setActivities(prev => prev.filter(a => a.id !== payload.old.id));
+            window.dispatchEvent(new CustomEvent('oep-activity-changed'));
+          }
         }
       )
       .subscribe();
@@ -10641,7 +10634,7 @@ function AppContent() {
       clearTimeout(repairTimer);
       supabase.removeChannel(channel);
     };
-  }, [user?.id, user?.user_metadata, fetchActivitiesFromDB]);
+  }, [user?.id, fetchActivitiesFromDB]);
 
   // Clear dashboard cache on logout so a different account sees fresh data
   useEffect(() => {

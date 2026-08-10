@@ -8,6 +8,7 @@ import {
   StudyPlanTask
 } from '../lib/studyPlannerEngine';
 
+
 interface AIStudyPlanCardProps {
   userId?: string;
   onLaunchTask?: (task: StudyPlanTask) => void;

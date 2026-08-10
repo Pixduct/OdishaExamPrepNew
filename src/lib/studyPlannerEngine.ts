@@ -64,30 +64,41 @@ export const cleanSubjectTitle = (rawName: string): string => {
   return s;
 };
 
-/** Get live user target exam from localStorage */
-const getUserTargetExam = (): { examId: string; examName: string; subjects: string[] } => {
+/** Get live user target exam from localStorage or parameters */
+const getUserTargetExam = (examIdInput?: string, examNameInput?: string): { examId: string; examName: string; subjects: string[] } => {
   try {
-    const savedExamId = localStorage.getItem('oep_selected_exam') || localStorage.getItem('selectedExamId') || 'osssc-nursing-2026';
+    const savedExamId = examIdInput || localStorage.getItem('oep_active_exam_id') || localStorage.getItem('oep_selected_exam') || localStorage.getItem('selectedExamId') || '';
     const cleanId = savedExamId.toLowerCase();
 
     if (cleanId.includes('ossc') && !cleanId.includes('osssc')) {
-      return { examId: savedExamId, examName: 'OSSC CGL Examination', subjects: EXAM_DEFAULT_SUBJECTS.ossc };
+      return { examId: savedExamId, examName: examNameInput || 'OSSC CGL Examination', subjects: EXAM_DEFAULT_SUBJECTS.ossc };
     }
     if (cleanId.includes('osssc') && !cleanId.includes('nursing')) {
-      return { examId: savedExamId, examName: 'OSSSC Combined Recruitment', subjects: EXAM_DEFAULT_SUBJECTS.osssc };
+      return { examId: savedExamId, examName: examNameInput || 'OSSSC Combined Recruitment', subjects: EXAM_DEFAULT_SUBJECTS.osssc };
     }
     if (cleanId.includes('opsc')) {
-      return { examId: savedExamId, examName: 'OPSC Civil Services (OCS)', subjects: EXAM_DEFAULT_SUBJECTS.opsc };
+      return { examId: savedExamId, examName: examNameInput || 'OPSC Civil Services (OCS)', subjects: EXAM_DEFAULT_SUBJECTS.opsc };
     }
     if (cleanId.includes('police')) {
-      return { examId: savedExamId, examName: 'Odisha Police Constable Exam', subjects: EXAM_DEFAULT_SUBJECTS.police };
+      return { examId: savedExamId, examName: examNameInput || 'Odisha Police Constable Exam', subjects: EXAM_DEFAULT_SUBJECTS.police };
     }
     if (cleanId.includes('bed')) {
-      return { examId: savedExamId, examName: 'Odisha B.Ed Entrance Exam', subjects: EXAM_DEFAULT_SUBJECTS.bed };
+      return { examId: savedExamId, examName: examNameInput || 'Odisha B.Ed Entrance Exam', subjects: EXAM_DEFAULT_SUBJECTS.bed };
     }
-    return { examId: savedExamId, examName: 'OSSSC Nursing Officer Exam', subjects: EXAM_DEFAULT_SUBJECTS.nursing };
+    if (cleanId.includes('nursing')) {
+      return { examId: savedExamId, examName: examNameInput || 'OSSSC Nursing Officer Exam', subjects: EXAM_DEFAULT_SUBJECTS.nursing };
+    }
+    return {
+      examId: savedExamId || 'general-exam',
+      examName: examNameInput || 'General Competitive Exam',
+      subjects: ['General Awareness', 'Reasoning & Mental Ability', 'Quantitative Aptitude', 'English Language', 'Odisha GK']
+    };
   } catch (e) {
-    return { examId: 'osssc-nursing-2026', examName: 'OSSSC Nursing Officer Exam', subjects: EXAM_DEFAULT_SUBJECTS.nursing };
+    return {
+      examId: 'general-exam',
+      examName: 'General Competitive Exam',
+      subjects: ['General Awareness', 'Reasoning & Mental Ability', 'Quantitative Aptitude', 'English Language', 'Odisha GK']
+    };
   }
 };
 
@@ -146,13 +157,13 @@ const getSeededNumber = (seedStr: string, offset: number): number => {
 };
 
 /** Dynamically compile Today's AI Study Plan using REAL student test performance & target exam syllabus */
-export const getTodayStudyPlan = (userId?: string): DailyStudyPlan => {
+export const getTodayStudyPlan = (userId?: string, activeExamIdInput?: string, activeExamNameInput?: string): DailyStudyPlan => {
   try {
     const todayStr = new Date().toISOString().split('T')[0];
+    const targetExam = getUserTargetExam(activeExamIdInput, activeExamNameInput);
     const weakTopicsData = getSmartWeakTopicRecommendations(userId);
     const streakState = getStreakState(userId);
     const completedIds = getCompletedTaskIds();
-    const targetExam = getUserTargetExam();
     const isPersonalizedFromAttempts = weakTopicsData.hasAttempts && (weakTopicsData.allTopicConfidence?.length || 0) > 0;
 
     // Scan today's activities for automatic task completion

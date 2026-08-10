@@ -213,8 +213,9 @@ export const activityTracker = {
         }
       }
 
-      // Sync full activity details to the public.activities table
+      // Sync lightweight activity details to the public.activities table (no heavy question payloads)
       try {
+        const cloudSafeActivity = toCloudSafe(newActivity);
         await supabase
           .from('activities')
           .upsert([{
@@ -227,7 +228,7 @@ export const activityTracker = {
             totalMarks: newActivity.totalMarks,
             accuracy: newActivity.accuracy,
             timeSpent: newActivity.timeSpent,
-            metadata: newActivity.metadata
+            metadata: cloudSafeActivity.metadata
           }]);
       } catch (dbErr) {
         console.error('[Activities System] Failed to write activity to database:', dbErr);

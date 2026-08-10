@@ -20,7 +20,7 @@ export const ActiveExamContextBar: React.FC<ActiveExamContextBarProps> = ({
   return (
     <>
       {/* Active Context Bar Container */}
-      <div className={`w-full bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-2.5 sm:p-3.5 shadow-xs mb-6 sticky top-16 z-30 transition-all ${className}`}>
+      <div className={`w-full bg-white border border-slate-200/80 rounded-2xl sm:rounded-3xl p-3 sm:p-4 shadow-xs mb-6 sm:mb-8 relative z-10 transition-all ${className}`}>
         <div className="flex items-center justify-between gap-3 min-w-0">
           
           {/* Left Side: Active Target Indicator */}

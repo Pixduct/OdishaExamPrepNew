@@ -205,9 +205,6 @@ const HistoryView = ({
 
   return (
     <div className="space-y-5">
-      {/* Hero Context Bar for Multi-Exam Context Selection */}
-      <ActiveExamContextBar />
-
       {/* ── Section header ── */}
       <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-100">
         <div className="flex items-center gap-2.5 min-w-0">
@@ -253,6 +250,9 @@ const HistoryView = ({
           </div>
         )}
       </div>
+
+      {/* Hero Context Bar for Multi-Exam Context Selection (Placed BELOW header, ABOVE filters) */}
+      <ActiveExamContextBar className="my-1 sm:my-2" />
 
       {/* ── Filter Pills ── */}
       {examFilteredActivities.length > 0 && (() => {

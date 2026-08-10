@@ -22,11 +22,11 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `1.7.21` (Practice Mode Explanation Auto-Sync & Solution Breakdown Toggle Engine) |
+| **Current Version** | `3.6.0` (Scalable Multi-Exam Context & Filtering Architecture) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & UI polished) |
-| **Last Updated** | July 25, 2026 |
+| **Last Updated** | August 10, 2026 |
 | **Overall Status** | ✅ **On Schedule & Fully Operational** |
 
 ---
@@ -35,9 +35,9 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 
 - **Current Phase:** Phase 9 — Performance, SEO & Native Android Build (Complete)
 - **Current Milestone:** Production Maintenance & User Experience Expansion
-- **Current Priority:** Spotlight Search Portal & Header Trigger Wiring
+- **Current Priority:** Multi-Exam Syllabus Scoping & In-Page Target Context Switcher
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Implemented Practice mode solution explanation auto-sync and toggle button in `MockTestSystem.tsx` (v1.7.21). When navigating back to any already-answered question in Practice mode, the Expert Explanation card now displays AUTOMATICALLY without requiring the student to clear or re-select their answer. Added an interactive `[Solution Breakdown / Hide Explanation]` button to the question header for instant visibility control.
+- **Last Completed Task:** Implemented Scalable Multi-Exam Context & Filtering Architecture (v3.6.0). Added global `activeExamStore.ts` with local persistence (`oep_active_exam_context`), sticky `ActiveExamContextBar` on Study Plan, Analytics, and Activity History pages, and responsive `ExamContextSelectorModal` (Bottom Sheet on mobile, Dialog on desktop) supporting search and category trees for 50+ exams. Scoped Study Plan tasks, Analytics Readiness & Radar metrics, and Activity History logs to active target exam context.
 
 ---
 

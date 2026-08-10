@@ -27,6 +27,7 @@ export interface DailyStudyPlan {
   lastGeneratedTime: string;
   isPersonalizedFromAttempts: boolean;
   targetExamName: string;
+  hasContent?: boolean;
 }
 
 const STORAGE_KEY_PLAN = 'oep_ai_study_plan_completed_tasks_v2';
@@ -172,6 +173,27 @@ export const getTodayStudyPlan = (userId?: string, activeExamIdInput?: string, a
     const streakState = getStreakState(userId);
     const completedIds = getCompletedTaskIds(targetExam.examId);
     const isPersonalizedFromAttempts = weakTopicsData.hasAttempts && (weakTopicsData.allTopicConfidence?.length || 0) > 0;
+    // Check if target exam has active content or is unreleased
+    const knownEmptyExams = ['aiims-norcet', 'osssc-anm', 'ossc-chsle', 'ssc-cgl-national', 'opsc-aso', 'odisha-police-si', 'otet-exam'];
+    const isUnreleasedExam = knownEmptyExams.includes(targetExam.examId.toLowerCase());
+
+    const hasContent = !isUnreleasedExam && (targetExam.examId === 'all' || isPersonalizedFromAttempts || targetExam.subjects.length > 0);
+
+    if (!hasContent) {
+      return {
+        totalMinutes: 0,
+        remainingMinutes: 0,
+        expectedScoreBoost: '+0%',
+        completedCount: 0,
+        totalCount: 0,
+        progressPercentage: 0,
+        tasks: [],
+        lastGeneratedTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isPersonalizedFromAttempts: false,
+        targetExamName: targetExam.examName,
+        hasContent: false
+      };
+    }
 
     // Scan today's activities for automatic task completion for target exam
     const activities: UserActivity[] = activityTracker.getActivities(userId);

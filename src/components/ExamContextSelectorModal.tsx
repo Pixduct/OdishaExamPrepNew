@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Layers, CheckCircle2, ChevronRight, ChevronDown, Sparkles, Target, Trophy } from 'lucide-react';
-import { DEFAULT_EXAM_CATEGORIES, useActiveExamContext, CategorizedExams } from '../lib/activeExamStore';
+import { useActiveExamContext, CategorizedExams, buildCategorizedExamsFromDb } from '../lib/activeExamStore';
+import { examService } from '../lib/examService';
 
 interface ExamContextSelectorModalProps {
   isOpen: boolean;
@@ -16,51 +17,32 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
 }) => {
   const [context, changeExam] = useActiveExamContext();
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
-    'Nursing & Healthcare': true,
-    'SSC & OSSC Exams': true,
-    'Civil Services & State Services': false,
-    'Police & Defence': false,
-    'Teaching & B.Ed': false
-  });
+  const [dbExams, setDbExams] = useState<any[]>(availableExamsFromDb);
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
 
-  // Combine DB exams with predefined default categories to ensure 50+ scaling support
-  const categories: CategorizedExams[] = useMemo(() => {
-    const baseMap = new Map<string, CategorizedExams>();
-
-    DEFAULT_EXAM_CATEGORIES.forEach(cat => {
-      baseMap.set(cat.categoryName, { ...cat, exams: [...cat.exams] });
-    });
-
-    // Merge any dynamically created DB exams into categories
+  useEffect(() => {
     if (Array.isArray(availableExamsFromDb) && availableExamsFromDb.length > 0) {
-      availableExamsFromDb.forEach(exam => {
-        const catName = exam.category || 'General Competitive Exams';
-        const existingCat = baseMap.get(catName);
-        const examItem = {
-          id: exam.id || exam.title?.toLowerCase().replace(/\s+/g, '-'),
-          name: exam.name || exam.title || 'Exam',
-          category: catName,
-          questionCount: exam.questions || exam.questionCount || 500,
-          readinessScore: 70
-        };
-
-        if (existingCat) {
-          if (!existingCat.exams.some(e => e.id === examItem.id)) {
-            existingCat.exams.push(examItem);
-          }
-        } else {
-          baseMap.set(catName, {
-            categoryName: catName,
-            categoryIcon: '📚',
-            exams: [examItem]
-          });
-        }
-      });
+      setDbExams(availableExamsFromDb);
+    } else if (isOpen) {
+      examService.getAllExams().then(res => {
+        if (res && res.length > 0) setDbExams(res);
+      }).catch(err => console.error("Error fetching exams for modal:", err));
     }
+  }, [availableExamsFromDb, isOpen]);
 
-    return Array.from(baseMap.values());
-  }, [availableExamsFromDb]);
+  // Build categories strictly from live database exams
+  const categories: CategorizedExams[] = useMemo(() => {
+    return buildCategorizedExamsFromDb(dbExams);
+  }, [dbExams]);
+
+  // Expand all category trees by default when loaded
+  useEffect(() => {
+    if (categories.length > 0) {
+      const state: Record<string, boolean> = {};
+      categories.forEach(c => { state[c.categoryName] = true; });
+      setExpandedCategories(state);
+    }
+  }, [categories]);
 
   // Enrolled / Pinned Recent Target Exams
   const enrolledExams = useMemo(() => {

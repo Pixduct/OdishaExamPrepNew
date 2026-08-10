@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Target, ChevronDown, Layers, Sparkles } from 'lucide-react';
 import { useActiveExamContext } from '../lib/activeExamStore';
 import { ExamContextSelectorModal } from './ExamContextSelectorModal';
@@ -14,6 +14,12 @@ export const ActiveExamContextBar: React.FC<ActiveExamContextBarProps> = ({
 }) => {
   const [context] = useActiveExamContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpen = () => setIsModalOpen(true);
+    window.addEventListener('oep-open-context-modal', handleOpen);
+    return () => window.removeEventListener('oep-open-context-modal', handleOpen);
+  }, []);
 
   const isAll = context.activeExamId === 'all';
 

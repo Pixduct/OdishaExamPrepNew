@@ -65,6 +65,42 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
     }
   };
 
+  if (plan.hasContent === false || plan.tasks.length === 0) {
+    return (
+      <div className="bg-white p-6 sm:p-10 rounded-2xl sm:rounded-[2.25rem] shadow-xs border border-slate-200/80 text-center space-y-5 mb-6 sm:mb-8 relative overflow-hidden">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center mx-auto text-brand-600 shadow-inner">
+          <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-brand-600 animate-float-sm" />
+        </div>
+
+        <div className="max-w-md mx-auto space-y-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold text-amber-700 bg-amber-50 border border-amber-200/70">
+            <Clock className="w-3.5 h-3.5 text-amber-600" />
+            Preparing Syllabus Content
+          </div>
+          <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+            Content Coming Soon for {activeContext.activeExamName}
+          </h3>
+          <p className="text-slate-500 font-medium text-xs sm:text-sm leading-relaxed">
+            We are actively preparing question banks and mock tests for this exam syllabus. Check back soon or switch your target exam.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <button
+            type="button"
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent('oep-open-context-modal'));
+            }}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-extrabold text-xs sm:text-sm transition-all duration-200 shadow-md active:scale-95 cursor-pointer border-none"
+          >
+            <Target className="w-4 h-4" />
+            <span>Switch Target Exam</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white p-4 sm:p-7 rounded-2xl sm:rounded-[2.25rem] shadow-xs border border-slate-200/80 space-y-4 mb-6 sm:mb-8 relative overflow-hidden">
       {/* Top Header & Dynamic Personalization Status */}

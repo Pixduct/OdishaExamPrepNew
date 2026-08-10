@@ -21,51 +21,64 @@ export interface CategorizedExams {
 
 const STORAGE_KEY = 'oep_active_exam_context_v1';
 
-export const DEFAULT_EXAM_CATEGORIES: CategorizedExams[] = [
-  {
-    categoryName: 'Nursing & Healthcare',
-    categoryIcon: '🏥',
-    exams: [
-      { id: 'osssc-nursing-officer', name: 'OSSSC Nursing Officer Exam', category: 'Nursing & Healthcare', readinessScore: 78, isEnrolled: true },
-      { id: 'aiims-norcet', name: 'AIIMS NORCET Examination', category: 'Nursing & Healthcare', readinessScore: 65, isEnrolled: true },
-      { id: 'osssc-anm', name: 'OSSSC ANM Recruitment', category: 'Nursing & Healthcare', readinessScore: 40 }
-    ]
-  },
-  {
-    categoryName: 'SSC & OSSC Exams',
-    categoryIcon: '🏛️',
-    exams: [
-      { id: 'ossc-cgl', name: 'OSSC CGL Examination', category: 'SSC & OSSC Exams', readinessScore: 82, isEnrolled: true },
-      { id: 'osssc-combined', name: 'OSSSC Combined Recruitment', category: 'SSC & OSSC Exams', readinessScore: 70, isEnrolled: true },
-      { id: 'ossc-chsle', name: 'OSSC CHSLE (10+2) Exam', category: 'SSC & OSSC Exams', readinessScore: 55 },
-      { id: 'ssc-cgl-national', name: 'SSC CGL Tier I & II', category: 'SSC & OSSC Exams', readinessScore: 60 }
-    ]
-  },
-  {
-    categoryName: 'Civil Services & State Services',
-    categoryIcon: '⚖️',
-    exams: [
-      { id: 'opsc-ocs', name: 'OPSC Civil Services (OCS)', category: 'Civil Services & State Services', readinessScore: 60, isEnrolled: true },
-      { id: 'opsc-aso', name: 'OPSC ASO Examination', category: 'Civil Services & State Services', readinessScore: 75 }
-    ]
-  },
-  {
-    categoryName: 'Police & Defence',
-    categoryIcon: '🛡️',
-    exams: [
-      { id: 'odisha-police-constable', name: 'Odisha Police Constable Exam', category: 'Police & Defence', readinessScore: 85 },
-      { id: 'odisha-police-si', name: 'Odisha Police Sub-Inspector', category: 'Police & Defence', readinessScore: 50 }
-    ]
-  },
-  {
-    categoryName: 'Teaching & B.Ed',
-    categoryIcon: '🎓',
-    exams: [
-      { id: 'odisha-bed', name: 'Odisha B.Ed Entrance Exam', category: 'Teaching & B.Ed', readinessScore: 70 },
-      { id: 'otet-exam', name: 'OTET / OSSTET Teacher Exam', category: 'Teaching & B.Ed', readinessScore: 62 }
-    ]
-  }
-];
+export const DEFAULT_EXAM_CATEGORIES: CategorizedExams[] = [];
+
+/** Build dynamic categories strictly from live database exams */
+export const buildCategorizedExamsFromDb = (dbExams: any[] = []): CategorizedExams[] => {
+  if (!Array.isArray(dbExams) || dbExams.length === 0) return [];
+
+  const categoryMap = new Map<string, CategorizedExams>();
+
+  // Filter out system and blog categories
+  const validExams = dbExams.filter(e => e.category !== 'blog' && e.category !== 'system' && !(e.name || '').startsWith('SYSTEM_SETTINGS_'));
+
+  validExams.forEach(exam => {
+    const rawCategory = exam.category || 'General Competitive Exams';
+    const cleanCategoryName = (() => {
+      const lower = rawCategory.toLowerCase();
+      if (lower.includes('nursing') || lower.includes('health') || lower.includes('medical')) return 'Nursing & Healthcare';
+      if (lower.includes('ossc') || lower.includes('ssc')) return 'SSC & OSSC Exams';
+      if (lower.includes('civil') || lower.includes('opsc') || lower.includes('ias') || lower.includes('ocs')) return 'Civil Services & State Services';
+      if (lower.includes('police') || lower.includes('defence') || lower.includes('constable')) return 'Police & Defence';
+      if (lower.includes('teach') || lower.includes('bed') || lower.includes('tet')) return 'Teaching & Education';
+      if (lower === 'upcoming') return 'Upcoming Recruitment Exams';
+      if (lower === 'popular') return 'Popular Target Exams';
+      return rawCategory.charAt(0).toUpperCase() + rawCategory.slice(1);
+    })();
+
+    const categoryIcon = (() => {
+      if (cleanCategoryName.includes('Nursing')) return '🏥';
+      if (cleanCategoryName.includes('SSC')) return '🏛️';
+      if (cleanCategoryName.includes('Civil')) return '⚖️';
+      if (cleanCategoryName.includes('Police')) return '🛡️';
+      if (cleanCategoryName.includes('Teaching')) return '🎓';
+      return '📚';
+    })();
+
+    const examItem = {
+      id: exam.id,
+      name: exam.name || 'Exam',
+      category: cleanCategoryName,
+      questionCount: exam.questions || exam.questionCount || 0,
+      readinessScore: 70
+    };
+
+    if (!categoryMap.has(cleanCategoryName)) {
+      categoryMap.set(cleanCategoryName, {
+        categoryName: cleanCategoryName,
+        categoryIcon,
+        exams: [examItem]
+      });
+    } else {
+      const cat = categoryMap.get(cleanCategoryName)!;
+      if (!cat.exams.some(e => e.id === examItem.id)) {
+        cat.exams.push(examItem);
+      }
+    }
+  });
+
+  return Array.from(categoryMap.values());
+};
 
 export const getActiveExamContext = (): ActiveExamContext => {
   try {

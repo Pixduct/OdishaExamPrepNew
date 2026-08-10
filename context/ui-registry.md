@@ -1185,6 +1185,27 @@ Last updated: 2026-08-10
 - **Compact Selected Indicators**: Selected items render a compact checkmark icon on mobile (`CheckCircle2`), preventing exam titles (`OSSSC Nursing Officer`) from truncating.
 - **Desktop/Laptop View Lock**: Desktop dark button (`bg-slate-900`), full titles, and inline badges remain 100% untouched.
 
+---
+
+### 41. `WelcomeVideoModal`, `OnboardingTour` & `PushPermissionPrompt` (Authenticated Onboarding & Permission Engine)
+
+Files: [`src/components/WelcomeVideoModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/WelcomeVideoModal.tsx), [`src/components/OnboardingTour.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/OnboardingTour.tsx) & [`src/components/PushPermissionPrompt.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/PushPermissionPrompt.tsx)
+Last updated: 2026-08-10
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Welcome Video Modal Window**| `relative w-full max-w-lg lg:max-w-4xl bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.35)] overflow-hidden z-10` |
+| **Welcome Video Header Bar** | `bg-slate-950 px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between border-b border-slate-800 text-white shrink-0 z-30` |
+| **Welcome CTA Button** | `py-2.5 px-5 rounded-xl font-black text-xs text-white bg-brand-600 hover:bg-brand-700 transition-all shadow-md hover:shadow-brand-500/20` |
+| **Push Permission Card** | `p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-slate-900/95 text-white border border-slate-800 shadow-2xl backdrop-blur-xl space-y-3` |
+| **Push Allow Button** | `px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-black text-xs transition-all shadow-sm active:scale-95` |
+
+**Pattern notes:**
+- **Strict User Auth Guarding**: Onboarding video modals, guided tour overlays, and push permission prompts are rendered ONLY when a user is authenticated (`user && !loading`). Unauthenticated (logged-out) visitors browsing the site will never see onboarding popups.
+- **First-Time Account Persistence**: `WelcomeVideoModal` and `OnboardingTour` auto-trigger ONLY for newly registered accounts on their very first login. Completion state is permanently persisted per account ID (`oep_welcome_video_seen_${userId}` and `oep_tour_completed_${userId}`) so popups never recur for that account.
+- **Permission & Dismissal Guards**: `PushPermissionPrompt` auto-triggers ONLY if `permissionState === 'default'` (never allowed or blocked) AND `!localStorage.getItem('oep_push_prompt_dismissed_' + userId)`. Dismissals and permission grants/denials suppress subsequent prompts permanently.
+
+
 
 
 

@@ -37,7 +37,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 - **Current Milestone:** Production Maintenance & User Experience Expansion
 - **Current Priority:** Multi-Exam Syllabus Scoping & In-Page Target Context Switcher
 - **Status Badge:** ✅ **Production Ready**
-- **Last Completed Task:** Implemented Scalable Multi-Exam Context & Filtering Architecture (v3.6.0). Added global `activeExamStore.ts` with local persistence (`oep_active_exam_context`), sticky `ActiveExamContextBar` on Study Plan, Analytics, and Activity History pages, and responsive `ExamContextSelectorModal` (Bottom Sheet on mobile, Dialog on desktop) supporting search and category trees for 50+ exams. Scoped Study Plan tasks, Analytics Readiness & Radar metrics, and Activity History logs to active target exam context.
+- **Last Completed Task:** Fixed AI Study Plan target exam switching bug (v3.6.1). Updated `studyPlannerEngine.ts` and `recommendationEngine.ts` to scope weak topic analysis, fallback syllabus subjects, and task generation strictly to the active target exam (`targetExam.examId`). When switching targets (e.g., from OSSSC Nursing to OSSC CGL), daily study plan tasks instantly refresh to generate subjects belonging strictly to the newly selected exam syllabus (`Computer Awareness & IT`, `General English Grammar`, `Arithmetic & Reasoning`).
 
 ---
 

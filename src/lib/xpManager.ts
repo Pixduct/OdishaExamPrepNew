@@ -24,6 +24,7 @@ export interface StudentRankEntry {
   xp: number;
   league: LeagueTier;
   avatarBg: string;
+  avatarUrl?: string | null;
   isCurrentUser: boolean;
   accuracyPct: number;
   streakDays: number;
@@ -300,7 +301,7 @@ export const getLeagueTierInfo = (xp: number): LeagueTierInfo => {
 };
 
 /** Calculate live user XP with Quality Accuracy Weighting */
-export const getUserXpState = (userId?: string): UserXpState => {
+export const getUserXpState = (userId?: string, userObj?: any): UserXpState => {
   try {
     const activities = activityTracker.getActivities(userId);
     const streakState = getStreakState(userId);
@@ -372,15 +373,18 @@ export const getUserXpState = (userId?: string): UserXpState => {
       totalStudents: 18500
     };
 
+    const userAvatarUrl = userObj?.user_metadata?.avatar_url || userObj?.user_metadata?.picture || null;
+
     // Save to persistent registry
     saveRealStudentProfile({
       rank: userRank,
       userId: userId || 'current-user',
-      name: getUserStudentName(),
+      name: getUserStudentName(userObj),
       district: getUserDistrict(),
       xp: totalXp,
       league: currentLeague.tier,
       avatarBg: 'bg-brand-600',
+      avatarUrl: userAvatarUrl,
       isCurrentUser: true,
       accuracyPct,
       streakDays: streakState.currentStreak || 1
@@ -408,9 +412,10 @@ export const getUserXpState = (userId?: string): UserXpState => {
 export const getOdishaLeaderboard = (
   userId?: string,
   timeFilter: 'daily' | 'weekly' | 'allTime' = 'weekly',
-  districtFilter: string = 'All Odisha'
+  districtFilter: string = 'All Odisha',
+  userObj?: any
 ): { podium: StudentRankEntry[]; rankList: StudentRankEntry[]; userEntry: StudentRankEntry; nearbyBracket: StudentRankEntry[]; resetNotice: string } => {
-  const userXpInfo = getUserXpState(userId);
+  const userXpInfo = getUserXpState(userId, userObj);
 
   let masterTopList: StudentRankEntry[] = [];
   let displayXp = userXpInfo.totalXp;
@@ -436,14 +441,17 @@ export const getOdishaLeaderboard = (
     s.isCurrentUser = false;
   });
 
+  const userAvatarUrl = userObj?.user_metadata?.avatar_url || userObj?.user_metadata?.picture || null;
+
   const currentUserEntry: StudentRankEntry = {
     rank: userXpInfo.userRank,
     userId: userId || 'current-user',
-    name: getUserStudentName(),
+    name: getUserStudentName(userObj),
     district: getUserDistrict(),
     xp: displayXp,
     league: userXpInfo.currentLeague.tier,
     avatarBg: 'bg-brand-600',
+    avatarUrl: userAvatarUrl,
     isCurrentUser: true,
     accuracyPct: userXpInfo.accuracyPct,
     streakDays: getStreakState(userId).currentStreak || 1

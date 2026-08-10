@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Crown, Flame, Target, ChevronDown, ShieldCheck, MapPin, Zap, Award, Target as TargetIcon, Edit2, Check, X } from 'lucide-react';
+import { useAuth } from '../lib/AuthContext';
 import {
   getUserXpState,
   getOdishaLeaderboard,
@@ -20,19 +21,20 @@ interface OdishaLeaderboardCardProps {
 }
 
 export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ userId }) => {
+  const { user } = useAuth();
   const [timeFilter, setTimeFilter] = useState<'daily' | 'weekly' | 'allTime'>('weekly');
-  const [xpState, setXpState] = useState<UserXpState>(() => getUserXpState(userId));
+  const [xpState, setXpState] = useState<UserXpState>(() => getUserXpState(userId, user));
   const [isDistrictModalOpen, setIsDistrictModalOpen] = useState(false);
   const [selectedDistrict, setSelectedDistrict] = useState<string>(() => getUserDistrict());
   const [districtSearch, setDistrictSearch] = useState('');
 
   useEffect(() => {
-    setXpState(getUserXpState(userId));
-  }, [userId]);
+    setXpState(getUserXpState(userId, user));
+  }, [userId, user]);
 
   useEffect(() => {
     const handleUpdate = () => {
-      setXpState(getUserXpState(userId));
+      setXpState(getUserXpState(userId, user));
       setSelectedDistrict(getUserDistrict());
     };
     window.addEventListener('oep-activity-logged', handleUpdate);
@@ -46,9 +48,9 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
       window.removeEventListener('oep-study-plan-updated', handleUpdate);
       window.removeEventListener('oep-profile-updated', handleUpdate);
     };
-  }, [userId]);
+  }, [userId, user]);
 
-  const { podium, rankList, userEntry, nearbyBracket, resetNotice } = getOdishaLeaderboard(userId, timeFilter, 'All Odisha');
+  const { podium, rankList, userEntry, nearbyBracket, resetNotice } = getOdishaLeaderboard(userId, timeFilter, 'All Odisha', user);
   const { currentLeague, xpProgressPct, xpToNextTier, totalXp, userRank, percentileText, accuracyPct } = xpState;
 
   const handleSelectDistrict = (dist: string) => {
@@ -118,7 +120,16 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
             })()}
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="font-extrabold text-xs sm:text-base text-white truncate">{userEntry.name}</span>
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-brand-600 border border-amber-300 text-white font-bold text-[10px] sm:text-xs flex items-center justify-center shrink-0 overflow-hidden">
+                    {userEntry.avatarUrl ? (
+                      <img src={userEntry.avatarUrl} alt={userEntry.name} className="w-full h-full object-cover" />
+                    ) : (
+                      userEntry.name.charAt(0).toUpperCase()
+                    )}
+                  </div>
+                  <span className="font-extrabold text-xs sm:text-base text-white truncate">{userEntry.name}</span>
+                </div>
 
                 {/* Interactive District Badge */}
                 <button
@@ -224,8 +235,12 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
           {/* 2nd Place (Silver) */}
           <div className="p-2 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-b from-slate-100 to-slate-200/70 border border-slate-300/80 space-y-0.5 relative">
             <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-base sm:text-xl">🥈</span>
-            <div className="w-7 h-7 sm:w-10 sm:h-10 mx-auto rounded-full bg-slate-300 text-slate-800 font-bold text-[10px] sm:text-xs flex items-center justify-center border-2 border-white shadow-2xs">
-              {podium[1].name.charAt(0)}
+            <div className="w-7 h-7 sm:w-10 sm:h-10 mx-auto rounded-full bg-slate-300 text-slate-800 font-bold text-[10px] sm:text-xs flex items-center justify-center border-2 border-white shadow-2xs overflow-hidden">
+              {podium[1].avatarUrl ? (
+                <img src={podium[1].avatarUrl} alt={podium[1].name} className="w-full h-full object-cover" />
+              ) : (
+                podium[1].name.charAt(0).toUpperCase()
+              )}
             </div>
             <span className="font-extrabold text-slate-900 text-[11px] sm:text-sm block pt-0.5 leading-tight">
               <span className="sm:hidden">{getMobileDisplayName(podium[1].name)}</span>
@@ -240,8 +255,12 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
           {/* 1st Place (Gold Podium - Elevated) */}
           <div className="p-2.5 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-b from-amber-100 via-amber-50 to-orange-100/80 border-2 border-amber-300 space-y-0.5 relative -mt-2 shadow-xs">
             <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-lg sm:text-2xl">👑</span>
-            <div className="w-8 h-8 sm:w-12 sm:h-12 mx-auto rounded-full bg-amber-400 text-amber-950 font-black text-xs sm:text-sm flex items-center justify-center border-2 border-white shadow-2xs">
-              {podium[0].name.charAt(0)}
+            <div className="w-8 h-8 sm:w-12 sm:h-12 mx-auto rounded-full bg-amber-400 text-amber-950 font-black text-xs sm:text-sm flex items-center justify-center border-2 border-white shadow-2xs overflow-hidden">
+              {podium[0].avatarUrl ? (
+                <img src={podium[0].avatarUrl} alt={podium[0].name} className="w-full h-full object-cover" />
+              ) : (
+                podium[0].name.charAt(0).toUpperCase()
+              )}
             </div>
             <span className="font-black text-slate-900 text-[11px] sm:text-sm block pt-0.5 leading-tight">
               <span className="sm:hidden">{getMobileDisplayName(podium[0].name)}</span>
@@ -256,8 +275,12 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
           {/* 3rd Place (Bronze) */}
           <div className="p-2 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-b from-amber-50 to-orange-100/50 border border-amber-200/80 space-y-0.5 relative">
             <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-base sm:text-xl">🥉</span>
-            <div className="w-7 h-7 sm:w-10 sm:h-10 mx-auto rounded-full bg-amber-200 text-amber-900 font-bold text-[10px] sm:text-xs flex items-center justify-center border-2 border-white shadow-2xs">
-              {podium[2].name.charAt(0)}
+            <div className="w-7 h-7 sm:w-10 sm:h-10 mx-auto rounded-full bg-amber-200 text-amber-900 font-bold text-[10px] sm:text-xs flex items-center justify-center border-2 border-white shadow-2xs overflow-hidden">
+              {podium[2].avatarUrl ? (
+                <img src={podium[2].avatarUrl} alt={podium[2].name} className="w-full h-full object-cover" />
+              ) : (
+                podium[2].name.charAt(0).toUpperCase()
+              )}
             </div>
             <span className="font-extrabold text-slate-900 text-[11px] sm:text-sm block pt-0.5 leading-tight">
               <span className="sm:hidden">{getMobileDisplayName(podium[2].name)}</span>
@@ -285,10 +308,14 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
                 : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-100/70'
             }`}
           >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <span className="w-5 font-mono font-black text-slate-700 text-center shrink-0 text-[11px] sm:text-xs">#{entry.rank}</span>
-              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full ${entry.avatarBg} text-white font-bold flex items-center justify-center shrink-0 text-xs`}>
-                {entry.name.charAt(0)}
+            <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
+              <span className="w-7 sm:w-8 font-mono font-black text-slate-700 text-left shrink-0 text-[11px] sm:text-xs">#{entry.rank}</span>
+              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full ${entry.avatarBg} text-white font-bold flex items-center justify-center shrink-0 text-xs overflow-hidden`}>
+                {entry.avatarUrl ? (
+                  <img src={entry.avatarUrl} alt={entry.name} className="w-full h-full object-cover" />
+                ) : (
+                  entry.name.charAt(0).toUpperCase()
+                )}
               </div>
               <div className="min-w-0 pr-1">
                 <span className="font-bold text-slate-900 block truncate text-xs">{entry.name}</span>
@@ -326,16 +353,20 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
                   : 'bg-white border-slate-200/90 hover:border-slate-300'
               }`}
             >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <span className={`w-8 sm:w-10 font-mono font-black text-center shrink-0 text-[10px] sm:text-xs ${entry.isCurrentUser ? 'text-amber-900 text-xs sm:text-sm' : 'text-slate-600'}`}>
+              <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
+                <span className={`w-14 sm:w-16 font-mono font-black text-left shrink-0 text-[10px] sm:text-xs ${entry.isCurrentUser ? 'text-amber-900 text-xs sm:text-sm font-extrabold' : 'text-slate-600'}`}>
                   #{entry.rank.toLocaleString()}
                 </span>
-                <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full ${entry.avatarBg} text-white font-bold flex items-center justify-center shrink-0 text-xs`}>
-                  {entry.name.charAt(0)}
+                <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full ${entry.avatarBg} text-white font-bold flex items-center justify-center shrink-0 text-xs overflow-hidden`}>
+                  {entry.avatarUrl ? (
+                    <img src={entry.avatarUrl} alt={entry.name} className="w-full h-full object-cover" />
+                  ) : (
+                    entry.name.charAt(0).toUpperCase()
+                  )}
                 </div>
                 <div className="min-w-0 pr-1">
                   <span className={`font-bold block truncate text-xs ${entry.isCurrentUser ? 'text-slate-950 font-black' : 'text-slate-900'}`}>
-                    {entry.isCurrentUser ? '👉 YOU (Aspirant)' : entry.name}
+                    {entry.isCurrentUser ? `👉 ${entry.name} (You)` : entry.name}
                   </span>
                   <span className="text-[9px] sm:text-[10px] text-slate-500 font-medium block truncate">
                     <span className="sm:hidden">{getMobileDistrictName(entry.district)} • Acc: {entry.accuracyPct}%</span>

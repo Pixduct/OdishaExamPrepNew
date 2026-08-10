@@ -59,11 +59,25 @@ export const setUserDistrict = (district: string): void => {
 };
 
 /** Get live user student name */
-export const getUserStudentName = (): string => {
+export const getUserStudentName = (user?: any): string => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY_NAME);
-    if (saved && saved.trim()) {
+    if (saved && saved.trim() && saved.trim() !== 'You (Aspirant)') {
       return saved.trim();
+    }
+    if (user) {
+      const meta = user.user_metadata || {};
+      const fullName = meta.full_name || meta.name || meta.custom_name;
+      if (fullName && typeof fullName === 'string' && fullName.trim()) {
+        return fullName.trim();
+      }
+      if (user.email) {
+        const raw = user.email.split('@')[0];
+        const formatted = raw.replace(/[0-9_.-]/g, ' ').trim();
+        if (formatted) {
+          return formatted.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        }
+      }
     }
   } catch (e) {
     // Fallback
@@ -81,3 +95,4 @@ export const setUserStudentName = (name: string): void => {
     // Fallback
   }
 };
+

@@ -102,44 +102,44 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
   }
 
   return (
-    <div className="bg-white p-4 sm:p-7 rounded-2xl sm:rounded-[2.25rem] shadow-xs border border-slate-200/80 space-y-4 mb-6 sm:mb-8 relative overflow-hidden">
+    <div className="bg-white p-3.5 sm:p-7 rounded-2xl sm:rounded-[2.25rem] shadow-xs border border-slate-200/80 space-y-3.5 sm:space-y-4 mb-6 sm:mb-8 relative overflow-hidden">
       {/* Top Header & Dynamic Personalization Status */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <span className="p-2 rounded-xl bg-brand-50 border border-brand-200 text-brand-600 shrink-0">
+        <div className="flex items-start sm:items-center gap-2.5">
+          <span className="p-2 rounded-xl bg-brand-50 border border-brand-200 text-brand-600 shrink-0 mt-0.5 sm:mt-0">
             <Sparkles className="w-5 h-5 fill-current" />
           </span>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight leading-tight">
                 Today's AI Study Plan
               </h3>
               {plan.isPersonalizedFromAttempts ? (
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/60 inline-flex items-center gap-1">
+                <span className="px-2 py-0.5 rounded-full text-[9px] sm:text-[9.5px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/60 inline-flex items-center gap-1 shrink-0">
                   <ShieldCheck className="w-2.5 h-2.5" />
                   <span>Real Data Personalized</span>
                 </span>
               ) : (
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-brand-50 text-brand-700 border border-brand-200/60 inline-flex items-center gap-1">
+                <span className="px-2 py-0.5 rounded-full text-[9px] sm:text-[9.5px] font-black uppercase tracking-wider bg-brand-50 text-brand-700 border border-brand-200/60 inline-flex items-center gap-1 shrink-0">
                   <Target className="w-2.5 h-2.5" />
                   <span>Syllabus Daily Rotation</span>
                 </span>
               )}
             </div>
-            <p className="text-slate-500 text-[10px] sm:text-xs font-medium pt-0.5">
+            <p className="text-slate-500 text-[10px] sm:text-xs font-medium pt-0.5 leading-normal">
               Target: <strong className="text-slate-800 font-bold">{plan.targetExamName}</strong> • Personalized schedule for maximum score gain
             </p>
           </div>
         </div>
 
         {/* Action Header Pills & AI Refresh Trigger */}
-        <div className="flex items-center gap-2 flex-wrap shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap shrink-0 w-full sm:w-auto">
           {/* Pill 1: Interactive AI Re-Analyze Button */}
           <button
             type="button"
             onClick={refreshPlan}
             disabled={isRefreshing}
-            className="px-3 py-1 rounded-full text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-2xs"
+            className="px-3 py-1.5 sm:py-1 rounded-full text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-all cursor-pointer inline-flex items-center justify-center gap-1.5 shadow-2xs shrink-0 max-w-full"
             title="Re-analyze test results & recalculate AI study plan"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-brand-600' : 'text-slate-600'}`} />
@@ -147,7 +147,7 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
           </button>
 
           {/* Pill 2: Dynamic Remaining Minutes Counter */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 font-mono shadow-2xs">
+          <div className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 sm:py-1 rounded-full text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 font-mono shadow-2xs shrink-0 max-w-full">
             <Clock className="w-3.5 h-3.5 text-slate-500" />
             <span>
               {plan.completedCount === plan.totalCount
@@ -157,7 +157,7 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
           </div>
 
           {/* Pill 3: Dynamic Score Gain Potential */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black text-brand-700 bg-brand-50 border border-brand-200 font-mono shadow-2xs">
+          <div className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 sm:py-1 rounded-full text-xs font-black text-brand-700 bg-brand-50 border border-brand-200 font-mono shadow-2xs shrink-0 max-w-full">
             <Zap className="w-3.5 h-3.5 text-brand-600 fill-current" />
             <span>{plan.expectedScoreBoost}</span>
           </div>
@@ -179,13 +179,13 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
       </AnimatePresence>
 
       {/* Progress Track Bar */}
-      <div className="p-3.5 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
-        <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+      <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs font-bold text-slate-700">
           <span className="flex items-center gap-1.5">
-            <CheckCircle2 className="w-4 h-4 text-brand-600" />
+            <CheckCircle2 className="w-4 h-4 text-brand-600 shrink-0" />
             <span>Daily Task Progress</span>
           </span>
-          <span className="font-mono text-brand-700 font-black">
+          <span className="font-mono text-brand-700 font-black text-xs">
             {plan.progressPercentage}% Completed ({plan.completedCount} of {plan.totalCount} Finished)
           </span>
         </div>
@@ -210,7 +210,7 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
             }`}
           >
             {/* Left Checkbox & Task Information */}
-            <div className="flex items-start gap-3 min-w-0">
+            <div className="flex items-start gap-2.5 sm:gap-3 min-w-0 flex-1">
               <button
                 type="button"
                 onClick={(e) => handleToggle(task.id, e)}
@@ -224,36 +224,37 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
                 <CheckCircle2 className="w-3.5 h-3.5 fill-current stroke-[2.5]" />
               </button>
 
-              <div className="min-w-0 space-y-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`text-xs sm:text-sm font-bold block truncate ${task.completed ? 'line-through text-slate-400' : 'text-slate-900 group-hover:text-brand-600'}`}>
+              <div className="min-w-0 space-y-1 flex-1">
+                <div className="flex items-start sm:items-center gap-2 flex-wrap">
+                  <span className={`text-xs sm:text-sm font-bold leading-snug break-words whitespace-normal sm:truncate ${task.completed ? 'line-through text-slate-400' : 'text-slate-900 group-hover:text-brand-600'}`}>
                     {task.title}
                   </span>
-                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider border ${task.priorityBadgeBg}`}>
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] sm:text-[9.5px] font-extrabold uppercase tracking-wider border shrink-0 ${task.priorityBadgeBg}`}>
                     {task.priorityLabel}
                   </span>
                 </div>
 
-                <p className="text-[10px] sm:text-xs text-slate-500 font-medium leading-relaxed">
+                <p className="text-[10px] sm:text-xs text-slate-500 font-medium leading-relaxed break-words">
                   Est. Time: <strong className="text-slate-700 font-bold">{task.estimatedMinutes} Mins</strong> • <strong className="text-slate-700 font-bold">{task.questionCount} Questions</strong> • Subject: <strong className="text-slate-700 font-bold">{task.subjectName}</strong>
                 </p>
 
                 {/* AI Rationale Reason Subtext */}
-                <p className="text-[10px] text-brand-600 font-medium italic pt-0.5 flex items-center gap-1">
-                  <span>💡 {task.reasonText}</span>
+                <p className="text-[10px] sm:text-[11px] text-brand-600 font-medium italic pt-0.5 flex items-start gap-1 leading-normal break-words">
+                  <span className="shrink-0">💡</span>
+                  <span>{task.reasonText}</span>
                 </p>
               </div>
             </div>
 
             {/* Right Direct Action Button */}
-            <div className="shrink-0 pt-1 sm:pt-0">
+            <div className="shrink-0 w-full sm:w-auto pt-1 sm:pt-0">
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleTaskClick(task);
                 }}
-                className={`w-full sm:w-auto px-3.5 py-1.5 rounded-lg text-xs font-extrabold inline-flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs ${
+                className={`w-full sm:w-auto px-4 py-2 sm:py-1.5 rounded-lg text-xs font-extrabold inline-flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs ${
                   task.completed
                     ? 'bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200'
                     : 'bg-brand-50 hover:bg-brand-100 text-brand-600 border border-brand-200 group-hover:bg-brand-600 group-hover:text-white'

@@ -197,8 +197,9 @@ export const examService = {
   async getAllQuestions() {
     const { data, error } = await supabase
       .from('questions')
-      .select('*')
-      .order('sortOrder', { ascending: true });
+      .select('id, examId, topic, difficulty, questionText, options, correctAnswerIndex, explanation, diagram, sortOrder')
+      .order('sortOrder', { ascending: true })
+      .limit(500);
     if (error) throw error;
     return data as Question[];
   },
@@ -330,7 +331,7 @@ export const examService = {
     while (keepFetching) {
       const { data, error } = await supabase
         .from('questions')
-        .select('*')
+        .select('id, examId, topic, difficulty, questionText, options, correctAnswerIndex, explanation, diagram, sortOrder')
         .in('topic', testIds)
         .range(page * pageSize, (page + 1) * pageSize - 1);
       

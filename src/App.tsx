@@ -6476,13 +6476,15 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         .from('questions')
         .select('topic')
         .eq('examId', activeExamId)
-        .ilike('topic', bankTopicName);
+        .ilike('topic', bankTopicName)
+        .limit(500);
         
       if (!error && (!data || data.length === 0)) {
         const fallbackRes = await supabase
           .from('questions')
           .select('topic')
-          .eq('examId', activeExamId);
+          .eq('examId', activeExamId)
+          .limit(500);
         if (!fallbackRes.error) {
           data = fallbackRes.data;
         }

@@ -28,6 +28,7 @@ export interface DailyStudyPlan {
   isPersonalizedFromAttempts: boolean;
   targetExamName: string;
   hasContent?: boolean;
+  noContentReason?: 'coming_soon' | 'no_question_bank' | 'no_mock_tests';
 }
 
 const STORAGE_KEY_PLAN = 'oep_ai_study_plan_completed_tasks_v2';
@@ -35,6 +36,7 @@ const STORAGE_KEY_PLAN = 'oep_ai_study_plan_completed_tasks_v2';
 /** Default exam syllabus subjects mapped for accurate fallback per target exam */
 const EXAM_DEFAULT_SUBJECTS: Record<string, string[]> = {
   'nursing': ['Fundamentals of Nursing - I', 'Community Health Nursing - II', 'Medical Surgical Nursing - I', 'Microbiology & Pathology'],
+  'ctsre': ['Technical Core Paper', 'General Awareness & Odisha GK', 'Reasoning & Mental Ability', 'Computer & IT Literacy'],
   'ossc': ['Odisha History & Culture', 'Arithmetic & Reasoning', 'General English Grammar', 'Computer Awareness & IT'],
   'osssc': ['Odisha Geography & Wildlife', 'Quantitative Aptitude', 'Logical Reasoning & DI', 'Odia Language & Grammar'],
   'opsc': ['Indian Polity & Odisha Governance', 'General Studies Paper I', 'Economy & Odisha Budget', 'History & Heritage of Odisha'],
@@ -69,36 +71,41 @@ export const cleanSubjectTitle = (rawName: string): string => {
 const getUserTargetExam = (examIdInput?: string, examNameInput?: string): { examId: string; examName: string; subjects: string[] } => {
   try {
     const savedExamId = examIdInput || localStorage.getItem('oep_active_exam_id') || localStorage.getItem('oep_selected_exam') || localStorage.getItem('selectedExamId') || '';
-    const cleanId = savedExamId.toLowerCase();
+    const savedExamName = examNameInput || localStorage.getItem('oep_active_exam_name') || sessionStorage.getItem('oep_selectedExamName') || '';
 
-    if (cleanId.includes('ossc') && !cleanId.includes('osssc')) {
-      return { examId: savedExamId, examName: examNameInput || 'OSSC CGL Examination', subjects: EXAM_DEFAULT_SUBJECTS.ossc };
+    const cleanText = `${savedExamId} ${savedExamName} ${examIdInput || ''} ${examNameInput || ''}`.toLowerCase();
+
+    if (cleanText.includes('nursing') || cleanText.includes('anm') || cleanText.includes('gnm') || cleanText.includes('health')) {
+      return { examId: savedExamId || 'osssc-nursing-officer', examName: savedExamName || 'OSSSC Nursing Officer Exam', subjects: EXAM_DEFAULT_SUBJECTS.nursing };
     }
-    if (cleanId.includes('osssc') && !cleanId.includes('nursing')) {
-      return { examId: savedExamId, examName: examNameInput || 'OSSSC Combined Recruitment', subjects: EXAM_DEFAULT_SUBJECTS.osssc };
+    if (cleanText.includes('ctsre') || cleanText.includes('cts') || cleanText.includes('technical')) {
+      return { examId: savedExamId || 'ossc-ctsre', examName: savedExamName || 'OSSC CTSRE Examination', subjects: EXAM_DEFAULT_SUBJECTS.ctsre };
     }
-    if (cleanId.includes('opsc')) {
-      return { examId: savedExamId, examName: examNameInput || 'OPSC Civil Services (OCS)', subjects: EXAM_DEFAULT_SUBJECTS.opsc };
+    if (cleanText.includes('ossc') && !cleanText.includes('osssc')) {
+      return { examId: savedExamId || 'ossc-cgl', examName: savedExamName || 'OSSC CGL Examination', subjects: EXAM_DEFAULT_SUBJECTS.ossc };
     }
-    if (cleanId.includes('police')) {
-      return { examId: savedExamId, examName: examNameInput || 'Odisha Police Constable Exam', subjects: EXAM_DEFAULT_SUBJECTS.police };
+    if (cleanText.includes('osssc') && !cleanText.includes('nursing')) {
+      return { examId: savedExamId || 'osssc-combined', examName: savedExamName || 'OSSSC Combined Recruitment', subjects: EXAM_DEFAULT_SUBJECTS.osssc };
     }
-    if (cleanId.includes('bed')) {
-      return { examId: savedExamId, examName: examNameInput || 'Odisha B.Ed Entrance Exam', subjects: EXAM_DEFAULT_SUBJECTS.bed };
+    if (cleanText.includes('opsc') || cleanText.includes('ocs') || cleanText.includes('civil')) {
+      return { examId: savedExamId || 'opsc-ocs', examName: savedExamName || 'OPSC Civil Services (OCS)', subjects: EXAM_DEFAULT_SUBJECTS.opsc };
     }
-    if (cleanId.includes('nursing')) {
-      return { examId: savedExamId, examName: examNameInput || 'OSSSC Nursing Officer Exam', subjects: EXAM_DEFAULT_SUBJECTS.nursing };
+    if (cleanText.includes('police') || cleanText.includes('constable') || cleanText.includes('si')) {
+      return { examId: savedExamId || 'odisha-police', examName: savedExamName || 'Odisha Police Constable Exam', subjects: EXAM_DEFAULT_SUBJECTS.police };
+    }
+    if (cleanText.includes('bed') || cleanText.includes('teaching') || cleanText.includes('tet')) {
+      return { examId: savedExamId || 'odisha-bed', examName: savedExamName || 'Odisha B.Ed Entrance Exam', subjects: EXAM_DEFAULT_SUBJECTS.bed };
     }
     return {
       examId: savedExamId || 'general-exam',
-      examName: examNameInput || 'General Competitive Exam',
-      subjects: ['General Awareness', 'Reasoning & Mental Ability', 'Quantitative Aptitude', 'English Language', 'Odisha GK']
+      examName: savedExamName || 'General Competitive Exam',
+      subjects: ['General Awareness & Odisha GK', 'Reasoning & Mental Ability', 'Quantitative Aptitude', 'English Language & Grammar', 'Computer Literacy']
     };
   } catch (e) {
     return {
       examId: 'general-exam',
       examName: 'General Competitive Exam',
-      subjects: ['General Awareness', 'Reasoning & Mental Ability', 'Quantitative Aptitude', 'English Language', 'Odisha GK']
+      subjects: ['General Awareness & Odisha GK', 'Reasoning & Mental Ability', 'Quantitative Aptitude', 'English Language & Grammar', 'Computer Literacy']
     };
   }
 };
@@ -169,14 +176,28 @@ export const getTodayStudyPlan = (userId?: string, activeExamIdInput?: string, a
   try {
     const todayStr = new Date().toISOString().split('T')[0];
     const targetExam = getUserTargetExam(activeExamIdInput, activeExamNameInput);
-    const weakTopicsData = getSmartWeakTopicRecommendations(userId, targetExam.examId);
+    const weakTopicsData = getSmartWeakTopicRecommendations(userId, targetExam.examId, targetExam.examName);
     const streakState = getStreakState(userId);
     const completedIds = getCompletedTaskIds(targetExam.examId);
     const isPersonalizedFromAttempts = weakTopicsData.hasAttempts && (weakTopicsData.allTopicConfidence?.length || 0) > 0;
-    // Check if target exam has active content or is unreleased
-    const knownEmptyExams = ['aiims-norcet', 'osssc-anm', 'ossc-chsle', 'ssc-cgl-national', 'opsc-aso', 'odisha-police-si', 'otet-exam'];
-    const isUnreleasedExam = knownEmptyExams.includes(targetExam.examId.toLowerCase());
 
+    // ── Content availability check ─────────────────────────────────────────
+    // Exams with confirmed zero question-banks AND zero test-series in Supabase.
+    // Key: Supabase exam UUID  Value: human-readable reason for empty state
+    const CONFIRMED_NO_CONTENT_EXAM_IDS: Record<string, 'coming_soon'> = {
+      '3bdefd17-112b-426d-ab60-6ca6957fbe0e': 'coming_soon', // OSSC (CGL)
+      '413d1646-d683-40fb-8083-d165e7fa49ec': 'coming_soon', // OSSC CTSRE
+      'f6efc518-82b0-4a6b-b957-cec4a1fd0969': 'coming_soon', // OPSC Assistant Industries Officer 2026
+    };
+
+    // Also catch by ID slug patterns for local / dev environments
+    const noContentBySlug = ['aiims-norcet', 'osssc-anm', 'ossc-chsle', 'ssc-cgl-national', 'opsc-aso', 'odisha-police-si', 'otet-exam'];
+
+    const noContentReason: DailyStudyPlan['noContentReason'] =
+      CONFIRMED_NO_CONTENT_EXAM_IDS[targetExam.examId] ||
+      (noContentBySlug.includes(targetExam.examId.toLowerCase()) ? 'coming_soon' : undefined);
+
+    const isUnreleasedExam = !!noContentReason;
     const hasContent = !isUnreleasedExam && (targetExam.examId === 'all' || isPersonalizedFromAttempts || targetExam.subjects.length > 0);
 
     if (!hasContent) {
@@ -188,10 +209,11 @@ export const getTodayStudyPlan = (userId?: string, activeExamIdInput?: string, a
         totalCount: 0,
         progressPercentage: 0,
         tasks: [],
-        lastGeneratedTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        lastGeneratedTime: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }),
         isPersonalizedFromAttempts: false,
         targetExamName: targetExam.examName,
-        hasContent: false
+        hasContent: false,
+        noContentReason
       };
     }
 
@@ -233,9 +255,9 @@ export const getTodayStudyPlan = (userId?: string, activeExamIdInput?: string, a
       secondaryWeak = cleanSubjectTitle(targetExam.subjects[seed2]);
       tertiaryWeak = cleanSubjectTitle(targetExam.subjects[seed3]);
 
-      primaryReason = `Daily priority topic for ${targetExam.examName} syllabus`;
-      secondaryReason = `High-yield daily topic selected for score improvement`;
-      tertiaryReason = `Daily conceptual revision & error analysis task`;
+      primaryReason = `Today's priority topic for ${targetExam.examName} syllabus — start here for maximum score gain`;
+      secondaryReason = `High-yield daily topic for ${targetExam.examName} — commonly tested in past papers`;
+      tertiaryReason = `Daily conceptual revision & error analysis for ${targetExam.examName}`;
     }
 
     // Auto-complete logic based on real test completions
@@ -326,7 +348,7 @@ export const getTodayStudyPlan = (userId?: string, activeExamIdInput?: string, a
       totalCount,
       progressPercentage,
       tasks,
-      lastGeneratedTime: 'Updated Today at 00:00 AM',
+      lastGeneratedTime: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }),
       isPersonalizedFromAttempts,
       targetExamName: targetExam.examName
     };

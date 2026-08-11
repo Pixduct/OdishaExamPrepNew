@@ -17,14 +17,14 @@ export const SmartRecommendationCard: React.FC<SmartRecommendationCardProps> = (
   onLaunchPractice
 }) => {
   const [activeContext] = useActiveExamContext();
-  const [data, setData] = useState<SmartRecommendationResult>(() => getSmartWeakTopicRecommendations(userId, activeContext.activeExamId));
+  const [data, setData] = useState<SmartRecommendationResult>(() => getSmartWeakTopicRecommendations(userId, activeContext.activeExamId, activeContext.activeExamName));
 
   useEffect(() => {
-    setData(getSmartWeakTopicRecommendations(userId, activeContext.activeExamId));
-  }, [userId, activeContext.activeExamId]);
+    setData(getSmartWeakTopicRecommendations(userId, activeContext.activeExamId, activeContext.activeExamName));
+  }, [userId, activeContext.activeExamId, activeContext.activeExamName]);
 
   useEffect(() => {
-    const handleUpdate = () => setData(getSmartWeakTopicRecommendations(userId, activeContext.activeExamId));
+    const handleUpdate = () => setData(getSmartWeakTopicRecommendations(userId, activeContext.activeExamId, activeContext.activeExamName));
     window.addEventListener('oep-streak-updated', handleUpdate);
     window.addEventListener('oep-streak-goal-completed', handleUpdate);
     window.addEventListener('oep-active-exam-changed', handleUpdate);
@@ -34,7 +34,7 @@ export const SmartRecommendationCard: React.FC<SmartRecommendationCardProps> = (
       window.removeEventListener('oep-streak-goal-completed', handleUpdate);
       window.removeEventListener('oep-active-exam-changed', handleUpdate);
     };
-  }, [userId, activeContext.activeExamId]);
+  }, [userId, activeContext.activeExamId, activeContext.activeExamName]);
 
   const { primaryRecommendation, secondaryRecommendations } = data;
 

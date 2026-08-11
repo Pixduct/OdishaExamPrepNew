@@ -16,14 +16,14 @@ export const TopicConfidenceMatrix: React.FC<TopicConfidenceMatrixProps> = ({
 }) => {
   const [activeContext] = useActiveExamContext();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [data, setData] = useState<SmartRecommendationResult>(() => getSmartWeakTopicRecommendations(userId, activeContext.activeExamId));
+  const [data, setData] = useState<SmartRecommendationResult>(() => getSmartWeakTopicRecommendations(userId, activeContext.activeExamId, activeContext.activeExamName));
 
   useEffect(() => {
-    setData(getSmartWeakTopicRecommendations(userId, activeContext.activeExamId));
-  }, [userId, activeContext.activeExamId]);
+    setData(getSmartWeakTopicRecommendations(userId, activeContext.activeExamId, activeContext.activeExamName));
+  }, [userId, activeContext.activeExamId, activeContext.activeExamName]);
 
   useEffect(() => {
-    const handleUpdate = () => setData(getSmartWeakTopicRecommendations(userId, activeContext.activeExamId));
+    const handleUpdate = () => setData(getSmartWeakTopicRecommendations(userId, activeContext.activeExamId, activeContext.activeExamName));
     window.addEventListener('oep-streak-updated', handleUpdate);
     window.addEventListener('oep-streak-goal-completed', handleUpdate);
     window.addEventListener('oep-readiness-updated', handleUpdate);
@@ -35,7 +35,7 @@ export const TopicConfidenceMatrix: React.FC<TopicConfidenceMatrixProps> = ({
       window.removeEventListener('oep-readiness-updated', handleUpdate);
       window.removeEventListener('oep-active-exam-changed', handleUpdate);
     };
-  }, [userId, activeContext.activeExamId]);
+  }, [userId, activeContext.activeExamId, activeContext.activeExamName]);
 
   const { allTopicConfidence } = data;
 

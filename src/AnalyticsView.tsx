@@ -14,6 +14,7 @@ import {
   Gauge, Lightbulb, Loader2, RefreshCw, Trash2, X, Check
 } from 'lucide-react';
 import { activityTracker } from './lib/activityTracker';
+import { activityMatchesExam } from './lib/examMatcher';
 import { cn } from './lib/utils';
 import { stagger } from './lib/animations';
 import { MathTextRenderer } from './components/MathTextRenderer';
@@ -725,14 +726,8 @@ function AnalyticsViewInner({ user, activities: propActivities, onNavigate }: { 
   const scopedActivities = useMemo(() => {
     if (!activities || activities.length === 0) return [];
     if (activeContext.activeExamId === 'all') return activities;
-
-    const targetKey = activeContext.activeExamId.toLowerCase().replace(/[\s\-_]+/g, '');
-    return activities.filter(a => {
-      if (!a) return false;
-      const rawExam = (a.metadata?.examId || a.metadata?.examName || a.metadata?.testCategory || a.title || '').toLowerCase().replace(/[\s\-_]+/g, '');
-      return rawExam.includes(targetKey) || targetKey.includes(rawExam);
-    });
-  }, [activities, activeContext.activeExamId]);
+    return activities.filter(a => activityMatchesExam(a, activeContext.activeExamId, activeContext.activeExamName));
+  }, [activities, activeContext.activeExamId, activeContext.activeExamName]);
 
   const stats = useMemo(() => {
     if (scopedActivities.length === 0) return null;

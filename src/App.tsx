@@ -78,6 +78,7 @@ import { sectionReveal, sectionRevealSimple, sectionRevealScale, fadeSlideRight,
 import { ErrorBoundary } from './ErrorBoundary';
 import ProtectedRoute from './components/ProtectedRoute';
 import { activityTracker } from './lib/activityTracker';
+import { activityMatchesExam } from './lib/examMatcher';
 import { MathTextRenderer, DiagramRenderer } from './components/MathTextRenderer';
 
 const AdminPanel = React.lazy(() => import('./AdminPanel'));
@@ -139,14 +140,8 @@ const HistoryView = ({
   const examFilteredActivities = useMemo(() => {
     if (!activities || activities.length === 0) return [];
     if (activeContext.activeExamId === 'all') return activities;
-
-    const targetKey = activeContext.activeExamId.toLowerCase().replace(/[\s\-_]+/g, '');
-    return activities.filter(a => {
-      if (!a) return false;
-      const rawExam = (a.metadata?.examId || a.metadata?.examName || a.metadata?.testCategory || a.title || '').toLowerCase().replace(/[\s\-_]+/g, '');
-      return rawExam.includes(targetKey) || targetKey.includes(rawExam);
-    });
-  }, [activities, activeContext.activeExamId]);
+    return activities.filter(a => activityMatchesExam(a, activeContext.activeExamId, activeContext.activeExamName));
+  }, [activities, activeContext.activeExamId, activeContext.activeExamName]);
 
   const handleDeleteActivity = async (activityId: string) => {
     if (!user?.id) return;
@@ -5297,6 +5292,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                     title: `Downloaded ${link.title || selectedBankItem.title} PDF`,
                                     metadata: {
                                       pdfUrl: link.url,
+                                      examId: selectedExam,
                                       examName: currentExamName,
                                       testCategory: specificCategory
                                     }
@@ -7447,6 +7443,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                 metadata: {
                   ...progressState,
                   resumeSessionId: activeTestState?.resumeSessionId || `session-${Date.now()}`,
+                  examId: selectedExam,
                   examName: currentExamName,
                   testCategory
                 }
@@ -7487,6 +7484,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                 metadata: {
                   ...results,
                   resumeSessionId: activeTestState?.resumeSessionId,
+                  examId: selectedExam,
                   examName: currentExamName,
                   testCategory: testCategory
                 }

@@ -49,16 +49,28 @@ const normalizeSubjectName = (rawTitle: string, metadata?: any): string => {
 };
 
 /** Analyze activity history and compute topic confidence strictly from real student activity data */
-export const getSmartWeakTopicRecommendations = (userId?: string, examId?: string): SmartRecommendationResult => {
+export const getSmartWeakTopicRecommendations = (userId?: string, examId?: string, examName?: string): SmartRecommendationResult => {
   try {
     let activities: UserActivity[] = activityTracker.getActivities(userId);
 
+    const cleanText = ((examId || '') + ' ' + (examName || '')).toLowerCase();
+
     if (examId && examId !== 'all') {
-      const targetKey = examId.toLowerCase().replace(/[\s\-_]+/g, '');
+      const targetKey = cleanText.replace(/[\s\-_]+/g, '');
       activities = activities.filter(act => {
         if (!act) return false;
         const rawExam = (act.metadata?.examId || act.metadata?.examName || act.metadata?.testCategory || act.title || '').toLowerCase().replace(/[\s\-_]+/g, '');
-        return rawExam.includes(targetKey) || targetKey.includes(rawExam);
+        if (rawExam.includes(targetKey) || targetKey.includes(rawExam)) return true;
+
+        if (cleanText.includes('nursing') && rawExam.includes('nursing')) return true;
+        if (cleanText.includes('ctsre') && rawExam.includes('ctsre')) return true;
+        if (cleanText.includes('ossc') && !cleanText.includes('osssc') && rawExam.includes('ossc') && !rawExam.includes('osssc')) return true;
+        if (cleanText.includes('osssc') && !cleanText.includes('nursing') && rawExam.includes('osssc') && !rawExam.includes('nursing')) return true;
+        if (cleanText.includes('opsc') && rawExam.includes('opsc')) return true;
+        if (cleanText.includes('police') && rawExam.includes('police')) return true;
+        if (cleanText.includes('bed') && rawExam.includes('bed')) return true;
+
+        return false;
       });
     }
 
@@ -110,21 +122,22 @@ export const getSmartWeakTopicRecommendations = (userId?: string, examId?: strin
     const topicKeys = Object.keys(topicStats);
 
     if (topicKeys.length === 0) {
-      // Dynamic fallback topics when no activity exists for this exam yet
-      const cleanId = (examId || '').toLowerCase();
-      let defaultNames = ['General Core', 'Reasoning & Aptitude', 'Subject Knowledge'];
+      // Dynamic fallback topics when no activity exists for this specific exam yet
+      let defaultNames = ['General Awareness & Odisha GK', 'Reasoning & Mental Ability', 'Quantitative Aptitude', 'English Language & Grammar'];
 
-      if (cleanId.includes('ossc') && !cleanId.includes('osssc')) {
+      if (cleanText.includes('nursing') || cleanText.includes('anm') || cleanText.includes('gnm') || cleanText.includes('health')) {
+        defaultNames = ['Fundamentals of Nursing - I', 'Community Health Nursing - II', 'Medical Surgical Nursing - I', 'Microbiology & Pathology'];
+      } else if (cleanText.includes('ctsre') || cleanText.includes('cts') || cleanText.includes('technical')) {
+        defaultNames = ['Technical Core Paper', 'General Awareness & Odisha GK', 'Reasoning & Mental Ability', 'Computer & IT Literacy'];
+      } else if (cleanText.includes('ossc') && !cleanText.includes('osssc')) {
         defaultNames = ['Odisha History & Culture', 'Arithmetic & Reasoning', 'General English Grammar', 'Computer Awareness & IT'];
-      } else if (cleanId.includes('osssc') && !cleanId.includes('nursing')) {
+      } else if (cleanText.includes('osssc') && !cleanText.includes('nursing')) {
         defaultNames = ['Odisha Geography & Wildlife', 'Quantitative Aptitude', 'Logical Reasoning & DI', 'Odia Language & Grammar'];
-      } else if (cleanId.includes('nursing')) {
-        defaultNames = ['Fundamentals of Nursing', 'Community Health Nursing', 'Medical-Surgical Nursing I', 'Microbiology & Pathology'];
-      } else if (cleanId.includes('opsc')) {
+      } else if (cleanText.includes('opsc') || cleanText.includes('ocs') || cleanText.includes('civil')) {
         defaultNames = ['Indian Polity & Odisha Governance', 'General Studies Paper I', 'Economy & Odisha Budget', 'History & Heritage of Odisha'];
-      } else if (cleanId.includes('police')) {
+      } else if (cleanText.includes('police') || cleanText.includes('constable') || cleanText.includes('si')) {
         defaultNames = ['Odisha Police GK & Current Affairs', 'Reasoning & Mental Ability', 'Numerical Ability & Math', 'Odia & English Language'];
-      } else if (cleanId.includes('bed')) {
+      } else if (cleanText.includes('bed') || cleanText.includes('teaching') || cleanText.includes('tet')) {
         defaultNames = ['Teaching Aptitude & Pedagogy', 'Educational General Awareness', 'Logical & Analytical Reasoning', 'General Odia & English'];
       }
 
@@ -137,7 +150,7 @@ export const getSmartWeakTopicRecommendations = (userId?: string, examId?: strin
         totalCorrect: 9,
         totalAttempted: 20,
         status: 'critical',
-        rationale: 'High-priority subject. Completing practice drills improves overall exam readiness.',
+        rationale: `Official high-priority topic for ${examName || 'this exam'} syllabus. Completing practice drills improves overall exam readiness.`,
         incompleteActivity: null
       }));
 

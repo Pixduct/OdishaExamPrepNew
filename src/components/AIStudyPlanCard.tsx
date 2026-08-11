@@ -67,35 +67,72 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
 
   if (plan.hasContent === false || plan.tasks.length === 0) {
     return (
-      <div className="bg-white p-6 sm:p-10 rounded-2xl sm:rounded-[2.25rem] shadow-xs border border-slate-200/80 text-center space-y-5 mb-6 sm:mb-8 relative overflow-hidden">
-        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center mx-auto text-brand-600 shadow-inner">
-          <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-brand-600 animate-float-sm" />
-        </div>
+      <div className="bg-white p-6 sm:p-10 rounded-2xl sm:rounded-[2.25rem] shadow-xs border border-slate-200/80 mb-6 sm:mb-8 relative overflow-hidden">
 
-        <div className="max-w-md mx-auto space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold text-amber-700 bg-amber-50 border border-amber-200/70">
-            <Clock className="w-3.5 h-3.5 text-amber-600" />
-            Preparing Syllabus Content
+        {/* Subtle background pattern */}
+        <div className="absolute inset-0 opacity-[0.025] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #6366f1 1px, transparent 0)', backgroundSize: '28px 28px' }} />
+
+        <div className="relative z-10 space-y-5 text-center">
+          {/* Icon */}
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto shadow-inner">
+            <Clock className="w-8 h-8 sm:w-10 sm:h-10 text-amber-500" />
           </div>
-          <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-            Content Coming Soon for {activeContext.activeExamName}
-          </h3>
-          <p className="text-slate-500 font-medium text-xs sm:text-sm leading-relaxed">
-            We are actively preparing question banks and mock tests for this exam syllabus. Check back soon or switch your target exam.
-          </p>
-        </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-          <button
-            type="button"
-            onClick={() => {
-              window.dispatchEvent(new CustomEvent('oep-open-context-modal'));
-            }}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-extrabold text-xs sm:text-sm transition-all duration-200 shadow-md active:scale-95 cursor-pointer border-none"
-          >
-            <Target className="w-4 h-4" />
-            <span>Switch Target Exam</span>
-          </button>
+          {/* Badge */}
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold text-amber-700 bg-amber-50 border border-amber-200/70">
+            <Flame className="w-3.5 h-3.5 text-amber-500" />
+            Content Being Prepared
+          </div>
+
+          {/* Heading */}
+          <div className="max-w-md mx-auto space-y-2">
+            <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+              No Practice Content Yet for {activeContext.activeExamName}
+            </h3>
+            <p className="text-slate-500 font-medium text-xs sm:text-sm leading-relaxed">
+              We haven't added <strong className="text-slate-700">question banks</strong> or <strong className="text-slate-700">mock tests</strong> for this exam yet.
+              Our team is actively building syllabus-aligned content — check back soon!
+            </p>
+          </div>
+
+          {/* What's missing info cards */}
+          <div className="grid grid-cols-2 gap-3 max-w-xs mx-auto text-left">
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <div className="text-slate-400 text-lg">📚</div>
+              <p className="text-xs font-bold text-slate-700">Question Banks</p>
+              <p className="text-[10px] text-slate-400 font-medium">Not available yet</p>
+            </div>
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+              <div className="text-slate-400 text-lg">🧪</div>
+              <p className="text-xs font-bold text-slate-700">Mock Tests</p>
+              <p className="text-[10px] text-slate-400 font-medium">Not available yet</p>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => { window.dispatchEvent(new CustomEvent('oep-open-context-modal')); }}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-extrabold text-xs sm:text-sm transition-all duration-200 shadow-md active:scale-95 cursor-pointer border-none"
+            >
+              <Target className="w-4 h-4" />
+              <span>Switch Target Exam</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { window.dispatchEvent(new CustomEvent('oep-navigate-tab', { detail: 'home' })); }}
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs sm:text-sm transition-all duration-200 active:scale-95 cursor-pointer border border-slate-200"
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>Browse Available Exams</span>
+            </button>
+          </div>
+
+          {/* Tip */}
+          <p className="text-[10px] text-slate-400 font-medium">
+            💡 <strong className="text-slate-500">OSSSC Nursing Officer</strong> has 75+ practice question banks ready to use right now
+          </p>
         </div>
       </div>
     );

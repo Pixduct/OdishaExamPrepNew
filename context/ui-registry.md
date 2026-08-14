@@ -1292,4 +1292,29 @@ Last updated: 2026-08-14
 - **Zero AI Image Generation**: Uses 100% real landscape stock photography from Pexels API and Wikimedia Commons API.
 - **Strict Anti-Repetition**: Persistent tracking in `published_image_history.json` ensures zero duplicate photo IDs across published articles.
 
+---
+
+### 46. `CurrentAffairsPortal` (Daily 360° Current Affairs Website Portal & Autonomous Engine)
+
+Files: [`src/pages/CurrentAffairs.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/CurrentAffairs.tsx), [`src/components/CurrentAffairsReaderModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/CurrentAffairsReaderModal.tsx), [`src/services/currentAffairsService.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/services/currentAffairsService.ts), [`automations/ca_website_publisher.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/ca_website_publisher.py), [`automations/.github/workflows/daily_ca_website.yml`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/.github/workflows/daily_ca_website.yml)
+Last updated: 2026-08-14
+
+| Property | Standard Pattern / Token |
+| :--- | :--- |
+| **Page Route** | `/current-affairs` (`ROUTE_PATHS.CURRENT_AFFAIRS`) |
+| **Category Badges** | `Odisha State CA` (amber pill), `India / National CA` (emerald pill), `World / International CA` (purple pill) |
+| **Hero Container** | `bg-gradient-to-br from-slate-900 via-brand-950 to-slate-900 rounded-3xl p-6 sm:p-10 text-white shadow-xl` |
+| **Category Filter Pills** | `bg-slate-900 text-white` (active) / `bg-white text-slate-600 border-slate-200/80` (inactive) |
+| **Reader Modal Backdrop** | `bg-slate-950/70 backdrop-blur-md z-50` |
+| **Reader Modal Window** | `bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl shadow-2xl max-w-4xl` |
+| **Summary Callout Box** | `bg-gradient-to-br from-brand-50/80 to-indigo-50/50 border border-brand-200/80 rounded-2xl` |
+| **Static GK Callout Card** | `background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-left: 4px solid #2563eb; rounded-2xl` |
+| **Practice MCQ Cards** | `bg-slate-50/80 border border-slate-200/80 rounded-2xl p-5` with instant option highlight & explanation |
+
+**Pattern notes:**
+- **360° Exam Digest Structure**: Every article contains Headline, 3-Bullet Executive Summary, Full Background Context, Static GK Exam Pointer Box, Key Data Table, and 2 Interactive Practice MCQs.
+- **Dynamic Category Filtration**: Filters by `All`, `Odisha State`, `National / India`, `World / International` with instant date calendar selector and real-time search.
+- **Autonomous Daily Publication**: `automations/ca_website_publisher.py` executes daily at 06:47 PM IST via GitHub Actions (`daily_ca_website.yml`), pushing synthesized digests to Supabase.
+
+
 

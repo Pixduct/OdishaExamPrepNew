@@ -6,6 +6,7 @@ export const ROUTE_PATHS = {
   REFUND_POLICY: '/refund-policy',
   BLOG: '/blog',
   BLOG_DETAIL: '/blog/:id',
+  CURRENT_AFFAIRS: '/current-affairs',
   ADMIN: '/admin',
   NOT_FOUND: '/404',
   EXAM_DETAIL: '/exams/:examId'

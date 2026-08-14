@@ -1,0 +1,74 @@
+[
+  {
+    "organization": "OSSSC",
+    "government_level": "ODISHA",
+    "official_domains": ["osssc.gov.in"],
+    "enabled": true,
+    "priority": 10,
+    "notes": "Odisha Sub-Ordinate Staff Selection Commission"
+  },
+  {
+    "organization": "OSSC",
+    "government_level": "ODISHA",
+    "official_domains": ["ossc.gov.in"],
+    "enabled": true,
+    "priority": 10,
+    "notes": "Odisha Staff Selection Commission"
+  },
+  {
+    "organization": "OPSC",
+    "government_level": "ODISHA",
+    "official_domains": ["opsc.gov.in"],
+    "enabled": true,
+    "priority": 10,
+    "notes": "Odisha Public Service Commission"
+  },
+  {
+    "organization": "Odisha Police",
+    "government_level": "ODISHA",
+    "official_domains": ["odishapolice.gov.in"],
+    "enabled": true,
+    "priority": 9,
+    "notes": "Odisha Police State Selection Board"
+  },
+  {
+    "organization": "SSC",
+    "government_level": "CENTRAL",
+    "official_domains": ["ssc.gov.in", "ssc.nic.in"],
+    "enabled": true,
+    "priority": 9,
+    "notes": "Staff Selection Commission"
+  },
+  {
+    "organization": "RRB",
+    "government_level": "CENTRAL",
+    "official_domains": ["rrbcdg.gov.in", "indianrailways.gov.in"],
+    "enabled": true,
+    "priority": 9,
+    "notes": "Railway Recruitment Board"
+  },
+  {
+    "organization": "UPSC",
+    "government_level": "CENTRAL",
+    "official_domains": ["upsc.gov.in"],
+    "enabled": true,
+    "priority": 8,
+    "notes": "Union Public Service Commission"
+  },
+  {
+    "organization": "IBPS",
+    "government_level": "CENTRAL",
+    "official_domains": ["ibps.in"],
+    "enabled": true,
+    "priority": 8,
+    "notes": "Institute of Banking Personnel Selection"
+  },
+  {
+    "organization": "SBI",
+    "government_level": "CENTRAL",
+    "official_domains": ["sbi.co.in"],
+    "enabled": true,
+    "priority": 8,
+    "notes": "State Bank of India Recruitment"
+  }
+]

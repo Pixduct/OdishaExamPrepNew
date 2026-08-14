@@ -1,0 +1,33 @@
+{
+  "official_domains": [
+    "osssc.gov.in",
+    "ossc.gov.in",
+    "opsc.gov.in",
+    "odishapolice.gov.in",
+    "ssc.gov.in",
+    "ssc.nic.in",
+    "rrbcdg.gov.in",
+    "indianrailways.gov.in",
+    "upsc.gov.in",
+    "ibps.in",
+    "sbi.co.in"
+  ],
+  "trusted_educational_domains": [
+    "testbook.com",
+    "adda247.com",
+    "pw.live",
+    "byjusexamprep.com",
+    "careerpower.in",
+    "jagranjosh.com",
+    "embibe.com"
+  ],
+  "untrusted_social_domains": [
+    "youtube.com",
+    "t.me",
+    "telegram.org",
+    "facebook.com",
+    "instagram.com",
+    "twitter.com",
+    "x.com"
+  ]
+}

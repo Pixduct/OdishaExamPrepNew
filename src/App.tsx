@@ -94,6 +94,7 @@ const SearchableSelect = React.lazy(() => import('./components/SearchableSelect'
 const YouTubeCarousel = React.lazy(() => import('./components/YouTubeCarousel'));
 const BlogList = React.lazy(() => import('./pages/BlogList'));
 const BlogPost = React.lazy(() => import('./pages/BlogPost'));
+const CurrentAffairsPage = React.lazy(() => import('./pages/CurrentAffairs').then(m => ({ default: m.CurrentAffairsPage })));
 const AiMentor = React.lazy(() => import('./pages/AiMentor'));
 import { ROUTE_PATHS } from './lib/routes-config';
 const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage'));
@@ -11036,6 +11037,7 @@ function AppContent() {
         <Route path={ROUTE_PATHS.REFUND_POLICY} element={<RefundPolicy />} />
         <Route path={ROUTE_PATHS.BLOG} element={<BlogList />} />
         <Route path={ROUTE_PATHS.BLOG_DETAIL} element={<BlogPost />} />
+        <Route path={ROUTE_PATHS.CURRENT_AFFAIRS} element={<CurrentAffairsPage />} />
         <Route 
           path={ROUTE_PATHS.ADMIN} 
           element={

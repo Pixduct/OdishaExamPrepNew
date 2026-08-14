@@ -1,64 +1,52 @@
-# Memory — Channel Automations, Cross-Platform CTA Engine & Multi-Platform Publishing (v3.9.2)
+# Memory — Workflow 5 Exam Visual Context Intelligence & Smart Image Engine (v4.0.0)
 
-Last updated: 2026-08-14T17:54:15+05:30
+Last updated: 2026-08-14T19:19:00+05:30
 
 ## What was built
 
-### 1. Cross-Platform CTA Cross-Promotion Engine across All Workflows
-- **Telegram Posts Cross-Promotion**: Updated `ca_publisher.py`, `mcq_engine.py`, and `engagement_engine.py` to append both official Website Link (`https://www.odishaexamprep.in/`) AND YouTube Channel Link (`https://www.youtube.com/@OdishaExamPrep365`) to all Telegram posts.
-- **YouTube Posts Cross-Promotion**: Updated `post_to_youtube.py` (`post_to_youtube` and `post_to_youtube_poll`) to append both official Website Link (`https://www.odishaexamprep.in/`) AND Telegram Channel Link (`https://t.me/OdishaExamPrepOfficial`) to all YouTube Community posts.
-- **Zero-Truncation Budget Guard**: `build_bulletproof_caption()` in `ca_publisher.py` pre-calculates combined header and CTA footer lengths under Telegram's 1024-character budget.
+### 1. Workflow 5 — Two Independent Autonomous Content Engines
+- **Engine 1 (`automations/exam_update_engine.py`)**: Autonomous official recruitment notification scraper and publisher running 3 times daily (08:47 AM, 02:47 PM, 08:47 PM IST).
+- **Engine 2 (`automations/seo_blog_engine.py`)**: Autonomous strategic evergreen educational article engine running daily at 12:07 PM IST.
 
-### 2. Workflow 4 — Strategic Engagement Engine (`automations/engagement_engine.py`)
-- **Target Exam Prioritization & DuckDuckGo Educational Research**: Reads daily target exams from Google Sheets (`Engagement_Posts` tab) and executes educational concept searches using `duckduckgo-search`, filtering out administrative news (admit cards, results).
-- **3-Stage Fallback Cascade**: Priority 1 (Exam-Specific Concept) ➔ Priority 2 (Exam-Preparation Strategy) ➔ Priority 3 (Universal Aspirant Engagement).
-- **AI Quality Gate & Deduplication**: DeepSeek AI validates content against 6 metrics (Educational Value >= 7, Curiosity >= 7, Repetition Risk <= 3) and checks persistent history in `published_history.json`.
-- **Telegram Regular Text Poll Mode (`type="regular"`)**: Sends open text polls (0 green checkmarks, 0 red X's) so students can vote freely.
-- **Follow-up Strategy Insights & Rotational Student Promo Cards**: Automatically attaches `student 1.png` - `student 7.png` via Telegram `sendPhoto` API based on day of week (`datetime.now().isoweekday()`), followed by strategy insights and cross-promotion CTA.
-- **YouTube Community Text Poll (`post_to_youtube.py`)**: Uses Playwright automation (`add a text poll`) with scoped option input fields (`#poll-editor`) and dynamic `Add another option` button clicking for 4 clean option fields (Option A, B, C, D) without pre-marked correct answers.
-- **Daily Automated Schedule (`.github/workflows/engagement_engine.yml`)**: Runs daily at `06:07 UTC` (11:37 AM IST).
+### 2. Exam Visual Context Intelligence Layer (`automations/shared/exam_visual_context.py`)
+- **Master `EXAM_VISUAL_CONTEXT` Registry**: Maps target exams (OSSSC Nursing Officer, OSSC CGL, OSSSC CTSRE, OPSC, SSC, Railway, Banking, Defence, Teaching, Police) to visual domains, preferred photographic concepts, and negative exclusion keywords.
+- **Dynamic Context Inference**: Auto-derives visual domain for unlisted exams (`AIIMS Nursing` -> Nursing, `RRB ALP` -> Technical/Railway, `CTET` -> Teaching).
+- **Query Combination**: Combines Exam Context + Article Subject + Real-World Activity (e.g. `"Indian nursing student studying pharmacology textbook"`).
 
-### 3. Daily 5-MCQ Quiz Set Engine (`automations/mcq_engine.py`)
-- **Poll Indexing & Branding**: Indexed daily polls as `[1/5]` through `[5/5]`.
-- **Conversion CTA & Rotational Student Promo Cards**: Daily completion banner with 7 rotational student promotion photos (`student 1.png` - `student 7.png`).
-- **GitHub Schedule (`daily_mcq.yml`)**: Runs daily at `04:17 UTC` (9:47 AM IST).
+### 3. Smart, Relevant, Copyright-Safe Image Engine (`automations/shared/pexels_image_fetcher.py` & `automations/shared/wikimedia_fetcher.py`)
+- **Pexels API Primary Search & 100-Point Scoring**: Scores candidate photos on Exam Match (25%), Article Match (30%), Profession Match (20%), Activity Match (15%), Quality (5%), and Uniqueness (5%).
+- **Negative Keyword Filter**: Hard exclusion of home decor and living room furniture (`furniture`, `living room`, `cabinet`, `sofa`, `couch`).
+- **Persistent Image History (`automations/published_image_history.json`)**: Tracks `blog_id`, `slug`, `exam`, `content_type`, `image_source`, `image_id`, `image_url`, `photographer`, `search_query`, `published_at` to enforce 30-blog cooldown and previous blog photo ID hard rejection.
+- **Secondary Fallback (Wikimedia Commons API)**: Verifies open CC BY / Public Domain licenses and records author, source URL, and license attribution.
+- **Hand-Curated Verified Exam Stock Directory**: Fallback pool of 100% verified academic exam desk study, nursing, and technical photos.
+- **Safe Failure Mode**: `IMAGE_NOT_FOUND` fallback safely publishes article without forcing an irrelevant image.
 
-### 4. Daily Current Affairs Engine (`automations/ca_publisher.py`, `ca_scraper.py`, `ca_formatter.py`, `ca_renderer.py`)
-- **Live Multi-Source Scraper (`ca_scraper.py`)**: Scrapes 6 real-time RSS feeds (PIB Odisha, PIB National, The Hindu, Indian Express, Times of India, BBC World).
-- **Persistent Deduplication (`seen_ca_news.json`)**: 60-day history tracking prevents repeating news items.
-- **Dynamic 100% Emoji-Free Graphic Decks (`ca_renderer.py`)**: Category badges in rounded pills (`border-radius: 30px;`), dynamic palette wheel (`EXAM`, `SCHEMES`, `APPOINTMENTS`, `ECONOMY`, `SPORTS`, `SCIENCE`, `DEFENCE`), 7 daily layout variants, signature logo icon.
-- **GitHub Schedule (`daily_ca.yml`)**: Runs daily at `14:17 UTC` (7:47 PM IST).
-
-### 5. Imprinting & Documentation Sync
-- **`context/ui-registry.md`**: Section 42 (`CurrentAffairsGraphicEngine`), Section 43 (`StrategicEngagementEngine`), and Section 44 (`CrossPlatformCTAPromotionEngine`).
-- **`context/architecture.md`**: Channel Automations Architecture.
-- **`context/progress-tracker.md`**: Version `3.9.2`.
+### 4. Content Quality Upgrade & Documentation Imprint
+- **100-Point Quality Gate (`automations/shared/seo_validator.py`)**: Enforces minimum score of 85/100, 1400–2500+ word depth, HTML Error Log tables, decision frameworks, action checklists, and 4–6 FAQs.
+- **Documentation Sync (`context/ui-registry.md`)**: Imprinted Section 45 (`ExamVisualContextImageEngine`).
 
 ## Decisions made
-- **Symmetric Cross-Platform Growth**: Every Telegram post drives traffic to YouTube (`@OdishaExamPrep365`), and every YouTube post drives traffic to Telegram (`@OdishaExamPrepOfficial`), while both consistently prioritize the official website (`www.odishaexamprep.in`).
-- **Open Text Poll Engagement**: Workflow 4 uses `type="regular"` on Telegram and `add a text poll` on YouTube Community so students engage with study strategy polls without getting marked incorrect.
-- **Direct Photo Attachment for Rotational Promo**: Telegram strategy insights messages use `sendPhoto` with `student {dayOfWeek}.png` directly to bypass Telegram OpenGraph link preview caching.
-- **YouTube DOM Option Scoping**: Scoped text poll option inputs inside `#poll-editor` and `ytd-select-poll-type-post-renderer` with single-assignment event dispatching to avoid duplicate text typing or search bar element overlap.
-- **Persistent Deduplication**: `published_history.json` and `seen_ca_news.json` are automatically committed back to GitHub Actions after every run.
+- **Two Independent Engines**: Exam update notifications and evergreen educational content operate as two separate autonomous runners sharing common infrastructure.
+- **Exam Visual Context Translation**: Translates literal exam acronyms into real-world visual domains (`OSSC CGL` -> Competitive exam study desk, `OSSSC Nursing` -> Healthcare clinical education, `OSSSC CTSRE` -> Technical engineering study).
+- **Strict Real Stock Photo Rule**: Zero AI image generation; uses only free stock photography from Pexels API and Wikimedia Commons API.
+- **Hard Furniture Exclusion**: Automatically rejects any image tagged with living room furniture or interior decor keywords.
+- **Persistent History Sync**: `published_image_history.json` and `used_blog_images.json` are automatically committed back to GitHub Actions after every run.
 
 ## Problems solved
-- **Cross-Promotion Gap**: Added YouTube links to Telegram posts and Telegram links to YouTube posts across all 4 automated workflows.
-- **YouTube Quiz vs Text Poll Distinction**: Converted Workflow 4 from Quiz mode to Text Poll mode on YouTube Studio, selecting `add a text poll` and removing correct answer radio button selections.
-- **Missing Option C & D on YouTube Text Polls**: Fixed by adding dynamic loop for `Add another option` button clicks until all 4 option inputs render in YouTube Studio's composer.
-- **Duplicated Option Text on YouTube**: Fixed by using DOM property assignment with native `input` and `change` event dispatching instead of duplicate keyboard typing.
-- **Telegram Link Preview Image Caching**: Resolved by sending direct `sendPhoto` attachments for daily student promo images.
-- **Telegram CTA Truncation**: Resolved by `build_bulletproof_caption()` budget pre-calculations.
+- **Generic Campus Student Photos**: Replaced generic university campus images with exact profession-first stock photos matching the exam subject (Nursing, Engineering, Exam Study Desk).
+- **Irrelevant Furniture Photos**: Added negative keyword filtering to eliminate living room cabinet/furniture images.
+- **Duplicate Pexels Image Selection**: Enforced persistent 30-blog cooldown and previous blog photo ID hard rejection.
+- **Missing License Information**: Integrated Wikimedia Commons API with automated CC BY / Public Domain license verification.
 
 ## Current state
-- TypeScript check: **0 compilation errors** (`npx tsc --noEmit` passes cleanly).
-- Repositories: All changes pushed to `https://github.com/Pixduct/odisha-mcq-engine.git` and `https://github.com/nareshsamal99384-cpu/OdishaExamPrepWebsite.git`.
-- Workflows: `daily_mcq.yml`, `daily_ca.yml`, and `engagement_engine.yml` passing cleanly on GitHub Actions with 100% success.
+- Python Compilation: **0 errors** across all automation scripts (`py_compile` passes cleanly).
+- Workflows: `.github/workflows/blog_cron.yml` & `.github/workflows/exam_update_cron.yml` configured and verified live on GitHub Actions (`blog_cron.yml` run #31806020997 completed cleanly in 25s).
+- Repositories: All code committed and pushed to `Pixduct/odisha-mcq-engine.git` and `nareshsamal99384-cpu/OdishaExamPrepWebsite.git`.
 
 ## Next session starts with
-- Monitor live daily GitHub Actions automated runs:
-  - MCQ Polls: `04:17 UTC` (9:47 AM IST)
-  - Strategic Engagement Engine: `06:07 UTC` (11:37 AM IST)
-  - Current Affairs Decks: `14:17 UTC` (7:47 PM IST)
+- Monitor automated daily execution:
+  - Engine 1 (Exam Updates): 08:47 AM, 02:47 PM, 08:47 PM IST.
+  - Engine 2 (Evergreen Blogs): 12:07 PM IST.
 - Proceed with any new features, UI refinements, or administrative tools requested by the user.
 
 ## Open questions

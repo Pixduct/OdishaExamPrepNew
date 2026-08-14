@@ -1936,7 +1936,8 @@ ${resultsContext}`;
       let title = "OdishaExamPrep - Best Platform for Odisha Exam Preparation";
       let description = "Excel in OPSC, OSSC, OSSSC, and other Odisha government competitive exams. Practice with expert-crafted mock tests, real-time rank analytics, and detailed syllabus roadmaps.";
       let keywords = "Odisha Exam Prep, OPSC, OSSC, OSSSC, Odisha Government Exams, Mock Tests, Odisha GK, Competitive Exams Odisha";
-      let imageUrl = `${baseUrl}/student.webp`; // High resolution default image
+      const dayOfWeek = (new Date().getDay() % 7) + 1; // 1 to 7 daily rotation
+      let imageUrl = `${baseUrl}/student%20${dayOfWeek}.png`; // High resolution daily rotated student promo image
       let schemaJson = "";
       let ogType = "website";
 

@@ -95,7 +95,7 @@ export const FALLBACK_CURRENT_AFFAIRS: CurrentAffairsItem[] = [
       }
     ],
     sources: "PIB Odisha / I&PR Department Odisha",
-    image_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Odisha_Legislative_Assembly%2C_Bhubaneswar.jpg/1200px-Odisha_Legislative_Assembly%2C_Bhubaneswar.jpg",
+    image_url: "https://images.pexels.com/photos/2047905/pexels-photo-2047905.jpeg?auto=compress&cs=tinysrgb&w=1200",
     created_at: "2026-08-14T10:00:00Z"
   },
   {
@@ -125,7 +125,7 @@ export const FALLBACK_CURRENT_AFFAIRS: CurrentAffairsItem[] = [
       }
     ],
     sources: "I&PR Department Odisha / Government Gazette",
-    image_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Odisha_Legislative_Assembly%2C_Bhubaneswar.jpg/1200px-Odisha_Legislative_Assembly%2C_Bhubaneswar.jpg",
+    image_url: "https://images.pexels.com/photos/2047905/pexels-photo-2047905.jpeg?auto=compress&cs=tinysrgb&w=1200",
     created_at: "2026-08-14T09:45:00Z"
   },
   {
@@ -155,7 +155,7 @@ export const FALLBACK_CURRENT_AFFAIRS: CurrentAffairsItem[] = [
       }
     ],
     sources: "Department of Forest, Environment & Climate Change, Odisha",
-    image_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Chilika_Lake_Sunset.jpg/1200px-Chilika_Lake_Sunset.jpg",
+    image_url: "https://images.pexels.com/photos/1486976/pexels-photo-1486976.jpeg?auto=compress&cs=tinysrgb&w=1200",
     created_at: "2026-08-13T14:20:00Z"
   },
   {
@@ -211,7 +211,7 @@ export const FALLBACK_CURRENT_AFFAIRS: CurrentAffairsItem[] = [
       }
     ],
     sources: "Press Information Bureau (PIB) / RBI Release",
-    image_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Reserve_Bank_of_India_Headquarters_Mumbai.jpg/1200px-Reserve_Bank_of_India_Headquarters_Mumbai.jpg",
+    image_url: "https://images.pexels.com/photos/5905712/pexels-photo-5905712.jpeg?auto=compress&cs=tinysrgb&w=1200",
     created_at: "2026-08-14T09:30:00Z"
   },
   {

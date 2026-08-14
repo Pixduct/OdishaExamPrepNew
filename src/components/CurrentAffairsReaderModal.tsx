@@ -14,6 +14,8 @@ export const CurrentAffairsReaderModal: React.FC<Props> = ({ article, onClose })
 
   if (!article) return null;
 
+  const cat = (article.category || '').toLowerCase();
+
   const handleSelectOption = (mcqIdx: number, optionLetter: string) => {
     setSelectedAnswers(prev => ({ ...prev, [mcqIdx]: optionLetter }));
     setShowExplanations(prev => ({ ...prev, [mcqIdx]: true }));
@@ -88,19 +90,27 @@ export const CurrentAffairsReaderModal: React.FC<Props> = ({ article, onClose })
             </span>
           </div>
 
-          {/* Hero Topic Real Image / Banner */}
-          {article.image_url && (
-            <div className="rounded-2xl overflow-hidden shadow-md border border-slate-200/80 bg-slate-100">
-              <img
-                src={getSmartRealImage(article.title, article.category, article.image_url)}
-                alt={article.title}
-                onError={(e) => {
-                  e.currentTarget.src = getSmartRealImage(article.title, article.category);
-                }}
-                className="w-full h-56 sm:h-80 object-cover"
-              />
+          {/* Executive Exam Topic Header Banner (Image-Free Professional Design) */}
+          <div className={`p-5 sm:p-6 rounded-2xl relative overflow-hidden flex flex-col justify-between shadow-xs ${
+            cat.includes('odisha')
+              ? 'bg-gradient-to-r from-amber-700 via-amber-800 to-orange-950 text-amber-50 border border-amber-600/30'
+              : cat.includes('world') || cat.includes('international')
+              ? 'bg-gradient-to-r from-indigo-800 via-purple-900 to-slate-950 text-purple-50 border border-purple-600/30'
+              : 'bg-gradient-to-r from-teal-800 via-emerald-900 to-slate-950 text-teal-600/30'
+          }`}>
+            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:12px_12px] pointer-events-none" />
+            <div className="flex items-center justify-between relative z-10 mb-2">
+              <span className="text-[11px] font-mono tracking-wider font-extrabold px-3 py-1 bg-white/10 backdrop-blur-md rounded-lg text-white border border-white/20 uppercase">
+                {cat.includes('odisha') ? 'OPSC • OSSC • OSSSC RELEVANT' : cat.includes('world') ? 'INTERNATIONAL RELATIONS' : 'SSC • RRB • BANKING RELEVANT'}
+              </span>
+              <span className="text-xs font-bold text-white/80 hidden sm:inline-block">
+                Verified 360° Exam Intelligence
+              </span>
             </div>
-          )}
+            <h2 className="text-lg sm:text-xl font-serif font-black leading-snug text-white relative z-10">
+              {article.title}
+            </h2>
+          </div>
 
           {/* 3-Bullet Executive Summary Box */}
           {article.summary && (

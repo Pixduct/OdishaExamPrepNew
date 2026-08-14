@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Calendar, Share2, Award, BookOpen, CheckCircle, HelpCircle, ArrowLeft, Building2, Globe, MapPin, Sparkles } from 'lucide-react';
+import { X, Calendar, Share2, Award, BookOpen, CheckCircle, HelpCircle, ArrowLeft, Building2, Globe, MapPin, Sparkles, Send, Play, Printer, ExternalLink } from 'lucide-react';
 import { CurrentAffairsItem, getSmartRealImage } from '../services/currentAffairsService';
 import { MathTextRenderer } from './MathTextRenderer';
 
@@ -90,31 +90,52 @@ export const CurrentAffairsReaderModal: React.FC<Props> = ({ article, onClose })
             </span>
           </div>
 
-          {/* Executive Exam Topic Header Banner (Image-Free Professional Design) */}
-          <div className={`p-5 sm:p-6 rounded-2xl relative overflow-hidden flex flex-col justify-between shadow-xs ${
-            cat.includes('odisha')
-              ? 'bg-gradient-to-r from-amber-700 via-amber-800 to-orange-950 text-amber-50 border border-amber-600/30'
-              : cat.includes('world') || cat.includes('international')
-              ? 'bg-gradient-to-r from-indigo-800 via-purple-900 to-slate-950 text-purple-50 border border-purple-600/30'
-              : 'bg-gradient-to-r from-teal-800 via-emerald-900 to-slate-950 text-teal-600/30'
-          }`}>
-            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:12px_12px] pointer-events-none" />
-            <div className="flex items-center justify-between relative z-10 mb-2">
-              <span className="text-[11px] font-mono tracking-wider font-extrabold px-3 py-1 bg-white/10 backdrop-blur-md rounded-lg text-white border border-white/20 uppercase">
-                {cat.includes('odisha') ? 'OPSC • OSSC • OSSSC RELEVANT' : cat.includes('world') ? 'INTERNATIONAL RELATIONS' : 'SSC • RRB • BANKING RELEVANT'}
-              </span>
-              <span className="text-xs font-bold text-white/80 hidden sm:inline-block">
-                Official 360° Exam Intelligence
-              </span>
-            </div>
-            <div className="relative z-10 space-y-1">
-              <h3 className="text-base sm:text-lg font-extrabold tracking-tight text-white flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-300" />
-                {cat.includes('odisha') ? 'Odisha State & Governance Comprehensive Briefing' : cat.includes('world') ? 'Global & International Affairs Briefing' : 'National & Central Government Briefing'}
-              </h3>
-              <p className="text-xs text-white/80 font-medium">
-                Comprehensive background context, static GK pointers, key data tables, and 2 practice MCQs.
-              </p>
+          {/* Student Community & Channel Promotion Hub Banner */}
+          <div className="bg-gradient-to-r from-slate-900 via-brand-950 to-slate-900 rounded-2xl p-5 sm:p-6 text-white border border-brand-500/30 shadow-lg relative overflow-hidden">
+            <div className="absolute -right-8 -bottom-8 w-48 h-48 bg-brand-500/20 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+              <div className="space-y-1 max-w-lg">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-brand-500/20 text-brand-300 border border-brand-400/30 rounded-md text-[11px] font-black uppercase tracking-wider">
+                  <Sparkles className="w-3.5 h-3.5" /> OdishaExamPrep Student Community
+                </div>
+                <h3 className="text-base sm:text-lg font-serif font-black text-white leading-tight">
+                  Daily Current Affairs PDFs & Video Class Alerts
+                </h3>
+                <p className="text-xs text-slate-300 font-medium leading-relaxed">
+                  Join 25,000+ OPSC, OSSC CGL & OSSSC aspirants getting instant PDF notes, daily quizzes & free YouTube video classes.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                <a
+                  href="https://t.me/OdishaExamPrep365"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3.5 py-2.5 bg-sky-500 hover:bg-sky-400 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 group"
+                >
+                  <Send className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  Join Telegram
+                </a>
+
+                <a
+                  href="https://www.youtube.com/@OdishaExamPrep365"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3.5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 group"
+                >
+                  <Play className="w-4 h-4 fill-white group-hover:scale-110 transition-transform" />
+                  Watch YouTube
+                </a>
+
+                <button
+                  onClick={() => window.print()}
+                  className="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs rounded-xl border border-slate-700 transition-all flex items-center gap-1.5"
+                  title="Print or Save PDF Note"
+                >
+                  <Printer className="w-3.5 h-3.5" /> Print PDF
+                </button>
+              </div>
             </div>
           </div>
 

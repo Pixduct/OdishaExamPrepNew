@@ -54,7 +54,15 @@ import {
   Clock3,
   MessageSquare,
   Video,
-  Flame
+  Flame,
+  HeartPulse,
+  Activity,
+  Laptop,
+  Code,
+  MapPin,
+  Building2,
+  PieChart,
+  Calculator
 } from 'lucide-react';
 import { Toaster, toast, useToasterStore } from 'react-hot-toast';
 import { useAuth } from './lib/AuthContext';
@@ -70,6 +78,57 @@ import { useActiveExamContext } from './lib/activeExamStore';
 import { ActiveExamContextBar } from './components/ActiveExamContextBar';
 import { getInstantQuestionsForTopic } from './lib/instantQuestionCompiler';
 import { examService } from './lib/examService';
+
+const getQuestionBankVectorTheme = (title: string = '', category: string = '') => {
+  const t = (title + ' ' + (category || '')).toLowerCase();
+  
+  if (t.includes('anatom') || t.includes('nurs') || t.includes('health') || t.includes('medic') || t.includes('pharm') || t.includes('biolog') || t.includes('pathol')) {
+    return {
+      gradient: 'bg-gradient-to-br from-teal-700 via-emerald-800 to-slate-950 text-teal-50',
+      badgeBg: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
+      badgeText: 'HEALTHCARE & NURSING SPECIAL',
+      examTag: 'OSSSC NURSING • AIIMS • ANM/GNM',
+      MainIcon: Activity,
+      WatermarkIcon: HeartPulse,
+    };
+  } else if (t.includes('comput') || t.includes('code') || t.includes('tech') || t.includes('data') || t.includes('cyber') || t.includes('it ') || t.includes('software')) {
+    return {
+      gradient: 'bg-gradient-to-br from-cyan-800 via-blue-900 to-slate-950 text-cyan-50',
+      badgeBg: 'bg-cyan-400/20 text-cyan-200 border-cyan-400/40',
+      badgeText: 'COMPUTER KNOWLEDGE EXAM',
+      examTag: 'OSSC CGL • OSSSC CTSRE • RRB',
+      MainIcon: Code,
+      WatermarkIcon: Laptop,
+    };
+  } else if (t.includes('odisha') || t.includes('opsc') || t.includes('ossc') || t.includes('osssc') || t.includes('state')) {
+    return {
+      gradient: 'bg-gradient-to-br from-amber-700 via-amber-800 to-orange-950 text-amber-50',
+      badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
+      badgeText: 'ODISHA STATE GK & GOVERNANCE',
+      examTag: 'OPSC • OSSC • OSSSC RELEVANT',
+      MainIcon: MapPin,
+      WatermarkIcon: Building2,
+    };
+  } else if (t.includes('math') || t.includes('aptitud') || t.includes('quant') || t.includes('reason') || t.includes('number') || t.includes('algebr') || t.includes('geomet')) {
+    return {
+      gradient: 'bg-gradient-to-br from-indigo-800 via-purple-900 to-slate-950 text-purple-50',
+      badgeBg: 'bg-purple-400/20 text-purple-200 border-purple-400/40',
+      badgeText: 'QUANTITATIVE & REASONING',
+      examTag: 'SSC CGL • BANKING • RAILWAYS',
+      MainIcon: PieChart,
+      WatermarkIcon: Calculator,
+    };
+  } else {
+    return {
+      gradient: 'bg-gradient-to-br from-slate-800 via-indigo-900 to-slate-950 text-indigo-50',
+      badgeBg: 'bg-indigo-400/20 text-indigo-200 border-indigo-400/40',
+      badgeText: 'GENERAL STUDIES & PYQ',
+      examTag: 'CIVIL SERVICES • ALL EXAMS',
+      MainIcon: Globe,
+      WatermarkIcon: BookOpen,
+    };
+  }
+};
 import { DEFAULT_ACHIEVERS_JOURNAL } from './lib/defaultAchievers';
 import { useScrollSpy } from './hooks/useScrollSpy';
 import { useCountdown } from './hooks/useCountdown';
@@ -8364,6 +8423,10 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             >
           {items.map((item) => {
             const isLocked = item.isPremium && !hasAccessTo(item);
+            const vecTheme = getQuestionBankVectorTheme(item.title, item.category);
+            const VecMainIcon = vecTheme.MainIcon;
+            const VecWatermarkIcon = vecTheme.WatermarkIcon;
+
             return (
               <motion.div
                 key={item.id}
@@ -8399,20 +8462,10 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     )} />
 
                     <div className="flex items-center gap-3.5 min-w-0 flex-1 pl-1">
-                      <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 shadow-sm relative border border-slate-100">
-                        <img 
-                          src={getDirectImageUrl(item.image)} 
-                          alt={item.title} 
-                          loading="lazy"
-                          decoding="async"
-                          className={cn(
-                            "w-full h-full object-cover select-none pointer-events-none",
-                            isLocked && "blur-[1px]"
-                          )}
-                          referrerPolicy="no-referrer"
-                        />
+                      <div className={cn("w-14 h-14 rounded-xl overflow-hidden shrink-0 shadow-sm relative border border-slate-100 flex items-center justify-center p-2 text-white select-none", vecTheme.gradient)}>
+                        <VecWatermarkIcon className="w-7 h-7 text-white stroke-[1.8]" />
                         {isLocked && (
-                          <div className="absolute inset-0 bg-slate-950/20 flex items-center justify-center">
+                          <div className="absolute inset-0 bg-slate-950/30 flex items-center justify-center">
                             <Lock className="w-3.5 h-3.5 text-white" />
                           </div>
                         )}
@@ -8470,25 +8523,49 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     {/* Ambient grid-bg inside the card */}
                     <div className={cn("absolute inset-0 grid-bg opacity-[0.02] pointer-events-none", !isMobile && "group-hover:opacity-[0.04] transition-opacity duration-500")} />
                     
-                    {/* Hero Image Section */}
-                    <div className={cn("h-44 overflow-hidden relative shrink-0 border-b border-slate-100", isLocked && "blur-[1px]")}>
-                      <img 
-                        src={getDirectImageUrl(item.image)} 
-                        alt={item.title} 
-                        loading="lazy"
-                        decoding="async"
-                        className={cn(
-                          "w-full h-full object-cover select-none pointer-events-none",
-                          !isMobile && "group-hover:scale-105 transition-transform duration-700"
-                        )}
-                        referrerPolicy="no-referrer"
-                      />
+                    {/* Hero Vector Banner Section */}
+                    <div className={cn(
+                      "h-44 overflow-hidden relative shrink-0 border-b border-slate-100 flex flex-col justify-between p-5 text-white select-none transition-all duration-500",
+                      vecTheme.gradient,
+                      isLocked && "blur-[1px]"
+                    )}>
+                      {/* Geometric Watermark Grid */}
+                      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:12px_12px] pointer-events-none" />
                       
-                      {/* Linear contrast gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none opacity-60" />
+                      {/* Large Vector Watermark Icon */}
+                      <VecWatermarkIcon className="absolute -right-4 -bottom-4 w-32 h-32 opacity-15 stroke-[1.2] text-white pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
+
+                      {/* Top Badge Row */}
+                      <div className="flex items-center justify-between relative z-10">
+                        <span className={cn("text-[9.5px] font-mono tracking-wider font-extrabold px-2.5 py-1 rounded-md uppercase border backdrop-blur-xs shadow-xs", vecTheme.badgeBg)}>
+                          {vecTheme.badgeText}
+                        </span>
+                        {isLocked ? (
+                          <span className="px-2 py-0.5 bg-rose-500/20 border border-rose-400/30 text-rose-200 text-[8px] font-black uppercase tracking-wider rounded">
+                            Premium
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 text-[8px] font-black uppercase tracking-wider rounded">
+                            Free
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Bottom Exam Target Info */}
+                      <div className="relative z-10 space-y-1">
+                        <div className="flex items-center gap-1.5 text-white/90 text-xs font-black uppercase tracking-wider">
+                          <VecMainIcon className="w-4 h-4 shrink-0 text-white" />
+                          <span className="line-clamp-1">{vecTheme.examTag}</span>
+                        </div>
+                        <div className="text-[10.5px] text-white/75 font-semibold tracking-wide flex items-center gap-1">
+                          <span>{item.questionCount || item.questions || 250} Practice Questions</span>
+                          <span>•</span>
+                          <span>Answer Key</span>
+                        </div>
+                      </div>
                       
                       {isLocked && (
-                        <div className={cn("absolute inset-0 bg-slate-950/20 flex items-center justify-center", !isMobile && "backdrop-blur-[2px]")}>
+                        <div className={cn("absolute inset-0 bg-slate-950/40 flex items-center justify-center z-20", !isMobile && "backdrop-blur-[2px]")}>
                           <div className="w-12 h-12 bg-white/95 rounded-2xl flex items-center justify-center shadow-lg border border-slate-200/50">
                              <Lock className="w-5 h-5 text-[#2563EB]" />
                           </div>

@@ -1250,3 +1250,21 @@ Last updated: 2026-08-14
 - **Direct Photo Attachment Guarantee**: Instead of relying on Telegram link previews (which cache old OpenGraph images), the follow-up strategy insight message sends `sendPhoto` with `student 1.png` - `student 7.png` directly, rotating high-res student cards every day of the week.
 - **YouTube DOM Option Scoping**: YouTube Community option inputs are scoped inside `ytd-backstage-post-dialog-renderer` / `#poll-editor`, dynamically expanding up to 4 option fields (`Option A`, `Option B`, `Option C`, `Option D`) with clean input event dispatching.
 
+---
+
+### 44. `CrossPlatformCTAPromotionEngine` (Unified Cross-Platform Cross-Promotion Engine)
+
+Files: [`automations/ca_publisher.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/ca_publisher.py), [`automations/mcq_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/mcq_engine.py), [`automations/engagement_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/engagement_engine.py), [`automations/post_to_youtube.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/post_to_youtube.py)
+Last updated: 2026-08-14
+
+| Property | Standard Pattern / Token |
+| :--- | :--- |
+| **Telegram Post CTA Footer** | Website Link (`https://www.odishaexamprep.in/`) + YouTube Channel Link (`https://www.youtube.com/@OdishaExamPrep365`) |
+| **YouTube Post CTA Footer** | Website Link (`https://www.odishaexamprep.in/`) + Telegram Channel Link (`https://t.me/OdishaExamPrepOfficial`) |
+| **Telegram Budget Guard** | `build_bulletproof_caption()` pre-calculates combined header and CTA footer lengths under 1024 limit |
+| **Cross-Promotion Scope** | Enforced across all 4 workflows: MCQ Engine, Current Affairs Decks, Engagement Polls, Community Posts |
+
+**Pattern notes:**
+- **Symmetric Cross-Platform Growth**: Every Telegram post drives traffic to YouTube (`@OdishaExamPrep365`), and every YouTube post drives traffic to Telegram (`@OdishaExamPrepOfficial`), while both consistently prioritize the official website (`www.odishaexamprep.in`).
+- **Zero-Truncation Guarantee**: Pre-calculated Telegram character budgets prevent footer link truncation, ensuring valid, clickable markdown/HTML links on every message.
+

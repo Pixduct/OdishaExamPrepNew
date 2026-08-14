@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Calendar, Share2, Award, BookOpen, CheckCircle, HelpCircle, ArrowLeft, Building2, Globe, MapPin } from 'lucide-react';
-import { CurrentAffairsItem } from '../services/currentAffairsService';
+import { CurrentAffairsItem, getSmartRealImage } from '../services/currentAffairsService';
 import { MathTextRenderer } from './MathTextRenderer';
 
 interface Props {
@@ -88,12 +88,15 @@ export const CurrentAffairsReaderModal: React.FC<Props> = ({ article, onClose })
             </span>
           </div>
 
-          {/* Hero Stock Image */}
+          {/* Hero Topic Real Image / Banner */}
           {article.image_url && (
-            <div className="rounded-2xl overflow-hidden shadow-md border border-slate-200/80">
+            <div className="rounded-2xl overflow-hidden shadow-md border border-slate-200/80 bg-slate-100">
               <img
-                src={article.image_url}
+                src={getSmartRealImage(article.title, article.category, article.image_url)}
                 alt={article.title}
+                onError={(e) => {
+                  e.currentTarget.src = getSmartRealImage(article.title, article.category);
+                }}
                 className="w-full h-56 sm:h-80 object-cover"
               />
             </div>

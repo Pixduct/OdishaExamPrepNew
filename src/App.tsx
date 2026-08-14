@@ -1788,16 +1788,18 @@ export const Navbar = ({
           {/* Current Affairs Link */}
           <Link 
             to="/current-affairs"
-            className="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest px-3 py-2 rounded-xl text-slate-700 hover:text-brand-600 hover:bg-slate-100/80 transition-all group cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 hover:text-amber-800 border border-amber-500/30 text-xs font-black uppercase tracking-wider transition-all group shrink-0 cursor-pointer shadow-2xs"
+            title="Daily 360° Current Affairs"
           >
-            <Globe className="w-3.5 h-3.5 text-brand-500 group-hover:text-brand-600 transition-colors" />
+            <Globe className="w-3.5 h-3.5 text-amber-600 group-hover:rotate-12 transition-transform" />
             <span>Current Affairs</span>
           </Link>
 
           {/* Blog Link */}
           <Link 
             to="/blog"
-            className="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest px-3 py-2 rounded-xl text-slate-700 hover:text-brand-600 hover:bg-slate-100/80 transition-all group cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 hover:bg-brand-50 text-slate-700 hover:text-brand-600 border border-slate-200/80 text-xs font-black uppercase tracking-wider transition-all group shrink-0 cursor-pointer"
+            title="Official Educational Blog"
           >
             <FileText className="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-600 transition-colors" />
             <span>Blog</span>
@@ -2105,6 +2107,25 @@ export const Navbar = ({
                       </motion.div>
                     </>
                   )}
+
+                  <motion.div variants={drawerItemVariants}>
+                    <Link 
+                      to="/current-affairs"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 text-sm font-extrabold p-2.5 rounded-xl transition-all border border-transparent group relative active:scale-[0.98] select-none",
+                        location.pathname.startsWith('/current-affairs')
+                          ? "bg-amber-50 text-amber-800 font-black border-amber-200 shadow-xs"
+                          : "text-slate-700 hover:bg-amber-50/50 hover:text-amber-800"
+                      )}
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-700 shrink-0 shadow-xs">
+                         <Globe className="w-4 h-4 text-amber-600" />
+                      </div>
+                      <span className="tracking-wide">Daily 360° Current Affairs</span>
+                      <ChevronRight className={cn("w-4 h-4 ml-auto transition-transform duration-250", location.pathname.startsWith('/current-affairs') ? "text-amber-600 translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
+                    </Link>
+                  </motion.div>
 
                   <motion.div variants={drawerItemVariants}>
                     <Link 

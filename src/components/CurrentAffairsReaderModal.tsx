@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Calendar, Share2, Award, BookOpen, CheckCircle, HelpCircle, ArrowLeft, Building2, Globe, MapPin, Sparkles, Send, Play, Printer, ExternalLink } from 'lucide-react';
 import { CurrentAffairsItem, getSmartRealImage } from '../services/currentAffairsService';
 import { MathTextRenderer } from './MathTextRenderer';
@@ -11,6 +11,15 @@ interface Props {
 export const CurrentAffairsReaderModal: React.FC<Props> = ({ article, onClose }) => {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const [showExplanations, setShowExplanations] = useState<Record<number, boolean>>({});
+
+  useEffect(() => {
+    // Lock background body scroll when modal is open to eliminate scroll lag & jitter
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, []);
 
   if (!article) return null;
 
@@ -48,11 +57,11 @@ export const CurrentAffairsReaderModal: React.FC<Props> = ({ article, onClose })
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-fadeIn">
-      <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden my-auto">
+    <div className="fixed inset-0 z-50 overflow-hidden bg-slate-950/80 flex items-center justify-center p-2 sm:p-4 animate-fadeIn">
+      <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] sm:max-h-[92vh] flex flex-col overflow-hidden my-auto transform-gpu">
         
         {/* Modal Top Header Bar */}
-        <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between shrink-0">
+        <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/90 flex items-center justify-between shrink-0 z-20">
           <button
             onClick={onClose}
             className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors"
@@ -71,8 +80,8 @@ export const CurrentAffairsReaderModal: React.FC<Props> = ({ article, onClose })
           </div>
         </div>
 
-        {/* Scrollable Reader Body */}
-        <div className="overflow-y-auto p-5 sm:p-8 space-y-6 text-slate-800">
+        {/* Scrollable Reader Body with Hardware-Accelerated Momentum Scrolling */}
+        <div className="overflow-y-auto overscroll-contain p-5 sm:p-8 space-y-6 text-slate-800 scroll-smooth [will-change:transform] [webkit-overflow-scrolling:touch]">
           
           {/* Article Title */}
           <h1 className="text-2xl sm:text-3xl font-serif font-black text-slate-900 leading-snug">

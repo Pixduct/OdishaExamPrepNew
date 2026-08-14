@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PageLayout from '../components/PageLayout';
-import { fetchCurrentAffairsDigests, CurrentAffairsItem } from '../services/currentAffairsService';
+import { fetchCurrentAffairsDigests, CurrentAffairsItem, getSmartRealImage } from '../services/currentAffairsService';
 import { CurrentAffairsReaderModal } from '../components/CurrentAffairsReaderModal';
 import { Search, Calendar, MapPin, Building2, Globe, Sparkles, BookOpen, ArrowRight, Filter } from 'lucide-react';
 
@@ -168,10 +168,13 @@ export const CurrentAffairsPage: React.FC = () => {
                     {/* Card Header & Thumbnail */}
                     <div>
                       {article.image_url && (
-                        <div className="h-44 overflow-hidden relative border-b border-slate-100">
+                        <div className="h-44 overflow-hidden relative border-b border-slate-100 bg-slate-100">
                           <img
-                            src={article.image_url}
+                            src={getSmartRealImage(article.title, article.category, article.image_url)}
                             alt={article.title}
+                            onError={(e) => {
+                              e.currentTarget.src = getSmartRealImage(article.title, article.category);
+                            }}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                           <div className="absolute top-3 left-3 z-10">

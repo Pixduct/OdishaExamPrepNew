@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Calendar, Share2, Award, BookOpen, CheckCircle, HelpCircle, ArrowLeft, Building2, Globe, MapPin } from 'lucide-react';
+import { X, Calendar, Share2, Award, BookOpen, CheckCircle, HelpCircle, ArrowLeft, Building2, Globe, MapPin, Sparkles } from 'lucide-react';
 import { CurrentAffairsItem, getSmartRealImage } from '../services/currentAffairsService';
 import { MathTextRenderer } from './MathTextRenderer';
 
@@ -104,12 +104,18 @@ export const CurrentAffairsReaderModal: React.FC<Props> = ({ article, onClose })
                 {cat.includes('odisha') ? 'OPSC • OSSC • OSSSC RELEVANT' : cat.includes('world') ? 'INTERNATIONAL RELATIONS' : 'SSC • RRB • BANKING RELEVANT'}
               </span>
               <span className="text-xs font-bold text-white/80 hidden sm:inline-block">
-                Verified 360° Exam Intelligence
+                Official 360° Exam Intelligence
               </span>
             </div>
-            <h2 className="text-lg sm:text-xl font-serif font-black leading-snug text-white relative z-10">
-              {article.title}
-            </h2>
+            <div className="relative z-10 space-y-1">
+              <h3 className="text-base sm:text-lg font-extrabold tracking-tight text-white flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-300" />
+                {cat.includes('odisha') ? 'Odisha State & Governance Comprehensive Briefing' : cat.includes('world') ? 'Global & International Affairs Briefing' : 'National & Central Government Briefing'}
+              </h3>
+              <p className="text-xs text-white/80 font-medium">
+                Comprehensive background context, static GK pointers, key data tables, and 2 practice MCQs.
+              </p>
+            </div>
           </div>
 
           {/* 3-Bullet Executive Summary Box */}

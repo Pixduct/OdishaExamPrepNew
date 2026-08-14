@@ -397,3 +397,36 @@ CREATE TABLE public.push_notifications (
 8. AI completion API requests MUST pass through server proxy `/api/chat/completions` to protect NIM API keys.
 9. Database queries fetching questions or tests MUST respect PostgreSQL RLS access policies.
 10. Web push notification keys (`VAPID_PUBLIC_KEY`) MUST be fetched from `/api/push/vapid-key` or client environment variables.
+
+---
+
+## Channel Automations & Social Media Graphic Engine Architecture
+
+Repository: `https://github.com/Pixduct/odisha-mcq-engine.git` (`automations/`)
+
+### 1. Daily 5-MCQ Quiz Set Engine (`automations/mcq_engine.py`)
+- **Execution Schedule:** Off-Peak Green Zone `04:17 UTC` (9:47 AM IST) on GitHub Actions (`daily_mcq.yml`). Announced at **10:00 AM IST**.
+- **Poll Indexing:** Poll questions indexed `[1/5]`, `[2/5]`, `[3/5]`, `[4/5]`, `[5/5]`.
+- **Conversion CTA:** Includes explanation CTA bubble driving traffic to `https://www.odishaexamprep.in/`.
+- **Student Promotion Banner:** Sends Daily Completion Banner attached with **7-Day Rotational Student Promotion Photos** (`student 1.png` - `student 7.png`).
+- **Sheet Sync:** Fetches unposted rows from Google Sheet (`Form Responses 1`) and marks published rows as `Published`.
+
+### 2. Daily Current Affairs Engine (`automations/ca_publisher.py`)
+- **Execution Schedule:** Off-Peak Green Zone `14:17 UTC` (7:47 PM IST) on GitHub Actions (`daily_ca.yml`). Announced at **8:00 PM IST**.
+- **Live Scraper (`ca_scraper.py`):** Scrapes 6 real-time RSS feeds (PIB Odisha, PIB National, The Hindu, Indian Express, Times of India, BBC World).
+- **Deduplication Engine:** `seen_ca_news.json` 60-day history tracking + 7 rotating daily fallback suites (Mon-Sun). Automatically committed back to GitHub via Actions (`[skip ci]`).
+- **AI Formatting (`ca_formatter.py`):** DeepSeek AI (`deepseek-chat`) formats 5 visual cards + 3 extra highlights.
+- **Dynamic Category Renderer (`ca_renderer.py`):** 100% Emoji-Free Pill Badges (`border-radius: 30px;`) with a dynamic keyword-mapped palette wheel (`EXAM` ➔ Red, `SCHEMES` ➔ Indigo, `APPOINTMENTS` ➔ Emerald, `ECONOMY` ➔ Cyan, `SPORTS` ➔ Gold, `SCIENCE` ➔ Purple, `DEFENCE` ➔ Orange) and string hash fallback.
+- **7 Daily Layout Variants:** Rotates visual container architecture Monday through Sunday (Hero Grid, Split Accent, Halo Glow, Nordic Frame, Banner Ribbon, Blueprint Grid, Gold Rimmed).
+- **Signature Branding:** Constant blue-indigo logo icon (`#6366F1` ➔ `#3B82F6`) + `Daily CA Quiz & Practice 🚀` footer text.
+- **HTML-Safe Captions:** `clean_html_caption` auto-balances HTML tags before sending to Telegram.
+- **Multi-Platform Dispatch:** Telegram Public Channel (`@OdishaExamPrepOfficial`), YouTube Community, and Admin Bot (`1317595163`).
+
+### 3. Breaking Exam Notification Engine (`automations/breaking_engine.py`)
+- **Webhook Endpoint:** `https://odisha-mcq-engine.onrender.com/webhook/breaking-notice`.
+- **Alert Cards:** Renders 1080x1080 PNG breaking notice graphics (`Real-Time Exam Alerts 🚀`).
+- **Instant Dispatch:** Dispatches immediate alert messages to Telegram Channel and Admin Bot.
+
+### 4. Dynamic Server OpenGraph Serving (`server.ts`)
+- Dynamically serves rotational student promo photos (`student 1.png` - `student 7.png`) for social sharing link previews based on `dayOfWeek`.
+

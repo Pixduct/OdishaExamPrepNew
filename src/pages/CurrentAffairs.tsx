@@ -167,21 +167,55 @@ export const CurrentAffairsPage: React.FC = () => {
                   >
                     {/* Card Header & Thumbnail */}
                     <div>
-                      {article.image_url && (
-                        <div className="h-44 overflow-hidden relative border-b border-slate-100 bg-slate-100">
-                          <img
-                            src={getSmartRealImage(article.title, article.category, article.image_url)}
-                            alt={article.title}
-                            onError={(e) => {
-                              e.currentTarget.src = getSmartRealImage(article.title, article.category);
-                            }}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                          <div className="absolute top-3 left-3 z-10">
-                            {categoryBadge}
+                      {/* Ultra-Professional Vector Exam Visual Banner */}
+                      <div className={`h-36 relative p-5 flex flex-col justify-between overflow-hidden ${
+                        cat.includes('odisha')
+                          ? 'bg-gradient-to-br from-amber-600 via-amber-700 to-orange-950 text-amber-50'
+                          : cat.includes('world') || cat.includes('international')
+                          ? 'bg-gradient-to-br from-indigo-700 via-purple-800 to-slate-950 text-purple-50'
+                          : 'bg-gradient-to-br from-teal-700 via-emerald-800 to-slate-950 text-teal-50'
+                      }`}>
+                        {/* Background Decorative Graphic Grid Watermark */}
+                        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:12px_12px] pointer-events-none" />
+                        <div className="absolute -right-6 -bottom-6 opacity-15 pointer-events-none transform rotate-12 scale-150">
+                          {cat.includes('odisha') ? (
+                            <Building2 className="w-32 h-32 text-white" />
+                          ) : cat.includes('world') || cat.includes('international') ? (
+                            <Globe className="w-32 h-32 text-white" />
+                          ) : (
+                            <Sparkles className="w-32 h-32 text-white" />
+                          )}
+                        </div>
+
+                        {/* Top Category Badge & Exam Target Tag */}
+                        <div className="flex items-center justify-between z-10">
+                          {categoryBadge}
+                          <span className="text-[10px] font-mono tracking-wider font-extrabold px-2 py-0.5 bg-black/30 backdrop-blur-xs rounded-md text-white/90 border border-white/10 uppercase">
+                            {cat.includes('odisha') ? 'OPSC • OSSC • OSSSC' : cat.includes('world') ? 'GLOBAL DIGEST' : 'SSC • RRB • BANKING'}
+                          </span>
+                        </div>
+
+                        {/* Banner Central Topic Icon & Category Label */}
+                        <div className="z-10 flex items-center gap-2.5">
+                          <div className="p-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xs">
+                            {cat.includes('odisha') ? (
+                              <Building2 className="w-5 h-5 text-amber-200" />
+                            ) : cat.includes('world') || cat.includes('international') ? (
+                              <Globe className="w-5 h-5 text-purple-200" />
+                            ) : (
+                              <Sparkles className="w-5 h-5 text-teal-200" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-[11px] font-black uppercase tracking-widest text-white/80">
+                              {cat.includes('odisha') ? 'Odisha State Exam Affairs' : cat.includes('world') ? 'International & World News' : 'National Current Affairs'}
+                            </p>
+                            <p className="text-[10px] font-semibold text-white/60">
+                              360° Exam Background & MCQs
+                            </p>
                           </div>
                         </div>
-                      )}
+                      </div>
 
                       <div className="p-6 space-y-3">
                         <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">

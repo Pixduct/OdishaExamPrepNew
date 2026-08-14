@@ -1268,3 +1268,28 @@ Last updated: 2026-08-14
 - **Symmetric Cross-Platform Growth**: Every Telegram post drives traffic to YouTube (`@OdishaExamPrep365`), and every YouTube post drives traffic to Telegram (`@OdishaExamPrepOfficial`), while both consistently prioritize the official website (`www.odishaexamprep.in`).
 - **Zero-Truncation Guarantee**: Pre-calculated Telegram character budgets prevent footer link truncation, ensuring valid, clickable markdown/HTML links on every message.
 
+---
+
+### 45. `ExamVisualContextImageEngine` (Workflow 5 — Exam Visual Context Intelligence & Pexels Photo Deduplication Engine)
+
+Files: [`automations/shared/exam_visual_context.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/exam_visual_context.py), [`automations/shared/pexels_image_fetcher.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/pexels_image_fetcher.py), [`automations/shared/wikimedia_fetcher.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/wikimedia_fetcher.py), [`automations/published_image_history.json`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/published_image_history.json)
+Last updated: 2026-08-14
+
+| Property | Standard Pattern / Token |
+| :--- | :--- |
+| **Visual Context Registry** | Master `EXAM_VISUAL_CONTEXT` mapping target exams to visual domains, preferred queries, and avoid keywords |
+| **Dynamic Context Inference** | Auto-derives visual domain for unlisted exams (`AIIMS Nursing` $\rightarrow$ Nursing, `RRB ALP` $\rightarrow$ Technical/Railway, `CTET` $\rightarrow$ Teaching) |
+| **Query Combination** | $\text{Exam Context} + \text{Article Subject} + \text{Real-World Activity}$ (e.g. `"Indian nursing student studying pharmacology textbook"`) |
+| **Negative Filtering** | Hard exclusion of home decor/living room furniture (`furniture`, `living room`, `cabinet`, `sofa`, `couch`) |
+| **100-Point Scoring** | Exam Match (25%), Article Match (30%), Profession Match (20%), Activity Match (15%), Quality (5%), Uniqueness (5%) |
+| **Image Cooldown Window** | 30-blog cooldown filtering + previous blog photo ID hard rejection |
+| **Persistent Tracking** | `published_image_history.json` tracks `blog_id`, `slug`, `exam`, `content_type`, `image_source`, `image_id`, `image_url`, `photographer`, `published_at` |
+| **Secondary Fallback** | Wikimedia Commons API search with open CC BY / Public Domain license verification |
+| **Safe Failure Mode** | `IMAGE_NOT_FOUND` fallback safely publishes article without forcing an irrelevant image |
+
+**Pattern notes:**
+- **Zero Generic Campus Photos**: Articles are mapped to real-world profession domains (Healthcare/Nursing, Engineering/Technical, Competitive Exam Study Desk) before querying Pexels API.
+- **Zero AI Image Generation**: Uses 100% real landscape stock photography from Pexels API and Wikimedia Commons API.
+- **Strict Anti-Repetition**: Persistent tracking in `published_image_history.json` ensures zero duplicate photo IDs across published articles.
+
+

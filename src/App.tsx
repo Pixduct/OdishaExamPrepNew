@@ -30,6 +30,7 @@ import {
   Star,
   Download,
   FileText,
+  Globe,
   Layers,
   Dumbbell,
   BookMarked,
@@ -1419,6 +1420,7 @@ export const Footer = () => {
             </h4>
             <ul className={cn("font-semibold text-slate-400", isMobile ? "space-y-3" : "space-y-4")}>
               {[
+                { to: "/current-affairs", label: "Daily Current Affairs", icon: Globe },
                 { to: "/blog", label: "Official Blog", icon: BookOpen },
                 { to: "/privacy-policy", label: "Privacy Policy", icon: ShieldCheck },
                 { to: "/terms-of-service", label: "Terms", icon: Scale },
@@ -1782,6 +1784,15 @@ export const Navbar = ({
               </a>
             </div>
           )}
+
+          {/* Current Affairs Link */}
+          <Link 
+            to="/current-affairs"
+            className="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest px-3 py-2 rounded-xl text-slate-700 hover:text-brand-600 hover:bg-slate-100/80 transition-all group cursor-pointer"
+          >
+            <Globe className="w-3.5 h-3.5 text-brand-500 group-hover:text-brand-600 transition-colors" />
+            <span>Current Affairs</span>
+          </Link>
 
           {/* Blog Link */}
           <Link 

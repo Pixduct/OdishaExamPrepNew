@@ -74,23 +74,39 @@ export const CurrentAffairsPage: React.FC = () => {
                 />
               </div>
 
-              {/* Date Filter */}
-              <div className="flex items-center gap-2 shrink-0">
-                <Calendar className="w-4 h-4 text-brand-400" />
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={e => setSelectedDate(e.target.value)}
-                  className="px-3 py-2 bg-slate-800/90 border border-slate-700/80 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-brand-400"
-                />
-                {selectedDate && (
-                  <button
-                    onClick={() => setSelectedDate('')}
-                    className="text-xs text-brand-400 hover:underline font-bold"
-                  >
-                    Reset Date
-                  </button>
-                )}
+              {/* Date Filter & Quick Preset Toggle */}
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <button
+                  onClick={() => setSelectedDate('2026-08-14')}
+                  className={`px-3 py-2 rounded-xl text-xs font-black transition-all border ${
+                    selectedDate === '2026-08-14'
+                      ? 'bg-brand-500 text-slate-950 border-brand-400 shadow-sm'
+                      : 'bg-slate-800/90 text-slate-300 border-slate-700/80 hover:bg-slate-700'
+                  }`}
+                >
+                  ⚡ Today's News (Aug 14)
+                </button>
+
+                <button
+                  onClick={() => setSelectedDate('')}
+                  className={`px-3 py-2 rounded-xl text-xs font-black transition-all border ${
+                    selectedDate === ''
+                      ? 'bg-brand-500 text-slate-950 border-brand-400 shadow-sm'
+                      : 'bg-slate-800/90 text-slate-300 border-slate-700/80 hover:bg-slate-700'
+                  }`}
+                >
+                  📚 All Timeline Archives
+                </button>
+
+                <div className="flex items-center gap-1 bg-slate-800/90 border border-slate-700/80 rounded-xl px-2.5 py-1.5 text-xs text-white">
+                  <Calendar className="w-3.5 h-3.5 text-brand-400" />
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={e => setSelectedDate(e.target.value)}
+                    className="bg-transparent text-white focus:outline-none text-xs"
+                  />
+                </div>
               </div>
 
             </div>

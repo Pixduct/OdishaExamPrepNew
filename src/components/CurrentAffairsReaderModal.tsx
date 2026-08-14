@@ -91,19 +91,38 @@ export const CurrentAffairsReaderModal: React.FC<Props> = ({ article, onClose })
           </div>
 
           {/* Student Community & Channel Promotion Hub Banner */}
-          <div className="bg-gradient-to-r from-slate-900 via-brand-950 to-slate-900 rounded-2xl p-5 sm:p-6 text-white border border-brand-500/30 shadow-lg relative overflow-hidden">
-            <div className="absolute -right-8 -bottom-8 w-48 h-48 bg-brand-500/20 rounded-full blur-2xl pointer-events-none" />
+          <div className={`rounded-2xl p-5 sm:p-6 text-white border shadow-lg relative overflow-hidden ${
+            cat.includes('odisha')
+              ? 'bg-gradient-to-r from-amber-700 via-amber-800 to-orange-950 border-amber-500/40'
+              : cat.includes('world') || cat.includes('international')
+              ? 'bg-gradient-to-r from-indigo-800 via-purple-900 to-slate-950 border-purple-500/40'
+              : 'bg-gradient-to-r from-teal-800 via-emerald-900 to-slate-950 border-teal-500/40'
+          }`}>
+            <div className={`absolute -right-8 -bottom-8 w-48 h-48 rounded-full blur-2xl pointer-events-none ${
+              cat.includes('odisha') ? 'bg-amber-500/20' : cat.includes('world') ? 'bg-purple-500/20' : 'bg-teal-500/20'
+            }`} />
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
               <div className="space-y-1 max-w-lg">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-brand-500/20 text-brand-300 border border-brand-400/30 rounded-md text-[11px] font-black uppercase tracking-wider">
-                  <Sparkles className="w-3.5 h-3.5" /> OdishaExamPrep Student Community
+                <div className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-black uppercase tracking-wider border ${
+                  cat.includes('odisha')
+                    ? 'bg-amber-400/20 text-amber-200 border-amber-400/40'
+                    : cat.includes('world') || cat.includes('international')
+                    ? 'bg-purple-400/20 text-purple-200 border-purple-400/40'
+                    : 'bg-teal-400/20 text-teal-200 border-teal-400/40'
+                }`}>
+                  <Sparkles className="w-3.5 h-3.5" />
+                  {cat.includes('odisha') ? 'Odisha State Exam Community' : cat.includes('world') || cat.includes('international') ? 'International Relations Community' : 'National Exam Community'}
                 </div>
                 <h3 className="text-base sm:text-lg font-serif font-black text-white leading-tight">
                   Daily Current Affairs PDFs & Video Class Alerts
                 </h3>
-                <p className="text-xs text-slate-300 font-medium leading-relaxed">
-                  Join 25,000+ OPSC, OSSC CGL & OSSSC aspirants getting instant PDF notes, daily quizzes & free YouTube video classes.
+                <p className="text-xs text-white/80 font-medium leading-relaxed">
+                  {cat.includes('odisha')
+                    ? 'Join 25,000+ OPSC, OSSC CGL & OSSSC aspirants getting instant PDF notes, daily quizzes & free YouTube classes.'
+                    : cat.includes('world') || cat.includes('international')
+                    ? 'Join UPSC & OPSC Civil Services aspirants getting global affairs PDF notes, daily quizzes & free YouTube classes.'
+                    : 'Join SSC CGL, Railway RRB & Banking aspirants getting instant PDF notes, daily quizzes & free YouTube classes.'}
                 </p>
               </div>
 
@@ -130,7 +149,7 @@ export const CurrentAffairsReaderModal: React.FC<Props> = ({ article, onClose })
 
                 <button
                   onClick={() => window.print()}
-                  className="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs rounded-xl border border-slate-700 transition-all flex items-center gap-1.5"
+                  className="px-3 py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-xl border border-white/20 transition-all flex items-center gap-1.5 backdrop-blur-xs"
                   title="Print or Save PDF Note"
                 >
                   <Printer className="w-3.5 h-3.5" /> Print PDF

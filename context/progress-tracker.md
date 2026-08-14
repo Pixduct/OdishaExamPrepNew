@@ -22,7 +22,7 @@ This document is the living execution tracker for **OdishaExamPrep** (`https://w
 | Metric | Value |
 | :--- | :--- |
 | **Project Name** | OdishaExamPrep (OEP) |
-| **Current Version** | `3.9.0` (Automated Channel Engine & Dynamic Future-Proof Branding Active) |
+| **Current Version** | `3.9.1` (Workflow 4 Strategic Engagement Engine & Rotational Student Promo Imprinted) |
 | **Development Stage** | Production / Active Feature Expansion |
 | **Overall Completion Percentage** | **100%** |
 | **Estimated Remaining Work** | 0% (All core features & channel automations operational) |

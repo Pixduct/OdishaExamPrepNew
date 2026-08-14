@@ -1229,3 +1229,24 @@ Last updated: 2026-08-14
 - **Caption HTML Safety**: Telegram captions automatically pass through `clean_html_caption` to auto-balance any truncated `<b>` or `<i>` tags, preventing `Error 400: Unclosed end tag` failures.
 - **Multi-Platform Automation**: Renders high-resolution 1080x1080 PNG slides, publishes to Telegram Public Channel (`@OdishaExamPrepOfficial`), YouTube Community, and reports status to `Odisha Prep Admin Bot`.
 
+---
+
+### 43. `StrategicEngagementEngine` (Workflow 4 — Strategic Engagement Engine & Rotational Student Promo Cards)
+
+File: [`automations/engagement_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/engagement_engine.py) & [`automations/post_to_youtube.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/post_to_youtube.py)
+Last updated: 2026-08-14
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Telegram Poll Mode** | `type="regular"` (Open Text Engagement Poll — 0 green checkmarks, 0 red X's) |
+| **YouTube Community Mode** | `add a text poll` (Text Poll Mode — 4 visible options: Option A, B, C, D — 0 pre-marked correct answers) |
+| **Follow-up Message Bubble** | `sendPhoto` with `student {dayOfWeek}.png` attachment (Rotational Student Promo Photo of the Day) + HTML Strategy Insights |
+| **Student Photo Rotation** | 7-day automated cycle (`student 1.png` on Monday ... `student 7.png` on Sunday) |
+| **Website Link CTA** | `🎯 Practice Daily Mock Tests & Question Banks:` `👉 https://www.odishaexamprep.in/` |
+| **Duplicate Prevention** | `published_history.json` persistent history tracking + DeepSeek quality gate |
+
+**Pattern notes:**
+- **Open Engagement Architecture**: Workflow 4 is strictly designed as an open Text Engagement Poll (`type="regular"` on Telegram and `add a text poll` on YouTube Community) rather than a quiz. Students can vote freely on strategy/concept choices without getting marked wrong.
+- **Direct Photo Attachment Guarantee**: Instead of relying on Telegram link previews (which cache old OpenGraph images), the follow-up strategy insight message sends `sendPhoto` with `student 1.png` - `student 7.png` directly, rotating high-res student cards every day of the week.
+- **YouTube DOM Option Scoping**: YouTube Community option inputs are scoped inside `ytd-backstage-post-dialog-renderer` / `#poll-editor`, dynamically expanding up to 4 option fields (`Option A`, `Option B`, `Option C`, `Option D`) with clean input event dispatching.
+

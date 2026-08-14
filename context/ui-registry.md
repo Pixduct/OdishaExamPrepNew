@@ -146,6 +146,7 @@ import { UniversalMathDiagramEngine } from '../components/UniversalMathDiagramEn
 - **Multi-Chat Session Manager**: OdishaExamPrep AI in `AiMentor.tsx` uses `ChatSession[]` stored in `localStorage` (`oep_ai_chat_sessions`). `+ New Chat` starts a fresh thread while `History 🕒` toggles a slide-over glassmorphic drawer (`bg-white/95 backdrop-blur-xl z-40`) featuring live search, inline title editing, and deletion.
 - **Fullscreen Workspace Mode**: Fullscreen mode in `AiMentor.tsx` MUST use `fixed inset-0 z-[100] w-screen h-dvh rounded-none border-none shadow-none bg-white` container styling combined with browser HTML5 `requestFullscreen()` and an `ESC` key `fullscreenchange` event listener to ensure seamless enter/exit behavior across desktop viewports.
 - **Smart Auto-Toggle Web Search**: The prompt input box in both `AiMentor.tsx` and `StickyAICompanion.tsx` contains an inline, left-aligned `Globe` button (🌐). As the user types, it automatically triggers a web search query (turns brand-blue) when keywords like "today", "current", "news", or "latest" are matched. The user can click it to manually force active/inactive states.
+- **Subject-Matched Vector Banners (`getQuestionBankVectorTheme`)**: Question Bank cards use dynamic 0ms SVG/CSS vector banners (`h-44`) with geometric grid watermarks, subject vector icons (`HeartPulse`, `Laptop`, `MapPin`, `PieChart`, `BookOpen`), and target badges (`HEALTHCARE SPECIAL`, `COMPUTER KNOWLEDGE`, `OPSC • OSSC • OSSSC RELEVANT`) matching the title/category keywords, eliminating external stock photo reliance.
 - **Multimodal Image Attachment Upload**: Uploaded image files (`.png`, `.jpg`, `.jpeg`, `.webp`) convert to base64 Data URLs (`data:image/...`). Express body parser in `server.ts` enforces `limit: '50mb'` to handle high-resolution image uploads cleanly, routing vision payloads `{ type: 'image_url', image_url: { url } }` to `meta/llama-3.2-11b-vision-instruct` with seamless text-model fallback.
 - **ChatGPT-Inspired Attachment Tray**: Attached files render inside a clean horizontal flex strip (`overflow-x-auto gap-2.5 py-1 px-1`). Images display as square 64x64px rounded thumbnail tiles (`w-16 h-16 rounded-xl border border-slate-200/90 shadow-xs object-cover`) with hover-overlay `✕` close buttons. Documents display as horizontal mini-cards (`rounded-xl bg-slate-50 border border-slate-200/80 max-w-[220px]`) with a red PDF badge icon, filename, size, and close icon. Sitting inside the input container, 1, 2, 3, or more files line up side-by-side without vertical stacking or overlapping Quick/Best mode buttons.
 - **ChatGPT-Style Visual Chat Message Attachment Cards**: Attached images in student chat bubbles render as visual square thumbnail cards (`w-18 h-18 sm:w-22 sm:h-22 rounded-xl border border-white/30 object-cover shadow-md hover:scale-105`) instead of raw filename strings (`[ 📎 Gemini Generated Image... ]`). Clicking any image tile opens an interactive full-screen Lightbox Zoom Modal (`fixed inset-0 z-[300] bg-slate-950/90 backdrop-blur-md`).
@@ -1294,7 +1295,7 @@ Last updated: 2026-08-14
 
 ---
 
-### 46. `CurrentAffairsPortal` (Daily 360° Current Affairs Website Portal & Autonomous Engine)
+### 46. `CurrentAffairsPortal` & `CurrentAffairsReaderModal` (Daily 360° Current Affairs Website Portal & Student Community Hub)
 
 Files: [`src/pages/CurrentAffairs.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/CurrentAffairs.tsx), [`src/components/CurrentAffairsReaderModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/CurrentAffairsReaderModal.tsx), [`src/services/currentAffairsService.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/services/currentAffairsService.ts), [`automations/ca_website_publisher.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/ca_website_publisher.py), [`automations/.github/workflows/daily_ca_website.yml`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/.github/workflows/daily_ca_website.yml)
 Last updated: 2026-08-14
@@ -1302,19 +1303,23 @@ Last updated: 2026-08-14
 | Property | Standard Pattern / Token |
 | :--- | :--- |
 | **Page Route** | `/current-affairs` (`ROUTE_PATHS.CURRENT_AFFAIRS`) |
-| **Category Badges** | `Odisha State CA` (amber pill), `India / National CA` (emerald pill), `World / International CA` (purple pill) |
-| **Hero Container** | `bg-gradient-to-br from-slate-900 via-brand-950 to-slate-900 rounded-3xl p-6 sm:p-10 text-white shadow-xl` |
-| **Category Filter Pills** | `bg-slate-900 text-white` (active) / `bg-white text-slate-600 border-slate-200/80` (inactive) |
-| **Reader Modal Backdrop** | `bg-slate-950/70 backdrop-blur-md z-50` |
-| **Reader Modal Window** | `bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl shadow-2xl max-w-4xl` |
-| **Summary Callout Box** | `bg-gradient-to-br from-brand-50/80 to-indigo-50/50 border border-brand-200/80 rounded-2xl` |
+| **Vector Exam Card Banners** | Odisha: `bg-gradient-to-br from-amber-600 via-amber-700 to-orange-950 text-amber-50`<br>National: `bg-gradient-to-br from-teal-700 via-emerald-800 to-slate-950 text-teal-50`<br>World: `bg-gradient-to-br from-indigo-700 via-purple-800 to-slate-950 text-purple-50` |
+| **Category Pills** | `Odisha State` (amber pill), `National` (emerald pill), `World` (purple pill) |
+| **Quick Date Controls** | `⚡ Today's News` (active brand-500) / `📚 All Timeline Archives` (slate button) + inline calendar picker |
+| **Hero Header** | `bg-gradient-to-br from-slate-900 via-brand-950 to-slate-900 rounded-3xl p-6 sm:p-10 text-white shadow-xl` |
+| **Reader Modal Backdrop** | `bg-slate-950/80 fixed inset-0 z-50 overflow-hidden` (0 backdrop-blur for 60FPS scroll performance) |
+| **Reader Modal Window** | `bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl shadow-2xl max-w-4xl max-h-[92vh] transform-gpu` |
+| **Modal Scroll Container** | `overflow-y-auto overscroll-contain p-5 sm:p-8 space-y-6 text-slate-800 scroll-smooth [will-change:transform] [webkit-overflow-scrolling:touch]` |
+| **Student Community Banner** | Dynamically themed by category (`from-amber-700` / `from-teal-800` / `from-indigo-800`) with `Join Telegram` (sky blue), `Watch YouTube` (crimson), `Print PDF` (glassmorphic) buttons |
+| **Summary Callout Box** | `bg-gradient-to-br from-brand-50/80 to-indigo-50/50 border border-brand-200/80 rounded-2xl p-5 sm:p-6 shadow-xs` |
 | **Static GK Callout Card** | `background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-left: 4px solid #2563eb; rounded-2xl` |
 | **Practice MCQ Cards** | `bg-slate-50/80 border border-slate-200/80 rounded-2xl p-5` with instant option highlight & explanation |
 
 **Pattern notes:**
+- **Stock Image-Free Executive Banners**: Card headers render high-contrast vector exam banners with custom geometric grid watermarks, exam target badges (`OPSC • OSSC • OSSSC`, `SSC • RRB • BANKING`, `GLOBAL DIGEST`), and category icons instead of unreliable external stock photos.
+- **60FPS Buttery-Smooth Scroll Architecture**: Modal overlay uses a single dedicated scroll container (`overflow-y-auto overscroll-contain`), hardware-accelerated momentum scrolling (`transform-gpu`, `[webkit-overflow-scrolling:touch]`), and background body scroll locking (`useEffect` with `document.body.style.overflow = 'hidden'`).
+- **Category-Themed Student Community Hub**: The promotional banner inside the modal dynamically switches color theme, badges, and target exam text to match the article category (Odisha State Amber, National Teal, World Indigo).
 - **360° Exam Digest Structure**: Every article contains Headline, 3-Bullet Executive Summary, Full Background Context, Static GK Exam Pointer Box, Key Data Table, and 2 Interactive Practice MCQs.
-- **Dynamic Category Filtration**: Filters by `All`, `Odisha State`, `National / India`, `World / International` with instant date calendar selector and real-time search.
-- **Autonomous Daily Publication**: `automations/ca_website_publisher.py` executes daily at 06:47 PM IST via GitHub Actions (`daily_ca_website.yml`), pushing synthesized digests to Supabase.
 
 
 

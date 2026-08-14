@@ -1,51 +1,56 @@
-# Memory — Mobile View UX Refinement & Authenticated-Only Onboarding & Notification Guards
+# Memory — Channel Automations, Dynamic Branding & Multi-Platform Publishing Engine (v3.9.0)
 
-Last updated: 2026-08-10T20:19:35+05:30
+Last updated: 2026-08-14T14:52:00+05:30
 
 ## What was built
 
-### 1. Mobile-Refined Layout for "Your Weak Topics & Practice Plan" (v3.8.1)
-- **`src/components/TopicConfidenceMatrix.tsx`**: Fixed topic title squishing and truncation on mobile (`<640px`) by building a dedicated 2-line header layout for topic title and status badge (`Needs Practice` / `Strong Area`), separated accuracy metadata sub-rows, and added full-width touch-friendly CTA buttons (`Resume Practice (Q16/100)` / `Start Practice Drill →`).
-- **`src/components/SmartRecommendationCard.tsx`**: Formatted mobile weak area recommendation banner into a clean 2-row layout (`⚡ Weak Area` tag on top, full topic title e.g. `Medical-Surgical Nursing` and accuracy badge below), preventing clipped title text with an ellipsis (`Medical-Sur...`).
+### 1. Daily 5-MCQ Quiz Set Engine (`automations/mcq_engine.py`)
+- **Poll Indexing & Branding**: Indexed daily polls as `[1/5]`, `[2/5]`, `[3/5]`, `[4/5]`, `[5/5]`.
+- **Conversion CTA**: Added explanation CTA bubble driving traffic to `https://www.odishaexamprep.in/`.
+- **7-Day Rotational Student Promo Photos**: Attached **Daily Completion Banner** with 7 rotational student promotion photos (`student 1.png` - `student 7.png`).
+- **Sheet Sync & Schedule**: Runs off-peak at `04:17 UTC` (9:47 AM IST) on GitHub Actions (`daily_mcq.yml`) with Playwright caching under 40 seconds; announced publicly at 10:00 AM IST.
 
-### 2. Mobile-Refined Layout for "Your Personal Records & Milestones" (v3.8.2)
-- **`src/components/PersonalBestCard.tsx`**: Fixed tag pill collisions on mobile tiles by hiding redundant category pills (`Score`, `Accuracy`, `Speed`, `Streak`) on mobile screens (`sm:hidden`), formatted empty states into clean 1-line labels (`No Record Yet` in `text-xs font-bold text-slate-400 font-sans`), formatted streak values (`1 Day Streak`), and eliminated redundant stacked subtext lines, while leaving desktop/laptop layout 100% untouched.
+### 2. Daily Current Affairs Engine (`automations/ca_publisher.py`, `ca_scraper.py`, `ca_formatter.py`, `ca_renderer.py`)
+- **Live Multi-Source Scraper (`ca_scraper.py`)**: Scrapes 6 real-time RSS feeds (PIB Odisha, PIB National, The Hindu, Indian Express, Times of India, BBC World).
+- **Persistent Deduplication (`seen_ca_news.json`)**: 60-day history tracking prevents repeating news items. Automatically committed back to GitHub via Actions (`[skip ci]`). Includes 7 rotating fallback datasets (Mon-Sun).
+- **Dynamic Future-Proof Category Engine (`ca_renderer.py` & `ca_formatter.py`)**:
+  - 100% Emoji-Free Pill Badges (`border-radius: 30px;`) matching user's exact reference screenshot.
+  - Yellow arrow `►` keypoint bullets with bold labels (`<b>Financial Outlay:</b>`).
+  - Dynamic palette wheel: `EXAM` ➔ Red, `SCHEMES` ➔ Indigo, `APPOINTMENTS` ➔ Emerald, `ECONOMY` ➔ Cyan, `SPORTS` ➔ Gold, `SCIENCE` ➔ Purple, `DEFENCE` ➔ Orange + string hash fallback.
+  - 7 Daily Layout Variants (Mon: Hero Grid, Tue: Split Accent, Wed: Halo Glow, Thu: Nordic Frame, Fri: Banner Ribbon, Sat: Blueprint Grid, Sun: Gold Rimmed).
+  - Constant signature blue-indigo logo icon (`#6366F1` ➔ `#3B82F6`) + `Daily CA Quiz & Practice 🚀` right-side footer text.
+- **HTML Caption Parser (`clean_html_caption`)**: Auto-balances truncated `<b>` or `<i>` tags before sending to Telegram, eliminating `Error 400: Unclosed end tag` failures.
+- **Multi-Platform Publishing**: Automatically posts to Telegram Public Channel (`@OdishaExamPrepOfficial`), YouTube Community, and reports status to `Odisha Prep Admin Bot` (`[REDACTED_CHAT_ID]`).
+- **GitHub Schedule**: Runs off-peak at `14:17 UTC` (7:47 PM IST) on GitHub Actions (`daily_ca.yml`); announced publicly at 8:00 PM IST.
 
-### 3. Mobile-Refined Layout for Target Exam Context Bar & Switch Target Modal (v3.8.3)
-- **`src/components/ActiveExamContextBar.tsx`**: Replaced harsh solid black button on mobile target bar with a sleek brand glassmorphic pill button (`[ Switch ⌄ ]` in `bg-brand-50 text-brand-700 border border-brand-200/80`), formatted container into a subtle gradient card (`bg-gradient-to-r from-slate-50/90 via-white to-brand-50/30`).
-- **`src/components/ExamContextSelectorModal.tsx`**: Formatted modal subtitle/search placeholder concise text, fixed badge collision on the "All Exams Combined" card by placing the `AGGREGATED VIEW` badge on a new line on mobile (`flex flex-col sm:flex-row`), and simplified the `Active Target` checkmark indicator in list items to prevent title truncation on mobile.
+### 3. Server OpenGraph Rotational Student Images (`server.ts`)
+- Configured `server.ts` to dynamically serve `student {dayOfWeek}.png` (`student 1.png` to `student 7.png`) for OpenGraph `og:image` tags when sharing on social media.
 
-### 4. Authenticated-Only Onboarding Modals & Notification Permission Guard Engine (v3.8.4)
-- **`src/App.tsx`**, **`src/components/WelcomeVideoModal.tsx`**, **`src/components/OnboardingTour.tsx`**, **`src/components/PushPermissionPrompt.tsx`**:
-  - Enforced strict authentication and per-account completion guards.
-  - Fixed issue where onboarding video guide modals, guided tour overlays, and push notification permission popups were showing to unauthenticated/logged-out visitors browsing the site or in incognito mode.
-  - Guest/incognito visitors browsing the site will **never** see onboarding modals or push prompts.
-  - `WelcomeVideoModal` & `OnboardingTour` trigger **only** for newly registered users upon their first login and permanently persist completion state per account ID (`oep_welcome_video_seen_${userId}` and `oep_tour_completed_${userId}`).
-  - `PushPermissionPrompt` strictly checks user authentication, browser blocked/granted state (`permissionState === 'default'`), and dismissal flags (`oep_push_prompt_dismissed_${userId}`).
-
-### 5. UI Registry Imprinting & GitHub Sync
-- **`context/ui-registry.md`**: Imprinted Section 38 (`TopicConfidenceMatrix`), Section 39 (`PersonalBestCard`), Section 40 (`ActiveExamContextBar` & `ExamContextSelectorModal`), and Section 41 (`WelcomeVideoModal`, `OnboardingTour` & `PushPermissionPrompt`).
-- **`context/progress-tracker.md`**: Updated release log to version `3.8.4`.
-- **GitHub Sync**: All commits up to `a07e9bb` pushed to `origin/main`.
+### 4. Code Base Imprinting & Documentation Sync
+- **`context/ui-registry.md`**: Added Section 42 (`CurrentAffairsGraphicEngine` & `AutomatedMCQEngine`).
+- **`context/architecture.md`**: Added Section `Channel Automations & Social Media Graphic Engine Architecture`.
+- **`context/progress-tracker.md`**: Updated project version to `3.9.0`.
 
 ## Decisions made
-- **Mobile-First Layout Branching**: Used dedicated mobile block structures (`sm:hidden` vs `hidden sm:flex`) so mobile cards have 100% breathing room without altering desktop/laptop aesthetics.
-- **Strict Visitor Privacy & Auth Guarding**: Onboarding popups and notification permission prompts must never disrupt unauthenticated/logged-out guests. Auth state checks (`user && !loading`) and per-user account keys (`${key}_${userId}`) enforce zero popup noise.
-- **Permanent Dismissal Persistence**: Dismissing or completing an onboarding video or notification prompt permanently writes to `localStorage` per user account ID so popups never recur unexpectedly.
+- **Green Zone Off-Peak Execution**: Scheduled GitHub Actions crons 13 minutes early (`04:17 UTC` & `14:17 UTC`) to run during low-traffic GitHub queue windows, avoiding queue delays while announcing public times (10:00 AM IST & 8:00 PM IST).
+- **100% Emoji-Free Pill Badges**: Category badges use clean uppercase text in rounded pills (`border-radius: 30px;`), matching user's exact visual reference.
+- **Dynamic Category Mapping**: AI model (`deepseek-chat`) is empowered to generate any accurate category label (`SPORTS & GAMES`, `DEFENCE & SECURITY`, `SCIENCE & SPACE`, `SCHEMES & POLICIES`), which `ca_renderer.py` maps dynamically to a vibrant color palette.
+- **Persistent Deduplication Storage**: `seen_ca_news.json` is committed back to GitHub after every run so history persists across ephemeral CI runners.
 
 ## Problems solved
-- **Mobile Topic Title Squishing**: Resolved by building a 2-line header layout in `TopicConfidenceMatrix.tsx`.
-- **Personal Best Tile Badge Collision**: Resolved by hiding category pills on mobile screens (`sm:hidden`) in `PersonalBestCard.tsx`.
-- **Target Exam Bar Black Box Contrast**: Replaced with a sleek brand glassmorphic pill button (`[ Switch ⌄ ]`) in `ActiveExamContextBar.tsx`.
-- **Logged-Out Popup Intrusion**: Fixed by wrapping `WelcomeVideoModal`, `OnboardingTour`, and `PushPermissionPrompt` in strict `userId` and `user` auth checks.
+- **Telegram HTML Caption Truncation Error (400)**: Solved via `clean_html_caption` tag-closing parser in `ca_publisher.py`.
+- **YouTube Skipped Warning**: Solved by removing `yt_state.json` from `.gitignore`, adding `YOUTUBE_STORAGE_STATE` to GitHub Secrets, and restoring session state during workflow runs.
+- **Duplicate News Repetition**: Solved by implementing `seen_ca_news.json` deduplication cache in `ca_scraper.py` and `ca_formatter.py`.
+- **Static Category Limitation**: Solved by introducing dynamic keyword-to-color mapping and string hashing palette fallback in `ca_renderer.py`.
 
 ## Current state
 - TypeScript check: **0 compilation errors** (`npx tsc --noEmit` passes cleanly).
-- Git repository: All commits pushed to `origin/main` (latest commit `a07e9bb`).
+- Automation Repositories: All commits pushed to `https://github.com/Pixduct/odisha-mcq-engine.git` and `https://github.com/nareshsamal99384-cpu/OdishaExamPrepWebsite.git`.
+- GitHub Actions Workflows: `daily_mcq.yml` and `daily_ca.yml` passing cleanly with 100% success.
 
 ## Next session starts with
-- Continue monitoring user onboarding flow and mobile UX across all dashboard views.
-- Implement any follow-up feature expansions or visual enhancements requested by the user.
+- Monitor live daily workflow executions for MCQ Polls (10:00 AM IST) and Current Affairs Decks (8:00 PM IST).
+- Proceed with any new features, UI refinements, or administrative tools requested by the user.
 
 ## Open questions
 - None.

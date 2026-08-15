@@ -1638,5 +1638,23 @@ Last updated: August 15, 2026
 **Pattern notes:**
 - **120 FPS Zero Re-Render Loop**: Integrates Lenis smooth scrolling globally while locking pointer events during active inertia scrolling (`is-scrolling`), preventing hover jank and ensuring butter-smooth 120 FPS performance across all viewports.
 
+---
+
+### 29. `BigBrandFooterWatermark`
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L1910-L1916)
+Last updated: August 15, 2026
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Watermark Headline** | `font-serif font-black tracking-tighter text-center whitespace-nowrap leading-none select-none pointer-events-none` |
+| **Responsive Typography Scale** | `text-4xl sm:text-6xl md:text-8xl lg:text-[7.5rem] xl:text-[9.5rem] 2xl:text-[11rem]` |
+| **Metallic Text Gradient** | `bg-gradient-to-b from-slate-700/40 via-slate-800/25 to-transparent bg-clip-text text-transparent` |
+| **Brand Accent Highlight** | `<span className="text-brand-500/35 font-serif font-black">Exam</span>` |
+
+**Pattern notes:**
+- **Executive Brand Stamp**: Placed at the very bottom of the page footer below the copyright line as a high-end luxury editorial watermark statement (`OdishaExamPrep`).
+
+
 
 

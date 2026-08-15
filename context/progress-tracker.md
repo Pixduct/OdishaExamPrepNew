@@ -41,7 +41,7 @@
 - [x] Completely Removed Top EXAM UPDATES Announcement Ticker Bar (`src/App.tsx`)
 - [x] Official Exam Registry Section Dark Mode Dual-Theme Fix: High-contrast luminous blue `FREE TEST →` action buttons, dark mode status badges (`bg-emerald-950/70`, `bg-amber-950/70`, `bg-blue-950/70`), and crisp date typography (`src/App.tsx`)
 - [x] Achievers' Journal "Load More preparation journals" Button Dark Mode Fix: Converted to dual-theme vector button (`bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_#2563EB] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.5)]`) (`src/App.tsx`)
-- [x] Hero Section Overlapping Card Border Fix: Removed bottom section border line (`border-b border-slate-200/50 dark:border-slate-800`) to prevent horizontal line bleeding across overlapping Sign-In & Streak cards (`src/App.tsx`)
+- [x] Consistent Site-Wide Section Divider Lines: Restored `border-b border-slate-200/50 dark:border-slate-800` across all homepage sections with clean positive vertical padding (`py-8 sm:py-10`), eliminating card slicing while maintaining 100% design consistency (`src/App.tsx`)
 
 
 

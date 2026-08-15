@@ -7999,7 +7999,13 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     }
 
     return (
-      <div className="space-y-6 sm:space-y-10">
+      <div className="space-y-6 sm:space-y-10 relative overflow-hidden p-1 sm:p-2 rounded-[2rem] sm:rounded-[2.5rem]">
+        {/* Vector background overlay & ambient radial glows */}
+        <div className="absolute inset-0 grid-bg opacity-40 dark:opacity-25 pointer-events-none rounded-[2rem] sm:rounded-[2.5rem]" />
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-brand-500/10 dark:bg-brand-500/15 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute top-1/2 -right-24 w-96 h-96 bg-purple-500/10 dark:bg-purple-500/15 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute -bottom-24 left-1/3 w-96 h-96 bg-blue-600/10 dark:bg-brand-600/15 rounded-full blur-[100px] pointer-events-none" />
+
         <YouTubeCarousel videoIds={globalVideoIds} />
         
         {isAdmin && (
@@ -8168,7 +8174,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         setActiveTestState({ ...a.metadata, resumeSessionId: a.metadata?.resumeSessionId || a.metadata?.test?.id });
                         setActiveTest(testToResume);
                       }}
-                      className={`snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px] rounded-2xl border border-slate-100/90 sm:border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 hover:border-brand-300/60 dark:hover:border-brand-600/50 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container ${
+                      className={`snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px] rounded-2xl border border-slate-100/90 sm:border-slate-200/60 dark:border-brand-800/50 bg-white dark:bg-gradient-to-br dark:from-[#0d1b3e] dark:via-[#0f2257] dark:to-[#0b1730] hover:border-brand-300/60 dark:hover:border-brand-500/70 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_0_20px_rgba(37,99,235,0.12),0_4px_16px_rgba(0,0,0,0.3)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container relative overflow-hidden ${
                         canResume ? 'cursor-pointer active:scale-[0.98]' : 'opacity-60 cursor-not-allowed'
                       }`}
                     >
@@ -8293,7 +8299,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         if (isTestResult) handleViewResults(a.metadata);
                         else if (a.type === 'question_bank_accessed' && a.metadata?.pdfUrl) window.open(a.metadata.pdfUrl, '_blank');
                       }}
-                      className="snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px] rounded-2xl border border-slate-100/90 sm:border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 hover:border-brand-300/60 dark:hover:border-brand-600/50 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 cursor-pointer group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container active:scale-[0.98]"
+                      className="snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px] rounded-2xl border border-slate-100/90 sm:border-slate-200/60 dark:border-brand-800/50 bg-white dark:bg-gradient-to-br dark:from-[#0d1b3e] dark:via-[#0f2257] dark:to-[#0b1730] hover:border-brand-300/60 dark:hover:border-brand-500/70 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_0_20px_rgba(37,99,235,0.12),0_4px_16px_rgba(0,0,0,0.3)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 cursor-pointer group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container relative overflow-hidden active:scale-[0.98]"
                     >
                       {/* Top row: icon + title + arrow */}
                       <div className="flex items-start gap-3 relative z-10">

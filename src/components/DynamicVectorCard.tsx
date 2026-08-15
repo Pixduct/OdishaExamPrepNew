@@ -4,6 +4,7 @@ interface DynamicVectorCardProps {
   children: React.ReactNode;
   className?: string;
   glowColor?: string;
+  roundedClass?: string;
   onClick?: () => void;
   style?: React.CSSProperties;
 }
@@ -12,6 +13,7 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
   children,
   className = '',
   glowColor = 'rgba(255, 255, 255, 0.14)',
+  roundedClass = 'rounded-[2rem] sm:rounded-[2.5rem]',
   onClick,
   style = {}
 }) => {
@@ -49,7 +51,7 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
         MozOsxFontSmoothing: 'grayscale',
         ...style
       }}
-      className={`relative transition-all duration-300 ${className}`}
+      className={`relative overflow-hidden ${roundedClass} transition-all duration-300 ${className}`}
     >
       {/* Dynamic Cursor Light Reflection Spotlight (Tracks mouse coordinates in 1:1 crisp native resolution) */}
       <div

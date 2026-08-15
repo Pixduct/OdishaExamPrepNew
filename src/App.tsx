@@ -547,7 +547,7 @@ const HistoryView = ({
       >
         {/* Executive Bright Study Vector Header Card */}
         <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)">
-          <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none rounded-3xl sm:rounded-[2.5rem] relative overflow-hidden z-10">
+          <div className="p-6 sm:p-8 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none rounded-3xl sm:rounded-[2.5rem] relative overflow-hidden z-10">
             {/* Radial Grid & Floating Header Watermark */}
             <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none" />
             <History className="absolute -right-8 -bottom-8 w-52 h-52 sm:w-64 sm:h-64 opacity-10 dark:opacity-15 stroke-[1.2] text-brand-600 dark:text-indigo-300 pointer-events-none rotate-12" />
@@ -579,7 +579,7 @@ const HistoryView = ({
                       </button>
                       <button
                         onClick={() => setConfirmClearAll(false)}
-                        className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-black uppercase tracking-wider cursor-pointer border-none"
+                        className="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-black uppercase tracking-wider cursor-pointer border-none"
                       >
                         Cancel
                       </button>
@@ -587,7 +587,7 @@ const HistoryView = ({
                   ) : (
                     <button
                       onClick={() => setConfirmClearAll(true)}
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200/80 text-xs font-black uppercase tracking-wider transition-all cursor-pointer shadow-2xs"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/60 text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-300 border border-slate-200/80 dark:border-slate-700 text-xs font-black uppercase tracking-wider transition-all cursor-pointer shadow-2xs"
                     >
                       <Trash2 className="w-4 h-4" />
                       Clear All History
@@ -650,7 +650,7 @@ const HistoryView = ({
                       <span className="uppercase tracking-wider font-mono">{f.label}</span>
                       <span className={cn(
                         "px-2 py-0.5 rounded-md text-[10px] font-mono font-black min-w-[20px] text-center",
-                        isActive ? "bg-white/25 text-white" : "bg-slate-100 text-slate-500"
+                        isActive ? "bg-white/25 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
                       )}>{count}</span>
                     </span>
                   </motion.button>
@@ -679,13 +679,13 @@ const HistoryView = ({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, transition: { duration: 0.14 } }}
                   transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
-                  className="flex flex-col items-center justify-center py-16 text-center space-y-4 bg-white/80 rounded-3xl border border-slate-200/80 shadow-sm"
+                  className="flex flex-col items-center justify-center py-16 text-center space-y-4 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-brand-50 flex items-center justify-center border border-brand-100">
-                    <History className="w-7 h-7 text-brand-600" />
+                  <div className="w-14 h-14 rounded-2xl bg-brand-50 dark:bg-slate-800 flex items-center justify-center border border-brand-100 dark:border-slate-700">
+                    <History className="w-7 h-7 text-brand-600 dark:text-brand-400" />
                   </div>
-                  <p className="text-base font-bold text-slate-600">No {activeFilter === 'ai_quiz' ? 'AI Quiz' : activeFilter} history recorded yet</p>
-                  <button onClick={() => setActiveFilter('all')} className="text-xs font-black uppercase tracking-wider text-brand-600 hover:text-brand-700 transition-colors cursor-pointer border-none bg-transparent">View All History</button>
+                  <p className="text-base font-bold text-slate-600 dark:text-slate-300">No {activeFilter === 'ai_quiz' ? 'AI Quiz' : activeFilter} history recorded yet</p>
+                  <button onClick={() => setActiveFilter('all')} className="text-xs font-black uppercase tracking-wider text-brand-600 dark:text-brand-400 hover:text-brand-700 transition-colors cursor-pointer border-none bg-transparent">View All History</button>
                 </motion.div>
               ) : (
                 <motion.div
@@ -730,7 +730,7 @@ const HistoryView = ({
                           }}
                           className={cn(
                             "relative overflow-hidden bg-white dark:bg-slate-900 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-6 shadow-lg shadow-slate-200/50 dark:shadow-none border border-slate-200/80 dark:border-slate-800 flex flex-col gap-4 group transition-all duration-300 text-slate-900 dark:text-white",
-                            isInteractive ? "cursor-pointer hover:border-brand-300 dark:hover:border-indigo-500 hover:shadow-xl" : ""
+                            isInteractive ? "cursor-pointer hover:border-brand-300 dark:hover:border-slate-700" : ""
                           )}
                         >
                           {/* Radial Grid & Floating Background Watermark Icon */}
@@ -749,10 +749,10 @@ const HistoryView = ({
                           {/* Confirm delete overlay */}
                           {confirmDeleteId === a.id && (
                             <div
-                              className="absolute inset-0 bg-white/95 backdrop-blur-md flex flex-col items-center justify-center gap-3 px-6 z-30 rounded-[inherit]"
+                              className="absolute inset-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md flex flex-col items-center justify-center gap-3 px-6 z-30 rounded-[inherit]"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <span className="text-sm font-bold text-slate-800 text-center">Delete this activity from history?</span>
+                              <span className="text-sm font-bold text-slate-800 dark:text-white text-center">Delete this activity from history?</span>
                               <div className="flex gap-3">
                                 <button
                                   onClick={async () => { await handleDeleteActivity(a.id); }}
@@ -762,7 +762,7 @@ const HistoryView = ({
                                 </button>
                                 <button
                                   onClick={() => setConfirmDeleteId(null)}
-                                  className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-black uppercase tracking-wider cursor-pointer border-none active:scale-95 transition-all"
+                                  className="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-black uppercase tracking-wider cursor-pointer border-none active:scale-95 transition-all"
                                 >
                                   Cancel
                                 </button>
@@ -775,10 +775,10 @@ const HistoryView = ({
                             <div className="flex items-center gap-3 flex-1 min-w-0">
                               <div className={cn(
                                 "p-3 rounded-2xl shrink-0 shadow-2xs border",
-                                a.type === 'test_incomplete' ? "bg-amber-50 text-amber-600 border-amber-200" :
-                                isAiQuiz ? "bg-purple-50 text-purple-600 border-purple-200" :
-                                isDownloadable ? "bg-blue-50 text-blue-600 border-blue-200" :
-                                "bg-brand-50 text-brand-600 border-brand-200"
+                                a.type === 'test_incomplete' ? "bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-300 border-amber-200 dark:border-amber-800" :
+                                isAiQuiz ? "bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 border-purple-200 dark:border-purple-800" :
+                                isDownloadable ? "bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-300 border-blue-200 dark:border-blue-800" :
+                                "bg-brand-50 dark:bg-indigo-950/60 text-brand-600 dark:text-indigo-300 border-brand-200 dark:border-indigo-800"
                               )}>
                                 {a.type === 'test_incomplete' ? <Clock className="w-5 h-5" /> :
                                  isAiQuiz ? <Sparkles className="w-5 h-5" /> :
@@ -787,26 +787,26 @@ const HistoryView = ({
                               </div>
 
                               <div className="min-w-0 flex-1">
-                                <h4 className="font-extrabold text-slate-900 text-base sm:text-lg leading-snug tracking-tight group-hover:text-brand-600 transition-colors line-clamp-2 uppercase">
+                                <h4 className="font-extrabold text-slate-900 dark:text-white text-base sm:text-lg leading-snug tracking-tight group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors line-clamp-2 uppercase">
                                   {titleText}
                                 </h4>
                                 <div className="flex items-center gap-2 mt-1">
-                                  <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                  <span className="text-xs font-semibold text-slate-500">{compactDate}</span>
+                                  <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{compactDate}</span>
                                 </div>
                               </div>
                             </div>
 
                             <div className="flex items-center gap-2 shrink-0">
                               {(isTestResult || a.type === 'test_incomplete') && (
-                                <div className="px-3 py-1.5 rounded-xl bg-brand-50 text-brand-600 border border-brand-200 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 group-hover:bg-brand-600 group-hover:text-white transition-all shadow-2xs">
+                                <div className="px-3 py-1.5 rounded-xl bg-brand-50 dark:bg-indigo-950/60 text-brand-600 dark:text-indigo-300 border border-brand-200 dark:border-indigo-800 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 group-hover:bg-brand-600 dark:group-hover:bg-brand-500 group-hover:text-white transition-all shadow-2xs">
                                   <span>{a.type === 'test_incomplete' ? 'Resume' : 'View Results'}</span>
                                   {a.type === 'test_incomplete' ? <Play className="w-3.5 h-3.5 fill-current" /> : <ChevronRight className="w-3.5 h-3.5" />}
                                 </div>
                               )}
                               <button
                                 onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(a.id); }}
-                                className="p-2 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all cursor-pointer border-none bg-transparent shrink-0"
+                                className="p-2 rounded-xl text-slate-300 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-all cursor-pointer border-none bg-transparent shrink-0"
                                 title="Delete activity"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -815,25 +815,25 @@ const HistoryView = ({
                           </div>
 
                           {/* Row 2 — Badges & Scores */}
-                          <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+                          <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
                             <div className="flex flex-wrap items-center gap-2">
                               {a.metadata?.testCategory && (
-                                <span className="px-2.5 py-1 bg-brand-50 text-brand-700 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider border border-brand-100">
+                                <span className="px-2.5 py-1 bg-brand-50 dark:bg-indigo-950/60 text-brand-700 dark:text-indigo-300 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider border border-brand-100 dark:border-indigo-800">
                                   {a.metadata.testCategory}
                                 </span>
                               )}
                               {a.metadata?.examName && (
-                                <span className="px-2.5 py-1 bg-slate-100/80 text-slate-600 rounded-lg text-[10px] font-semibold uppercase tracking-wider border border-slate-200/60 max-w-[180px] sm:max-w-[220px] truncate" title={a.metadata.examName}>
+                                <span className="px-2.5 py-1 bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 rounded-lg text-[10px] font-semibold uppercase tracking-wider border border-slate-200/60 dark:border-slate-700/60 max-w-[180px] sm:max-w-[220px] truncate" title={a.metadata.examName}>
                                   {a.metadata.examName}
                                 </span>
                               )}
                               {a.type === 'test_incomplete' && (
-                                <span className="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider border border-amber-200">
+                                <span className="px-2.5 py-1 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider border border-amber-200 dark:border-amber-800">
                                   Incomplete
                                 </span>
                               )}
                               {a.type === 'question_bank_accessed' && (
-                                <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider border border-blue-200 flex items-center gap-1">
+                                <span className="px-2.5 py-1 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider border border-blue-200 dark:border-blue-800 flex items-center gap-1">
                                   <Download className="w-3 h-3" />
                                   {isDownloadable ? 'Download Available' : 'PDF Downloaded'}
                                 </span>
@@ -842,21 +842,21 @@ const HistoryView = ({
 
                             <div className="shrink-0">
                               {a.type === 'test_incomplete' && (
-                                <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 rounded-xl border border-amber-200">
-                                  <Clock className="w-3.5 h-3.5 text-amber-600" />
-                                  <span className="text-xs font-mono font-black text-amber-700">
+                                <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-950/60 rounded-xl border border-amber-200 dark:border-amber-800">
+                                  <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                                  <span className="text-xs font-mono font-black text-amber-700 dark:text-amber-300">
                                     {Object.keys(a.metadata?.answers || {}).length} answered
                                   </span>
                                 </div>
                               )}
                               {((isTestResult || isAiQuiz) && a.score !== undefined && a.score !== null) && (
-                                <div className="flex items-baseline gap-1 px-3.5 py-1 bg-slate-50 rounded-xl border border-slate-200/80">
-                                  <span className="font-mono font-black text-slate-900 text-base sm:text-lg">
+                                <div className="flex items-baseline gap-1 px-3.5 py-1 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200/80 dark:border-slate-700">
+                                  <span className="font-mono font-black text-slate-900 dark:text-white text-base sm:text-lg">
                                     {typeof a.score === 'number' ? Number(a.score.toFixed(2)) : a.score}
                                   </span>
-                                  <span className="text-slate-400 text-xs font-mono font-bold">/{a.totalMarks}</span>
+                                  <span className="text-slate-400 dark:text-slate-400 text-xs font-mono font-bold">/{a.totalMarks}</span>
                                   {!isAiQuiz && (
-                                    <span className="ml-1.5 text-xs font-mono font-black text-brand-600">
+                                    <span className="ml-1.5 text-xs font-mono font-black text-brand-600 dark:text-brand-400">
                                       · {Math.round(a.accuracy || 0)}%
                                     </span>
                                   )}

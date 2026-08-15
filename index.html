@@ -38,6 +38,15 @@
     <meta property="twitter:url" content="https://odishaexamprep.in/" />
     <meta property="twitter:title" content="OdishaExamPrep - Best Platform for Odisha Exam Preparation" />
     <meta property="twitter:description" content="Prepare for OPSC, OSSC, OSSSC and other Odisha government competitive exams. Practice with expert-crafted mock tests, syllabus roadmaps, and real-time rank analytics." />
+    <style>
+      html, body {
+        background-color: #FAF8F5;
+      }
+      html.dark, html.dark body, html[data-theme="dark"], html[data-theme="dark"] body {
+        background-color: #0b0f19 !important;
+        color: #f8fafc;
+      }
+    </style>
     <script>
       // Anti-flicker initial theme setup: Apply dark mode class to HTML before DOM rendering
       (function() {
@@ -47,9 +56,13 @@
           if (saved === 'dark' || (!saved && prefersDark)) {
             document.documentElement.classList.add('dark');
             document.documentElement.setAttribute('data-theme', 'dark');
+            document.documentElement.style.backgroundColor = '#0b0f19';
+            var metaTheme = document.querySelector('meta[name="theme-color"]');
+            if (metaTheme) metaTheme.setAttribute('content', '#0b0f19');
           } else {
             document.documentElement.classList.remove('dark');
             document.documentElement.setAttribute('data-theme', 'light');
+            document.documentElement.style.backgroundColor = '#FAF8F5';
           }
         } catch (e) {}
       })();

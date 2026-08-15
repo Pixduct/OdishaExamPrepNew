@@ -15,7 +15,7 @@ export default function AnimatedRoutes({ children }: { children: React.ReactNode
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAF8F5] dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-300 relative overflow-hidden">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAF8F5] dark:bg-[#0b0f19] text-slate-900 dark:text-white transition-colors duration-300 relative overflow-hidden">
           {/* Ambient background grid and glowing orb */}
           <div className="absolute inset-0 grid-bg opacity-30 dark:opacity-10 pointer-events-none" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-brand-500/5 dark:bg-brand-500/10 rounded-full blur-[80px] pointer-events-none" />

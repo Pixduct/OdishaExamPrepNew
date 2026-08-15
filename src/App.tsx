@@ -1096,7 +1096,7 @@ const ExamRegistrySection = ({
     else if (key === 'opsc' || (item.exam || '').toLowerCase().includes('opsc')) setSelectedExam('opsc-aio');
   };
   return (
-    <section id="exam-registry" className={cn("bg-[#FAF8F5] border-y border-slate-200/50 scroll-mt-24", isMobile ? "py-10" : "py-12 md:py-16")}>
+    <section id="exam-registry" className={cn("bg-transparent border-y border-slate-200/50 dark:border-slate-800 scroll-mt-24", isMobile ? "py-10" : "py-12 md:py-16")}>
       <div className={cn("max-w-6xl mx-auto space-y-6 md:space-y-12", isMobile ? "px-4" : "px-6")}>
         <div className="flex flex-col items-center space-y-4 text-center">
           <span className="section-chip">
@@ -1111,14 +1111,14 @@ const ExamRegistrySection = ({
             Never miss an OPSC, OSSC, or OSSSC deadline. Get real-time updates and <span className="whitespace-nowrap">syllabus-specific</span> tests.
           </p>
           {/* Desktop Version (Optimized) */}
-          <p className="max-w-2xl mx-auto md:text-lg md:leading-relaxed text-slate-600 hidden md:block">
+          <p className="max-w-2xl mx-auto md:text-lg md:leading-relaxed text-slate-600 dark:text-slate-300 hidden md:block">
             Never miss a crucial deadline. Track real-time OPSC, OSSC, and OSSSC updates and instantly unlock <span className="whitespace-nowrap">syllabus-specific</span> test series.
           </p>
         </div>
 
         <div className={cn(
           "flex flex-col items-center w-full",
-          isMobile ? "gap-4" : "gap-6 md:items-stretch md:gap-0 md:bg-white dark:md:bg-slate-900 md:border-2 md:border-slate-900/80 dark:md:border-slate-800 md:rounded-[2.5rem] md:overflow-hidden md:shadow-[6px_6px_0px_rgba(37,99,235,0.15)] dark:md:shadow-none md:divide-y-2 md:divide-slate-100 dark:md:divide-slate-800"
+          isMobile ? "gap-4" : "gap-6 md:items-stretch md:gap-0 md:bg-white dark:md:bg-slate-900/90 md:border-2 md:border-slate-900/80 dark:md:border-slate-700/80 md:rounded-[2.5rem] md:overflow-hidden md:shadow-[6px_6px_0px_rgba(37,99,235,0.15)] dark:md:shadow-[8px_8px_0px_rgba(37,99,235,0.4)] md:divide-y-2 md:divide-slate-100 dark:md:divide-slate-800"
         )}>
           {announcements.map((item, idx) => {
             const statusMeta = EXAM_REGISTRY_STATUS_MAP[item.status] || {
@@ -1316,34 +1316,37 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
                     hidden: { opacity: 0, y: 12 },
                     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 25 } }
                   }}
-                  className={cn(
-                    isMobile 
-                      ? "bg-white border border-slate-250/60 border-l-4 border-l-[#2563EB] rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3 relative active:scale-[0.98] transition-transform duration-200"
-                      : "bg-white border-2 border-slate-900/80 rounded-2xl p-5 sm:p-6 shadow-[4px_4px_0px_rgba(0,0,0,1)] flex items-start justify-between gap-4"
-                  )}
                 >
-                  <div className="space-y-1">
-                    <p className={cn(
-                      "font-black uppercase text-[#2563EB]",
-                      isMobile ? "text-[9px] tracking-wider" : "text-[10px] tracking-wider"
-                    )}>
-                      {topic.label}
-                    </p>
-                    <h3 className={cn(
-                      "font-serif font-extrabold text-slate-900 leading-tight",
-                      isMobile ? "text-[14px]" : "text-base sm:text-lg"
-                    )}>
-                      {topic.name}
-                    </h3>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <span className={cn(
-                      "inline-flex bg-brand-50 text-[#2563EB] rounded font-mono font-black uppercase border border-brand-100",
-                      isMobile ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-xs"
-                    )}>
-                      {topic.count} Sets
-                    </span>
-                  </div>
+                  <DynamicVectorCard
+                    className={cn(
+                      isMobile 
+                        ? "bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 border-l-4 border-l-[#2563EB] rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3 relative active:scale-[0.98] transition-transform duration-200"
+                        : "bg-white dark:bg-slate-900 border-2 border-slate-900/80 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 shadow-[4px_4px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)] flex items-start justify-between gap-4"
+                    )}
+                  >
+                    <div className="space-y-1">
+                      <p className={cn(
+                        "font-black uppercase text-[#2563EB] dark:text-brand-400",
+                        isMobile ? "text-[9px] tracking-wider" : "text-[10px] tracking-wider"
+                      )}>
+                        {topic.label}
+                      </p>
+                      <h3 className={cn(
+                        "font-serif font-extrabold text-slate-900 dark:text-white leading-tight",
+                        isMobile ? "text-[14px]" : "text-base sm:text-lg"
+                      )}>
+                        {topic.name}
+                      </h3>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className={cn(
+                        "inline-flex bg-brand-50 dark:bg-brand-950/60 text-[#2563EB] dark:text-brand-300 rounded font-mono font-black uppercase border border-brand-100 dark:border-brand-800",
+                        isMobile ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-xs"
+                      )}>
+                        {topic.count} Sets
+                      </span>
+                    </div>
+                  </DynamicVectorCard>
                 </motion.div>
               ))}
             </motion.div>
@@ -1538,89 +1541,92 @@ const AchieversJournalSection = () => {
                       hidden: { opacity: 0, y: 12 },
                       show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 25 } }
                     }}
-                    className={cn(
-                      "bg-white flex flex-col justify-between transition-all duration-300",
-                      isMobile
-                        ? "border border-slate-200/60 rounded-2xl p-4 shadow-md shadow-slate-100/80 active:scale-[0.99]"
-                        : "border-2 border-slate-900 rounded-[2rem] p-6 sm:p-8 shadow-[6px_6px_0px_rgba(37,99,235,0.1)] md:hover:shadow-[8px_8px_0px_#2563EB] md:hover:-translate-y-1 md:hover:-translate-x-1"
-                    )}
                   >
-                    <div className={cn(isMobile ? "space-y-3" : "space-y-4")}>
-                      {/* Avatar + Name Row */}
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <img 
-                            src={item.avatar?.includes('dicebear.com') ? item.avatar : item.avatar?.replace(/\.(png|jpg|jpeg)$/i, '.webp')} 
-                            alt={`${item.name} ${item.rank} Achiever Profile`} 
-                            className={cn(
-                              "rounded-full border border-slate-200 object-cover shrink-0",
-                              isMobile ? "w-10 h-10" : "w-12 h-12"
-                            )}
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              if (target.src !== item.avatar) {
-                                target.src = item.avatar;
-                              }
-                            }}
-                          />
-                          <div className="min-w-0">
-                            <h3 className={cn(
-                              "font-serif font-extrabold text-slate-900 leading-snug",
-                              isMobile ? "text-[14px] truncate" : "text-base leading-none"
-                            )}>{item.name}</h3>
-                            <p className="text-[9px] font-black uppercase text-[#2563EB] tracking-widest mt-0.5">{item.rank}</p>
+                    <DynamicVectorCard
+                      className={cn(
+                        "bg-white dark:bg-slate-900 text-slate-900 dark:text-white flex flex-col justify-between transition-all duration-300",
+                        isMobile
+                          ? "border border-slate-200/60 dark:border-slate-800 rounded-2xl p-4 shadow-md shadow-slate-100/80 dark:shadow-none active:scale-[0.99]"
+                          : "border-2 border-slate-900/80 dark:border-slate-700/80 rounded-[2rem] p-6 sm:p-8 shadow-[6px_6px_0px_rgba(37,99,235,0.1)] dark:shadow-[8px_8px_0px_rgba(37,99,235,0.4)] md:hover:-translate-y-1 md:hover:-translate-x-1"
+                      )}
+                    >
+                      <div className={cn(isMobile ? "space-y-3" : "space-y-4")}>
+                        {/* Avatar + Name Row */}
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <img 
+                              src={item.avatar?.includes('dicebear.com') ? item.avatar : item.avatar?.replace(/\.(png|jpg|jpeg)$/i, '.webp')} 
+                              alt={`${item.name} ${item.rank} Achiever Profile`} 
+                              className={cn(
+                                "rounded-full border border-slate-200 dark:border-slate-700 object-cover shrink-0",
+                                isMobile ? "w-10 h-10" : "w-12 h-12"
+                              )}
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                if (target.src !== item.avatar) {
+                                  target.src = item.avatar;
+                                }
+                              }}
+                            />
+                            <div className="min-w-0">
+                              <h3 className={cn(
+                                "font-serif font-extrabold text-slate-900 dark:text-white leading-snug",
+                                isMobile ? "text-[14px] truncate" : "text-base leading-none"
+                              )}>{item.name}</h3>
+                              <p className="text-[9px] font-black uppercase text-[#2563EB] dark:text-brand-400 tracking-widest mt-0.5">{item.rank}</p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-0.5 shrink-0 text-right">
+                            <span className={cn(
+                              "font-mono font-black text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded uppercase tracking-tight",
+                              isMobile ? "text-[9px] px-1.5 py-0.5" : "text-[10px] px-2.5 py-1 rounded-md"
+                            )}>
+                              📍 {item.district}
+                            </span>
+                            <span className="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 flex items-center gap-1 select-none mt-0.5">
+                              <Clock className="w-2.5 h-2.5 text-slate-400 dark:text-slate-500" />
+                              {(() => {
+                                try {
+                                  if (!item.date) return 'Recent';
+                                  const d = new Date(item.date);
+                                  if (isNaN(d.getTime())) return item.date;
+                                  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+                                } catch (e) {
+                                  return item.date || 'Recent';
+                                }
+                              })()}
+                            </span>
                           </div>
                         </div>
-                        <div className="flex flex-col items-end gap-0.5 shrink-0 text-right">
-                          <span className={cn(
-                            "font-mono font-black text-slate-500 bg-slate-50 border border-slate-100 rounded uppercase tracking-tight",
-                            isMobile ? "text-[9px] px-1.5 py-0.5" : "text-[10px] px-2.5 py-1 rounded-md"
-                          )}>
-                            📍 {item.district}
-                          </span>
-                          <span className="text-[9px] font-extrabold text-slate-400 flex items-center gap-1 select-none mt-0.5">
-                            <Clock className="w-2.5 h-2.5 text-slate-400" />
-                            {(() => {
-                              try {
-                                if (!item.date) return 'Recent';
-                                const d = new Date(item.date);
-                                if (isNaN(d.getTime())) return item.date;
-                                return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-                              } catch (e) {
-                                return item.date || 'Recent';
-                              }
-                            })()}
-                          </span>
-                        </div>
+
+                        {/* Quote */}
+                        <p className={cn(
+                          "font-serif leading-relaxed italic text-slate-600 dark:text-slate-300",
+                          isMobile
+                            ? "text-[12.5px] pl-3 border-l-2 border-l-brand-200/70 dark:border-l-brand-700 py-0.5"
+                            : "text-sm"
+                        )}>
+                          "{item.story}"
+                        </p>
                       </div>
 
-                      {/* Quote */}
-                      <p className={cn(
-                        "font-serif leading-relaxed italic text-slate-600",
-                        isMobile
-                          ? "text-[12.5px] pl-3 border-l-2 border-l-brand-200/70 py-0.5"
-                          : "text-sm"
+                      {/* Stats Grid */}
+                      <div className={cn(
+                        "grid grid-cols-3 text-center text-slate-800 dark:text-slate-200 border-t border-slate-100 dark:border-slate-800",
+                        isMobile ? "gap-2 pt-3 mt-3" : "gap-2.5 pt-4 mt-6"
                       )}>
-                        "{item.story}"
-                      </p>
-                    </div>
-
-                    {/* Stats Grid */}
-                    <div className={cn(
-                      "grid grid-cols-3 text-center text-slate-800 border-t border-slate-100",
-                      isMobile ? "gap-2 pt-3 mt-3" : "gap-2.5 pt-4 mt-6"
-                    )}>
-                      {[
-                        { label: 'Score', value: item.stats.score },
-                        { label: 'Accuracy', value: item.stats.accuracy },
-                        { label: 'Timeline', value: item.stats.time },
-                      ].map(stat => (
-                        <div key={stat.label} className={cn("rounded-xl border", isMobile ? "p-2 bg-slate-50/60 border-slate-100/50" : "p-2 bg-slate-50 border-slate-100")}>
-                          <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider mb-0.5">{stat.label}</p>
-                          <p className={cn("font-black text-slate-900", isMobile ? "text-[11px]" : "text-xs")}>{stat.value}</p>
-                        </div>
-                      ))}
-                    </div>
+                        {[
+                          { label: 'Score', value: item.stats.score },
+                          { label: 'Accuracy', value: item.stats.accuracy },
+                          { label: 'Timeline', value: item.stats.time },
+                        ].map(stat => (
+                          <div key={stat.label} className={cn("rounded-xl border", isMobile ? "p-2 bg-slate-50/60 dark:bg-slate-800/60 border-slate-100/50 dark:border-slate-700/50" : "p-2 bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700")}>
+                            <p className="text-[8px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-wider mb-0.5">{stat.label}</p>
+                            <p className={cn("font-black text-slate-900 dark:text-white", isMobile ? "text-[11px]" : "text-xs")}>{stat.value}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </DynamicVectorCard>
                   </motion.div>
                 ))
               )}
@@ -3330,7 +3336,18 @@ const LandingPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-300 relative overflow-hidden">
+      {/* Site-Wide Vector Canvas Grid Overlay */}
+      <div className="fixed inset-0 pointer-events-none z-[0] opacity-40 dark:opacity-[0.05] bg-[radial-gradient(#94a3b8_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:24px_24px]" />
+      
+      {/* Floating Ambient Academic Watermarks */}
+      <div className="fixed top-20 right-10 pointer-events-none z-[0] opacity-[0.03] dark:opacity-[0.04] text-slate-900 dark:text-white animate-spin-slow">
+        <GraduationCap className="w-96 h-96" />
+      </div>
+      <div className="fixed bottom-20 left-10 pointer-events-none z-[0] opacity-[0.03] dark:opacity-[0.04] text-slate-900 dark:text-white">
+        <Compass className="w-80 h-80" />
+      </div>
+
       {/* Global Mouse Tracking Viewport Spotlight & Vector Cursor Follower */}
       <MouseTrackingCanvas />
       <VectorCursorFollower />
@@ -3369,7 +3386,7 @@ const LandingPage = () => {
 
       <Navbar user={user} isAdmin={false} onSignIn={() => setShowAuthModal(true)} />
 
-      <main className="flex-1 bg-[#FAF8F5] dark:bg-transparent transition-colors duration-300">
+      <main className="flex-1 bg-transparent transition-colors duration-300 relative z-10">
         {/* Elite Split-Layout Hero Section */}
         <section className="relative overflow-hidden pt-6 pb-12 lg:pt-10 lg:pb-20 border-b border-slate-200/50 dark:border-slate-800">
           {/* Animated Mesh + Grid Background */}
@@ -3483,7 +3500,9 @@ const LandingPage = () => {
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="hidden lg:block flex-1 relative w-full lg:max-w-[500px]"
               >
-                <InteractiveHeroPreview />
+                <DynamicVectorCard roundedClass="rounded-[2rem]" className="w-full">
+                  <InteractiveHeroPreview />
+                </DynamicVectorCard>
               </motion.div>
             </div>
           </div>
@@ -3505,8 +3524,8 @@ const LandingPage = () => {
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-slate-900 border border-slate-800 text-white rounded-2xl p-3.5 sm:p-5 shadow-xl shadow-slate-950/20 relative overflow-hidden group"
                 >
+                  <DynamicVectorCard className="bg-slate-900 border-2 border-slate-800 text-white p-3.5 sm:p-5 shadow-xl shadow-slate-950/20 relative overflow-hidden group">
                   <div className="absolute -right-16 -top-16 w-48 h-48 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
 
                   {/* Mobile View: Thin 44px 1-line bar */}
@@ -3592,13 +3611,14 @@ const LandingPage = () => {
                       <span>{streak.todayGoalCompleted ? 'View Streak Grid' : `Solve ${remainingQs} More Qs →`}</span>
                     </Button>
                   </div>
+                  </DynamicVectorCard>
                 </motion.div>
               );
             })()}
           </section>
         ) : (
           <section className="relative z-10 -mt-6 sm:-mt-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl sm:rounded-[2.25rem] p-6 sm:p-8 text-slate-900 dark:text-white shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
+            <DynamicVectorCard className="bg-white dark:bg-slate-900 border-2 border-slate-900/80 dark:border-slate-700/80 p-6 sm:p-8 text-slate-900 dark:text-white shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
               <div className="space-y-2 text-center sm:text-left max-w-2xl">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-brand-500/10 dark:bg-brand-500/20 text-brand-600 dark:text-brand-300 border border-brand-500/20 dark:border-brand-500/30">
                   <Sparkles className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
@@ -3621,7 +3641,7 @@ const LandingPage = () => {
                   Sign In / Register Free →
                 </button>
               </div>
-            </div>
+            </DynamicVectorCard>
           </section>
         )}
 

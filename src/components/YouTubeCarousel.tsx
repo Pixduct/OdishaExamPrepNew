@@ -326,10 +326,10 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
                   if (!isDragging.current) setActiveVideo(video.id);
                 }}
                 className={cn(
-                  "relative shrink-0 rounded-2xl overflow-hidden border-2 border-slate-900 dark:border-slate-600 bg-[#FAF8F5] dark:bg-slate-800 group/video transition-all cursor-pointer flex flex-col",
+                  "relative shrink-0 rounded-2xl overflow-hidden border-2 border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-900 group/video transition-all cursor-pointer flex flex-col",
                   isMobile
-                    ? "shadow-[3px_3px_0px_rgba(0,0,0,0.85)] active:shadow-[1px_1px_0px_rgba(0,0,0,0.85)] active:translate-x-[2px] active:translate-y-[2px]"
-                    : "shadow-[4px_4px_0px_rgba(0,0,0,1)] md:hover:-translate-x-0.5 md:hover:-translate-y-0.5 md:hover:shadow-[6px_6px_0px_rgba(37,99,235,0.15)]"
+                    ? "shadow-[3px_3px_0px_rgba(0,0,0,0.85)] dark:shadow-[3px_3px_0px_rgba(37,99,235,0.4)] active:shadow-[1px_1px_0px_rgba(0,0,0,0.85)] active:translate-x-[2px] active:translate-y-[2px]"
+                    : "shadow-[4px_4px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)] md:hover:-translate-x-0.5 md:hover:-translate-y-0.5 md:hover:shadow-[6px_6px_0px_rgba(37,99,235,0.4)]"
                 )}
                 style={{ width: cardWidth }}
               >

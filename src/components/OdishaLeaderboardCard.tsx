@@ -76,26 +76,30 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
   };
 
   return (
-    <div className="bg-white p-3.5 sm:p-7 rounded-2xl sm:rounded-[2.25rem] shadow-xs border border-slate-200/80 space-y-4 sm:space-y-5 mb-6 sm:mb-8 relative overflow-hidden">
+    <div className="p-5 sm:p-7 text-white rounded-[2.2rem] bg-gradient-to-br from-slate-900 via-amber-950/40 to-slate-900 border border-amber-500/20 shadow-xl shadow-amber-950/20 space-y-4 sm:space-y-5 mb-6 sm:mb-8 relative overflow-hidden card-3d-deep">
+      {/* Radial Grid & Floating Watermark Icon */}
+      <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
+      <Trophy className="absolute -right-8 -bottom-8 w-52 h-52 opacity-15 stroke-[1.2] text-amber-300 pointer-events-none transition-transform duration-700 hover:scale-110 hover:rotate-6 z-0" />
+
       {/* Top Header Bar (Inline on Mobile & Desktop) */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="p-1.5 sm:p-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 shrink-0">
-            <Trophy className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
-          </span>
+      <div className="flex items-center justify-between gap-2 relative z-10">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-orange-600 text-slate-950 flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/30 border border-amber-300/60 font-black">
+            <Trophy className="w-6 h-6 stroke-[2.2]" />
+          </div>
           <div className="min-w-0">
-            <h3 className="text-xs sm:text-base font-black text-slate-900 tracking-tight leading-tight block">
+            <h3 className="text-sm sm:text-lg font-black text-white tracking-tight leading-tight block uppercase">
               <span className="sm:hidden">Odisha Rank & Leagues</span>
               <span className="hidden sm:inline truncate">Odisha Rank & Student Leagues</span>
             </h3>
-            <p className="text-slate-500 text-[10px] sm:text-xs font-medium truncate hidden sm:block">
+            <p className="text-white/80 text-[10px] sm:text-xs font-medium truncate hidden sm:block">
               Earn effort XP points, unlock league tiers, and compete among 18,500 Odisha aspirants
             </p>
           </div>
         </div>
 
         {/* Current League Badge (Compact Inline) */}
-        <div className={`inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-extrabold border ${currentLeague.badgeBg} ${currentLeague.badgeBorder} ${currentLeague.badgeTextColor} shrink-0 font-mono shadow-2xs`}>
+        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold border ${currentLeague.badgeBg} ${currentLeague.badgeBorder} ${currentLeague.badgeTextColor} shrink-0 font-mono shadow-2xs backdrop-blur-md`}>
           <span>{currentLeague.badgeIcon}</span>
           <span className="truncate">{currentLeague.name}</span>
         </div>

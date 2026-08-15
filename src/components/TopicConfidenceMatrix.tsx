@@ -46,18 +46,22 @@ export const TopicConfidenceMatrix: React.FC<TopicConfidenceMatrixProps> = ({
   const hasMoreTopics = allTopicConfidence.length > mobileVisibleCount;
 
   return (
-    <div className="bg-white p-4 sm:p-7 rounded-2xl sm:rounded-[2.25rem] shadow-sm border border-slate-200/80 space-y-3 sm:space-y-4">
+    <div className="p-5 sm:p-7 text-white rounded-[2.2rem] bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/20 shadow-xl shadow-indigo-950/20 space-y-4 relative overflow-hidden card-3d-deep">
+      {/* Radial Grid & Floating Watermark Icon */}
+      <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
+      <Zap className="absolute -right-8 -bottom-8 w-52 h-52 opacity-15 stroke-[1.2] text-amber-300 pointer-events-none transition-transform duration-700 hover:scale-110 hover:rotate-6 z-0" />
+
       {/* Top Header Bar */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2.5">
-          <span className="p-1.5 sm:p-2 rounded-xl bg-amber-50 border border-amber-100 text-amber-600 shrink-0">
-            <Zap className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
-          </span>
+      <div className="flex items-center justify-between gap-2 relative z-10">
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-orange-600 text-slate-950 flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/30 border border-amber-300/60 font-black">
+            <Zap className="w-6 h-6 stroke-[2.2]" />
+          </div>
           <div>
-            <h3 className="text-xs sm:text-base font-black text-slate-900 tracking-tight leading-tight">
+            <h3 className="text-sm sm:text-lg font-black text-white tracking-tight leading-tight uppercase">
               Your Weak Topics & Practice Plan
             </h3>
-            <p className="text-slate-500 text-[10px] sm:text-xs font-medium">Focus on your weakest subjects first to quickly raise your exam score</p>
+            <p className="text-white/80 text-[10px] sm:text-xs font-medium">Focus on your weakest subjects first to quickly raise your exam score</p>
           </div>
         </div>
 

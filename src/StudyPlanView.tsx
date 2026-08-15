@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Target, Sparkles, Trophy, Zap, BookOpen } from 'lucide-react';
+import { Target, Sparkles, Trophy, Zap, BookOpen, GraduationCap, Calendar, TrendingUp, Compass, Award } from 'lucide-react';
 import { AIStudyPlanCard } from './components/AIStudyPlanCard';
 import { SmartRecommendationCard } from './components/SmartRecommendationCard';
 import { TopicConfidenceMatrix } from './components/TopicConfidenceMatrix';
@@ -22,36 +22,56 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
   onLaunchTopicPractice
 }) => {
   return (
-    <div className="relative w-full min-h-screen overflow-x-hidden" style={{ isolation: 'isolate' }}>
-      {/* Background ambient gradients */}
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.06),transparent_50%),radial-gradient(circle_at_bottom_right,rgba(99,102,241,0.04),transparent_50%)] -z-10 pointer-events-none" />
+    <div className="relative w-full min-h-screen overflow-x-hidden p-3 sm:p-6 lg:p-8 bg-slate-50/60 rounded-[2.5rem] border border-slate-200/50 shadow-xs" style={{ isolation: 'isolate' }}>
+      {/* Academic Vector Canvas Grid & Floating Watermarks */}
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden rounded-[2.5rem]">
+        {/* Crisp Geometric Dot Grid */}
+        <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40" />
+        
+        {/* Ambient HSL Soft Glows */}
+        <div className="absolute -top-24 left-1/4 w-96 h-96 bg-gradient-to-br from-brand-300/20 via-indigo-200/15 to-transparent rounded-full blur-3xl" />
+        <div className="absolute top-1/3 right-10 w-[30rem] h-[30rem] bg-gradient-to-br from-sky-200/20 via-blue-100/10 to-transparent rounded-full blur-3xl" />
+        <div className="absolute bottom-10 left-10 w-[28rem] h-[28rem] bg-gradient-to-br from-purple-200/15 via-pink-100/10 to-transparent rounded-full blur-3xl" />
+
+        {/* Floating Academic Study Vector Watermarks */}
+        <GraduationCap className="absolute top-16 right-12 w-44 h-44 opacity-[0.04] stroke-[1.2] text-slate-800 rotate-12" />
+        <Calendar className="absolute top-1/3 left-6 w-48 h-48 opacity-[0.035] stroke-[1.2] text-slate-800 -rotate-6" />
+        <Trophy className="absolute top-2/3 right-8 w-44 h-44 opacity-[0.04] stroke-[1.2] text-slate-800 rotate-45" />
+        <TrendingUp className="absolute bottom-40 left-12 w-36 h-36 opacity-[0.035] stroke-[1.2] text-slate-800 -rotate-12" />
+      </div>
 
       <motion.div
         variants={stagger.containerDelay(0.1, 0.1)}
         initial="hidden"
         animate="show"
-        className="w-full mx-auto px-4 sm:px-0 pt-4 sm:pt-6 space-y-6 sm:space-y-8 pb-32 sm:pb-24 relative z-10 max-w-7xl"
+        className="w-full mx-auto space-y-6 sm:space-y-8 pb-32 sm:pb-24 relative z-10 max-w-7xl"
       >
-        {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-xs">
-          <div className="flex items-center gap-3">
-            <span className="p-2 sm:p-3 rounded-2xl bg-brand-50 border border-brand-100 text-brand-650 shrink-0 shadow-xs">
-              <Target className="w-5 h-5 sm:w-6 sm:h-6" />
-            </span>
-            <div>
-              <h2 className="text-base sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
-                Study Plan & Preparation Hub
-              </h2>
-              <p className="text-slate-500 text-xs sm:text-sm font-medium">
-                Your daily time-boxed schedule, weak subject drills, and Odisha student rankings
-              </p>
-            </div>
-          </div>
+        {/* Executive Bright Study Vector Header Card */}
+        <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 border border-slate-200/80 shadow-xl shadow-slate-200/40 rounded-[2.2rem] relative overflow-hidden z-10">
+          {/* Radial Grid & Floating Header Watermark */}
+          <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none" />
+          <Calendar className="absolute -right-8 -bottom-8 w-52 h-52 sm:w-64 sm:h-64 opacity-10 stroke-[1.2] text-brand-600 pointer-events-none rotate-12" />
 
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold text-brand-700 bg-brand-50 border border-brand-200/60 shrink-0 font-mono">
-            <Sparkles className="w-3.5 h-3.5 text-brand-600" />
-            Personalized Hub
-          </span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-brand-500 via-indigo-600 to-brand-700 text-white flex items-center justify-center shrink-0 shadow-lg shadow-brand-500/25 border border-white/40">
+                <Target className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.2]" />
+              </div>
+              <div>
+                <h2 className="text-xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight uppercase">
+                  Study Plan & Preparation Hub
+                </h2>
+                <p className="text-slate-600 text-xs sm:text-sm font-medium mt-1">
+                  Your daily time-boxed schedule, weak subject drills, and Odisha student rankings
+                </p>
+              </div>
+            </div>
+
+            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black text-brand-700 bg-brand-50/80 border border-brand-200/70 shrink-0 font-mono shadow-2xs backdrop-blur-md">
+              <Sparkles className="w-4 h-4 text-brand-600 animate-pulse" />
+              Personalized Hub
+            </span>
+          </div>
         </div>
 
         {/* Hero Context Bar for Multi-Exam Selection */}

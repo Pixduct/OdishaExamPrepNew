@@ -139,32 +139,36 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
   }
 
   return (
-    <div className="bg-white p-3.5 sm:p-7 rounded-2xl sm:rounded-[2.25rem] shadow-xs border border-slate-200/80 space-y-3.5 sm:space-y-4 mb-6 sm:mb-8 relative overflow-hidden">
+    <div className="p-5 sm:p-7 text-white rounded-[2.2rem] bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/20 shadow-xl shadow-indigo-950/20 space-y-4 mb-6 sm:mb-8 relative overflow-hidden card-3d-deep">
+      {/* Radial Grid & Floating Watermark Icon */}
+      <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
+      <Clock className="absolute -right-8 -bottom-8 w-52 h-52 opacity-15 stroke-[1.2] text-indigo-300 pointer-events-none transition-transform duration-700 hover:scale-110 hover:rotate-6 z-0" />
+
       {/* Top Header & Dynamic Personalization Status */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <span className="p-2 rounded-xl bg-brand-50 border border-brand-200 text-brand-600 shrink-0">
-            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
-          </span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 via-blue-600 to-indigo-700 text-white flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/30 border border-indigo-400/40">
+            <Sparkles className="w-5 h-5 stroke-[2.2]" />
+          </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight leading-tight">
+              <h3 className="text-base sm:text-lg font-black text-white tracking-tight leading-tight uppercase">
                 Today's AI Study Plan
               </h3>
               {plan.isPersonalizedFromAttempts ? (
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/60 inline-flex items-center gap-1">
-                  <ShieldCheck className="w-2.5 h-2.5" />
+                <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-400/20 text-emerald-300 border border-emerald-400/40 inline-flex items-center gap-1 backdrop-blur-md">
+                  <ShieldCheck className="w-3 h-3" />
                   <span>Real Data Personalized</span>
                 </span>
               ) : (
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-brand-50 text-brand-700 border border-brand-200/60 inline-flex items-center gap-1">
-                  <Target className="w-2.5 h-2.5" />
+                <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-indigo-400/20 text-indigo-200 border border-indigo-400/40 inline-flex items-center gap-1 backdrop-blur-md">
+                  <Target className="w-3 h-3" />
                   <span>Syllabus Daily Rotation</span>
                 </span>
               )}
             </div>
-            <p className="text-slate-500 text-[10px] sm:text-xs font-medium pt-0.5">
-              Target: <strong className="text-slate-800 font-bold">{plan.targetExamName}</strong>
+            <p className="text-white/80 text-xs font-medium pt-0.5">
+              Target: <strong className="text-white font-bold">{plan.targetExamName}</strong>
               <span className="hidden sm:inline"> • Personalized schedule for maximum score gain</span>
             </p>
           </div>

@@ -33,24 +33,28 @@ export const PersonalBestCard: React.FC<PersonalBestCardProps> = ({ userId }) =>
   const { highestScore, highestAccuracy, fastestSpeed, longestStreak, subjectBests } = bests;
 
   return (
-    <div className="bg-white p-4 sm:p-7 rounded-2xl sm:rounded-[2.25rem] shadow-sm border border-slate-200/80 space-y-4">
+    <div className="p-5 sm:p-7 text-white rounded-[2.2rem] bg-gradient-to-br from-slate-900 via-amber-950/30 to-slate-900 border border-amber-500/20 shadow-xl shadow-amber-950/20 space-y-4 relative overflow-hidden card-3d-deep">
+      {/* Radial Grid & Floating Watermark Icon */}
+      <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
+      <Trophy className="absolute -right-8 -bottom-8 w-52 h-52 opacity-15 stroke-[1.2] text-amber-300 pointer-events-none transition-transform duration-700 hover:scale-110 hover:rotate-6 z-0" />
+
       {/* Top Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <span className="p-1.5 sm:p-2 rounded-xl bg-amber-50 border border-amber-100 text-amber-600 shrink-0">
-            <Trophy className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
-          </span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-500 text-slate-950 flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/30 border border-amber-300/60 font-black">
+            <Trophy className="w-6 h-6 stroke-[2.2]" />
+          </div>
           <div>
-            <h3 className="text-xs sm:text-base font-black text-slate-900 tracking-tight leading-tight">
+            <h3 className="text-sm sm:text-lg font-black text-white tracking-tight leading-tight uppercase">
               Your Personal Records & Milestones
             </h3>
-            <p className="text-slate-500 text-[10px] sm:text-xs font-medium">Track your best achievements and beat your own records</p>
+            <p className="text-white/80 text-[10px] sm:text-xs font-medium">Track your best achievements and beat your own records</p>
           </div>
         </div>
 
         {/* Live Account Data Audit Badge */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 shrink-0">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black text-emerald-300 bg-emerald-400/20 border border-emerald-400/40 shrink-0 backdrop-blur-md">
+          <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>100% Real Account Data</span>
         </div>
       </div>

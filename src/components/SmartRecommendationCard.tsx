@@ -44,11 +44,15 @@ export const SmartRecommendationCard: React.FC<SmartRecommendationCardProps> = (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-slate-900 border border-slate-800 text-white rounded-2xl sm:rounded-[2.2rem] p-4 sm:p-7 shadow-xl shadow-slate-950/20 relative overflow-hidden group mb-6 sm:mb-8"
+      className="p-5 sm:p-7 text-white rounded-[2.2rem] bg-gradient-to-br from-slate-950 via-teal-950 to-slate-900 border border-teal-500/30 shadow-xl shadow-teal-950/20 relative overflow-hidden group mb-6 sm:mb-8 card-3d-deep"
     >
+      {/* Radial Grid & Floating Watermark Icon */}
+      <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
+      <Sparkles className="absolute -right-8 -bottom-8 w-52 h-52 opacity-15 stroke-[1.2] text-teal-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+
       {/* Background Accent Glow */}
-      <div className="absolute -left-20 -top-20 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -left-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Mobile View: Structured 2-Row Compact Banner */}
       <div

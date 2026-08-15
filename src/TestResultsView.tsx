@@ -439,14 +439,14 @@ export default function TestResultsView({ results, onClose }: { results: any, on
         <Clock className="absolute bottom-28 right-[6%] w-36 h-36 text-indigo-600 opacity-[0.08] stroke-[1.2] -rotate-12" />
       </div>
 
-      <header className="h-16 sm:h-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/80 flex items-center justify-between px-4 sm:px-10 sticky top-0 z-[100] w-full mb-4 sm:mb-8 shadow-xs">
+      <header className="h-16 sm:h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between px-4 sm:px-10 sticky top-0 z-[100] w-full mb-4 sm:mb-8 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-600">
+          <div className="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-600 dark:text-brand-400">
             <Award className="w-5 h-5 stroke-[2.2]" />
           </div>
-          <h1 className="font-black text-lg sm:text-2xl text-slate-900 tracking-tight line-clamp-1">Performance Report</h1>
+          <h1 className="font-black text-lg sm:text-2xl text-slate-900 dark:text-white tracking-tight line-clamp-1">Performance Report</h1>
         </div>
-        <Button onClick={onClose} variant="outline" className="px-4 sm:px-6 py-1.5 sm:py-2 text-sm sm:text-base border-2 border-slate-200 rounded-xl font-extrabold hover:bg-slate-100 cursor-pointer">Back</Button>
+        <Button onClick={onClose} variant="outline" className="px-4 sm:px-6 py-1.5 sm:py-2 text-sm sm:text-base border-2 border-slate-200 dark:border-slate-700 rounded-xl font-extrabold hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-white cursor-pointer">Back</Button>
       </header>
 
       {/* Personal Best Celebration Banner */}
@@ -482,9 +482,9 @@ export default function TestResultsView({ results, onClose }: { results: any, on
           
           {/* Overall Score Card */}
           <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)" className="lg:col-span-1">
-            <div className="relative overflow-hidden bg-white/90 lg:bg-white/80 backdrop-blur-xl px-5 py-6 sm:p-8 rounded-2xl sm:rounded-[2.5rem] border border-slate-200/80 shadow-xl shadow-slate-200/50 flex flex-col justify-between group transition-all duration-500 cursor-default min-h-full">
+            <div className="relative overflow-hidden bg-white/90 lg:bg-white/80 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 backdrop-blur-xl px-5 py-6 sm:p-8 rounded-2xl sm:rounded-[2.5rem] border border-slate-200/80 dark:border-indigo-500/20 shadow-xl shadow-slate-200/50 dark:shadow-indigo-950/20 flex flex-col justify-between group transition-all duration-500 cursor-default min-h-full">
               {/* Radial Grid & Floating Background Watermark Icon */}
-              <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-30 pointer-events-none" />
+              <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-30 dark:opacity-[0.04] pointer-events-none" />
               <Award className="absolute -right-8 -bottom-8 w-52 h-52 opacity-10 stroke-[1.2] text-[#2563eb] pointer-events-none rotate-12 transition-transform duration-700 group-hover:scale-110" />
 
               <div className="relative z-10 text-center">

@@ -148,18 +148,18 @@ export const GlobalSearchModal = ({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: -20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-2xl bg-white/80 backdrop-blur-2xl rounded-[2rem] shadow-[0_25px_60px_-15px_rgba(12,35,64,0.18)] border border-white/60 overflow-hidden z-10 flex flex-col max-h-[80vh] premium-shadow"
+          className="relative w-full max-w-2xl bg-white/80 dark:bg-slate-900/95 backdrop-blur-2xl rounded-[2rem] shadow-[0_25px_60px_-15px_rgba(12,35,64,0.18)] dark:shadow-slate-950/80 border border-white/60 dark:border-slate-700/60 overflow-hidden z-10 flex flex-col max-h-[80vh] premium-shadow"
         >
           {/* Top Search Input Bar */}
-          <div className="p-4.5 sm:p-5.5 border-b border-slate-100 flex items-center gap-3.5 bg-white/40 focus-within:bg-white/70 focus-within:shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] transition-all duration-300 focus-within:ring-2 focus-within:ring-brand-500/8 focus-within:border-brand-500/20">
-            <Search className="w-5.5 h-5.5 text-brand-600 shrink-0 filter drop-shadow-[0_0_8px_rgba(37,99,235,0.12)]" />
+          <div className="p-4.5 sm:p-5.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3.5 bg-white/40 dark:bg-slate-800/40 focus-within:bg-white/70 dark:focus-within:bg-slate-800/70 focus-within:shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] transition-all duration-300 focus-within:ring-2 focus-within:ring-brand-500/8 focus-within:border-brand-500/20">
+            <Search className="w-5.5 h-5.5 text-brand-600 dark:text-brand-400 shrink-0 filter drop-shadow-[0_0_8px_rgba(37,99,235,0.12)]" />
             <input
               ref={inputRef}
               type="text"
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="Search exams, mock tests, practice sets, question banks..."
-              className="w-full bg-transparent text-slate-900 placeholder:text-slate-400 font-extrabold text-base sm:text-lg focus:outline-none tracking-tight"
+              className="w-full bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 font-extrabold text-base sm:text-lg focus:outline-none tracking-tight"
             />
             {query ? (
               <button

@@ -483,14 +483,14 @@ const HistoryView = ({
 
   if (!examFilteredActivities || examFilteredActivities.length === 0) {
     return (
-      <div className="relative w-full min-h-screen bg-[#F8FAFC] overflow-x-hidden" style={{ isolation: 'isolate' }}>
-        <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 pointer-events-none z-0" />
-        <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 rounded-full blur-3xl pointer-events-none z-0" />
-        <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 rounded-full blur-3xl pointer-events-none z-0" />
+      <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent overflow-x-hidden" style={{ isolation: 'isolate' }}>
+        <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-[0.03] pointer-events-none z-0" />
+        <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none z-0" />
+        <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none z-0" />
 
         <div className="w-full mx-auto space-y-6 relative z-10">
           <ActiveExamContextBar />
-          <div className="flex flex-col items-center justify-center p-12 sm:p-16 text-center space-y-6 bg-gradient-to-b from-white to-slate-50/40 rounded-[2.5rem] border border-slate-200/40 shadow-xl relative overflow-hidden py-16">
+          <div className="flex flex-col items-center justify-center p-12 sm:p-16 text-center space-y-6 bg-gradient-to-b from-white to-slate-50/40 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 rounded-[2.5rem] border border-slate-200/40 dark:border-indigo-500/20 shadow-xl relative overflow-hidden py-16">
             <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none" />
             <div className="relative flex items-center justify-center w-24 h-24 rounded-full bg-brand-50/50 mb-2">
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-100 to-brand-50 flex items-center justify-center shadow-inner">
@@ -498,9 +498,9 @@ const HistoryView = ({
               </div>
             </div>
             <div className="space-y-2 relative z-10 max-w-sm">
-              <h2 className="text-2xl font-serif font-extrabold bg-gradient-to-r from-brand-700 to-brand-500 bg-clip-text text-transparent">No History For This Exam</h2>
-              <p className="text-slate-500 font-semibold text-xs sm:text-sm leading-relaxed">
-                No test attempts recorded under <strong className="text-slate-800">{activeContext.activeExamName}</strong>. Switch to "All Exams Combined" or take a test for this target exam.
+              <h2 className="text-2xl font-serif font-extrabold bg-gradient-to-r from-brand-700 to-brand-500 dark:from-brand-300 dark:to-indigo-300 bg-clip-text text-transparent">No History For This Exam</h2>
+              <p className="text-slate-500 dark:text-slate-400 font-semibold text-xs sm:text-sm leading-relaxed">
+                No test attempts recorded under <strong className="text-slate-800 dark:text-slate-200">{activeContext.activeExamName}</strong>. Switch to "All Exams Combined" or take a test for this target exam.
               </p>
             </div>
             <button
@@ -525,11 +525,11 @@ const HistoryView = ({
   }
 
   return (
-    <div className="relative w-full min-h-screen bg-[#F8FAFC] overflow-x-hidden" style={{ isolation: 'isolate' }}>
+    <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent overflow-x-hidden" style={{ isolation: 'isolate' }}>
       {/* Full-Screen Edge-to-Edge Academic Vector Canvas Grid & HSL Glows */}
-      <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 pointer-events-none z-0" />
-      <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 rounded-full blur-3xl pointer-events-none z-0" />
-      <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 rounded-full blur-3xl pointer-events-none z-0" />
+      <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-[0.03] pointer-events-none z-0" />
+      <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none z-0" />
+      <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none z-0" />
 
       {/* Floating Viewport Academic Study Vector Watermarks */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-20">
@@ -547,10 +547,10 @@ const HistoryView = ({
       >
         {/* Executive Bright Study Vector Header Card */}
         <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)">
-          <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 border border-slate-200/80 shadow-xl shadow-slate-200/40 rounded-3xl sm:rounded-[2.5rem] relative overflow-hidden z-10">
+          <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 border border-slate-200/80 dark:border-indigo-500/20 shadow-xl shadow-slate-200/40 dark:shadow-indigo-950/20 rounded-3xl sm:rounded-[2.5rem] relative overflow-hidden z-10">
             {/* Radial Grid & Floating Header Watermark */}
-            <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none" />
-            <History className="absolute -right-8 -bottom-8 w-52 h-52 sm:w-64 sm:h-64 opacity-10 stroke-[1.2] text-brand-600 pointer-events-none rotate-12" />
+            <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none" />
+            <History className="absolute -right-8 -bottom-8 w-52 h-52 sm:w-64 sm:h-64 opacity-10 dark:opacity-15 stroke-[1.2] text-brand-600 dark:text-indigo-300 pointer-events-none rotate-12" />
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
               <div className="flex items-center gap-4">
@@ -558,10 +558,10 @@ const HistoryView = ({
                   <History className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h2 className="text-xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight uppercase">
+                  <h2 className="text-xl sm:text-3xl font-black text-slate-950 dark:text-white tracking-tight leading-tight uppercase">
                     Activity History
                   </h2>
-                  <p className="text-slate-600 text-xs sm:text-sm font-medium mt-1">
+                  <p className="text-slate-600 dark:text-slate-300 text-xs sm:text-sm font-medium mt-1">
                     Manage, review, and track all your exam practice sessions
                   </p>
                 </div>
@@ -634,8 +634,8 @@ const HistoryView = ({
                       isActive
                         ? "text-white border-brand-600 shadow-md shadow-brand-500/20"
                         : count === 0
-                          ? "bg-slate-100/60 text-slate-300 border-slate-200/50 cursor-not-allowed"
-                          : "bg-white text-slate-600 border-slate-200/80 hover:border-brand-300 hover:text-brand-600 hover:bg-slate-50 cursor-pointer"
+                          ? "bg-slate-100/60 dark:bg-slate-900/40 text-slate-300 dark:text-slate-600 border-slate-200/50 dark:border-slate-800 cursor-not-allowed"
+                          : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200/80 dark:border-slate-700 hover:border-brand-300 dark:hover:border-indigo-500 hover:text-brand-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/80 cursor-pointer"
                     )}
                   >
                     {isActive && (
@@ -729,12 +729,12 @@ const HistoryView = ({
                             }
                           }}
                           className={cn(
-                            "relative overflow-hidden bg-white/90 lg:bg-white/80 backdrop-blur-xl rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-6 shadow-lg shadow-slate-200/50 border border-slate-200/80 flex flex-col gap-4 group transition-all duration-300",
-                            isInteractive ? "cursor-pointer hover:border-brand-300 hover:shadow-xl hover:shadow-brand-500/10" : ""
+                            "relative overflow-hidden bg-white/90 lg:bg-white/80 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 backdrop-blur-xl rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-6 shadow-lg shadow-slate-200/50 dark:shadow-indigo-950/20 border border-slate-200/80 dark:border-indigo-500/20 flex flex-col gap-4 group transition-all duration-300",
+                            isInteractive ? "cursor-pointer hover:border-brand-300 dark:hover:border-indigo-400 hover:shadow-xl hover:shadow-brand-500/10" : ""
                           )}
                         >
                           {/* Radial Grid & Floating Background Watermark Icon */}
-                          <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none z-0" />
+                          <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
                           
                           {a.type === 'test_incomplete' ? (
                             <Clock className="absolute -right-6 -bottom-6 w-44 h-44 opacity-10 stroke-[1.2] text-amber-500 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
@@ -11433,7 +11433,7 @@ function AppContent() {
             initial={false}
             animate={{ y: isBottomNavVisible ? 0 : '100%' }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="bg-white/92 backdrop-blur-xl border-t border-slate-200/30 sm:glass sm:border-t sm:border-white/25 border-x-transparent border-b-transparent px-2 sm:px-8 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:py-4 flex justify-around items-center fixed bottom-0 left-0 right-0 z-30 rounded-t-[2rem] shadow-[0_-10px_35px_rgba(0,0,0,0.06)]"
+            className="bg-white/92 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/30 dark:border-slate-700/60 sm:glass sm:border-t sm:border-white/25 border-x-transparent border-b-transparent px-2 sm:px-8 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:py-4 flex justify-around items-center fixed bottom-0 left-0 right-0 z-30 rounded-t-[2rem] shadow-[0_-10px_35px_rgba(0,0,0,0.06)] dark:shadow-slate-950/60"
           >
             {/* Hide Navigation Toggle Tab */}
             <button 

@@ -249,13 +249,13 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="absolute right-0 mt-3 w-80 sm:w-96 bg-white/95 backdrop-blur-3xl rounded-3xl shadow-[0_20px_50px_rgba(12,35,64,0.15)] border border-white/60 overflow-hidden z-[150] premium-shadow"
+              className="absolute right-0 mt-3 w-80 sm:w-96 bg-white/95 dark:bg-slate-900/95 backdrop-blur-3xl rounded-3xl shadow-[0_20px_50px_rgba(12,35,64,0.15)] dark:shadow-slate-950/80 border border-white/60 dark:border-slate-700/60 overflow-hidden z-[150] premium-shadow"
             >
               {/* Header Bar */}
-              <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-white/70 backdrop-blur-xs">
+              <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white/70 dark:bg-slate-900/70 backdrop-blur-xs">
                 <div className="flex items-center gap-2">
-                  <Bell className="w-4 h-4 text-brand-600" />
-                  <h4 className="font-extrabold text-sm text-slate-900">Notifications</h4>
+                  <Bell className="w-4 h-4 text-brand-600 dark:text-brand-400" />
+                  <h4 className="font-extrabold text-sm text-slate-900 dark:text-white">Notifications</h4>
                   {unreadCount > 0 && (
                     <span className="px-2 py-0.5 text-[10px] font-black text-rose-700 bg-rose-100 rounded-full border border-rose-200 animate-pulse">
                       {unreadCount}

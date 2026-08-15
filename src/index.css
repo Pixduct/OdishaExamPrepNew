@@ -675,6 +675,19 @@ body[data-premium-blur="true"] #root {
   box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
 }
 
+html.dark .navbar-glass,
+html[data-theme="dark"] .navbar-glass {
+  background: rgba(11, 15, 25, 0.9);
+  border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+}
+
+html.dark .navbar-scrolled,
+html[data-theme="dark"] .navbar-scrolled {
+  background: rgba(11, 15, 25, 0.96);
+  border-bottom: 1px solid rgba(51, 65, 85, 0.8);
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.6);
+}
+
 .nav-link {
   position: relative;
   font-weight: 600;

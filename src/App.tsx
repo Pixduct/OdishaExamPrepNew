@@ -2157,35 +2157,35 @@ export const Navbar = ({
           {/* Current Affairs Link */}
           <Link 
             to="/current-affairs"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 hover:text-amber-800 border border-amber-500/30 text-xs font-black uppercase tracking-wider transition-all group shrink-0 cursor-pointer shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 dark:border-amber-500/40 text-xs font-black uppercase tracking-wider transition-all group shrink-0 cursor-pointer shadow-2xs"
             title="Daily 360° Current Affairs"
           >
-            <Globe className="w-3.5 h-3.5 text-amber-600 group-hover:rotate-12 transition-transform" />
+            <Globe className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 group-hover:rotate-12 transition-transform" />
             <span>Current Affairs</span>
           </Link>
 
           {/* Blog Link */}
           <Link 
             to="/blog"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 hover:bg-brand-50 text-slate-700 hover:text-brand-600 border border-slate-200/80 text-xs font-black uppercase tracking-wider transition-all group shrink-0 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-brand-600 dark:hover:text-white border border-slate-200/80 dark:border-slate-700 text-xs font-black uppercase tracking-wider transition-all group shrink-0 cursor-pointer"
             title="Official Educational Blog"
           >
-            <FileText className="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-600 transition-colors" />
+            <FileText className="w-3.5 h-3.5 text-slate-400 dark:text-slate-400 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors" />
             <span>Blog</span>
           </Link>
           
-          <div className="flex items-center gap-2.5 sm:gap-3 pl-2 sm:pl-3 border-l border-slate-200">
+          <div className="flex items-center gap-2.5 sm:gap-3 pl-2 sm:pl-3 border-l border-slate-200 dark:border-slate-700">
             <ThemeToggle />
 
             <button
               type="button"
               onClick={() => setIsSearchModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800 hover:bg-brand-50 text-slate-600 dark:text-slate-300 hover:text-brand-600 transition-all text-xs font-black cursor-pointer border border-slate-200/80 dark:border-slate-700 group shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-white transition-all text-xs font-black cursor-pointer border border-slate-200/80 dark:border-slate-700 group shrink-0"
               title="Search exams, tests, practice sets (Ctrl+K)"
             >
-              <Search className="w-3.5 h-3.5 text-brand-600 group-hover:scale-110 transition-transform" />
-              <span className="hidden md:inline text-slate-700 group-hover:text-brand-600">Search</span>
-              <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[9px] font-black text-slate-400 bg-white rounded border border-slate-200 shadow-2xs">⌘K</kbd>
+              <Search className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400 group-hover:scale-110 transition-transform" />
+              <span className="hidden md:inline text-slate-700 dark:text-slate-200 group-hover:text-brand-600 dark:group-hover:text-brand-400">Search</span>
+              <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[9px] font-black text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700 shadow-2xs">⌘K</kbd>
             </button>
 
             <NotificationCenter
@@ -2231,13 +2231,13 @@ export const Navbar = ({
             {user ? (
                <div className="relative">
                   <div 
-                    className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-1.5 pr-3 rounded-full transition-colors border border-transparent hover:border-slate-200"
+                    className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 p-1.5 pr-3 rounded-full transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
                     onClick={() => setShowProfileDropdown(!showProfileDropdown)}
                   >
                     <UserAvatar profile={profile} user={user} className="w-9 h-9" />
                     <div className="hidden sm:block text-left">
-                      <p className="text-xs font-black text-slate-700 leading-none mb-0.5">{profile?.displayName || user?.email?.split('@')[0]}</p>
-                      <p className="text-[10px] font-bold text-slate-400 leading-none">{user?.email}</p>
+                      <p className="text-xs font-black text-slate-700 dark:text-white leading-none mb-0.5">{profile?.displayName || user?.email?.split('@')[0]}</p>
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-400 leading-none">{user?.email}</p>
                     </div>
                     <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showProfileDropdown ? 'rotate-180' : ''}`} />
                   </div>
@@ -4850,9 +4850,9 @@ const PurchasesView = ({ user, profile, exams, mockTests, testSeries, dynamicQue
             <button
               onClick={handleRefresh}
               disabled={refreshing}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 hover:border-slate-300 font-bold rounded-xl text-xs transition-[background-color,border-color,transform,box-shadow] shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed select-none"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-700 font-bold rounded-xl text-xs transition-[background-color,border-color,transform,box-shadow] shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed select-none"
             >
-              <RotateCw className={cn("w-3.5 h-3.5 text-brand-600", refreshing && "animate-spin")} />
+              <RotateCw className={cn("w-3.5 h-3.5 text-brand-600 dark:text-brand-400", refreshing && "animate-spin")} />
               {refreshing ? 'Syncing Library...' : 'Sync Library'}
             </button>
           </div>
@@ -4883,18 +4883,18 @@ const PurchasesView = ({ user, profile, exams, mockTests, testSeries, dynamicQue
         <motion.div 
           initial={{ opacity: 0, y: 20, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          className="premium-glass-card p-8 md:p-16 rounded-2xl md:rounded-[2.5rem] text-center max-w-2xl mx-auto mt-6 md:mt-12 relative overflow-hidden"
+          className="premium-glass-card dark:bg-slate-900/90 dark:border-slate-800 p-8 md:p-16 rounded-2xl md:rounded-[2.5rem] text-center max-w-2xl mx-auto mt-6 md:mt-12 relative overflow-hidden"
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/10 blur-[80px] rounded-full pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 blur-[80px] rounded-full pointer-events-none" />
           
           <motion.div 
-            className="w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-slate-100 to-slate-200/50 rounded-2xl md:rounded-3xl flex items-center justify-center mx-auto mb-6 md:mb-8 shadow-inner inner-glow animate-float-gentle"
+            className="w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-slate-100 to-slate-200/50 dark:from-slate-800 dark:to-slate-900 rounded-2xl md:rounded-3xl flex items-center justify-center mx-auto mb-6 md:mb-8 shadow-inner inner-glow animate-float-gentle"
           >
-            <Lock className="w-8 h-8 md:w-10 md:h-10 text-slate-400" />
+            <Lock className="w-8 h-8 md:w-10 md:h-10 text-slate-400 dark:text-slate-500" />
           </motion.div>
-          <h2 className="text-2xl md:text-3xl font-black text-slate-900 mb-3 md:mb-4 tracking-tight">Your Library is Empty</h2>
-          <p className="text-slate-500 mb-6 md:mb-10 max-w-md mx-auto text-sm md:text-lg leading-relaxed">
+          <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mb-3 md:mb-4 tracking-tight">Your Library is Empty</h2>
+          <p className="text-slate-500 dark:text-slate-400 mb-6 md:mb-10 max-w-md mx-auto text-sm md:text-lg leading-relaxed">
             You haven't unlocked any premium content yet. Explore our comprehensive exams and test series to start your journey today.
           </p>
           <button
@@ -8997,9 +8997,9 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         <div className="w-full mx-auto space-y-6 sm:space-y-8 pb-32 sm:pb-24 relative z-10">
 
         {/* Executive Bright Study Vector Header Card */}
-        <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 border border-slate-200/80 shadow-xl shadow-slate-200/40 rounded-[2.2rem] relative overflow-hidden z-10 mb-8 sm:mb-10">
+        <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 border border-slate-200/80 dark:border-indigo-500/20 shadow-xl shadow-slate-200/40 dark:shadow-indigo-950/20 rounded-[2.2rem] relative overflow-hidden z-10 mb-8 sm:mb-10">
           {/* Radial Grid & Floating Header Watermark */}
-          <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none" />
           <GraduationCap className="absolute -right-8 -bottom-8 w-52 h-52 sm:w-64 sm:h-64 opacity-10 stroke-[1.2] text-brand-600 pointer-events-none rotate-12" />
 
           <div className="flex flex-col gap-6 relative z-10">
@@ -9012,16 +9012,16 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     scrollToElement('exams', { block: 'start', delay: 100 }); 
                   }
                 }} 
-                className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-brand-300 hover:bg-brand-50 text-slate-700 hover:text-brand-600 transition-all shrink-0 flex items-center justify-center p-0"
+                className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:border-brand-300 dark:hover:border-slate-600 hover:bg-brand-50 dark:hover:bg-slate-700 text-slate-700 dark:text-white transition-all shrink-0 flex items-center justify-center p-0"
               >
-                <ChevronRight className="w-6 h-6 rotate-180 text-brand-600" />
+                <ChevronRight className="w-6 h-6 rotate-180 text-brand-600 dark:text-brand-400" />
               </Button>
               <div className="min-w-0 flex-1">
                 {/* Desktop Title with inline badge */}
-                <h1 className="hidden sm:flex flex-wrap items-center gap-3 text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight mb-1.5">
+                <h1 className="hidden sm:flex flex-wrap items-center gap-3 text-2xl sm:text-3xl font-black text-slate-950 dark:text-white tracking-tight leading-tight mb-1.5">
                   {currentExam?.name}
                   {hasAccessTo(`exam_bundle_${selectedExam}`) && (
-                    <span className="px-3.5 py-1 bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 text-[10px] font-black rounded-lg uppercase tracking-wider inline-flex items-center gap-1.5 h-6">
+                    <span className="px-3.5 py-1 bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[10px] font-black rounded-lg uppercase tracking-wider inline-flex items-center gap-1.5 h-6">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                       Premium Unlocked
                     </span>
@@ -9030,7 +9030,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                 
                 {/* Mobile Title with stacked badge */}
                 <div className="sm:hidden flex flex-col">
-                  <h1 className="text-xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                  <h1 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
                     {currentExam?.name}
                   </h1>
                   {hasAccessTo(`exam_bundle_${selectedExam}`) && (
@@ -9046,7 +9046,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                 <div className="max-w-3xl mt-1.5 sm:mt-0">
                   <p 
                     className={cn(
-                      "text-slate-600 font-medium text-xs sm:text-base leading-relaxed transition-all duration-300",
+                      "text-slate-600 dark:text-slate-300 font-medium text-xs sm:text-base leading-relaxed transition-all duration-300",
                       !isDescExpanded && "line-clamp-2"
                     )}
                   >
@@ -9068,17 +9068,17 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             <motion.div 
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="hidden sm:flex flex-wrap items-center gap-2 sm:gap-3 pt-1 border-t border-slate-200/60"
+              className="hidden sm:flex flex-wrap items-center gap-2 sm:gap-3 pt-1 border-t border-slate-200/60 dark:border-slate-700/60"
             >
-              <Button variant="outline" className="rounded-full bg-white/90 border-slate-200/80 shadow-xs text-slate-700 font-bold hover:bg-brand-50 hover:text-brand-700 hover:border-brand-200 h-9.5 px-4.5 text-xs sm:text-sm transition-all" onClick={() => scrollToElement('question-bank-section', { block: 'start' })}>
+              <Button variant="outline" className="rounded-full bg-white/90 dark:bg-slate-800/90 border-slate-200/80 dark:border-slate-700 shadow-xs text-slate-700 dark:text-slate-200 font-bold hover:bg-brand-50 dark:hover:bg-slate-700 hover:text-brand-700 dark:hover:text-white hover:border-brand-200 h-9.5 px-4.5 text-xs sm:text-sm transition-all" onClick={() => scrollToElement('question-bank-section', { block: 'start' })}>
                 <Layers className="w-4 h-4 mr-2 text-brand-500" />
                 Question Bank
               </Button>
-              <Button variant="outline" className="rounded-full bg-white/90 border-slate-200/80 shadow-xs text-slate-700 font-bold hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 h-9.5 px-4.5 text-xs sm:text-sm transition-all" onClick={() => scrollToElement('practice-mode-section', { block: 'start' })}>
+              <Button variant="outline" className="rounded-full bg-white/90 dark:bg-slate-800/90 border-slate-200/80 dark:border-slate-700 shadow-xs text-slate-700 dark:text-slate-200 font-bold hover:bg-indigo-50 dark:hover:bg-slate-700 hover:text-indigo-700 dark:hover:text-white hover:border-indigo-200 h-9.5 px-4.5 text-xs sm:text-sm transition-all" onClick={() => scrollToElement('practice-mode-section', { block: 'start' })}>
                 <Dumbbell className="w-4 h-4 mr-2 text-indigo-500" />
                 Practice Tests
               </Button>
-              <Button variant="outline" className="rounded-full bg-white/90 border-slate-200/80 shadow-xs text-slate-700 font-bold hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200 h-9.5 px-4.5 text-xs sm:text-sm transition-all" onClick={() => scrollToElement('test-series', { block: 'start' })}>
+              <Button variant="outline" className="rounded-full bg-white/90 dark:bg-slate-800/90 border-slate-200/80 dark:border-slate-700 shadow-xs text-slate-700 dark:text-slate-200 font-bold hover:bg-amber-50 dark:hover:bg-slate-700 hover:text-amber-700 dark:hover:text-white hover:border-amber-200 h-9.5 px-4.5 text-xs sm:text-sm transition-all" onClick={() => scrollToElement('test-series', { block: 'start' })}>
                 <Award className="w-4 h-4 mr-2 text-amber-500" />
                 Mock Tests
               </Button>
@@ -9782,12 +9782,12 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       {(!isMobile || mobileExamTab === 'practice') && (
         <section id="practice-mode-section" className="space-y-6 scroll-mt-24">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center border border-indigo-100">
-              <Dumbbell className="w-5 h-5 text-indigo-600" />
+            <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/60 rounded-xl flex items-center justify-center border border-indigo-100 dark:border-indigo-800">
+              <Dumbbell className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
             </div>
             <div>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Step 1: Practice Tests</h2>
-              <p className="text-slate-500 font-medium text-xs sm:text-sm mt-0.5">Master topics with instant answers, explanations & interactive drills.</p>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Step 1: Practice Tests</h2>
+              <p className="text-slate-500 dark:text-slate-400 font-medium text-xs sm:text-sm mt-0.5">Master topics with instant answers, explanations & interactive drills.</p>
             </div>
           </div>
 
@@ -10026,18 +10026,18 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       {(!isMobile || mobileExamTab === 'mock') && (
         <section id="test-series" className="space-y-10 scroll-mt-24">
         <div className="space-y-3">
-          <div className="hidden sm:flex items-center gap-2 text-brand-600 font-black text-[10px] uppercase tracking-[0.2em] bg-brand-50 w-fit px-3 py-1 rounded-full border border-brand-100">
+          <div className="hidden sm:flex items-center gap-2 text-brand-600 dark:text-indigo-300 font-black text-[10px] uppercase tracking-[0.2em] bg-brand-50 dark:bg-indigo-950/60 w-fit px-3 py-1 rounded-full border border-brand-100 dark:border-indigo-800">
             <Award className="w-3 h-3" />
             Test Series
           </div>
           <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4 sm:gap-6">
             <div>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-955 tracking-tight">Step 2: Mock Tests</h2>
-              <p className="text-slate-500 text-sm sm:text-lg font-medium mt-1 sm:mt-2 leading-relaxed">Simulate the real exam environment with our expert-curated test series.</p>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-955 dark:text-white tracking-tight">Step 2: Mock Tests</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-lg font-medium mt-1 sm:mt-2 leading-relaxed">Simulate the real exam environment with our expert-curated test series.</p>
             </div>
-            <div className="flex items-center gap-2.5 sm:gap-3 bg-white px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full border border-slate-200/50 shadow-sm w-fit text-xs sm:text-sm">
-              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-500" />
-              <span className="font-bold text-slate-700">
+            <div className="flex items-center gap-2.5 sm:gap-3 bg-white dark:bg-slate-900 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full border border-slate-200/50 dark:border-slate-800 shadow-sm w-fit text-xs sm:text-sm">
+              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-500 dark:text-brand-400" />
+              <span className="font-bold text-slate-700 dark:text-slate-300">
                 Updated for {new Date().getFullYear()} Exam Pattern
               </span>
             </div>
@@ -10350,14 +10350,14 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
       {/* Section 3: Reference Library & Downloadable Question Banks */}
       {(!isMobile || mobileExamTab === 'learn') && (
-        <section id="question-bank-section" className="space-y-6 scroll-mt-24 pt-6 border-t border-slate-200/60">
+        <section id="question-bank-section" className="space-y-6 scroll-mt-24 pt-6 border-t border-slate-200/60 dark:border-slate-800">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center border border-slate-200/50">
-              <BookMarked className="w-5 h-5 text-slate-700" />
+            <div className="w-10 h-10 bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center border border-slate-200/50 dark:border-slate-800">
+              <BookMarked className="w-5 h-5 text-slate-700 dark:text-slate-300" />
             </div>
             <div>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Step 3: Reference Library & Question Banks</h2>
-              <p className="text-slate-500 font-medium text-xs sm:text-sm mt-0.5">Downloadable PDF question modules, revision sets, and past paper collections.</p>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Step 3: Reference Library & Question Banks</h2>
+              <p className="text-slate-500 dark:text-slate-400 font-medium text-xs sm:text-sm mt-0.5">Downloadable PDF question modules, revision sets, and past paper collections.</p>
             </div>
           </div>
           
@@ -10862,7 +10862,7 @@ const ExamDetailPage = () => {
         initial={false}
         animate={{ y: isBottomNavVisible ? 0 : '100%' }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="bg-white/92 backdrop-blur-xl border-t border-slate-200/30 sm:glass sm:border-t sm:border-white/25 border-x-transparent border-b-transparent px-2 sm:px-8 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:py-4 flex justify-around items-center fixed bottom-0 left-0 right-0 z-30 rounded-t-[2rem] shadow-[0_-10px_35px_rgba(0,0,0,0.06)]"
+        className="bg-white/92 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/30 dark:border-slate-700/60 sm:glass sm:border-t sm:border-white/25 border-x-transparent border-b-transparent px-2 sm:px-8 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:py-4 flex justify-around items-center fixed bottom-0 left-0 right-0 z-30 rounded-t-[2rem] shadow-[0_-10px_35px_rgba(0,0,0,0.06)] dark:shadow-slate-950/60"
       >
         <button 
           type="button"
@@ -11412,7 +11412,7 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-[#F8FAFC] font-sans text-slate-900">
+    <div className="min-h-screen min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0b0f19] font-sans text-slate-900 dark:text-slate-100">
       {isAIOctive && (
         <div className="flex flex-col min-h-screen min-h-[100dvh]">
           <Navbar user={user} isAdmin={isAdmin} onHomeClick={handleHomeClick} />
@@ -11612,7 +11612,7 @@ function AppContent() {
                   initial={false}
                   animate={{ y: isBottomNavVisible ? 0 : '100%' }}
                   transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  className="bg-white/92 backdrop-blur-xl border-t border-slate-200/30 sm:glass sm:border-t sm:border-white/25 border-x-transparent border-b-transparent px-2 sm:px-8 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:py-4 flex justify-around items-center fixed bottom-0 left-0 right-0 z-30 rounded-t-[2rem] shadow-[0_-10px_35px_rgba(0,0,0,0.06)]"
+                  className="bg-white/92 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/30 dark:border-slate-700/60 sm:glass sm:border-t sm:border-white/25 border-x-transparent border-b-transparent px-2 sm:px-8 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:py-4 flex justify-around items-center fixed bottom-0 left-0 right-0 z-30 rounded-t-[2rem] shadow-[0_-10px_35px_rgba(0,0,0,0.06)] dark:shadow-slate-950/60"
                 >
                   {/* Hide Navigation Toggle Tab */}
                   <button 

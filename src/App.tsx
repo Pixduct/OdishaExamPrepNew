@@ -4139,7 +4139,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
                     <span className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-100 dark:border-slate-700">Practice Set</span>
                   )}
                   {suffix && (
-                    <span className="text-[10px] font-black text-brand-700 uppercase tracking-widest bg-brand-50 px-2 py-0.5 rounded border border-brand-100/60 shadow-2xs">Set {suffix}</span>
+                    <span className="text-[10px] font-black text-brand-700 dark:text-indigo-300 uppercase tracking-widest bg-brand-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded border border-brand-100/60 dark:border-indigo-800 shadow-2xs">Set {suffix}</span>
                   )}
                 </div>
               </div>
@@ -4386,19 +4386,19 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
               <div className="flex items-center gap-1.5 flex-wrap">
                 <h4 className="font-extrabold text-[12.5px] sm:text-[13.5px] text-slate-900 dark:text-white tracking-tight leading-snug line-clamp-1 sm:line-clamp-2 uppercase pr-1" title={test.title}>{mainTitle}</h4>
                 {suffix && (
-                  <span className="px-1.5 py-0.5 bg-brand-50 text-brand-700 text-[8.5px] font-black rounded border border-brand-100/60 uppercase tracking-wider shrink-0">Set {suffix}</span>
+                  <span className="px-1.5 py-0.5 bg-brand-50 dark:bg-indigo-950/60 text-brand-700 dark:text-indigo-300 text-[8.5px] font-black rounded border border-brand-100/60 dark:border-indigo-800 uppercase tracking-wider shrink-0">Set {suffix}</span>
                 )}
                 {isScheduledUpcoming ? (
-                  <span className="px-1.5 py-0.5 bg-amber-100 text-amber-800 text-[8.5px] font-black rounded border border-amber-200 uppercase tracking-wider shrink-0">📅 UPCOMING</span>
+                  <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[8.5px] font-black rounded border border-amber-200 dark:border-amber-800 uppercase tracking-wider shrink-0">📅 UPCOMING</span>
                 ) : isCompleted ? (
-                  <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 text-[8.5px] font-black rounded border border-emerald-100 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5" /> Completed</span>
+                  <span className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[8.5px] font-black rounded border border-emerald-100 dark:border-emerald-800 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5" /> Completed</span>
                 ) : isInProgress ? (
-                  <span className="px-1.5 py-0.5 bg-amber-50 text-amber-700 text-[8.5px] font-black rounded border border-amber-100 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><Clock className="w-2.5 h-2.5 animate-pulse" /> {progressPercent}%</span>
+                  <span className="px-1.5 py-0.5 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-[8.5px] font-black rounded border border-amber-100 dark:border-amber-800 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><Clock className="w-2.5 h-2.5 animate-pulse" /> {progressPercent}%</span>
                 ) : isPremium && (
                   isLocked ? (
-                    <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 text-[8.5px] font-black rounded border border-amber-100 uppercase tracking-wider shrink-0">Premium</span>
+                    <span className="px-1.5 py-0.5 bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-300 text-[8.5px] font-black rounded border border-amber-100 dark:border-amber-800 uppercase tracking-wider shrink-0">Premium</span>
                   ) : (
-                    <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 text-[8.5px] font-black rounded border border-emerald-100 uppercase tracking-wider shrink-0">Active</span>
+                    <span className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-300 text-[8.5px] font-black rounded border border-emerald-100 dark:border-emerald-800 uppercase tracking-wider shrink-0">Active</span>
                   )
                 )}
               </div>
@@ -4503,23 +4503,23 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
                 <div className="absolute inset-0 border-2 border-white/20 rounded-xl" />
               </div>
               <div className="text-left min-w-0 flex-1">
-                <h4 className="font-black text-base sm:text-lg text-slate-955 tracking-tight group-hover:text-brand-600 transition-colors uppercase leading-snug line-clamp-2" title={test.title}>{mainTitle}</h4>
+                <h4 className="font-black text-base sm:text-lg text-slate-955 dark:text-white tracking-tight group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors uppercase leading-snug line-clamp-2" title={test.title}>{mainTitle}</h4>
                 <div className="flex items-center flex-wrap gap-1.5 mt-1">
                   {isScheduledUpcoming ? (
-                    <span className="text-[10px] font-black text-amber-800 uppercase tracking-widest bg-amber-100 px-2.5 py-0.5 rounded border border-amber-200 flex items-center gap-1">
+                    <span className="text-[10px] font-black text-amber-800 dark:text-amber-300 uppercase tracking-widest bg-amber-100 dark:bg-amber-950/60 px-2.5 py-0.5 rounded border border-amber-200 dark:border-amber-800 flex items-center gap-1">
                       📅 UPCOMING
                     </span>
                   ) : (
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100 whitespace-nowrap">Official Mock</span>
+                    <span className="text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase tracking-widest bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-100 dark:border-slate-700 whitespace-nowrap">Official Mock</span>
                   )}
                   {suffix && (
-                    <span className="text-[10px] font-black text-brand-700 uppercase tracking-widest bg-brand-50 px-2 py-0.5 rounded border border-brand-100/60 shadow-2xs whitespace-nowrap">Set {suffix}</span>
+                    <span className="text-[10px] font-black text-brand-700 dark:text-indigo-300 uppercase tracking-widest bg-brand-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded border border-brand-100/60 dark:border-indigo-800 shadow-2xs whitespace-nowrap">Set {suffix}</span>
                   )}
                   {!isScheduledUpcoming && isCompleted && (
-                    <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-100/60 flex items-center gap-0.5 whitespace-nowrap"><CheckCircle2 className="w-3.5 h-3.5" /> Completed</span>
+                    <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-300 uppercase tracking-widest bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded border border-emerald-100/60 dark:border-emerald-800 flex items-center gap-0.5 whitespace-nowrap"><CheckCircle2 className="w-3.5 h-3.5" /> Completed</span>
                   )}
                   {!isScheduledUpcoming && isInProgress && (
-                    <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest bg-amber-50 px-2.5 py-0.5 rounded border border-amber-100/60 flex items-center gap-0.5 whitespace-nowrap"><Clock className="w-3.5 h-3.5 animate-pulse" /> In Progress ({progressPercent}%)</span>
+                    <span className="text-[10px] font-black text-amber-600 dark:text-amber-300 uppercase tracking-widest bg-amber-50 dark:bg-amber-950/60 px-2.5 py-0.5 rounded border border-amber-100/60 dark:border-amber-800 flex items-center gap-0.5 whitespace-nowrap"><Clock className="w-3.5 h-3.5 animate-pulse" /> In Progress ({progressPercent}%)</span>
                   )}
                 </div>
               </div>
@@ -4541,21 +4541,21 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
           </div>
           
           {isScheduledUpcoming ? (
-            <div className="bg-amber-50/80 border border-amber-200/80 rounded-xl p-3.5 space-y-1.5 relative z-10 text-left">
-              <div className="flex items-center justify-between text-xs font-extrabold text-amber-900">
-                <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" /> Release Countdown</span>
-                <span className="font-mono text-xs tracking-wider font-black text-amber-950 bg-amber-200/60 px-2 py-0.5 rounded-md border border-amber-300/60">{countdown.formattedCountdown}</span>
+            <div className="bg-amber-50/80 dark:bg-amber-950/60 border border-amber-200/80 dark:border-amber-800 rounded-xl p-3.5 space-y-1.5 relative z-10 text-left">
+              <div className="flex items-center justify-between text-xs font-extrabold text-amber-900 dark:text-amber-300">
+                <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" /> Release Countdown</span>
+                <span className="font-mono text-xs tracking-wider font-black text-amber-950 dark:text-amber-200 bg-amber-200/60 dark:bg-amber-900/60 px-2 py-0.5 rounded-md border border-amber-300/60 dark:border-amber-700/60">{countdown.formattedCountdown}</span>
               </div>
-              <div className="flex items-center justify-between text-[11px] font-semibold text-amber-800 pt-0.5">
+              <div className="flex items-center justify-between text-[11px] font-semibold text-amber-800 dark:text-amber-300 pt-0.5">
                 <span>Scheduled for {countdown.formattedScheduledDate}</span>
               </div>
             </div>
           ) : (
             <div className="space-y-4 flex-1 relative z-10 pt-2 text-left">
-              <div className="flex gap-4 text-xs font-bold text-slate-500 flex-wrap">
-                <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><Clock className="w-3.5 h-3.5 text-slate-400"/> {test.durationMinutes} Mins</span>
-                <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><Award className="w-3.5 h-3.5 text-slate-400"/> {test.totalMarks} Marks</span>
-                <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><FileText className="w-3.5 h-3.5 text-slate-400"/> {totalQs} Qs</span>
+              <div className="flex gap-4 text-xs font-bold text-slate-500 dark:text-slate-300 flex-wrap">
+                <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><Clock className="w-3.5 h-3.5 text-slate-400"/> {test.durationMinutes} Mins</span>
+                <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><Award className="w-3.5 h-3.5 text-slate-400"/> {test.totalMarks} Marks</span>
+                <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><FileText className="w-3.5 h-3.5 text-slate-400"/> {totalQs} Qs</span>
               </div>
             </div>
           )}
@@ -9951,15 +9951,15 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
             return (
               <div className="space-y-6 sm:space-y-8">
-                <div className="flex items-center gap-2 sm:gap-4 border-b border-slate-100 pb-3 sm:pb-6">
+                <div className="flex items-center gap-2 sm:gap-4 border-b border-slate-100 dark:border-slate-800 pb-3 sm:pb-6">
                   <Button variant="ghost" onClick={() => {
                     setSelectedPracticeCategory(null);
                     scrollToElement('practice-mode-section', { block: 'start', delay: 50 });
-                  }} className="p-1.5 sm:p-3 rounded-xl sm:rounded-2xl hover:bg-brand-50 shrink-0">
-                    <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6 rotate-180 text-brand-600" />
+                  }} className="p-1.5 sm:p-3 rounded-xl sm:rounded-2xl hover:bg-brand-50 dark:hover:bg-slate-800 shrink-0">
+                    <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6 rotate-180 text-brand-600 dark:text-indigo-400" />
                   </Button>
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-lg sm:text-2xl md:text-3xl font-black text-slate-900 capitalize tracking-tight leading-tight">
+                    <h3 className="text-lg sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white capitalize tracking-tight leading-tight">
                       {({
                         'topic-wise': 'Chapter-Wise Practice',
                         'exam-focused': 'High-Yield Topic Banks',
@@ -10205,19 +10205,19 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
           return (
             <div className="space-y-5 sm:space-y-8">
-              <div className="flex items-center gap-2 sm:gap-4 border-b border-slate-100 pb-3 sm:pb-6">
+              <div className="flex items-center gap-2 sm:gap-4 border-b border-slate-100 dark:border-slate-800 pb-3 sm:pb-6">
                 <Button variant="ghost" onClick={() => {
                   setSelectedMockCategory(null);
                   scrollToElement('test-series', { block: 'start', delay: 50 });
-                }} className="p-2 sm:p-3 rounded-xl sm:rounded-2xl hover:bg-brand-50 shrink-0">
-                  <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 rotate-180 text-brand-600" />
+                }} className="p-2 sm:p-3 rounded-xl sm:rounded-2xl hover:bg-brand-50 dark:hover:bg-slate-800 shrink-0">
+                  <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 rotate-180 text-brand-600 dark:text-indigo-400" />
                 </Button>
                 <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-                  <h3 className="text-lg sm:text-3xl font-black text-slate-900 capitalize truncate flex items-center gap-2">
+                  <h3 className="text-lg sm:text-3xl font-black text-slate-900 dark:text-white capitalize truncate flex items-center gap-2">
                     {selectedMockCategory.replace('-', ' ')} Tests
                   </h3>
                   {selectedMockCategory === 'sectional' && (
-                    <span className="bg-brand-100 text-brand-600 text-[10px] sm:text-xs font-black uppercase tracking-widest px-2.5 py-0.5 sm:py-1 rounded-full border border-brand-200 shrink-0">Subject-Wise</span>
+                    <span className="bg-brand-100 dark:bg-indigo-950/60 text-brand-600 dark:text-indigo-300 text-[10px] sm:text-xs font-black uppercase tracking-widest px-2.5 py-0.5 sm:py-1 rounded-full border border-brand-200 dark:border-indigo-800 shrink-0">Subject-Wise</span>
                   )}
                 </div>
               </div>

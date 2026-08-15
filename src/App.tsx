@@ -3363,7 +3363,7 @@ const LandingPage = () => {
 
       <main className="flex-1 bg-transparent transition-colors duration-300 relative z-10">
         {/* Elite Split-Layout Hero Section */}
-        <section className="relative overflow-hidden pt-6 pb-12 lg:pt-10 lg:pb-20 border-b border-slate-200/50 dark:border-slate-800">
+        <section className="relative overflow-hidden pt-6 pb-12 lg:pt-10 lg:pb-20">
           {/* Animated Mesh + Grid Background */}
           <div className="absolute inset-0 -z-10 mesh-bg opacity-100 dark:opacity-30" />
           <div className="absolute inset-0 -z-10 grid-bg opacity-60 dark:opacity-20" />

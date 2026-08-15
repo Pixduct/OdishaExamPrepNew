@@ -9063,23 +9063,33 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             handleStartDirectPractice(targetTest, incompleteActivity);
           };
 
+          const recVecTheme = getQuestionBankVectorTheme(recTitle, recCategoryPill);
+          const RecWatermarkIcon = recVecTheme.WatermarkIcon;
+
           return (
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative overflow-hidden rounded-2xl sm:rounded-[2.2rem] bg-gradient-to-br from-brand-950 via-slate-900 to-indigo-950 text-white p-4 sm:p-8 md:p-10 shadow-2xl shadow-brand-950/20 border border-brand-500/20 card-3d-deep group mb-6 sm:mb-10"
+              className={cn(
+                "relative overflow-hidden rounded-2xl sm:rounded-[2.2rem] text-white p-4 sm:p-8 md:p-10 shadow-2xl border transition-all duration-500 card-3d-deep group mb-6 sm:mb-10",
+                recVecTheme.gradient,
+                "border-white/20 shadow-slate-950/30"
+              )}
             >
-              <div className="absolute -right-16 -top-16 w-64 h-64 bg-brand-500/20 rounded-full blur-3xl group-hover:bg-brand-500/30 transition-all duration-700 pointer-events-none" />
-              <div className="absolute -left-16 -bottom-16 w-64 h-64 bg-indigo-500/15 rounded-full blur-3xl group-hover:bg-indigo-500/25 transition-all duration-700 pointer-events-none" />
+              {/* Geometric Watermark Grid */}
+              <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none z-0" />
               
+              {/* Large Vector Watermark Icon */}
+              <RecWatermarkIcon className="absolute -right-6 -bottom-6 w-48 h-48 sm:w-64 sm:h-64 opacity-15 stroke-[1.2] text-white pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+
               <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-8">
                 <div className="space-y-2 sm:space-y-4 max-w-2xl">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="badge-recommended flex items-center gap-1.5 shadow-sm text-[9px] sm:text-xs py-0.5 sm:py-1 px-2.5 sm:px-3">
-                      <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-500 animate-pulse shrink-0" />
+                      <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-300 animate-pulse shrink-0" />
                       {recBadge}
                     </span>
-                    <span className="px-2.5 py-0.5 sm:px-3 sm:py-1 bg-white/10 text-white/80 text-[8.5px] sm:text-[10px] font-black uppercase tracking-widest rounded-full border border-white/10 backdrop-blur-md">
+                    <span className={cn("px-2.5 py-0.5 sm:px-3 sm:py-1 text-[8.5px] sm:text-[10px] font-black uppercase tracking-widest rounded-full border backdrop-blur-md shadow-xs", recVecTheme.badgeBg)}>
                       {recCategoryPill}
                     </span>
                   </div>
@@ -9088,20 +9098,20 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     <h2 className="text-base sm:text-2xl md:text-3xl font-black tracking-tight text-white leading-snug">
                       {recTitle}
                     </h2>
-                    <p className="text-slate-300 font-medium text-xs sm:text-sm md:text-base leading-relaxed mt-1 sm:mt-2">
+                    <p className="text-white/80 font-medium text-xs sm:text-sm md:text-base leading-relaxed mt-1 sm:mt-2">
                       <span className="sm:hidden">{recMobileDesc}</span>
                       <span className="hidden sm:inline">{recDesc}</span>
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2 sm:gap-6 pt-1 sm:pt-0.5 text-[11px] sm:text-xs font-bold text-slate-300 flex-wrap">
-                    <div className="flex items-center gap-1.5 bg-emerald-950/40 sm:bg-transparent px-2.5 py-1 sm:p-0 rounded-lg border border-emerald-500/20 sm:border-0">
-                      <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400 shrink-0" />
+                  <div className="flex items-center gap-2 sm:gap-6 pt-1 sm:pt-0.5 text-[11px] sm:text-xs font-bold text-white/90 flex-wrap">
+                    <div className="flex items-center gap-1.5 bg-black/20 sm:bg-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-white/15 backdrop-blur-xs">
+                      <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-300 shrink-0" />
                       <span className="sm:hidden">{recMobileTargetScore}</span>
                       <span className="hidden sm:inline">{recTargetScore}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 bg-amber-950/40 sm:bg-transparent px-2.5 py-1 sm:p-0 rounded-lg border border-amber-500/20 sm:border-0">
-                      <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0" />
+                    <div className="flex items-center gap-1.5 bg-black/20 sm:bg-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-white/15 backdrop-blur-xs">
+                      <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 shrink-0" />
                       <span className="sm:hidden">{recMobileDurationText}</span>
                       <span className="hidden sm:inline">{recDurationText}</span>
                     </div>
@@ -9142,23 +9152,33 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             handleStartDirectPractice(firstTopicBank);
           };
 
+          const recVecTheme = getQuestionBankVectorTheme(recTitle, recCategoryPill);
+          const RecWatermarkIcon = recVecTheme.WatermarkIcon;
+
           return (
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative overflow-hidden rounded-2xl sm:rounded-[2.2rem] bg-gradient-to-br from-brand-950 via-slate-900 to-indigo-950 text-white p-4 sm:p-8 md:p-10 shadow-2xl shadow-brand-950/20 border border-brand-500/20 card-3d-deep group mb-6 sm:mb-10"
+              className={cn(
+                "relative overflow-hidden rounded-2xl sm:rounded-[2.2rem] text-white p-4 sm:p-8 md:p-10 shadow-2xl border transition-all duration-500 card-3d-deep group mb-6 sm:mb-10",
+                recVecTheme.gradient,
+                "border-white/20 shadow-slate-950/30"
+              )}
             >
-              <div className="absolute -right-16 -top-16 w-64 h-64 bg-brand-500/20 rounded-full blur-3xl group-hover:bg-brand-500/30 transition-all duration-700 pointer-events-none" />
-              <div className="absolute -left-16 -bottom-16 w-64 h-64 bg-indigo-500/15 rounded-full blur-3xl group-hover:bg-indigo-500/25 transition-all duration-700 pointer-events-none" />
+              {/* Geometric Watermark Grid */}
+              <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none z-0" />
               
+              {/* Large Vector Watermark Icon */}
+              <RecWatermarkIcon className="absolute -right-6 -bottom-6 w-48 h-48 sm:w-64 sm:h-64 opacity-15 stroke-[1.2] text-white pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+
               <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-8">
                 <div className="space-y-2 sm:space-y-4 max-w-2xl">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="badge-recommended flex items-center gap-1.5 shadow-sm text-[9px] sm:text-xs py-0.5 sm:py-1 px-2.5 sm:px-3">
-                      <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-500 animate-pulse shrink-0" />
+                      <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-300 animate-pulse shrink-0" />
                       {recBadge}
                     </span>
-                    <span className="px-2.5 py-0.5 sm:px-3 sm:py-1 bg-white/10 text-white/80 text-[8.5px] sm:text-[10px] font-black uppercase tracking-widest rounded-full border border-white/10 backdrop-blur-md">
+                    <span className={cn("px-2.5 py-0.5 sm:px-3 sm:py-1 text-[8.5px] sm:text-[10px] font-black uppercase tracking-widest rounded-full border backdrop-blur-md shadow-xs", recVecTheme.badgeBg)}>
                       {recCategoryPill}
                     </span>
                   </div>
@@ -9167,20 +9187,20 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     <h2 className="text-base sm:text-2xl md:text-3xl font-black tracking-tight text-white leading-snug">
                       {recTitle}
                     </h2>
-                    <p className="text-slate-300 font-medium text-xs sm:text-sm md:text-base leading-relaxed mt-1 sm:mt-2">
+                    <p className="text-white/80 font-medium text-xs sm:text-sm md:text-base leading-relaxed mt-1 sm:mt-2">
                       <span className="sm:hidden">{recMobileDesc}</span>
                       <span className="hidden sm:inline">{recDesc}</span>
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2 sm:gap-6 pt-1 sm:pt-0.5 text-[11px] sm:text-xs font-bold text-slate-300 flex-wrap">
-                    <div className="flex items-center gap-1.5 bg-emerald-950/40 sm:bg-transparent px-2.5 py-1 sm:p-0 rounded-lg border border-emerald-500/20 sm:border-0">
-                      <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400 shrink-0" />
+                  <div className="flex items-center gap-2 sm:gap-6 pt-1 sm:pt-0.5 text-[11px] sm:text-xs font-bold text-white/90 flex-wrap">
+                    <div className="flex items-center gap-1.5 bg-black/20 sm:bg-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-white/15 backdrop-blur-xs">
+                      <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-300 shrink-0" />
                       <span className="sm:hidden">{recMobileTargetScore}</span>
                       <span className="hidden sm:inline">{recTargetScore}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 bg-amber-950/40 sm:bg-transparent px-2.5 py-1 sm:p-0 rounded-lg border border-amber-500/20 sm:border-0">
-                      <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0" />
+                    <div className="flex items-center gap-1.5 bg-black/20 sm:bg-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-white/15 backdrop-blur-xs">
+                      <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 shrink-0" />
                       <span className="sm:hidden">{recMobileDurationText}</span>
                       <span className="hidden sm:inline">{recDurationText}</span>
                     </div>

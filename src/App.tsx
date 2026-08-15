@@ -1013,12 +1013,12 @@ const VisualEffects = () => (
 // --- Custom Portal Sections (Refined Educational Editorial) ---
 
 const EXAM_REGISTRY_STATUS_MAP: Record<string, { label: string; color: string }> = {
-  'notification': { label: 'Notification Released', color: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
-  'admit-card':   { label: 'Admit Card Out',        color: 'bg-amber-50 text-amber-700 border-amber-100' },
-  'applications': { label: 'Applications Active',   color: 'bg-blue-50 text-blue-700 border-blue-100' },
-  'result':       { label: 'Result Declared',       color: 'bg-purple-50 text-purple-700 border-purple-100' },
-  'postponed':    { label: 'Postponed',             color: 'bg-rose-50 text-rose-700 border-rose-100' },
-  'upcoming':     { label: 'Upcoming',              color: 'bg-slate-50 text-slate-600 border-slate-200' },
+  'notification': { label: 'Notification Released', color: 'bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' },
+  'admit-card':   { label: 'Admit Card Out',        color: 'bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800' },
+  'applications': { label: 'Applications Active',   color: 'bg-blue-50 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800' },
+  'result':       { label: 'Result Declared',       color: 'bg-purple-50 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800' },
+  'postponed':    { label: 'Postponed',             color: 'bg-rose-50 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800' },
+  'upcoming':     { label: 'Upcoming',              color: 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700' },
 };
 
 const EXAM_REGISTRY_STATUS_COLOR_MAP: Record<string, string> = {
@@ -1141,7 +1141,7 @@ const ExamRegistrySection = ({
                     <span className={cn("px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-wider border", statusMeta.color)}>
                       {statusMeta.label}
                     </span>
-                    <span className="text-xs font-bold text-slate-400 font-mono">
+                    <span className="text-xs font-bold text-slate-500 dark:text-slate-300 font-mono">
                       {item.date}
                     </span>
                   </div>
@@ -1152,14 +1152,14 @@ const ExamRegistrySection = ({
                 <button 
                   onClick={() => handlePracticeClick(item)}
                   className={cn(
-                    "inline-flex items-center justify-center gap-2 px-5 py-3 transition-all cursor-pointer w-full md:w-auto",
+                    "inline-flex items-center justify-center gap-2 px-5 py-3 transition-all cursor-pointer w-full md:w-auto font-black uppercase tracking-widest text-xs rounded-xl border-2 transition-all duration-200 shrink-0",
                     isMobile
-                      ? "rounded-xl bg-[#2563EB] text-white text-xs font-black uppercase tracking-widest border border-[#2563EB] shadow-sm active:scale-[0.97]"
-                      : "rounded-xl border-2 border-slate-900 text-xs font-black uppercase tracking-widest text-slate-900 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:bg-slate-900 hover:text-white hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
+                      ? "bg-[#2563EB] hover:bg-brand-600 text-white border-[#2563EB] shadow-sm active:scale-[0.97]"
+                      : "bg-[#2563EB] dark:bg-[#2563EB] hover:bg-brand-500 dark:hover:bg-brand-500 text-white border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_rgba(15,23,42,1)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
                   )}
                 >
-                  {item.actionLabel}
-                  {isMobile ? null : <ArrowRight className="w-4 h-4" />}
+                  {item.actionLabel || 'FREE TEST →'}
+                  {isMobile ? null : <ArrowRight className="w-4 h-4 text-white" />}
                 </button>
               </div>
             );
@@ -3357,37 +3357,7 @@ const LandingPage = () => {
       <MouseTrackingCanvas />
       <VectorCursorFollower />
 
-      {/* Top Professional Announcement Bar */}
-      <div className="ticker-bar relative z-50 bg-[#0F172A] border-b-2 border-slate-900 overflow-hidden">
-        <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center h-10 relative">
-          <div className="flex items-center gap-2 px-4 h-full bg-[#2563EB] text-white border-r-2 border-slate-900 shrink-0 relative z-20 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
-            <span className="flex h-2 w-2 rounded-full bg-white animate-pulse" />
-            <span className="text-[10px] font-black uppercase tracking-widest leading-none">Exam Updates</span>
-          </div>
-          
-          <div className="flex-1 overflow-hidden relative h-full flex items-center z-10">
-            <div className="flex items-center gap-12 animate-marquee-lr whitespace-nowrap px-6">
-              {announcements.map((text, i) => (
-                <div key={i} className="flex items-center gap-2 text-[10px] font-bold text-slate-300 uppercase tracking-tight">
-                  <span className="text-[#2563EB] font-black">•</span>
-                  {text}
-                </div>
-              ))}
-              {/* Duplicate the EXACT same list to create a seamless infinite loop with marquee-lr (-50% to 0) */}
-              {announcements.map((text, i) => (
-                <div key={`dup-${i}`} className="flex items-center gap-2 text-[10px] font-bold text-slate-300 uppercase tracking-tight">
-                  <span className="text-[#2563EB] font-black">•</span>
-                  {text}
-                </div>
-              ))}
-            </div>
-            
-            {/* Edge Gradients for smooth fade */}
-            <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-[#0F172A] to-transparent z-10" />
-            <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#0F172A] to-transparent z-10" />
-          </div>
-        </div>
-      </div>
+
 
       <Navbar user={user} isAdmin={false} onSignIn={() => setShowAuthModal(true)} />
 
@@ -10873,34 +10843,7 @@ const ExamDetailPage = () => {
     // Guest view
     return (
       <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
-        {/* Announcement Bar */}
-        <div className="ticker-bar relative z-50 bg-[#0F172A] border-b-2 border-slate-900 overflow-hidden">
-          <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center h-10 relative">
-            <div className="flex items-center gap-2 px-4 h-full bg-[#2563EB] text-white border-r-2 border-slate-900 shrink-0 relative z-20 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
-              <span className="flex h-2 w-2 rounded-full bg-white animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest leading-none">Exam Updates</span>
-            </div>
-            
-            <div className="flex-1 overflow-hidden relative h-full flex items-center z-10">
-              <div className="flex items-center gap-12 animate-marquee-lr whitespace-nowrap px-6">
-                {announcements.map((text, i) => (
-                  <div key={i} className="flex items-center gap-2 text-[10px] font-bold text-slate-300 uppercase tracking-tight">
-                    <span className="text-[#2563EB] font-black">•</span>
-                    {text}
-                  </div>
-                ))}
-                {announcements.map((text, i) => (
-                  <div key={`dup-${i}`} className="flex items-center gap-2 text-[10px] font-bold text-slate-300 uppercase tracking-tight">
-                    <span className="text-[#2563EB] font-black">•</span>
-                    {text}
-                  </div>
-                ))}
-              </div>
-              <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-[#0F172A] to-transparent z-10" />
-              <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#0F172A] to-transparent z-10" />
-            </div>
-          </div>
-        </div>
+
 
         <Navbar user={null} isAdmin={false} onSignIn={() => setShowAuthModal(true)} />
 

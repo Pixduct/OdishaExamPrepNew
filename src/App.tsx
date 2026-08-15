@@ -8040,7 +8040,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             {/* Section header — bolder on mobile */}
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-[18px] sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-tight">Continue Practice</h2>
+                <h2 className="text-[18px] sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">Continue Practice</h2>
                 <p className="text-[11px] text-slate-400 font-medium mt-0.5 sm:hidden">Pick up where you left off</p>
               </div>
               <button
@@ -8057,7 +8057,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               <button 
                 type="button"
                 onClick={() => scrollContinuePractice('left')}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/95 border border-slate-200/60 text-slate-600 hover:text-brand-600 shadow-md flex items-center justify-center cursor-pointer transition-all duration-200 z-20 opacity-0 group-hover/scroll:opacity-100 hover:scale-105 active:scale-95 hidden md:flex"
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/95 dark:bg-slate-800/95 border border-slate-200/60 dark:border-slate-700/60 text-slate-600 dark:text-slate-300 hover:text-brand-600 shadow-md flex items-center justify-center cursor-pointer transition-all duration-200 z-20 opacity-0 group-hover/scroll:opacity-100 hover:scale-105 active:scale-95 hidden md:flex"
                 title="Scroll Left"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -8066,7 +8066,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               <button 
                 type="button"
                 onClick={() => scrollContinuePractice('right')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/95 border border-slate-200/60 text-slate-600 hover:text-brand-600 shadow-md flex items-center justify-center cursor-pointer transition-all duration-200 z-20 opacity-0 group-hover/scroll:opacity-100 hover:scale-105 active:scale-95 hidden md:flex"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/95 dark:bg-slate-800/95 border border-slate-200/60 dark:border-slate-700/60 text-slate-600 dark:text-slate-300 hover:text-brand-600 shadow-md flex items-center justify-center cursor-pointer transition-all duration-200 z-20 opacity-0 group-hover/scroll:opacity-100 hover:scale-105 active:scale-95 hidden md:flex"
                 title="Scroll Right"
               >
                 <ChevronRight className="w-4 h-4" />
@@ -8168,7 +8168,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         setActiveTestState({ ...a.metadata, resumeSessionId: a.metadata?.resumeSessionId || a.metadata?.test?.id });
                         setActiveTest(testToResume);
                       }}
-                      className={`snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px] rounded-2xl border border-slate-100/90 sm:border-white/40 bg-white sm:glass hover:border-brand-300/60 sm:hover:border-brand-300/50 shadow-[0_4px_16px_rgba(0,0,0,0.035)] sm:hover:shadow-2xl hover:shadow-brand-500/8 sm:hover:shadow-brand-500/5 transition-all duration-300 group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container ${
+                      className={`snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px] rounded-2xl border border-slate-100/90 sm:border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 hover:border-brand-300/60 dark:hover:border-brand-600/50 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container ${
                         canResume ? 'cursor-pointer active:scale-[0.98]' : 'opacity-60 cursor-not-allowed'
                       }`}
                     >
@@ -8179,10 +8179,10 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white fill-white ml-0.5" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 line-clamp-2 sm:line-clamp-1 leading-snug group-hover:text-brand-600 transition-colors duration-300">{a.title || 'Practice Session'}</h4>
-                          <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium mt-0.5">Last practiced <span className="text-slate-600 font-semibold">{timeAgo}</span></p>
+                          <h4 className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 dark:text-white line-clamp-2 sm:line-clamp-1 leading-snug group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors duration-300">{a.title || 'Practice Session'}</h4>
+                          <p className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">Last practiced <span className="text-slate-600 dark:text-slate-300 font-semibold">{timeAgo}</span></p>
                           {a.metadata?.testCategory && (
-                            <span className="inline-block mt-1 text-[8.5px] sm:text-[9px] font-black uppercase tracking-widest text-brand-600 bg-brand-50/70 border border-brand-100/40 px-1.5 py-0.5 rounded">{a.metadata.testCategory}</span>
+                            <span className="inline-block mt-1 text-[8.5px] sm:text-[9px] font-black uppercase tracking-widest text-brand-600 dark:text-brand-400 bg-brand-50/70 dark:bg-brand-950/50 border border-brand-100/40 dark:border-brand-800/50 px-1.5 py-0.5 rounded">{a.metadata.testCategory}</span>
                           )}
                           {!canResume && (
                             <span className="block text-[8.5px] sm:text-[9px] font-bold text-slate-400 mt-0.5">Open app to resume</span>
@@ -8192,10 +8192,10 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       {/* Progress bar — taller + labelled on mobile for clarity */}
                       <div className="flex flex-col gap-1 relative z-10">
                         <div className="flex items-center justify-between mb-0.5">
-                          <span className="text-[8.5px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest">Progress</span>
+                          <span className="text-[8.5px] sm:text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Progress</span>
                           <span className="text-[10px] sm:text-[11px] font-black text-brand-600">{progressPct}%</span>
                         </div>
-                        <div className="w-full h-1.5 sm:h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="w-full h-1.5 sm:h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-gradient-to-r from-brand-600 to-brand-400 rounded-full transition-all duration-700"
                             style={{ width: `${Math.max(progressPct, progressPct === 0 ? 0 : 4)}%` }}
@@ -8223,7 +8223,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             {/* Section header — bolder on mobile */}
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-[18px] sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-tight">Recent Activity</h2>
+                <h2 className="text-[18px] sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">Recent Activity</h2>
                 <p className="text-[11px] text-slate-400 font-medium mt-0.5 sm:hidden">Your test history at a glance</p>
               </div>
               <button
@@ -8240,7 +8240,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               <button 
                 type="button"
                 onClick={() => scrollRecentActivity('left')}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/95 border border-slate-200/60 text-slate-600 hover:text-brand-600 shadow-md flex items-center justify-center cursor-pointer transition-all duration-200 z-20 opacity-0 group-hover/scroll-recent:opacity-100 hover:scale-105 active:scale-95 hidden md:flex"
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/95 dark:bg-slate-800/95 border border-slate-200/60 dark:border-slate-700/60 text-slate-600 dark:text-slate-300 hover:text-brand-600 shadow-md flex items-center justify-center cursor-pointer transition-all duration-200 z-20 opacity-0 group-hover/scroll-recent:opacity-100 hover:scale-105 active:scale-95 hidden md:flex"
                 title="Scroll Left"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -8249,7 +8249,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               <button 
                 type="button"
                 onClick={() => scrollRecentActivity('right')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/95 border border-slate-200/60 text-slate-600 hover:text-brand-600 shadow-md flex items-center justify-center cursor-pointer transition-all duration-200 z-20 opacity-0 group-hover/scroll-recent:opacity-100 hover:scale-105 active:scale-95 hidden md:flex"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/95 dark:bg-slate-800/95 border border-slate-200/60 dark:border-slate-700/60 text-slate-600 dark:text-slate-300 hover:text-brand-600 shadow-md flex items-center justify-center cursor-pointer transition-all duration-200 z-20 opacity-0 group-hover/scroll-recent:opacity-100 hover:scale-105 active:scale-95 hidden md:flex"
                 title="Scroll Right"
               >
                 <ChevronRight className="w-4 h-4" />
@@ -8275,12 +8275,12 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   // Derive percentage for colour coding
                   const scorePct = (!isNaN(scoreNum) && !isNaN(totalNum) && totalNum > 0) ? (scoreNum / totalNum) * 100 : null;
                   const scoreColour = scorePct === null
-                    ? 'bg-slate-100 text-slate-600'
+                    ? 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                     : scorePct >= 60
-                    ? 'bg-emerald-50 text-emerald-700'
+                    ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400'
                     : scorePct >= 35
-                    ? 'bg-amber-50 text-amber-700'
-                    : 'bg-red-50 text-red-600';
+                    ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400'
+                    : 'bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400';
                   return (
                     <motion.div
                       key={i}
@@ -8293,24 +8293,24 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         if (isTestResult) handleViewResults(a.metadata);
                         else if (a.type === 'question_bank_accessed' && a.metadata?.pdfUrl) window.open(a.metadata.pdfUrl, '_blank');
                       }}
-                      className="snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px] rounded-2xl border border-slate-100/90 sm:border-white/40 bg-white sm:glass hover:border-brand-300/60 sm:hover:border-brand-300/50 shadow-[0_4px_16px_rgba(0,0,0,0.035)] sm:hover:shadow-2xl hover:shadow-brand-500/8 sm:hover:shadow-brand-500/5 transition-all duration-300 cursor-pointer group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container active:scale-[0.98]"
+                      className="snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px] rounded-2xl border border-slate-100/90 sm:border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 hover:border-brand-300/60 dark:hover:border-brand-600/50 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 cursor-pointer group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container active:scale-[0.98]"
                     >
                       {/* Top row: icon + title + arrow */}
                       <div className="flex items-start gap-3 relative z-10">
                         {/* Completed icon — branded circle */}
-                        <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 bg-brand-50 text-brand-600 border border-brand-100 group-hover:scale-105 transition-transform relative z-10">
+                        <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 border border-brand-100 dark:border-brand-800/50 group-hover:scale-105 transition-transform relative z-10">
                           <CheckCircle2 className="w-4.5 h-4.5 sm:w-5 h-5" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 line-clamp-2 sm:line-clamp-1 leading-snug group-hover:text-brand-600 transition-colors">{a.title}</h4>
-                          <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium mt-0.5">{new Date(a.timestamp).toLocaleDateString()}</p>
+                          <h4 className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 dark:text-white line-clamp-2 sm:line-clamp-1 leading-snug group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">{a.title}</h4>
+                          <p className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">{new Date(a.timestamp).toLocaleDateString()}</p>
                         </div>
                         <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300 shrink-0 mt-0.5 group-hover:text-brand-500 group-hover:translate-x-0.5 transition-all relative z-10" />
                       </div>
 
                       {/* Bottom row: score chip + category label */}
-                      <div className="flex items-center justify-between pt-2 border-t border-slate-100 relative z-10">
-                        <span className="text-[8.5px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400 truncate">
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700 relative z-10">
+                        <span className="text-[8.5px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 truncate">
                           {a.metadata?.testCategory || 'Activity'}
                         </span>
                         {scoreLabel && (

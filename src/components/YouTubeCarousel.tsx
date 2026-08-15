@@ -3,6 +3,7 @@ import { Play, X, Youtube, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { modalBackdrop, modalContent } from '../lib/animations';
 import { cn } from '../lib/utils';
+import { useTheme } from '../lib/themeStore';
 
 const AUTO_SPEED = 0.6;  // px per animation frame (~36px/s at 60fps)
 const RESUME_DELAY_MS = 2000; // ms after last user interaction before auto-scroll resumes
@@ -40,6 +41,8 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
   const [isVisible, setIsVisible] = useState(true);
   const [fetchedTitles, setFetchedTitles] = useState<Record<string, string>>({});
   const containerRef = useRef<HTMLDivElement>(null);
+  const [theme] = useTheme();
+  const isDark = theme === 'dark';
 
   // Fetch authentic YouTube titles dynamically via noembed endpoint
   const videoIdsKey = videoIds ? videoIds.join(',') : '';
@@ -226,7 +229,7 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
   if (sourceVideos.length === 0) return null;
 
   return (
-    <div ref={containerRef} className="w-full relative py-3 sm:py-12 overflow-hidden bg-[#F2EFE9] border-2 border-slate-900 rounded-[2rem] sm:rounded-[2.5rem] shadow-[6px_6px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_rgba(0,0,0,1)] select-none">
+    <div ref={containerRef} className="w-full relative py-3 sm:py-12 overflow-hidden bg-[#F2EFE9] dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-[2rem] sm:rounded-[2.5rem] shadow-[6px_6px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_rgba(0,0,0,1)] select-none">
       {/* Editorial Decorative Grid overlay — desktop only */}
       {!isMobile && <div className="absolute inset-0 grid-bg opacity-[0.02] pointer-events-none" />}
 
@@ -239,10 +242,10 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
               <Youtube className="w-4 h-4 text-white" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="text-[13px] font-serif font-extrabold text-slate-900 tracking-tight leading-tight">
+              <h3 className="text-[13px] font-serif font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
                 Free Strategy Videos
               </h3>
-              <p className="text-slate-500 font-medium text-[10px] leading-snug">
+              <p className="text-slate-500 dark:text-slate-400 font-medium text-[10px] leading-snug">
                 Masterclasses &amp; exam tips — free
               </p>
             </div>
@@ -266,8 +269,8 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
               <Youtube className="w-6 h-6 text-white" />
             </div>
             <div className="min-w-0">
-              <h3 className="text-2xl font-serif font-extrabold text-slate-900 tracking-tight leading-tight">Free Strategy Videos</h3>
-              <p className="text-slate-600 font-medium text-sm mt-0.5">Watch free masterclasses and proven exam tips from our channel.</p>
+              <h3 className="text-2xl font-serif font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">Free Strategy Videos</h3>
+              <p className="text-slate-600 dark:text-slate-400 font-medium text-sm mt-0.5">Watch free masterclasses and proven exam tips from our channel.</p>
             </div>
           </div>
 
@@ -294,17 +297,17 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
         {!isMobile ? (
           <>
             <div className="absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
-              style={{ background: 'linear-gradient(to right, #F2EFE9, transparent)' }} />
+              style={{ background: `linear-gradient(to right, ${isDark ? '#0f172a' : '#F2EFE9'}, transparent)` }} />
             <div className="absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
-              style={{ background: 'linear-gradient(to left, #F2EFE9, transparent)' }} />
+              style={{ background: `linear-gradient(to left, ${isDark ? '#0f172a' : '#F2EFE9'}, transparent)` }} />
           </>
         ) : (
           <>
             {/* Soft left fade on mobile so partial cards look intentional */}
             <div className="absolute left-0 top-0 bottom-0 w-8 z-10 pointer-events-none"
-              style={{ background: 'linear-gradient(to right, #F2EFE9 30%, transparent)' }} />
+              style={{ background: `linear-gradient(to right, ${isDark ? '#0f172a' : '#F2EFE9'} 30%, transparent)` }} />
             <div className="absolute right-0 top-0 bottom-0 w-8 z-10 pointer-events-none"
-              style={{ background: 'linear-gradient(to left, #F2EFE9 30%, transparent)' }} />
+              style={{ background: `linear-gradient(to left, ${isDark ? '#0f172a' : '#F2EFE9'} 30%, transparent)` }} />
           </>
         )}
 
@@ -323,7 +326,7 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
                   if (!isDragging.current) setActiveVideo(video.id);
                 }}
                 className={cn(
-                  "relative shrink-0 rounded-2xl overflow-hidden border-2 border-slate-900 bg-[#FAF8F5] group/video transition-all cursor-pointer flex flex-col",
+                  "relative shrink-0 rounded-2xl overflow-hidden border-2 border-slate-900 dark:border-slate-600 bg-[#FAF8F5] dark:bg-slate-800 group/video transition-all cursor-pointer flex flex-col",
                   isMobile
                     ? "shadow-[3px_3px_0px_rgba(0,0,0,0.85)] active:shadow-[1px_1px_0px_rgba(0,0,0,0.85)] active:translate-x-[2px] active:translate-y-[2px]"
                     : "shadow-[4px_4px_0px_rgba(0,0,0,1)] md:hover:-translate-x-0.5 md:hover:-translate-y-0.5 md:hover:shadow-[6px_6px_0px_rgba(37,99,235,0.15)]"
@@ -365,7 +368,7 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
 
                 {/* Text Meta section */}
                 <div className={cn(
-                  "flex-1 flex flex-col justify-between bg-white",
+                  "flex-1 flex flex-col justify-between bg-white dark:bg-slate-800",
                   isMobile ? "p-2.5" : "p-4"
                 )}>
                   <div>
@@ -382,7 +385,7 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
 
                     {/* Title */}
                     <h3 className={cn(
-                      "text-slate-900 font-serif font-extrabold line-clamp-2 leading-snug md:group-hover/video:text-[#2563EB] transition-colors",
+                      "text-slate-900 dark:text-white font-serif font-extrabold line-clamp-2 leading-snug md:group-hover/video:text-[#2563EB] dark:md:group-hover/video:text-brand-400 transition-colors",
                       isMobile ? "text-[12.5px]" : "text-base"
                     )}>
                       {video.title}
@@ -391,11 +394,11 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
 
                   {/* Footer row */}
                   <div className={cn(
-                    "flex items-center justify-between border-t border-slate-100",
+                    "flex items-center justify-between border-t border-slate-100 dark:border-slate-700",
                     isMobile ? "pt-2.5 mt-3" : "pt-3 mt-4"
                   )}>
                     <span className={cn(
-                      "font-black uppercase tracking-widest text-slate-400 font-mono",
+                      "font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 font-mono",
                       isMobile ? "text-[8px]" : "text-[9px]"
                     )}>
                       Free Lecture

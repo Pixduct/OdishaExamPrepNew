@@ -7999,17 +7999,22 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     }
 
     return (
-      <div className="relative space-y-6 sm:space-y-10">
-        {/* Ambient Vector Background Grid Overlay for Home Tab Page Consistency */}
-        <div className="absolute -inset-4 sm:-inset-6 -z-10 pointer-events-none overflow-hidden rounded-3xl sm:rounded-[3rem]">
-          {/* Dual Ambient Glow Spotlights */}
-          <div className="absolute -top-32 -left-32 w-96 h-96 bg-brand-500/10 dark:bg-brand-500/15 rounded-full blur-[100px]" />
-          <div className="absolute top-1/2 -right-32 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/15 rounded-full blur-[100px]" />
-          {/* SVG Vector Dot Grid Pattern */}
-          <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:24px_24px] opacity-40 dark:opacity-[0.06]" />
+      <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent overflow-x-hidden" style={{ isolation: 'isolate' }}>
+        {/* Full-Screen Edge-to-Edge Academic Vector Canvas Grid & HSL Glows */}
+        <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-[0.03] pointer-events-none z-0" />
+        <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none z-0" />
+        <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none z-0" />
+
+        {/* Floating Viewport Academic Vector Watermarks */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-20">
+          <GraduationCap className="absolute top-24 left-[5%] w-44 h-44 text-slate-800 opacity-[0.08] stroke-[1.2] rotate-12" />
+          <BookOpen className="absolute top-1/3 right-[5%] w-48 h-48 text-brand-600 opacity-[0.08] stroke-[1.2] -rotate-6" />
+          <Award className="absolute bottom-1/3 left-[6%] w-44 h-44 text-amber-600 opacity-[0.08] stroke-[1.2] rotate-45" />
+          <Compass className="absolute bottom-28 right-[6%] w-36 h-36 text-indigo-600 opacity-[0.08] stroke-[1.2] -rotate-12" />
         </div>
 
-        <YouTubeCarousel videoIds={globalVideoIds} />
+        <div className="w-full mx-auto space-y-6 sm:space-y-10 pb-32 sm:pb-24 relative z-10">
+          <YouTubeCarousel videoIds={globalVideoIds} />
         
         {isAdmin && (
           <motion.div
@@ -8130,62 +8135,59 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   );
 
                   return (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, y: 15, scale: 0.96 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ type: 'spring', stiffness: 200, damping: 22, delay: i * 0.06 }}
-                      whileHover={whileHover.subtle}
-                      whileTap={whileTap.press}
-                      onClick={async () => {
-                        if (!canResume) return;
-                        
-                        let testToResume = { ...a.metadata?.test };
-                        if (!testToResume.title && a.title) {
-                          testToResume.title = a.title;
-                        }
-                        if (!Array.isArray(testToResume.questions) || testToResume.questions.length === 0) {
-                          const testId = testToResume.id || '';
-                          if (testId.startsWith('practice-') || !testId) {
-                            const topicName = (testToResume.title || a.title || '').replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
-                            const reqCount = a.metadata?.totalQuestions || 20;
-                            const instantQs = getInstantQuestionsForTopic(topicName, reqCount);
-                            testToResume.questions = instantQs.map(q => ({
-                              id: q.id,
-                              questionText: q.questionText,
-                              options: q.options,
-                              correctAnswerIndex: q.correctAnswerIndex,
-                              explanation: q.explanation
-                            }));
-                          } else {
-                            try {
-                              const freshQs = await examService.getQuestionsForMockTest(testId);
-                              if (freshQs && freshQs.length > 0) {
-                                testToResume.questions = freshQs;
+                    <DynamicVectorCard key={i} glowColor="rgba(37, 99, 235, 0.12)" roundedClass="rounded-2xl" className="snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px]">
+                      <motion.div
+                        initial={{ opacity: 0, y: 15, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ type: 'spring', stiffness: 200, damping: 22, delay: i * 0.06 }}
+                        whileHover={whileHover.subtle}
+                        whileTap={whileTap.press}
+                        onClick={async () => {
+                          if (!canResume) return;
+                          
+                          let testToResume = { ...a.metadata?.test };
+                          if (!testToResume.title && a.title) {
+                            testToResume.title = a.title;
+                          }
+                          if (!Array.isArray(testToResume.questions) || testToResume.questions.length === 0) {
+                            const testId = testToResume.id || '';
+                            if (testId.startsWith('practice-') || !testId) {
+                              const topicName = (testToResume.title || a.title || '').replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
+                              const reqCount = a.metadata?.totalQuestions || 20;
+                              const instantQs = getInstantQuestionsForTopic(topicName, reqCount);
+                              testToResume.questions = instantQs.map(q => ({
+                                id: q.id,
+                                questionText: q.questionText,
+                                options: q.options,
+                                correctAnswerIndex: q.correctAnswerIndex,
+                                explanation: q.explanation
+                              }));
+                            } else {
+                              try {
+                                const freshQs = await examService.getQuestionsForMockTest(testId);
+                                if (freshQs && freshQs.length > 0) {
+                                  testToResume.questions = freshQs;
+                                }
+                              } catch (e) {
+                                console.error("Failed to fetch fresh questions on Continue resume:", e);
                               }
-                            } catch (e) {
-                              console.error("Failed to fetch fresh questions on Continue resume:", e);
                             }
                           }
-                        }
 
-                        if (!Array.isArray(testToResume.questions) || testToResume.questions.length === 0) {
-                          alert("Could not load test questions to resume. Please select the test from Mock Tests or Practice Mode.");
-                          return;
-                        }
-                        
-                        setActiveTestState({ ...a.metadata, resumeSessionId: a.metadata?.resumeSessionId || a.metadata?.test?.id });
-                        setActiveTest(testToResume);
-                      }}
-                      className={`snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px] border border-slate-100/90 sm:border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 hover:border-brand-300/60 dark:hover:border-brand-600/50 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container ${
-                        canResume ? 'cursor-pointer active:scale-[0.98]' : 'opacity-60 cursor-not-allowed'
-                      }`}
-                    >
-                      <DynamicVectorCard
-                        glowColor="rgba(37, 99, 235, 0.12)"
-                        roundedClass="rounded-2xl"
-                        className="w-full h-full flex flex-col gap-2.5"
+                          if (!Array.isArray(testToResume.questions) || testToResume.questions.length === 0) {
+                            alert("Could not load test questions to resume. Please select the test from Mock Tests or Practice Mode.");
+                            return;
+                          }
+                          
+                          setActiveTestState({ ...a.metadata, resumeSessionId: a.metadata?.resumeSessionId || a.metadata?.test?.id });
+                          setActiveTest(testToResume);
+                        }}
+                        className={`w-full h-full rounded-2xl border border-slate-100/90 sm:border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 hover:border-brand-300/60 dark:hover:border-brand-600/50 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container relative overflow-hidden ${
+                          canResume ? 'cursor-pointer active:scale-[0.98]' : 'opacity-60 cursor-not-allowed'
+                        }`}
                       >
+                        {/* Inner Vector Grid Overlay */}
+                        <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
                         {/* Top row: icon + text */}
                         <div className="flex items-center gap-3 relative z-10">
                           {/* Play icon with brand gradient */}
@@ -8216,8 +8218,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                             />
                           </div>
                         </div>
-                      </DynamicVectorCard>
-                    </motion.div>
+                      </motion.div>
+                    </DynamicVectorCard>
                   );
                 })}
               </div>
@@ -8297,16 +8299,21 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400'
                     : 'bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400';
                   return (
-                    <DynamicVectorCard
-                      key={i}
-                      glowColor="rgba(37, 99, 235, 0.12)"
-                      roundedClass="rounded-2xl"
-                      onClick={() => {
-                        if (isTestResult) handleViewResults(a.metadata);
-                        else if (a.type === 'question_bank_accessed' && a.metadata?.pdfUrl) window.open(a.metadata.pdfUrl, '_blank');
-                      }}
-                      className="snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px] border border-slate-100/90 sm:border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 hover:border-brand-300/60 dark:hover:border-brand-600/50 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 cursor-pointer group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container active:scale-[0.98]"
-                    >
+                    <DynamicVectorCard key={i} glowColor="rgba(37, 99, 235, 0.12)" roundedClass="rounded-2xl" className="snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px]">
+                      <motion.div
+                        initial={{ opacity: 0, y: 15, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ type: 'spring', stiffness: 200, damping: 22, delay: i * 0.06 }}
+                        whileHover={whileHover.subtle}
+                        whileTap={whileTap.press}
+                        onClick={() => {
+                          if (isTestResult) handleViewResults(a.metadata);
+                          else if (a.type === 'question_bank_accessed' && a.metadata?.pdfUrl) window.open(a.metadata.pdfUrl, '_blank');
+                        }}
+                        className="w-full h-full rounded-2xl border border-slate-100/90 sm:border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 hover:border-brand-300/60 dark:hover:border-brand-600/50 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 cursor-pointer group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container relative overflow-hidden active:scale-[0.98]"
+                      >
+                        {/* Inner Vector Grid Overlay */}
+                        <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
                       {/* Top row: icon + title + arrow */}
                       <div className="flex items-start gap-3 relative z-10">
                         {/* Completed icon — branded circle */}
@@ -8331,6 +8338,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           </span>
                         )}
                       </div>
+                      </motion.div>
                     </DynamicVectorCard>
                   );
                 })}
@@ -8496,52 +8504,55 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           animate={{ opacity: 1, scale: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.95 }}
                           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                          className="h-full"
+                          onClick={() => {
+                            setSelectedExam(exam.id);
+                          }}
+                          className="cursor-pointer h-full group/card"
                         >
-                          <DynamicVectorCard
-                            glowColor="rgba(37, 99, 235, 0.15)"
-                            roundedClass={isMobile ? "rounded-2xl" : "rounded-2xl sm:rounded-3xl"}
-                            onClick={() => {
-                              setSelectedExam(exam.id);
-                            }}
-                            className="cursor-pointer h-full group/card"
-                          >
                           {isMobile ? (
                             // Sleek Premium Mobile Row Item
-                            <div className="p-3.5 bg-white dark:bg-slate-900/90 border border-slate-100/90 dark:border-slate-800 rounded-2xl flex flex-row items-center justify-between gap-3.5 relative shadow-[0_4px_16px_rgba(0,0,0,0.035)] active:scale-[0.98] active:border-brand-300 transition-all duration-300">
-                              {/* Soft brand left indicator */}
-                              <div className="absolute left-0 top-3.5 bottom-3.5 w-1 bg-gradient-to-b from-[#2563EB] to-brand-700 rounded-r-md opacity-80" />
-                              
-                              {/* Left Content (Icon & Text) */}
-                              <div className="flex items-center gap-3.5 min-w-0 flex-1 pl-1.5">
-                                {/* Icon container */}
-                                <div className="w-12 h-12 rounded-xl border border-brand-100/20 bg-brand-50/50 dark:bg-slate-800 flex justify-center items-center shrink-0 shadow-sm relative overflow-hidden">
-                                  {(exam.icon && (exam.icon.startsWith('http') || exam.icon.startsWith('/'))) ? (
-                                    <img src={getDirectImageUrl(exam.icon)} alt={`Odisha Exam Prep Icon: ${exam.name}`} className="w-8/12 h-8/12 object-contain relative z-10" referrerPolicy="no-referrer" />
-                                  ) : (
-                                    <span className="text-xl relative z-10">{exam.icon || '📚'}</span>
-                                  )}
-                                </div>
+                            <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)" roundedClass="rounded-2xl" className="w-full">
+                              <div className="p-3.5 bg-white dark:bg-slate-900/90 border border-slate-100/90 dark:border-slate-800 rounded-2xl flex flex-row items-center justify-between gap-3.5 relative shadow-[0_4px_16px_rgba(0,0,0,0.035)] active:scale-[0.98] active:border-brand-300 transition-all duration-300 overflow-hidden">
+                                {/* Inner Vector Grid Overlay */}
+                                <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
                                 
-                                {/* Title and Subtitle */}
-                                <div className="min-w-0 flex-1">
-                                  <h3 className="text-[13.5px] font-extrabold text-slate-900 dark:text-white leading-snug tracking-tight uppercase line-clamp-1">
-                                    {exam.name}
-                                  </h3>
-                                  <p className="text-slate-455 dark:text-slate-400 text-[11px] font-medium leading-normal mt-0.5 line-clamp-1 pr-1">
-                                    {displayDesc}
-                                  </p>
+                                {/* Soft brand left indicator */}
+                                <div className="absolute left-0 top-3.5 bottom-3.5 w-1 bg-gradient-to-b from-[#2563EB] to-brand-700 rounded-r-md opacity-80 z-10" />
+                                
+                                {/* Left Content (Icon & Text) */}
+                                <div className="flex items-center gap-3.5 min-w-0 flex-1 pl-1.5 relative z-10">
+                                  {/* Icon container */}
+                                  <div className="w-12 h-12 rounded-xl border border-brand-100/20 bg-brand-50/50 dark:bg-slate-800 flex justify-center items-center shrink-0 shadow-sm relative overflow-hidden">
+                                    {(exam.icon && (exam.icon.startsWith('http') || exam.icon.startsWith('/'))) ? (
+                                      <img src={getDirectImageUrl(exam.icon)} alt={`Odisha Exam Prep Icon: ${exam.name}`} className="w-8/12 h-8/12 object-contain relative z-10" referrerPolicy="no-referrer" />
+                                    ) : (
+                                      <span className="text-xl relative z-10">{exam.icon || '📚'}</span>
+                                    )}
+                                  </div>
+                                  
+                                  {/* Title and Subtitle */}
+                                  <div className="min-w-0 flex-1">
+                                    <h3 className="text-[13.5px] font-extrabold text-slate-900 dark:text-white leading-snug tracking-tight uppercase line-clamp-1">
+                                      {exam.name}
+                                    </h3>
+                                    <p className="text-slate-455 dark:text-slate-400 text-[11px] font-medium leading-normal mt-0.5 line-clamp-1 pr-1">
+                                      {displayDesc}
+                                    </p>
+                                  </div>
+                                </div>
+   
+                                {/* Right Icon Chevron */}
+                                <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-300 shrink-0 shadow-2xs relative z-10">
+                                  <ChevronRight className="w-4 h-4" />
                                 </div>
                               </div>
- 
-                              {/* Right Icon Chevron */}
-                              <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-300 shrink-0 shadow-2xs">
-                                <ChevronRight className="w-4 h-4" />
-                              </div>
-                            </div>
+                            </DynamicVectorCard>
                           ) : (
                             // Desktop Card
-                            <div className="p-3 sm:p-5 md:p-6 h-full bg-white dark:bg-gradient-to-br dark:from-[#0d1b3e] dark:via-[#0f2257] dark:to-[#0b1730] border sm:border-2 border-slate-900 dark:border-brand-800/50 rounded-2xl sm:rounded-3xl flex flex-col items-center text-center justify-center space-y-2 sm:space-y-4 md:space-y-5 relative shadow-[0_4px_16px_rgba(0,0,0,0.035)] sm:shadow-[4px_4px_0px_#2563EB] md:group-hover/card:shadow-[8px_8px_0px_#2563EB] md:group-hover/card:-translate-y-1 md:group-hover/card:-translate-x-1 transition-all duration-300 active:scale-[0.98] sm:active:scale-100 active:bg-slate-50/70 sm:active:bg-white dark:active:bg-[#0d1b3e] text-slate-900 dark:text-white">
+                            <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.15)" roundedClass="rounded-2xl sm:rounded-3xl" className="h-full">
+                              <div className="p-3 sm:p-5 md:p-6 h-full bg-white dark:bg-gradient-to-br dark:from-[#0d1b3e] dark:via-[#0f2257] dark:to-[#0b1730] border sm:border-2 border-slate-900 dark:border-brand-800/50 rounded-2xl sm:rounded-3xl flex flex-col items-center text-center justify-center space-y-2 sm:space-y-4 md:space-y-5 relative shadow-[0_4px_16px_rgba(0,0,0,0.035)] sm:shadow-[4px_4px_0px_#2563EB] md:group-hover/card:shadow-[8px_8px_0px_#2563EB] md:group-hover/card:-translate-y-1 md:group-hover/card:-translate-x-1 transition-all duration-300 active:scale-[0.98] sm:active:scale-100 active:bg-slate-50/70 sm:active:bg-white dark:active:bg-[#0d1b3e] text-slate-900 dark:text-white overflow-hidden">
+                                {/* Inner Vector Grid Overlay */}
+                                <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
                               {/* Corner arrow - structured circle */}
                               <div className="absolute top-2 right-2 sm:top-4 sm:right-4 md:top-5 md:right-5 w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full border-2 border-slate-900 dark:border-brand-700/70 bg-white dark:bg-brand-900/60 flex items-center justify-center transition-all duration-300 shadow-[2px_2px_0px_#2563EB] group-hover/card:bg-[#2563EB] group-hover/card:shadow-none group-hover/card:translate-x-0.5 group-hover/card:translate-y-0.5">
                                 <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-900 dark:text-blue-200 group-hover/card:text-white transition-colors" />
@@ -8585,10 +8596,11 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                 </div>
                               </div>
                             </div>
-                          )}
                           </DynamicVectorCard>
-                        </motion.div>
-                      )})
+                        )}
+                      </motion.div>
+                    );
+                  })
                   )}
                 </AnimatePresence>
               </motion.div>
@@ -8596,7 +8608,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           </div>
         </div>
       </div>
-    );
+    </div>
+  );
   }
 
   if (selectedBankType) {

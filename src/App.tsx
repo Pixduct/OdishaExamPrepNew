@@ -62,7 +62,8 @@ import {
   MapPin,
   Building2,
   PieChart,
-  Calculator
+  Calculator,
+  GraduationCap
 } from 'lucide-react';
 import { Toaster, toast, useToasterStore } from 'react-hot-toast';
 import { useAuth } from './lib/AuthContext';
@@ -8925,10 +8926,32 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
     return (
       <ErrorBoundary>
-      <div className="space-y-12 pb-28 sm:pb-12">
-        <div className="flex flex-col gap-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-start gap-3 sm:gap-4">
+      <div className="space-y-12 pb-28 sm:pb-12 relative p-3 sm:p-6 lg:p-8 bg-slate-50/60 rounded-[2.5rem] border border-slate-200/50 shadow-xs overflow-hidden">
+        {/* Background Academic Vector Canvas Grid & Floating Watermarks */}
+        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden rounded-[2.5rem]">
+          {/* Crisp Geometric Dot Grid */}
+          <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40" />
+          
+          {/* Ambient HSL Soft Glows */}
+          <div className="absolute -top-24 left-1/4 w-96 h-96 bg-gradient-to-br from-brand-300/20 via-indigo-200/15 to-transparent rounded-full blur-3xl" />
+          <div className="absolute top-1/3 right-10 w-[30rem] h-[30rem] bg-gradient-to-br from-sky-200/20 via-blue-100/10 to-transparent rounded-full blur-3xl" />
+          <div className="absolute bottom-10 left-10 w-[28rem] h-[28rem] bg-gradient-to-br from-purple-200/15 via-pink-100/10 to-transparent rounded-full blur-3xl" />
+
+          {/* Floating Academic Study Vector Watermarks */}
+          <GraduationCap className="absolute top-20 right-12 w-36 h-36 opacity-[0.04] stroke-[1.2] text-slate-800 rotate-12" />
+          <BookOpen className="absolute top-1/3 left-6 w-44 h-44 opacity-[0.035] stroke-[1.2] text-slate-800 -rotate-6" />
+          <Award className="absolute top-2/3 right-8 w-40 h-40 opacity-[0.04] stroke-[1.2] text-slate-800 rotate-45" />
+          <Compass className="absolute bottom-40 left-12 w-32 h-32 opacity-[0.035] stroke-[1.2] text-slate-800 -rotate-12" />
+        </div>
+
+        {/* Executive Bright Study Vector Header Card */}
+        <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 border border-slate-200/80 shadow-xl shadow-slate-200/40 rounded-[2.2rem] relative overflow-hidden z-10">
+          {/* Radial Grid & Floating Header Watermark */}
+          <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none" />
+          <GraduationCap className="absolute -right-8 -bottom-8 w-52 h-52 sm:w-64 sm:h-64 opacity-10 stroke-[1.2] text-brand-600 pointer-events-none rotate-12" />
+
+          <div className="flex flex-col gap-6 relative z-10">
+            <div className="flex items-start gap-3.5 sm:gap-5">
               <Button 
                 variant="ghost" 
                 onClick={() => { 
@@ -8937,13 +8960,13 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     scrollToElement('exams', { block: 'start', delay: 100 }); 
                   }
                 }} 
-                className="p-3 rounded-2xl hover:bg-brand-50 mt-1 shrink-0"
+                className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-brand-300 hover:bg-brand-50 text-slate-700 hover:text-brand-600 transition-all shrink-0 flex items-center justify-center p-0"
               >
                 <ChevronRight className="w-6 h-6 rotate-180 text-brand-600" />
               </Button>
               <div className="min-w-0 flex-1">
                 {/* Desktop Title with inline badge */}
-                <h1 className="hidden sm:flex flex-wrap items-center gap-3 text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight mb-1">
+                <h1 className="hidden sm:flex flex-wrap items-center gap-3 text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight mb-1.5">
                   {currentExam?.name}
                   {hasAccessTo(`exam_bundle_${selectedExam}`) && (
                     <span className="px-3.5 py-1 bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 text-[10px] font-black rounded-lg uppercase tracking-wider inline-flex items-center gap-1.5 h-6">
@@ -8971,7 +8994,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                 <div className="max-w-3xl mt-1.5 sm:mt-0">
                   <p 
                     className={cn(
-                      "text-slate-500 font-medium text-xs sm:text-base leading-relaxed transition-all duration-300",
+                      "text-slate-600 font-medium text-xs sm:text-base leading-relaxed transition-all duration-300",
                       !isDescExpanded && "line-clamp-2"
                     )}
                   >
@@ -8988,27 +9011,28 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Desktop Quick Navigation Pills */}
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="hidden sm:flex flex-wrap items-center gap-2 sm:gap-3"
-          >
-            <Button variant="outline" className="rounded-full bg-white border-slate-200/60 shadow-sm text-slate-600 font-bold hover:bg-brand-50 hover:text-brand-700 hover:border-brand-200 h-9 px-4 text-xs sm:text-sm transition-all" onClick={() => scrollToElement('question-bank-section', { block: 'start' })}>
-              <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 text-brand-500" />
-              Question Bank
-            </Button>
-            <Button variant="outline" className="rounded-full bg-white border-slate-200/60 shadow-sm text-slate-600 font-bold hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 h-9 px-4 text-xs sm:text-sm transition-all" onClick={() => scrollToElement('practice-mode-section', { block: 'start' })}>
-              <Dumbbell className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 text-indigo-500" />
-              Practice Tests
-            </Button>
-            <Button variant="outline" className="rounded-full bg-white border-slate-200/60 shadow-sm text-slate-600 font-bold hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200 h-9 px-4 text-xs sm:text-sm transition-all" onClick={() => scrollToElement('test-series', { block: 'start' })}>
-              <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 text-amber-500" />
-              Mock Tests
-            </Button>
-          </motion.div>
+            {/* Desktop Quick Navigation Pills */}
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="hidden sm:flex flex-wrap items-center gap-2 sm:gap-3 pt-1 border-t border-slate-200/60"
+            >
+              <Button variant="outline" className="rounded-full bg-white/90 border-slate-200/80 shadow-xs text-slate-700 font-bold hover:bg-brand-50 hover:text-brand-700 hover:border-brand-200 h-9.5 px-4.5 text-xs sm:text-sm transition-all" onClick={() => scrollToElement('question-bank-section', { block: 'start' })}>
+                <Layers className="w-4 h-4 mr-2 text-brand-500" />
+                Question Bank
+              </Button>
+              <Button variant="outline" className="rounded-full bg-white/90 border-slate-200/80 shadow-xs text-slate-700 font-bold hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 h-9.5 px-4.5 text-xs sm:text-sm transition-all" onClick={() => scrollToElement('practice-mode-section', { block: 'start' })}>
+                <Dumbbell className="w-4 h-4 mr-2 text-indigo-500" />
+                Practice Tests
+              </Button>
+              <Button variant="outline" className="rounded-full bg-white/90 border-slate-200/80 shadow-xs text-slate-700 font-bold hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200 h-9.5 px-4.5 text-xs sm:text-sm transition-all" onClick={() => scrollToElement('test-series', { block: 'start' })}>
+                <Award className="w-4 h-4 mr-2 text-amber-500" />
+                Mock Tests
+              </Button>
+            </motion.div>
+          </div>
+        </div>
 
           {/* Mobile Premium Segmented Tab Switcher */}
           {isMobile && (
@@ -10407,7 +10431,6 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
       {/* Common View Elements */}
       {renderCommonModals()}
-    </div>
     </ErrorBoundary>
     );
   };

@@ -48,11 +48,11 @@ export const ExamReadinessCard: React.FC<ExamReadinessCardProps> = ({
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-5 sm:p-7 text-white rounded-[2.2rem] bg-gradient-to-br from-slate-900 via-blue-950/40 to-slate-900 border border-blue-500/30 shadow-xl shadow-blue-950/20 relative overflow-hidden group"
+          className="p-5 sm:p-7 text-slate-900 rounded-[2.2rem] bg-white/90 lg:bg-white/80 backdrop-blur-xl border border-slate-200/80 shadow-xl shadow-slate-200/50 relative overflow-hidden group"
         >
           {/* Radial Grid & Floating 3D Watermark Icon */}
-          <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
-          <Gauge className="absolute -right-8 -bottom-8 w-52 h-52 opacity-15 stroke-[1.2] text-blue-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+          <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none z-0" />
+          <Gauge className="absolute -right-8 -bottom-8 w-52 h-52 opacity-10 stroke-[1.2] text-[#2563eb] pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
 
           {/* Background Accent Glow */}
           <div className="absolute -right-20 -top-20 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -63,13 +63,13 @@ export const ExamReadinessCard: React.FC<ExamReadinessCardProps> = ({
             onClick={() => setIsModalOpen(true)}
           >
             <div className="flex items-center gap-2 min-w-0 flex-1">
-              <span className="flex items-center gap-1 font-mono font-black text-brand-300 shrink-0 bg-brand-500/20 px-2 py-0.5 rounded-lg border border-brand-500/30">
-                <Target className="w-3.5 h-3.5 text-brand-300" />
+              <span className="flex items-center gap-1 font-mono font-black text-brand-600 shrink-0 bg-brand-50 px-2 py-0.5 rounded-lg border border-brand-200">
+                <Target className="w-3.5 h-3.5 text-brand-600" />
                 {score}%
               </span>
 
               <div className="flex-1 min-w-0">
-                <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden p-0.5 border border-slate-800">
+                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-brand-500 to-indigo-500"
                     style={{ width: `${score}%` }}
@@ -77,12 +77,12 @@ export const ExamReadinessCard: React.FC<ExamReadinessCardProps> = ({
                 </div>
               </div>
 
-              <span className="text-[10px] font-mono text-slate-200 shrink-0 font-bold">
+              <span className="text-[10px] font-mono text-slate-700 shrink-0 font-bold">
                 {rankBadgeIcon} {rankTitle.split(' ')[0]}
               </span>
             </div>
 
-            <span className="text-[10px] font-black text-brand-300 hover:text-brand-200 uppercase tracking-wider shrink-0">
+            <span className="text-[10px] font-black text-brand-600 hover:text-brand-700 uppercase tracking-wider shrink-0">
               Details →
             </span>
           </div>
@@ -100,7 +100,7 @@ export const ExamReadinessCard: React.FC<ExamReadinessCardProps> = ({
                     cx="50"
                     cy="50"
                     r={radius}
-                    className="stroke-slate-800"
+                    className="stroke-slate-200"
                     strokeWidth="8"
                     fill="transparent"
                   />
@@ -108,7 +108,7 @@ export const ExamReadinessCard: React.FC<ExamReadinessCardProps> = ({
                     cx="50"
                     cy="50"
                     r={radius}
-                    className="stroke-brand-400"
+                    className="stroke-[#2563eb]"
                     strokeWidth="8"
                     strokeDasharray={circumference}
                     initial={{ strokeDashoffset: circumference }}
@@ -120,16 +120,16 @@ export const ExamReadinessCard: React.FC<ExamReadinessCardProps> = ({
                 </svg>
 
                 <div className="absolute flex flex-col items-center justify-center text-center">
-                  <span className="text-2xl font-black font-mono text-white tracking-tight leading-none">
+                  <span className="text-2xl font-black font-mono text-[#2563eb] tracking-tight leading-none">
                     {score}%
                   </span>
-                  <span className="text-[8.5px] font-black uppercase text-brand-300 tracking-wider mt-0.5">Ready</span>
+                  <span className="text-[8.5px] font-black uppercase text-slate-400 tracking-wider mt-0.5">Ready</span>
                 </div>
               </div>
 
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-black text-base text-white tracking-tight leading-tight group-hover/title:text-brand-300 transition-colors uppercase">
+                  <h3 className="font-black text-base text-slate-900 tracking-tight leading-tight group-hover/title:text-brand-600 transition-colors uppercase">
                     Exam Readiness Score
                   </h3>
                   <span className={`px-2.5 py-0.5 rounded-full text-[9.5px] font-black uppercase tracking-wider border ${rankBadgeBg} ${rankBadgeColor} ${rankBadgeBorder}`}>
@@ -137,7 +137,7 @@ export const ExamReadinessCard: React.FC<ExamReadinessCardProps> = ({
                   </span>
                 </div>
 
-                <p className="text-xs text-slate-200 font-medium">
+                <p className="text-xs text-slate-600 font-medium">
                   Real-time exam readiness score based on your study progress.
                 </p>
               </div>
@@ -145,55 +145,55 @@ export const ExamReadinessCard: React.FC<ExamReadinessCardProps> = ({
 
             {/* 4 Mini Component Indicators */}
             <div className="flex-1 max-w-md grid grid-cols-2 gap-3">
-              <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 space-y-1">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-200">
-                  <span className="flex items-center gap-1 text-emerald-400 font-black">
-                    <Target className="w-3.5 h-3.5" />
+              <div className="p-2.5 rounded-xl bg-slate-50/90 border border-slate-200/80 space-y-1">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                  <span className="flex items-center gap-1 text-emerald-700 font-black">
+                    <Target className="w-3.5 h-3.5 text-emerald-600" />
                     Accuracy
                   </span>
-                  <span className="font-mono text-emerald-300 font-black">{breakdown.accuracy.percentage}%</span>
+                  <span className="font-mono text-emerald-700 font-black">{breakdown.accuracy.percentage}%</span>
                 </div>
-                <div className="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
-                  <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${breakdown.accuracy.percentage}%` }} />
+                <div className="w-full h-1.5 bg-slate-200/80 rounded-full overflow-hidden border border-slate-200">
+                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${breakdown.accuracy.percentage}%` }} />
                 </div>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 space-y-1">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-200">
-                  <span className="flex items-center gap-1 text-indigo-400 font-black">
-                    <BookOpen className="w-3.5 h-3.5" />
+              <div className="p-2.5 rounded-xl bg-slate-50/90 border border-slate-200/80 space-y-1">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                  <span className="flex items-center gap-1 text-indigo-700 font-black">
+                    <BookOpen className="w-3.5 h-3.5 text-indigo-600" />
                     Subjects
                   </span>
-                  <span className="font-mono text-indigo-300 font-black">{readiness.topicsAttemptedCount}/10</span>
+                  <span className="font-mono text-indigo-700 font-black">{readiness.topicsAttemptedCount}/10</span>
                 </div>
-                <div className="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
-                  <div className="h-full bg-indigo-400 rounded-full" style={{ width: `${breakdown.syllabus.percentage}%` }} />
+                <div className="w-full h-1.5 bg-slate-200/80 rounded-full overflow-hidden border border-slate-200">
+                  <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${breakdown.syllabus.percentage}%` }} />
                 </div>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 space-y-1">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-200">
-                  <span className="flex items-center gap-1 text-amber-400 font-black">
-                    <Layers className="w-3.5 h-3.5" />
+              <div className="p-2.5 rounded-xl bg-slate-50/90 border border-slate-200/80 space-y-1">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                  <span className="flex items-center gap-1 text-amber-800 font-black">
+                    <Layers className="w-3.5 h-3.5 text-amber-600" />
                     Questions
                   </span>
-                  <span className="font-mono text-amber-300 font-black">{readiness.questionsSolved} Qs</span>
+                  <span className="font-mono text-amber-800 font-black">{readiness.questionsSolved} Qs</span>
                 </div>
-                <div className="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
-                  <div className="h-full bg-amber-400 rounded-full" style={{ width: `${breakdown.volume.percentage}%` }} />
+                <div className="w-full h-1.5 bg-slate-200/80 rounded-full overflow-hidden border border-slate-200">
+                  <div className="h-full bg-amber-500 rounded-full" style={{ width: `${breakdown.volume.percentage}%` }} />
                 </div>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 space-y-1">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-200">
-                  <span className="flex items-center gap-1 text-cyan-400 font-black">
-                    <Award className="w-3.5 h-3.5" />
+              <div className="p-2.5 rounded-xl bg-slate-50/90 border border-slate-200/80 space-y-1">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                  <span className="flex items-center gap-1 text-cyan-800 font-black">
+                    <Award className="w-3.5 h-3.5 text-cyan-600" />
                     Mocks
                   </span>
-                  <span className="font-mono text-cyan-300 font-black">{readiness.mocksCompleted} Taken</span>
+                  <span className="font-mono text-cyan-800 font-black">{readiness.mocksCompleted} Taken</span>
                 </div>
-                <div className="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
-                  <div className="h-full bg-cyan-400 rounded-full" style={{ width: `${breakdown.mocks.percentage}%` }} />
+                <div className="w-full h-1.5 bg-slate-200/80 rounded-full overflow-hidden border border-slate-200">
+                  <div className="h-full bg-cyan-500 rounded-full" style={{ width: `${breakdown.mocks.percentage}%` }} />
                 </div>
               </div>
             </div>
@@ -201,7 +201,7 @@ export const ExamReadinessCard: React.FC<ExamReadinessCardProps> = ({
             {/* Action Button */}
             <Button
               onClick={() => setIsModalOpen(true)}
-              className="h-11 px-5 rounded-xl bg-gradient-to-r from-brand-500 via-blue-600 to-indigo-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-xs shadow-lg shadow-brand-500/25 shrink-0 cursor-pointer flex items-center gap-2"
+              className="h-11 px-5 rounded-xl bg-gradient-to-r from-brand-600 via-blue-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-black text-xs shadow-lg shadow-brand-500/25 shrink-0 cursor-pointer flex items-center gap-2"
             >
               <span>View Score Details</span>
               <ArrowRight className="w-4 h-4" />

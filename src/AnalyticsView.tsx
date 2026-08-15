@@ -229,8 +229,8 @@ const Sparkline = React.memo(({ data, color = "#2563eb", id }: { data: number[];
 
 const StatCard = React.memo(({ icon, title, value, suffix = "", trend, decimals = 0, sparklineData, color = "brand", bgVectorIcon: BgVectorIcon }: any) => {
   const isPositive = (trend ?? 0) >= 0;
-  const strokeColor = color === "brand" ? "#60a5fa" : color === "success" ? "#34d399" : color === "warning" ? "#fbbf24" : "#a78bfa";
-  const glowColor = color === "brand" ? "rgba(37, 99, 235, 0.15)" : color === "success" ? "rgba(16, 185, 129, 0.15)" : color === "warning" ? "rgba(245, 158, 11, 0.15)" : "rgba(99, 102, 241, 0.15)";
+  const strokeColor = color === "brand" ? "#2563eb" : color === "success" ? "#10b981" : color === "warning" ? "#f59e0b" : "#6366f1";
+  const glowColor = color === "brand" ? "rgba(37, 99, 235, 0.12)" : color === "success" ? "rgba(16, 185, 129, 0.12)" : color === "warning" ? "rgba(245, 158, 11, 0.12)" : "rgba(99, 102, 241, 0.12)";
   const VectorIcon = BgVectorIcon || Activity;
 
   return (
@@ -240,23 +240,23 @@ const StatCard = React.memo(({ icon, title, value, suffix = "", trend, decimals 
     >
       <DynamicVectorCard glowColor={glowColor} className="w-full">
         <div
-          className="relative w-full p-4 sm:p-6 text-white rounded-[2rem] bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-slate-700/80 shadow-xl shadow-slate-950/20 flex flex-col justify-between overflow-hidden group min-h-[120px] sm:min-h-[170px]"
+          className="relative w-full p-4 sm:p-6 text-slate-900 rounded-[2rem] bg-white/90 lg:bg-white/80 backdrop-blur-xl border border-slate-200/80 shadow-lg shadow-slate-200/50 flex flex-col justify-between overflow-hidden group min-h-[120px] sm:min-h-[170px]"
         >
           {/* Radial Grid Watermark */}
-          <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
-          <VectorIcon className="absolute -right-6 -bottom-6 w-36 h-36 opacity-15 stroke-[1.2] text-slate-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+          <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none z-0" />
+          <VectorIcon className="absolute -right-6 -bottom-6 w-36 h-36 opacity-10 stroke-[1.2] text-[#2563eb] pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
 
           {/* Top Row: Icon + Trend */}
           <div className="relative z-10 flex items-center justify-between mb-2 sm:mb-4">
-             <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-slate-800/90 text-amber-300 border border-slate-700 shadow-2xs">
-                {React.cloneElement(icon, { className: "w-4 h-4 sm:w-5 sm:h-5 text-amber-300" })}
+             <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-brand-50 text-brand-600 border border-brand-200 shadow-2xs">
+                {React.cloneElement(icon, { className: "w-4 h-4 sm:w-5 sm:h-5 text-brand-600" })}
              </div>
              {trend !== undefined && trend !== 0 && (
                 <div className={cn(
                    "flex items-center gap-1 px-2 py-1 rounded-xl text-[9px] sm:text-xs font-black font-mono shadow-2xs border",
-                   isPositive ? "bg-emerald-400/20 text-emerald-300 border-emerald-400/40" : "bg-rose-500/20 text-rose-300 border-rose-500/40"
+                   isPositive ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200"
                 )}>
-                   {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                   {isPositive ? <TrendingUp className="w-3 h-3 text-emerald-600" /> : <TrendingDown className="w-3 h-3 text-rose-600" />}
                    {Math.abs(Math.round(trend))}%
                 </div>
              )}
@@ -264,16 +264,16 @@ const StatCard = React.memo(({ icon, title, value, suffix = "", trend, decimals 
 
           {/* Label + Value */}
           <div className="relative z-10 flex-1 min-w-0 mb-2">
-            <h4 className="text-[9px] sm:text-[11px] font-mono font-black tracking-wider text-amber-200/90 uppercase truncate">{title}</h4>
-            <div className="text-xl sm:text-3xl font-black text-white font-mono flex items-baseline tracking-tight leading-none mt-1">
+            <h4 className="text-[9px] sm:text-[11px] font-sans font-black tracking-wider text-slate-400 uppercase truncate">{title}</h4>
+            <div className="text-xl sm:text-3xl font-black text-slate-900 font-mono flex items-baseline tracking-tight leading-none mt-1">
                <AnimatedCounter value={value} decimals={decimals} />
-               {suffix && <span className="text-xs sm:text-sm font-black text-slate-300 ml-1">{suffix}</span>}
+               {suffix && <span className="text-xs sm:text-sm font-black text-slate-400 ml-1">{suffix}</span>}
             </div>
           </div>
           
           {/* Sparkline */}
           {sparklineData && sparklineData.length >= 2 && (
-            <div className="relative z-10 w-full pt-1.5 border-t border-slate-800 opacity-90">
+            <div className="relative z-10 w-full pt-1.5 border-t border-slate-100 opacity-90">
               <Sparkline data={sparklineData} color={strokeColor} id={title.replace(/\s+/g, '-').toLowerCase()} />
             </div>
           )}
@@ -311,15 +311,15 @@ const SubjectRow = React.memo(({ subject }: { subject: any }) => {
     <div 
       onClick={() => setIsExpanded(!isExpanded)}
       className={cn(
-        "flex flex-col p-3.5 sm:p-4 bg-slate-900/90 rounded-2xl border border-slate-700/80 shadow-md text-white hover:border-slate-600 transition-all duration-300 group cursor-pointer relative overflow-hidden",
-        isExpanded && "bg-slate-900 border-blue-500/40"
+        "flex flex-col p-3.5 sm:p-4 bg-slate-50/90 rounded-2xl border border-slate-200/80 shadow-xs text-slate-900 hover:border-slate-300 transition-all duration-300 group cursor-pointer relative overflow-hidden",
+        isExpanded && "bg-white border-brand-300 shadow-md"
       )}
     >
        <div className="flex items-center justify-between gap-3 relative z-10">
           <div className="flex flex-col min-w-0 flex-1">
              <span 
                 className={cn(
-                   "font-black text-white group-hover:text-blue-300 transition-colors text-xs sm:text-sm", 
+                   "font-black text-slate-900 group-hover:text-brand-600 transition-colors text-xs sm:text-sm", 
                    isExpanded ? "" : "truncate"
                 )} 
                 title={subject.name}
@@ -328,69 +328,69 @@ const SubjectRow = React.memo(({ subject }: { subject: any }) => {
              </span>
           </div>
           <div className="flex items-center gap-3 shrink-0">
-            <span className="text-xs sm:text-sm font-mono font-black text-white group-hover:text-blue-300 transition-colors">{subject.avgScore}%</span>
+            <span className="text-xs sm:text-sm font-mono font-black text-slate-900 group-hover:text-brand-600 transition-colors">{subject.avgScore}%</span>
             <span className={cn(
               "px-2.5 py-1 rounded-lg text-[9px] font-mono font-black uppercase tracking-wider leading-none shadow-2xs border", 
               subject.status === 'Strong' 
-                 ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40" 
-                 : "bg-rose-500/20 text-rose-300 border-rose-500/40"
+                 ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
+                 : "bg-rose-50 text-rose-700 border-rose-200"
             )}>
                {subject.status}
             </span>
-            <ChevronDown className={cn("w-4 h-4 text-slate-400 group-hover:text-slate-200 transition-transform duration-300", isExpanded && "rotate-180")} />
+            <ChevronDown className={cn("w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-300", isExpanded && "rotate-180")} />
           </div>
        </div>
        
        {/* Subtle Accuracy Meter underneath */}
        {!isExpanded && (
-         <div className="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden mt-2.5 border border-slate-800">
-            <motion.div 
-               initial={{ width: 0 }}
-               animate={{ width: `${subject.avgScore}%` }}
-               transition={{ duration: 0.85, ease: "easeOut" }}
-               className={cn(
-                 "h-full rounded-full bg-gradient-to-r", 
-                 subject.avgScore >= 70 ? "from-emerald-500 to-emerald-400" : "from-rose-500 to-rose-400"
-               )}
-            />
-         </div>
+          <div className="w-full h-1.5 bg-slate-200/80 rounded-full overflow-hidden mt-2.5 border border-slate-200">
+             <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: `${subject.avgScore}%` }}
+                transition={{ duration: 0.85, ease: "easeOut" }}
+                className={cn(
+                  "h-full rounded-full bg-gradient-to-r", 
+                  subject.avgScore >= 70 ? "from-emerald-500 to-emerald-400" : "from-rose-500 to-rose-400"
+                )}
+             />
+          </div>
        )}
        
        <AnimatePresence>
-         {isExpanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="overflow-hidden"
-            >
-              <div className="pt-4 mt-3 border-t border-slate-800 relative z-10">
-                 <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
-                   {/* Attempted stat box */}
-                   <div className="p-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-center flex flex-col justify-between items-center">
-                     <span className="text-amber-200/90 font-mono font-black uppercase tracking-widest text-[8px] leading-none mb-1">Attempted</span>
-                     <span className="text-white font-mono font-black text-xs sm:text-sm">{subject.attempted}</span>
-                     <span className="text-[7.5px] font-bold text-slate-300 uppercase mt-1 leading-none">Questions</span>
-                   </div>
-                   
-                   {/* Correct stat box */}
-                   <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-center flex flex-col justify-between items-center">
-                     <span className="text-emerald-300 font-mono font-black uppercase tracking-widest text-[8px] leading-none mb-1">Correct</span>
-                     <span className="text-emerald-400 font-mono font-black text-xs sm:text-sm">{subject.correct}</span>
-                     <span className="text-[7.5px] font-mono font-black text-emerald-300 uppercase mt-1 leading-none">{correctPct}% Acc</span>
-                   </div>
-                   
-                   {/* Incorrect stat box */}
-                   <div className="p-2.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-center flex flex-col justify-between items-center">
-                     <span className="text-rose-300 font-mono font-black uppercase tracking-widest text-[8px] leading-none mb-1">Incorrect</span>
-                     <span className="text-rose-400 font-mono font-black text-xs sm:text-sm">{incorrect}</span>
-                     <span className="text-[7.5px] font-mono font-black text-rose-300 uppercase mt-1 leading-none">{incorrectPct}% Pct</span>
-                   </div>
-                 </div>
-              </div>
-            </motion.div>
-         )}
+          {isExpanded && (
+             <motion.div
+               initial={{ height: 0, opacity: 0 }}
+               animate={{ height: 'auto', opacity: 1 }}
+               exit={{ height: 0, opacity: 0 }}
+               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+               className="overflow-hidden"
+             >
+               <div className="pt-4 mt-3 border-t border-slate-200/80 relative z-10">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
+                    {/* Attempted stat box */}
+                    <div className="p-2.5 bg-slate-100/80 border border-slate-200/80 rounded-xl text-center flex flex-col justify-between items-center">
+                      <span className="text-slate-500 font-mono font-black uppercase tracking-widest text-[8px] leading-none mb-1">Attempted</span>
+                      <span className="text-slate-900 font-mono font-black text-xs sm:text-sm">{subject.attempted}</span>
+                      <span className="text-[7.5px] font-bold text-slate-400 uppercase mt-1 leading-none">Questions</span>
+                    </div>
+                    
+                    {/* Correct stat box */}
+                    <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-center flex flex-col justify-between items-center">
+                      <span className="text-emerald-700 font-mono font-black uppercase tracking-widest text-[8px] leading-none mb-1">Correct</span>
+                      <span className="text-emerald-600 font-mono font-black text-xs sm:text-sm">{subject.correct}</span>
+                      <span className="text-[7.5px] font-mono font-black text-emerald-700 uppercase mt-1 leading-none">{correctPct}% Acc</span>
+                    </div>
+                    
+                    {/* Incorrect stat box */}
+                    <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-center flex flex-col justify-between items-center">
+                      <span className="text-rose-700 font-mono font-black uppercase tracking-widest text-[8px] leading-none mb-1">Incorrect</span>
+                      <span className="text-rose-600 font-mono font-black text-xs sm:text-sm">{incorrect}</span>
+                      <span className="text-[7.5px] font-mono font-black text-rose-700 uppercase mt-1 leading-none">{incorrectPct}% Pct</span>
+                    </div>
+                  </div>
+               </div>
+             </motion.div>
+          )}
        </AnimatePresence>
     </div>
   );
@@ -1414,15 +1414,17 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
           />
         </div>
 
+
+
         {/* AI Performance Lab */}
         <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.15)">
           <motion.div
             variants={stagger.itemFadeUp}
-            className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950/40 to-slate-900 text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-9 border border-blue-500/30 shadow-xl shadow-blue-950/20 group"
+            className="relative overflow-hidden bg-white/90 lg:bg-white/80 backdrop-blur-xl text-slate-900 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-9 border border-slate-200/80 shadow-xl shadow-slate-200/50 group"
           >
             {/* Radial Grid & 3D Floating Watermark Icon */}
-            <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
-            <Brain className="absolute -right-8 -bottom-8 w-56 h-56 opacity-15 stroke-[1.2] text-blue-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+            <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none z-0" />
+            <Brain className="absolute -right-8 -bottom-8 w-56 h-56 opacity-10 stroke-[1.2] text-[#2563eb] pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
 
             <div className="relative z-10">
               {scanningPhase === 0 && (
@@ -1431,30 +1433,30 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
                   <div className="flex md:hidden flex-col gap-3">
                     {/* Row 1: icon + labels + status */}
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-400/40 flex items-center justify-center relative shadow-sm shrink-0">
-                        <Brain className="w-5 h-5 text-blue-300 animate-pulse" />
+                      <div className="w-10 h-10 rounded-xl bg-brand-50 border border-brand-200 flex items-center justify-center relative shadow-2xs shrink-0 text-brand-600">
+                        <Brain className="w-5 h-5 text-brand-600 animate-pulse" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="px-2 py-0.5 bg-blue-400/20 border border-blue-400/30 text-blue-200 text-[8px] font-black uppercase tracking-widest rounded-md flex items-center gap-1 leading-none">
+                          <span className="px-2 py-0.5 bg-brand-50 border border-brand-200 text-brand-700 text-[8px] font-black uppercase tracking-widest rounded-md flex items-center gap-1 leading-none">
                             <Cpu className="w-2 h-2" /> OdishaExamPrep AI
                           </span>
                           <span className="flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                            <span className="text-[9px] font-bold text-emerald-300 uppercase tracking-wider">Ready</span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="text-[9px] font-bold text-emerald-700 uppercase tracking-wider">Ready</span>
                           </span>
                         </div>
-                        <h3 className="text-sm font-black tracking-tight leading-tight text-white mt-0.5 uppercase">AI Performance & Diagnostic Lab</h3>
+                        <h3 className="text-sm font-black tracking-tight leading-tight text-slate-900 mt-0.5 uppercase">AI Performance & Diagnostic Lab</h3>
                       </div>
                     </div>
                     {/* Row 2: description */}
-                    <p className="text-indigo-200/90 text-[11px] font-medium leading-relaxed">
+                    <p className="text-slate-600 text-[11px] font-medium leading-relaxed">
                       Unlock instant cognitive diagnostics, custom time-management strategy, and a targeted exam preparation roadmap.
                     </p>
                     {/* Row 3: full-width CTA button */}
                     <button
                       onClick={() => runAiAnalysis()}
-                      className="w-full h-11 rounded-2xl bg-gradient-to-r from-brand-500 via-blue-600 to-indigo-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2 group cursor-pointer border-none"
+                      className="w-full h-11 rounded-2xl bg-gradient-to-r from-brand-600 via-blue-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2 group cursor-pointer border-none"
                     >
                       <Sparkles className="w-3.5 h-3.5 fill-white/10 group-hover:scale-110 transition-transform" />
                       Initialize AI Scan
@@ -1464,27 +1466,27 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
                   {/* ── Desktop: side-by-side layout ── */}
                   <div className="hidden md:flex flex-row items-center justify-between gap-6">
                     <div className="flex flex-row items-start gap-5 flex-1">
-                      <div className="w-16 h-16 rounded-2xl bg-blue-500/20 border border-blue-400/40 flex items-center justify-center relative shadow-sm shrink-0">
-                        <Brain className="w-9 h-9 text-blue-300 animate-pulse" />
-                        <div className="absolute inset-0 rounded-2xl border-2 border-blue-400/20 animate-ping" />
+                      <div className="w-16 h-16 rounded-2xl bg-brand-50 border border-brand-200 flex items-center justify-center relative shadow-2xs shrink-0 text-brand-600">
+                        <Brain className="w-9 h-9 text-brand-600 animate-pulse" />
+                        <div className="absolute inset-0 rounded-2xl border-2 border-brand-300 animate-ping" />
                       </div>
                       <div>
                         <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                          <span className="px-2.5 py-0.5 bg-blue-400/20 border border-blue-400/30 text-blue-200 text-[9px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1 shadow-sm leading-none">
+                          <span className="px-2.5 py-0.5 bg-brand-50 border border-brand-200 text-brand-700 text-[9px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1 shadow-2xs leading-none">
                             <Cpu className="w-2.5 h-2.5" /> OdishaExamPrep AI
                           </span>
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                          <span className="text-[9px] font-bold text-emerald-300 uppercase tracking-wider">Ready to diagnose</span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="text-[9px] font-bold text-emerald-700 uppercase tracking-wider">Ready to diagnose</span>
                         </div>
-                        <h3 className="text-2xl font-black tracking-tight leading-tight text-white uppercase">AI Performance & Diagnostic Laboratory</h3>
-                        <p className="text-indigo-200/90 text-sm font-medium mt-1.5 max-w-xl">
+                        <h3 className="text-2xl font-black tracking-tight leading-tight text-slate-900 uppercase">AI Performance & Diagnostic Laboratory</h3>
+                        <p className="text-slate-600 text-sm font-medium mt-1.5 max-w-xl">
                           Unlock instant cognitive diagnostics, custom time-management strategy, and a targeted exam preparation roadmap.
                         </p>
                       </div>
                     </div>
                     <button
                       onClick={() => runAiAnalysis()}
-                      className="shrink-0 px-8 h-[52px] rounded-2xl bg-gradient-to-r from-brand-500 via-blue-600 to-indigo-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-brand-500/20 hover:scale-[1.02] active:scale-98 transition-all flex items-center justify-center gap-2 group cursor-pointer border-none"
+                      className="shrink-0 px-8 h-[52px] rounded-2xl bg-gradient-to-r from-brand-600 via-blue-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-brand-500/20 hover:scale-[1.02] active:scale-98 transition-all flex items-center justify-center gap-2 group cursor-pointer border-none"
                     >
                       <Sparkles className="w-4 h-4 fill-white/10 group-hover:scale-110 transition-transform" />
                       Initialize AI Scan
@@ -1600,260 +1602,225 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
                   </div>
                 </div>
 
-                {/* AI Panel Tabs Body */}
-                <div className="min-h-[180px] sm:min-h-[220px]">
-                  {aiPanelTab === 'diagnostic' && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start"
-                    >
-                      <div className="lg:col-span-8 space-y-3">
-                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                          <span className="px-2 py-0.5 bg-[#2563EB]/10 border border-[#2563EB]/20 text-[#2563EB] text-[9px] font-black uppercase tracking-widest rounded-lg whitespace-nowrap">Performance Report</span>
-                          <span className="text-[10px] font-bold text-slate-500 leading-normal">Targeting Odisha Competitive Exams</span>
-                        </div>
-                        <p className="text-slate-700 text-[13px] sm:text-base font-medium leading-relaxed max-w-3xl">
-                          {aiInsight}
-                        </p>
+                {/* Tab 1: AI Holographic Insights */}
+                {aiPanelTab === 'diagnostic' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-4"
+                  >
+                    <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-2xl p-4 sm:p-6 border border-slate-200/80 shadow-xs relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-[#2563EB]/5 rounded-full blur-2xl pointer-events-none" />
+                      <div className="flex items-center gap-2 mb-3">
+                        <Lightbulb className="w-4 h-4 text-[#2563EB]" />
+                        <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Cognitive Diagnostic Synthesis</h4>
                       </div>
-
-                      {/* Visual metrics cards */}
-                      <div className="lg:col-span-4 grid grid-cols-2 lg:grid-cols-1 gap-2.5 sm:gap-3">
-                        <div className="p-3 sm:p-4 bg-emerald-50/70 border border-emerald-100 rounded-2xl flex items-start gap-2.5 sm:gap-3.5 hover:bg-emerald-50/90 transition-colors">
-                          <div className="p-1.5 sm:p-2 rounded-xl bg-emerald-100 text-emerald-700 shadow-sm shrink-0">
-                            <Gauge className="w-4 h-4 sm:w-5 sm:h-5" />
-                          </div>
-                          <div className="min-w-0">
-                            <h4 className="text-[9px] sm:text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-0.5">Top Strength</h4>
-                            <p className="text-slate-700 text-[11px] sm:text-xs font-semibold leading-snug sm:leading-relaxed">
-                              {stats.avgAccuracy >= 70 ? 'Superior Accuracy under moderate test pacing.' : 'Consistent performance in core topics.'}
-                            </p>
-                          </div>
+                      {loadingAi ? (
+                        <div className="flex items-center gap-3 py-6 text-slate-500 font-medium text-xs">
+                          <Loader2 className="w-4 h-4 animate-spin text-[#2563EB]" />
+                          Analyzing recent test patterns and accuracy metrics...
                         </div>
+                      ) : (
+                        <MarkdownMathRenderer text={aiInsight} />
+                      )}
+                    </div>
+                  </motion.div>
+                )}
 
-                        <div className="p-3 sm:p-4 bg-amber-50/70 border border-amber-100 rounded-2xl flex items-start gap-2.5 sm:gap-3.5 hover:bg-amber-50/90 transition-colors">
-                          <div className="p-1.5 sm:p-2 rounded-xl bg-amber-100 text-amber-700 shadow-sm shrink-0">
-                            <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
-                          </div>
-                          <div className="min-w-0">
-                            <h4 className="text-[9px] sm:text-[10px] font-black text-amber-600 uppercase tracking-widest mb-0.5">Main Blocker</h4>
-                            <p className="text-slate-700 text-[11px] sm:text-xs font-semibold leading-snug sm:leading-relaxed">
-                              {stats.avgTimePerQuestion > 60 ? 'Speed decay on complex questions.' : 'Precision drop under high-speed answers.'}
-                            </p>
-                          </div>
-                        </div>
+                {/* Tab 2: Personal Action Plan */}
+                {aiPanelTab === 'actionPlan' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-3"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                        <Check className="w-4 h-4 text-emerald-600" />
+                        Targeted Priority Checklist
+                      </h4>
+                      <span className="text-[10px] font-bold text-slate-500 font-mono">
+                        {Object.values(checkedActions).filter(Boolean).length} / {actionItems.length} Completed
+                      </span>
+                    </div>
+
+                    {actionItems.length === 0 ? (
+                      <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200/80 text-center text-xs font-semibold text-slate-500">
+                        No pending action items. Scan analytics to generate custom practice tasks!
                       </div>
-                    </motion.div>
-                  )}
-
-                  {aiPanelTab === 'actionPlan' && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="space-y-4"
-                    >
-                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2">
-                        <span className="px-2 py-0.5 bg-[#2563EB]/10 border border-[#2563EB]/20 text-[#2563EB] text-[9px] font-black uppercase tracking-widest rounded-lg whitespace-nowrap">Study Checklist</span>
-                        <span className="text-[10px] font-bold text-slate-500 leading-normal">Check off items as you complete them to lift your score</span>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 items-stretch">
-                        {actionItems.map((item, idx) => (
-                          <div 
-                            key={idx}
-                            onClick={() => setCheckedActions(prev => ({ ...prev, [idx]: !prev[idx] }))}
-                            className={cn(
-                              "p-3.5 sm:p-4 bg-slate-50/80 border border-slate-200/70 rounded-2xl flex items-start gap-3 cursor-pointer hover:bg-white hover:border-[#2563EB]/40 hover:shadow-sm transition-all duration-300 active:scale-[0.98] group relative",
-                              checkedActions[idx] && "bg-[#2563EB]/5 border-[#2563EB]/20"
-                            )}
-                          >
-                            <div className={cn(
-                              "w-5 h-5 rounded-md border flex items-center justify-center shrink-0 mt-0.5 transition-colors",
-                              checkedActions[idx] 
-                                ? "bg-emerald-500 border-emerald-400 text-white shadow-xs" 
-                                : "border-slate-300 text-transparent bg-white group-hover:border-slate-400"
-                            )}>
-                              <Check className="w-3.5 h-3.5 text-white stroke-[3]" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className={cn(
-                                "text-slate-800 text-xs sm:text-sm font-semibold leading-relaxed whitespace-normal break-words",
-                                checkedActions[idx] && "line-through text-slate-400"
-                              )}>
-                                {item.task}
-                              </p>
-                              {item.timeframe && (
-                                <span className="inline-block text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1.5">
-                                  Target: {item.timeframe}
-                                </span>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-2.5">
+                        {actionItems.map((item, idx) => {
+                          const isChecked = !!checkedActions[idx];
+                          return (
+                            <div
+                              key={idx}
+                              onClick={() => setCheckedActions(prev => ({ ...prev, [idx]: !prev[idx] }))}
+                              className={cn(
+                                "p-3.5 rounded-xl border transition-all cursor-pointer flex items-start gap-3 group select-none",
+                                isChecked
+                                  ? "bg-emerald-50/60 border-emerald-200/80 text-slate-500"
+                                  : "bg-white border-slate-200/80 hover:border-brand-200 text-slate-800 shadow-2xs"
                               )}
-                            </div>
-                            <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
-                              <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[9px] font-black rounded-lg border border-emerald-200/50 uppercase">
-                                {item.boost || '+5%'}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {aiPanelTab === 'chat' && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch"
-                    >
-                      {/* Left: Chat Container */}
-                      <div className="lg:col-span-8 flex flex-col justify-between border border-slate-200 rounded-2xl bg-slate-50/50 overflow-hidden h-[340px] sm:h-[440px] lg:h-[520px]">
-                        {/* Top bar with Clear Chat option */}
-                        <div className="px-4 py-2.5 bg-white border-b border-slate-200 flex items-center justify-between shrink-0">
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                            <span className="text-[10px] font-black text-slate-700 uppercase tracking-wider">AI Performance Coach</span>
-                          </div>
-                          {chatHistory.length > 0 && (
-                            <button
-                              onClick={() => setChatHistory([])}
-                              className="text-[9px] font-black text-slate-400 hover:text-[#2563EB] flex items-center gap-1.5 transition-colors cursor-pointer border-none bg-transparent"
                             >
-                              <Trash2 className="w-3 h-3" /> CLEAR CHAT
-                            </button>
-                          )}
-                        </div>
-
-                        <div ref={chatContainerRef} className="p-4 overflow-y-auto space-y-3.5 flex-1 no-scrollbar text-xs" style={{ overscrollBehaviorY: 'contain' }}>
-                          {chatHistory.length === 0 ? (
-                            <div className="h-full flex flex-col items-center justify-center text-center text-slate-500 p-4 sm:p-6">
-                              <Cpu className="w-8 h-8 sm:w-10 sm:h-10 text-slate-400 mb-2 sm:mb-3 animate-float-gentle" />
-                              <p className="font-semibold text-sm text-slate-700 mb-1">Your AI Exam Coach is ready</p>
-                              <p className="text-[10px] font-medium leading-relaxed max-w-xs text-slate-500">Ask about mock scores, speed problems, or study advice.</p>
-                            </div>
-                          ) : (
-                            chatHistory.map((msg, i) => (
-                              <div 
-                                key={i} 
+                              <div
                                 className={cn(
-                                  "flex gap-2 sm:gap-3 animate-in fade-in slide-in-from-bottom-2 duration-305",
-                                  msg.role === 'user' 
-                                    ? "max-w-[85%] sm:max-w-[75%] ml-auto flex-row-reverse" 
-                                    : "w-full sm:w-auto max-w-[96%] sm:max-w-[85%] md:max-w-[80%] mr-auto"
+                                  "w-5 h-5 rounded-lg border flex items-center justify-center shrink-0 mt-0.5 transition-colors",
+                                  isChecked
+                                    ? "bg-emerald-600 border-emerald-600 text-white"
+                                    : "border-slate-300 group-hover:border-brand-500 bg-slate-50"
                                 )}
                               >
-                                <div className={cn(
-                                  "w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center shrink-0 text-[9px] sm:text-[10px] font-black shadow-sm",
-                                  msg.role === 'user' ? "bg-[#2563EB] text-white" : "bg-slate-200 text-slate-700"
-                                )}>
-                                  {msg.role === 'user' ? 'ME' : 'AI'}
-                                </div>
-                                <div className={cn(
-                                  "p-2.5 sm:p-3 rounded-2xl leading-relaxed text-xs shadow-sm",
-                                  msg.role === 'user' 
-                                    ? "bg-[#2563EB] text-white rounded-tr-none" 
-                                    : "bg-white border border-slate-200 text-slate-800 rounded-tl-none"
-                                )}>
-                                  <MarkdownMathRenderer text={msg.content} isUser={msg.role === 'user'} />
-                                </div>
+                                {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                               </div>
-                            ))
-                          )}
-                          {chatLoading && chatHistory[chatHistory.length - 1]?.role === 'user' && (
-                            <div className="flex gap-2 sm:gap-3 max-w-[90%] sm:max-w-[85%] items-center mr-auto">
-                              <div className="w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-lg bg-slate-200 text-slate-700 flex items-center justify-center text-[9px] sm:text-[10px] font-black shadow-sm">
-                                AI
-                              </div>
-                              <div className="p-2.5 sm:p-3 rounded-2xl bg-white border border-slate-200 text-slate-500 rounded-tl-none flex items-center gap-1.5 shadow-sm">
-                                <Loader2 className="w-3.5 h-3.5 animate-spin text-[#2563EB]" /> Thinking...
+                              <div className="flex-1 min-w-0">
+                                <span className={cn("text-xs font-bold leading-relaxed block", isChecked && "line-through text-slate-400")}>
+                                  {typeof item === 'string' ? item : item.text || item.title || JSON.stringify(item)}
+                                </span>
                               </div>
                             </div>
-                          )}
-                        </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
 
-                        {/* Text Input */}
-                        <div className="p-3 border-t border-slate-200 bg-white flex gap-2.5 items-center">
-                          <input
-                            type="text"
-                            value={chatInput}
-                            onChange={(e) => setChatInput(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-                            disabled={chatLoading}
-                            placeholder="Ask about speed, scores, accuracy..."
-                            className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#2563EB]/50 focus:bg-white disabled:opacity-50 transition-all font-sans"
-                          />
-                          <button
-                            onClick={() => sendMessage()}
-                            disabled={!chatInput.trim() || chatLoading}
-                            className="p-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1d4ed8] text-white disabled:opacity-50 transition-all cursor-pointer shrink-0 border-none flex items-center justify-center"
+                {/* Tab 3: Interactive AI Coach Chat */}
+                {aiPanelTab === 'chat' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-3"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <Brain className="w-4 h-4 text-[#2563EB]" />
+                        <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Odisha AI Mentor Chat</h4>
+                      </div>
+                      {chatHistory.length > 0 && (
+                        <button
+                          onClick={() => setChatHistory([])}
+                          className="text-[10px] font-bold text-slate-400 hover:text-rose-600 flex items-center gap-1 cursor-pointer border-none bg-transparent"
+                        >
+                          <Trash2 className="w-3 h-3" /> Clear Chat
+                        </button>
+                      )}
+                    </div>
+
+                    <div
+                      ref={chatContainerRef}
+                      className="h-[320px] sm:h-[380px] overflow-y-auto p-3 sm:p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-3 custom-scrollbar"
+                    >
+                      {chatHistory.length === 0 ? (
+                        <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-3">
+                          <div className="w-12 h-12 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 shadow-2xs">
+                            <Brain className="w-6 h-6 text-[#2563EB]" />
+                          </div>
+                          <h5 className="text-sm font-black text-slate-800">Ask your AI Prep Coach anything!</h5>
+                          <p className="text-xs font-medium text-slate-500 max-w-xs">
+                            Get personalized advice on weak subjects, exam strategies, or time management.
+                          </p>
+                        </div>
+                      ) : (
+                        chatHistory.map((msg, i) => (
+                          <div
+                            key={i}
+                            className={cn(
+                              "flex flex-col max-w-[85%] sm:max-w-[78%]",
+                              msg.role === 'user' ? "ml-auto items-end" : "mr-auto items-start"
+                            )}
                           >
-                            <Send className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Right: Quick Chips Panel */}
-                      <div className="lg:col-span-4 flex flex-col gap-2.5 sm:gap-3 bg-slate-50/50 border border-slate-200/80 p-3 sm:p-4 rounded-2xl">
-                        <div className="flex items-center justify-between">
-                          <h4 className="text-[10px] font-black text-[#2563EB] uppercase tracking-widest flex items-center gap-1">
-                            <Lightbulb className="w-3.5 h-3.5" /> Study Assistant
-                          </h4>
-                          <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest hidden sm:block">Tap a prompt</span>
-                        </div>
-                        <p className="text-[10px] font-medium text-slate-500 leading-relaxed hidden sm:block">Click any prompt to trigger instant diagnostics from your AI coach.</p>
-                          
-                        <div className="flex flex-row overflow-x-auto gap-2 no-scrollbar pb-1 whitespace-nowrap lg:flex-col lg:overflow-visible lg:whitespace-normal">
-                          {assistantChips.map((chip, idx) => (
-                            <button
-                              key={idx}
-                              onClick={() => sendMessage(chip)}
-                              disabled={chatLoading}
-                              className="text-left px-3 py-2 sm:p-2.5 bg-white hover:bg-brand-50 border border-slate-200/60 hover:border-brand-200 rounded-xl text-[10px] sm:text-[11px] font-semibold text-slate-600 hover:text-[#2563EB] transition-all cursor-pointer leading-tight disabled:opacity-50 shadow-sm shrink-0 whitespace-nowrap lg:whitespace-normal active:scale-95"
+                            <div
+                              className={cn(
+                                "p-3.5 rounded-2xl text-xs font-medium shadow-2xs leading-relaxed",
+                                msg.role === 'user'
+                                  ? "bg-[#2563EB] text-white rounded-br-none font-semibold"
+                                  : "bg-white text-slate-800 border border-slate-200/80 rounded-bl-none"
+                              )}
                             >
-                              {chip}
-                            </button>
-                          ))}
+                              <MarkdownMathRenderer text={msg.content} isUser={msg.role === 'user'} />
+                            </div>
+                          </div>
+                        ))
+                      )}
+                      {chatLoading && (
+                        <div className="flex items-center gap-2 text-slate-400 text-xs font-medium p-2">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-[#2563EB]" />
+                          Odisha AI Coach is typing...
                         </div>
+                      )}
+                    </div>
 
-                        <div className="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-center mt-auto pt-1 hidden sm:block">
-                          OdishaExamPrep Cognitive Lab
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </div>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        sendMessage();
+                      }}
+                      className="flex items-center gap-2 pt-1"
+                    >
+                      <input
+                        type="text"
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        placeholder="Ask about your performance, speed, weak areas..."
+                        disabled={chatLoading}
+                        className="flex-1 h-11 px-4 text-xs font-semibold bg-white border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] text-slate-900 placeholder:text-slate-400 shadow-2xs"
+                      />
+                      <button
+                        type="submit"
+                        disabled={chatLoading || !chatInput.trim()}
+                        className="h-11 px-4 bg-[#2563EB] hover:bg-[#1d4ed8] text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 disabled:opacity-40 transition-all cursor-pointer border-none shadow-2xs shrink-0"
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                      </button>
+                    </form>
+                  </motion.div>
+                )}
               </div>
             )}
-          </div>
-        </motion.div>
-      </DynamicVectorCard>
+            </div>
+          </motion.div>
+        </DynamicVectorCard>
+
+        {/* Topic Confidence Matrix */}
+        <TopicConfidenceMatrix userId={user?.id} activities={scopedActivities} />
+
+        {/* Personal Best Record Card */}
+        <PersonalBestCard userId={user?.id} />
+
+        {/* AI Personalized Study Plan Card */}
+        <AIStudyPlanCard userId={user?.id} onNavigate={onNavigate} />
 
         {/* Charts & Breakdown Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
            {/* Performance Trend Card */}
-           <DynamicVectorCard glowColor="rgba(59, 130, 246, 0.08)" className="lg:col-span-8">
+           <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.08)" className="lg:col-span-8">
              <motion.div 
                variants={stagger.itemFadeUp} 
-               className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl border border-indigo-500/30 group"
+               className="relative overflow-hidden bg-white/90 lg:bg-white/80 backdrop-blur-xl text-slate-900 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl border border-slate-200/80 group"
              >
                 {/* Radial Grid & 3D Watermark */}
-                <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
-                <TrendingUp className="absolute -right-8 -bottom-8 w-52 h-52 opacity-15 stroke-[1.2] text-indigo-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none z-0" />
+                <TrendingUp className="absolute -right-8 -bottom-8 w-52 h-52 opacity-10 stroke-[1.2] text-[#2563eb] pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
                 
                 <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                    <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-1.5 h-5 bg-brand-400 rounded-full shrink-0" />
-                        <h3 className="text-lg sm:text-xl font-black text-white tracking-tight uppercase">Performance Trend</h3>
+                        <div className="w-1.5 h-5 bg-[#2563eb] rounded-full shrink-0" />
+                        <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase">Performance Trend</h3>
                       </div>
-                      <p className="text-xs font-semibold text-slate-200 leading-none mt-1">Your mock exam score progression history</p>
+                      <p className="text-xs font-semibold text-slate-500 leading-none mt-1">Your mock exam score progression history</p>
                    </div>
                    {stats.impScore !== 0 && (
                      <div className={cn(
                        "px-3 py-1.5 rounded-xl flex items-center gap-1.5 text-[10px] font-mono font-black uppercase tracking-widest shadow-2xs border transition-all duration-300 group-hover:scale-103",
                        stats.impScore > 0 
-                         ? "bg-emerald-400/20 text-emerald-300 border-emerald-400/40" 
-                         : "bg-rose-500/20 text-rose-300 border-rose-500/40"
+                         ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
+                         : "bg-rose-50 text-rose-700 border-rose-200"
                      )}>
                         {stats.impScore > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
                         {Math.abs(Math.round(stats.impScore))}% {stats.impScore > 0 ? 'Improvement' : 'Drop'}
@@ -1864,33 +1831,33 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
                 {stats.chartData.length > 0 ? (
                   <PerformanceTrendChart chartData={stats.chartData} />
                 ) : (
-                   <div className="w-full h-[300px] flex items-center justify-center bg-slate-950/60 rounded-2xl border border-slate-800">
-                      <p className="text-slate-300 font-bold text-sm">Not enough data to plot a trend.</p>
+                   <div className="w-full h-[300px] flex items-center justify-center bg-slate-50 rounded-2xl border border-slate-200">
+                      <p className="text-slate-500 font-bold text-sm">Not enough data to plot a trend.</p>
                    </div>
                 )}
              </motion.div>
            </DynamicVectorCard>
 
            {/* Accuracy Breakdown Card */}
-           <DynamicVectorCard glowColor="rgba(59, 130, 246, 0.08)" className="lg:col-span-4">
+           <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.08)" className="lg:col-span-4">
              <motion.div 
                variants={stagger.itemFadeUp} 
-               className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl border border-indigo-500/30 group"
+               className="relative overflow-hidden bg-white/90 lg:bg-white/80 backdrop-blur-xl text-slate-900 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl border border-slate-200/80 group"
              >
                 {/* Radial Grid Watermark */}
-                <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
-                <Target className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-indigo-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none z-0" />
+                <Target className="absolute -right-6 -bottom-6 w-44 h-44 opacity-10 stroke-[1.2] text-[#2563eb] pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
                 
                 <div className="flex items-center gap-2.5 mb-6 justify-center relative z-10">
-                  <div className="w-1.5 h-5 bg-brand-400 rounded-full shrink-0" />
-                  <h3 className="text-lg font-black text-white tracking-tight text-center uppercase">Accuracy Breakdown</h3>
+                  <div className="w-1.5 h-5 bg-[#2563eb] rounded-full shrink-0" />
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight text-center uppercase">Accuracy Breakdown</h3>
                 </div>
                 
                 <div className="relative z-10">
                   {stats.totalQuestions > 0 ? (
                     <AccuracyBreakdownChart pieData={stats.pieData} totalQuestions={stats.totalQuestions} totalCorrect={stats.totalCorrect} totalWrong={stats.totalWrong} totalSkipped={stats.totalSkipped} />
                   ) : (
-                     <div className="p-4 bg-slate-950/60 rounded-2xl border border-slate-800 text-center text-xs font-bold text-slate-300">
+                     <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center text-xs font-bold text-slate-500">
                         No question breakdown history available.
                      </div>
                   )}
@@ -1898,252 +1865,252 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
              </motion.div>
            </DynamicVectorCard>
 
-            {/* Skill Radar Card */}
-             <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)" className="lg:col-span-12">
-               <motion.div 
-                 variants={stagger.itemFadeUp} 
-                 className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950/40 to-slate-900 text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-9 shadow-xl border border-blue-500/30 group"
-               >
-                  {/* Radial Grid Watermark */}
-                  <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
-                  <Crosshair className="absolute -right-8 -bottom-8 w-56 h-56 opacity-15 stroke-[1.2] text-blue-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
-                  
-                  <div className="flex flex-col gap-1.5 mb-6 text-center relative z-10">
-                    <div className="flex justify-center">
-                      <span className="text-[9px] font-mono font-black text-amber-300 uppercase tracking-widest bg-amber-400/20 px-3 py-1 rounded-full border border-amber-400/30 leading-none">
-                         Metrics Overview
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-black text-white tracking-tight mt-1.5 uppercase">Overall Skill Profile</h3>
-                    <p className="text-xs font-bold text-slate-200">Analysis of your core exam-taking dimensions</p>
-                  </div>
-                  
-                  {stats.skillProfile && stats.totalQuestions > 0 ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
-                       <SkillRadarChart skillProfile={stats.skillProfile} />
-    
-                       {/* Detailed breakdown items */}
-                       <div className="lg:col-span-7 space-y-3.5 relative z-10">
-                         {stats.skillProfile.map((skill: any, idx: number) => {
-                            let icon = <Target className="w-4 h-4 text-emerald-400" />;
-                            let colorClass = "from-emerald-500 to-emerald-400";
-                            let desc = "Correctness rate on attempts";
-                            let bgClass = "bg-emerald-500/20 border-emerald-400/40";
-                            let textClass = "text-emerald-300";
+             {/* Skill Radar Card */}
+              <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)" className="lg:col-span-12">
+                <motion.div 
+                  variants={stagger.itemFadeUp} 
+                  className="relative overflow-hidden bg-white/90 lg:bg-white/80 backdrop-blur-xl text-slate-900 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-9 shadow-xl border border-slate-200/80 group"
+                >
+                   {/* Radial Grid Watermark */}
+                   <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none z-0" />
+                   <Crosshair className="absolute -right-8 -bottom-8 w-56 h-56 opacity-10 stroke-[1.2] text-[#2563eb] pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                   
+                   <div className="flex flex-col gap-1.5 mb-6 text-center relative z-10">
+                     <div className="flex justify-center">
+                       <span className="text-[9px] font-mono font-black text-brand-700 uppercase tracking-widest bg-brand-50 px-3 py-1 rounded-full border border-brand-200 leading-none">
+                          Metrics Overview
+                       </span>
+                     </div>
+                     <h3 className="text-xl font-black text-slate-900 tracking-tight mt-1.5 uppercase">Overall Skill Profile</h3>
+                     <p className="text-xs font-bold text-slate-500">Analysis of your core exam-taking dimensions</p>
+                   </div>
+                   
+                   {stats.skillProfile && stats.totalQuestions > 0 ? (
+                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+                        <SkillRadarChart skillProfile={stats.skillProfile} />
+     
+                        {/* Detailed breakdown items */}
+                        <div className="lg:col-span-7 space-y-3.5 relative z-10">
+                          {stats.skillProfile.map((skill: any, idx: number) => {
+                             let icon = <Target className="w-4 h-4 text-emerald-600" />;
+                             let colorClass = "from-emerald-500 to-emerald-400";
+                             let desc = "Correctness rate on attempts";
+                             let bgClass = "bg-emerald-50 border-emerald-200";
+                             let textClass = "text-emerald-700";
 
-                            if (skill.name === "Accuracy") {
-                               icon = <Target className="w-4 h-4 text-emerald-400" />;
-                               colorClass = "from-emerald-500 to-emerald-400";
-                               desc = "Accuracy on attempted questions";
-                               bgClass = "bg-emerald-500/20 border-emerald-400/40";
-                               textClass = "text-emerald-300";
-                            } else if (skill.name === "Precision") {
-                               icon = <Crosshair className="w-4 h-4 text-blue-400" />;
-                               colorClass = "from-blue-500 to-blue-400";
-                               desc = "Consistency & focus in answers";
-                               bgClass = "bg-blue-500/20 border-blue-400/40";
-                               textClass = "text-blue-300";
-                            } else if (skill.name === "Speed") {
-                               icon = <Timer className="w-4 h-4 text-amber-400" />;
-                               colorClass = "from-amber-500 to-amber-400";
-                               desc = "Pace answering questions";
-                               bgClass = "bg-amber-500/20 border-amber-400/40";
-                               textClass = "text-amber-300";
-                            } else if (skill.name === "Endurance") {
-                               icon = <Flame className="w-4 h-4 text-indigo-400" />;
-                               colorClass = "from-indigo-500 to-indigo-400";
-                               desc = "Volume of questions practiced";
-                               bgClass = "bg-indigo-500/20 border-indigo-400/40";
-                               textClass = "text-indigo-300";
-                            } else if (skill.name === "Momentum") {
-                               icon = <TrendingUp className="w-4 h-4 text-cyan-400" />;
-                               colorClass = "from-cyan-500 to-cyan-400";
-                               desc = "Test-to-test improvement rate";
-                               bgClass = "bg-cyan-500/20 border-cyan-400/40";
-                               textClass = "text-cyan-300";
-                            }
+                             if (skill.name === "Accuracy") {
+                                icon = <Target className="w-4 h-4 text-emerald-600" />;
+                                colorClass = "from-emerald-500 to-emerald-400";
+                                desc = "Accuracy on attempted questions";
+                                bgClass = "bg-emerald-50 border-emerald-200";
+                                textClass = "text-emerald-700";
+                             } else if (skill.name === "Precision") {
+                                icon = <Crosshair className="w-4 h-4 text-blue-600" />;
+                                colorClass = "from-blue-500 to-blue-400";
+                                desc = "Consistency & focus in answers";
+                                bgClass = "bg-blue-50 border-blue-200";
+                                textClass = "text-blue-700";
+                             } else if (skill.name === "Speed") {
+                                icon = <Timer className="w-4 h-4 text-amber-600" />;
+                                colorClass = "from-amber-500 to-amber-400";
+                                desc = "Pace answering questions";
+                                bgClass = "bg-amber-50 border-amber-200";
+                                textClass = "text-amber-700";
+                             } else if (skill.name === "Endurance") {
+                                icon = <Flame className="w-4 h-4 text-indigo-600" />;
+                                colorClass = "from-indigo-500 to-indigo-400";
+                                desc = "Volume of questions practiced";
+                                bgClass = "bg-indigo-50 border-indigo-200";
+                                textClass = "text-indigo-700";
+                             } else if (skill.name === "Momentum") {
+                                icon = <TrendingUp className="w-4 h-4 text-cyan-600" />;
+                                colorClass = "from-cyan-500 to-cyan-400";
+                                desc = "Test-to-test improvement rate";
+                                bgClass = "bg-cyan-50 border-cyan-200";
+                                textClass = "text-cyan-700";
+                             }
 
-                            return (
-                               <div key={idx} className="p-3.5 bg-slate-950/70 border border-slate-800 rounded-2xl flex flex-col gap-2 hover:border-slate-700 transition-all duration-350">
-                                  <div className="flex items-center justify-between">
-                                     <div className="flex items-center gap-2.5">
-                                        <div className={cn("p-1.5 rounded-xl border shrink-0", bgClass)}>
-                                           {icon}
-                                        </div>
-                                        <div className="flex flex-col min-w-0">
-                                           <span className="text-xs font-black text-white leading-none">{skill.name}</span>
-                                           <span className="text-[9.5px] font-bold text-slate-300 leading-none mt-1 truncate">{desc}</span>
-                                        </div>
-                                     </div>
-                                     <span className={cn("text-xs font-mono font-black tracking-tight", textClass)}>{skill.value}%</span>
-                                  </div>
-                                  <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
-                                     <motion.div 
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${skill.value}%` }}
-                                        transition={{ duration: 0.85, ease: "easeOut", delay: idx * 0.05 }}
-                                        className={cn("h-full rounded-full bg-gradient-to-r", colorClass)}
-                                     />
+                             return (
+                                <div key={idx} className="p-3.5 bg-slate-50/90 border border-slate-200/80 rounded-2xl flex flex-col gap-2 hover:border-slate-300 transition-all duration-350">
+                                   <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-2.5">
+                                         <div className={cn("p-1.5 rounded-xl border shrink-0", bgClass)}>
+                                            {icon}
+                                         </div>
+                                         <div className="flex flex-col min-w-0">
+                                            <span className="text-xs font-black text-slate-900 leading-none">{skill.name}</span>
+                                            <span className="text-[9.5px] font-bold text-slate-500 leading-none mt-1 truncate">{desc}</span>
+                                         </div>
+                                      </div>
+                                      <span className={cn("text-xs font-mono font-black tracking-tight", textClass)}>{skill.value}%</span>
                                    </div>
-                               </div>
-                            );
-                         })}
-                       </div>
-                    </div>
+                                   <div className="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden border border-slate-200">
+                                      <motion.div 
+                                         initial={{ width: 0 }}
+                                         animate={{ width: `${skill.value}%` }}
+                                         transition={{ duration: 0.85, ease: "easeOut", delay: idx * 0.05 }}
+                                         className={cn("h-full rounded-full bg-gradient-to-r", colorClass)}
+                                      />
+                                   </div>
+                                </div>
+                             );
+                          })}
+                        </div>
+                     </div>
                   ) : (
-                    <div className="p-4 bg-slate-950/60 rounded-2xl border border-slate-800 text-center text-xs font-bold text-slate-300">
+                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center text-xs font-bold text-slate-500">
                        Complete tests to compile your skill profile.
                     </div>
                  )}
-               </motion.div>
-             </DynamicVectorCard>
-
-             {/* Performance Breakdown Card */}
-             {stats.examAnalysis && stats.examAnalysis.length > 0 && (
-               <div className="lg:col-span-12 flex flex-col gap-6 relative">
-               {stats.examAnalysis.map((exam: any, idx: number) => {
-                 const combinedSubjects = [...(exam.mockTests || []), ...(exam.practiceTests || [])];
-                 const uniqueMap = new Map();
-                 
-                 combinedSubjects.forEach(s => {
-                   if (!uniqueMap.has(s.name)) {
-                     uniqueMap.set(s.name, { ...s });
-                   } else {
-                     const existing = uniqueMap.get(s.name);
-                     existing.correct += (s.correct || 0);
-                     existing.attempted += (s.attempted || 0);
-                     const newAcc = existing.attempted > 0 ? (existing.correct / existing.attempted) * 100 : 0;
-                     existing.avgScore = Math.round(newAcc);
-                     existing.status = newAcc >= 70 ? 'Strong' : 'Weak';
-                   }
-                 });
-                 const uniqueSubjects = Array.from(uniqueMap.values());
-
-                 return (
-                    <DynamicVectorCard key={idx} glowColor="rgba(37, 99, 235, 0.12)" className="w-full">
-                      <motion.div variants={stagger.itemFadeUp} className="bg-gradient-to-br from-slate-900 via-blue-950/40 to-slate-900 text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl border border-blue-500/30 relative overflow-hidden flex flex-col shrink-0 group">
-                        {/* Radial Grid Watermark */}
-                        <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
-                        <Layers className="absolute -right-8 -bottom-8 w-52 h-52 opacity-15 stroke-[1.2] text-blue-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
-
-                        <div className="mb-6 relative z-10 flex flex-col gap-3">
-                           <div>
-                              <span className="px-3 py-1.5 bg-blue-400/20 text-blue-200 text-[9px] font-mono font-black rounded-xl uppercase tracking-widest border border-blue-400/30 shadow-2xs leading-none">
-                                 {exam.examName}
-                              </span>
-                           </div>
-                           <div>
-                              <h3 className="text-xl font-black text-white leading-tight mb-1 uppercase">Performance Breakdown</h3>
-                              <p className="text-xs text-slate-300 font-bold flex items-center gap-1.5">
-                                 Attempts: <span className="text-amber-300 font-mono font-black">{exam.totalAttempts}</span>
-                                 <span className="text-slate-600">•</span>
-                                 Last Attempt: <span className="text-blue-300 font-mono font-black">{exam.lastAttemptDate}</span>
-                              </p>
-                           </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10">
-                           {/* Left column: Bar Chart */}
-                           {uniqueSubjects.length > 0 ? (
-                               <SubjectBarChart uniqueSubjects={uniqueSubjects} />
-                            ) : null}
-     
-                           {/* Divider on mobile only */}
-                           {uniqueSubjects.length > 0 && (
-                             <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent my-1 lg:hidden" />
-                           )}
-     
-                           {/* Right column: Expandable List */}
-                           <div className={cn("space-y-4 max-h-[380px] overflow-y-auto custom-scrollbar pr-1", uniqueSubjects.length > 0 ? "lg:col-span-7" : "lg:col-span-12")} style={{ overscrollBehaviorY: 'contain' }}>
-                              {exam.mockTests && exam.mockTests.length > 0 && (
-                                <div className="space-y-3">
-                                  <h4 className="text-[9.5px] font-mono font-black text-amber-200/90 uppercase tracking-widest pl-1">Mock Tests</h4>
-                                  <div className="space-y-3">
-                                    {exam.mockTests.map((subject: any, i: number) => (
-                                       <SubjectRow key={`m-${i}`} subject={subject} />
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-         
-                              {exam.practiceTests && exam.practiceTests.length > 0 && (
-                                <div className="space-y-3">
-                                  <h4 className="text-[9.5px] font-mono font-black text-amber-200/90 uppercase tracking-widest pl-1 mt-2">Practice Sessions</h4>
-                                  <div className="space-y-3">
-                                    {exam.practiceTests.map((subject: any, i: number) => (
-                                       <SubjectRow key={`p-${i}`} subject={subject} />
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-         
-                              {(!exam.practiceTests || exam.practiceTests.length === 0) && (!exam.mockTests || exam.mockTests.length === 0) && (
-                                <div className="p-4 bg-slate-950/60 rounded-2xl border border-slate-800 text-center text-xs font-bold text-slate-300">
-                                  No subject metrics compiled yet.
-                                </div>
-                              )}
-                           </div>
-                        </div>
-                      </motion.div>
-                    </DynamicVectorCard>
-                 );
-               })}
-             </div>
-           )}
-             
-            {/* Visual Action cards */}
-            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-              <DynamicVectorCard glowColor="rgba(16, 185, 129, 0.12)" className="w-full">
-                <motion.div variants={stagger.itemFadeUp} className="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 rounded-3xl sm:rounded-[2rem] p-5 sm:p-6 shadow-xl border border-slate-700/80 flex gap-4 sm:gap-5 items-start text-white relative overflow-hidden group">
-                   <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
-                   <div className={cn("p-3 rounded-2xl shrink-0 shadow-2xs border relative z-10", stats.impScore >= 0 ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40" : "bg-rose-500/20 text-rose-300 border-rose-500/40")}>
-                      {stats.impScore >= 0 ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
-                  </div>
-                  <div className="relative z-10">
-                     <h4 className="font-black text-white mb-1 tracking-tight text-sm sm:text-base uppercase">{stats.impScore >= 0 ? "You are improving" : "Scores dropped recently"}</h4>
-                     <p className="text-xs sm:text-sm font-medium text-slate-300 leading-relaxed">{stats.impScore >= 0 ? "Your latest test scores show positive momentum. Keep up the good work!" : "Review your recent mistakes to get back on track."}</p>
-                  </div>
-               </motion.div>
+                </motion.div>
               </DynamicVectorCard>
 
-              <DynamicVectorCard glowColor="rgba(245, 158, 11, 0.12)" className="w-full">
-                <motion.div variants={stagger.itemFadeUp} className="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 rounded-3xl sm:rounded-[2rem] p-5 sm:p-6 shadow-xl border border-slate-700/80 flex gap-4 sm:gap-5 items-start text-white relative overflow-hidden group">
-                   <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
-                   <div className={cn("p-3 rounded-2xl shrink-0 shadow-2xs border relative z-10", stats.avgTimePerQuestion > 60 ? "bg-amber-500/20 text-amber-300 border-amber-500/40" : "bg-blue-500/20 text-blue-300 border-blue-500/40")}>
-                     <Timer className="w-5 h-5" />
-                  </div>
-                  <div className="relative z-10">
-                     <h4 className="font-black text-white mb-1 tracking-tight text-sm sm:text-base uppercase">{stats.avgTimePerQuestion > 60 ? "Improve Question Speed" : "Optimal Solving Pace"}</h4>
-                     <p className="text-xs sm:text-sm font-medium text-slate-300 leading-relaxed">Averaging {stats.avgTimePerQuestion.toFixed(1)}s per question. {stats.avgTimePerQuestion > 60 ? "Try to solve familiar questions faster." : "Excellent pacing, maintain this rate in real exams."}</p>
-                  </div>
-               </motion.div>
-               </DynamicVectorCard>
-             </div>
+              {/* Performance Breakdown Card */}
+              {stats.examAnalysis && stats.examAnalysis.length > 0 && (
+                <div className="lg:col-span-12 flex flex-col gap-6 relative">
+                {stats.examAnalysis.map((exam: any, idx: number) => {
+                  const combinedSubjects = [...(exam.mockTests || []), ...(exam.practiceTests || [])];
+                  const uniqueMap = new Map();
+                  
+                  combinedSubjects.forEach(s => {
+                    if (!uniqueMap.has(s.name)) {
+                      uniqueMap.set(s.name, { ...s });
+                    } else {
+                      const existing = uniqueMap.get(s.name);
+                      existing.correct += (s.correct || 0);
+                      existing.attempted += (s.attempted || 0);
+                      const newAcc = existing.attempted > 0 ? (existing.correct / existing.attempted) * 100 : 0;
+                      existing.avgScore = Math.round(newAcc);
+                      existing.status = newAcc >= 70 ? 'Strong' : 'Weak';
+                    }
+                  });
+                  const uniqueSubjects = Array.from(uniqueMap.values());
 
-           {/* Premium action banner */}
-           <motion.div 
-             variants={stagger.itemFadeUp} 
-             whileHover={{ y: -3 }}
-             className="lg:col-span-5 relative bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 rounded-3xl sm:rounded-[2rem] p-4.5 sm:p-6 lg:p-8 flex flex-col justify-between shadow-xl border border-slate-800 gap-6 overflow-hidden min-h-[160px]"
-           >
-             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-500/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none animate-pulse-soft" />
-             <div className="text-left relative z-10">
-               <h3 className="text-xl sm:text-2xl font-serif font-black text-white mb-2 tracking-tight">Unlock Your Potential</h3>
-               <p className="text-slate-400 text-xs sm:text-sm font-medium">Focus on weak subjects in targeted mock sessions to optimize your overall score.</p>
-             </div>
-             <div className="mt-auto pt-2 flex justify-start">
-                <motion.button 
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => onNavigate?.('home')} 
-                  className="relative z-10 px-8 py-3.5 bg-[#2563EB] hover:bg-[#1d4ed8] text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all duration-300 flex items-center gap-2 shrink-0 whitespace-nowrap cursor-pointer shadow-lg shadow-brand-500/20"
-                >
-                  Start Practice Mocks
-                  <ArrowRight className="w-4 h-4" />
-                </motion.button>
-             </div>
-           </motion.div>
-        </div>
+                  return (
+                     <DynamicVectorCard key={idx} glowColor="rgba(37, 99, 235, 0.12)" className="w-full">
+                       <motion.div variants={stagger.itemFadeUp} className="bg-white/90 lg:bg-white/80 backdrop-blur-xl text-slate-900 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl border border-slate-200/80 relative overflow-hidden flex flex-col shrink-0 group">
+                         {/* Radial Grid Watermark */}
+                         <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none z-0" />
+                         <Layers className="absolute -right-8 -bottom-8 w-52 h-52 opacity-10 stroke-[1.2] text-[#2563eb] pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+
+                         <div className="mb-6 relative z-10 flex flex-col gap-3">
+                            <div>
+                               <span className="px-3 py-1.5 bg-brand-50 text-brand-700 text-[9px] font-mono font-black rounded-xl uppercase tracking-widest border border-brand-200 shadow-2xs leading-none">
+                                  {exam.examName}
+                               </span>
+                            </div>
+                            <div>
+                               <h3 className="text-xl font-black text-slate-900 leading-tight mb-1 uppercase">Performance Breakdown</h3>
+                               <p className="text-xs text-slate-500 font-bold flex items-center gap-1.5">
+                                  Attempts: <span className="text-amber-700 font-mono font-black">{exam.totalAttempts}</span>
+                                  <span className="text-slate-300">•</span>
+                                  Last Attempt: <span className="text-brand-600 font-mono font-black">{exam.lastAttemptDate}</span>
+                               </p>
+                            </div>
+                         </div>
+                         
+                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10">
+                            {/* Left column: Bar Chart */}
+                            {uniqueSubjects.length > 0 ? (
+                                <SubjectBarChart uniqueSubjects={uniqueSubjects} />
+                             ) : null}
+      
+                            {/* Divider on mobile only */}
+                            {uniqueSubjects.length > 0 && (
+                              <div className="w-full h-px bg-slate-200/80 my-1 lg:hidden" />
+                            )}
+      
+                            {/* Right column: Expandable List */}
+                            <div className={cn("space-y-4 max-h-[380px] overflow-y-auto custom-scrollbar pr-1", uniqueSubjects.length > 0 ? "lg:col-span-7" : "lg:col-span-12")} style={{ overscrollBehaviorY: 'contain' }}>
+                               {exam.mockTests && exam.mockTests.length > 0 && (
+                                 <div className="space-y-3">
+                                   <h4 className="text-[9.5px] font-mono font-black text-slate-400 uppercase tracking-widest pl-1">Mock Tests</h4>
+                                   <div className="space-y-3">
+                                     {exam.mockTests.map((subject: any, i: number) => (
+                                        <SubjectRow key={`m-${i}`} subject={subject} />
+                                     ))}
+                                   </div>
+                                 </div>
+                               )}
+          
+                               {exam.practiceTests && exam.practiceTests.length > 0 && (
+                                 <div className="space-y-3">
+                                   <h4 className="text-[9.5px] font-mono font-black text-slate-400 uppercase tracking-widest pl-1 mt-2">Practice Sessions</h4>
+                                   <div className="space-y-3">
+                                     {exam.practiceTests.map((subject: any, i: number) => (
+                                        <SubjectRow key={`p-${i}`} subject={subject} />
+                                     ))}
+                                   </div>
+                                 </div>
+                               )}
+          
+                               {(!exam.practiceTests || exam.practiceTests.length === 0) && (!exam.mockTests || exam.mockTests.length === 0) && (
+                                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center text-xs font-bold text-slate-500">
+                                   No subject metrics compiled yet.
+                                 </div>
+                               )}
+                            </div>
+                         </div>
+                       </motion.div>
+                     </DynamicVectorCard>
+                  );
+                })}
+              </div>
+            )}
+              
+             {/* Visual Action cards */}
+             <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+               <DynamicVectorCard glowColor="rgba(16, 185, 129, 0.12)" className="w-full">
+                 <motion.div variants={stagger.itemFadeUp} className="bg-white/90 lg:bg-white/80 backdrop-blur-xl rounded-3xl sm:rounded-[2rem] p-5 sm:p-6 shadow-xl border border-slate-200/80 flex gap-4 sm:gap-5 items-start text-slate-900 relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none z-0" />
+                    <div className={cn("p-3 rounded-2xl shrink-0 shadow-2xs border relative z-10", stats.impScore >= 0 ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200")}>
+                       {stats.impScore >= 0 ? <TrendingUp className="w-5 h-5 text-emerald-600" /> : <TrendingDown className="w-5 h-5 text-rose-600" />}
+                   </div>
+                   <div className="relative z-10">
+                      <h4 className="font-black text-slate-900 mb-1 tracking-tight text-sm sm:text-base uppercase">{stats.impScore >= 0 ? "You are improving" : "Scores dropped recently"}</h4>
+                      <p className="text-xs sm:text-sm font-medium text-slate-600 leading-relaxed">{stats.impScore >= 0 ? "Your latest test scores show positive momentum. Keep up the good work!" : "Review your recent mistakes to get back on track."}</p>
+                   </div>
+                </motion.div>
+               </DynamicVectorCard>
+
+               <DynamicVectorCard glowColor="rgba(245, 158, 11, 0.12)" className="w-full">
+                 <motion.div variants={stagger.itemFadeUp} className="bg-white/90 lg:bg-white/80 backdrop-blur-xl rounded-3xl sm:rounded-[2rem] p-5 sm:p-6 shadow-xl border border-slate-200/80 flex gap-4 sm:gap-5 items-start text-slate-900 relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none z-0" />
+                    <div className={cn("p-3 rounded-2xl shrink-0 shadow-2xs border relative z-10", stats.avgTimePerQuestion > 60 ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-brand-50 text-brand-700 border-brand-200")}>
+                      <Timer className="w-5 h-5 text-amber-600" />
+                   </div>
+                   <div className="relative z-10">
+                      <h4 className="font-black text-slate-900 mb-1 tracking-tight text-sm sm:text-base uppercase">{stats.avgTimePerQuestion > 60 ? "Improve Question Speed" : "Optimal Solving Pace"}</h4>
+                      <p className="text-xs sm:text-sm font-medium text-slate-600 leading-relaxed">Averaging {stats.avgTimePerQuestion.toFixed(1)}s per question. {stats.avgTimePerQuestion > 60 ? "Try to solve familiar questions faster." : "Excellent pacing, maintain this rate in real exams."}</p>
+                   </div>
+                </motion.div>
+               </DynamicVectorCard>
+              </div>
+
+            {/* Premium action banner */}
+            <motion.div 
+              variants={stagger.itemFadeUp} 
+              whileHover={{ y: -3 }}
+              className="lg:col-span-5 relative bg-gradient-to-br from-brand-600 via-blue-600 to-indigo-600 rounded-3xl sm:rounded-[2rem] p-4.5 sm:p-6 lg:p-8 flex flex-col justify-between shadow-xl border border-brand-500/30 gap-6 overflow-hidden min-h-[160px]"
+            >
+              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none animate-pulse-soft" />
+              <div className="text-left relative z-10">
+                <h3 className="text-xl sm:text-2xl font-serif font-black text-white mb-2 tracking-tight">Unlock Your Potential</h3>
+                <p className="text-brand-100 text-xs sm:text-sm font-medium">Focus on weak subjects in targeted mock sessions to optimize your overall score.</p>
+              </div>
+              <div className="mt-auto pt-2 flex justify-start">
+                 <motion.button 
+                   whileHover={{ scale: 1.02 }}
+                   whileTap={{ scale: 0.97 }}
+                   onClick={() => onNavigate?.('home')} 
+                   className="relative z-10 px-8 py-3.5 bg-white text-brand-700 hover:bg-brand-50 rounded-2xl font-black text-xs uppercase tracking-widest transition-all duration-300 flex items-center gap-2 shrink-0 whitespace-nowrap cursor-pointer shadow-lg shadow-black/10"
+                 >
+                   Start Practice Mocks
+                   <ArrowRight className="w-4 h-4" />
+                 </motion.button>
+              </div>
+            </motion.div>
+         </div>
       </motion.div>
     </div>
   );

@@ -10,3 +10,7 @@
 - [x] Executive Target Exam Context Bar (`src/components/ActiveExamContextBar.tsx`)
 - [x] Executive Target Exam Context Selector Modal (`src/components/ExamContextSelectorModal.tsx`)
 - [x] Executive Your Exam Readiness Score Detail Modal (`src/components/ReadinessDetailModal.tsx`)
+- [x] Niche-Aligned Unique Background Vector Logos for StatCards (`Zap`, `Target`, `Timer`, `History`)
+- [x] Pixel-Perfect Smooth Vector Card Corner Arc & Spotlight Glare Elimination (`DynamicVectorCard.tsx`)
+- [x] Full-Screen Edge-to-Edge Academic Vector Canvas Upgrade for Study Plan Hub (`StudyPlanView.tsx`)
+

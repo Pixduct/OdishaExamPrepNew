@@ -1322,11 +1322,37 @@ Last updated: 2026-08-14
 | **Static GK Callout Card** | `background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-left: 4px solid #2563eb; rounded-2xl` |
 | **Practice MCQ Cards** | `bg-slate-50/80 border border-slate-200/80 rounded-2xl p-5` with instant option highlight & explanation |
 
-**Pattern notes:**
-- **Stock Image-Free Executive Banners**: Card headers render high-contrast vector exam banners with custom geometric grid watermarks, exam target badges (`OPSC • OSSC • OSSSC`, `SSC • RRB • BANKING`, `GLOBAL DIGEST`), and category icons instead of unreliable external stock photos.
-- **60FPS Buttery-Smooth Scroll Architecture**: Modal overlay uses a single dedicated scroll container (`overflow-y-auto overscroll-contain`), hardware-accelerated momentum scrolling (`transform-gpu`, `[webkit-overflow-scrolling:touch]`), and background body scroll locking (`useEffect` with `document.body.style.overflow = 'hidden'`).
-- **Category-Themed Student Community Hub**: The promotional banner inside the modal dynamically switches color theme, badges, and target exam text to match the article category (Odisha State Amber, National Teal, World Indigo).
 - **360° Exam Digest Structure**: Every article contains Headline, 3-Bullet Executive Summary, Full Background Context, Static GK Exam Pointer Box, Key Data Table, and 2 Interactive Practice MCQs.
+
+---
+
+### 47. `DynamicVectorCard` & `AcademicVectorCanvas`
+
+File: [`src/components/DynamicVectorCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/DynamicVectorCard.tsx), [`src/StudyPlanView.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/StudyPlanView.tsx), [`src/AnalyticsView.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AnalyticsView.tsx)  
+Last updated: 2026-08-15
+
+| Property | Standard Class / Token |
+| :--- | :--- |
+| **Full-Screen Page Canvas** | `relative w-full min-h-screen bg-[#F8FAFC] overflow-x-hidden` |
+| **Canvas Geometric Dot Matrix** | `fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 pointer-events-none z-0` |
+| **Canvas Ambient HSL Glows** | `fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 rounded-full blur-3xl pointer-events-none z-0` |
+| **Floating Viewport Watermarks** | `fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-20` (`GraduationCap`, `Calendar`, `Trophy`, `TrendingUp`, `Activity`, `Brain`) |
+| **Card Container Wrapper** | `relative rounded-3xl sm:rounded-[2.5rem] transition-all duration-300` |
+| **Card Interior Base** | `relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950/40 to-slate-900 text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-9 shadow-xl border border-blue-500/30 group` |
+| **Spotlight Overlay Layer** | `pointer-events-none absolute inset-0 rounded-[inherit] transition-opacity duration-500 z-[1] overflow-hidden mix-blend-soft-light` |
+| **Spotlight Glow Color** | `rgba(59, 130, 246, 0.08)` (subtle ambient spotlight reflection) |
+| **Radial Grid Watermark** | `absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0` |
+| **3D Background Icon Watermarks** | `absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-slate-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0` |
+| **Text — Primary Header** | `text-lg sm:text-xl font-black text-white tracking-tight uppercase` |
+| **Text — Secondary Subtext** | `text-xs font-semibold text-slate-200 leading-none` |
+| **Accent Gold Subtext** | `text-amber-200/90 font-mono font-black` |
+
+**Pattern notes:**
+- **Full-Screen Edge-to-Edge Canvas**: All main page view containers (`StudyPlanView`, `AnalyticsView`) MUST use `relative w-full min-h-screen bg-[#F8FAFC] overflow-x-hidden` with `fixed inset-0` dot matrix backgrounds to ensure the background spans 100% of the viewport from edge-to-edge.
+- **Spotlight z-Index Isolation (`z-[1]`)**: The cursor reflection spotlight overlay inside `DynamicVectorCard` MUST be set to `z-[1]` with `mix-blend-soft-light` and soft ambient glow opacity (`rgba(59, 130, 246, 0.08)`). It MUST NEVER use high z-indices (`z-30`) or harsh white opacities (`0.15`), which cause top-corner diagonal glare washouts.
+- **Unified Corner Radius (`rounded-3xl sm:rounded-[2.5rem]`)**: Every card wrapped in `<DynamicVectorCard>` MUST explicitly declare `rounded-3xl sm:rounded-[2.5rem]` on both parent and child elements so card borders, shadows, backgrounds, and spotlight overlays share 100% pixel-perfect vector curves.
+- **Unique Niche-Aligned Watermark Icons**: StatCards and feature cards MUST assign unique watermark icons matching their specific niche (`Zap` for Average Score, `Target` for Accuracy, `Timer` for Pace, `History` for Attempts, `TrendingUp` for Trend, `Crosshair` for Skill Profile).
+
 
 
 

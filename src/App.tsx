@@ -4005,18 +4005,18 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
             if (!isScheduledUpcoming) handleStartDirectPractice(bank);
           }}
           className={cn(
-            "p-4 bg-white border rounded-2xl flex items-center justify-between gap-4 transition-all duration-300 relative overflow-hidden",
+            "p-4 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center justify-between gap-4 transition-all duration-300 relative overflow-hidden text-slate-900 dark:text-white",
             isScheduledUpcoming
-              ? "border-amber-200 bg-amber-50/20 cursor-not-allowed opacity-90"
+              ? "border-amber-200 dark:border-amber-800 bg-amber-50/20 dark:bg-amber-950/20 cursor-not-allowed opacity-90"
               : isCompleted
-                ? "border-emerald-250 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.04)] active:border-emerald-350 cursor-pointer"
+                ? "border-emerald-250 dark:border-emerald-800 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.04)] active:border-emerald-350 cursor-pointer"
                 : isInProgress
-                  ? "border-amber-255 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.04)] active:border-amber-360 cursor-pointer"
+                  ? "border-amber-255 dark:border-amber-800 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.04)] active:border-amber-360 cursor-pointer"
                   : isLocked 
-                    ? "border-slate-100 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.03),0_1px_2px_rgba(245,158,11,0.01)] active:border-amber-300 cursor-pointer"
+                    ? "border-slate-100 dark:border-slate-800 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.03),0_1px_2px_rgba(245,158,11,0.01)] active:border-amber-300 cursor-pointer"
                     : isPremiumUnlocked
-                      ? "border-slate-100 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.03),0_1px_2px_rgba(16,185,129,0.01)] active:border-emerald-300 cursor-pointer"
-                      : "border-slate-100 shadow-[0_4px_16px_-4px_rgba(79,70,229,0.03),0_1px_2px_rgba(79,70,229,0.01)] active:border-brand-300 cursor-pointer"
+                      ? "border-slate-100 dark:border-slate-800 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.03),0_1px_2px_rgba(16,185,129,0.01)] active:border-emerald-300 cursor-pointer"
+                      : "border-slate-100 dark:border-slate-800 shadow-[0_4px_16px_-4px_rgba(79,70,229,0.03),0_1px_2px_rgba(79,70,229,0.01)] active:border-brand-300 cursor-pointer"
           )}
         >
           <div className="flex items-center gap-3.5 min-w-0 flex-1 pl-1">
@@ -4041,27 +4041,27 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
 
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <h4 className="font-extrabold text-[13.5px] text-slate-900 tracking-tight leading-snug line-clamp-2 uppercase pr-2">{mainTitle}</h4>
+                <h4 className="font-extrabold text-[13.5px] text-slate-900 dark:text-white tracking-tight leading-snug line-clamp-2 uppercase pr-2">{mainTitle}</h4>
                 {isScheduledUpcoming ? (
-                  <span className="px-1.5 py-0.5 bg-amber-100 text-amber-800 text-[8.5px] font-black rounded border border-amber-200 uppercase tracking-wider shrink-0">📅 UPCOMING</span>
+                  <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[8.5px] font-black rounded border border-amber-200 dark:border-amber-800 uppercase tracking-wider shrink-0">📅 UPCOMING</span>
                 ) : isCompleted ? (
-                  <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 text-[8.5px] font-black rounded border border-emerald-200 uppercase tracking-wider shrink-0 flex items-center gap-1"><CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" /> COMPLETED</span>
+                  <span className="px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[8.5px] font-black rounded border border-emerald-200 dark:border-emerald-800 uppercase tracking-wider shrink-0 flex items-center gap-1"><CheckCircle2 className="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400" /> COMPLETED</span>
                 ) : isInProgress ? (
-                  <span className="px-1.5 py-0.5 bg-amber-100 text-amber-800 text-[8.5px] font-black rounded border border-amber-200 uppercase tracking-wider shrink-0">IN PROGRESS ({progressPercent}%)</span>
+                  <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[8.5px] font-black rounded border border-amber-200 dark:border-amber-800 uppercase tracking-wider shrink-0">IN PROGRESS ({progressPercent}%)</span>
                 ) : (
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100 whitespace-nowrap">Practice Set</span>
+                  <span className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-100 dark:border-slate-700 whitespace-nowrap">Practice Set</span>
                 )}
               </div>
 
               {isScheduledUpcoming ? (
-                <div className="mt-1.5 text-[11px] font-bold text-amber-800 flex items-center gap-1.5">
-                  <Clock className="w-3 h-3 text-amber-600 shrink-0" />
-                  <span>Starts in <strong className="font-mono text-amber-900">{countdown.formattedCountdown}</strong></span>
+                <div className="mt-1.5 text-[11px] font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+                  <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <span>Starts in <strong className="font-mono text-amber-900 dark:text-amber-200">{countdown.formattedCountdown}</strong></span>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 mt-2 text-[10px] font-extrabold text-slate-555 flex-wrap">
-                  <span className="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-100/60"><FileText className="w-3 h-3 text-slate-400" /> {totalQs} Questions</span>
-                  <span className="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-100/60"><Clock className="w-3 h-3 text-slate-400" /> {totalQs > 0 ? `${totalQs} Mins` : 'Soon'}</span>
+                <div className="flex items-center gap-2 mt-2 text-[10px] font-extrabold text-slate-555 dark:text-slate-300 flex-wrap">
+                  <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-0.5 rounded-lg border border-slate-100/60 dark:border-slate-700/60"><FileText className="w-3 h-3 text-slate-400" /> {totalQs} Questions</span>
+                  <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-0.5 rounded-lg border border-slate-100/60 dark:border-slate-700/60"><Clock className="w-3 h-3 text-slate-400" /> {totalQs > 0 ? `${totalQs} Mins` : 'Soon'}</span>
                 </div>
               )}
             </div>
@@ -4082,14 +4082,14 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
       ) : (
         <Card 
           className={cn(
-            "p-6 bg-white border shadow-lg shadow-slate-200/30 rounded-[1.5rem] transition-all duration-500 flex flex-col justify-between gap-6 relative overflow-hidden premium-shine-container h-full", 
+            "p-6 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 border border-slate-200/80 dark:border-indigo-500/20 shadow-lg shadow-slate-200/30 dark:shadow-indigo-950/20 rounded-[1.5rem] transition-all duration-500 flex flex-col justify-between gap-6 relative overflow-hidden premium-shine-container h-full text-slate-900 dark:text-white", 
             isScheduledUpcoming
-              ? "border-amber-200 bg-amber-50/10 cursor-not-allowed"
+              ? "border-amber-200 dark:border-amber-800 bg-amber-50/10 dark:bg-amber-950/20 cursor-not-allowed"
               : isCompleted
-                ? "border-emerald-200 shadow-emerald-500/5 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10 hover:border-emerald-300 cursor-pointer"
+                ? "border-emerald-200 dark:border-emerald-800 shadow-emerald-500/5 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10 hover:border-emerald-300 cursor-pointer"
                 : isInProgress
-                  ? "border-amber-250 shadow-amber-500/5 hover:-translate-y-2 hover:shadow-2xl hover:shadow-amber-500/10 hover:border-amber-300 cursor-pointer"
-                  : "border-slate-200 bg-white hover:-translate-y-2 hover:shadow-2xl hover:shadow-brand-500/10 hover:border-brand-200 cursor-pointer"
+                  ? "border-amber-250 dark:border-amber-800 shadow-amber-500/5 hover:-translate-y-2 hover:shadow-2xl hover:shadow-amber-500/10 hover:border-amber-300 cursor-pointer"
+                  : "border-slate-200 dark:border-indigo-500/20 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 hover:-translate-y-2 hover:shadow-2xl hover:shadow-brand-500/10 hover:border-brand-200 cursor-pointer"
           )}
           onClick={() => {
             if (!isScheduledUpcoming) handleStartDirectPractice(bank);
@@ -4117,7 +4117,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
                 <div className="absolute inset-0 border-2 border-white/20 rounded-xl" />
               </div>
               <div className="text-left min-w-0 flex-1">
-                <h4 className="font-black text-base sm:text-lg text-slate-950 tracking-tight group-hover:text-brand-600 transition-colors uppercase leading-snug line-clamp-2">{mainTitle}</h4>
+                <h4 className="font-black text-base sm:text-lg text-slate-950 dark:text-white tracking-tight group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors uppercase leading-snug line-clamp-2">{mainTitle}</h4>
                 <div className="flex items-center flex-wrap gap-1.5 mt-1">
                   {isScheduledUpcoming ? (
                     <span className="text-[10px] font-black text-amber-800 uppercase tracking-widest bg-amber-100 px-2.5 py-0.5 rounded border border-amber-200 flex items-center gap-1">
@@ -4136,7 +4136,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" /> IN PROGRESS ({progressPercent}%)
                     </span>
                   ) : (
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100">Practice Set</span>
+                    <span className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-100 dark:border-slate-700">Practice Set</span>
                   )}
                   {suffix && (
                     <span className="text-[10px] font-black text-brand-700 uppercase tracking-widest bg-brand-50 px-2 py-0.5 rounded border border-brand-100/60 shadow-2xs">Set {suffix}</span>
@@ -4158,9 +4158,9 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
             </div>
           ) : (
             <div className="space-y-4 flex-1 relative z-10 pt-2 text-left">
-              <div className="flex gap-4 text-xs font-bold text-slate-555 flex-wrap">
-                <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><FileText className="w-3.5 h-3.5 text-slate-400"/> {totalQs} Questions</span>
-                <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded"><Clock className="w-3.5 h-3.5 text-slate-400"/> {totalQs > 0 ? `${totalQs} Mins Session` : 'Practice Session Soon'}</span>
+              <div className="flex gap-4 text-xs font-bold text-slate-555 dark:text-slate-300 flex-wrap">
+                <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><FileText className="w-3.5 h-3.5 text-slate-400"/> {totalQs} Questions</span>
+                <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><Clock className="w-3.5 h-3.5 text-slate-400"/> {totalQs > 0 ? `${totalQs} Mins Session` : 'Practice Session Soon'}</span>
               </div>
             </div>
           )}
@@ -4317,18 +4317,18 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
             if (!isScheduledUpcoming) handleStartTest({ ...test, isPremium, price });
           }}
           className={cn(
-            "px-3 py-2.5 sm:p-4 bg-white border rounded-xl sm:rounded-2xl flex items-center justify-between gap-3 group relative overflow-hidden transition-all duration-300",
+            "px-3 py-2.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl sm:rounded-2xl flex items-center justify-between gap-3 group relative overflow-hidden transition-all duration-300 text-slate-900 dark:text-white",
             isScheduledUpcoming
-              ? "border-amber-200 bg-amber-50/20 cursor-not-allowed opacity-90"
+              ? "border-amber-200 dark:border-amber-800 bg-amber-50/20 dark:bg-amber-950/20 cursor-not-allowed opacity-90"
               : isCompleted
-                ? "border-emerald-250 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.04)] active:border-emerald-350 cursor-pointer"
+                ? "border-emerald-250 dark:border-emerald-800 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.04)] active:border-emerald-350 cursor-pointer"
                 : isInProgress
-                  ? "border-amber-250 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.04)] active:border-amber-355 cursor-pointer"
+                  ? "border-amber-250 dark:border-amber-800 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.04)] active:border-amber-355 cursor-pointer"
                   : isLocked 
-                    ? "border-slate-100 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.03),0_1px_2px_rgba(245,158,11,0.01)] active:border-amber-300 cursor-pointer"
+                    ? "border-slate-100 dark:border-slate-800 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.03),0_1px_2px_rgba(245,158,11,0.01)] active:border-amber-300 cursor-pointer"
                     : isPremiumUnlocked
-                      ? "border-slate-100 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.03),0_1px_2px_rgba(16,185,129,0.01)] active:border-emerald-300 cursor-pointer"
-                      : "border-slate-100 shadow-[0_4px_16px_-4px_rgba(79,70,229,0.03),0_1px_2px_rgba(79,70,229,0.01)] active:border-brand-300 cursor-pointer"
+                      ? "border-slate-100 dark:border-slate-800 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.03),0_1px_2px_rgba(16,185,129,0.01)] active:border-emerald-300 cursor-pointer"
+                      : "border-slate-100 dark:border-slate-800 shadow-[0_4px_16px_-4px_rgba(79,70,229,0.03),0_1px_2px_rgba(79,70,229,0.01)] active:border-brand-300 cursor-pointer"
           )}
         >
           <div className={cn(
@@ -4384,7 +4384,7 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
             
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <h4 className="font-extrabold text-[12.5px] sm:text-[13.5px] text-slate-900 tracking-tight leading-snug line-clamp-1 sm:line-clamp-2 uppercase pr-1" title={test.title}>{mainTitle}</h4>
+                <h4 className="font-extrabold text-[12.5px] sm:text-[13.5px] text-slate-900 dark:text-white tracking-tight leading-snug line-clamp-1 sm:line-clamp-2 uppercase pr-1" title={test.title}>{mainTitle}</h4>
                 {suffix && (
                   <span className="px-1.5 py-0.5 bg-brand-50 text-brand-700 text-[8.5px] font-black rounded border border-brand-100/60 uppercase tracking-wider shrink-0">Set {suffix}</span>
                 )}
@@ -4409,10 +4409,10 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
                   <span>Starts in <strong className="font-mono text-amber-900">{countdown.formattedCountdown}</strong></span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1.5 mt-1.5 sm:mt-2 text-[9.5px] sm:text-[10px] font-extrabold text-slate-500 flex-nowrap overflow-hidden">
-                  <span className="flex items-center gap-0.5 bg-slate-50 px-1.5 py-0.5 rounded-md border border-slate-100/60 shrink-0"><Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {test.durationMinutes}m</span>
-                  <span className="flex items-center gap-0.5 bg-slate-50 px-1.5 py-0.5 rounded-md border border-slate-100/60 shrink-0"><Award className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {test.totalMarks}M</span>
-                  <span className="flex items-center gap-0.5 bg-slate-50 px-1.5 py-0.5 rounded-md border border-slate-100/60 shrink-0"><FileText className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {totalQs}Q</span>
+                <div className="flex items-center gap-1.5 mt-1.5 sm:mt-2 text-[9.5px] sm:text-[10px] font-extrabold text-slate-500 dark:text-slate-300 flex-nowrap overflow-hidden">
+                  <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-slate-800/80 px-1.5 py-0.5 rounded-md border border-slate-100/60 dark:border-slate-700/60 shrink-0"><Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {test.durationMinutes}m</span>
+                  <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-slate-800/80 px-1.5 py-0.5 rounded-md border border-slate-100/60 dark:border-slate-700/60 shrink-0"><Award className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {test.totalMarks}M</span>
+                  <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-slate-800/80 px-1.5 py-0.5 rounded-md border border-slate-100/60 dark:border-slate-700/60 shrink-0"><FileText className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {totalQs}Q</span>
                   {isCompleted && completedAct && (
                     <span className="flex items-center gap-0.5 bg-emerald-50/50 text-emerald-700 px-1.5 py-0.5 rounded-md border border-emerald-100/30 shrink-0">
                       Score: {completedAct.score}/{completedAct.totalMarks || test.totalMarks}
@@ -4454,18 +4454,18 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
         <Card 
           key={test.id} 
           className={cn(
-            "p-6 bg-white border shadow-lg shadow-slate-200/30 rounded-[1.5rem] group transition-all duration-500 flex flex-col justify-between gap-6 relative overflow-hidden premium-shine-container h-full", 
+            "p-6 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 border border-slate-200/80 dark:border-indigo-500/20 shadow-lg shadow-slate-200/30 dark:shadow-indigo-950/20 group transition-all duration-500 flex flex-col justify-between gap-6 relative overflow-hidden premium-shine-container h-full text-slate-900 dark:text-white", 
             isScheduledUpcoming
-              ? "border-amber-200 bg-amber-50/10 cursor-not-allowed"
+              ? "border-amber-200 dark:border-amber-800 bg-amber-50/10 dark:bg-amber-950/20 cursor-not-allowed"
               : isCompleted
-                ? "border-emerald-200 shadow-emerald-500/5 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10 hover:border-emerald-300 cursor-pointer"
+                ? "border-emerald-200 dark:border-emerald-800 shadow-emerald-500/5 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10 hover:border-emerald-300 cursor-pointer"
                 : isInProgress
-                  ? "border-amber-250 shadow-amber-500/5 hover:-translate-y-2 hover:shadow-2xl hover:shadow-amber-500/10 hover:border-amber-300 cursor-pointer"
+                  ? "border-amber-250 dark:border-amber-800 shadow-amber-500/5 hover:-translate-y-2 hover:shadow-2xl hover:shadow-amber-500/10 hover:border-amber-300 cursor-pointer"
                   : isLocked 
-                    ? "border-slate-200 bg-white hover:-translate-y-2 hover:border-slate-400 hover:bg-slate-50/50 hover:shadow-md cursor-pointer"
+                    ? "border-slate-200 dark:border-indigo-500/20 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 hover:-translate-y-2 hover:border-slate-400 hover:bg-slate-50/50 hover:shadow-md cursor-pointer"
                     : isPremiumUnlocked 
-                      ? "border-slate-200 bg-white hover:-translate-y-2 hover:border-slate-400 hover:bg-slate-50/50 hover:shadow-md cursor-pointer"
-                      : "border-slate-200 bg-white hover:-translate-y-2 hover:border-slate-400 hover:bg-slate-50/50 hover:shadow-2xl hover:shadow-brand-500/10 hover:border-brand-200 cursor-pointer"
+                      ? "border-slate-200 dark:border-indigo-500/20 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 hover:-translate-y-2 hover:border-slate-400 hover:bg-slate-50/50 hover:shadow-md cursor-pointer"
+                      : "border-slate-200 dark:border-indigo-500/20 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 hover:-translate-y-2 hover:border-slate-400 hover:bg-slate-50/50 hover:shadow-2xl hover:shadow-brand-500/10 hover:border-brand-200 cursor-pointer"
           )}
           onClick={() => {
             if (!isScheduledUpcoming) handleStartTest({ ...test, isPremium, price });
@@ -10099,7 +10099,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                             setSelectedMockCategory(test.id);
                             scrollToElement('test-series', { block: 'start', delay: 50 });
                           }}
-                          className="p-4 bg-white border border-slate-200/80 rounded-2xl flex items-center justify-between gap-4 cursor-pointer group relative overflow-hidden transition-all duration-300 shadow-sm active:scale-[0.98]"
+                          className="p-4 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center justify-between gap-4 cursor-pointer group relative overflow-hidden transition-all duration-300 shadow-sm active:scale-[0.98]"
                         >
                           <div className="flex items-center gap-3.5 min-w-0 flex-1">
                             <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-md relative text-white", vecTheme.logoBg)}>
@@ -10108,8 +10108,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                             
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                <h4 className="font-extrabold text-[14.5px] text-slate-900 tracking-tight leading-snug">{test.title}</h4>
-                                <span className="px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[8.5px] font-black uppercase tracking-wider rounded border border-slate-200/50 shrink-0">
+                                <h4 className="font-extrabold text-[14.5px] text-slate-900 dark:text-white tracking-tight leading-snug">{test.title}</h4>
+                                <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[8.5px] font-black uppercase tracking-wider rounded border border-slate-200/50 dark:border-slate-700 shrink-0">
                                   {count} {count === 1 ? 'Test' : 'Tests'}
                                 </span>
                                 {hasNewUnreadContent('mock', test.id) ? (
@@ -10307,7 +10307,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       <div className="space-y-5 sm:space-y-10">
                         {filteredGroupedBySubject.map(([subject, tests]) => (
                           <div key={subject} className="space-y-2.5 sm:space-y-5">
-                            <h4 className="text-[13px] sm:text-xl font-black text-brand-700 px-3 py-1.5 sm:px-5 sm:py-2.5 bg-brand-50/80 rounded-lg sm:rounded-xl inline-flex items-center gap-1.5 border border-brand-100/50 shadow-sm">{subject}</h4>
+                            <h4 className="text-[13px] sm:text-xl font-black text-brand-700 dark:text-indigo-300 px-3 py-1.5 sm:px-5 sm:py-2.5 bg-brand-50/80 dark:bg-indigo-950/60 rounded-lg sm:rounded-xl inline-flex items-center gap-1.5 border border-brand-100/50 dark:border-indigo-800 shadow-sm">{subject}</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6">
                               {(tests as any[]).map(test => (
                                 <ExamDetailMockTestCard

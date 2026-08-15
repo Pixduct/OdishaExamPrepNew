@@ -42,6 +42,8 @@
 - [x] Official Exam Registry Section Dark Mode Dual-Theme Fix: High-contrast luminous blue `FREE TEST →` action buttons, dark mode status badges (`bg-emerald-950/70`, `bg-amber-950/70`, `bg-blue-950/70`), and crisp date typography (`src/App.tsx`)
 - [x] Achievers' Journal "Load More preparation journals" Button Dark Mode Fix: Converted to dual-theme vector button (`bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_#2563EB] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.5)]`) (`src/App.tsx`)
 - [x] Consistent Site-Wide Section Divider Lines: Restored `border-b border-slate-200/50 dark:border-slate-800` across all homepage sections with clean positive vertical padding (`py-8 sm:py-10`), eliminating card slicing while maintaining 100% design consistency (`src/App.tsx`)
+- [x] Ultra-Smooth 120 FPS Scrolling Engine (Lenis smooth scroll integration, zero React state re-render GPU translate3d refactors for MouseTrackingCanvas, VectorCursorFollower, and DynamicVectorCard, plus active scroll-guard pointer-events lock) (`src/lib/lenisScroll.ts`, `MouseTrackingCanvas.tsx`, `VectorCursorFollower.tsx`, `DynamicVectorCard.tsx`, `index.css`)
+- [x] Executive Footer Contrast & Legibility Overhaul: Converted dim, unreadable text into high-contrast text (`text-white`, `text-slate-200`, `text-slate-300`), crisp stat card borders (`bg-slate-900/90 border-2 border-slate-800`), bright input controls, and vibrant blue icons (`text-brand-400`) (`src/App.tsx`)
 
 
 

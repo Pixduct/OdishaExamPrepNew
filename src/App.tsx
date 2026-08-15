@@ -8337,7 +8337,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         <div className="flex flex-col space-y-5 sm:space-y-7">
           {/* Controls Bar */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-            <div className="border border-slate-200/80 sm:border-2 sm:border-slate-900 bg-slate-50/50 sm:bg-white p-1 rounded-2xl flex gap-1.5 w-full sm:w-auto shrink-0 shadow-none sm:shadow-[4px_4px_0px_rgba(37,99,235,0.15)] relative">
+            <div className="border border-slate-200/80 dark:border-slate-700/80 sm:border-2 sm:border-slate-900 bg-slate-50/50 dark:bg-slate-800/60 sm:bg-white sm:dark:bg-slate-800/80 p-1 rounded-2xl flex gap-1.5 w-full sm:w-auto shrink-0 shadow-none sm:shadow-[4px_4px_0px_rgba(37,99,235,0.15)] relative">
               {(['upcoming', 'popular'] as const).map((tab) => {
                 const isTabActive = examSearchQuery 
                   ? filteredExams.some(e => e.category === tab) 
@@ -8356,7 +8356,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       "px-5 sm:px-8 py-2 sm:py-3 rounded-xl font-extrabold text-xs sm:text-sm cursor-pointer relative transition-all duration-300 focus:outline-none select-none flex-1 sm:flex-initial text-center",
                       isTabActive 
                         ? "text-white sm:-translate-y-0.5" 
-                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-50/50"
+                        : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-slate-700/60"
                     )}
                   >
                     {isTabActive && (
@@ -8524,14 +8524,14 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                             </div>
                           ) : (
                             // Desktop Card
-                            <div className="p-3 sm:p-5 md:p-6 h-full bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 border sm:border-2 border-slate-900 dark:border-indigo-500/30 rounded-2xl sm:rounded-3xl flex flex-col items-center text-center justify-center space-y-2 sm:space-y-4 md:space-y-5 relative shadow-[0_4px_16px_rgba(0,0,0,0.035)] sm:shadow-[4px_4px_0px_#2563EB] md:group-hover/card:shadow-[8px_8px_0px_#2563EB] md:group-hover/card:-translate-y-1 md:group-hover/card:-translate-x-1 transition-all duration-300 active:scale-[0.98] sm:active:scale-100 active:bg-slate-50/70 sm:active:bg-white text-slate-900 dark:text-white">
+                            <div className="p-3 sm:p-5 md:p-6 h-full bg-white dark:bg-gradient-to-br dark:from-[#0d1b3e] dark:via-[#0f2257] dark:to-[#0b1730] border sm:border-2 border-slate-900 dark:border-brand-800/50 rounded-2xl sm:rounded-3xl flex flex-col items-center text-center justify-center space-y-2 sm:space-y-4 md:space-y-5 relative shadow-[0_4px_16px_rgba(0,0,0,0.035)] sm:shadow-[4px_4px_0px_#2563EB] md:group-hover/card:shadow-[8px_8px_0px_#2563EB] md:group-hover/card:-translate-y-1 md:group-hover/card:-translate-x-1 transition-all duration-300 active:scale-[0.98] sm:active:scale-100 active:bg-slate-50/70 sm:active:bg-white dark:active:bg-[#0d1b3e] text-slate-900 dark:text-white">
                               {/* Corner arrow - structured circle */}
-                              <div className="absolute top-2 right-2 sm:top-4 sm:right-4 md:top-5 md:right-5 w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full border-2 border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center transition-all duration-300 shadow-[2px_2px_0px_#2563EB] group-hover/card:bg-[#2563EB] group-hover/card:shadow-none group-hover/card:translate-x-0.5 group-hover/card:translate-y-0.5">
-                                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-900 dark:text-white group-hover/card:text-white transition-colors" />
+                              <div className="absolute top-2 right-2 sm:top-4 sm:right-4 md:top-5 md:right-5 w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full border-2 border-slate-900 dark:border-brand-700/70 bg-white dark:bg-brand-900/60 flex items-center justify-center transition-all duration-300 shadow-[2px_2px_0px_#2563EB] group-hover/card:bg-[#2563EB] group-hover/card:shadow-none group-hover/card:translate-x-0.5 group-hover/card:translate-y-0.5">
+                                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-900 dark:text-blue-200 group-hover/card:text-white transition-colors" />
                               </div>
  
                               {/* Icon Container */}
-                              <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-2xl border sm:border-2 border-brand-100/20 sm:border-slate-900 bg-brand-50/60 sm:bg-[#FAF8F5] flex justify-center items-center shrink-0 shadow-none sm:shadow-[3px_3px_0px_rgba(37,99,235,0.15)] md:group-hover/card:shadow-[4px_4px_0px_#2563EB] transition-all duration-300 relative overflow-hidden">
+                              <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-2xl border sm:border-2 border-brand-100/20 sm:border-slate-900 dark:border-brand-700/40 bg-brand-50/60 sm:bg-[#FAF8F5] dark:bg-white/10 dark:sm:bg-white/10 flex justify-center items-center shrink-0 shadow-none sm:shadow-[3px_3px_0px_rgba(37,99,235,0.15)] md:group-hover/card:shadow-[4px_4px_0px_#2563EB] transition-all duration-300 relative overflow-hidden">
                                 {(exam.icon && (exam.icon.startsWith('http') || exam.icon.startsWith('/'))) ? (
                                   <img src={getDirectImageUrl(exam.icon)} alt={`Odisha Exam Prep Icon: ${exam.name}`} className="w-8/12 h-8/12 object-contain relative z-10" referrerPolicy="no-referrer" />
                                 ) : (
@@ -8541,7 +8541,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                               
                               <div className="flex-1 w-full flex flex-col justify-start">
                                 <h3 
-                                  className="text-[12px] sm:text-base md:text-lg lg:text-xl font-serif font-black text-slate-900 md:group-hover/card:text-[#2563EB] transition-all duration-300 leading-snug tracking-tight uppercase"
+                                  className="text-[12px] sm:text-base md:text-lg lg:text-xl font-serif font-black text-slate-900 dark:text-white md:group-hover/card:text-[#2563EB] dark:md:group-hover/card:text-brand-300 transition-all duration-300 leading-snug tracking-tight uppercase"
                                   style={{
                                     display: '-webkit-box',
                                     WebkitLineClamp: 2,
@@ -8554,7 +8554,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                 </h3>
                                 <div className="w-full mt-2">
                                   <p 
-                                    className="text-slate-400 sm:text-slate-500 text-[10px] sm:text-xs font-medium sm:font-bold leading-normal sm:leading-relaxed opacity-85 md:group-hover/card:opacity-100 transition-opacity"
+                                    className="text-slate-400 sm:text-slate-500 dark:text-blue-200/70 dark:sm:text-blue-200/70 text-[10px] sm:text-xs font-medium sm:font-bold leading-normal sm:leading-relaxed opacity-85 md:group-hover/card:opacity-100 transition-opacity"
                                     style={{
                                       display: '-webkit-box',
                                       WebkitLineClamp: 2,

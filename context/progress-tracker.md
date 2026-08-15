@@ -37,6 +37,9 @@
 - [x] Professional Floating Sticky Navigation Header (Compact scroll height transition h-14/h-16, backdrop-blur-xl glassmorphism & elevation shadow) (`src/App.tsx`)
 - [x] Fixed Root Overflow Context (`overflow-x-clip`) to Restore Native CSS Sticky Header Docking on Scroll (`src/App.tsx`)
 - [x] Full-Screen Professional Widescreen Layout Overhaul: Upgraded all front-end section boundaries to `max-w-7xl` (1280px/1440px) with responsive 3-column grids for Syllabus & Achievers Journal (`src/App.tsx`)
+- [x] Viewport-Anchored Fixed Sticky Navigation Header (Guaranteed top-0 viewport pinning on scroll across all flexbox containers & screen sizes) (`src/App.tsx`)
+- [x] Completely Removed Top EXAM UPDATES Announcement Ticker Bar (`src/App.tsx`)
+- [x] Official Exam Registry Section Dark Mode Dual-Theme Fix: High-contrast luminous blue `FREE TEST →` action buttons, dark mode status badges (`bg-emerald-950/70`, `bg-amber-950/70`, `bg-blue-950/70`), and crisp date typography (`src/App.tsx`)
 
 
 

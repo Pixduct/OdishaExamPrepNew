@@ -6,6 +6,10 @@ import './index.css';
 import { AuthProvider } from './lib/AuthContext';
 import { ErrorBoundary } from './ErrorBoundary';
 import LoadingPortal from './components/LoadingPortal';
+import { applyThemeToDocument, getStoredTheme } from './lib/themeStore';
+
+// Ensure dark/light theme is synchronously applied to HTML root before React mounts
+applyThemeToDocument(getStoredTheme());
 
 // Global client-side error reporter for remote diagnostics
 window.onerror = function(message, source, lineno, colno, error) {

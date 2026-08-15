@@ -7,6 +7,9 @@ export const getStoredTheme = (): ThemeMode => {
   try {
     const saved = localStorage.getItem(THEME_STORAGE_KEY);
     if (saved === 'dark' || saved === 'light') return saved;
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
   } catch {
     // fallback
   }
@@ -35,6 +38,11 @@ export const applyThemeToDocument = (theme: ThemeMode): void => {
     root.setAttribute('data-theme', 'light');
   }
 };
+
+// Immediately apply stored theme on script load before React hydrates
+if (typeof window !== 'undefined') {
+  applyThemeToDocument(getStoredTheme());
+}
 
 // React Hook for dynamic theme switching
 import { useState, useEffect } from 'react';

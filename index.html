@@ -38,8 +38,22 @@
     <meta property="twitter:url" content="https://odishaexamprep.in/" />
     <meta property="twitter:title" content="OdishaExamPrep - Best Platform for Odisha Exam Preparation" />
     <meta property="twitter:description" content="Prepare for OPSC, OSSC, OSSSC and other Odisha government competitive exams. Practice with expert-crafted mock tests, syllabus roadmaps, and real-time rank analytics." />
-    <meta property="twitter:image" content="https://odishaexamprep.in/android-chrome-512x512.png" />
     <script>
+      // Anti-flicker initial theme setup: Apply dark mode class to HTML before DOM rendering
+      (function() {
+        try {
+          var saved = localStorage.getItem('oep-theme-preference');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (saved === 'dark' || (!saved && prefersDark)) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.setAttribute('data-theme', 'dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.setAttribute('data-theme', 'light');
+          }
+        } catch (e) {}
+      })();
+
       // Automatically reload the page when dynamic chunk imports fail (e.g. flaky network on mobile app switches)
       (function() {
         function reloadPage() {

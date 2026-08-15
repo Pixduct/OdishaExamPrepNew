@@ -1655,6 +1655,28 @@ Last updated: August 15, 2026
 **Pattern notes:**
 - **Executive Brand Stamp**: Placed at the very bottom of the page footer below the copyright line as a high-end luxury editorial watermark statement (`OdishaExamPrep`).
 
+---
+
+### 30. `ExecutiveFooter`
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L1700-L1915)
+Last updated: August 15, 2026
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Footer Outer Canvas** | `bg-[#0a0f1d] dark:bg-[#070a10] text-slate-200 relative overflow-hidden noise-overlay border-t-2 border-slate-900 dark:border-slate-800` |
+| **Stats Card Container** | `bg-slate-900/90 border-2 border-slate-800 rounded-2xl p-4 sm:p-5 hover:border-brand-500/50 transition-all duration-300 shadow-lg` |
+| **Stats Card Typography** | `Label: text-slate-300 font-black uppercase | Value: text-white font-serif font-black text-2xl sm:text-3xl | Desc: text-slate-300 font-semibold` |
+| **Logo Title & Emblem** | `Emblem: bg-[#2563EB] rounded-2xl border-2 border-brand-400/40 | Title: font-serif font-black text-white text-2xl sm:text-3xl` |
+| **Platform / Contact Headings** | `text-white font-black tracking-widest uppercase text-xs sm:text-sm relative after:bg-[#2563eb]` |
+| **Navigation & Contact Links** | `text-slate-300 hover:text-white font-bold text-xs sm:text-sm | Icons: text-brand-400 group-hover:text-brand-300` |
+| **Newsletter Input Control** | `bg-slate-900 border-2 border-slate-700 focus:border-[#2563EB] rounded-xl px-4 py-3 text-xs sm:text-sm text-white font-bold placeholder:text-slate-400` |
+| **Subscribe Button CTA** | `bg-[#2563EB] hover:bg-brand-600 border border-brand-400/40 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-brand-500/20` |
+
+**Pattern notes:**
+- **High-Contrast Obsidain Tone**: The footer uses an executive dark obsidian container (`bg-[#0a0f1d]`) with crisp white titles, high-contrast slate body text (`text-slate-300`), bright input controls, and vibrant blue icons (`text-brand-400`), guaranteeing 100% legibility in both Light and Dark modes.
+
+
 
 
 

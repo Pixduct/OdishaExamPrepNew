@@ -44,6 +44,8 @@
 - [x] Consistent Site-Wide Section Divider Lines: Restored `border-b border-slate-200/50 dark:border-slate-800` across all homepage sections with clean positive vertical padding (`py-8 sm:py-10`), eliminating card slicing while maintaining 100% design consistency (`src/App.tsx`)
 - [x] Ultra-Smooth 120 FPS Scrolling Engine (Lenis smooth scroll integration, zero React state re-render GPU translate3d refactors for MouseTrackingCanvas, VectorCursorFollower, and DynamicVectorCard, plus active scroll-guard pointer-events lock) (`src/lib/lenisScroll.ts`, `MouseTrackingCanvas.tsx`, `VectorCursorFollower.tsx`, `DynamicVectorCard.tsx`, `index.css`)
 - [x] Executive Footer Contrast & Legibility Overhaul: Converted dim, unreadable text into high-contrast text (`text-white`, `text-slate-200`, `text-slate-300`), crisp stat card borders (`bg-slate-900/90 border-2 border-slate-800`), bright input controls, and vibrant blue icons (`text-brand-400`) (`src/App.tsx`)
+- [x] Expanded 10-Slide Multi-Domain Current Affairs Carousel Engine: 10 visual PNG slides per post, 7-day visual template rotation, balanced Odisha (1-4), National (5-8), and World (9-10) distribution, and live Nvidia LLM API support ([`commit 717a55a`](https://github.com/Pixduct/odisha-mcq-engine/commit/717a55a)) (`automations/ca_formatter.py`, `ca_renderer.py`, `ca_publisher.py`)
+- [x] Big Executive Brand Watermark Headline: Integrated massive, responsive brand watermark statement (`OdishaExamPrep`) at the bottom of the footer (`text-4xl sm:text-6xl md:text-8xl lg:text-[7.5rem] xl:text-[9.5rem] 2xl:text-[11rem]`) (`src/App.tsx`)
 
 
 

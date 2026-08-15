@@ -69,7 +69,7 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
 
   if (plan.hasContent === false || plan.tasks.length === 0) {
     return (
-      <div className="bg-white p-6 sm:p-10 rounded-2xl sm:rounded-[2.25rem] shadow-xs border border-slate-200/80 mb-6 sm:mb-8 relative overflow-hidden">
+      <div className="bg-white dark:bg-slate-900/90 p-6 sm:p-10 rounded-2xl sm:rounded-[2.25rem] shadow-xs border border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-white mb-6 sm:mb-8 relative overflow-hidden">
 
         {/* Subtle background pattern */}
         <div className="absolute inset-0 opacity-[0.025] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #6366f1 1px, transparent 0)', backgroundSize: '28px 28px' }} />

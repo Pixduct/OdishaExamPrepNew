@@ -84,6 +84,7 @@ import { ActiveExamContextBar } from './components/ActiveExamContextBar';
 import { getInstantQuestionsForTopic } from './lib/instantQuestionCompiler';
 import { examService } from './lib/examService';
 import { ThemeToggle } from './components/ThemeToggle';
+import { initLenis, destroyLenis } from './lib/lenisScroll';
 
 const getQuestionBankVectorTheme = (title: string = '', category: string = '') => {
   const t = (title + ' ' + (category || '')).toLowerCase();
@@ -1696,45 +1697,42 @@ export const Footer = () => {
   };
 
   return (
-    <footer id="contact" className={cn("bg-[#080b11] text-slate-300 relative overflow-hidden noise-overlay", isMobile ? "py-10 mt-12" : "py-16 md:py-24 mt-20")}>
+    <footer id="contact" className={cn("bg-[#0a0f1d] dark:bg-[#070a10] text-slate-200 relative overflow-hidden noise-overlay border-t-2 border-slate-900 dark:border-slate-800", isMobile ? "py-10 mt-12" : "py-16 md:py-24 mt-20")}>
       {/* Decorative background grid and orbs */}
-      <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#2563eb_1px,transparent_1px),linear-gradient(to_bottom,#2563eb_1px,transparent_1px)] bg-[size:3.5rem_3.5rem]" />
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-slate-800 to-transparent" />
+      <div className="absolute inset-0 opacity-[0.04] bg-[linear-gradient(to_right,#2563eb_1px,transparent_1px),linear-gradient(to_bottom,#2563eb_1px,transparent_1px)] bg-[size:3.5rem_3.5rem]" />
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-500/40 to-transparent" />
       
-      {/* Glowing blur spheres — hidden on mobile to prevent GPU compositing during scroll-in */}
-      <div className="hidden md:block absolute -top-20 right-1/4 w-[500px] h-[500px] bg-brand-500/10 rounded-full blur-[120px] pointer-events-none animate-pulse-soft" />
-      <div className="hidden md:block absolute -bottom-40 left-10 w-[400px] h-[400px] bg-slate-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse-soft" style={{ animationDelay: '-2s' }} />
+      {/* Glowing blur spheres */}
+      <div className="hidden md:block absolute -top-20 right-1/4 w-[500px] h-[500px] bg-brand-500/15 rounded-full blur-[120px] pointer-events-none animate-pulse-soft" />
+      <div className="hidden md:block absolute -bottom-40 left-10 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse-soft" style={{ animationDelay: '-2s' }} />
 
       <div className={cn("max-w-7xl mx-auto relative z-10", isMobile ? "px-4" : "px-6")}>
         
         {/* Pre-footer Stats Dashboard */}
-        <div className={cn("grid grid-cols-2 lg:grid-cols-4 border-b border-slate-800/60", isMobile ? "gap-3 pb-8 mb-8" : "gap-4 sm:gap-6 pb-16 mb-16")}>
+        <div className={cn("grid grid-cols-2 lg:grid-cols-4 border-b border-slate-800/80", isMobile ? "gap-3 pb-8 mb-8" : "gap-4 sm:gap-6 pb-16 mb-16")}>
           {[
-            { label: "Mock Tests Attempted", value: "10,000+", icon: BarChart3, color: "text-blue-400 bg-blue-500/10", desc: "Real exam simulations" },
-            { label: "Syllabus Coverage", value: "98.4%", icon: Target, color: "text-rose-400 bg-rose-500/10", desc: "Mapped to state boards" },
-            { label: "Score Analytics", value: "Real-Time", icon: Zap, color: "text-amber-400 bg-amber-500/10", desc: "Detailed rank mapping" },
-            { label: "Expert Support", value: "24/7 Support", icon: MessageSquare, color: "text-emerald-400 bg-emerald-500/10", desc: "Priority Telegram & Call" }
+            { label: "Mock Tests Attempted", value: "10,000+", icon: BarChart3, color: "text-blue-400 bg-blue-500/15 border-blue-500/30", desc: "Real exam simulations" },
+            { label: "Syllabus Coverage", value: "98.4%", icon: Target, color: "text-rose-400 bg-rose-500/15 border-rose-500/30", desc: "Mapped to state boards" },
+            { label: "Score Analytics", value: "Real-Time", icon: Zap, color: "text-amber-400 bg-amber-500/15 border-amber-500/30", desc: "Detailed rank mapping" },
+            { label: "Expert Support", value: "24/7 Support", icon: MessageSquare, color: "text-emerald-400 bg-emerald-500/15 border-emerald-500/30", desc: "Priority Telegram & Call" }
           ].map((stat, idx) => (
             <div 
               key={idx}
               className={cn(
-                isMobile
-                  /* Mobile: no backdrop-blur, no layout-shifting translate, simple color transition */
-                  ? "bg-slate-900/60 border border-slate-800/50 rounded-2xl p-3.5 group transition-colors duration-200 hover:border-brand-500/30 hover:bg-slate-900/80"
-                  /* Desktop: full premium effect */
-                  : "bg-slate-900/30 backdrop-blur-md border border-slate-800/80 rounded-2xl p-5 hover:border-brand-500/30 hover:bg-slate-900/60 transition-all duration-300 group hover:-translate-y-1"
+                "bg-slate-900/90 border-2 border-slate-800 rounded-2xl p-4 sm:p-5 hover:border-brand-500/50 transition-all duration-300 group shadow-lg",
+                isMobile ? "p-3.5" : "p-5 hover:-translate-y-1"
               )}
             >
               <div className={cn("flex items-center", isMobile ? "gap-2 mb-2" : "gap-3 mb-3")}>
-                <div className={cn(`p-1.5 rounded-lg ${stat.color} group-hover:scale-110 transition-transform duration-300`, isMobile ? "shrink-0" : "p-2")}>
+                <div className={cn(`p-2 rounded-xl ${stat.color} border group-hover:scale-105 transition-transform shrink-0`, isMobile ? "p-1.5" : "p-2")}>
                   <stat.icon className={cn(isMobile ? "w-3.5 h-3.5" : "w-4 h-4")} />
                 </div>
-                <h3 className={cn("font-black uppercase text-slate-500 leading-snug", isMobile ? "text-[9px] tracking-wide" : "text-xs tracking-wider")}>{stat.label}</h3>
+                <h3 className={cn("font-black uppercase text-slate-300 leading-snug", isMobile ? "text-[10px] tracking-wide" : "text-xs tracking-wider")}>{stat.label}</h3>
               </div>
-              <h5 className={cn("font-serif font-black text-white tracking-tight leading-none mb-1", isMobile ? "text-lg" : "text-xl sm:text-2xl")}>
+              <h5 className={cn("font-serif font-black text-white tracking-tight leading-none mb-1.5", isMobile ? "text-lg" : "text-xl sm:text-2xl")}>
                 {stat.value}
               </h5>
-              <p className={cn("font-medium text-slate-400", isMobile ? "text-[10px]" : "text-[11px]")}>
+              <p className={cn("font-semibold text-slate-300", isMobile ? "text-[10px]" : "text-[11px]")}>
                 {stat.desc}
               </p>
             </div>
@@ -1747,25 +1745,25 @@ export const Footer = () => {
           {/* Logo & Tagline column */}
           <div className={cn("col-span-1 md:col-span-2", isMobile ? "space-y-4" : "space-y-6")}>
             <div className="flex items-center gap-3">
-              <div role="img" aria-label="OdishaExamPrep Platform Logo" className={cn("premium-gradient rounded-2xl flex items-center justify-center shadow-lg shadow-[#2563eb]/10 animate-float-sm", isMobile ? "w-10 h-10 shrink-0" : "w-12 h-12")}>
+              <div role="img" aria-label="OdishaExamPrep Platform Logo" className={cn("bg-[#2563EB] rounded-2xl flex items-center justify-center shadow-lg shadow-[#2563eb]/20 border-2 border-brand-400/40", isMobile ? "w-10 h-10 shrink-0" : "w-12 h-12")}>
                 <BookOpen className={cn("text-white", isMobile ? "w-5 h-5" : "w-6 h-6")} />
               </div>
-              <span className={cn("font-serif font-black tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent", isMobile ? "text-2xl" : "text-3xl")}>
+              <span className={cn("font-serif font-black tracking-tight text-white", isMobile ? "text-2xl" : "text-3xl")}>
                 Odisha<span className="text-brand-400 font-serif font-black">Exam</span>Prep
               </span>
             </div>
             {/* Mobile Version (Shorter) */}
-            <p className="block md:hidden text-xs leading-relaxed text-slate-400/90 font-medium max-w-sm">
+            <p className="block md:hidden text-xs leading-relaxed text-slate-300 font-medium max-w-sm">
               Master OPSC, OSSC, and OSSSC exams with verified PYQs and a 24/7 AI Mentor.
             </p>
             {/* Desktop Version (Original) */}
-            <p className="hidden md:block text-slate-400 font-medium leading-relaxed max-w-sm text-sm sm:text-base">
+            <p className="hidden md:block text-slate-300 font-medium leading-relaxed max-w-sm text-sm sm:text-base">
               The ultimate state-level civil service exam prep platform. Master the OPSC, OSSC, and OSSSC with our verified PYQs, real-time analytics, and 24/7 AI Mentor.
             </p>
             
             {/* Newsletter update form */}
             <div className={cn("space-y-2.5", isMobile ? "pt-2" : "space-y-3 pt-4")}>
-              <h2 className="text-xs font-black uppercase tracking-wider text-slate-200">Never Miss an Odisha Exam Update</h2>
+              <h2 className="text-xs font-black uppercase tracking-wider text-white">Never Miss an Odisha Exam Update</h2>
               <form onSubmit={handleSubscribe} className={cn("flex max-w-md", isMobile ? "gap-1.5" : "gap-2")}>
                 <input 
                   type="email" 
@@ -1773,26 +1771,26 @@ export const Footer = () => {
                   placeholder={isMobile ? "Email address…" : "Enter email to get notified..."}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 min-w-0 bg-slate-950/80 border border-slate-800/80 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500/50 transition-all font-bold placeholder:text-slate-600"
+                  className="flex-1 min-w-0 bg-slate-900 border-2 border-slate-700 focus:border-[#2563EB] rounded-xl px-4 py-3 text-xs sm:text-sm text-white focus:outline-none transition-all font-bold placeholder:text-slate-400"
                 />
                 <button 
                   type="submit"
-                  className="shrink-0 px-4 py-2.5 bg-[#2563EB] hover:bg-[#1d4ed8] border border-brand-500/20 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-1.5 cursor-pointer shadow-lg shadow-brand-500/10"
+                  className="shrink-0 px-5 py-3 bg-[#2563EB] hover:bg-brand-600 border border-brand-400/40 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-1.5 cursor-pointer shadow-lg shadow-brand-500/20"
                 >
                   {subscribed ? "Done!" : (
                     <>
                       <span>Join</span>
-                      <ArrowRight className="w-3 h-3" />
+                      <ArrowRight className="w-3.5 h-3.5 text-white" />
                     </>
                   )}
                 </button>
               </form>
               {/* Mobile Version (Shorter) */}
-              <p className="block md:hidden text-[10px] leading-relaxed text-slate-500 font-medium">
+              <p className="block md:hidden text-[10px] leading-relaxed text-slate-400 font-medium">
                 Get instant alerts for OPSC, OSSC &amp; OSSSC notifications and admit card drops.
               </p>
               {/* Desktop Version (Original) */}
-              <p className="hidden md:block text-[10px] text-slate-500 font-medium">
+              <p className="hidden md:block text-[10px] text-slate-400 font-medium">
                 Join our mailing list to get instant alerts for OPSC, OSSC, and OSSSC notification drops and admit card releases.
               </p>
             </div>
@@ -1803,10 +1801,10 @@ export const Footer = () => {
 
           {/* Platform navigation */}
           <div className={cn(isMobile ? "" : "space-y-6")}>
-            <h4 className={cn("text-white font-black tracking-widest uppercase text-xs relative after:content-[''] after:absolute after:-bottom-2.5 after:left-0 after:w-8 after:h-[2px] after:bg-[#2563eb]", isMobile ? "mb-4" : "mb-6")}>
+            <h4 className={cn("text-white font-black tracking-widest uppercase text-xs sm:text-sm relative after:content-[''] after:absolute after:-bottom-2.5 after:left-0 after:w-8 after:h-[2.5px] after:bg-[#2563eb]", isMobile ? "mb-4" : "mb-6")}>
               Platform
             </h4>
-            <ul className={cn("font-semibold text-slate-400", isMobile ? "space-y-3" : "space-y-4")}>
+            <ul className={cn("font-bold text-slate-300", isMobile ? "space-y-3" : "space-y-4")}>
               {[
                 { to: "/current-affairs", label: "Daily Current Affairs", icon: Globe },
                 { to: "/blog", label: "Official Blog", icon: BookOpen },
@@ -1817,9 +1815,9 @@ export const Footer = () => {
                 <li key={idx}>
                   <Link 
                     to={link.to} 
-                    className="hover:text-brand-400 transition-all duration-300 flex items-center gap-2 group hover:translate-x-1.5"
+                    className="hover:text-brand-300 transition-all duration-300 flex items-center gap-2 group hover:translate-x-1.5"
                   >
-                    <link.icon className={cn("text-slate-700 group-hover:text-brand-500 transition-colors shrink-0", isMobile ? "w-3.5 h-3.5" : "w-4 h-4")} />
+                    <link.icon className={cn("text-brand-400 group-hover:text-brand-300 transition-colors shrink-0", isMobile ? "w-3.5 h-3.5" : "w-4 h-4")} />
                     <span className={cn(isMobile ? "text-xs" : "text-sm")}>{link.label}</span>
                   </Link>
                 </li>
@@ -1829,10 +1827,10 @@ export const Footer = () => {
 
           {/* Contact details */}
           <div className={cn(isMobile ? "" : "space-y-6")}>
-            <h4 className={cn("text-white font-black tracking-widest uppercase text-xs relative after:content-[''] after:absolute after:-bottom-2.5 after:left-0 after:w-8 after:h-[2px] after:bg-[#2563eb]", isMobile ? "mb-4" : "mb-6")}>
+            <h4 className={cn("text-white font-black tracking-widest uppercase text-xs sm:text-sm relative after:content-[''] after:absolute after:-bottom-2.5 after:left-0 after:w-8 after:h-[2.5px] after:bg-[#2563eb]", isMobile ? "mb-4" : "mb-6")}>
               Contact
             </h4>
-            <ul className={cn("font-medium text-slate-400", isMobile ? "space-y-3" : "space-y-3.5")}>
+            <ul className={cn("font-bold text-slate-300", isMobile ? "space-y-3" : "space-y-3.5")}>
               <li>
                 <a 
                   href="https://mail.google.com/mail/?view=cm&fs=1&to=odishaexamprep365@gmail.com" 
@@ -1840,10 +1838,10 @@ export const Footer = () => {
                   rel="noopener noreferrer" 
                   className="flex items-center gap-2.5 group"
                 >
-                  <div className={cn("rounded-xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-center shrink-0 group-hover:border-brand-500/50 group-hover:bg-[#2563eb]/10 transition-all duration-300", isMobile ? "w-8 h-8" : "w-10 h-10")}>
-                    <Mail className={cn("text-slate-400 group-hover:text-brand-400 transition-colors", isMobile ? "w-3.5 h-3.5" : "w-4 h-4")} />
+                  <div className={cn("rounded-xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center shrink-0 group-hover:border-[#2563eb] group-hover:bg-[#2563eb]/20 transition-all duration-300", isMobile ? "w-8 h-8" : "w-10 h-10")}>
+                    <Mail className={cn("text-brand-400 group-hover:text-brand-300 transition-colors", isMobile ? "w-3.5 h-3.5" : "w-4 h-4")} />
                   </div>
-                  <span className={cn("break-all group-hover:text-white transition-colors duration-300", isMobile ? "text-[10px] leading-snug" : "text-sm lg:whitespace-nowrap")}>
+                  <span className={cn("break-all text-slate-200 group-hover:text-white transition-colors duration-300 font-bold", isMobile ? "text-[10px] leading-snug" : "text-sm lg:whitespace-nowrap")}>
                     odishaexamprep365
                     {isMobile ? <br /> : ""}
                     @gmail.com
@@ -1855,10 +1853,10 @@ export const Footer = () => {
                   href="tel:+917377431715" 
                   className="flex items-center gap-2.5 group"
                 >
-                  <div className={cn("rounded-xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-center shrink-0 group-hover:border-[#25D366]/50 group-hover:bg-[#25D366]/10 transition-all duration-300", isMobile ? "w-8 h-8" : "w-10 h-10")}>
-                    <Phone className={cn("text-slate-400 group-hover:text-[#25D366] transition-colors", isMobile ? "w-3.5 h-3.5" : "w-4 h-4")} />
+                  <div className={cn("rounded-xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center shrink-0 group-hover:border-[#25D366] group-hover:bg-[#25D366]/20 transition-all duration-300", isMobile ? "w-8 h-8" : "w-10 h-10")}>
+                    <Phone className={cn("text-[#25D366] group-hover:text-[#25D366] transition-colors", isMobile ? "w-3.5 h-3.5" : "w-4 h-4")} />
                   </div>
-                  <span className={cn("group-hover:text-white transition-colors duration-300", isMobile ? "text-xs" : "text-sm")}>
+                  <span className={cn("text-slate-200 group-hover:text-white transition-colors duration-300 font-bold", isMobile ? "text-xs" : "text-sm")}>
                     +91 7377431715
                   </span>
                 </a>
@@ -1870,7 +1868,7 @@ export const Footer = () => {
                   href="https://www.youtube.com/@OdishaExamPrep365" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className={cn("rounded-xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-center hover:bg-[#FF0000] hover:border-[#FF0000] hover:-translate-y-1 transition-all duration-300 text-slate-400 hover:text-white shadow-lg hover:shadow-red-600/10 group", isMobile ? "w-9 h-9" : "w-11 h-11")}
+                  className={cn("rounded-xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center hover:bg-[#FF0000] hover:border-[#FF0000] hover:-translate-y-1 transition-all duration-300 text-slate-300 hover:text-white shadow-lg hover:shadow-red-600/20 group", isMobile ? "w-9 h-9" : "w-11 h-11")}
                 >
                   <svg role="img" aria-label="OdishaExamPrep YouTube Channel" viewBox="0 0 24 24" fill="currentColor" className={cn("group-hover:scale-110 transition-transform", isMobile ? "w-4 h-4" : "w-5 h-5")}>
                     <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
@@ -1880,7 +1878,7 @@ export const Footer = () => {
                   href="https://wa.me/917377431715" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className={cn("rounded-xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-center hover:bg-[#25D366] hover:border-[#25D366] hover:-translate-y-1 transition-all duration-300 text-slate-400 hover:text-white shadow-lg hover:shadow-[#25D366]/10 group", isMobile ? "w-9 h-9" : "w-11 h-11")}
+                  className={cn("rounded-xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center hover:bg-[#25D366] hover:border-[#25D366] hover:-translate-y-1 transition-all duration-300 text-slate-300 hover:text-white shadow-lg hover:shadow-[#25D366]/20 group", isMobile ? "w-9 h-9" : "w-11 h-11")}
                 >
                   <svg role="img" aria-label="OdishaExamPrep WhatsApp Contact" viewBox="0 0 24 24" fill="currentColor" className={cn("group-hover:scale-110 transition-transform", isMobile ? "w-4 h-4" : "w-5 h-5")}>
                     <path d="M12.031 0C5.385 0 0 5.385 0 12.029a12.022 12.022 0 001.6 6.02L0 24l6.15-1.611a12.012 12.012 0 005.881 1.523h.004c6.645 0 12.03-5.386 12.03-12.031S18.675 0 12.031 0zm0 21.936a9.988 9.988 0 01-5.086-1.385l-.364-.216-3.774.99.998-3.682-.236-.376A9.957 9.957 0 012.064 12.03c0-5.497 4.475-9.972 9.972-9.972 5.497 0 9.97 4.475 9.97 9.972s-4.473 9.97-9.97 9.97z"/>
@@ -1897,12 +1895,12 @@ export const Footer = () => {
       
       {/* Bottom bar */}
       <div className={cn("max-w-7xl mx-auto", isMobile ? "px-4 mt-10" : "px-6 mt-16 md:mt-24")}>
-        <div className="pt-8 border-t border-slate-800/60 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
-          <p className="text-xs font-mono font-bold tracking-widest text-slate-500 uppercase">
+        <div className="pt-8 border-t border-slate-800/80 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+          <p className="text-xs font-mono font-bold tracking-widest text-slate-400 uppercase">
             © 2026 OdishaExamPrep. All rights reserved.
           </p>
           <div className="flex justify-center md:justify-start">
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-slate-900/80 border border-slate-800/80 text-slate-400">
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-slate-900 border-2 border-slate-800 text-slate-300">
               <span>Made with</span>
               <span className="text-rose-500 animate-pulse">❤️</span>
               <span>in Odisha</span>
@@ -11042,6 +11040,10 @@ function AppContent() {
   // the body to be blurred/locked before the modal has a chance to render.
   useEffect(() => {
     sessionStorage.removeItem('oep_selectedBankItem');
+    const lenis = initLenis();
+    return () => {
+      destroyLenis();
+    };
   }, []);
 
   // Register service worker on app start (for push notifications)

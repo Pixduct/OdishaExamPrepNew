@@ -727,19 +727,19 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
         <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-[#2563eb]/5 to-transparent pointer-events-none z-[1]" />
 
         {/* Sticky Glassmorphic Header */}
-        <header className="shrink-0 flex items-center justify-between px-6 py-4 sm:px-10 sm:py-5 border-b border-slate-200/60 bg-white/75 backdrop-blur-md z-20 relative">
+        <header className="shrink-0 flex items-center justify-between px-6 py-4 sm:px-10 sm:py-5 border-b border-slate-200/60 dark:border-slate-800 bg-white/75 dark:bg-slate-900/80 backdrop-blur-md z-20 relative">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[#2563eb]/5 border border-[#2563eb]/10 flex items-center justify-center">
               <FileText className="w-5 h-5 text-[#2563eb]" />
             </div>
             <div>
-              <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest block leading-none">Assessment System</span>
-              <span className="text-slate-800 text-sm font-extrabold tracking-tight mt-1 block">General Briefing</span>
+              <span className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest block leading-none">Assessment System</span>
+              <span className="text-slate-800 dark:text-white text-sm font-extrabold tracking-tight mt-1 block">General Briefing</span>
             </div>
           </div>
           <button 
             onClick={() => onExit(undefined)} 
-            className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-500 hover:text-slate-800 transition-all duration-200 cursor-pointer"
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200/80 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all duration-200 cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -751,22 +751,22 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
             
             {/* Motivation Header */}
             <div className="text-center space-y-2 sm:space-y-3 max-w-2xl mx-auto">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#2563eb]/5 border border-[#2563eb]/15 rounded-full text-[#2563eb] text-[10px] font-black uppercase tracking-widest">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#2563eb]/5 border border-[#2563eb]/15 rounded-full text-[#2563eb] dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest">
                 <BookOpen className="w-3.5 h-3.5" /> {currentMode === 'practice' ? 'Practice Mode Active' : 'Official Mock Exam'}
               </div>
-              <h1 className="text-2xl sm:text-4xl font-serif font-black text-slate-900 tracking-tight leading-tight">
+              <h1 className="text-2xl sm:text-4xl font-serif font-black text-slate-900 dark:text-white tracking-tight leading-tight">
                 {test.title}
               </h1>
-              <p className="hidden sm:block text-slate-500 text-sm sm:text-base font-medium leading-relaxed">
+              <p className="hidden sm:block text-slate-500 dark:text-slate-400 text-sm sm:text-base font-medium leading-relaxed">
                 Review the marking rubrics, select your preparation mode, analyze the distribution of topics, and initiate when ready.
               </p>
             </div>
 
             {/* Mode Selection Panel */}
-            <div className="bg-white border border-slate-200/60 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 shadow-sm max-w-4xl mx-auto space-y-3 sm:space-y-4">
+            <div className="bg-white dark:bg-slate-900/90 border border-slate-200/60 dark:border-slate-800 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 shadow-sm max-w-4xl mx-auto space-y-3 sm:space-y-4">
               <div className="text-center">
-                <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest block leading-none">Select Session Style</span>
-                <h3 className="text-slate-800 text-sm sm:text-base font-black tracking-tight mt-1">Choose How You Want to Study</h3>
+                <span className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest block leading-none">Select Session Style</span>
+                <h3 className="text-slate-800 dark:text-white text-sm sm:text-base font-black tracking-tight mt-1">Choose How You Want to Study</h3>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-4">
@@ -780,8 +780,8 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                   className={cn(
                     "p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 text-left transition-all duration-300 flex flex-col gap-2 sm:gap-0 sm:space-y-3 cursor-pointer active:scale-[0.98]",
                     currentMode === 'mock'
-                      ? "border-[#2563eb] bg-[#2563eb]/5 shadow-sm"
-                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                      ? "border-[#2563eb] bg-[#2563eb]/5 dark:bg-indigo-600/20 shadow-sm"
+                      : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-white hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50/50"
                   )}
                 >
                   <div className="flex items-center justify-between w-full">

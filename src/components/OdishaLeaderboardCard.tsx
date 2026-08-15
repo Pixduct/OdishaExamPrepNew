@@ -400,22 +400,22 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-3xl p-4 sm:p-6 max-w-lg w-full shadow-2xl border border-slate-200 space-y-3.5 max-h-[85vh] flex flex-col"
+              className="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-6 max-w-lg w-full shadow-2xl border border-slate-200 dark:border-slate-800 space-y-3.5 max-h-[85vh] flex flex-col text-slate-900 dark:text-white"
             >
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="p-1.5 sm:p-2 bg-rose-50 rounded-xl text-rose-600 border border-rose-100 shrink-0">
+                  <span className="p-1.5 sm:p-2 bg-rose-50 dark:bg-rose-500/20 rounded-xl text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-500/30 shrink-0">
                     <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
                   </span>
                   <div className="min-w-0">
-                    <h3 className="font-extrabold text-sm sm:text-base text-slate-900 truncate">Select Your Odisha District</h3>
-                    <p className="text-[10px] sm:text-xs text-slate-500 truncate">Pick from all 30 districts of Odisha</p>
+                    <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white truncate">Select Your Odisha District</h3>
+                    <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">Pick from all 30 districts of Odisha</p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsDistrictModalOpen(false)}
-                  className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 cursor-pointer shrink-0"
+                  className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer shrink-0"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -427,7 +427,7 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
                 placeholder="Search district (e.g. Cuttack, Ganjam...)"
                 value={districtSearch}
                 onChange={(e) => setDistrictSearch(e.target.value)}
-                className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl text-xs font-bold bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-slate-800 placeholder-slate-400"
+                className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
               />
 
               {/* District List Grid */}
@@ -441,8 +441,8 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
                       onClick={() => handleSelectDistrict(dist)}
                       className={`w-full p-2.5 sm:p-3 rounded-xl border flex items-center justify-between text-xs font-bold text-left transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-amber-50 border-amber-400 text-amber-950 shadow-2xs font-extrabold'
-                          : 'bg-white border-slate-200/80 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                          ? 'bg-amber-50 dark:bg-amber-500/20 border-amber-400 dark:border-amber-500/40 text-amber-950 dark:text-amber-300 shadow-2xs font-extrabold'
+                          : 'bg-white dark:bg-slate-800/80 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
                       }`}
                     >
                       <span className="flex items-center gap-2 truncate">

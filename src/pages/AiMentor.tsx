@@ -3942,13 +3942,13 @@ JSON structure:
       {/* Premium Custom Confirmation Dialog */}
       <AnimatePresence>
         {confirmDialog && (
-          <div className="fixed inset-0 bg-slate-50   z-[9999] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-slate-50/80 dark:bg-slate-950/90 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="bg-white border border-slate-200/60 rounded-[2rem] max-w-sm w-full p-6 shadow-2xl space-y-6 text-left relative overflow-hidden "
+              className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-[2rem] max-w-sm w-full p-6 shadow-2xl space-y-6 text-left relative overflow-hidden text-slate-900 dark:text-white"
             >
               <div className="absolute -top-10 -right-10 w-20 h-20 bg-amber-500/5 rounded-full blur-xl pointer-events-none" />
               

@@ -8362,7 +8362,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             </div>
 
             <div className="relative flex-1 min-w-0">
-              <Search className="absolute left-3.5 sm:left-5 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-slate-400" />
+              <Search className="absolute left-3.5 sm:left-5 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-slate-400 dark:text-slate-500" />
               <input 
                 type="text"
                 placeholder="Search exams..."
@@ -8372,10 +8372,10 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   setExamSearchQuery(val);
                   sessionStorage.setItem('oep_exam_search_query', val);
                 }}
-                className="pl-10 sm:pl-14 pr-12 py-2.5 sm:py-3.5 rounded-2xl font-bold text-sm sm:text-base w-full border border-slate-200 bg-white/95 sm:border-2 sm:border-slate-900 shadow-sm sm:shadow-[4px_4px_0px_rgba(37,99,235,0.15)] focus:border-brand-500/80 sm:focus:border-slate-900 focus:ring-2 focus:ring-brand-500/10 sm:focus:ring-0 focus:shadow-none sm:focus:shadow-[6px_6px_0px_#2563EB] focus:outline-none transition-all duration-200"
+                className="pl-10 sm:pl-14 pr-12 py-2.5 sm:py-3.5 rounded-2xl font-bold text-sm sm:text-base w-full border border-slate-200 bg-white/95 dark:bg-slate-900/90 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 sm:border-2 sm:border-slate-900 shadow-sm sm:shadow-[4px_4px_0px_rgba(37,99,235,0.15)] focus:border-brand-500/80 sm:focus:border-slate-900 focus:ring-2 focus:ring-brand-500/10 sm:focus:ring-0 focus:shadow-none sm:focus:shadow-[6px_6px_0px_#2563EB] focus:outline-none transition-all duration-200"
               />
               {examSearchQuery && (
-                <button onClick={() => { setExamSearchQuery(''); sessionStorage.removeItem('oep_exam_search_query'); }} className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-900 transition-colors">
+                <button onClick={() => { setExamSearchQuery(''); sessionStorage.removeItem('oep_exam_search_query'); }} className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
                   <X className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               )}
@@ -8384,10 +8384,10 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
           <div className="relative group -mx-2 px-2">
             {/* Top Fade */}
-            <div className="absolute top-0.5 left-0.5 right-0.5 h-8 bg-gradient-to-b from-[#FAF8F5] to-transparent z-20 pointer-events-none rounded-t-3xl hidden sm:block" />
+            <div className="absolute top-0.5 left-0.5 right-0.5 h-8 bg-gradient-to-b from-[#FAF8F5] dark:from-[#0b0f19] to-transparent z-20 pointer-events-none rounded-t-3xl hidden sm:block" />
 
             <div 
-              className="max-h-[420px] sm:max-h-[500px] md:max-h-[600px] overflow-y-auto no-scrollbar pb-2 pt-2 px-1 sm:pb-6 sm:pt-6 sm:px-4 rounded-3xl border-0 sm:border-2 border-transparent sm:border-slate-900 bg-transparent sm:bg-[#FAF8F5] shadow-none sm:shadow-[6px_6px_0px_rgba(37,99,235,0.15)]"
+              className="max-h-[420px] sm:max-h-[500px] md:max-h-[600px] overflow-y-auto no-scrollbar pb-2 pt-2 px-1 sm:pb-6 sm:pt-6 sm:px-4 rounded-3xl border-0 sm:border-2 border-transparent sm:border-slate-900 dark:sm:border-slate-700/80 bg-transparent sm:bg-[#FAF8F5] dark:sm:bg-slate-900/40 shadow-none sm:shadow-[6px_6px_0px_rgba(37,99,235,0.15)]"
               style={{ scrollbarGutter: 'stable' }}
               onWheel={(e) => {
                 const el = e.currentTarget;
@@ -8410,7 +8410,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     Array.from({ length: 6 }).map((_, i) => (
                       <motion.div
                         key={`skeleton-${i}`}
-                        className="h-28 sm:h-40 md:h-56 rounded-2xl border-2 border-slate-900 bg-white animate-pulse shadow-[4px_4px_0px_rgba(37,99,235,0.1)]"
+                        className="h-28 sm:h-40 md:h-56 rounded-2xl border-2 border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-800 animate-pulse shadow-[4px_4px_0px_rgba(37,99,235,0.1)]"
                       />
                     ))
                   ) : filteredExams.length === 0 ? (
@@ -8418,13 +8418,13 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       key="empty-exams"
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="col-span-2 sm:col-span-3 lg:col-span-4 flex flex-col items-center justify-center py-12 text-center gap-3 bg-white border-2 border-slate-900 rounded-2xl p-6 shadow-[4px_4px_0px_rgba(37,99,235,0.15)]"
+                      className="col-span-2 sm:col-span-3 lg:col-span-4 flex flex-col items-center justify-center py-12 text-center gap-3 bg-white dark:bg-slate-900/90 border-2 border-slate-900 dark:border-slate-800 rounded-2xl p-6 shadow-[4px_4px_0px_rgba(37,99,235,0.15)]"
                     >
-                      <div className="w-14 h-14 rounded-2xl border-2 border-slate-900 bg-[#FAF8F5] flex items-center justify-center text-3xl shadow-[2px_2px_0px_#2563EB]">📚</div>
-                      <p className="font-serif font-bold text-slate-900 text-lg">
+                      <div className="w-14 h-14 rounded-2xl border-2 border-slate-900 dark:border-slate-700 bg-[#FAF8F5] dark:bg-slate-800 flex items-center justify-center text-3xl shadow-[2px_2px_0px_#2563EB]">📚</div>
+                      <p className="font-serif font-bold text-slate-900 dark:text-white text-lg">
                         {examSearchQuery ? `No results for "${examSearchQuery}"` : `No ${activeTab} exams yet`}
                       </p>
-                      <p className="text-slate-500 text-sm font-medium max-w-xs">
+                      <p className="text-slate-500 dark:text-slate-400 text-sm font-medium max-w-xs">
                         {examSearchQuery ? 'Try a different search term' : activeTab === 'upcoming' ? 'Switch to Popular to see available exams' : 'Exams will appear here once added'}
                       </p>
                       {!examSearchQuery && activeTab === 'upcoming' && (
@@ -8480,14 +8480,14 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         >
                           {isMobile ? (
                             // Sleek Premium Mobile Row Item
-                            <div className="p-3.5 bg-white border border-slate-100/90 rounded-2xl flex flex-row items-center justify-between gap-3.5 relative shadow-[0_4px_16px_rgba(0,0,0,0.035)] active:scale-[0.98] active:border-brand-300 transition-all duration-300">
+                            <div className="p-3.5 bg-white dark:bg-slate-900/90 border border-slate-100/90 dark:border-slate-800 rounded-2xl flex flex-row items-center justify-between gap-3.5 relative shadow-[0_4px_16px_rgba(0,0,0,0.035)] active:scale-[0.98] active:border-brand-300 transition-all duration-300">
                               {/* Soft brand left indicator */}
                               <div className="absolute left-0 top-3.5 bottom-3.5 w-1 bg-gradient-to-b from-[#2563EB] to-brand-700 rounded-r-md opacity-80" />
                               
                               {/* Left Content (Icon & Text) */}
                               <div className="flex items-center gap-3.5 min-w-0 flex-1 pl-1.5">
                                 {/* Icon container */}
-                                <div className="w-12 h-12 rounded-xl border border-brand-100/20 bg-brand-50/50 flex justify-center items-center shrink-0 shadow-sm relative overflow-hidden">
+                                <div className="w-12 h-12 rounded-xl border border-brand-100/20 bg-brand-50/50 dark:bg-slate-800 flex justify-center items-center shrink-0 shadow-sm relative overflow-hidden">
                                   {(exam.icon && (exam.icon.startsWith('http') || exam.icon.startsWith('/'))) ? (
                                     <img src={getDirectImageUrl(exam.icon)} alt={`Odisha Exam Prep Icon: ${exam.name}`} className="w-8/12 h-8/12 object-contain relative z-10" referrerPolicy="no-referrer" />
                                   ) : (
@@ -8497,26 +8497,26 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                 
                                 {/* Title and Subtitle */}
                                 <div className="min-w-0 flex-1">
-                                  <h3 className="text-[13.5px] font-extrabold text-slate-900 leading-snug tracking-tight uppercase line-clamp-1">
+                                  <h3 className="text-[13.5px] font-extrabold text-slate-900 dark:text-white leading-snug tracking-tight uppercase line-clamp-1">
                                     {exam.name}
                                   </h3>
-                                  <p className="text-slate-455 text-[11px] font-medium leading-normal mt-0.5 line-clamp-1 pr-1">
+                                  <p className="text-slate-455 dark:text-slate-400 text-[11px] font-medium leading-normal mt-0.5 line-clamp-1 pr-1">
                                     {displayDesc}
                                   </p>
                                 </div>
                               </div>
  
                               {/* Right Icon Chevron */}
-                              <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 shrink-0 shadow-2xs">
+                              <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-300 shrink-0 shadow-2xs">
                                 <ChevronRight className="w-4 h-4" />
                               </div>
                             </div>
                           ) : (
                             // Desktop Card
-                            <div className="p-3 sm:p-5 md:p-6 h-full bg-white border sm:border-2 border-slate-900 rounded-2xl sm:rounded-3xl flex flex-col items-center text-center justify-center space-y-2 sm:space-y-4 md:space-y-5 relative shadow-[0_4px_16px_rgba(0,0,0,0.035)] sm:shadow-[4px_4px_0px_#2563EB] md:group-hover/card:shadow-[8px_8px_0px_#2563EB] md:group-hover/card:-translate-y-1 md:group-hover/card:-translate-x-1 transition-all duration-300 active:scale-[0.98] sm:active:scale-100 active:bg-slate-50/70 sm:active:bg-white">
+                            <div className="p-3 sm:p-5 md:p-6 h-full bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 border sm:border-2 border-slate-900 dark:border-indigo-500/30 rounded-2xl sm:rounded-3xl flex flex-col items-center text-center justify-center space-y-2 sm:space-y-4 md:space-y-5 relative shadow-[0_4px_16px_rgba(0,0,0,0.035)] sm:shadow-[4px_4px_0px_#2563EB] md:group-hover/card:shadow-[8px_8px_0px_#2563EB] md:group-hover/card:-translate-y-1 md:group-hover/card:-translate-x-1 transition-all duration-300 active:scale-[0.98] sm:active:scale-100 active:bg-slate-50/70 sm:active:bg-white text-slate-900 dark:text-white">
                               {/* Corner arrow - structured circle */}
-                              <div className="absolute top-2 right-2 sm:top-4 sm:right-4 md:top-5 md:right-5 w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full border-2 border-slate-900 bg-white flex items-center justify-center transition-all duration-300 shadow-[2px_2px_0px_#2563EB] group-hover/card:bg-[#2563EB] group-hover/card:shadow-none group-hover/card:translate-x-0.5 group-hover/card:translate-y-0.5">
-                                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-900 group-hover/card:text-white transition-colors" />
+                              <div className="absolute top-2 right-2 sm:top-4 sm:right-4 md:top-5 md:right-5 w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full border-2 border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center transition-all duration-300 shadow-[2px_2px_0px_#2563EB] group-hover/card:bg-[#2563EB] group-hover/card:shadow-none group-hover/card:translate-x-0.5 group-hover/card:translate-y-0.5">
+                                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-900 dark:text-white group-hover/card:text-white transition-colors" />
                               </div>
  
                               {/* Icon Container */}

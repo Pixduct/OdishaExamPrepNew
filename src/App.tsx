@@ -1907,6 +1907,13 @@ export const Footer = () => {
             </span>
           </div>
         </div>
+
+        {/* Big Executive Brand Watermark Headline */}
+        <div className="pt-10 sm:pt-16 pb-4 flex justify-center overflow-hidden pointer-events-none select-none">
+          <h1 className="font-serif font-black tracking-tighter text-center text-4xl sm:text-6xl md:text-8xl lg:text-[7.5rem] xl:text-[9.5rem] 2xl:text-[11rem] leading-none bg-gradient-to-b from-slate-700/40 via-slate-800/25 to-transparent bg-clip-text text-transparent transition-all duration-500 whitespace-nowrap">
+            Odisha<span className="text-brand-500/35 font-serif font-black">Exam</span>Prep
+          </h1>
+        </div>
       </div>
     </footer>
   );

@@ -8926,23 +8926,21 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
     return (
       <ErrorBoundary>
-      <div className="space-y-12 pb-28 sm:pb-12 relative p-3 sm:p-6 lg:p-8 bg-slate-50/60 rounded-[2.5rem] border border-slate-200/50 shadow-xs overflow-hidden">
-        {/* Background Academic Vector Canvas Grid & Floating Watermarks */}
-        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden rounded-[2.5rem]">
-          {/* Crisp Geometric Dot Grid */}
-          <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40" />
-          
-          {/* Ambient HSL Soft Glows */}
-          <div className="absolute -top-24 left-1/4 w-96 h-96 bg-gradient-to-br from-brand-300/20 via-indigo-200/15 to-transparent rounded-full blur-3xl" />
-          <div className="absolute top-1/3 right-10 w-[30rem] h-[30rem] bg-gradient-to-br from-sky-200/20 via-blue-100/10 to-transparent rounded-full blur-3xl" />
-          <div className="absolute bottom-10 left-10 w-[28rem] h-[28rem] bg-gradient-to-br from-purple-200/15 via-pink-100/10 to-transparent rounded-full blur-3xl" />
+      <div className="relative w-full min-h-screen bg-[#F8FAFC] overflow-x-hidden" style={{ isolation: 'isolate' }}>
+        {/* Full-Screen Edge-to-Edge Academic Vector Canvas Grid & HSL Glows */}
+        <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 pointer-events-none z-0" />
+        <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 rounded-full blur-3xl pointer-events-none z-0" />
+        <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 rounded-full blur-3xl pointer-events-none z-0" />
 
-          {/* Floating Academic Study Vector Watermarks */}
-          <GraduationCap className="absolute top-20 right-12 w-36 h-36 opacity-[0.04] stroke-[1.2] text-slate-800 rotate-12" />
-          <BookOpen className="absolute top-1/3 left-6 w-44 h-44 opacity-[0.035] stroke-[1.2] text-slate-800 -rotate-6" />
-          <Award className="absolute top-2/3 right-8 w-40 h-40 opacity-[0.04] stroke-[1.2] text-slate-800 rotate-45" />
-          <Compass className="absolute bottom-40 left-12 w-32 h-32 opacity-[0.035] stroke-[1.2] text-slate-800 -rotate-12" />
+        {/* Floating Viewport Academic Study Vector Watermarks */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-20">
+          <GraduationCap className="absolute top-24 left-[5%] w-44 h-44 text-slate-800 opacity-[0.08] stroke-[1.2] rotate-12" />
+          <BookOpen className="absolute top-1/3 right-[5%] w-48 h-48 text-brand-600 opacity-[0.08] stroke-[1.2] -rotate-6" />
+          <Award className="absolute bottom-1/3 left-[6%] w-44 h-44 text-amber-600 opacity-[0.08] stroke-[1.2] rotate-45" />
+          <Compass className="absolute bottom-28 right-[6%] w-36 h-36 text-indigo-600 opacity-[0.08] stroke-[1.2] -rotate-12" />
         </div>
+
+        <div className="w-full mx-auto space-y-6 sm:space-y-8 pb-32 sm:pb-24 relative z-10">
 
         {/* Executive Bright Study Vector Header Card */}
         <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 border border-slate-200/80 shadow-xl shadow-slate-200/40 rounded-[2.2rem] relative overflow-hidden z-10 mb-8 sm:mb-10">
@@ -10430,6 +10428,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
       {/* Common View Elements */}
       {renderCommonModals()}
+        </div>
       </div>
     </ErrorBoundary>
     );

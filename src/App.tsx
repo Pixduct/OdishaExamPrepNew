@@ -329,6 +329,61 @@ const getMockTestVectorTheme = (mockId: string) => {
       };
   }
 };
+
+const getReferenceLibraryVectorTheme = (libraryId: string) => {
+  switch (libraryId) {
+    case 'topic-wise':
+      return {
+        gradient: 'bg-gradient-to-br from-indigo-950 via-slate-900 to-blue-950 text-indigo-50',
+        logoBg: 'bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-800 text-white shadow-lg shadow-blue-500/30 border border-blue-400/40',
+        badgeBg: 'bg-blue-400/20 text-blue-200 border-blue-400/40',
+        btnGradient: 'bg-gradient-to-r from-blue-600 via-indigo-600 to-brand-600 hover:from-blue-500 hover:to-indigo-500 shadow-blue-500/25',
+        badgeText: 'PDF TOPIC MODULES',
+        MainIcon: Layers,
+        WatermarkIcon: BookOpen,
+      };
+    case 'exam-focused':
+      return {
+        gradient: 'bg-gradient-to-br from-amber-950 via-slate-900 to-orange-950 text-amber-50',
+        logoBg: 'bg-gradient-to-br from-amber-500 via-orange-500 to-red-600 text-white shadow-lg shadow-amber-500/30 border border-amber-400/40',
+        badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
+        btnGradient: 'bg-gradient-to-r from-amber-500 via-orange-600 to-red-600 hover:from-amber-400 hover:to-orange-500 shadow-amber-500/25',
+        badgeText: 'HIGH YIELD REVISION',
+        MainIcon: Target,
+        WatermarkIcon: Zap,
+      };
+    case 'revision-sets':
+      return {
+        gradient: 'bg-gradient-to-br from-emerald-950 via-slate-900 to-teal-950 text-emerald-50',
+        logoBg: 'bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 text-white shadow-lg shadow-emerald-500/30 border border-emerald-400/40',
+        badgeBg: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
+        btnGradient: 'bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 hover:from-emerald-400 hover:to-teal-500 shadow-emerald-500/25',
+        badgeText: 'CONCEPT SUMMARIES',
+        MainIcon: BookMarked,
+        WatermarkIcon: FileText,
+      };
+    case 'pyq-collections':
+      return {
+        gradient: 'bg-gradient-to-br from-purple-950 via-slate-900 to-pink-950 text-purple-50',
+        logoBg: 'bg-gradient-to-br from-purple-600 via-pink-600 to-rose-700 text-white shadow-lg shadow-purple-500/30 border border-purple-400/40',
+        badgeBg: 'bg-purple-400/20 text-purple-200 border-purple-400/40',
+        btnGradient: 'bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:from-purple-500 hover:to-pink-500 shadow-purple-500/25',
+        badgeText: 'PAST PAPER ARCHIVES',
+        MainIcon: History,
+        WatermarkIcon: Award,
+      };
+    default:
+      return {
+        gradient: 'bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-indigo-50',
+        logoBg: 'bg-gradient-to-br from-brand-600 to-indigo-700 text-white shadow-lg shadow-brand-500/30 border border-brand-400/40',
+        badgeBg: 'bg-indigo-400/20 text-indigo-200 border-indigo-400/40',
+        btnGradient: 'bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 shadow-brand-500/25',
+        badgeText: 'PDF REFERENCE LIBRARY',
+        MainIcon: BookMarked,
+        WatermarkIcon: BookOpen,
+      };
+  }
+};
 import { DEFAULT_ACHIEVERS_JOURNAL } from './lib/defaultAchievers';
 import { useScrollSpy } from './hooks/useScrollSpy';
 import { useCountdown } from './hooks/useCountdown';
@@ -10250,11 +10305,15 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             )}
           >
             {[
-              { id: 'topic-wise', title: 'Topic-wise Question Bank', desc: 'Curated PDF modules categorized by subject topic.', icon: <Layers className="w-5 h-5 text-slate-700" /> },
-              { id: 'exam-focused', title: 'Exam-Focused High Yield', desc: 'Targeted high-yield questions for fast revision.', icon: <Target className="w-5 h-5 text-slate-700" /> },
-              { id: 'revision-sets', title: 'Last-Minute Revision Sets', desc: 'Compact formula & key concept quick summaries.', icon: <BookMarked className="w-5 h-5 text-slate-700" /> },
-              { id: 'pyq-collections', title: 'PYQ Question Archives', desc: 'Previous year paper PDF archives with solutions.', icon: <History className="w-5 h-5 text-slate-700" /> },
+              { id: 'topic-wise', title: 'Topic-wise Question Bank', desc: 'Curated PDF modules categorized by subject topic.' },
+              { id: 'exam-focused', title: 'Exam-Focused High Yield', desc: 'Targeted high-yield questions for fast revision.' },
+              { id: 'revision-sets', title: 'Last-Minute Revision Sets', desc: 'Compact formula & key concept quick summaries.' },
+              { id: 'pyq-collections', title: 'PYQ Question Archives', desc: 'Previous year paper PDF archives with solutions.' },
             ].map((item, i) => {
+              const vecTheme = getReferenceLibraryVectorTheme(item.id);
+              const MainIcon = vecTheme.MainIcon;
+              const WatermarkIcon = vecTheme.WatermarkIcon;
+
               const count = (dynamicQuestionBanks[item.id] || []).filter((b: any) => {
                 if (b.is_archived && !hasAccessTo(b.id, selectedExam)) return false;
                 if (b.examId !== selectedExam) return false;
@@ -10269,37 +10328,76 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     hidden: { y: 10, opacity: 0 },
                     show: { y: 0, opacity: 1 }
                   }}
-                  whileHover={isMobile ? undefined : { y: -3 }}
+                  whileHover={isMobile ? undefined : { y: -5 }}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full"
+                  className="w-full h-full"
                 >
-                  <div
-                    onClick={() => setSelectedBankType(item.id)}
-                    className="p-4 sm:p-5 bg-white border border-slate-200/80 hover:border-slate-300 shadow-xs hover:shadow-md rounded-2xl flex flex-col justify-between gap-4 cursor-pointer group transition-all duration-300 relative overflow-hidden"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200/60 flex items-center justify-center shrink-0 group-hover:bg-brand-50 group-hover:border-brand-100 group-hover:text-brand-600 transition-colors">
-                        {item.icon}
+                  {isMobile ? (
+                    <div
+                      onClick={() => setSelectedBankType(item.id)}
+                      className="p-4 bg-white border border-slate-200/80 rounded-2xl flex items-center justify-between gap-4 cursor-pointer group relative overflow-hidden transition-all duration-300 shadow-sm active:scale-[0.98]"
+                    >
+                      <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                        <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-md relative text-white", vecTheme.logoBg)}>
+                          <MainIcon className="w-6 h-6 stroke-[2.2]" />
+                        </div>
+                        
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <h4 className="font-extrabold text-[14.5px] text-slate-900 tracking-tight leading-snug">{item.title}</h4>
+                            <span className="px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[8.5px] font-black uppercase tracking-wider rounded border border-slate-200/50 shrink-0">
+                              {count} {count === 1 ? 'Resource' : 'Resources'}
+                            </span>
+                          </div>
+                          <p className="text-[11.5px] text-slate-500 font-medium leading-relaxed mt-0.5 line-clamp-2 pr-1">{item.desc}</p>
+                        </div>
                       </div>
-                      <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-md border border-slate-200/50">
-                        {count} {count === 1 ? 'Resource' : 'Resources'}
-                      </span>
+                      
+                      <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0 group-active:translate-x-0.5 transition-all">
+                        <ChevronRight className="w-4 h-4" />
+                      </div>
                     </div>
+                  ) : (
+                    <div
+                      onClick={() => setSelectedBankType(item.id)}
+                      className={cn(
+                        "p-5 sm:p-6 text-white rounded-[2.2rem] hover:-translate-y-2 hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-5 relative overflow-hidden h-full border border-white/20 shadow-slate-950/20 card-3d-deep min-h-[260px]",
+                        vecTheme.gradient
+                      )}
+                    >
+                      {/* Geometric Radial Watermark Grid */}
+                      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:14px_14px] pointer-events-none z-0" />
+                      
+                      {/* 3D Floating Watermark Icon */}
+                      <WatermarkIcon className="absolute -right-6 -bottom-6 w-40 h-40 opacity-15 stroke-[1.2] text-white pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
 
-                    <div className="space-y-1">
-                      <h4 className="font-extrabold text-sm sm:text-base text-slate-900 group-hover:text-brand-600 transition-colors leading-tight">
-                        {item.title}
-                      </h4>
-                      <p className="text-xs text-slate-500 font-medium leading-relaxed line-clamp-2">
-                        {item.desc}
-                      </p>
-                    </div>
+                      <div className="space-y-3.5 relative z-10">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className={cn(
+                            "w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shrink-0 text-white transition-transform group-hover:scale-110 relative",
+                            vecTheme.logoBg
+                          )}>
+                            <MainIcon className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.2]" />
+                            <div className="absolute inset-0 border border-white/30 rounded-2xl animate-pulse" />
+                          </div>
+                          
+                          <span className="px-2.5 py-1 bg-black/20 text-white/80 text-[9px] font-black uppercase tracking-wider rounded-lg border border-white/10 backdrop-blur-xs">
+                            {count} {count === 1 ? 'Resource' : 'Resources'}
+                          </span>
+                        </div>
 
-                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-600 group-hover:text-brand-600">
-                      <span>Browse PDF Library</span>
-                      <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        <div>
+                          <h4 className="font-black text-lg sm:text-xl text-white tracking-tight leading-tight group-hover:text-amber-300 transition-colors uppercase">{item.title}</h4>
+                          <p className="text-white/80 font-medium text-xs leading-relaxed mt-1.5">{item.desc}</p>
+                        </div>
+                      </div>
+
+                      <div className="pt-3 border-t border-white/15 flex items-center justify-between text-xs font-bold text-white/90 group-hover:text-amber-300 relative z-10 transition-colors">
+                        <span>Browse PDF Library</span>
+                        <ChevronRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </motion.div>
               );
             })}

@@ -7999,12 +7999,15 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     }
 
     return (
-      <div className="space-y-6 sm:space-y-10 relative overflow-hidden p-1 sm:p-2 rounded-[2rem] sm:rounded-[2.5rem]">
-        {/* Vector background overlay & ambient radial glows */}
-        <div className="absolute inset-0 grid-bg opacity-40 dark:opacity-25 pointer-events-none rounded-[2rem] sm:rounded-[2.5rem]" />
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-brand-500/10 dark:bg-brand-500/15 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute top-1/2 -right-24 w-96 h-96 bg-purple-500/10 dark:bg-purple-500/15 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute -bottom-24 left-1/3 w-96 h-96 bg-blue-600/10 dark:bg-brand-600/15 rounded-full blur-[100px] pointer-events-none" />
+      <div className="relative space-y-6 sm:space-y-10">
+        {/* Ambient Vector Background Grid Overlay for Home Tab Page Consistency */}
+        <div className="absolute -inset-4 sm:-inset-6 -z-10 pointer-events-none overflow-hidden rounded-3xl sm:rounded-[3rem]">
+          {/* Dual Ambient Glow Spotlights */}
+          <div className="absolute -top-32 -left-32 w-96 h-96 bg-brand-500/10 dark:bg-brand-500/15 rounded-full blur-[100px]" />
+          <div className="absolute top-1/2 -right-32 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/15 rounded-full blur-[100px]" />
+          {/* SVG Vector Dot Grid Pattern */}
+          <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:24px_24px] opacity-40 dark:opacity-[0.06]" />
+        </div>
 
         <YouTubeCarousel videoIds={globalVideoIds} />
         
@@ -8174,40 +8177,46 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         setActiveTestState({ ...a.metadata, resumeSessionId: a.metadata?.resumeSessionId || a.metadata?.test?.id });
                         setActiveTest(testToResume);
                       }}
-                      className={`snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px] rounded-2xl border border-slate-100/90 sm:border-slate-200/60 dark:border-brand-800/50 bg-white dark:bg-gradient-to-br dark:from-[#0d1b3e] dark:via-[#0f2257] dark:to-[#0b1730] hover:border-brand-300/60 dark:hover:border-brand-500/70 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_0_20px_rgba(37,99,235,0.12),0_4px_16px_rgba(0,0,0,0.3)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container relative overflow-hidden ${
+                      className={`snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px] border border-slate-100/90 sm:border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 hover:border-brand-300/60 dark:hover:border-brand-600/50 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container ${
                         canResume ? 'cursor-pointer active:scale-[0.98]' : 'opacity-60 cursor-not-allowed'
                       }`}
                     >
-                      {/* Top row: icon + text */}
-                      <div className="flex items-center gap-3 relative z-10">
-                        {/* Play icon with brand gradient */}
-                        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shrink-0 shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform duration-300">
-                          <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white fill-white ml-0.5" />
+                      <DynamicVectorCard
+                        glowColor="rgba(37, 99, 235, 0.12)"
+                        roundedClass="rounded-2xl"
+                        className="w-full h-full flex flex-col gap-2.5"
+                      >
+                        {/* Top row: icon + text */}
+                        <div className="flex items-center gap-3 relative z-10">
+                          {/* Play icon with brand gradient */}
+                          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shrink-0 shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform duration-300">
+                            <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white fill-white ml-0.5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 dark:text-white line-clamp-2 sm:line-clamp-1 leading-snug group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors duration-300">{a.title || 'Practice Session'}</h4>
+                            <p className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">Last practiced <span className="text-slate-600 dark:text-slate-300 font-semibold">{timeAgo}</span></p>
+                            {a.metadata?.testCategory && (
+                              <span className="inline-block mt-1 text-[8.5px] sm:text-[9px] font-black uppercase tracking-widest text-brand-600 dark:text-brand-400 bg-brand-50/70 dark:bg-brand-950/50 border border-brand-100/40 dark:border-brand-800/50 px-1.5 py-0.5 rounded">{a.metadata.testCategory}</span>
+                            )}
+                            {!canResume && (
+                              <span className="block text-[8.5px] sm:text-[9px] font-bold text-slate-400 mt-0.5">Open app to resume</span>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 dark:text-white line-clamp-2 sm:line-clamp-1 leading-snug group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors duration-300">{a.title || 'Practice Session'}</h4>
-                          <p className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">Last practiced <span className="text-slate-600 dark:text-slate-300 font-semibold">{timeAgo}</span></p>
-                          {a.metadata?.testCategory && (
-                            <span className="inline-block mt-1 text-[8.5px] sm:text-[9px] font-black uppercase tracking-widest text-brand-600 dark:text-brand-400 bg-brand-50/70 dark:bg-brand-950/50 border border-brand-100/40 dark:border-brand-800/50 px-1.5 py-0.5 rounded">{a.metadata.testCategory}</span>
-                          )}
-                          {!canResume && (
-                            <span className="block text-[8.5px] sm:text-[9px] font-bold text-slate-400 mt-0.5">Open app to resume</span>
-                          )}
+                        {/* Progress bar — taller + labelled on mobile for clarity */}
+                        <div className="flex flex-col gap-1 relative z-10">
+                          <div className="flex items-center justify-between mb-0.5">
+                            <span className="text-[8.5px] sm:text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Progress</span>
+                            <span className="text-[10px] sm:text-[11px] font-black text-brand-600">{progressPct}%</span>
+                          </div>
+                          <div className="w-full h-1.5 sm:h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-brand-600 to-brand-400 rounded-full transition-all duration-700"
+                              style={{ width: `${Math.max(progressPct, progressPct === 0 ? 0 : 4)}%` }}
+                            />
+                          </div>
                         </div>
-                      </div>
-                      {/* Progress bar — taller + labelled on mobile for clarity */}
-                      <div className="flex flex-col gap-1 relative z-10">
-                        <div className="flex items-center justify-between mb-0.5">
-                          <span className="text-[8.5px] sm:text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Progress</span>
-                          <span className="text-[10px] sm:text-[11px] font-black text-brand-600">{progressPct}%</span>
-                        </div>
-                        <div className="w-full h-1.5 sm:h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-brand-600 to-brand-400 rounded-full transition-all duration-700"
-                            style={{ width: `${Math.max(progressPct, progressPct === 0 ? 0 : 4)}%` }}
-                          />
-                        </div>
-                      </div>
+                      </DynamicVectorCard>
                     </motion.div>
                   );
                 })}
@@ -8288,18 +8297,15 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400'
                     : 'bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400';
                   return (
-                    <motion.div
+                    <DynamicVectorCard
                       key={i}
-                      initial={{ opacity: 0, y: 15, scale: 0.96 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ type: 'spring', stiffness: 200, damping: 22, delay: i * 0.06 }}
-                      whileHover={whileHover.subtle}
-                      whileTap={whileTap.press}
+                      glowColor="rgba(37, 99, 235, 0.12)"
+                      roundedClass="rounded-2xl"
                       onClick={() => {
                         if (isTestResult) handleViewResults(a.metadata);
                         else if (a.type === 'question_bank_accessed' && a.metadata?.pdfUrl) window.open(a.metadata.pdfUrl, '_blank');
                       }}
-                      className="snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px] rounded-2xl border border-slate-100/90 sm:border-slate-200/60 dark:border-brand-800/50 bg-white dark:bg-gradient-to-br dark:from-[#0d1b3e] dark:via-[#0f2257] dark:to-[#0b1730] hover:border-brand-300/60 dark:hover:border-brand-500/70 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_0_20px_rgba(37,99,235,0.12),0_4px_16px_rgba(0,0,0,0.3)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 cursor-pointer group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container relative overflow-hidden active:scale-[0.98]"
+                      className="snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px] border border-slate-100/90 sm:border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 hover:border-brand-300/60 dark:hover:border-brand-600/50 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 cursor-pointer group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container active:scale-[0.98]"
                     >
                       {/* Top row: icon + title + arrow */}
                       <div className="flex items-start gap-3 relative z-10">
@@ -8325,7 +8331,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           </span>
                         )}
                       </div>
-                    </motion.div>
+                    </DynamicVectorCard>
                   );
                 })}
               </div>
@@ -8490,11 +8496,16 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           animate={{ opacity: 1, scale: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.95 }}
                           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                          onClick={() => {
-                            setSelectedExam(exam.id);
-                          }}
-                          className="cursor-pointer h-full group/card"
+                          className="h-full"
                         >
+                          <DynamicVectorCard
+                            glowColor="rgba(37, 99, 235, 0.15)"
+                            roundedClass={isMobile ? "rounded-2xl" : "rounded-2xl sm:rounded-3xl"}
+                            onClick={() => {
+                              setSelectedExam(exam.id);
+                            }}
+                            className="cursor-pointer h-full group/card"
+                          >
                           {isMobile ? (
                             // Sleek Premium Mobile Row Item
                             <div className="p-3.5 bg-white dark:bg-slate-900/90 border border-slate-100/90 dark:border-slate-800 rounded-2xl flex flex-row items-center justify-between gap-3.5 relative shadow-[0_4px_16px_rgba(0,0,0,0.035)] active:scale-[0.98] active:border-brand-300 transition-all duration-300">
@@ -8575,6 +8586,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                               </div>
                             </div>
                           )}
+                          </DynamicVectorCard>
                         </motion.div>
                       )})
                   )}

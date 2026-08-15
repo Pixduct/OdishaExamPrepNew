@@ -63,97 +63,97 @@ export const PersonalBestCard: React.FC<PersonalBestCardProps> = ({ userId }) =>
       </div>
 
       {/* 4 Main Personal Best Tiles */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5 relative z-10">
         {/* Tile 1: Highest Score */}
-        <div className="p-3 sm:p-4 rounded-xl bg-gradient-to-br from-amber-50/70 to-orange-50/40 border border-amber-200/70 space-y-1">
-          <div className="flex items-center justify-between text-xs text-amber-800 font-bold gap-1">
+        <div className="p-3 sm:p-4 rounded-xl bg-slate-900/90 border border-amber-500/30 space-y-1">
+          <div className="flex items-center justify-between text-xs text-amber-300 font-bold gap-1">
             <span className="flex items-center gap-1 min-w-0 font-extrabold truncate">
-              <Trophy className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <Trophy className="w-3.5 h-3.5 text-amber-400 shrink-0" />
               <span>Best Score</span>
             </span>
-            <span className="hidden sm:inline-block text-[10px] font-mono text-amber-700 bg-amber-100/80 px-1.5 py-0.5 rounded font-bold shrink-0">Score</span>
+            <span className="hidden sm:inline-block text-[10px] font-mono text-amber-300 bg-amber-400/20 px-1.5 py-0.5 rounded font-black shrink-0 border border-amber-400/30">Score</span>
           </div>
-          <div className="text-xs sm:text-xl font-black text-slate-900 font-mono pt-0.5 tracking-tight leading-snug">
+          <div className="text-xs sm:text-xl font-black text-white font-mono pt-0.5 tracking-tight leading-snug">
             {highestScore.value > 0 ? highestScore.formattedValue : <span className="text-slate-400 font-sans font-bold">No Record Yet</span>}
           </div>
-          <p className="text-[10px] text-slate-500 font-medium truncate" title={highestScore.testTitle}>
+          <p className="text-[10px] text-amber-200/90 font-medium truncate" title={highestScore.testTitle}>
             {highestScore.value > 0 && highestScore.testTitle && !highestScore.testTitle.includes('Complete a test')
               ? highestScore.testTitle
               : 'Complete a test to unlock'}
           </p>
           {highestScore.value > 0 && highestScore.detail && (
-            <span className="text-[9px] font-bold text-amber-700 block pt-0.5 truncate">
+            <span className="text-[9px] font-bold text-amber-400 block pt-0.5 truncate">
               {highestScore.detail}
             </span>
           )}
         </div>
 
         {/* Tile 2: Highest Accuracy */}
-        <div className="p-3 sm:p-4 rounded-xl bg-gradient-to-br from-emerald-50/70 to-teal-50/40 border border-emerald-200/70 space-y-1">
-          <div className="flex items-center justify-between text-xs text-emerald-800 font-bold gap-1">
+        <div className="p-3 sm:p-4 rounded-xl bg-slate-900/90 border border-emerald-500/30 space-y-1">
+          <div className="flex items-center justify-between text-xs text-emerald-300 font-bold gap-1">
             <span className="flex items-center gap-1 min-w-0 font-extrabold truncate">
-              <Target className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <Target className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
               <span>Best Accuracy</span>
             </span>
-            <span className="hidden sm:inline-block text-[10px] font-mono text-emerald-700 bg-emerald-100/80 px-1.5 py-0.5 rounded font-bold shrink-0">Accuracy</span>
+            <span className="hidden sm:inline-block text-[10px] font-mono text-emerald-300 bg-emerald-400/20 px-1.5 py-0.5 rounded font-black shrink-0 border border-emerald-400/30">Accuracy</span>
           </div>
-          <div className="text-xs sm:text-xl font-black text-slate-900 font-mono pt-0.5 tracking-tight leading-snug">
+          <div className="text-xs sm:text-xl font-black text-white font-mono pt-0.5 tracking-tight leading-snug">
             {highestAccuracy.value > 0 ? highestAccuracy.formattedValue : <span className="text-slate-400 font-sans font-bold">No Record Yet</span>}
           </div>
-          <p className="text-[10px] text-slate-500 font-medium truncate" title={highestAccuracy.testTitle}>
+          <p className="text-[10px] text-emerald-200/90 font-medium truncate" title={highestAccuracy.testTitle}>
             {highestAccuracy.value > 0 && highestAccuracy.testTitle && !highestAccuracy.testTitle.includes('Complete a test')
               ? highestAccuracy.testTitle
               : 'Highest test accuracy'}
           </p>
           {highestAccuracy.value > 0 && highestAccuracy.detail && (
-            <span className="text-[9px] font-bold text-emerald-700 block pt-0.5 truncate">
+            <span className="text-[9px] font-bold text-emerald-400 block pt-0.5 truncate">
               {highestAccuracy.detail}
             </span>
           )}
         </div>
 
         {/* Tile 3: Fastest Speed */}
-        <div className="p-3 sm:p-4 rounded-xl bg-gradient-to-br from-cyan-50/70 to-blue-50/40 border border-cyan-200/70 space-y-1">
-          <div className="flex items-center justify-between text-xs text-cyan-800 font-bold gap-1">
+        <div className="p-3 sm:p-4 rounded-xl bg-slate-900/90 border border-cyan-500/30 space-y-1">
+          <div className="flex items-center justify-between text-xs text-cyan-300 font-bold gap-1">
             <span className="flex items-center gap-1 min-w-0 font-extrabold truncate">
-              <Zap className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+              <Zap className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
               <span>Fastest Speed</span>
             </span>
-            <span className="hidden sm:inline-block text-[10px] font-mono text-cyan-700 bg-cyan-100/80 px-1.5 py-0.5 rounded font-bold shrink-0">Speed</span>
+            <span className="hidden sm:inline-block text-[10px] font-mono text-cyan-300 bg-cyan-400/20 px-1.5 py-0.5 rounded font-black shrink-0 border border-cyan-400/30">Speed</span>
           </div>
-          <div className="text-xs sm:text-xl font-black text-slate-900 font-mono pt-0.5 tracking-tight leading-snug">
+          <div className="text-xs sm:text-xl font-black text-white font-mono pt-0.5 tracking-tight leading-snug">
             {fastestSpeed.value > 0 ? fastestSpeed.formattedValue : <span className="text-slate-400 font-sans font-bold">No Record Yet</span>}
           </div>
-          <p className="text-[10px] text-slate-500 font-medium truncate" title={fastestSpeed.testTitle}>
+          <p className="text-[10px] text-cyan-200/90 font-medium truncate" title={fastestSpeed.testTitle}>
             {fastestSpeed.value > 0 && fastestSpeed.testTitle && !fastestSpeed.testTitle.includes('Complete a test')
               ? fastestSpeed.testTitle
               : 'Avg time per question'}
           </p>
           {fastestSpeed.value > 0 && fastestSpeed.detail && (
-            <span className="text-[9px] font-bold text-cyan-700 block pt-0.5 truncate">
+            <span className="text-[9px] font-bold text-cyan-400 block pt-0.5 truncate">
               {fastestSpeed.detail}
             </span>
           )}
         </div>
 
         {/* Tile 4: Longest Streak */}
-        <div className="p-3 sm:p-4 rounded-xl bg-gradient-to-br from-orange-50/70 to-amber-50/40 border border-orange-200/70 space-y-1">
-          <div className="flex items-center justify-between text-xs text-orange-800 font-bold gap-1">
+        <div className="p-3 sm:p-4 rounded-xl bg-slate-900/90 border border-orange-500/30 space-y-1">
+          <div className="flex items-center justify-between text-xs text-orange-300 font-bold gap-1">
             <span className="flex items-center gap-1 min-w-0 font-extrabold truncate">
-              <Flame className="w-3.5 h-3.5 text-orange-600 shrink-0" />
+              <Flame className="w-3.5 h-3.5 text-orange-400 shrink-0" />
               <span>Best Streak</span>
             </span>
-            <span className="hidden sm:inline-block text-[10px] font-mono text-orange-700 bg-orange-100/80 px-1.5 py-0.5 rounded font-bold shrink-0">Streak</span>
+            <span className="hidden sm:inline-block text-[10px] font-mono text-orange-300 bg-orange-400/20 px-1.5 py-0.5 rounded font-black shrink-0 border border-orange-400/30">Streak</span>
           </div>
-          <div className="text-xs sm:text-xl font-black text-slate-900 font-mono pt-0.5 tracking-tight leading-snug">
+          <div className="text-xs sm:text-xl font-black text-white font-mono pt-0.5 tracking-tight leading-snug">
             <span className="sm:hidden">{longestStreak.formattedValue.replace('In A Row', 'Streak')}</span>
             <span className="hidden sm:inline">{longestStreak.formattedValue}</span>
           </div>
-          <p className="text-[10px] text-slate-500 font-medium truncate">
+          <p className="text-[10px] text-orange-200/90 font-medium truncate">
             Max study streak
           </p>
           {longestStreak.detail && (
-            <span className="text-[9px] font-bold text-orange-700 block pt-0.5 truncate">
+            <span className="text-[9px] font-bold text-orange-400 block pt-0.5 truncate">
               {longestStreak.detail}
             </span>
           )}
@@ -162,17 +162,17 @@ export const PersonalBestCard: React.FC<PersonalBestCardProps> = ({ userId }) =>
 
       {/* Expandable Subject Personal Bests Drawer Toggle */}
       {subjectBests.length > 0 && (
-        <div className="pt-1">
+        <div className="pt-1 relative z-10">
           <button
             type="button"
             onClick={() => setShowSubjectBests(!showSubjectBests)}
-            className="w-full py-2.5 px-4 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 text-slate-700 text-xs font-bold flex items-center justify-between transition-colors cursor-pointer"
+            className="w-full py-2.5 px-4 rounded-xl bg-slate-800/90 hover:bg-slate-800 border border-slate-700 text-white text-xs font-black flex items-center justify-between transition-colors cursor-pointer"
           >
             <span className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-brand-600" />
+              <BookOpen className="w-4 h-4 text-amber-400" />
               <span>Subject-Wise Best Scores ({subjectBests.length} Subjects)</span>
             </span>
-            <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${showSubjectBests ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-slate-300 transition-transform ${showSubjectBests ? 'rotate-180' : ''}`} />
           </button>
 
           <AnimatePresence>
@@ -187,16 +187,16 @@ export const PersonalBestCard: React.FC<PersonalBestCardProps> = ({ userId }) =>
                   {subjectBests.map((sub, idx) => (
                     <div
                       key={idx}
-                      className="p-3 rounded-xl bg-slate-50/70 border border-slate-200/80 flex items-center justify-between text-xs"
+                      className="p-3 rounded-xl bg-slate-800/70 border border-slate-700/70 flex items-center justify-between text-xs text-white"
                     >
                       <div className="min-w-0 pr-2">
-                        <span className="font-bold text-slate-800 block truncate">{sub.subjectName}</span>
-                        <span className="text-[10px] text-slate-500 font-medium">
+                        <span className="font-bold text-white block truncate">{sub.subjectName}</span>
+                        <span className="text-[10px] text-slate-300 font-medium">
                           {sub.attemptCount} {sub.attemptCount === 1 ? 'practice session' : 'practice sessions'} ({sub.totalAttempted} questions)
                         </span>
                       </div>
 
-                      <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200/60 font-mono font-black text-xs shrink-0">
+                      <span className="px-2.5 py-1 rounded-lg bg-slate-950 text-emerald-300 border border-emerald-500/40 font-mono font-black text-xs shrink-0">
                         {sub.highestAccuracy}% Correct
                       </span>
                     </div>

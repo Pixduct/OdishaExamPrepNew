@@ -20,9 +20,6 @@ import { stagger } from './lib/animations';
 import { MathTextRenderer } from './components/MathTextRenderer';
 import { aiDiagnosticManager } from './lib/aiDiagnosticManager';
 import { ExamReadinessCard } from './components/ExamReadinessCard';
-import { TopicConfidenceMatrix } from './components/TopicConfidenceMatrix';
-import { PersonalBestCard } from './components/PersonalBestCard';
-import { AIStudyPlanCard } from './components/AIStudyPlanCard';
 import { useActiveExamContext } from './lib/activeExamStore';
 import { ActiveExamContextBar } from './components/ActiveExamContextBar';
 import { DynamicVectorCard } from './components/DynamicVectorCard';
@@ -1786,14 +1783,7 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
           </motion.div>
         </DynamicVectorCard>
 
-        {/* Topic Confidence Matrix */}
-        <TopicConfidenceMatrix userId={user?.id} activities={scopedActivities} />
 
-        {/* Personal Best Record Card */}
-        <PersonalBestCard userId={user?.id} />
-
-        {/* AI Personalized Study Plan Card */}
-        <AIStudyPlanCard userId={user?.id} onNavigate={onNavigate} />
 
         {/* Charts & Breakdown Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">

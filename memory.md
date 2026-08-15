@@ -1,53 +1,46 @@
-# Memory — Executive 3D Vector Cards & Full-Screen Academic Canvas Engine (v6.0.0)
+# Memory — Home Tab Vector Upgrade & Global Mouse Tracking Engine (v7.3.0)
 
-Last updated: 2026-08-15T08:46:40+05:30
+Last updated: 2026-08-15T20:40:30+05:30
 
 ## What was built
 
-### 1. 1:1 Pixel Crisp Dynamic Cursor Spotlight Card Engine (`src/components/DynamicVectorCard.tsx`)
-- **Real-Time Cursor Tracking**: Built reusable `<DynamicVectorCard>` component in `src/components/DynamicVectorCard.tsx` calculating exact mouse percentage coordinates (`posX`, `posY`) to drive real-time cursor reflection spotlights (`radial-gradient`).
-- **Spotlight z-Index Isolation (`z-[1]`)**: Isolated cursor reflection spotlight to `z-[1]` layer (under content `z-10`, above card background `z-0`) with `mix-blend-soft-light` and soft ambient glow opacity (`rgba(59, 130, 246, 0.08)`), eliminating top-corner diagonal glare line washouts.
-- **Unified Vector Border Radius (`rounded-3xl sm:rounded-[2.5rem]`)**: Applied explicit `rounded-3xl sm:rounded-[2.5rem]` across root containers and child card `<motion.div>` elements, eliminating subpixel parent clip-path border collisions and ensuring 100% smooth, anti-aliased vector corner curves.
+### 1. Home Tab Edge-to-Edge Vector Canvas & Vector Cards (`src/App.tsx`)
+- **Full Vector Background Canvas:** Added full-viewport dot-matrix grid canvas (`bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px]`), ambient blur orbs, and rotating vector watermarks (`GraduationCap`, `BookOpen`, `Award`, `Compass`).
+- **Vector Card Conversions:** Converted **Continue Practice**, **Recent Activity**, and **Explore Exams** (mobile rows & desktop grid cards) into vector cards wrapped with `<DynamicVectorCard>` and inner vector dot-matrix overlays (`bg-[radial-gradient(#cbd5e1_1px,transparent_1px)]`).
 
-### 2. Full-Screen Edge-to-Edge Academic Vector Canvas (`src/StudyPlanView.tsx` & `src/AnalyticsView.tsx`)
-- **Viewport Canvas Spanning**: Structured `StudyPlanView.tsx` and `AnalyticsView.tsx` with full-screen edge-to-edge page canvases (`relative w-full min-h-screen bg-[#F8FAFC] overflow-x-hidden`).
-- **Fixed Geometric Dot Grid**: Grid matrix uses `fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40`, spanning 100% of the viewport behind all hub cards without side margins.
-- **Fixed Floating Vector Watermarks**: Positioned floating study vector watermarks (`GraduationCap`, `Calendar`, `Trophy`, `TrendingUp`, `Activity`, `Brain`) at `fixed inset-0` viewport edges.
+### 2. Complete Dark Mode Color Refinement (`src/App.tsx` & `src/components/YouTubeCarousel.tsx`)
+- **YouTube Strategy Videos Card:** Added outer container dark styles (`dark:bg-slate-900 dark:border-slate-700`), dynamic edge fade gradient masks (`#0f172a` in dark mode), and dark card backgrounds (`dark:bg-slate-800`).
+- **Continue Practice & Recent Activity:** Upgraded section headings, scroll buttons, text colors, progress bar tracks, and score pills (`emerald`, `amber`, `red`, `slate`) for dark mode.
+- **Explore Exams Controls & Cards:** Fixed upcoming/popular control tab pills (`dark:bg-slate-800/60`, `dark:text-slate-300`). Replaced metallic gray dark card backgrounds with a rich deep navy blue gradient (`from-[#0d1b3e] via-[#0f2257] to-[#0b1730]`).
 
-### 3. Analytics Tab Executive 3D Vector Cards & Modal Upgrades (`src/AnalyticsView.tsx`)
-- **Executive Card Transformations**: Converted `ExamReadinessCard`, `StatCard` (4 metrics), `AI Performance Lab`, `Performance Trend Card`, `Accuracy Breakdown Card`, `Overall Skill Profile Card`, `Performance Breakdown Card`, and `SubjectRow` cards into Executive 3D Vector Cards wrapped in `<DynamicVectorCard>`.
-- **Niche-Aligned Vector Background Watermark Logos**: Assigned unique watermark logos matching each card's niche:
-  - `Average Score`: `<Zap className="w-36 h-36 opacity-15 text-slate-300" />`
-  - `Accuracy`: `<Target className="w-36 h-36 opacity-15 text-slate-300" />`
-  - `Time per Question`: `<Timer className="w-36 h-36 opacity-15 text-slate-300" />`
-  - `Total Attempts`: `<History className="w-36 h-36 opacity-15 text-slate-300" />`
-- **Active Exam Context Bar & Modal**: Upgraded `ActiveExamContextBar.tsx` and `ExamContextSelectorModal.tsx` into Executive Dark Vector Cards with radial grid watermarks and floating 3D `Target` background icons.
-- **Readiness Detail Modal**: Transformed `ReadinessDetailModal.tsx` into an Executive Dark Vector Card Modal featuring radial SVG score ring, live study audit banner, and 4 step progress cards.
+### 3. Site-Wide Ambient Mouse Tracking & Vector Cursor System (`MouseTrackingCanvas.tsx`, `VectorCursorFollower.tsx`, `DynamicVectorCard.tsx`)
+- **Ambient Light Canvas (`MouseTrackingCanvas.tsx`):** 60fps lerp-interpolated background canvas rendering a subtle ambient glow orb following viewport mouse position across all pages.
+- **Interactive Cursor Follower (`VectorCursorFollower.tsx`):** Precision center dot and expandable interactive ring follower detecting buttons, links, cards, and interactive elements (`1.45x` scale expansion on hover).
+- **3D Magnetic Card Parallax (`DynamicVectorCard.tsx`):** Added 3D perspective magnetic tilt (`transform: perspective(1000px) rotateX(...) rotateY(...)`), top-layer surface spotlight (`z-20`), and cursor edge illumination ring (`z-30`).
 
-### 4. Accessibility High-Contrast Text Upgrade
-- **High-Contrast Text System**: Replaced low-contrast gray text across all cards with bright high-contrast typography (`text-white`, `text-amber-200/90`, `text-indigo-200/90`, `text-amber-300 font-mono font-black`).
+### 4. Full-Width Executive Header Navigation (`src/App.tsx`)
+- **Full-Width Layout Upgrade:** Updated inner top navbar container from rigid `max-w-7xl` to edge-to-edge `w-full px-4 sm:px-6 lg:px-8` layout so logo and controls anchor cleanly to far screen edges on wide monitors.
 
-### 5. UI Registry & Progress Tracker Imprints (`context/ui-registry.md` & `context/progress-tracker.md`)
-- **Updated Section 47**: Imprinted `DynamicVectorCard` and `AcademicVectorCanvas` standard tokens, spotlight rules, and corner radius alignment standards.
+### 5. Design System & UI Registry Imprints (`context/ui-registry.md` & `context/progress-tracker.md`)
+- Imprinted visual patterns for `TopHeaderNavigation`, `DynamicVectorCard`, `MouseTrackingCanvas`, and `VectorCursorFollower` in `context/ui-registry.md`.
+- Updated `context/progress-tracker.md` with completion status for all components.
 
 ## Decisions made
-- **Subtle Spotlight Glow (`z-[1]`)**: Set cursor spotlight overlay to `z-[1]` under content with soft opacity (`0.08`) and `mix-blend-soft-light` to illuminate card backgrounds without painting over borders or text.
-- **Full-Screen Canvas Viewport Spanning**: Page background canvases use `fixed inset-0` with `bg-[#F8FAFC]` to ensure consistent edge-to-edge canvas backgrounds across laptop screens.
-- **Explicit Matching Border Radii**: Every card container and child `<motion.div>` explicitly declares `rounded-3xl sm:rounded-[2.5rem]` to avoid subpixel clipping collisions.
+- **Top-Layer Surface & Edge Spotlight (`z-20` / `z-30`):** Surface spotlight and edge illumination ring in `DynamicVectorCard` are placed above `{children}` so cursor tracking remains visible over opaque card backgrounds.
+- **Full-Width Header Container:** Top navigation bar uses `w-full px-4 sm:px-6 lg:px-8` edge-to-edge styling across all routes.
+- **Defensive Device Guards:** Mouse tracking canvas and cursor follower automatically disable on touch devices (`pointer: coarse`) to preserve mobile battery and performance.
 
 ## Problems solved
-- **Card Edge Clipping & Boxy Hover Edges**: Solved by removing root `overflow-hidden` from `DynamicVectorCard` and unifying parent/child border radius to `rounded-3xl sm:rounded-[2.5rem]`.
-- **Top Corner Glare Washouts**: Resolved by lowering spotlight z-index from `z-30` to `z-[1]` and setting `glowColor` to `rgba(59, 130, 246, 0.08)`.
-- **Study Hub Inset Canvas Gap**: Resolved by changing `StudyPlanView.tsx` root container to full-screen `fixed inset-0` vector dot grid matching `AnalyticsView.tsx`.
-- **Low-Contrast Gray Reading Strain**: Resolved by upgrading low-contrast gray text to bright white, amber-gold, and indigo typography.
+- **Hidden Card Mouse Spotlight:** Solved issue where card backgrounds obscured mouse spotlights by elevating spotlight layers (`z-20` / `z-30`) above children content.
+- **Dark Mode Metallic Gray Card Fix:** Replaced flat metallic gray exam cards with a rich deep navy blue gradient (`#0d1b3e` to `#0b1730`) with high-contrast text styling.
+- **Dark Mode Pill Inconsistency:** Fixed light-mode behavior on upcoming/popular exam pills in dark mode.
 
 ## Current state
-- TypeScript Validation: `npx tsc --noEmit` passes with **0 errors**.
-- Repositories: All website code committed and pushed to `Pixduct/OdishaExamPrepNew.git` (Latest commit `1a2a5f6`).
-- Live Website: `https://www.odishaexamprep.in/` verified working cleanly.
+- Clean build verified (0 TypeScript errors).
+- All changes committed and pushed to GitHub main branch (`https://github.com/Pixduct/OdishaExamPrepNew.git`).
 
 ## Next session starts with
-- Assist the user with any new feature requests, card enhancements, administrative tools, or content updates.
+- Assist the user with any new feature requests, page layout updates, or administrative enhancements.
 
 ## Open questions
 - None.

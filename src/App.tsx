@@ -3363,7 +3363,7 @@ const LandingPage = () => {
 
       <main className="flex-1 bg-transparent transition-colors duration-300 relative z-10">
         {/* Elite Split-Layout Hero Section */}
-        <section className="relative overflow-hidden pt-6 pb-12 lg:pt-10 lg:pb-20">
+        <section className="relative overflow-hidden pt-6 pb-12 lg:pt-10 lg:pb-16 border-b border-slate-200/50 dark:border-slate-800">
           {/* Animated Mesh + Grid Background */}
           <div className="absolute inset-0 -z-10 mesh-bg opacity-100 dark:opacity-30" />
           <div className="absolute inset-0 -z-10 grid-bg opacity-60 dark:opacity-20" />
@@ -3485,7 +3485,7 @@ const LandingPage = () => {
 
         {/* Home Dashboard Exam Readiness, Smart Recommendation & AI Study Plan System — Only render for LOGGED-IN users */}
         {user ? (
-          <section className="relative z-10 -mt-6 sm:-mt-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <section className="relative z-10 py-8 sm:py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 border-b border-slate-200/50 dark:border-slate-800">
             <ExamReadinessCard userId={user?.id} onStartPracticeClick={() => scrollToElement('exams', { block: 'start', delay: 50 })} />
             <AIStudyPlanCard userId={user?.id} />
             <SmartRecommendationCard userId={user?.id} onLaunchPractice={(topic) => scrollToElement('exams', { block: 'start', delay: 50 })} />
@@ -3592,7 +3592,7 @@ const LandingPage = () => {
             })()}
           </section>
         ) : (
-          <section className="relative z-10 -mt-6 sm:-mt-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <section className="relative z-10 py-8 sm:py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-slate-200/50 dark:border-slate-800">
             <DynamicVectorCard className="bg-white dark:bg-slate-900 border-2 border-slate-900/80 dark:border-slate-700/80 p-6 sm:p-8 text-slate-900 dark:text-white shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
               <div className="space-y-2 text-center sm:text-left max-w-2xl">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-brand-500/10 dark:bg-brand-500/20 text-brand-600 dark:text-brand-300 border border-brand-500/20 dark:border-brand-500/30">

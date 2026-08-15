@@ -1102,7 +1102,7 @@ const ExamRegistrySection = ({
           <span className="section-chip">
             ⏰ ODISHA RECRUITMENT BULLETIN
           </span>
-          <h2 className={cn("font-serif font-extrabold text-slate-955 tracking-tight leading-tight", isMobile ? "text-2xl" : "text-3xl md:text-5xl")}>
+          <h2 className={cn("font-serif font-extrabold text-slate-955 dark:text-white tracking-tight leading-tight", isMobile ? "text-2xl" : "text-3xl md:text-5xl")}>
             Official Exam Notifications <span className="premium-text-gradient font-serif font-extrabold">& Targeted <span className="whitespace-nowrap">Mock Tests</span></span>
           </h2>
           {isMobile ? null : <div className="section-divider" />}
@@ -1237,7 +1237,7 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
           <span className="section-chip">
             🎯 SYLLABUS-MAPPED PREPARATION
           </span>
-          <h2 className={cn("font-serif font-extrabold text-slate-955 tracking-tight leading-tight max-w-5xl", isMobile ? "text-2xl" : "text-3xl md:text-4xl")}>
+          <h2 className={cn("font-serif font-extrabold text-slate-955 dark:text-white tracking-tight leading-tight max-w-5xl", isMobile ? "text-2xl" : "text-3xl md:text-4xl")}>
             Master Every Topic with <span className="premium-text-gradient font-serif font-extrabold">Targeted <span className="whitespace-nowrap">Chapter-Wise</span> Tests</span>
           </h2>
           {!isMobile && <div className="section-divider" />}
@@ -1408,13 +1408,13 @@ const AchieversJournalSection = () => {
   }, [activeFilter, searchQuery]);
 
   return (
-    <section id="achievers-journal" className={cn("bg-slate-50 border-y border-slate-200/60 scroll-mt-24", isMobile ? "py-10" : "py-12 md:py-16")}>
+    <section id="achievers-journal" className={cn("bg-slate-50 dark:bg-slate-900/60 border-y border-slate-200/60 dark:border-slate-800 scroll-mt-24", isMobile ? "py-10" : "py-12 md:py-16")}>
       <div className={cn("max-w-6xl mx-auto space-y-6 md:space-y-10", isMobile ? "px-4" : "px-6")}>
         <div className="flex flex-col items-center space-y-4 text-center">
           <span className="section-chip">
             🏆 VERIFIED SUCCESS STORIES
           </span>
-          <h2 className={cn("font-serif font-extrabold text-slate-955 tracking-tight leading-tight max-w-5xl", isMobile ? "text-2xl" : "text-3xl md:text-4xl")}>
+          <h2 className={cn("font-serif font-extrabold text-slate-955 dark:text-white tracking-tight leading-tight max-w-5xl", isMobile ? "text-2xl" : "text-3xl md:text-4xl")}>
             Join Hundreds of Aspirants <span className="premium-text-gradient font-serif font-extrabold">Who Cracked Their Target Exams</span>
           </h2>
           {!isMobile && <div className="section-divider" />}
@@ -2190,25 +2190,29 @@ export const Navbar = ({
           <div className="flex items-center gap-2.5 sm:gap-3 pl-2 sm:pl-3 border-l border-slate-200 dark:border-slate-700">
             <ThemeToggle />
 
-            <button
-              type="button"
-              onClick={() => setIsSearchModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-white transition-all text-xs font-black cursor-pointer border border-slate-200/80 dark:border-slate-700 group shrink-0"
-              title="Search exams, tests, practice sets (Ctrl+K)"
-            >
-              <Search className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400 group-hover:scale-110 transition-transform" />
-              <span className="hidden md:inline text-slate-700 dark:text-slate-200 group-hover:text-brand-600 dark:group-hover:text-brand-400">Search</span>
-              <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[9px] font-black text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700 shadow-2xs">⌘K</kbd>
-            </button>
+            {user && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsSearchModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-white transition-all text-xs font-black cursor-pointer border border-slate-200/80 dark:border-slate-700 group shrink-0"
+                  title="Search exams, tests, practice sets (Ctrl+K)"
+                >
+                  <Search className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400 group-hover:scale-110 transition-transform" />
+                  <span className="hidden md:inline text-slate-700 dark:text-slate-200 group-hover:text-brand-600 dark:group-hover:text-brand-400">Search</span>
+                  <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[9px] font-black text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700 shadow-2xs">⌘K</kbd>
+                </button>
 
-            <NotificationCenter
-              exams={_dashboardCache.exams || []}
-              mockTests={_dashboardCache.mockTests || []}
-              dynamicQuestionBanks={_dashboardCache.dynamicQuestionBanks || {}}
-              onViewExam={(examId) => window.dispatchEvent(new CustomEvent('oep-view-exam', { detail: examId }))}
-              onLaunchMockTest={(test: any) => window.dispatchEvent(new CustomEvent('oep-launch-mock-test', { detail: test }))}
-              onLaunchBank={(bank: any) => window.dispatchEvent(new CustomEvent('oep-launch-bank', { detail: bank }))}
-            />
+                <NotificationCenter
+                  exams={_dashboardCache.exams || []}
+                  mockTests={_dashboardCache.mockTests || []}
+                  dynamicQuestionBanks={_dashboardCache.dynamicQuestionBanks || {}}
+                  onViewExam={(examId) => window.dispatchEvent(new CustomEvent('oep-view-exam', { detail: examId }))}
+                  onLaunchMockTest={(test: any) => window.dispatchEvent(new CustomEvent('oep-launch-mock-test', { detail: test }))}
+                  onLaunchBank={(bank: any) => window.dispatchEvent(new CustomEvent('oep-launch-bank', { detail: bank }))}
+                />
+              </>
+            )}
 
             {/* Header Streak Flame Pill Button — Only visible when LOGGED IN */}
             {user && (
@@ -3309,7 +3313,7 @@ const LandingPage = () => {
 
       {/* Top Professional Announcement Bar */}
       <div className="ticker-bar relative z-50 bg-[#0F172A] border-b-2 border-slate-900 overflow-hidden">
-        <div className="max-w-7xl mx-auto flex items-center h-10 relative">
+        <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center h-10 relative">
           <div className="flex items-center gap-2 px-4 h-full bg-[#2563EB] text-white border-r-2 border-slate-900 shrink-0 relative z-20 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
             <span className="flex h-2 w-2 rounded-full bg-white animate-pulse" />
             <span className="text-[10px] font-black uppercase tracking-widest leading-none">Exam Updates</span>
@@ -3570,16 +3574,16 @@ const LandingPage = () => {
           </section>
         ) : (
           <section className="relative z-10 -mt-6 sm:-mt-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-gradient-to-r from-slate-900 via-brand-950 to-slate-900 border border-slate-800 rounded-2xl sm:rounded-[2.25rem] p-6 sm:p-8 text-white shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl sm:rounded-[2.25rem] p-6 sm:p-8 text-slate-900 dark:text-white shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
               <div className="space-y-2 text-center sm:text-left max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-brand-500/20 text-brand-300 border border-brand-500/30">
-                  <Sparkles className="w-3.5 h-3.5 text-brand-400" />
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-brand-500/10 dark:bg-brand-500/20 text-brand-600 dark:text-brand-300 border border-brand-500/20 dark:border-brand-500/30">
+                  <Sparkles className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
                   Personalized Preparation Engine
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+                <h3 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white">
                   Sign In to Access Your Personal AI Study Plan & Score Tracker
                 </h3>
-                <p className="text-xs sm:text-sm font-medium text-slate-300 leading-relaxed">
+                <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
                   Your readiness score, daily weak-topic drills, streak goals, and personal performance matrix are securely tied to your user account.
                 </p>
               </div>
@@ -8030,22 +8034,22 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           >
             <div 
               onClick={() => navigate('/admin')}
-              className="p-5 sm:p-8 soft-card bg-[#0f0a28] text-white border-none shadow-2xl shadow-brand-500/10 cursor-pointer group relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] premium-shine-container"
+              className="p-5 sm:p-8 soft-card bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200/80 dark:border-slate-800 shadow-xl cursor-pointer group relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] premium-shine-container"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-brand-600/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-br from-brand-600/10 to-purple-600/10 dark:from-brand-600/20 dark:to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               <VisualEffects />
-              <div className="absolute -right-20 -top-20 w-80 h-80 bg-brand-500/20 rounded-full blur-[100px] group-hover:scale-150 transition-all duration-1000" />
+              <div className="absolute -right-20 -top-20 w-80 h-80 bg-brand-500/10 dark:bg-brand-500/20 rounded-full blur-[100px] group-hover:scale-150 transition-all duration-1000" />
               <div className="flex flex-col sm:flex-row items-center justify-between gap-6 relative z-10">
                 <div className="flex items-center gap-6">
-                  <div className="w-16 h-16 bg-white/20 rounded-[1.75rem] flex items-center justify-center backdrop-blur-xl">
+                  <div className="w-16 h-16 bg-brand-600 dark:bg-white/20 rounded-[1.75rem] flex items-center justify-center backdrop-blur-xl">
                     <Settings className="w-8 h-8 text-white" />
                   </div>
                   <div className="text-center sm:text-left">
-                    <h3 className="text-lg sm:text-2xl font-black tracking-tight">Admin Control Center</h3>
-                    <p className="text-brand-100 font-bold opacity-80 text-sm sm:text-base">Manage all system content & users</p>
+                    <h3 className="text-lg sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white">Admin Control Center</h3>
+                    <p className="text-slate-600 dark:text-brand-100 font-bold opacity-90 text-sm sm:text-base">Manage all system content & users</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 font-black text-xs sm:text-sm bg-white/20 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl backdrop-blur-xl group-hover:bg-white group-hover:text-brand-600 transition-all duration-500 shadow-xl shadow-brand-900/10 shrink-0">
+                <div className="flex items-center gap-2 font-black text-xs sm:text-sm bg-brand-50 dark:bg-slate-800 text-brand-600 dark:text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl border border-brand-200 dark:border-slate-700 backdrop-blur-xl group-hover:bg-brand-600 group-hover:text-white transition-all duration-300 shadow-md shrink-0">
                   Open Dashboard
                   <ChevronRight className="w-5 h-5" />
                 </div>
@@ -10822,7 +10826,7 @@ const ExamDetailPage = () => {
       <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
         {/* Announcement Bar */}
         <div className="ticker-bar relative z-50 bg-[#0F172A] border-b-2 border-slate-900 overflow-hidden">
-          <div className="max-w-7xl mx-auto flex items-center h-10 relative">
+          <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center h-10 relative">
             <div className="flex items-center gap-2 px-4 h-full bg-[#2563EB] text-white border-r-2 border-slate-900 shrink-0 relative z-20 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
               <span className="flex h-2 w-2 rounded-full bg-white animate-pulse" />
               <span className="text-[10px] font-black uppercase tracking-widest leading-none">Exam Updates</span>

@@ -29,6 +29,10 @@
 - [x] Home Tab Full Edge-to-Edge Vector Canvas Background & Home Section Vector Cards Upgrade (`src/App.tsx`)
 - [x] Site-Wide Global Viewport Mouse Tracking Canvas, 3D Perspective Card Tilt & Vector Cursor Follower Ring (`MouseTrackingCanvas.tsx`, `VectorCursorFollower.tsx`, `DynamicVectorCard.tsx`)
 - [x] Full-Width Executive Header Navigation Container (`src/App.tsx`)
+- [x] Full-Width EXAM UPDATES Top Announcement Ticker Bar Container (`src/App.tsx`)
+- [x] Clean Signed-Out Header Navigation (Hidden Search Button & Notification Bell when Signed Out) (`src/App.tsx`)
+- [x] Front-End Adaptive Dual-Theme Overhaul: 100% cards, section headers, banners, and text elements seamlessly adapt between Light Cards (Light Mode) and Dark Cards (Dark Mode) (`src/App.tsx`, `YouTubeCarousel.tsx`, `index.css`)
+
 
 
 

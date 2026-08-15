@@ -743,7 +743,7 @@ const HistoryView = ({
                           ) : isDownloadable ? (
                             <Download className="absolute -right-6 -bottom-6 w-44 h-44 opacity-10 stroke-[1.2] text-blue-500 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
                           ) : (
-                            <CheckCircle2 className="absolute -right-6 -bottom-6 w-44 h-44 opacity-10 stroke-[1.2] text-brand-600 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                            <CheckCircle2 className="absolute -right-6 -bottom-6 w-44 h-44 opacity-10 stroke-[1.2] text-emerald-500 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
                           )}
 
                           {/* Confirm delete overlay */}
@@ -778,7 +778,7 @@ const HistoryView = ({
                                 a.type === 'test_incomplete' ? "bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-300 border-amber-200 dark:border-amber-800" :
                                 isAiQuiz ? "bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 border-purple-200 dark:border-purple-800" :
                                 isDownloadable ? "bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-300 border-blue-200 dark:border-blue-800" :
-                                "bg-brand-50 dark:bg-indigo-950/60 text-brand-600 dark:text-indigo-300 border-brand-200 dark:border-indigo-800"
+                                "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
                               )}>
                                 {a.type === 'test_incomplete' ? <Clock className="w-5 h-5" /> :
                                  isAiQuiz ? <Sparkles className="w-5 h-5" /> :
@@ -787,7 +787,7 @@ const HistoryView = ({
                               </div>
 
                               <div className="min-w-0 flex-1">
-                                <h4 className="font-extrabold text-slate-900 dark:text-white text-base sm:text-lg leading-snug tracking-tight group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors line-clamp-2 uppercase">
+                                <h4 className="font-extrabold text-slate-900 dark:text-white text-base sm:text-lg leading-snug tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2 uppercase">
                                   {titleText}
                                 </h4>
                                 <div className="flex items-center gap-2 mt-1">
@@ -799,7 +799,12 @@ const HistoryView = ({
 
                             <div className="flex items-center gap-2 shrink-0">
                               {(isTestResult || a.type === 'test_incomplete') && (
-                                <div className="px-3 py-1.5 rounded-xl bg-brand-50 dark:bg-indigo-950/60 text-brand-600 dark:text-indigo-300 border border-brand-200 dark:border-indigo-800 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 group-hover:bg-brand-600 dark:group-hover:bg-brand-500 group-hover:text-white transition-all shadow-2xs">
+                                <div className={cn(
+                                  "px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-2xs border",
+                                  a.type === 'test_incomplete'
+                                    ? "bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-300 border-amber-200 dark:border-amber-800 group-hover:bg-amber-600 group-hover:text-white"
+                                    : "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 group-hover:bg-emerald-600 dark:group-hover:bg-emerald-500 group-hover:text-white"
+                                )}>
                                   <span>{a.type === 'test_incomplete' ? 'Resume' : 'View Results'}</span>
                                   {a.type === 'test_incomplete' ? <Play className="w-3.5 h-3.5 fill-current" /> : <ChevronRight className="w-3.5 h-3.5" />}
                                 </div>
@@ -818,7 +823,13 @@ const HistoryView = ({
                           <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
                             <div className="flex flex-wrap items-center gap-2">
                               {a.metadata?.testCategory && (
-                                <span className="px-2.5 py-1 bg-brand-50 dark:bg-indigo-950/60 text-brand-700 dark:text-indigo-300 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider border border-brand-100 dark:border-indigo-800">
+                                <span className={cn(
+                                  "px-2.5 py-1 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider border",
+                                  a.type === 'test_incomplete' ? "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800" :
+                                  isAiQuiz ? "bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800" :
+                                  isDownloadable ? "bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800" :
+                                  "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
+                                )}>
                                   {a.metadata.testCategory}
                                 </span>
                               )}

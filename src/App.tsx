@@ -219,6 +219,61 @@ const getQuestionBankVectorTheme = (title: string = '', category: string = '') =
     };
   }
 };
+
+const getPracticeModeVectorTheme = (modeId: string) => {
+  switch (modeId) {
+    case 'topic-wise':
+      return {
+        gradient: 'bg-gradient-to-br from-indigo-950 via-slate-900 to-blue-950 text-indigo-50',
+        logoBg: 'bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-800 text-white shadow-lg shadow-blue-500/30 border border-blue-400/40',
+        badgeBg: 'bg-blue-400/20 text-blue-200 border-blue-400/40',
+        btnGradient: 'bg-gradient-to-r from-blue-600 via-indigo-600 to-brand-600 hover:from-blue-500 hover:to-indigo-500 shadow-blue-500/25',
+        badgeText: 'CHAPTER-WISE DRILLS',
+        MainIcon: BookOpen,
+        WatermarkIcon: Layers,
+      };
+    case 'exam-focused':
+      return {
+        gradient: 'bg-gradient-to-br from-amber-950 via-slate-900 to-orange-950 text-amber-50',
+        logoBg: 'bg-gradient-to-br from-amber-500 via-orange-500 to-red-600 text-white shadow-lg shadow-amber-500/30 border border-amber-400/40',
+        badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
+        btnGradient: 'bg-gradient-to-r from-amber-500 via-orange-600 to-red-600 hover:from-amber-400 hover:to-orange-500 shadow-amber-500/25',
+        badgeText: 'HIGH YIELD TOPIC BANKS',
+        MainIcon: Flame,
+        WatermarkIcon: Zap,
+      };
+    case 'revision-sets':
+      return {
+        gradient: 'bg-gradient-to-br from-emerald-950 via-slate-900 to-teal-950 text-emerald-50',
+        logoBg: 'bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 text-white shadow-lg shadow-emerald-500/30 border border-emerald-400/40',
+        badgeBg: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
+        btnGradient: 'bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 hover:from-emerald-400 hover:to-teal-500 shadow-emerald-500/25',
+        badgeText: 'DAILY SPEED QUIZZES',
+        MainIcon: Timer,
+        WatermarkIcon: Activity,
+      };
+    case 'pyq-collections':
+      return {
+        gradient: 'bg-gradient-to-br from-purple-950 via-slate-900 to-pink-950 text-purple-50',
+        logoBg: 'bg-gradient-to-br from-purple-600 via-pink-600 to-rose-700 text-white shadow-lg shadow-purple-500/30 border border-purple-400/40',
+        badgeBg: 'bg-purple-400/20 text-purple-200 border-purple-400/40',
+        btnGradient: 'bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:from-purple-500 hover:to-pink-500 shadow-purple-500/25',
+        badgeText: '10-YR SOLVED PYQS',
+        MainIcon: Award,
+        WatermarkIcon: History,
+      };
+    default:
+      return {
+        gradient: 'bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-indigo-50',
+        logoBg: 'bg-gradient-to-br from-brand-600 to-indigo-700 text-white shadow-lg shadow-brand-500/30 border border-brand-400/40',
+        badgeBg: 'bg-indigo-400/20 text-indigo-200 border-indigo-400/40',
+        btnGradient: 'bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 shadow-brand-500/25',
+        badgeText: 'PRACTICE DRILLS',
+        MainIcon: BookOpen,
+        WatermarkIcon: Layers,
+      };
+  }
+};
 import { DEFAULT_ACHIEVERS_JOURNAL } from './lib/defaultAchievers';
 import { useScrollSpy } from './hooks/useScrollSpy';
 import { useCountdown } from './hooks/useCountdown';
@@ -9571,18 +9626,15 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   )}
                 >
                   {[
-                    { id: 'topic-wise', title: 'Chapter-Wise Practice', desc: 'Master individual chapters with structured question sets & instant solutions.', icon: <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />, color: 'from-blue-500 to-indigo-600', tag: 'Structured Drills' },
-                    { id: 'exam-focused', title: 'High-Yield Topic Banks', desc: 'Focus on most frequently asked questions and core exam topics.', icon: <Zap className="w-5 h-5 sm:w-6 sm:h-6" />, color: 'from-amber-400 to-orange-500', tag: 'High Yield' },
-                    { id: 'revision-sets', title: 'Daily Speed & Accuracy Quizzes', desc: '10-minute micro-quizzes to boost solving speed and accuracy.', icon: <Clock className="w-5 h-5 sm:w-6 sm:h-6" />, color: 'from-emerald-400 to-teal-600', tag: 'Daily Boost' },
-                    { id: 'pyq-collections', title: 'Topic-Wise Solved PYQs', desc: 'Previous year exam questions categorized topic-by-topic.', icon: <History className="w-5 h-5 sm:w-6 sm:h-6" />, color: 'from-purple-500 to-pink-600', tag: '10-Yr PYQs' },
+                    { id: 'topic-wise', title: 'Chapter-Wise Practice', desc: 'Master individual chapters with structured question sets & instant solutions.', tag: 'Structured Drills' },
+                    { id: 'exam-focused', title: 'High-Yield Topic Banks', desc: 'Focus on most frequently asked questions and core exam topics.', tag: 'High Yield' },
+                    { id: 'revision-sets', title: 'Daily Speed & Accuracy Quizzes', desc: '10-minute micro-quizzes to boost solving speed and accuracy.', tag: 'Daily Boost' },
+                    { id: 'pyq-collections', title: 'Topic-Wise Solved PYQs', desc: 'Previous year exam questions categorized topic-by-topic.', tag: '10-Yr PYQs' },
                   ].map((test, i) => {
-                    const styleMap: Record<string, any> = {
-                      'topic-wise': { shadow: 'rgba(79,70,229,0.03)', borderActive: 'active:border-indigo-300', textActive: 'group-active:bg-indigo-50 group-active:border-indigo-100 group-active:text-indigo-600' },
-                      'exam-focused': { shadow: 'rgba(244,63,94,0.03)', borderActive: 'active:border-rose-300', textActive: 'group-active:bg-rose-50 group-active:border-rose-100 group-active:text-rose-600' },
-                      'revision-sets': { shadow: 'rgba(16,185,129,0.03)', borderActive: 'active:border-emerald-300', textActive: 'group-active:bg-emerald-50 group-active:border-emerald-100 group-active:text-emerald-600' },
-                      'pyq-collections': { shadow: 'rgba(236,72,153,0.03)', borderActive: 'active:border-pink-300', textActive: 'group-active:bg-pink-50 group-active:border-pink-100 group-active:text-pink-600' }
-                    };
-                    const style = styleMap[test.id] || styleMap['topic-wise'];
+                    const vecTheme = getPracticeModeVectorTheme(test.id);
+                    const MainIcon = vecTheme.MainIcon;
+                    const WatermarkIcon = vecTheme.WatermarkIcon;
+
                     const count = (dynamicQuestionBanks[test.id] || []).filter((b: any) => {
                       if (b.is_archived && !hasAccessTo(b.id, selectedExam)) return false;
                       if (b.examId !== selectedExam) return false;
@@ -9607,25 +9659,17 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                               setSelectedPracticeCategory(test.id);
                               scrollToElement('practice-mode-section', { block: 'start', delay: 50 });
                             }}
-                            className={cn(
-                              "p-4 bg-white border border-slate-100 rounded-2xl flex items-center justify-between gap-4 cursor-pointer group relative overflow-hidden transition-all duration-300",
-                              style.borderActive
-                            )}
-                            style={{ boxShadow: `0 4px 16px -4px ${style.shadow}, 0 1px 2px rgba(0,0,0,0.02)` }}
+                            className="p-4 bg-white border border-slate-200/80 rounded-2xl flex items-center justify-between gap-4 cursor-pointer group relative overflow-hidden transition-all duration-300 shadow-sm active:scale-[0.98]"
                           >
-                            <div className="absolute inset-0 bg-gradient-to-r from-slate-500/0 via-slate-500/[0.01] to-slate-500/0 opacity-0 group-active:opacity-100 transition-opacity pointer-events-none" />
-                            <div className={cn("absolute left-0 top-3.5 bottom-3.5 w-1 rounded-r-md opacity-80 bg-gradient-to-b", test.color)} />
-                            
-                            <div className="flex items-center gap-3.5 min-w-0 flex-1 pl-1">
-                              <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-md relative text-white bg-gradient-to-br", test.color)}>
-                                {test.icon}
-                                <div className="absolute inset-0 border border-white/10 rounded-xl" />
+                            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                              <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-md relative text-white", vecTheme.logoBg)}>
+                                <MainIcon className="w-6 h-6 stroke-[2.2]" />
                               </div>
                               
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-1.5 flex-wrap">
-                                  <h4 className="font-extrabold text-[14.5px] text-slate-850 tracking-tight leading-snug">{test.title}</h4>
-                                  <span className="px-1.5 py-0.5 bg-slate-100/80 text-slate-500 text-[8.5px] font-black uppercase tracking-wider rounded border border-slate-200/50 shrink-0">
+                                  <h4 className="font-extrabold text-[14.5px] text-slate-900 tracking-tight leading-snug">{test.title}</h4>
+                                  <span className="px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[8.5px] font-black uppercase tracking-wider rounded border border-slate-200/50 shrink-0">
                                     {count} {count === 1 ? 'Set' : 'Sets'}
                                   </span>
                                   {hasNewUnreadContent('practice', test.id) ? (
@@ -9634,66 +9678,84 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                       New
                                     </span>
                                   ) : (
-                                    <span className="px-1.5 py-0.5 bg-slate-50 text-slate-400 text-[8.5px] font-black rounded border border-slate-100 uppercase tracking-wider shrink-0">{test.tag}</span>
+                                    <span className="px-1.5 py-0.5 bg-slate-50 text-slate-500 text-[8.5px] font-black rounded border border-slate-200/60 uppercase tracking-wider shrink-0">{test.tag}</span>
                                   )}
                                 </div>
                                 <p className="text-[11.5px] text-slate-500 font-medium leading-relaxed mt-0.5 line-clamp-2 pr-1">{test.desc}</p>
                               </div>
                             </div>
                             
-                            <div className={cn(
-                              "w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 shrink-0 shadow-2xs group-active:translate-x-0.5 transition-all duration-300",
-                              style.textActive
-                            )}>
+                            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0 group-active:translate-x-0.5 transition-all">
                               <ChevronRight className="w-4 h-4" />
                             </div>
                           </div>
                         ) : (
-                          <Card 
-                            className="p-5 sm:p-6 lg:p-8 bg-white border-slate-200/60 shadow-lg shadow-slate-200/30 rounded-[2rem] hover:-translate-y-2 hover:shadow-2xl hover:shadow-brand-500/10 hover:border-brand-200 group transition-all duration-500 cursor-pointer flex flex-col gap-4 sm:gap-6 relative overflow-hidden h-full premium-shine-container"
+                          <div 
+                            className={cn(
+                              "p-6 sm:p-7 lg:p-8 text-white rounded-[2.2rem] hover:-translate-y-2 hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative overflow-hidden h-full border border-white/20 shadow-slate-950/20 card-3d-deep",
+                              vecTheme.gradient
+                            )}
                             onClick={() => {
                               setSelectedPracticeCategory(test.id);
                               scrollToElement('practice-mode-section', { block: 'start', delay: 50 });
                             }}
                           >
-                            <div className="flex items-center gap-3 sm:gap-4 relative z-10">
-                              <div className={cn(
-                                "w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center shrink-0 shadow-md bg-gradient-to-br text-white transition-transform group-hover:scale-110 relative",
-                                test.color
-                              )}>
-                                {test.icon}
-                                <div className="absolute inset-0 border-2 border-white/20 rounded-2xl animate-pulse" />
+                            {/* Geometric Radial Watermark Grid */}
+                            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:14px_14px] pointer-events-none z-0" />
+                            
+                            {/* 3D Floating Watermark Icon */}
+                            <WatermarkIcon className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-white pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+
+                            <div className="space-y-4 relative z-10">
+                              <div className="flex items-center justify-between gap-3">
+                                <div className={cn(
+                                  "w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center shrink-0 text-white transition-transform group-hover:scale-110 relative",
+                                  vecTheme.logoBg
+                                )}>
+                                  <MainIcon className="w-7 h-7 sm:w-8 sm:h-8 stroke-[2.2]" />
+                                  <div className="absolute inset-0 border border-white/30 rounded-2xl animate-pulse" />
+                                </div>
+                                
+                                <span className={cn("px-3 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded-full border backdrop-blur-md shadow-xs", vecTheme.badgeBg)}>
+                                  {vecTheme.badgeText}
+                                </span>
                               </div>
-                              <h4 className="font-black text-xl sm:text-2xl text-slate-950 tracking-tight leading-tight group-hover:text-brand-600 transition-colors uppercase">{test.title}</h4>
+
+                              <div>
+                                <h4 className="font-black text-xl sm:text-2xl text-white tracking-tight leading-tight group-hover:text-amber-300 transition-colors uppercase">{test.title}</h4>
+                                <p className="text-white/80 font-medium text-xs sm:text-sm leading-relaxed mt-2">{test.desc}</p>
+                              </div>
                             </div>
                             
-                            <div className="space-y-4 flex-1 relative z-10">
-                              <p className="text-slate-500 font-medium text-xs sm:text-sm leading-relaxed">{test.desc}</p>
+                            <div className="space-y-4 relative z-10">
                               <div className="flex items-center gap-2 flex-wrap">
                                 {hasNewUnreadContent('practice', test.id) ? (
-                                  <span className="text-[10px] font-black uppercase tracking-wider px-3 py-1.5 bg-brand-500 text-white rounded-lg flex items-center gap-1 animate-pulse">
+                                  <span className="text-[10px] font-black uppercase tracking-wider px-3 py-1 bg-brand-500 text-white rounded-lg flex items-center gap-1 animate-pulse shadow-xs">
                                     <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping shrink-0" />
                                     New
                                   </span>
                                 ) : (
-                                  <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 bg-slate-50 text-slate-400 rounded-lg border border-slate-100 group-hover:bg-brand-50 group-hover:text-brand-600 group-hover:border-brand-100 transition-colors">
+                                  <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 bg-white/10 text-white/90 rounded-lg border border-white/15 backdrop-blur-xs">
                                     {test.tag}
                                   </span>
                                 )}
-                                <span className="text-[10px] font-black uppercase tracking-wider px-3 py-1.5 bg-slate-100 text-slate-650 rounded-lg border border-slate-200/40">
+                                <span className="text-[10px] font-black uppercase tracking-wider px-3 py-1 bg-black/20 text-white/80 rounded-lg border border-white/10 backdrop-blur-xs">
                                   {count} {count === 1 ? 'Set' : 'Sets'}
                                 </span>
                               </div>
-                            </div>
 
-                            <Button 
-                              className="w-full h-[48px] sm:h-[56px] mt-2 rounded-xl flex items-center justify-center gap-2 font-black text-sm sm:text-base premium-gradient text-white shadow-lg shadow-brand-500/20 group-hover:premium-glow transition-all relative z-10 pointer-events-none overflow-hidden"
-                            >
-                              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 z-10" />
-                              <span className="relative z-10">Explore Sets</span>
-                              <ChevronRight className="w-4 h-4 sm:ml-1 group-hover:translate-x-1 transition-transform relative z-10" />
-                            </Button>
-                          </Card>
+                              <Button 
+                                className={cn(
+                                  "w-full h-[48px] sm:h-[54px] rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 font-black text-sm sm:text-base text-white transition-all relative z-10 pointer-events-none overflow-hidden cursor-pointer shadow-lg",
+                                  vecTheme.btnGradient
+                                )}
+                              >
+                                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 z-10" />
+                                <span className="relative z-10">Explore Sets</span>
+                                <ChevronRight className="w-4 h-4 sm:ml-1 group-hover:translate-x-1.5 transition-transform relative z-10" />
+                              </Button>
+                            </div>
+                          </div>
                         )}
                       </motion.div>
                     );

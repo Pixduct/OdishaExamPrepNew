@@ -75,6 +75,8 @@ import { ExamReadinessCard } from './components/ExamReadinessCard';
 import { SmartRecommendationCard } from './components/SmartRecommendationCard';
 import { AIStudyPlanCard } from './components/AIStudyPlanCard';
 import { DynamicVectorCard } from './components/DynamicVectorCard';
+import { MouseTrackingCanvas } from './components/MouseTrackingCanvas';
+import { VectorCursorFollower } from './components/VectorCursorFollower';
 import { stagger } from './lib/animations';
 import { StudyPlanView } from './StudyPlanView';
 import { useActiveExamContext } from './lib/activeExamStore';
@@ -2088,7 +2090,7 @@ export const Navbar = ({
         ? "fixed top-0 left-0 z-[60] bg-white dark:bg-slate-900 border-b border-slate-200/60 dark:border-slate-700/60" 
         : (scrolled ? "sticky top-0 z-[60] navbar-scrolled dark:bg-slate-900/95 dark:border-slate-700/60 dark:backdrop-blur-xl" : "sticky top-0 z-[60] navbar-glass dark:bg-slate-900/80 dark:backdrop-blur-xl dark:border-b dark:border-slate-700/40")
     )}>
-      <div className="max-w-7xl mx-auto px-4 h-16 sm:h-20 flex items-center justify-between relative z-[65]">
+      <div className="w-full px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between relative z-[65]">
         <div
           className="flex items-center gap-2 sm:gap-3 group cursor-pointer"
           onClick={() => {
@@ -3301,6 +3303,10 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
+      {/* Global Mouse Tracking Viewport Spotlight & Vector Cursor Follower */}
+      <MouseTrackingCanvas />
+      <VectorCursorFollower />
+
       {/* Top Professional Announcement Bar */}
       <div className="ticker-bar relative z-50 bg-[#0F172A] border-b-2 border-slate-900 overflow-hidden">
         <div className="max-w-7xl mx-auto flex items-center h-10 relative">

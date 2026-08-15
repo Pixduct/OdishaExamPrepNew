@@ -1097,7 +1097,7 @@ const ExamRegistrySection = ({
   };
   return (
     <section id="exam-registry" className={cn("bg-transparent border-y border-slate-200/50 dark:border-slate-800 scroll-mt-24", isMobile ? "py-10" : "py-12 md:py-16")}>
-      <div className={cn("max-w-6xl mx-auto space-y-6 md:space-y-12", isMobile ? "px-4" : "px-6")}>
+      <div className={cn("max-w-7xl mx-auto space-y-6 md:space-y-12", isMobile ? "px-4" : "px-6")}>
         <div className="flex flex-col items-center space-y-4 text-center">
           <span className="section-chip">
             ⏰ ODISHA RECRUITMENT BULLETIN
@@ -1231,13 +1231,13 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
   const activeTab = tabs[activeTabIdx] || tabs[0];
 
   return (
-    <section id="syllabus-paths" className={cn("scroll-mt-24 border-b border-slate-200/50", isMobile ? "py-10" : "py-12 md:py-16")}>
-      <div className={cn("max-w-6xl mx-auto space-y-6 md:space-y-12", isMobile ? "px-4" : "px-6")}>
+    <section id="syllabus-paths" className={cn("scroll-mt-24 border-b border-slate-200/50 dark:border-slate-800", isMobile ? "py-10" : "py-12 md:py-16")}>
+      <div className={cn("max-w-7xl mx-auto space-y-6 md:space-y-12", isMobile ? "px-4" : "px-6")}>
         <div className="flex flex-col items-center space-y-4 text-center">
           <span className="section-chip">
             🎯 SYLLABUS-MAPPED PREPARATION
           </span>
-          <h2 className={cn("font-serif font-extrabold text-slate-955 dark:text-white tracking-tight leading-tight max-w-5xl", isMobile ? "text-2xl" : "text-3xl md:text-4xl")}>
+          <h2 className={cn("font-serif font-extrabold text-slate-955 dark:text-white tracking-tight leading-tight max-w-6xl", isMobile ? "text-2xl" : "text-3xl md:text-4xl")}>
             Master Every Topic with <span className="premium-text-gradient font-serif font-extrabold">Targeted <span className="whitespace-nowrap">Chapter-Wise</span> Tests</span>
           </h2>
           {!isMobile && <div className="section-divider" />}
@@ -1246,17 +1246,17 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
             Stop blindly studying. Unlock full-length mock tests and PYQs designed exactly for the OPSC and OSSC curriculum.
           </p>
           {/* Desktop Version (Optimized) */}
-          <p className="max-w-2xl mx-auto md:text-lg md:leading-relaxed text-slate-600 hidden md:block">
+          <p className="max-w-2xl mx-auto md:text-lg md:leading-relaxed text-slate-600 dark:text-slate-300 hidden md:block">
             Stop blindly studying. Master Odisha History to Indian Polity with full-length mock tests and PYQs mapped exactly to the OPSC and OSSC curriculum.
           </p>
         </div>
 
         {/* Tab switcher */}
         <div className={cn(
-          "flex justify-center max-w-2xl mx-auto relative z-10",
+          "flex justify-center max-w-3xl mx-auto relative z-10",
           isMobile 
-            ? "gap-1.5 p-1 bg-slate-100/50 rounded-xl border border-slate-200/30 flex-nowrap overflow-x-auto no-scrollbar w-full"
-            : "gap-2 sm:gap-4 p-1.5 bg-slate-100/60 rounded-2xl border border-slate-200/50 flex-wrap"
+            ? "gap-1.5 p-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-xl border border-slate-200/30 dark:border-slate-700/50 flex-nowrap overflow-x-auto no-scrollbar w-full"
+            : "gap-2 sm:gap-4 p-1.5 bg-slate-100/60 dark:bg-slate-800/60 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 flex-wrap"
         )}>
           {tabs.map((tab, i) => {
             const isTabActive = activeTabIdx === i;
@@ -1270,16 +1270,16 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
                     ? "flex-1 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider"
                     : "flex-grow min-w-[100px] rounded-xl text-xs font-black uppercase tracking-widest",
                   isTabActive
-                    ? "text-slate-900"
-                    : "text-slate-400 hover:text-slate-700"
+                    ? "text-slate-900 dark:text-white"
+                    : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                 )}
               >
                 {isTabActive && (
                   <motion.div
                     layoutId="activeSyllabusTabBg"
                     className={cn(
-                      "absolute inset-0 bg-white shadow-sm border z-0",
-                      isMobile ? "rounded-lg border-slate-200/60" : "rounded-xl border-slate-200"
+                      "absolute inset-0 bg-white dark:bg-slate-900 shadow-sm border z-0",
+                      isMobile ? "rounded-lg border-slate-200/60 dark:border-slate-700" : "rounded-xl border-slate-200 dark:border-slate-700"
                     )}
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
@@ -1307,7 +1307,7 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
                   }
                 }
               }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-4 max-w-4xl mx-auto"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-4 max-w-7xl mx-auto"
             >
               {(activeTab.topics || []).map((topic: any, i: number) => (
                 <motion.div
@@ -1411,13 +1411,13 @@ const AchieversJournalSection = () => {
   }, [activeFilter, searchQuery]);
 
   return (
-    <section id="achievers-journal" className={cn("bg-slate-50 dark:bg-slate-900/60 border-y border-slate-200/60 dark:border-slate-800 scroll-mt-24", isMobile ? "py-10" : "py-12 md:py-16")}>
-      <div className={cn("max-w-6xl mx-auto space-y-6 md:space-y-10", isMobile ? "px-4" : "px-6")}>
+    <section id="achievers-journal" className={cn("bg-transparent border-y border-slate-200/60 dark:border-slate-800 scroll-mt-24", isMobile ? "py-10" : "py-12 md:py-16")}>
+      <div className={cn("max-w-7xl mx-auto space-y-6 md:space-y-10", isMobile ? "px-4" : "px-6")}>
         <div className="flex flex-col items-center space-y-4 text-center">
           <span className="section-chip">
             🏆 VERIFIED SUCCESS STORIES
           </span>
-          <h2 className={cn("font-serif font-extrabold text-slate-955 dark:text-white tracking-tight leading-tight max-w-5xl", isMobile ? "text-2xl" : "text-3xl md:text-4xl")}>
+          <h2 className={cn("font-serif font-extrabold text-slate-955 dark:text-white tracking-tight leading-tight max-w-6xl", isMobile ? "text-2xl" : "text-3xl md:text-4xl")}>
             Join Hundreds of Aspirants <span className="premium-text-gradient font-serif font-extrabold">Who Cracked Their Target Exams</span>
           </h2>
           {!isMobile && <div className="section-divider" />}
@@ -1426,19 +1426,19 @@ const AchieversJournalSection = () => {
             Explore real preparation strategies and test scores from students who conquered OPSC, OSSC, and OSSSC.
           </p>
           {/* Desktop Version (Optimized) */}
-          <p className="max-w-2xl mx-auto md:text-lg md:leading-relaxed text-slate-600 hidden md:block">
+          <p className="max-w-2xl mx-auto md:text-lg md:leading-relaxed text-slate-600 dark:text-slate-300 hidden md:block">
             Explore detailed preparation strategies and actual test scores from real students who conquered OPSC, OSSC, and OSSSC.
           </p>
         </div>
 
         {/* Search and Filters bar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-3 max-w-5xl mx-auto pt-2">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3 max-w-7xl mx-auto pt-2">
           {/* Category Filter */}
           <div className={cn(
-            "bg-white p-1 flex flex-nowrap w-full sm:w-auto justify-between gap-1 shrink-0 relative z-10",
+            "bg-white dark:bg-slate-900 p-1 flex flex-nowrap w-full sm:w-auto justify-between gap-1 shrink-0 relative z-10",
             isMobile
-              ? "border border-slate-200/60 rounded-xl shadow-sm"
-              : "border-2 border-slate-900 rounded-2xl shadow-[4px_4px_0px_rgba(37,99,235,0.15)]"
+              ? "border border-slate-200/60 dark:border-slate-800 rounded-xl shadow-sm"
+              : "border-2 border-slate-900 dark:border-slate-700 rounded-2xl shadow-[4px_4px_0px_rgba(37,99,235,0.15)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)]"
           )}>
             {(['all', 'opsc', 'ossc', 'osssc'] as const).map(filter => {
               const isFilterActive = activeFilter === filter;
@@ -1451,7 +1451,7 @@ const AchieversJournalSection = () => {
                     isMobile ? "px-2 text-[10px] tracking-wide" : "px-1.5 sm:px-4 text-[10px] sm:text-xs tracking-wider sm:tracking-widest",
                     isFilterActive 
                       ? "text-white" 
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                      : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800"
                   )}
                 >
                   {isFilterActive && (
@@ -1488,16 +1488,16 @@ const AchieversJournalSection = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={cn(
-                "w-full pl-10 pr-4 py-2.5 rounded-xl bg-white font-bold text-xs sm:text-sm focus:outline-none transition-all duration-200",
+                "w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-bold text-xs sm:text-sm focus:outline-none transition-all duration-200",
                 isMobile
-                  ? "border border-slate-200/70 shadow-sm focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]/20"
-                  : "border-2 border-slate-900 shadow-[3px_3px_0px_rgba(37,99,235,0.1)] focus:shadow-[4px_4px_0px_#2563EB]"
+                  ? "border border-slate-200/70 dark:border-slate-800 shadow-sm focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]/20"
+                  : "border-2 border-slate-900 dark:border-slate-700 shadow-[3px_3px_0px_rgba(37,99,235,0.1)] dark:shadow-[3px_3px_0px_rgba(37,99,235,0.4)] focus:shadow-[4px_4px_0px_#2563EB]"
               )}
             />
           </div>
         </div>
 
-        <div className={cn("max-w-5xl mx-auto", isMobile ? "pt-1" : "pt-4")}>
+        <div className={cn("max-w-7xl mx-auto", isMobile ? "pt-1" : "pt-4")}>
           <AnimatePresence mode="wait">
             <motion.div
               key={activeFilter}
@@ -1513,7 +1513,7 @@ const AchieversJournalSection = () => {
                   }
                 }
               }}
-              className={cn("grid grid-cols-1 md:grid-cols-2", isMobile ? "gap-3" : "gap-6 sm:gap-8")}
+              className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3", isMobile ? "gap-3" : "gap-6 sm:gap-8")}
             >
               {filteredStories.length === 0 ? (
                 <motion.div
@@ -1705,7 +1705,7 @@ export const Footer = () => {
       <div className="hidden md:block absolute -top-20 right-1/4 w-[500px] h-[500px] bg-brand-500/10 rounded-full blur-[120px] pointer-events-none animate-pulse-soft" />
       <div className="hidden md:block absolute -bottom-40 left-10 w-[400px] h-[400px] bg-slate-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse-soft" style={{ animationDelay: '-2s' }} />
 
-      <div className={cn("max-w-6xl mx-auto relative z-10", isMobile ? "px-4" : "px-6")}>
+      <div className={cn("max-w-7xl mx-auto relative z-10", isMobile ? "px-4" : "px-6")}>
         
         {/* Pre-footer Stats Dashboard */}
         <div className={cn("grid grid-cols-2 lg:grid-cols-4 border-b border-slate-800/60", isMobile ? "gap-3 pb-8 mb-8" : "gap-4 sm:gap-6 pb-16 mb-16")}>
@@ -1896,7 +1896,7 @@ export const Footer = () => {
       </div>
       
       {/* Bottom bar */}
-      <div className={cn("max-w-6xl mx-auto", isMobile ? "px-4 mt-10" : "px-6 mt-16 md:mt-24")}>
+      <div className={cn("max-w-7xl mx-auto", isMobile ? "px-4 mt-10" : "px-6 mt-16 md:mt-24")}>
         <div className="pt-8 border-t border-slate-800/60 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
           <p className="text-xs font-mono font-bold tracking-widest text-slate-500 uppercase">
             © 2026 OdishaExamPrep. All rights reserved.
@@ -2091,12 +2091,17 @@ export const Navbar = ({
 
   return (
     <header className={cn(
-      "w-full transition-[background-color,border-color,box-shadow,transform] duration-300", 
+      "w-full z-[60] transition-all duration-300", 
       mobileMenuOpen 
-        ? "fixed top-0 left-0 z-[60] bg-white dark:bg-slate-900 border-b border-slate-200/60 dark:border-slate-700/60" 
-        : (scrolled ? "sticky top-0 z-[60] navbar-scrolled dark:bg-slate-900/95 dark:border-slate-700/60 dark:backdrop-blur-xl" : "sticky top-0 z-[60] navbar-glass dark:bg-slate-900/80 dark:backdrop-blur-xl dark:border-b dark:border-slate-700/40")
+        ? "fixed top-0 left-0 right-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800" 
+        : (scrolled 
+            ? "fixed top-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800 shadow-md shadow-slate-900/10 dark:shadow-black/60" 
+            : "sticky top-0 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border-b border-slate-200/40 dark:border-slate-800/40")
     )}>
-      <div className="w-full px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between relative z-[65]">
+      <div className={cn(
+        "w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between relative z-[65] transition-all duration-300",
+        scrolled ? "h-14 sm:h-16" : "h-16 sm:h-20"
+      )}>
         <div
           className="flex items-center gap-2 sm:gap-3 group cursor-pointer"
           onClick={() => {
@@ -3336,7 +3341,7 @@ const LandingPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-300 relative overflow-hidden">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-300 relative overflow-x-clip">
       {/* Site-Wide Vector Canvas Grid Overlay */}
       <div className="fixed inset-0 pointer-events-none z-[0] opacity-40 dark:opacity-[0.05] bg-[radial-gradient(#94a3b8_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:24px_24px]" />
       
@@ -3646,8 +3651,8 @@ const LandingPage = () => {
         )}
 
         {/* 1. Practice Core (Explore Exams) */}
-        <section id="exams" className="py-12 md:py-16 scroll-mt-24 border-b border-slate-200/50">
-          <div id="exam-gateway-wrapper" data-tour="exam-search" className="max-w-6xl mx-auto px-6 space-y-12 sm:space-y-10">
+        <section id="exams" className="py-12 md:py-16 scroll-mt-24 border-b border-slate-200/50 dark:border-slate-800 bg-transparent">
+          <div id="exam-gateway-wrapper" data-tour="exam-search" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 sm:space-y-10">
             <div id="exam-gateway-header" className="flex flex-col items-center space-y-4 text-center">
               <span className="section-chip">
                 <Zap className="w-3.5 h-3.5" />

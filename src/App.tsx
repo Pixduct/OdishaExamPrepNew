@@ -2115,77 +2115,101 @@ export const Navbar = ({
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-3 lg:gap-4">
-          {!user && (
-            <div className="flex items-center border-2 border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl p-0.5 shadow-[3px_3px_0px_#0f172a] dark:shadow-none relative">
+          {!user ? (
+            <div className="flex items-center gap-1 bg-slate-100/80 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/60 rounded-2xl p-1 shadow-xs">
               <a 
                 href="#exams"
                 onClick={(e) => scrollToSection(e, 'exams')}
-                className="relative flex items-center gap-1.5 text-xs font-black uppercase tracking-widest px-4 py-2 rounded-lg group cursor-pointer"
-              >
-                {activeSection === 'exams' && (
-                  <motion.div
-                    layoutId="nav-active-pill"
-                    className="absolute inset-0 rounded-lg bg-[#fce7eb]"
-                    transition={{ type: 'spring', stiffness: 420, damping: 38, mass: 0.8 }}
-                  />
+                className={cn(
+                  "flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer select-none",
+                  activeSection === 'exams' 
+                    ? "bg-white dark:bg-slate-900 text-[#2563EB] dark:text-brand-400 shadow-xs font-black" 
+                    : "text-slate-600 dark:text-slate-300 hover:text-[#2563EB] dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-800"
                 )}
-                <Target className={cn("relative z-10 w-3.5 h-3.5 transition-colors duration-150", activeSection === 'exams' ? "text-[#2563EB]" : "text-slate-400 group-hover:text-[#2563EB]")} />
-                <span className={cn("relative z-10 transition-colors duration-150", activeSection === 'exams' ? "text-[#2563EB]" : "text-slate-600 group-hover:text-[#2563EB]")}>Exams</span>
+              >
+                <Target className="w-3.5 h-3.5 text-[#2563EB] dark:text-brand-400" />
+                <span>Exams</span>
               </a>
-              <div className="w-0.5 h-4 bg-slate-200 mx-0.5 shrink-0"></div>
+
               <a 
                 href="#syllabus-paths"
                 onClick={(e) => scrollToSection(e, 'syllabus-paths')}
-                className="relative flex items-center gap-1.5 text-xs font-black uppercase tracking-widest px-4 py-2 rounded-lg group cursor-pointer"
-              >
-                {activeSection === 'syllabus-paths' && (
-                  <motion.div
-                    layoutId="nav-active-pill"
-                    className="absolute inset-0 rounded-lg bg-[#fce7eb]"
-                    transition={{ type: 'spring', stiffness: 420, damping: 38, mass: 0.8 }}
-                  />
+                className={cn(
+                  "flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer select-none",
+                  activeSection === 'syllabus-paths' 
+                    ? "bg-white dark:bg-slate-900 text-[#2563EB] dark:text-brand-400 shadow-xs font-black" 
+                    : "text-slate-600 dark:text-slate-300 hover:text-[#2563EB] dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-800"
                 )}
-                <BookOpen className={cn("relative z-10 w-3.5 h-3.5 transition-colors duration-150", activeSection === 'syllabus-paths' ? "text-[#2563EB]" : "text-slate-400 group-hover:text-[#2563EB]")} />
-                <span className={cn("relative z-10 transition-colors duration-150", activeSection === 'syllabus-paths' ? "text-[#2563EB]" : "text-slate-600 group-hover:text-[#2563EB]")}>Syllabus</span>
+              >
+                <BookOpen className="w-3.5 h-3.5 text-[#2563EB] dark:text-brand-400" />
+                <span>Syllabus</span>
               </a>
-              <div className="w-0.5 h-4 bg-slate-200 mx-0.5 shrink-0"></div>
+
               <a 
                 href="#achievers-journal"
                 onClick={(e) => scrollToSection(e, 'achievers-journal')}
-                className="relative flex items-center gap-1.5 text-xs font-black uppercase tracking-widest px-4 py-2 rounded-lg group cursor-pointer"
-              >
-                {activeSection === 'achievers-journal' && (
-                  <motion.div
-                    layoutId="nav-active-pill"
-                    className="absolute inset-0 rounded-lg bg-[#fce7eb]"
-                    transition={{ type: 'spring', stiffness: 420, damping: 38, mass: 0.8 }}
-                  />
+                className={cn(
+                  "flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer select-none",
+                  activeSection === 'achievers-journal' 
+                    ? "bg-white dark:bg-slate-900 text-[#2563EB] dark:text-brand-400 shadow-xs font-black" 
+                    : "text-slate-600 dark:text-slate-300 hover:text-[#2563EB] dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-800"
                 )}
-                <Award className={cn("relative z-10 w-3.5 h-3.5 transition-colors duration-150", activeSection === 'achievers-journal' ? "text-[#2563EB]" : "text-slate-400 group-hover:text-[#2563EB]")} />
-                <span className={cn("relative z-10 transition-colors duration-150", activeSection === 'achievers-journal' ? "text-[#2563EB]" : "text-slate-600 group-hover:text-[#2563EB]")}>Achievers</span>
+              >
+                <Award className="w-3.5 h-3.5 text-[#2563EB] dark:text-brand-400" />
+                <span>Achievers</span>
               </a>
+
+              <Link 
+                to="/current-affairs"
+                className={cn(
+                  "flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer select-none",
+                  location.pathname === '/current-affairs' 
+                    ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-xs font-black" 
+                    : "text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-300 hover:bg-white/60 dark:hover:bg-slate-800"
+                )}
+                title="Daily 360° Current Affairs"
+              >
+                <Globe className="w-3.5 h-3.5 text-amber-500" />
+                <span>Current Affairs</span>
+              </Link>
+
+              <Link 
+                to="/blog"
+                className={cn(
+                  "flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer select-none",
+                  isBlogActive 
+                    ? "bg-white dark:bg-slate-900 text-[#2563EB] dark:text-brand-400 shadow-xs font-black" 
+                    : "text-slate-600 dark:text-slate-300 hover:text-[#2563EB] dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-800"
+                )}
+                title="Official Educational Blog"
+              >
+                <FileText className="w-3.5 h-3.5 text-[#2563EB] dark:text-brand-400" />
+                <span>Blog</span>
+              </Link>
             </div>
+          ) : (
+            <>
+              {/* Current Affairs Link for Authenticated Users */}
+              <Link 
+                to="/current-affairs"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 dark:border-amber-500/40 text-xs font-black uppercase tracking-wider transition-all group shrink-0 cursor-pointer shadow-2xs"
+                title="Daily 360° Current Affairs"
+              >
+                <Globe className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 group-hover:rotate-12 transition-transform" />
+                <span>Current Affairs</span>
+              </Link>
+
+              {/* Blog Link for Authenticated Users */}
+              <Link 
+                to="/blog"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100/90 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-[#2563EB] dark:hover:text-white border border-slate-200/80 dark:border-slate-700 text-xs font-black uppercase tracking-wider transition-all group shrink-0 cursor-pointer"
+                title="Official Educational Blog"
+              >
+                <FileText className="w-3.5 h-3.5 text-slate-400 dark:text-slate-400 group-hover:text-[#2563EB] dark:group-hover:text-brand-400 transition-colors" />
+                <span>Blog</span>
+              </Link>
+            </>
           )}
-
-          {/* Current Affairs Link */}
-          <Link 
-            to="/current-affairs"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 dark:border-amber-500/40 text-xs font-black uppercase tracking-wider transition-all group shrink-0 cursor-pointer shadow-2xs"
-            title="Daily 360° Current Affairs"
-          >
-            <Globe className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 group-hover:rotate-12 transition-transform" />
-            <span>Current Affairs</span>
-          </Link>
-
-          {/* Blog Link */}
-          <Link 
-            to="/blog"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-brand-600 dark:hover:text-white border border-slate-200/80 dark:border-slate-700 text-xs font-black uppercase tracking-wider transition-all group shrink-0 cursor-pointer"
-            title="Official Educational Blog"
-          >
-            <FileText className="w-3.5 h-3.5 text-slate-400 dark:text-slate-400 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors" />
-            <span>Blog</span>
-          </Link>
           
           <div className="flex items-center gap-2.5 sm:gap-3 pl-2 sm:pl-3 border-l border-slate-200 dark:border-slate-700">
             <ThemeToggle />
@@ -2302,7 +2326,7 @@ export const Navbar = ({
               onSignIn && (
                 <button 
                   onClick={onSignIn}
-                  className="px-6 h-10 text-xs font-black uppercase tracking-widest rounded-lg border-2 border-slate-900 bg-[#2563EB] text-white shadow-[3px_3px_0px_#0f172a] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all duration-200 cursor-pointer shrink-0"
+                  className="px-6 h-10 text-xs font-black uppercase tracking-widest rounded-xl bg-[#2563EB] hover:bg-brand-700 text-white shadow-md hover:shadow-[#2563EB]/25 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer shrink-0"
                 >
                   Sign In
                 </button>
@@ -2692,27 +2716,27 @@ const InteractiveHeroPreview = () => {
   const penaltyLabel = card.penalty?.toFixed(2) ?? '0.25';
 
   return (
-    <div className="w-full bg-white border-2 border-slate-900/80 rounded-[2rem] p-6 sm:p-8 shadow-[8px_8px_0px_rgba(37,99,235,1)] relative overflow-hidden font-sans">
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03] grid-bg" />
+    <div className="w-full bg-white dark:bg-slate-900 border-2 border-slate-900/80 dark:border-slate-700/80 rounded-[2rem] p-6 sm:p-8 shadow-[8px_8px_0px_rgba(37,99,235,1)] dark:shadow-[8px_8px_0px_rgba(37,99,235,0.4)] relative overflow-hidden font-sans">
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.08] grid-bg" />
       
-      <div className="flex items-center justify-between border-b-2 border-slate-100 pb-4 mb-5 shrink-0 relative z-10">
+      <div className="flex items-center justify-between border-b-2 border-slate-100 dark:border-slate-800 pb-4 mb-5 shrink-0 relative z-10">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 bg-[#2563EB] rounded-full animate-pulse" />
-          <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest leading-none">{card.examLabel}</span>
+          <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-widest leading-none">{card.examLabel}</span>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-100 border border-slate-200 rounded-lg font-mono text-xs font-black text-slate-700">
-            <Clock3 className="w-3.5 h-3.5 text-slate-500" />
+          <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-mono text-xs font-black text-slate-700 dark:text-slate-200">
+            <Clock3 className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
             {formatTimer(secondsLeft)}
           </div>
-          <span className="text-xs font-extrabold text-[#2563EB] bg-brand-50 px-2 py-0.5 rounded-md border border-brand-100">
+          <span className="text-xs font-extrabold text-[#2563EB] dark:text-brand-400 bg-brand-50 dark:bg-brand-950/60 px-2 py-0.5 rounded-md border border-brand-100 dark:border-brand-800">
             {card.questionNumber}
           </span>
         </div>
       </div>
 
       <div className="space-y-4 mb-6 relative z-10">
-        <h3 className="text-base sm:text-lg font-serif font-extrabold text-slate-900 leading-relaxed">
+        <h3 className="text-base sm:text-lg font-serif font-extrabold text-slate-900 dark:text-white leading-relaxed">
           <MathTextRenderer text={card.questionText} />
         </h3>
         {card.diagram ? (
@@ -2727,21 +2751,21 @@ const InteractiveHeroPreview = () => {
           const showSuccess = showResult && isCorrect;
           const showFailure = showResult && isSelected && !isCorrect;
 
-          let optionStyle = "border-slate-200 hover:border-slate-900/60 hover:bg-slate-50";
-          let badgeStyle = "bg-slate-100 text-slate-500";
+          let optionStyle = "border-slate-200 dark:border-slate-700 hover:border-slate-900/60 dark:hover:border-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/80 bg-white dark:bg-slate-800/60 text-slate-800 dark:text-slate-100";
+          let badgeStyle = "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300";
 
           if (showResult) {
             if (isCorrect) {
-              optionStyle = "border-emerald-500 bg-emerald-50 text-emerald-900";
+              optionStyle = "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200";
               badgeStyle = "bg-emerald-500 text-white";
             } else if (isSelected) {
-              optionStyle = "border-rose-500 bg-rose-50 text-rose-900";
+              optionStyle = "border-rose-500 bg-rose-50 dark:bg-rose-950/40 text-rose-900 dark:text-rose-200";
               badgeStyle = "bg-rose-500 text-white";
             } else {
-              optionStyle = "border-slate-100 bg-slate-50/50 opacity-60";
+              optionStyle = "border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 opacity-60 text-slate-500 dark:text-slate-400";
             }
           } else if (isSelected) {
-            optionStyle = "border-[#2563EB] bg-[#2563EB]/5 text-slate-900";
+            optionStyle = "border-[#2563EB] bg-[#2563EB]/5 dark:bg-[#2563EB]/20 text-slate-900 dark:text-white";
             badgeStyle = "bg-[#2563EB] text-white";
           }
 
@@ -2759,8 +2783,8 @@ const InteractiveHeroPreview = () => {
                 {String.fromCharCode(65 + idx)}
               </div>
               <span className="flex-1 font-bold"><MathTextRenderer text={opt} isOption /></span>
-              {showSuccess && <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />}
-              {showFailure && <X className="w-5 h-5 text-rose-600 shrink-0" />}
+              {showSuccess && <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />}
+              {showFailure && <X className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0" />}
             </button>
           );
         })}
@@ -2774,25 +2798,25 @@ const InteractiveHeroPreview = () => {
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div className="border-t-2 border-dashed border-slate-100 pt-5 space-y-3 relative z-10">
+            <div className="border-t-2 border-dashed border-slate-100 dark:border-slate-800 pt-5 space-y-3 relative z-10">
               <div className="flex items-center gap-2">
                 <span className={cn(
                   "px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider border",
                   selectedOption === card.correctIndex 
-                    ? "bg-emerald-50 text-emerald-700 border-emerald-100" 
-                    : "bg-rose-50 text-rose-700 border-rose-100"
+                    ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-800" 
+                    : "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-100 dark:border-rose-800"
                 )}>
                   {selectedOption === card.correctIndex ? `Correct Answer! (+${marksLabel} Marks)` : `Incorrect! (-${penaltyLabel} Marks)`}
                 </span>
                 <button 
                   onClick={handleReset}
-                  className="text-xs font-black text-slate-400 hover:text-[#2563EB] transition-colors ml-auto uppercase tracking-wider cursor-pointer"
+                  className="text-xs font-black text-slate-400 hover:text-[#2563EB] dark:hover:text-brand-400 transition-colors ml-auto uppercase tracking-wider cursor-pointer"
                 >
                   Try Again
                 </button>
               </div>
-              <p className="text-xs font-medium text-slate-600 leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-100 font-serif">
-                <strong className="text-slate-800 font-extrabold block mb-1">Explanation:</strong>
+              <p className="text-xs font-medium text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/80 p-3.5 rounded-xl border border-slate-100 dark:border-slate-700 font-serif">
+                <strong className="text-slate-800 dark:text-white font-extrabold block mb-1">Explanation:</strong>
                 <MathTextRenderer text={card.explanation} />
               </p>
             </div>
@@ -2800,7 +2824,7 @@ const InteractiveHeroPreview = () => {
         )}
       </AnimatePresence>
       
-      <div className="flex items-center justify-between border-t-2 border-slate-100 pt-4 mt-5 text-[10px] font-black text-slate-400 uppercase tracking-widest relative z-10 shrink-0">
+      <div className="flex items-center justify-between border-t-2 border-slate-100 dark:border-slate-800 pt-4 mt-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest relative z-10 shrink-0">
         <div>Marks: {marksLabel}</div>
         <div>Penalty: {penaltyLabel}</div>
         <div>Status: Interactive Demo</div>
@@ -3345,12 +3369,12 @@ const LandingPage = () => {
 
       <Navbar user={user} isAdmin={false} onSignIn={() => setShowAuthModal(true)} />
 
-      <main className="flex-1" style={{background: 'linear-gradient(160deg, #FAF8F5 0%, #FAF8F5 40%, #FAF8F5 100%)'}}>
+      <main className="flex-1 bg-[#FAF8F5] dark:bg-transparent transition-colors duration-300">
         {/* Elite Split-Layout Hero Section */}
-        <section className="relative overflow-hidden pt-6 pb-12 lg:pt-10 lg:pb-20 border-b border-slate-200/50">
+        <section className="relative overflow-hidden pt-6 pb-12 lg:pt-10 lg:pb-20 border-b border-slate-200/50 dark:border-slate-800">
           {/* Animated Mesh + Grid Background */}
-          <div className="absolute inset-0 -z-10 mesh-bg" />
-          <div className="absolute inset-0 -z-10 grid-bg opacity-60" />
+          <div className="absolute inset-0 -z-10 mesh-bg opacity-100 dark:opacity-30" />
+          <div className="absolute inset-0 -z-10 grid-bg opacity-60 dark:opacity-20" />
           {/* Glowing Orbs */}
           <div className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full -z-10 animate-orb" style={{background: 'radial-gradient(circle, rgba(37,99,235,0.06) 0%, transparent 70%)', filter: 'blur(40px)'}} />
           <div className="absolute bottom-0 -left-40 w-[500px] h-[500px] rounded-full -z-10 animate-orb" style={{background: 'radial-gradient(circle, rgba(0,0,0,0.02) 0%, transparent 70%)', filter: 'blur(50px)', animationDelay: '2.5s'}} />
@@ -3366,28 +3390,28 @@ const LandingPage = () => {
               >
                 <div className="space-y-6">
                   {/* Premium Badge */}
-                  <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-2xl bg-white shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 mb-2 max-w-full overflow-hidden">
+                  <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-2xl bg-white dark:bg-slate-900 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 dark:border-slate-800 mb-2 max-w-full overflow-hidden">
                     <div className="flex -space-x-2 shrink-0">
                       {[1,2,3].map(i => (
-                        <div key={i} className="w-7 h-7 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-bold text-brand-600 shadow-sm">
+                        <div key={i} className="w-7 h-7 rounded-full border-2 border-white dark:border-slate-800 bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-bold text-brand-600 dark:text-brand-400 shadow-sm">
                           {i === 1 ? <Target className="w-3.5 h-3.5" /> : i === 2 ? <Award className="w-3.5 h-3.5" /> : <Star className="w-3.5 h-3.5" />}
                         </div>
                       ))}
                     </div>
-                    <span className="text-[9px] sm:text-[11px] font-black text-slate-500 uppercase tracking-wide truncate">🎯 Trusted by 10K+ Odisha Aspirants</span>
+                    <span className="text-[9px] sm:text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wide truncate">🎯 Trusted by 10K+ Odisha Aspirants</span>
                   </div>
 
                   <div className="space-y-3 md:space-y-5">
-                    <h1 className="text-[1.75rem] sm:text-4xl md:text-5xl xl:text-6xl font-serif font-extrabold text-slate-955 tracking-tight leading-tight break-words">
+                    <h1 className="text-[1.75rem] sm:text-4xl md:text-5xl xl:text-6xl font-serif font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight break-words">
                       Crack Your Odisha Govt Exams with{" "}
                       <span className="premium-text-gradient font-serif font-extrabold">Realistic Mock Tests</span>
                     </h1>
                     {/* Mobile Version (Shorter) */}
-                    <p className="block md:hidden text-sm leading-relaxed text-slate-500 max-w-xl mx-auto lg:mx-0 font-normal">
+                    <p className="block md:hidden text-sm leading-relaxed text-slate-500 dark:text-slate-300 max-w-xl mx-auto lg:mx-0 font-normal">
                       Master OPSC, OSSC, and OSSSC with verified PYQs and a 24/7 AI mentor.
                     </p>
                     {/* Desktop Version (Original) */}
-                    <p className="hidden md:block text-slate-500 text-sm sm:text-base md:text-lg max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed">
+                    <p className="hidden md:block text-slate-600 dark:text-slate-300 text-sm sm:text-base md:text-lg max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed">
                       Stop guessing your rank. Master the OPSC, OSSC, and OSSSC syllabus with timed test series, verified PYQs, and a 24/7 AI mentor.
                     </p>
                   </div>
@@ -3407,7 +3431,7 @@ const LandingPage = () => {
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="w-full sm:w-auto h-12 sm:h-16 px-6 sm:px-12 text-sm sm:text-xl rounded-2xl border-slate-200 bg-white hover:bg-slate-50 transition-all font-bold"
+                    className="w-full sm:w-auto h-12 sm:h-16 px-6 sm:px-12 text-sm sm:text-xl rounded-2xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-900 dark:text-white transition-all font-bold"
                     onClick={() => {
                       scrollToElement('syllabus-paths');
                     }}
@@ -3439,8 +3463,8 @@ const LandingPage = () => {
                             className={cn(
                               "px-4 py-2 sm:px-3.5 sm:py-1.5 rounded-xl border text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all duration-300 whitespace-nowrap shadow-sm select-none snap-center shrink-0",
                               hasLink 
-                                ? "bg-brand-50/80 border-brand-100/80 text-brand-800 hover:bg-brand-100 hover:text-brand-900 hover:scale-[1.03] active:scale-95 cursor-pointer" 
-                                : "bg-brand-50/30 border-brand-100/40 text-brand-700/70 cursor-default"
+                                ? "bg-brand-50/80 dark:bg-brand-950/50 border-brand-100/80 dark:border-brand-800/80 text-brand-800 dark:text-brand-300 hover:bg-brand-100 dark:hover:bg-brand-900/60 hover:text-brand-900 dark:hover:text-brand-200 hover:scale-[1.03] active:scale-95 cursor-pointer" 
+                                : "bg-brand-50/30 dark:bg-brand-950/20 border-brand-100/40 dark:border-brand-900/40 text-brand-700/70 dark:text-brand-400/70 cursor-default"
                             )}
                           >
                             {tag.label}

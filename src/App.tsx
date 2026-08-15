@@ -8597,12 +8597,12 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       <div className="space-y-8 md:space-y-10">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => setSelectedBankType(null)} className="p-3 rounded-2xl hover:bg-brand-50 shrink-0">
-              <ChevronRight className="w-6 h-6 rotate-180 text-brand-600" />
+            <Button variant="ghost" onClick={() => setSelectedBankType(null)} className="p-3 rounded-2xl hover:bg-brand-50 dark:hover:bg-slate-800 shrink-0">
+              <ChevronRight className="w-6 h-6 rotate-180 text-brand-600 dark:text-indigo-400" />
             </Button>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">{bankTitle}</h1>
-              <p className="text-sm sm:text-base text-slate-500 font-medium">Browse available question banks</p>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-955 dark:text-white tracking-tight">{bankTitle}</h1>
+              <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium">Browse available question banks</p>
             </div>
           </div>
           
@@ -8752,7 +8752,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   <div
                     onClick={() => setSelectedBankItem(item)}
                     className={cn(
-                      "p-4 bg-white border border-slate-100 rounded-2xl flex items-center justify-between gap-4 cursor-pointer group relative overflow-hidden transition-all duration-300",
+                      "p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl flex items-center justify-between gap-4 cursor-pointer group relative overflow-hidden transition-all duration-300",
                       isLocked 
                         ? "shadow-[0_4px_16px_-4px_rgba(245,158,11,0.06),0_1px_2px_rgba(245,158,11,0.02)] active:border-amber-300"
                         : "shadow-[0_4px_16px_-4px_rgba(37,99,235,0.06),0_1px_2px_rgba(37,99,235,0.02)] active:border-brand-300"
@@ -8783,7 +8783,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <h4 className="font-extrabold text-[14.5px] text-slate-855 tracking-tight leading-snug line-clamp-2 capitalize">
+                          <h4 className="font-extrabold text-[14.5px] text-slate-855 dark:text-white tracking-tight leading-snug line-clamp-2 capitalize">
                             {item.title.toLowerCase()}
                           </h4>
                           {isLocked ? (
@@ -8797,14 +8797,14 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           )}
                         </div>
                         
-                        <div className="flex items-center gap-1.5 mt-1.5 text-[11px] font-bold text-slate-455 flex-wrap">
-                          <span className="flex items-center gap-0.5 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100/50">
+                        <div className="flex items-center gap-1.5 mt-1.5 text-[11px] font-bold text-slate-455 dark:text-slate-300 flex-wrap">
+                          <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-100/50 dark:border-slate-700">
                             <FileText className="w-3 h-3 text-slate-400" />
                             {item.questionCount || item.questions} Qs
                           </span>
                           
                           {item.tagline && (
-                            <span className="flex items-center gap-0.5 bg-brand-50/50 text-brand-650 px-1.5 py-0.5 rounded border border-brand-100/20 text-[9.5px] font-black uppercase tracking-wider">
+                            <span className="flex items-center gap-0.5 bg-brand-50/50 dark:bg-indigo-950/60 text-brand-650 dark:text-indigo-300 px-1.5 py-0.5 rounded border border-brand-100/20 dark:border-indigo-800 text-[9.5px] font-black uppercase tracking-wider">
                               <Zap className="w-2.5 h-2.5 fill-brand-650 text-brand-650 shrink-0" />
                               {item.tagline}
                             </span>
@@ -8826,8 +8826,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   <Card 
                     onClick={() => setSelectedBankItem(item)}
                     className={cn(
-                      "group cursor-pointer relative overflow-hidden rounded-[2rem] h-full border-slate-200/50 bg-white shadow-sm flex flex-col",
-                      !isMobile && "hover:border-brand-300/80 hover:-translate-y-1.5 transition-all duration-500 hover:shadow-xl hover:shadow-brand-500/5 premium-shine-container"
+                      "group cursor-pointer relative overflow-hidden rounded-[2rem] h-full border-slate-200/50 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex flex-col",
+                      !isMobile && "hover:border-brand-300/80 dark:hover:border-indigo-500/80 hover:-translate-y-1.5 transition-all duration-500 hover:shadow-xl hover:shadow-brand-500/5 premium-shine-container"
                     )}
                   >
                     {/* Ambient grid-bg inside the card */}
@@ -8884,20 +8884,20 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     </div>
                     
                     {/* Card Content Body */}
-                    <div className={cn("p-6 flex flex-col flex-1 relative z-10 bg-white/90", !isMobile && "bg-white/50 backdrop-blur-sm", isLocked && "opacity-60")}>
+                    <div className={cn("p-6 flex flex-col flex-1 relative z-10 bg-white/90 dark:bg-slate-900/95", !isMobile && "bg-white/50 dark:bg-slate-900/80 backdrop-blur-sm", isLocked && "opacity-60")}>
                       <div className="flex justify-between items-start mb-3">
-                        <h3 className={cn("text-lg font-serif font-extrabold text-slate-900 capitalize tracking-tight leading-snug line-clamp-1", !isMobile && "group-hover:text-brand-650 transition-colors")}>
+                        <h3 className={cn("text-lg font-serif font-extrabold text-slate-900 dark:text-white capitalize tracking-tight leading-snug line-clamp-1", !isMobile && "group-hover:text-brand-650 dark:group-hover:text-brand-400 transition-colors")}>
                           {item.title.toLowerCase()}
                         </h3>
                         {isLocked ? (
                           <div className="flex items-center gap-1.5 shrink-0">
                             <Lock className="w-3.5 h-3.5 text-[#2563EB]" />
-                            <span className="px-2 py-0.5 bg-rose-50 text-[#2563EB] text-[8px] font-black uppercase tracking-wider rounded border border-rose-200/40">
+                            <span className="px-2 py-0.5 bg-rose-50 dark:bg-rose-950/60 text-[#2563EB] dark:text-rose-300 text-[8px] font-black uppercase tracking-wider rounded border border-rose-200/40 dark:border-rose-800">
                               Premium
                             </span>
                           </div>
                         ) : (
-                          <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[8px] font-black uppercase tracking-wider rounded border border-emerald-200/40 shrink-0">
+                          <span className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[8px] font-black uppercase tracking-wider rounded border border-emerald-200/40 dark:border-emerald-800 shrink-0">
                             Free
                           </span>
                         )}
@@ -8905,18 +8905,18 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       
                       {/* Stats and Highlights */}
                       <div className="space-y-3.5 mb-6">
-                        <div className="flex items-center gap-2 text-slate-500">
-                          <div className={cn("w-6.5 h-6.5 rounded-lg bg-slate-50 border border-slate-100/60 flex items-center justify-center text-slate-400 shadow-sm", !isMobile && "group-hover:text-brand-500 group-hover:bg-brand-50/50 transition-all")}>
+                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                          <div className={cn("w-6.5 h-6.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100/60 dark:border-slate-700 flex items-center justify-center text-slate-400 shadow-sm", !isMobile && "group-hover:text-brand-500 dark:group-hover:text-brand-400 group-hover:bg-brand-50/50 dark:group-hover:bg-slate-700 transition-all")}>
                             <FileText className="w-3.5 h-3.5" />
                           </div>
-                          <span className={cn("text-xs font-bold text-slate-500", !isMobile && "group-hover:text-slate-700 transition-colors")}>
+                          <span className={cn("text-xs font-bold text-slate-500 dark:text-slate-300", !isMobile && "group-hover:text-slate-700 dark:group-hover:text-white transition-colors")}>
                             {item.questionCount || item.questions} Questions
                           </span>
                         </div>
                         
                         {item.tagline && (
-                          <div className="flex items-center gap-2 text-brand-650 bg-gradient-to-r from-brand-50/70 to-indigo-50/40 px-3 py-1.5 rounded-xl w-fit border border-brand-100/30">
-                            <Zap className="w-3.5 h-3.5 fill-brand-650 text-brand-650 shrink-0" />
+                          <div className="flex items-center gap-2 text-brand-650 dark:text-indigo-300 bg-gradient-to-r from-brand-50/70 to-indigo-50/40 dark:from-indigo-950/80 dark:to-slate-900/80 px-3 py-1.5 rounded-xl w-fit border border-brand-100/30 dark:border-indigo-800">
+                            <Zap className="w-3.5 h-3.5 fill-brand-650 dark:fill-indigo-300 text-brand-650 dark:text-indigo-300 shrink-0" />
                             <span className="text-[10px] font-black uppercase tracking-wider">{item.tagline}</span>
                           </div>
                         )}
@@ -8926,7 +8926,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       <div className="mt-auto pt-2">
                         <button 
                           className={cn(
-                            "w-full py-3 px-6 rounded-xl font-black text-xs uppercase tracking-wider relative overflow-hidden flex items-center justify-center gap-2 border border-brand-100 bg-brand-50/40 text-brand-600 shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
+                            "w-full py-3 px-6 rounded-xl font-black text-xs uppercase tracking-wider relative overflow-hidden flex items-center justify-center gap-2 border border-brand-100 dark:border-indigo-800/80 bg-brand-50/40 dark:bg-indigo-950/60 text-brand-600 dark:text-indigo-300 shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
                             !isMobile && "transition-all duration-500 hover:scale-[1.02] active:scale-95 group-hover:bg-gradient-to-r group-hover:from-brand-600 group-hover:to-brand-500 group-hover:text-white group-hover:border-transparent group-hover:shadow-lg group-hover:shadow-brand-500/20"
                           )}
                         >

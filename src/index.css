@@ -212,17 +212,12 @@ body[data-premium-blur="true"] #root {
   }
 
   .crisp-vector-card {
-    backface-visibility: hidden !important;
-    -webkit-backface-visibility: hidden !important;
     -webkit-font-smoothing: antialiased !important;
     -moz-osx-font-smoothing: grayscale !important;
-    transform-style: preserve-3d;
-    will-change: transform;
   }
   .crisp-vector-card * {
     -webkit-font-smoothing: antialiased !important;
     -moz-osx-font-smoothing: grayscale !important;
-    backface-visibility: hidden !important;
   }
   
   .card-lift {

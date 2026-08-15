@@ -1105,22 +1105,22 @@ const ExamRegistrySection = ({
 
         <div className={cn(
           "flex flex-col items-center w-full",
-          isMobile ? "gap-4" : "gap-6 md:items-stretch md:gap-0 md:bg-white md:border-2 md:border-slate-900/80 md:rounded-[2.5rem] md:overflow-hidden md:shadow-[6px_6px_0px_rgba(37,99,235,0.15)] md:divide-y-2 md:divide-slate-100"
+          isMobile ? "gap-4" : "gap-6 md:items-stretch md:gap-0 md:bg-white dark:md:bg-slate-900 md:border-2 md:border-slate-900/80 dark:md:border-slate-800 md:rounded-[2.5rem] md:overflow-hidden md:shadow-[6px_6px_0px_rgba(37,99,235,0.15)] dark:md:shadow-none md:divide-y-2 md:divide-slate-100 dark:md:divide-slate-800"
         )}>
           {announcements.map((item, idx) => {
             const statusMeta = EXAM_REGISTRY_STATUS_MAP[item.status] || {
               label: item.status,
-              color: 'bg-slate-50 text-slate-600 border-slate-200'
+              color: 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
             };
             const statusBorderColor = EXAM_REGISTRY_STATUS_COLOR_MAP[item.status] || 'border-l-slate-400';
             return (
               <div 
                 key={idx} 
                 className={cn(
-                  "w-full flex flex-col items-center text-center md:flex-row md:items-center md:text-left md:justify-between bg-white",
+                  "w-full flex flex-col items-center text-center md:flex-row md:items-center md:text-left md:justify-between bg-white dark:bg-slate-900",
                   isMobile 
-                    ? cn("p-5 border border-slate-250/60 border-l-4 rounded-2xl shadow-sm gap-5", statusBorderColor)
-                    : "p-6 sm:p-8 border-2 border-slate-900/80 rounded-3xl md:rounded-none md:border-none shadow-[4px_4px_0px_rgba(37,99,235,0.15)] md:shadow-none hover:bg-slate-50/50 transition-colors gap-6"
+                    ? cn("p-5 border border-slate-250/60 dark:border-slate-800 border-l-4 rounded-2xl shadow-sm gap-5", statusBorderColor)
+                    : "p-6 sm:p-8 border-2 border-slate-900/80 dark:border-slate-800 rounded-3xl md:rounded-none md:border-none shadow-[4px_4px_0px_rgba(37,99,235,0.15)] md:shadow-none hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors gap-6"
                 )}
               >
                 <div className={cn("w-full", isMobile ? "space-y-2.5" : "space-y-3")}>
@@ -1132,7 +1132,7 @@ const ExamRegistrySection = ({
                       {item.date}
                     </span>
                   </div>
-                  <h3 className={cn("font-serif font-extrabold text-slate-900", isMobile ? "text-base text-left leading-snug" : "text-lg sm:text-xl text-center md:text-left")}>
+                  <h3 className={cn("font-serif font-extrabold text-slate-900 dark:text-white", isMobile ? "text-base text-left leading-snug" : "text-lg sm:text-xl text-center md:text-left")}>
                     {item.exam}
                   </h3>
                 </div>
@@ -8980,11 +8980,11 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
     return (
       <ErrorBoundary>
-      <div className="relative w-full min-h-screen bg-[#F8FAFC] overflow-x-hidden" style={{ isolation: 'isolate' }}>
+      <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent overflow-x-hidden" style={{ isolation: 'isolate' }}>
         {/* Full-Screen Edge-to-Edge Academic Vector Canvas Grid & HSL Glows */}
-        <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 pointer-events-none z-0" />
-        <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 rounded-full blur-3xl pointer-events-none z-0" />
-        <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 rounded-full blur-3xl pointer-events-none z-0" />
+        <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-[0.03] pointer-events-none z-0" />
+        <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none z-0" />
+        <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none z-0" />
 
         {/* Floating Viewport Academic Study Vector Watermarks */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-20">
@@ -9985,16 +9985,16 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   if (matchingBanks.length === 0) {
                     if (loadingDashboardData) {
                       return (
-                        <div className="flex flex-col items-center justify-center p-12 space-y-4 bg-slate-50 rounded-[2rem] border border-slate-200">
+                        <div className="flex flex-col items-center justify-center p-12 space-y-4 bg-slate-50 dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800">
                           <div className="relative w-12 h-12 flex items-center justify-center">
-                            <div className="absolute inset-0 rounded-full border-4 border-slate-100 border-t-[#2563EB] animate-[spin_1s_linear_infinite]" />
+                            <div className="absolute inset-0 rounded-full border-4 border-slate-100 dark:border-slate-800 border-t-[#2563EB] animate-[spin_1s_linear_infinite]" />
                           </div>
-                          <p className="text-slate-500 font-bold text-sm tracking-wide animate-pulse">Loading practice sets...</p>
+                          <p className="text-slate-500 dark:text-slate-400 font-bold text-sm tracking-wide animate-pulse">Loading practice sets...</p>
                         </div>
                       );
                     }
                     return (
-                      <div className="p-8 text-center bg-slate-50 rounded-[2rem] border border-slate-200 text-slate-500 font-bold">
+                      <div className="p-8 text-center bg-slate-50 dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold">
                         No practice sets found in this category for the selected exam.
                       </div>
                     );
@@ -10234,18 +10234,18 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                 if (matchingTests.length === 0) {
                   if (loadingDashboardData) {
                     return (
-                      <div className="flex flex-col items-center justify-center p-12 space-y-4 bg-slate-50 rounded-[2rem] border border-slate-200">
+                      <div className="flex flex-col items-center justify-center p-12 space-y-4 bg-slate-50 dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800">
                         <div className="relative w-12 h-12 flex items-center justify-center">
-                          <div className="absolute inset-0 rounded-full border-4 border-slate-100 border-t-[#2563EB] animate-[spin_1s_linear_infinite]" />
+                          <div className="absolute inset-0 rounded-full border-4 border-slate-100 dark:border-slate-800 border-t-[#2563EB] animate-[spin_1s_linear_infinite]" />
                         </div>
-                        <p className="text-slate-500 font-bold text-sm tracking-wide animate-pulse">Loading mock tests...</p>
+                        <p className="text-slate-500 dark:text-slate-400 font-bold text-sm tracking-wide animate-pulse">Loading mock tests...</p>
                       </div>
                     );
                   }
                   return (
-                    <div className="w-full p-12 bg-white rounded-[2rem] border border-slate-200/60 shadow-sm flex flex-col items-center justify-center text-center space-y-4">
-                      <div className="w-16 h-16 bg-brand-50 rounded-2xl flex items-center justify-center border border-brand-100/50">
-                        <Sparkles className="w-8 h-8 text-brand-600 animate-pulse" />
+                    <div className="w-full p-12 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200/60 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center space-y-4">
+                      <div className="w-16 h-16 bg-brand-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center border border-brand-100/50 dark:border-slate-700">
+                        <Sparkles className="w-8 h-8 text-brand-600 dark:text-brand-400 animate-pulse" />
                       </div>
                       <div className="space-y-1">
                         <h3 className="text-xl font-bold text-slate-900">Tests Coming Soon</h3>

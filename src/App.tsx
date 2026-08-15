@@ -8945,7 +8945,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         </div>
 
         {/* Executive Bright Study Vector Header Card */}
-        <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 border border-slate-200/80 shadow-xl shadow-slate-200/40 rounded-[2.2rem] relative overflow-hidden z-10">
+        <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 border border-slate-200/80 shadow-xl shadow-slate-200/40 rounded-[2.2rem] relative overflow-hidden z-10 mb-8 sm:mb-10">
           {/* Radial Grid & Floating Header Watermark */}
           <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none" />
           <GraduationCap className="absolute -right-8 -bottom-8 w-52 h-52 sm:w-64 sm:h-64 opacity-10 stroke-[1.2] text-brand-600 pointer-events-none rotate-12" />
@@ -9095,7 +9095,6 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               </div>
             </div>
           )}
-        </div>
 
       {/* Tier 1: Guided Next Step Hero Module */}
       {(!isMobile || mobileExamTab === 'practice') && (() => {
@@ -10431,6 +10430,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
       {/* Common View Elements */}
       {renderCommonModals()}
+      </div>
     </ErrorBoundary>
     );
   };

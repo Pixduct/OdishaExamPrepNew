@@ -47,8 +47,14 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`GuidedRecommendationHero`** | Navigation / Hero | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) | Dynamic "What to Study Next" Recommendation Module | App.tsx (Exam Details) | Active |
 | **`AIStudyPlanCard`** | Data Display / Plan | [`src/components/AIStudyPlanCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/AIStudyPlanCard.tsx) | Desktop Grid, Mobile Compact Item | StudyPlanView.tsx, AnalyticsView.tsx, App.tsx | Active |
 | **`OdishaLeaderboardCard`** | Gamification / Social | [`src/components/OdishaLeaderboardCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/OdishaLeaderboardCard.tsx) | Pinned Hero, 3-Podium, Master List, Nearby Rivals | StudyPlanView.tsx, AnalyticsView.tsx, App.tsx | Active |
-
-
+| **`AdminMockTestUploadQsButton`** | Admin / Card Action | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L5043-L5060) | Direct Upload Qs action button on Mock Test cards | AdminPanel.tsx | Active |
+| **`AdminQuestionEditModalForm`** | Admin / Form Modal | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L2445-L2595) | Dynamic question form editor with optgroup target selector & active radio answer selector | AdminPanel.tsx | Active |
+| **`CurrentAffairsPage`** | Page View | [`src/pages/CurrentAffairs.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/CurrentAffairs.tsx) | Multi-period time range toolbar & category grid view | Router (`/current-affairs`) | Active |
+| **`CurrentAffairsReaderModal`** | Overlay / Modal | [`src/components/CurrentAffairsReaderModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/CurrentAffairsReaderModal.tsx) | Glassmorphic 360° article reader with guaranteed self-test MCQs | CurrentAffairs.tsx | Active |
+| **`TopHeaderNavigation`** | Navigation | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L2085-L2285) | Executive Full-Width (`w-full px-4 sm:px-6 lg:px-8`), Glass Navbar | App.tsx | Active |
+| **`DynamicVectorCard`** | Container / Utility | [`src/components/DynamicVectorCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/DynamicVectorCard.tsx) | 3D Magnetic Parallax, Surface Spotlight, Edge Ring Illumination | StudyPlanView, AnalyticsView, App.tsx | Active |
+| **`MouseTrackingCanvas`** | Background / Canvas | [`src/components/MouseTrackingCanvas.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MouseTrackingCanvas.tsx) | 60fps Lerp Viewport Ambient Light Orb | App.tsx (Root) | Active |
+| **`VectorCursorFollower`** | Utility / Feedback | [`src/components/VectorCursorFollower.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/VectorCursorFollower.tsx) | Interactive Ring Follower + Center Precision Pointer Dot | App.tsx (Root) | Active |
 
 ---
 
@@ -1353,6 +1359,165 @@ Last updated: 2026-08-15
 - **Unified Corner Radius (`rounded-3xl sm:rounded-[2.5rem]`)**: Every card wrapped in `<DynamicVectorCard>` MUST explicitly declare `rounded-3xl sm:rounded-[2.5rem]` on both parent and child elements so card borders, shadows, backgrounds, and spotlight overlays share 100% pixel-perfect vector curves.
 - **Unique Niche-Aligned Watermark Icons**: StatCards and feature cards MUST assign unique watermark icons matching their specific niche (`Zap` for Average Score, `Target` for Accuracy, `Timer` for Pace, `History` for Attempts, `TrendingUp` for Trend, `Crosshair` for Skill Profile).
 
+---
 
+### 18. `AdminMockTestUploadQsButton`
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L5158-L5171)
+Last updated: August 15, 2026
+
+| Property | Class |
+| :--- | :--- |
+| Background — Button | `bg-brand-50 hover:bg-brand-600` |
+| Text — Button Label | `text-brand-600 hover:text-white text-xs font-black` |
+| Border — Button | `border border-brand-200` |
+| Border radius — Button | `rounded-xl` |
+| Spacing & Sizing | `px-3 py-1.5 shrink-0` |
+| Icon | `<Upload className="w-3.5 h-3.5" />` |
+| Interaction | `e.stopPropagation()` with smooth `transition-all cursor-pointer shadow-xs` |
+
+**Pattern notes:**
+- **Propagation Safeguard**: Action buttons placed inside clickable card containers MUST include `e.stopPropagation()` to execute the button action (e.g. launching the upload modal) without triggering the parent card click navigation.
+- **Visual Consistency**: Admin card upload buttons across both Content Banks and Mock Tests MUST share identical styling (`px-3 py-1.5 rounded-xl text-xs font-black bg-brand-50 text-brand-600 hover:bg-brand-600 hover:text-white border border-brand-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0`) for 100% UI consistency.
+
+---
+
+### 19. `AdminQuestionEditModalForm`
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L2445-L2595)
+Last updated: August 15, 2026
+
+| Property | Class |
+| :--- | :--- |
+| Container Layout | `space-y-6` |
+| Grid Structure | `grid grid-cols-1 md:grid-cols-3 gap-6` |
+| Form Input Base | `w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50/30 text-slate-800 placeholder-slate-400 font-semibold focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15 outline-none transition-all duration-200 shadow-inner` |
+| Option Radio Card — Active | `flex items-center gap-3 p-3.5 rounded-2xl border bg-brand-50/80 border-brand-300 ring-2 ring-brand-500/20 transition-all` |
+| Option Radio Card — Inactive | `flex items-center gap-3 p-3.5 rounded-2xl border bg-slate-50/40 border-slate-200 transition-all` |
+| Radio Input | `w-4 h-4 text-brand-600 focus:ring-brand-500 cursor-pointer shrink-0` |
+| Target Selector Optgroups | `<optgroup label="📦 Question Banks & Practice Sets">` and `<optgroup label="📝 Mock Tests">` |
+
+**Pattern notes:**
+- **Dynamic Switch Case Inclusion**: Every `activeTab` value MUST have a matching `case '[tab]'` in `renderFormFields()` so clicking Add/Edit never yields a blank modal form.
+- **Active Radio Container Highlight**: Correct answer option cards inside the Question Editor MUST dynamically switch background and border styles (`bg-brand-50/80 border-brand-300 ring-2 ring-brand-500/20`) when `correctAnswerIndex === idx` to give instant visual feedback.
+
+---
+
+### 20. `CurrentAffairsPage`
+
+File: [`src/pages/CurrentAffairs.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/CurrentAffairs.tsx)
+Last updated: August 15, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Hero Background** | `bg-gradient-to-br from-slate-900 via-brand-950 to-slate-900 rounded-3xl p-6 sm:p-10 text-white shadow-xl relative overflow-hidden` |
+| **Time-Range Pill — Active** | `bg-brand-500 text-slate-950 border-brand-400 shadow-sm px-3 py-2 rounded-xl text-xs font-black transition-all border shrink-0` |
+| **Time-Range Pill — Inactive** | `bg-slate-800/90 text-slate-300 border-slate-700/80 hover:bg-slate-700 px-3 py-2 rounded-xl text-xs font-black transition-all border shrink-0` |
+| **Category Pill — Active** | `bg-slate-900 text-white border-slate-900 shadow-md inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-extrabold transition-all shrink-0 border` |
+| **Category Pill — Inactive** | `bg-white text-slate-600 border-slate-200/80 hover:bg-slate-100/80 hover:border-slate-300 inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-extrabold transition-all shrink-0 border` |
+| **Article Card Container** | `bg-white border border-slate-200/80 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group` |
+
+**Pattern notes:**
+- **Multi-Period Filtering**: Time-range toolbar MUST support `⚡ Today's News`, `📅 Last 7 Days`, `🗓️ This Month`, `📆 Last 3 Months`, `📊 Last 6 Months`, and `📚 All Time Archives`.
+- **Dynamic Date Comparison**: "Today's News" matches articles where `event_date === today` OR `created_at` timestamp matches today.
+
+---
+
+### 21. `CurrentAffairsReaderModal`
+
+File: [`src/components/CurrentAffairsReaderModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/CurrentAffairsReaderModal.tsx)
+Last updated: August 15, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Modal Overlay** | `fixed inset-0 z-50 overflow-hidden bg-slate-950/80 flex items-center justify-center p-2 sm:p-4 animate-fadeIn` |
+| **Modal Container** | `bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] sm:max-h-[92vh] flex flex-col overflow-hidden my-auto transform-gpu` |
+| **Summary Box** | `bg-gradient-to-br from-brand-50/80 to-indigo-50/50 border border-brand-200/80 rounded-2xl p-5 sm:p-6 shadow-xs` |
+| **Callout — Odisha** | `p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 font-medium my-4` |
+| **Callout — Scheme** | `p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 font-medium my-4` |
+| **Callout — Defense/Science**| `p-4 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-900 font-medium my-4` |
+| **Callout — International** | `p-4 rounded-2xl bg-purple-50 border border-purple-200 text-purple-900 font-medium my-4` |
+| **MCQ Option — Default** | `p-3 rounded-xl border text-left text-xs sm:text-sm transition-all flex items-center justify-between bg-white border-slate-200 text-slate-700 hover:border-brand-400 hover:bg-brand-50/50` |
+| **MCQ Option — Correct** | `bg-emerald-500 text-white border-emerald-600 shadow-sm font-bold p-3 rounded-xl border text-left text-xs sm:text-sm transition-all flex items-center justify-between` |
+
+**Pattern notes:**
+- **Guaranteed MCQ Synthesizer**: If `article.mcqs` is missing or empty, `CurrentAffairsReaderModal` automatically synthesizes 2 high-yield self-test MCQs so practice questions are rendered for 100% of articles.
+- **Domain-Aware Callouts**: Renders distinct pastel callouts (`bg-amber-50`, `bg-emerald-50`, `bg-indigo-50`, `bg-purple-50`) matched to the news domain.
+
+---
+
+### 22. `TopHeaderNavigation`
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L2085-L2285)
+Last updated: August 15, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Header Container** | `w-full transition-[background-color,border-color,box-shadow,transform] duration-300` |
+| **Inner Layout Container** | `w-full px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between relative z-[65]` |
+| **Sticky Glass Background** | `sticky top-0 z-[60] navbar-glass dark:bg-slate-900/80 dark:backdrop-blur-xl dark:border-b dark:border-slate-700/40` |
+| **Sticky Scrolled Background** | `sticky top-0 z-[60] navbar-scrolled dark:bg-slate-900/95 dark:border-slate-700/60 dark:backdrop-blur-xl` |
+| **Brand Logo Emblem** | `w-9 h-9 sm:w-11 sm:h-11 rounded-xl border-2 border-slate-900 dark:border-slate-700 bg-[#2563EB] flex items-center justify-center shadow-[3px_3px_0px_#0f172a]` |
+| **Brand Logo Text** | `font-serif font-black text-lg sm:text-2xl tracking-tight text-slate-900 dark:text-white uppercase` |
+| **Nav Pill Container** | `flex items-center border-2 border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl p-0.5 shadow-[3px_3px_0px_#0f172a]` |
+| **Current Affairs Link** | `flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-black uppercase` |
+| **Blog Link** | `flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200/80 text-xs font-black uppercase` |
+| **Search Trigger Button** | `flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/80 text-xs font-black` |
+| **Streak Flame Pill** | `flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-600 border border-amber-500/30 text-xs font-black` |
+| **User Avatar Trigger** | `flex items-center gap-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 p-1.5 pr-3 rounded-full transition-colors` |
+
+---
+
+### 23. `DynamicVectorCard`
+
+File: [`src/components/DynamicVectorCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/DynamicVectorCard.tsx)
+Last updated: August 15, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Card Container** | `relative rounded-3xl sm:rounded-[2.5rem]` |
+| **3D Transform Engine** | `perspective: 1000px, transformStyle: preserve-3d, scale3d(1.015, 1.015, 1.015)` |
+| **Surface Spotlight Overlay** | `pointer-events-none absolute inset-0 z-20 overflow-hidden mix-blend-soft-light` |
+| **Ambient Light Flare** | `pointer-events-none absolute inset-0 z-20 opacity-30 dark:opacity-40` |
+| **Border Ring Illumination** | `pointer-events-none absolute -inset-[1.5px] z-30 (WebkitMaskComposite: xor)` |
+
+**Pattern notes:**
+- **Layering Order**: Surface spotlight overlay (`z-20`) and edge illumination ring (`z-30`) MUST sit on top of `{children}` so cursor tracking remains visible over opaque card backgrounds.
+- **Subtle 3D Perspective**: 3D magnetic parallax tilt (`rotateX`, `rotateY`) is capped at `3.5deg` max for a refined tactile response.
+
+---
+
+### 24. `MouseTrackingCanvas`
+
+File: [`src/components/MouseTrackingCanvas.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MouseTrackingCanvas.tsx)
+Last updated: August 15, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Viewport Canvas Layer** | `fixed inset-0 pointer-events-none z-[1] overflow-hidden` |
+| **Ambient Light Orb** | `absolute w-[600px] h-[600px] -ml-[300px] -mt-[300px] rounded-full blur-[90px]` |
+| **Light Mode Gradient** | `radial-gradient(circle, rgba(37, 99, 235, 0.3) 0%, rgba(129, 140, 248, 0.15) 45%, transparent 70%)` |
+| **Dark Mode Gradient** | `radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, rgba(37, 99, 235, 0.2) 45%, transparent 70%)` |
+
+**Pattern notes:**
+- **60fps Lerp Loop**: Uses `requestAnimationFrame` with smooth lerp interpolation (`0.12`) to keep animation fluid and lightweight.
+- **Pointer Device Guard**: Disabled on touch devices (`pointer: coarse`) to conserve mobile battery.
+
+---
+
+### 25. `VectorCursorFollower`
+
+File: [`src/components/VectorCursorFollower.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/VectorCursorFollower.tsx)
+Last updated: August 15, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Follower Layer** | `fixed pointer-events-none z-[9999] transition-transform duration-150 ease-out` |
+| **Ring — Normal** | `w-6 h-6 border-brand-400/50 dark:border-brand-300/40 bg-brand-500/5 rounded-full` |
+| **Ring — Hover Expanded** | `w-10 h-10 border-brand-500 bg-brand-500/15 shadow-[0_0_15px_rgba(37,99,235,0.4)] backdrop-blur-[1px]` |
+| **Center Pointer Dot** | `w-1.5 h-1.5 bg-brand-500/70 (Expanded: w-2 h-2 bg-brand-600 shadow-[0_0_8px_#2563EB])` |
+
+**Pattern notes:**
+- **Interactive Element Detection**: Automatically expands ring scale (`1.45x`) when hovering over `button`, `a`, `input`, `[role="button"]`, `.cursor-pointer`, or `.group/card`.
 
 

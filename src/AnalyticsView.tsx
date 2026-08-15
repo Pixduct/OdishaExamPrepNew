@@ -227,10 +227,11 @@ const Sparkline = React.memo(({ data, color = "#2563eb", id }: { data: number[];
   );
 });
 
-const StatCard = React.memo(({ icon, title, value, suffix = "", trend, decimals = 0, sparklineData, color = "brand" }: any) => {
+const StatCard = React.memo(({ icon, title, value, suffix = "", trend, decimals = 0, sparklineData, color = "brand", bgVectorIcon: BgVectorIcon }: any) => {
   const isPositive = (trend ?? 0) >= 0;
   const strokeColor = color === "brand" ? "#60a5fa" : color === "success" ? "#34d399" : color === "warning" ? "#fbbf24" : "#a78bfa";
   const glowColor = color === "brand" ? "rgba(37, 99, 235, 0.15)" : color === "success" ? "rgba(16, 185, 129, 0.15)" : color === "warning" ? "rgba(245, 158, 11, 0.15)" : "rgba(99, 102, 241, 0.15)";
+  const VectorIcon = BgVectorIcon || Activity;
 
   return (
     <motion.div 
@@ -243,7 +244,7 @@ const StatCard = React.memo(({ icon, title, value, suffix = "", trend, decimals 
         >
           {/* Radial Grid Watermark */}
           <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
-          <Activity className="absolute -right-6 -bottom-6 w-36 h-36 opacity-15 stroke-[1.2] text-slate-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+          <VectorIcon className="absolute -right-6 -bottom-6 w-36 h-36 opacity-15 stroke-[1.2] text-slate-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
 
           {/* Top Row: Icon + Trend */}
           <div className="relative z-10 flex items-center justify-between mb-2 sm:mb-4">
@@ -1380,6 +1381,7 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
             suffix="%" 
             trend={stats.impScore}
             color="brand"
+            bgVectorIcon={Zap}
             sparklineData={stats.chartData.map(d => d.score)}
           />
           <StatCard 
@@ -1389,6 +1391,7 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
             suffix="%" 
             trend={stats.impAcc}
             color="success"
+            bgVectorIcon={Target}
             sparklineData={stats.chartData.map(d => d.accuracy)}
           />
           <StatCard 
@@ -1398,6 +1401,7 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
             suffix="s" 
             decimals={1}
             color="warning"
+            bgVectorIcon={Timer}
             sparklineData={stats.chartData.map(d => d.time)}
           />
           <StatCard 
@@ -1405,6 +1409,7 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
             title="Total Attempts" 
             value={stats.totalTests}
             color="info"
+            bgVectorIcon={History}
             sparklineData={stats.chartData.map((_, i) => i + 1)}
           />
         </div>

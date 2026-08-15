@@ -11,7 +11,7 @@ import {
   Timer, History, LayoutDashboard, Rocket,
   ArrowRight, ChevronDown, Crosshair, Flame,
   Sparkles, Brain, Cpu, Send, Activity, 
-  Gauge, Lightbulb, Loader2, RefreshCw, Trash2, X, Check
+  Gauge, Lightbulb, Loader2, RefreshCw, Trash2, X, Check, BarChart3, Layers
 } from 'lucide-react';
 import { activityTracker } from './lib/activityTracker';
 import { activityMatchesExam } from './lib/examMatcher';
@@ -25,6 +25,7 @@ import { PersonalBestCard } from './components/PersonalBestCard';
 import { AIStudyPlanCard } from './components/AIStudyPlanCard';
 import { useActiveExamContext } from './lib/activeExamStore';
 import { ActiveExamContextBar } from './components/ActiveExamContextBar';
+import { DynamicVectorCard } from './components/DynamicVectorCard';
 
 
 const MarkdownMathRenderer = ({ text, isUser = false }: { text: string; isUser?: boolean }) => {
@@ -228,81 +229,55 @@ const Sparkline = React.memo(({ data, color = "#2563eb", id }: { data: number[];
 
 const StatCard = React.memo(({ icon, title, value, suffix = "", trend, decimals = 0, sparklineData, color = "brand" }: any) => {
   const isPositive = (trend ?? 0) >= 0;
-  const strokeColor = color === "brand" ? "#2563eb" : color === "success" ? "#10b981" : color === "warning" ? "#d97706" : "#6366f1";
-  
-  const iconBg = color === "brand" 
-    ? "bg-[#2563eb]/5 text-[#2563eb] border-[#2563eb]/10 hover:bg-[#2563eb]/10" 
-    : color === "success" 
-      ? "bg-emerald-50/70 text-emerald-600 border-emerald-100/60 hover:bg-emerald-100/50" 
-      : color === "warning" 
-        ? "bg-amber-50/70 text-amber-600 border-amber-100/60 hover:bg-amber-100/50" 
-        : "bg-indigo-50/70 text-indigo-600 border-indigo-100/60 hover:bg-indigo-100/50";
+  const strokeColor = color === "brand" ? "#60a5fa" : color === "success" ? "#34d399" : color === "warning" ? "#fbbf24" : "#a78bfa";
+  const glowColor = color === "brand" ? "rgba(37, 99, 235, 0.15)" : color === "success" ? "rgba(16, 185, 129, 0.15)" : color === "warning" ? "rgba(245, 158, 11, 0.15)" : "rgba(99, 102, 241, 0.15)";
 
   return (
     <motion.div 
       variants={stagger.itemFadeUp} 
       className="w-full flex"
     >
-      <div
-        className={cn(
-          "relative w-full bg-white p-3 sm:p-6 rounded-2xl sm:rounded-[2.25rem] shadow-sm border border-slate-200/60 flex flex-col justify-between group transition-[transform,box-shadow,border-color,background-color] duration-300 ease-out cursor-default hover:-translate-y-1 hover:scale-[1.01] active:scale-[0.99] min-h-[110px] sm:min-h-[170px] will-change-transform",
-          color === "brand" ? "hover:border-brand-200/60 hover:shadow-md" :
-          color === "success" ? "hover:border-emerald-200/60 hover:shadow-md" :
-          color === "warning" ? "hover:border-amber-200/60 hover:shadow-md" :
-          "hover:border-indigo-200/60 hover:shadow-md"
-        )}
-        style={{
-          WebkitBackfaceVisibility: 'hidden',
-          backfaceVisibility: 'hidden',
-          isolation: 'isolate'
-        }}
-      >
-        <div className="absolute inset-0 rounded-2xl sm:rounded-[2.25rem] overflow-hidden pointer-events-none z-0">
-          <div 
-            className="absolute -top-24 -right-24 w-48 h-48 opacity-20 group-hover:opacity-30 transition-opacity duration-300" 
-            style={{
-              background: `radial-gradient(circle at center, ${
-                color === "brand" ? "#2563eb" :
-                color === "success" ? "#10b981" :
-                color === "warning" ? "#d97706" :
-                "#6366f1"
-              } 0%, transparent 70%)`
-            }}
-          />
-        </div>
-        
-        {/* ── Mobile: icon + trend on one row ── */}
-        <div className="relative z-10 flex items-center justify-between mb-2 sm:mb-5">
-           <div className={cn("p-1.5 sm:p-3 rounded-xl sm:rounded-2xl border shadow-sm transition-[transform,background-color,border-color] duration-300 group-hover:scale-105 group-hover:rotate-2", iconBg)}>
-              {React.cloneElement(icon, { className: "w-3.5 h-3.5 sm:w-5 sm:h-5" })}
-           </div>
-           {trend !== undefined && trend !== 0 && (
-              <div className={cn(
-                 "flex items-center gap-0.5 sm:gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1.5 rounded-lg sm:rounded-xl text-[8px] sm:text-xs font-black shadow-sm border border-white/80",
-                 isPositive ? "bg-emerald-50/80 text-emerald-700 border-emerald-100" : "bg-rose-50/80 text-rose-700 border-rose-100"
-              )}>
-                 {isPositive ? <TrendingUp className="w-2 h-2 sm:w-3.5 sm:h-3.5" /> : <TrendingDown className="w-2 h-2 sm:w-3.5 sm:h-3.5" />}
-                 {Math.abs(Math.round(trend))}%
-              </div>
-           )}
-        </div>
+      <DynamicVectorCard glowColor={glowColor} className="w-full">
+        <div
+          className="relative w-full p-4 sm:p-6 text-white rounded-[2rem] bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-slate-700/80 shadow-xl shadow-slate-950/20 flex flex-col justify-between overflow-hidden group min-h-[120px] sm:min-h-[170px]"
+        >
+          {/* Radial Grid Watermark */}
+          <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
+          <Activity className="absolute -right-6 -bottom-6 w-36 h-36 opacity-15 stroke-[1.2] text-slate-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
 
-        {/* ── Label + value ── */}
-        <div className="relative z-10 flex-1 min-w-0 mb-2 sm:mb-3">
-          <h4 className="text-[8px] sm:text-[10px] font-sans font-black tracking-widest text-slate-400/90 uppercase leading-none truncate">{title}</h4>
-          <div className="text-lg xs:text-xl sm:text-3xl font-sans font-black text-slate-900 flex items-baseline tracking-tight group-hover:text-slate-950 transition-colors duration-300 leading-none mt-0.5 sm:mt-1">
-             <AnimatedCounter value={value} decimals={decimals} />
-             {suffix && <span className="text-[10px] sm:text-sm font-sans font-black text-slate-400/80 ml-1 leading-none">{suffix}</span>}
+          {/* Top Row: Icon + Trend */}
+          <div className="relative z-10 flex items-center justify-between mb-2 sm:mb-4">
+             <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-slate-800/90 text-amber-300 border border-slate-700 shadow-2xs">
+                {React.cloneElement(icon, { className: "w-4 h-4 sm:w-5 sm:h-5 text-amber-300" })}
+             </div>
+             {trend !== undefined && trend !== 0 && (
+                <div className={cn(
+                   "flex items-center gap-1 px-2 py-1 rounded-xl text-[9px] sm:text-xs font-black font-mono shadow-2xs border",
+                   isPositive ? "bg-emerald-400/20 text-emerald-300 border-emerald-400/40" : "bg-rose-500/20 text-rose-300 border-rose-500/40"
+                )}>
+                   {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                   {Math.abs(Math.round(trend))}%
+                </div>
+             )}
           </div>
+
+          {/* Label + Value */}
+          <div className="relative z-10 flex-1 min-w-0 mb-2">
+            <h4 className="text-[9px] sm:text-[11px] font-mono font-black tracking-wider text-amber-200/90 uppercase truncate">{title}</h4>
+            <div className="text-xl sm:text-3xl font-black text-white font-mono flex items-baseline tracking-tight leading-none mt-1">
+               <AnimatedCounter value={value} decimals={decimals} />
+               {suffix && <span className="text-xs sm:text-sm font-black text-slate-300 ml-1">{suffix}</span>}
+            </div>
+          </div>
+          
+          {/* Sparkline */}
+          {sparklineData && sparklineData.length >= 2 && (
+            <div className="relative z-10 w-full pt-1.5 border-t border-slate-800 opacity-90">
+              <Sparkline data={sparklineData} color={strokeColor} id={title.replace(/\s+/g, '-').toLowerCase()} />
+            </div>
+          )}
         </div>
-        
-        {/* ── Sparkline ── */}
-        {sparklineData && sparklineData.length >= 2 && (
-          <div className="relative z-10 w-full pt-1 border-t border-slate-100/50 opacity-80 group-hover:opacity-100 transition-opacity duration-300">
-            <Sparkline data={sparklineData} color={strokeColor} id={title.replace(/\s+/g, '-').toLowerCase()} />
-          </div>
-        )}
-      </div>
+      </DynamicVectorCard>
     </motion.div>
   );
 });
@@ -335,15 +310,15 @@ const SubjectRow = React.memo(({ subject }: { subject: any }) => {
     <div 
       onClick={() => setIsExpanded(!isExpanded)}
       className={cn(
-        "flex flex-col p-3 sm:p-4 bg-white/80 rounded-2xl border border-slate-100/70 shadow-[0_2px_8px_rgba(0,0,0,0.005)] hover:bg-white/95 hover:border-brand-200/40 hover:-translate-y-0.5 transition-[transform,background-color,border-color,box-shadow] duration-300 group cursor-pointer relative overflow-hidden",
-        isExpanded && "bg-white/85 border-brand-200/30 shadow-[0_8px_20px_rgba(37,99,235,0.02)]"
+        "flex flex-col p-3.5 sm:p-4 bg-slate-900/90 rounded-2xl border border-slate-700/80 shadow-md text-white hover:border-slate-600 transition-all duration-300 group cursor-pointer relative overflow-hidden",
+        isExpanded && "bg-slate-900 border-blue-500/40"
       )}
     >
        <div className="flex items-center justify-between gap-3 relative z-10">
           <div className="flex flex-col min-w-0 flex-1">
              <span 
                 className={cn(
-                   "font-sans font-black text-slate-800 group-hover:text-[#2563eb] transition-colors text-xs sm:text-sm", 
+                   "font-black text-white group-hover:text-blue-300 transition-colors text-xs sm:text-sm", 
                    isExpanded ? "" : "truncate"
                 )} 
                 title={subject.name}
@@ -352,22 +327,22 @@ const SubjectRow = React.memo(({ subject }: { subject: any }) => {
              </span>
           </div>
           <div className="flex items-center gap-3 shrink-0">
-            <span className="text-xs sm:text-sm font-sans font-black text-slate-800 group-hover:text-[#2563eb] transition-colors">{subject.avgScore}%</span>
+            <span className="text-xs sm:text-sm font-mono font-black text-white group-hover:text-blue-300 transition-colors">{subject.avgScore}%</span>
             <span className={cn(
-              "px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[9px] font-sans font-black uppercase tracking-wider leading-none shadow-sm border", 
+              "px-2.5 py-1 rounded-lg text-[9px] font-mono font-black uppercase tracking-wider leading-none shadow-2xs border", 
               subject.status === 'Strong' 
-                 ? "bg-emerald-50 text-emerald-700 border-emerald-100/70" 
-                 : "bg-rose-50 text-rose-700 border-rose-100/70"
+                 ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40" 
+                 : "bg-rose-500/20 text-rose-300 border-rose-500/40"
             )}>
                {subject.status}
             </span>
-            <ChevronDown className={cn("w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-300", isExpanded && "rotate-180")} />
+            <ChevronDown className={cn("w-4 h-4 text-slate-400 group-hover:text-slate-200 transition-transform duration-300", isExpanded && "rotate-180")} />
           </div>
        </div>
        
        {/* Subtle Accuracy Meter underneath */}
        {!isExpanded && (
-         <div className="w-full h-1 bg-slate-100/60 rounded-full overflow-hidden mt-2.5">
+         <div className="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden mt-2.5 border border-slate-800">
             <motion.div 
                initial={{ width: 0 }}
                animate={{ width: `${subject.avgScore}%` }}
@@ -389,27 +364,27 @@ const SubjectRow = React.memo(({ subject }: { subject: any }) => {
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               className="overflow-hidden"
             >
-              <div className="pt-4 mt-3 border-t border-slate-100/60 relative z-10">
+              <div className="pt-4 mt-3 border-t border-slate-800 relative z-10">
                  <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
                    {/* Attempted stat box */}
-                   <div className="p-2 sm:p-2.5 bg-slate-50/50 border border-slate-100 rounded-xl text-center flex flex-col justify-between items-center hover:bg-slate-100/40 transition-colors">
-                     <span className="text-slate-400 font-sans font-black uppercase tracking-widest text-[8px] leading-none mb-1">Attempted</span>
-                     <span className="text-slate-800 font-sans font-black text-xs sm:text-sm">{subject.attempted}</span>
-                     <span className="text-[7.5px] font-bold text-slate-400 uppercase mt-1 leading-none scale-90 sm:scale-100">Questions</span>
+                   <div className="p-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-center flex flex-col justify-between items-center">
+                     <span className="text-amber-200/90 font-mono font-black uppercase tracking-widest text-[8px] leading-none mb-1">Attempted</span>
+                     <span className="text-white font-mono font-black text-xs sm:text-sm">{subject.attempted}</span>
+                     <span className="text-[7.5px] font-bold text-slate-300 uppercase mt-1 leading-none">Questions</span>
                    </div>
                    
                    {/* Correct stat box */}
-                   <div className="p-2 sm:p-2.5 bg-emerald-50/30 border border-emerald-100/40 rounded-xl text-center flex flex-col justify-between items-center hover:bg-emerald-50/55 transition-colors">
-                     <span className="text-emerald-700/80 font-sans font-black uppercase tracking-widest text-[8px] leading-none mb-1">Correct</span>
-                     <span className="text-emerald-600 font-sans font-black text-xs sm:text-sm">{subject.correct}</span>
-                     <span className="text-[7.5px] font-sans font-black text-emerald-500/80 uppercase mt-1 leading-none scale-90 sm:scale-100">{correctPct}% Acc</span>
+                   <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-center flex flex-col justify-between items-center">
+                     <span className="text-emerald-300 font-mono font-black uppercase tracking-widest text-[8px] leading-none mb-1">Correct</span>
+                     <span className="text-emerald-400 font-mono font-black text-xs sm:text-sm">{subject.correct}</span>
+                     <span className="text-[7.5px] font-mono font-black text-emerald-300 uppercase mt-1 leading-none">{correctPct}% Acc</span>
                    </div>
                    
                    {/* Incorrect stat box */}
-                   <div className="p-2 sm:p-2.5 bg-rose-50/30 border border-rose-100/40 rounded-xl text-center flex flex-col justify-between items-center hover:bg-rose-50/55 transition-colors">
-                     <span className="text-rose-700/80 font-sans font-black uppercase tracking-widest text-[8px] leading-none mb-1">Incorrect</span>
-                     <span className="text-rose-600 font-sans font-black text-xs sm:text-sm">{incorrect}</span>
-                     <span className="text-[7.5px] font-sans font-black text-rose-500/80 uppercase mt-1 leading-none scale-90 sm:scale-100">{incorrectPct}% Pct</span>
+                   <div className="p-2.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-center flex flex-col justify-between items-center">
+                     <span className="text-rose-300 font-mono font-black uppercase tracking-widest text-[8px] leading-none mb-1">Incorrect</span>
+                     <span className="text-rose-400 font-mono font-black text-xs sm:text-sm">{incorrect}</span>
+                     <span className="text-[7.5px] font-mono font-black text-rose-300 uppercase mt-1 leading-none">{incorrectPct}% Pct</span>
                    </div>
                  </div>
               </div>
@@ -1370,8 +1345,19 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
   );
 
   return (
-    <div className="relative w-full min-h-screen overflow-x-hidden" style={{ isolation: 'isolate' }}>
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.06),transparent_50%),radial-gradient(circle_at_bottom_right,rgba(99,102,241,0.04),transparent_50%)] -z-10 pointer-events-none" />
+    <div className="relative w-full min-h-screen bg-[#F8FAFC] overflow-x-hidden" style={{ isolation: 'isolate' }}>
+      {/* Bright Academic Vector Canvas Grid Background */}
+      <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 pointer-events-none z-0" />
+      <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 rounded-full blur-3xl pointer-events-none z-0" />
+      <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 rounded-full blur-3xl pointer-events-none z-0" />
+
+      {/* Floating Academic & Analytics Vector Watermarks */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-20">
+        <Activity className="absolute top-28 left-[6%] w-36 h-36 text-brand-400 stroke-[1]" />
+        <BarChart3 className="absolute top-1/3 right-[5%] w-44 h-44 text-indigo-400 stroke-[1]" />
+        <TrendingUp className="absolute bottom-1/4 left-[8%] w-40 h-40 text-blue-400 stroke-[1]" />
+        <Brain className="absolute bottom-32 right-[8%] w-36 h-36 text-amber-400 stroke-[1]" />
+      </div>
 
       <motion.div 
         variants={stagger.containerDelay(0.1, 0.1)}
@@ -1424,91 +1410,83 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
         </div>
 
         {/* AI Performance Lab */}
-        <motion.div
-          variants={stagger.itemFadeUp}
-          className="relative overflow-hidden bg-white text-slate-800 rounded-3xl sm:rounded-[2.5rem] p-4.5 sm:p-6 lg:p-8 border border-slate-200/60 shadow-xl"
-        >
-          {/* Subtle Glow Orbs */}
-          <div 
-            className="absolute top-[-100px] right-[-100px] w-80 h-80 pointer-events-none" 
-            style={{ background: 'radial-gradient(circle at center, rgba(37, 99, 235, 0.05) 0%, transparent 70%)' }} 
-          />
-          <div 
-            className="absolute bottom-[-100px] left-[-100px] w-80 h-80 pointer-events-none" 
-            style={{ background: 'radial-gradient(circle at center, rgba(99, 102, 241, 0.05) 0%, transparent 70%)' }} 
-          />
+        <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.15)">
+          <motion.div
+            variants={stagger.itemFadeUp}
+            className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950/40 to-slate-900 text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-9 border border-blue-500/30 shadow-xl shadow-blue-950/20 group"
+          >
+            {/* Radial Grid & 3D Floating Watermark Icon */}
+            <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
+            <Brain className="absolute -right-8 -bottom-8 w-56 h-56 opacity-15 stroke-[1.2] text-blue-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
 
-          {/* Faint grid pattern background */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.008)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.008)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none opacity-40" />
-
-          <div className="relative z-10">
-            {scanningPhase === 0 && (
-              <div className="py-3 sm:py-4">
-                {/* ── Mobile: compact single horizontal block ── */}
-                <div className="flex md:hidden flex-col gap-3">
-                  {/* Row 1: icon + labels + status */}
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#2563EB]/5 border border-[#2563EB]/15 flex items-center justify-center relative shadow-sm shrink-0">
-                      <Brain className="w-5 h-5 text-[#2563EB] animate-pulse" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="px-2 py-0.5 bg-[#2563EB]/10 border border-[#2563EB]/20 text-[#2563EB] text-[8px] font-black uppercase tracking-widest rounded-md flex items-center gap-1 leading-none">
-                          <Cpu className="w-2 h-2" /> OdishaExamPrep AI
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-wider">Ready</span>
-                        </span>
+            <div className="relative z-10">
+              {scanningPhase === 0 && (
+                <div className="py-3 sm:py-4">
+                  {/* ── Mobile: compact single horizontal block ── */}
+                  <div className="flex md:hidden flex-col gap-3">
+                    {/* Row 1: icon + labels + status */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-400/40 flex items-center justify-center relative shadow-sm shrink-0">
+                        <Brain className="w-5 h-5 text-blue-300 animate-pulse" />
                       </div>
-                      <h3 className="text-sm font-sans font-black tracking-tight leading-tight text-slate-900 mt-0.5">AI Performance & Diagnostic Lab</h3>
-                    </div>
-                  </div>
-                  {/* Row 2: description */}
-                  <p className="text-slate-500 text-[11px] font-medium leading-relaxed">
-                    Unlock instant cognitive diagnostics, custom time-management strategy, and a targeted exam preparation roadmap.
-                  </p>
-                  {/* Row 3: full-width CTA button */}
-                  <button
-                    onClick={() => runAiAnalysis()}
-                    className="w-full h-11 rounded-2xl bg-gradient-to-r from-[#2563EB] via-[#1e40af] to-indigo-600 hover:from-[#1d4ed8] hover:to-indigo-700 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-brand-500/10 hover:shadow-brand-500/20 hover:scale-[1.01] active:scale-[0.98] transition-[transform,box-shadow] flex items-center justify-center gap-2 group cursor-pointer border-none"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 fill-white/10 group-hover:scale-110 transition-transform" />
-                    Initialize AI Scan
-                  </button>
-                </div>
-
-                {/* ── Desktop: original side-by-side layout ── */}
-                <div className="hidden md:flex flex-row items-center justify-between gap-6">
-                  <div className="flex flex-row items-start gap-5 flex-1">
-                    <div className="w-16 h-16 rounded-2xl bg-[#2563EB]/5 border border-[#2563EB]/15 flex items-center justify-center relative shadow-sm shrink-0">
-                      <Brain className="w-9 h-9 text-[#2563EB] animate-pulse" />
-                      <div className="absolute inset-0 rounded-2xl border-2 border-[#2563EB]/10 animate-ping" />
-                    </div>
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                        <span className="px-2.5 py-0.5 bg-[#2563EB]/10 border border-[#2563EB]/20 text-[#2563EB] text-[9px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1 shadow-sm leading-none">
-                          <Cpu className="w-2.5 h-2.5" /> OdishaExamPrep AI
-                        </span>
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-wider">Ready to diagnose</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="px-2 py-0.5 bg-blue-400/20 border border-blue-400/30 text-blue-200 text-[8px] font-black uppercase tracking-widest rounded-md flex items-center gap-1 leading-none">
+                            <Cpu className="w-2 h-2" /> OdishaExamPrep AI
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            <span className="text-[9px] font-bold text-emerald-300 uppercase tracking-wider">Ready</span>
+                          </span>
+                        </div>
+                        <h3 className="text-sm font-black tracking-tight leading-tight text-white mt-0.5 uppercase">AI Performance & Diagnostic Lab</h3>
                       </div>
-                      <h3 className="text-2xl font-sans font-black tracking-tight leading-tight text-slate-900">AI Performance & Diagnostic Laboratory</h3>
-                      <p className="text-slate-500 text-sm font-medium mt-1.5 max-w-xl">
-                        Unlock instant cognitive diagnostics, custom time-management strategy, and a targeted exam preparation roadmap.
-                      </p>
                     </div>
+                    {/* Row 2: description */}
+                    <p className="text-indigo-200/90 text-[11px] font-medium leading-relaxed">
+                      Unlock instant cognitive diagnostics, custom time-management strategy, and a targeted exam preparation roadmap.
+                    </p>
+                    {/* Row 3: full-width CTA button */}
+                    <button
+                      onClick={() => runAiAnalysis()}
+                      className="w-full h-11 rounded-2xl bg-gradient-to-r from-brand-500 via-blue-600 to-indigo-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2 group cursor-pointer border-none"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 fill-white/10 group-hover:scale-110 transition-transform" />
+                      Initialize AI Scan
+                    </button>
                   </div>
-                  <button
-                    onClick={() => runAiAnalysis()}
-                    className="shrink-0 px-8 h-[52px] rounded-2xl bg-gradient-to-r from-[#2563EB] via-[#1e40af] to-indigo-600 hover:from-[#1d4ed8] hover:to-indigo-700 text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-brand-500/10 hover:shadow-brand-500/20 hover:scale-[1.02] active:scale-98 transition-[transform,box-shadow] flex items-center justify-center gap-2 group cursor-pointer border-none"
-                  >
-                    <Sparkles className="w-4 h-4 fill-white/10 group-hover:scale-110 transition-transform" />
-                    Initialize AI Scan
-                  </button>
+
+                  {/* ── Desktop: side-by-side layout ── */}
+                  <div className="hidden md:flex flex-row items-center justify-between gap-6">
+                    <div className="flex flex-row items-start gap-5 flex-1">
+                      <div className="w-16 h-16 rounded-2xl bg-blue-500/20 border border-blue-400/40 flex items-center justify-center relative shadow-sm shrink-0">
+                        <Brain className="w-9 h-9 text-blue-300 animate-pulse" />
+                        <div className="absolute inset-0 rounded-2xl border-2 border-blue-400/20 animate-ping" />
+                      </div>
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                          <span className="px-2.5 py-0.5 bg-blue-400/20 border border-blue-400/30 text-blue-200 text-[9px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1 shadow-sm leading-none">
+                            <Cpu className="w-2.5 h-2.5" /> OdishaExamPrep AI
+                          </span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          <span className="text-[9px] font-bold text-emerald-300 uppercase tracking-wider">Ready to diagnose</span>
+                        </div>
+                        <h3 className="text-2xl font-black tracking-tight leading-tight text-white uppercase">AI Performance & Diagnostic Laboratory</h3>
+                        <p className="text-indigo-200/90 text-sm font-medium mt-1.5 max-w-xl">
+                          Unlock instant cognitive diagnostics, custom time-management strategy, and a targeted exam preparation roadmap.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => runAiAnalysis()}
+                      className="shrink-0 px-8 h-[52px] rounded-2xl bg-gradient-to-r from-brand-500 via-blue-600 to-indigo-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-brand-500/20 hover:scale-[1.02] active:scale-98 transition-all flex items-center justify-center gap-2 group cursor-pointer border-none"
+                    >
+                      <Sparkles className="w-4 h-4 fill-white/10 group-hover:scale-110 transition-transform" />
+                      Initialize AI Scan
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {scanningPhase === 1 && (
               <div className="flex flex-col items-center justify-center py-10 text-center">
@@ -1843,187 +1821,181 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
             )}
           </div>
         </motion.div>
+      </DynamicVectorCard>
 
         {/* Charts & Breakdown Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
            {/* Performance Trend Card */}
-           <motion.div 
-             variants={stagger.itemFadeUp} 
-             className="lg:col-span-8 relative overflow-hidden bg-white/92 rounded-3xl sm:rounded-[2.5rem] p-4.5 sm:p-6 lg:p-8 shadow-sm border border-slate-200/60 hover:border-brand-200/50 hover:shadow-md transition-[border-color,box-shadow] duration-500 group"
-           >
-              <div 
-                className="absolute -top-32 -right-32 w-72 h-72 pointer-events-none transition-transform duration-700 group-hover:scale-110" 
-                style={{ background: 'radial-gradient(circle at center, rgba(37, 99, 235, 0.05) 0%, transparent 70%)' }} 
-              />
-              <div 
-                className="absolute -bottom-32 -left-32 w-72 h-72 pointer-events-none" 
-                style={{ background: 'radial-gradient(circle at center, rgba(99, 102, 241, 0.03) 0%, transparent 70%)' }} 
-              />
-              
-              <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                 <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-1 h-5 bg-[#2563eb] rounded-full shrink-0" />
-                      <h3 className="text-lg sm:text-xl font-sans font-black text-slate-900 tracking-tight">Performance Trend</h3>
-                    </div>
-                    <p className="text-xs font-semibold text-slate-400 leading-none mt-1">Your mock exam score progression history</p>
-                 </div>
-                 {stats.impScore !== 0 && (
-                   <div className={cn(
-                     "px-2.5 py-1.5 rounded-xl flex items-center gap-1 text-[9px] font-sans font-black uppercase tracking-widest shadow-sm border transition-all duration-300 group-hover:scale-103",
-                     stats.impScore > 0 
-                       ? "bg-emerald-500/8 text-emerald-700 border-emerald-200/50" 
-                       : "bg-rose-500/8 text-rose-700 border-rose-200/50"
-                   )}>
-                      {stats.impScore > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-                      {Math.abs(Math.round(stats.impScore))}% {stats.impScore > 0 ? 'Improvement' : 'Drop'}
+           <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)" className="lg:col-span-8">
+             <motion.div 
+               variants={stagger.itemFadeUp} 
+               className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl border border-indigo-500/30 group"
+             >
+                {/* Radial Grid & 3D Watermark */}
+                <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
+                <TrendingUp className="absolute -right-8 -bottom-8 w-52 h-52 opacity-15 stroke-[1.2] text-indigo-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                
+                <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                   <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-1.5 h-5 bg-brand-400 rounded-full shrink-0" />
+                        <h3 className="text-lg sm:text-xl font-black text-white tracking-tight uppercase">Performance Trend</h3>
+                      </div>
+                      <p className="text-xs font-semibold text-slate-200 leading-none mt-1">Your mock exam score progression history</p>
                    </div>
-                 )}
-              </div>
-              
-              {stats.chartData.length > 0 ? (
-                <PerformanceTrendChart chartData={stats.chartData} />
-              ) : (
-                 <div className="w-full h-[300px] flex items-center justify-center bg-slate-50/40 rounded-2xl border border-slate-150/50">
-                    <p className="text-slate-400 font-bold text-sm">Not enough data to plot a trend.</p>
-                 </div>
-              )}
-           </motion.div>
+                   {stats.impScore !== 0 && (
+                     <div className={cn(
+                       "px-3 py-1.5 rounded-xl flex items-center gap-1.5 text-[10px] font-mono font-black uppercase tracking-widest shadow-2xs border transition-all duration-300 group-hover:scale-103",
+                       stats.impScore > 0 
+                         ? "bg-emerald-400/20 text-emerald-300 border-emerald-400/40" 
+                         : "bg-rose-500/20 text-rose-300 border-rose-500/40"
+                     )}>
+                        {stats.impScore > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                        {Math.abs(Math.round(stats.impScore))}% {stats.impScore > 0 ? 'Improvement' : 'Drop'}
+                     </div>
+                   )}
+                </div>
+                
+                {stats.chartData.length > 0 ? (
+                  <PerformanceTrendChart chartData={stats.chartData} />
+                ) : (
+                   <div className="w-full h-[300px] flex items-center justify-center bg-slate-950/60 rounded-2xl border border-slate-800">
+                      <p className="text-slate-300 font-bold text-sm">Not enough data to plot a trend.</p>
+                   </div>
+                )}
+             </motion.div>
+           </DynamicVectorCard>
 
            {/* Accuracy Breakdown Card */}
-           <motion.div 
-             variants={stagger.itemFadeUp} 
-             className="lg:col-span-4 relative overflow-hidden bg-white/92 rounded-3xl sm:rounded-[2.5rem] p-4.5 sm:p-6 lg:p-8 shadow-sm border border-slate-200/60 hover:border-brand-200/50 hover:shadow-md transition-[border-color,box-shadow] duration-500 group"
-           >
-              <div 
-                className="absolute -bottom-24 -left-24 w-48 h-48 pointer-events-none" 
-                style={{ background: 'radial-gradient(circle at center, rgba(203, 213, 225, 0.5) 0%, transparent 70%)' }} 
-              />
-              <div 
-                className="absolute -top-24 -right-24 w-48 h-48 pointer-events-none" 
-                style={{ background: 'radial-gradient(circle at center, rgba(37, 99, 235, 0.05) 0%, transparent 70%)' }} 
-              />
-              
-              <div className="flex items-center gap-2.5 mb-8 justify-center">
-                <div className="w-1 h-5 bg-[#2563eb] rounded-full shrink-0" />
-                <h3 className="text-lg font-sans font-black text-slate-900 tracking-tight text-center">Accuracy Breakdown</h3>
-              </div>
-              
-              {stats.totalQuestions > 0 ? (
-                <AccuracyBreakdownChart pieData={stats.pieData} totalQuestions={stats.totalQuestions} totalCorrect={stats.totalCorrect} totalWrong={stats.totalWrong} totalSkipped={stats.totalSkipped} />
-              ) : (
-                 <div className="p-4 bg-slate-50/40 rounded-2xl border border-slate-200/50 text-center text-xs font-bold text-slate-400">
-                    No question breakdown history available.
-                 </div>
-              )}
-           </motion.div>
+           <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)" className="lg:col-span-4">
+             <motion.div 
+               variants={stagger.itemFadeUp} 
+               className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl border border-indigo-500/30 group"
+             >
+                {/* Radial Grid Watermark */}
+                <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
+                <Target className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-indigo-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                
+                <div className="flex items-center gap-2.5 mb-6 justify-center relative z-10">
+                  <div className="w-1.5 h-5 bg-brand-400 rounded-full shrink-0" />
+                  <h3 className="text-lg font-black text-white tracking-tight text-center uppercase">Accuracy Breakdown</h3>
+                </div>
+                
+                <div className="relative z-10">
+                  {stats.totalQuestions > 0 ? (
+                    <AccuracyBreakdownChart pieData={stats.pieData} totalQuestions={stats.totalQuestions} totalCorrect={stats.totalCorrect} totalWrong={stats.totalWrong} totalSkipped={stats.totalSkipped} />
+                  ) : (
+                     <div className="p-4 bg-slate-950/60 rounded-2xl border border-slate-800 text-center text-xs font-bold text-slate-300">
+                        No question breakdown history available.
+                     </div>
+                  )}
+                </div>
+             </motion.div>
+           </DynamicVectorCard>
 
             {/* Skill Radar Card */}
-            <motion.div 
-              variants={stagger.itemFadeUp} 
-              className="lg:col-span-12 relative overflow-hidden bg-white/92 rounded-3xl sm:rounded-[2.5rem] p-4.5 sm:p-6 lg:p-8 shadow-sm border border-slate-200/60 hover:border-brand-200/50 hover:shadow-md transition-[border-color,box-shadow] duration-500 group"
-            >
-               <div 
-                 className="absolute -bottom-24 -left-24 w-48 h-48 pointer-events-none" 
-                 style={{ background: 'radial-gradient(circle at center, rgba(248, 250, 252, 1) 0%, transparent 70%)' }} 
-               />
-               <div 
-                 className="absolute -top-24 -right-24 w-48 h-48 pointer-events-none" 
-                 style={{ background: 'radial-gradient(circle at center, rgba(99, 102, 241, 0.03) 0%, transparent 70%)' }} 
-               />
-               
-               <div className="flex flex-col gap-1.5 mb-6 text-center">
-                 <div className="flex justify-center">
-                   <span className="text-[9px] font-sans font-black text-[#2563eb] uppercase tracking-widest bg-[#2563eb]/5 px-3 py-1 rounded-full border border-[#2563eb]/10 leading-none">
-                      Metrics Overview
-                   </span>
-                 </div>
-                 <h3 className="text-xl font-serif font-black text-slate-900 tracking-tight mt-1.5">Overall Skill Profile</h3>
-                 <p className="text-[11px] font-bold text-slate-400">Analysis of your core exam-taking dimensions</p>
-               </div>
-               
-               {stats.skillProfile && stats.totalQuestions > 0 ? (
-                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                    <SkillRadarChart skillProfile={stats.skillProfile} />
- 
-                    {/* Detailed breakdown items */}
-                    <div className="lg:col-span-7 space-y-3.5 relative z-10">
-                      {stats.skillProfile.map((skill: any, idx: number) => {
-                         let icon = <Target className="w-4 h-4 text-emerald-500" />;
-                         let colorClass = "from-emerald-500 to-emerald-400";
-                         let desc = "Correctness rate on attempts";
-                         let bgClass = "bg-emerald-50/50 border-emerald-100/50";
-                         let textClass = "text-emerald-700";
+             <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)" className="lg:col-span-12">
+               <motion.div 
+                 variants={stagger.itemFadeUp} 
+                 className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950/40 to-slate-900 text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-9 shadow-xl border border-blue-500/30 group"
+               >
+                  {/* Radial Grid Watermark */}
+                  <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
+                  <Crosshair className="absolute -right-8 -bottom-8 w-56 h-56 opacity-15 stroke-[1.2] text-blue-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                  
+                  <div className="flex flex-col gap-1.5 mb-6 text-center relative z-10">
+                    <div className="flex justify-center">
+                      <span className="text-[9px] font-mono font-black text-amber-300 uppercase tracking-widest bg-amber-400/20 px-3 py-1 rounded-full border border-amber-400/30 leading-none">
+                         Metrics Overview
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-black text-white tracking-tight mt-1.5 uppercase">Overall Skill Profile</h3>
+                    <p className="text-xs font-bold text-slate-200">Analysis of your core exam-taking dimensions</p>
+                  </div>
+                  
+                  {stats.skillProfile && stats.totalQuestions > 0 ? (
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+                       <SkillRadarChart skillProfile={stats.skillProfile} />
+    
+                       {/* Detailed breakdown items */}
+                       <div className="lg:col-span-7 space-y-3.5 relative z-10">
+                         {stats.skillProfile.map((skill: any, idx: number) => {
+                            let icon = <Target className="w-4 h-4 text-emerald-400" />;
+                            let colorClass = "from-emerald-500 to-emerald-400";
+                            let desc = "Correctness rate on attempts";
+                            let bgClass = "bg-emerald-500/20 border-emerald-400/40";
+                            let textClass = "text-emerald-300";
 
-                         if (skill.name === "Accuracy") {
-                            icon = <Target className="w-4 h-4 text-emerald-600" />;
-                            colorClass = "from-emerald-600 to-emerald-400";
-                            desc = "Accuracy on attempted questions";
-                            bgClass = "bg-emerald-50/50 border-emerald-100/50";
-                            textClass = "text-emerald-700";
-                         } else if (skill.name === "Precision") {
-                            icon = <Crosshair className="w-4 h-4 text-[#2563eb]" />;
-                            colorClass = "from-[#2563eb] to-[#3b82f6]";
-                            desc = "Consistency & focus in answers";
-                            bgClass = "bg-brand-50/50 border-brand-100/50";
-                            textClass = "text-brand-700";
-                         } else if (skill.name === "Speed") {
-                            icon = <Timer className="w-4 h-4 text-amber-600" />;
-                            colorClass = "from-amber-600 to-amber-400";
-                            desc = "Pace answering questions";
-                            bgClass = "bg-amber-50/50 border-amber-100/50";
-                            textClass = "text-amber-700";
-                         } else if (skill.name === "Endurance") {
-                            icon = <Flame className="w-4 h-4 text-indigo-600" />;
-                            colorClass = "from-indigo-600 to-indigo-400";
-                            desc = "Volume of questions practiced";
-                            bgClass = "bg-indigo-50/50 border-indigo-100/50";
-                            textClass = "text-indigo-700";
-                         } else if (skill.name === "Momentum") {
-                            icon = <TrendingUp className="w-4 h-4 text-cyan-600" />;
-                            colorClass = "from-cyan-600 to-cyan-400";
-                            desc = "Test-to-test improvement rate";
-                            bgClass = "bg-cyan-50/50 border-cyan-100/50";
-                            textClass = "text-cyan-700";
-                         }
+                            if (skill.name === "Accuracy") {
+                               icon = <Target className="w-4 h-4 text-emerald-400" />;
+                               colorClass = "from-emerald-500 to-emerald-400";
+                               desc = "Accuracy on attempted questions";
+                               bgClass = "bg-emerald-500/20 border-emerald-400/40";
+                               textClass = "text-emerald-300";
+                            } else if (skill.name === "Precision") {
+                               icon = <Crosshair className="w-4 h-4 text-blue-400" />;
+                               colorClass = "from-blue-500 to-blue-400";
+                               desc = "Consistency & focus in answers";
+                               bgClass = "bg-blue-500/20 border-blue-400/40";
+                               textClass = "text-blue-300";
+                            } else if (skill.name === "Speed") {
+                               icon = <Timer className="w-4 h-4 text-amber-400" />;
+                               colorClass = "from-amber-500 to-amber-400";
+                               desc = "Pace answering questions";
+                               bgClass = "bg-amber-500/20 border-amber-400/40";
+                               textClass = "text-amber-300";
+                            } else if (skill.name === "Endurance") {
+                               icon = <Flame className="w-4 h-4 text-indigo-400" />;
+                               colorClass = "from-indigo-500 to-indigo-400";
+                               desc = "Volume of questions practiced";
+                               bgClass = "bg-indigo-500/20 border-indigo-400/40";
+                               textClass = "text-indigo-300";
+                            } else if (skill.name === "Momentum") {
+                               icon = <TrendingUp className="w-4 h-4 text-cyan-400" />;
+                               colorClass = "from-cyan-500 to-cyan-400";
+                               desc = "Test-to-test improvement rate";
+                               bgClass = "bg-cyan-500/20 border-cyan-400/40";
+                               textClass = "text-cyan-300";
+                            }
 
-                         return (
-                            <div key={idx} className="p-3 bg-white/40 border border-slate-100/60 rounded-2xl flex flex-col gap-2 hover:bg-white/80 hover:border-slate-200/50 transition-all duration-350">
-                               <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2.5">
-                                     <div className={cn("p-1.5 rounded-xl border shrink-0", bgClass)}>
-                                        {icon}
+                            return (
+                               <div key={idx} className="p-3.5 bg-slate-950/70 border border-slate-800 rounded-2xl flex flex-col gap-2 hover:border-slate-700 transition-all duration-350">
+                                  <div className="flex items-center justify-between">
+                                     <div className="flex items-center gap-2.5">
+                                        <div className={cn("p-1.5 rounded-xl border shrink-0", bgClass)}>
+                                           {icon}
+                                        </div>
+                                        <div className="flex flex-col min-w-0">
+                                           <span className="text-xs font-black text-white leading-none">{skill.name}</span>
+                                           <span className="text-[9.5px] font-bold text-slate-300 leading-none mt-1 truncate">{desc}</span>
+                                        </div>
                                      </div>
-                                     <div className="flex flex-col min-w-0">
-                                        <span className="text-xs font-sans font-black text-slate-800 leading-none">{skill.name}</span>
-                                        <span className="text-[9px] font-bold text-slate-400 leading-none mt-1 truncate">{desc}</span>
-                                     </div>
+                                     <span className={cn("text-xs font-mono font-black tracking-tight", textClass)}>{skill.value}%</span>
                                   </div>
-                                  <span className={cn("text-xs font-sans font-black tracking-tight", textClass)}>{skill.value}%</span>
+                                  <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                                     <motion.div 
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${skill.value}%` }}
+                                        transition={{ duration: 0.85, ease: "easeOut", delay: idx * 0.05 }}
+                                        className={cn("h-full rounded-full bg-gradient-to-r", colorClass)}
+                                     />
+                                   </div>
                                </div>
-                               <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                  <motion.div 
-                                     initial={{ width: 0 }}
-                                     animate={{ width: `${skill.value}%` }}
-                                     transition={{ duration: 0.85, ease: "easeOut", delay: idx * 0.05 }}
-                                     className={cn("h-full rounded-full bg-gradient-to-r", colorClass)}
-                                  />
-                                </div>
-                            </div>
-                         );
-                      })}
-                   </div>
-                 </div>
-               ) : (
-                 <div className="p-4 bg-slate-50/40 rounded-2xl border border-slate-200/50 text-center text-xs font-bold text-slate-400">
-                    Complete tests to compile your skill profile.
-                 </div>
-              )}
-           </motion.div>
+                            );
+                         })}
+                       </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-slate-950/60 rounded-2xl border border-slate-800 text-center text-xs font-bold text-slate-300">
+                       Complete tests to compile your skill profile.
+                    </div>
+                 )}
+               </motion.div>
+             </DynamicVectorCard>
 
-           {/* Performance Breakdown Card */}
-           {stats.examAnalysis && stats.examAnalysis.length > 0 && (
-             <div className="lg:col-span-12 flex flex-col gap-6 relative">
+             {/* Performance Breakdown Card */}
+             {stats.examAnalysis && stats.examAnalysis.length > 0 && (
+               <div className="lg:col-span-12 flex flex-col gap-6 relative">
                {stats.examAnalysis.map((exam: any, idx: number) => {
                  const combinedSubjects = [...(exam.mockTests || []), ...(exam.practiceTests || [])];
                  const uniqueMap = new Map();
@@ -2043,92 +2015,105 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
                  const uniqueSubjects = Array.from(uniqueMap.values());
 
                  return (
-                   <motion.div key={idx} variants={stagger.itemFadeUp} className="bg-white/92 rounded-3xl sm:rounded-[2.5rem] p-4.5 sm:p-6 lg:p-8 shadow-sm border border-slate-200/60 hover:border-brand-200/50 hover:shadow-md transition-[border-color,box-shadow] duration-500 relative overflow-hidden flex flex-col shrink-0">
-                     <div className="mb-6 relative z-10 flex flex-col gap-3">
-                        <div>
-                           <span className="px-3 py-1.5 bg-[#2563eb]/8 text-[#2563eb] text-[9px] font-sans font-black rounded-xl uppercase tracking-widest border border-[#2563eb]/15 shadow-sm leading-none">
-                              {exam.examName}
-                           </span>
+                    <DynamicVectorCard key={idx} glowColor="rgba(37, 99, 235, 0.12)" className="w-full">
+                      <motion.div variants={stagger.itemFadeUp} className="bg-gradient-to-br from-slate-900 via-blue-950/40 to-slate-900 text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl border border-blue-500/30 relative overflow-hidden flex flex-col shrink-0 group">
+                        {/* Radial Grid Watermark */}
+                        <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
+                        <Layers className="absolute -right-8 -bottom-8 w-52 h-52 opacity-15 stroke-[1.2] text-blue-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+
+                        <div className="mb-6 relative z-10 flex flex-col gap-3">
+                           <div>
+                              <span className="px-3 py-1.5 bg-blue-400/20 text-blue-200 text-[9px] font-mono font-black rounded-xl uppercase tracking-widest border border-blue-400/30 shadow-2xs leading-none">
+                                 {exam.examName}
+                              </span>
+                           </div>
+                           <div>
+                              <h3 className="text-xl font-black text-white leading-tight mb-1 uppercase">Performance Breakdown</h3>
+                              <p className="text-xs text-slate-300 font-bold flex items-center gap-1.5">
+                                 Attempts: <span className="text-amber-300 font-mono font-black">{exam.totalAttempts}</span>
+                                 <span className="text-slate-600">•</span>
+                                 Last Attempt: <span className="text-blue-300 font-mono font-black">{exam.lastAttemptDate}</span>
+                              </p>
+                           </div>
                         </div>
-                        <div>
-                           <h3 className="text-xl font-serif font-black text-slate-900 leading-tight mb-1">Performance Breakdown</h3>
-                           <p className="text-[11px] text-slate-400 font-bold flex items-center gap-1.5">
-                              Attempts: <span className="text-slate-800 font-black">{exam.totalAttempts}</span>
-                              <span className="text-slate-200">•</span>
-                              Last Attempt: <span className="text-[#2563eb] font-black">{exam.lastAttemptDate}</span>
-                           </p>
+                        
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10">
+                           {/* Left column: Bar Chart */}
+                           {uniqueSubjects.length > 0 ? (
+                               <SubjectBarChart uniqueSubjects={uniqueSubjects} />
+                            ) : null}
+     
+                           {/* Divider on mobile only */}
+                           {uniqueSubjects.length > 0 && (
+                             <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent my-1 lg:hidden" />
+                           )}
+     
+                           {/* Right column: Expandable List */}
+                           <div className={cn("space-y-4 max-h-[380px] overflow-y-auto custom-scrollbar pr-1", uniqueSubjects.length > 0 ? "lg:col-span-7" : "lg:col-span-12")} style={{ overscrollBehaviorY: 'contain' }}>
+                              {exam.mockTests && exam.mockTests.length > 0 && (
+                                <div className="space-y-3">
+                                  <h4 className="text-[9.5px] font-mono font-black text-amber-200/90 uppercase tracking-widest pl-1">Mock Tests</h4>
+                                  <div className="space-y-3">
+                                    {exam.mockTests.map((subject: any, i: number) => (
+                                       <SubjectRow key={`m-${i}`} subject={subject} />
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+         
+                              {exam.practiceTests && exam.practiceTests.length > 0 && (
+                                <div className="space-y-3">
+                                  <h4 className="text-[9.5px] font-mono font-black text-amber-200/90 uppercase tracking-widest pl-1 mt-2">Practice Sessions</h4>
+                                  <div className="space-y-3">
+                                    {exam.practiceTests.map((subject: any, i: number) => (
+                                       <SubjectRow key={`p-${i}`} subject={subject} />
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+         
+                              {(!exam.practiceTests || exam.practiceTests.length === 0) && (!exam.mockTests || exam.mockTests.length === 0) && (
+                                <div className="p-4 bg-slate-950/60 rounded-2xl border border-slate-800 text-center text-xs font-bold text-slate-300">
+                                  No subject metrics compiled yet.
+                                </div>
+                              )}
+                           </div>
                         </div>
-                     </div>
-                     
-                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10">
-                        {/* Left column: Bar Chart */}
-                        {uniqueSubjects.length > 0 ? (
-                            <SubjectBarChart uniqueSubjects={uniqueSubjects} />
-                         ) : null}
-  
-                        {/* Divider on mobile only */}
-                        {uniqueSubjects.length > 0 && (
-                          <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent my-1 lg:hidden" />
-                        )}
-  
-                        {/* Right column: Expandable List */}
-                        <div className={cn("space-y-4 max-h-[380px] overflow-y-auto custom-scrollbar pr-1", uniqueSubjects.length > 0 ? "lg:col-span-7" : "lg:col-span-12")} style={{ overscrollBehaviorY: 'contain' }}>
-                           {exam.mockTests && exam.mockTests.length > 0 && (
-                             <div className="space-y-3">
-                               <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Mock Tests</h4>
-                               <div className="space-y-3">
-                                 {exam.mockTests.map((subject: any, i: number) => (
-                                    <SubjectRow key={`m-${i}`} subject={subject} />
-                                 ))}
-                               </div>
-                             </div>
-                           )}
-      
-                           {exam.practiceTests && exam.practiceTests.length > 0 && (
-                             <div className="space-y-3">
-                               <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1 mt-2">Practice Sessions</h4>
-                               <div className="space-y-3">
-                                 {exam.practiceTests.map((subject: any, i: number) => (
-                                    <SubjectRow key={`p-${i}`} subject={subject} />
-                                 ))}
-                               </div>
-                             </div>
-                           )}
-      
-                           {(!exam.practiceTests || exam.practiceTests.length === 0) && (!exam.mockTests || exam.mockTests.length === 0) && (
-                             <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100 text-center text-xs font-semibold text-slate-400">
-                               No subject metrics compiled yet.
-                             </div>
-                           )}
-                        </div>
-                     </div>
-                   </motion.div>
+                      </motion.div>
+                    </DynamicVectorCard>
                  );
                })}
              </div>
            )}
+             
+            {/* Visual Action cards */}
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <DynamicVectorCard glowColor="rgba(16, 185, 129, 0.12)" className="w-full">
+                <motion.div variants={stagger.itemFadeUp} className="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 rounded-3xl sm:rounded-[2rem] p-5 sm:p-6 shadow-xl border border-slate-700/80 flex gap-4 sm:gap-5 items-start text-white relative overflow-hidden group">
+                   <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
+                   <div className={cn("p-3 rounded-2xl shrink-0 shadow-2xs border relative z-10", stats.impScore >= 0 ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40" : "bg-rose-500/20 text-rose-300 border-rose-500/40")}>
+                      {stats.impScore >= 0 ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
+                  </div>
+                  <div className="relative z-10">
+                     <h4 className="font-black text-white mb-1 tracking-tight text-sm sm:text-base uppercase">{stats.impScore >= 0 ? "You are improving" : "Scores dropped recently"}</h4>
+                     <p className="text-xs sm:text-sm font-medium text-slate-300 leading-relaxed">{stats.impScore >= 0 ? "Your latest test scores show positive momentum. Keep up the good work!" : "Review your recent mistakes to get back on track."}</p>
+                  </div>
+               </motion.div>
+              </DynamicVectorCard>
 
-           {/* Visual Action cards */}
-           <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-               <motion.div variants={stagger.itemFadeUp} whileHover={{ y: -3 }} className="bg-white/92 rounded-3xl sm:rounded-[2rem] p-4.5 sm:p-6 shadow-sm border border-slate-200/60 hover:border-slate-300 flex gap-4 sm:gap-5 items-start">
-                  <div className={cn("p-3 rounded-2xl shrink-0 shadow-sm border border-slate-100", stats.impScore >= 0 ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
-                     {stats.impScore >= 0 ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
-                 </div>
-                 <div>
-                    <h4 className="font-extrabold text-slate-800 mb-1 tracking-tight text-sm sm:text-base">{stats.impScore >= 0 ? "You are improving" : "Scores dropped recently"}</h4>
-                    <p className="text-xs sm:text-sm font-medium text-slate-400 leading-relaxed">{stats.impScore >= 0 ? "Your latest test scores show positive momentum. Keep up the good work!" : "Review your recent mistakes to get back on track."}</p>
-                 </div>
-              </motion.div>
-               <motion.div variants={stagger.itemFadeUp} whileHover={{ y: -3 }} className="bg-white/92 rounded-3xl sm:rounded-[2rem] p-4.5 sm:p-6 shadow-[0_8px_30px_rgba(15,23,42,0.015)] border border-slate-100/70 hover:border-slate-200 flex gap-4 sm:gap-5 items-start">
-                  <div className={cn("p-3 rounded-2xl shrink-0 shadow-sm border border-slate-100", stats.avgTimePerQuestion > 60 ? "bg-amber-50 text-amber-600" : "bg-brand-50 text-brand-600")}>
-                    <Timer className="w-5 h-5" />
-                 </div>
-                 <div>
-                    <h4 className="font-extrabold text-slate-800 mb-1 tracking-tight text-sm sm:text-base">{stats.avgTimePerQuestion > 60 ? "Improve Question Speed" : "Optimal Solving Pace"}</h4>
-                    <p className="text-xs sm:text-sm font-medium text-slate-400 leading-relaxed">Averaging {stats.avgTimePerQuestion.toFixed(1)}s per question. {stats.avgTimePerQuestion > 60 ? "Try to solve familiar questions faster." : "Excellent pacing, maintain this rate in real exams."}</p>
-                 </div>
-              </motion.div>
-           </div>
+              <DynamicVectorCard glowColor="rgba(245, 158, 11, 0.12)" className="w-full">
+                <motion.div variants={stagger.itemFadeUp} className="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 rounded-3xl sm:rounded-[2rem] p-5 sm:p-6 shadow-xl border border-slate-700/80 flex gap-4 sm:gap-5 items-start text-white relative overflow-hidden group">
+                   <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
+                   <div className={cn("p-3 rounded-2xl shrink-0 shadow-2xs border relative z-10", stats.avgTimePerQuestion > 60 ? "bg-amber-500/20 text-amber-300 border-amber-500/40" : "bg-blue-500/20 text-blue-300 border-blue-500/40")}>
+                     <Timer className="w-5 h-5" />
+                  </div>
+                  <div className="relative z-10">
+                     <h4 className="font-black text-white mb-1 tracking-tight text-sm sm:text-base uppercase">{stats.avgTimePerQuestion > 60 ? "Improve Question Speed" : "Optimal Solving Pace"}</h4>
+                     <p className="text-xs sm:text-sm font-medium text-slate-300 leading-relaxed">Averaging {stats.avgTimePerQuestion.toFixed(1)}s per question. {stats.avgTimePerQuestion > 60 ? "Try to solve familiar questions faster." : "Excellent pacing, maintain this rate in real exams."}</p>
+                  </div>
+               </motion.div>
+               </DynamicVectorCard>
+             </div>
 
            {/* Premium action banner */}
            <motion.div 

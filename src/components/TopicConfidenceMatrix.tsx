@@ -49,26 +49,26 @@ export const TopicConfidenceMatrix: React.FC<TopicConfidenceMatrixProps> = ({
 
   return (
     <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)" className="mb-6 sm:mb-8">
-      <div className="p-5 sm:p-7 text-slate-900 rounded-[2.2rem] bg-white/90 lg:bg-white/80 backdrop-blur-xl border border-slate-200/80 shadow-xl shadow-slate-200/50 space-y-4 relative overflow-hidden group">
+      <div className="p-5 sm:p-7 text-slate-900 dark:text-white rounded-[2.2rem] bg-white/90 lg:bg-white/80 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 backdrop-blur-xl border border-slate-200/80 dark:border-indigo-500/20 shadow-xl shadow-slate-200/50 dark:shadow-indigo-950/20 space-y-4 relative overflow-hidden group">
         {/* Radial Grid & Floating Watermark Icon */}
-        <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none z-0" />
-        <Zap className="absolute -right-8 -bottom-8 w-52 h-52 opacity-10 stroke-[1.2] text-[#2563eb] pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+        <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-10 pointer-events-none z-0" />
+        <Zap className="absolute -right-8 -bottom-8 w-52 h-52 opacity-10 dark:opacity-15 stroke-[1.2] text-[#2563eb] dark:text-amber-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
 
       {/* Top Header Bar */}
       <div className="flex items-center justify-between gap-2 relative z-10">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-brand-50 text-brand-600 border border-brand-200 flex items-center justify-center shrink-0 shadow-2xs font-black">
-            <Zap className="w-6 h-6 stroke-[2.2] text-brand-600" />
+          <div className="w-11 h-11 rounded-2xl bg-brand-50 text-brand-600 dark:bg-gradient-to-br dark:from-amber-400 dark:via-amber-500 dark:to-orange-600 dark:text-slate-950 border border-brand-200 dark:border-amber-300/60 flex items-center justify-center shrink-0 shadow-2xs dark:shadow-amber-500/30 font-black">
+            <Zap className="w-6 h-6 stroke-[2.2]" />
           </div>
           <div>
-            <h3 className="text-sm sm:text-lg font-black text-slate-900 tracking-tight leading-tight uppercase">
+            <h3 className="text-sm sm:text-lg font-black text-slate-900 dark:text-white tracking-tight leading-tight uppercase">
               Your Weak Topics & Practice Plan
             </h3>
-            <p className="text-slate-500 text-[10px] sm:text-xs font-medium">Focus on your weakest subjects first to quickly raise your exam score</p>
+            <p className="text-slate-500 dark:text-white/80 text-[10px] sm:text-xs font-medium">Focus on your weakest subjects first to quickly raise your exam score</p>
           </div>
         </div>
 
-        <span className="hidden sm:inline-flex px-3 py-1 rounded-full text-xs font-black text-brand-700 bg-brand-50 border border-brand-200 font-mono">
+        <span className="hidden sm:inline-flex px-3 py-1 rounded-full text-xs font-black text-brand-700 dark:text-slate-300 bg-brand-50 dark:bg-slate-800 border border-brand-200 dark:border-slate-700 font-mono">
           {allTopicConfidence.length} Topics Analyzed
         </span>
       </div>
@@ -89,17 +89,17 @@ export const TopicConfidenceMatrix: React.FC<TopicConfidenceMatrixProps> = ({
             : 'bg-amber-500';
 
           const badgeBg = isCritical
-            ? 'bg-rose-50 text-rose-700 border-rose-200'
+            ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/40'
             : isMastered
-            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-            : 'bg-amber-50 text-amber-700 border-amber-200';
+            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40'
+            : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/40';
 
           const statusIcon = isCritical ? (
-            <AlertTriangle className="w-3 h-3 text-rose-600" />
+            <AlertTriangle className="w-3 h-3 text-rose-600 dark:text-rose-400" />
           ) : isMastered ? (
-            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+            <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
           ) : (
-            <Zap className="w-3 h-3 text-amber-600" />
+            <Zap className="w-3 h-3 text-amber-600 dark:text-amber-400" />
           );
 
           const badgeLabel = isCritical ? 'Needs Practice' : isMastered ? 'Strong Area' : 'In Progress';
@@ -107,14 +107,14 @@ export const TopicConfidenceMatrix: React.FC<TopicConfidenceMatrixProps> = ({
           return (
             <div
               key={idx}
-              className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all space-y-2 relative bg-slate-50/90 border-slate-200/80 text-slate-900 hover:border-slate-300 ${
+              className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all space-y-2 relative bg-slate-50/90 dark:bg-slate-900/90 border-slate-200/80 dark:border-slate-700/80 text-slate-900 dark:text-white hover:border-slate-300 dark:hover:border-slate-600 ${
                 idx >= mobileVisibleCount && !isExpanded ? 'hidden sm:block' : 'block'
               }`}
             >
               {/* Desktop Header (>= sm): Title, Status Badge, Accuracy */}
               <div className="hidden sm:flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 min-w-0">
-                  <h4 className="font-extrabold text-slate-900 text-sm tracking-tight truncate">
+                  <h4 className="font-extrabold text-slate-900 dark:text-white text-sm tracking-tight truncate">
                     {topic.topicName}
                   </h4>
 
@@ -124,7 +124,7 @@ export const TopicConfidenceMatrix: React.FC<TopicConfidenceMatrixProps> = ({
                   </span>
                 </div>
 
-                <span className="font-bold text-slate-900 text-xs shrink-0 font-mono">
+                <span className="font-bold text-slate-900 dark:text-amber-300 text-xs shrink-0 font-mono">
                   {topic.accuracy}% Correct • {topic.totalQuestions} Questions
                 </span>
               </div>
@@ -132,7 +132,7 @@ export const TopicConfidenceMatrix: React.FC<TopicConfidenceMatrixProps> = ({
               {/* Mobile Header (< sm): Structured 2-Line Title & Status Bar */}
               <div className="sm:hidden space-y-1.5">
                 <div className="flex items-center justify-between gap-2">
-                  <h4 className="font-extrabold text-slate-900 text-xs tracking-tight leading-snug truncate pr-1">
+                  <h4 className="font-extrabold text-slate-900 dark:text-white text-xs tracking-tight leading-snug truncate pr-1">
                     {topic.topicName}
                   </h4>
                   <span className={`px-2 py-0.5 rounded-full text-[8.5px] font-extrabold uppercase tracking-wider border flex items-center gap-1 shrink-0 ${badgeBg}`}>
@@ -141,14 +141,14 @@ export const TopicConfidenceMatrix: React.FC<TopicConfidenceMatrixProps> = ({
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium">
-                  <span className="text-slate-900 font-bold">{topic.accuracy}% Accuracy Rate</span>
-                  <span className="font-mono font-semibold text-slate-500">{topic.totalQuestions} Questions</span>
+                <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-300 font-medium">
+                  <span className="text-slate-900 dark:text-amber-300 font-bold">{topic.accuracy}% Accuracy Rate</span>
+                  <span className="font-mono font-semibold text-slate-500 dark:text-slate-300">{topic.totalQuestions} Questions</span>
                 </div>
               </div>
 
               {/* Progress Bar */}
-              <div className="w-full h-1.5 sm:h-2 bg-slate-200/80 rounded-full overflow-hidden p-0.5 border border-slate-200">
+              <div className="w-full h-1.5 sm:h-2 bg-slate-200/80 dark:bg-slate-950 rounded-full overflow-hidden p-0.5 border border-slate-200 dark:border-slate-800">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${topic.accuracy}%` }}
@@ -158,12 +158,12 @@ export const TopicConfidenceMatrix: React.FC<TopicConfidenceMatrixProps> = ({
               </div>
 
               {/* Desktop Bottom Row (>= sm) */}
-              <div className="hidden sm:flex items-center justify-between text-[11px] text-slate-500 font-medium pt-0.5">
+              <div className="hidden sm:flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-300 font-medium pt-0.5">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span>{topic.attemptCount} {topic.attemptCount === 1 ? 'practice session' : 'practice sessions'}</span>
                   {hasIncomplete && (
-                    <span className="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 font-bold text-[9.5px] flex items-center gap-1">
-                      <Clock className="w-2.5 h-2.5 text-amber-600" />
+                    <span className="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-400/20 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-400/40 font-bold text-[9.5px] flex items-center gap-1">
+                      <Clock className="w-2.5 h-2.5 text-amber-600 dark:text-amber-300" />
                       Unfinished (Question {topic.completedQuestionsCount} of {topic.totalQuestionsCount})
                     </span>
                   )}
@@ -181,13 +181,13 @@ export const TopicConfidenceMatrix: React.FC<TopicConfidenceMatrixProps> = ({
                   }}
                   className={`font-black inline-flex items-center gap-1 cursor-pointer px-3 py-1.5 rounded-xl text-xs transition-all shadow-2xs shrink-0 border-none ${
                     hasIncomplete
-                      ? 'bg-amber-500 hover:bg-amber-600 text-white font-black'
-                      : 'bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-black'
+                      ? 'bg-amber-500 hover:bg-amber-600 text-white dark:text-slate-950 font-black'
+                      : 'bg-gradient-to-r from-brand-600 to-indigo-600 dark:from-brand-500 dark:to-indigo-500 hover:from-brand-500 hover:to-indigo-500 text-white font-black'
                   }`}
                 >
                   {hasIncomplete ? (
                     <>
-                      <PlayCircle className="w-3 h-3 text-white fill-current" />
+                      <PlayCircle className="w-3 h-3 text-white dark:text-slate-950 fill-current" />
                       <span>Resume Practice</span>
                     </>
                   ) : (
@@ -201,11 +201,11 @@ export const TopicConfidenceMatrix: React.FC<TopicConfidenceMatrixProps> = ({
 
               {/* Mobile Bottom Row (< sm): Clean Touch-Friendly Stacked Layout */}
               <div className="sm:hidden space-y-2 pt-0.5">
-                <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium">
+                <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-300 font-medium">
                   <span>{topic.attemptCount} {topic.attemptCount === 1 ? 'practice session' : 'practice sessions'}</span>
                   {hasIncomplete && (
-                    <span className="text-amber-800 font-bold text-[9.5px] flex items-center gap-1">
-                      <Clock className="w-2.5 h-2.5 text-amber-700 shrink-0" />
+                    <span className="text-amber-800 dark:text-amber-300 font-bold text-[9.5px] flex items-center gap-1">
+                      <Clock className="w-2.5 h-2.5 text-amber-700 dark:text-amber-400 shrink-0" />
                       <span>Q{topic.completedQuestionsCount}/{topic.totalQuestionsCount} Incomplete</span>
                     </span>
                   )}
@@ -223,13 +223,13 @@ export const TopicConfidenceMatrix: React.FC<TopicConfidenceMatrixProps> = ({
                   }}
                   className={`w-full py-2.5 rounded-xl text-xs font-black inline-flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer border-none ${
                     hasIncomplete
-                      ? 'bg-amber-500 active:bg-amber-600 text-white font-black'
+                      ? 'bg-amber-500 active:bg-amber-600 text-white dark:text-slate-950 font-black'
                       : 'bg-gradient-to-r from-brand-600 to-indigo-600 active:from-brand-500 active:to-indigo-500 text-white font-black'
                   }`}
                 >
                   {hasIncomplete ? (
                     <>
-                      <PlayCircle className="w-3.5 h-3.5 text-white fill-current shrink-0" />
+                      <PlayCircle className="w-3.5 h-3.5 text-white dark:text-slate-950 fill-current shrink-0" />
                       <span>Resume Practice (Q{topic.completedQuestionsCount}/{topic.totalQuestionsCount})</span>
                     </>
                   ) : (

@@ -81,6 +81,7 @@ import { useActiveExamContext } from './lib/activeExamStore';
 import { ActiveExamContextBar } from './components/ActiveExamContextBar';
 import { getInstantQuestionsForTopic } from './lib/instantQuestionCompiler';
 import { examService } from './lib/examService';
+import { ThemeToggle } from './components/ThemeToggle';
 
 const getQuestionBankVectorTheme = (title: string = '', category: string = '') => {
   const t = (title + ' ' + (category || '')).toLowerCase();
@@ -2073,8 +2074,8 @@ export const Navbar = ({
     <header className={cn(
       "w-full transition-[background-color,border-color,box-shadow,transform] duration-300", 
       mobileMenuOpen 
-        ? "fixed top-0 left-0 z-[60] bg-white border-b border-slate-200/60" 
-        : (scrolled ? "sticky top-0 z-[60] navbar-scrolled" : "sticky top-0 z-[60] navbar-glass")
+        ? "fixed top-0 left-0 z-[60] bg-white dark:bg-slate-900 border-b border-slate-200/60 dark:border-slate-700/60" 
+        : (scrolled ? "sticky top-0 z-[60] navbar-scrolled dark:bg-slate-900/95 dark:border-slate-700/60 dark:backdrop-blur-xl" : "sticky top-0 z-[60] navbar-glass dark:bg-slate-900/80 dark:backdrop-blur-xl dark:border-b dark:border-slate-700/40")
     )}>
       <div className="max-w-7xl mx-auto px-4 h-16 sm:h-20 flex items-center justify-between relative z-[65]">
         <div
@@ -2091,10 +2092,10 @@ export const Navbar = ({
             }
           }}
         >
-          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl border-2 border-slate-900 bg-[#2563EB] flex items-center justify-center shadow-[3px_3px_0px_#0f172a] group-hover:rotate-3 group-hover:scale-105 transition-all duration-300">
+          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl border-2 border-slate-900 dark:border-slate-700 bg-[#2563EB] flex items-center justify-center shadow-[3px_3px_0px_#0f172a] dark:shadow-[3px_3px_0px_rgba(99,102,241,0.3)] group-hover:rotate-3 group-hover:scale-105 transition-all duration-300">
             <BookOpen className="text-white w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <span className="font-serif font-black text-lg sm:text-2xl tracking-tight text-slate-900 group-hover:text-[#2563EB] transition-colors duration-300 uppercase">
+          <span className="font-serif font-black text-lg sm:text-2xl tracking-tight text-slate-900 dark:text-white group-hover:text-[#2563EB] transition-colors duration-300 uppercase">
             Odisha<span className="text-[#2563EB] font-serif font-black">Exam</span>Prep
           </span>
         </div>
@@ -2102,7 +2103,7 @@ export const Navbar = ({
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-3 lg:gap-4">
           {!user && (
-            <div className="flex items-center border-2 border-slate-900 bg-white rounded-xl p-0.5 shadow-[3px_3px_0px_#0f172a] relative">
+            <div className="flex items-center border-2 border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl p-0.5 shadow-[3px_3px_0px_#0f172a] dark:shadow-none relative">
               <a 
                 href="#exams"
                 onClick={(e) => scrollToSection(e, 'exams')}
@@ -2174,12 +2175,12 @@ export const Navbar = ({
           </Link>
           
           <div className="flex items-center gap-2.5 sm:gap-3 pl-2 sm:pl-3 border-l border-slate-200">
-
+            <ThemeToggle />
 
             <button
               type="button"
               onClick={() => setIsSearchModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 hover:bg-brand-50 text-slate-600 hover:text-brand-600 transition-all text-xs font-black cursor-pointer border border-slate-200/80 group shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800 hover:bg-brand-50 text-slate-600 dark:text-slate-300 hover:text-brand-600 transition-all text-xs font-black cursor-pointer border border-slate-200/80 dark:border-slate-700 group shrink-0"
               title="Search exams, tests, practice sets (Ctrl+K)"
             >
               <Search className="w-3.5 h-3.5 text-brand-600 group-hover:scale-110 transition-transform" />

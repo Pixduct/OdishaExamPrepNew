@@ -23,11 +23,11 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
   onLaunchTopicPractice
 }) => {
   return (
-    <div className="relative w-full min-h-screen bg-[#F8FAFC] overflow-x-hidden" style={{ isolation: 'isolate' }}>
+    <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent overflow-x-hidden" style={{ isolation: 'isolate' }}>
       {/* Full-Screen Edge-to-Edge Academic Vector Canvas Grid & HSL Glows */}
-      <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 pointer-events-none z-0" />
-      <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 rounded-full blur-3xl pointer-events-none z-0" />
-      <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 rounded-full blur-3xl pointer-events-none z-0" />
+      <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-[0.03] pointer-events-none z-0" />
+      <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none z-0" />
+      <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none z-0" />
 
       {/* Floating Viewport Academic Study Vector Watermarks */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-20">
@@ -45,10 +45,10 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
       >
         {/* Executive Bright Study Vector Header Card */}
         <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)">
-          <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 border border-slate-200/80 shadow-xl shadow-slate-200/40 rounded-3xl sm:rounded-[2.5rem] relative overflow-hidden z-10">
+          <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 border border-slate-200/80 dark:border-indigo-500/20 shadow-xl shadow-slate-200/40 dark:shadow-indigo-950/20 rounded-3xl sm:rounded-[2.5rem] relative overflow-hidden z-10">
             {/* Radial Grid & Floating Header Watermark */}
-            <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none" />
-            <Calendar className="absolute -right-8 -bottom-8 w-52 h-52 sm:w-64 sm:h-64 opacity-10 stroke-[1.2] text-brand-600 pointer-events-none rotate-12" />
+            <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none" />
+            <Calendar className="absolute -right-8 -bottom-8 w-52 h-52 sm:w-64 sm:h-64 opacity-10 dark:opacity-15 stroke-[1.2] text-brand-600 dark:text-indigo-300 pointer-events-none rotate-12" />
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
               <div className="flex items-center gap-4">
@@ -56,10 +56,10 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
                   <Target className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h2 className="text-xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight uppercase">
+                  <h2 className="text-xl sm:text-3xl font-black text-slate-950 dark:text-white tracking-tight leading-tight uppercase">
                     Study Plan & Preparation Hub
                   </h2>
-                  <p className="text-slate-600 text-xs sm:text-sm font-medium mt-1">
+                  <p className="text-slate-600 dark:text-slate-300 text-xs sm:text-sm font-medium mt-1">
                     Your daily time-boxed schedule, weak subject drills, and Odisha student rankings
                   </p>
                 </div>

@@ -237,23 +237,23 @@ const StatCard = React.memo(({ icon, title, value, suffix = "", trend, decimals 
     >
       <DynamicVectorCard glowColor={glowColor} className="w-full">
         <div
-          className="relative w-full p-4 sm:p-6 text-slate-900 rounded-[2rem] bg-white/90 lg:bg-white/80 backdrop-blur-xl border border-slate-200/80 shadow-lg shadow-slate-200/50 flex flex-col justify-between overflow-hidden group min-h-[120px] sm:min-h-[170px]"
+          className="relative w-full p-4 sm:p-6 text-slate-900 dark:text-white rounded-[2rem] bg-white/90 lg:bg-white/80 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 backdrop-blur-xl border border-slate-200/80 dark:border-indigo-500/20 shadow-lg shadow-slate-200/50 dark:shadow-indigo-950/20 flex flex-col justify-between overflow-hidden group min-h-[120px] sm:min-h-[170px]"
         >
           {/* Radial Grid Watermark */}
-          <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none z-0" />
-          <VectorIcon className="absolute -right-6 -bottom-6 w-36 h-36 opacity-10 stroke-[1.2] text-[#2563eb] pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+          <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
+          <VectorIcon className="absolute -right-6 -bottom-6 w-36 h-36 opacity-10 dark:opacity-15 stroke-[1.2] text-[#2563eb] dark:text-indigo-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
 
           {/* Top Row: Icon + Trend */}
           <div className="relative z-10 flex items-center justify-between mb-2 sm:mb-4">
-             <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-brand-50 text-brand-600 border border-brand-200 shadow-2xs">
-                {React.cloneElement(icon, { className: "w-4 h-4 sm:w-5 sm:h-5 text-brand-600" })}
+             <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-brand-50 dark:bg-brand-900/30 text-brand-600 border border-brand-200 dark:border-brand-700/50 shadow-2xs">
+                {React.cloneElement(icon, { className: "w-4 h-4 sm:w-5 sm:h-5 text-brand-600 dark:text-brand-400" })}
              </div>
              {trend !== undefined && trend !== 0 && (
                 <div className={cn(
                    "flex items-center gap-1 px-2 py-1 rounded-xl text-[9px] sm:text-xs font-black font-mono shadow-2xs border",
-                   isPositive ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200"
+                   isPositive ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-700/50" : "bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-700/50"
                 )}>
-                   {isPositive ? <TrendingUp className="w-3 h-3 text-emerald-600" /> : <TrendingDown className="w-3 h-3 text-rose-600" />}
+                   {isPositive ? <TrendingUp className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> : <TrendingDown className="w-3 h-3 text-rose-600 dark:text-rose-400" />}
                    {Math.abs(Math.round(trend))}%
                 </div>
              )}
@@ -261,16 +261,16 @@ const StatCard = React.memo(({ icon, title, value, suffix = "", trend, decimals 
 
           {/* Label + Value */}
           <div className="relative z-10 flex-1 min-w-0 mb-2">
-            <h4 className="text-[9px] sm:text-[11px] font-sans font-black tracking-wider text-slate-400 uppercase truncate">{title}</h4>
-            <div className="text-xl sm:text-3xl font-black text-slate-900 font-mono flex items-baseline tracking-tight leading-none mt-1">
+            <h4 className="text-[9px] sm:text-[11px] font-sans font-black tracking-wider text-slate-400 dark:text-slate-400 uppercase truncate">{title}</h4>
+            <div className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono flex items-baseline tracking-tight leading-none mt-1">
                <AnimatedCounter value={value} decimals={decimals} />
-               {suffix && <span className="text-xs sm:text-sm font-black text-slate-400 ml-1">{suffix}</span>}
+               {suffix && <span className="text-xs sm:text-sm font-black text-slate-400 dark:text-slate-500 ml-1">{suffix}</span>}
             </div>
           </div>
           
           {/* Sparkline */}
           {sparklineData && sparklineData.length >= 2 && (
-            <div className="relative z-10 w-full pt-1.5 border-t border-slate-100 opacity-90">
+            <div className="relative z-10 w-full pt-1.5 border-t border-slate-100 dark:border-slate-700/50 opacity-90">
               <Sparkline data={sparklineData} color={strokeColor} id={title.replace(/\s+/g, '-').toLowerCase()} />
             </div>
           )}
@@ -1417,11 +1417,11 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
         <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.15)">
           <motion.div
             variants={stagger.itemFadeUp}
-            className="relative overflow-hidden bg-white/90 lg:bg-white/80 backdrop-blur-xl text-slate-900 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-9 border border-slate-200/80 shadow-xl shadow-slate-200/50 group"
+            className="relative overflow-hidden bg-white/90 lg:bg-white/80 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 backdrop-blur-xl text-slate-900 dark:text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-9 border border-slate-200/80 dark:border-indigo-500/20 shadow-xl shadow-slate-200/50 dark:shadow-indigo-950/20 group"
           >
             {/* Radial Grid & 3D Floating Watermark Icon */}
-            <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none z-0" />
-            <Brain className="absolute -right-8 -bottom-8 w-56 h-56 opacity-10 stroke-[1.2] text-[#2563eb] pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+            <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
+            <Brain className="absolute -right-8 -bottom-8 w-56 h-56 opacity-10 dark:opacity-15 stroke-[1.2] text-[#2563eb] dark:text-indigo-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
 
             <div className="relative z-10">
               {scanningPhase === 0 && (
@@ -1443,11 +1443,11 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
                             <span className="text-[9px] font-bold text-emerald-700 uppercase tracking-wider">Ready</span>
                           </span>
                         </div>
-                        <h3 className="text-sm font-black tracking-tight leading-tight text-slate-900 mt-0.5 uppercase">AI Performance & Diagnostic Lab</h3>
+                        <h3 className="text-sm font-black tracking-tight leading-tight text-slate-900 dark:text-white mt-0.5 uppercase">AI Performance & Diagnostic Lab</h3>
                       </div>
                     </div>
                     {/* Row 2: description */}
-                    <p className="text-slate-600 text-[11px] font-medium leading-relaxed">
+                    <p className="text-slate-600 dark:text-slate-300 text-[11px] font-medium leading-relaxed">
                       Unlock instant cognitive diagnostics, custom time-management strategy, and a targeted exam preparation roadmap.
                     </p>
                     {/* Row 3: full-width CTA button */}
@@ -1475,8 +1475,8 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                           <span className="text-[9px] font-bold text-emerald-700 uppercase tracking-wider">Ready to diagnose</span>
                         </div>
-                        <h3 className="text-2xl font-black tracking-tight leading-tight text-slate-900 uppercase">AI Performance & Diagnostic Laboratory</h3>
-                        <p className="text-slate-600 text-sm font-medium mt-1.5 max-w-xl">
+                        <h3 className="text-2xl font-black tracking-tight leading-tight text-slate-900 dark:text-white uppercase">AI Performance & Diagnostic Laboratory</h3>
+                        <p className="text-slate-600 dark:text-slate-300 text-sm font-medium mt-1.5 max-w-xl">
                           Unlock instant cognitive diagnostics, custom time-management strategy, and a targeted exam preparation roadmap.
                         </p>
                       </div>
@@ -1505,8 +1505,8 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
                     <Loader2 className="w-3.5 h-3.5 animate-spin text-[#2563EB]" />
                     Holographic Scanning Active
                   </div>
-                  <h4 className="text-lg font-black tracking-tight mt-1 text-slate-800">{scanStep}</h4>
-                  <div className="w-full max-w-[256px] h-1.5 bg-slate-100 rounded-full mt-4 mx-auto relative overflow-hidden border border-slate-200/50">
+                  <h4 className="text-lg font-black tracking-tight mt-1 text-slate-800 dark:text-white">{scanStep}</h4>
+                  <div className="w-full max-w-[256px] h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mt-4 mx-auto relative overflow-hidden border border-slate-200/50 dark:border-slate-700/50">
                     <div
                       className="absolute top-0 h-full w-[40%] bg-gradient-to-r from-[#2563EB] to-indigo-500 rounded-full animate-scan-bar"
                     />
@@ -1518,15 +1518,15 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
             {scanningPhase === 2 && (
               <div className="space-y-6">
                 {/* AI Panel Header */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-200/60 pb-4 sm:pb-5 gap-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-200/60 dark:border-slate-700/60 pb-4 sm:pb-5 gap-4">
                   <div className="flex items-center justify-between w-full sm:w-auto min-w-0">
                     <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-50 border border-slate-200/60 flex items-center justify-center shrink-0">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/50 flex items-center justify-center shrink-0">
                         <Cpu className="w-5 h-5 sm:w-5.5 sm:h-5.5 text-[#2563EB]" />
                       </div>
                       <div className="min-w-0">
-                        <h3 className="text-base sm:text-lg font-sans font-black tracking-tight leading-snug text-slate-900">AI Diagnostics Center</h3>
-                        <p className="text-[8px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1 sm:mt-1.5 leading-normal">Synthesized via OdishaExamPrep AI Engine</p>
+                        <h3 className="text-base sm:text-lg font-sans font-black tracking-tight leading-snug text-slate-900 dark:text-white">AI Diagnostics Center</h3>
+                        <p className="text-[8px] sm:text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 sm:mt-1.5 leading-normal">Synthesized via OdishaExamPrep AI Engine</p>
                       </div>
                     </div>
                     {/* Mobile Close Button */}

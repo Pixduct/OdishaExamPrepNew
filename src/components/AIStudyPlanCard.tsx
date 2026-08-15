@@ -11,6 +11,8 @@ import {
 
 import { useActiveExamContext } from '../lib/activeExamStore';
 
+import { DynamicVectorCard } from './DynamicVectorCard';
+
 interface AIStudyPlanCardProps {
   userId?: string;
   onLaunchTask?: (task: StudyPlanTask) => void;
@@ -139,10 +141,11 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
   }
 
   return (
-    <div className="p-5 sm:p-7 text-white rounded-[2.2rem] bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/20 shadow-xl shadow-indigo-950/20 space-y-4 mb-6 sm:mb-8 relative overflow-hidden card-3d-deep">
-      {/* Radial Grid & Floating Watermark Icon */}
-      <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
-      <Clock className="absolute -right-8 -bottom-8 w-52 h-52 opacity-15 stroke-[1.2] text-indigo-300 pointer-events-none transition-transform duration-700 hover:scale-110 hover:rotate-6 z-0" />
+    <DynamicVectorCard glowColor="rgba(99, 102, 241, 0.15)" className="mb-6 sm:mb-8">
+      <div className="p-5 sm:p-7 text-white rounded-[2.2rem] bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/20 shadow-xl shadow-indigo-950/20 space-y-4 relative overflow-hidden">
+        {/* Radial Grid & Floating Watermark Icon */}
+        <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
+        <Clock className="absolute -right-8 -bottom-8 w-52 h-52 opacity-15 stroke-[1.2] text-indigo-300 pointer-events-none transition-transform duration-700 hover:scale-110 hover:rotate-6 z-0" />
 
       {/* Top Header & Dynamic Personalization Status */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
@@ -339,6 +342,7 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
           </div>
         ))}
       </div>
-    </div>
+      </div>
+    </DynamicVectorCard>
   );
 };

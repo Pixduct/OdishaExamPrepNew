@@ -5,6 +5,8 @@ import { getSmartWeakTopicRecommendations, SmartRecommendationResult } from '../
 
 import { useActiveExamContext } from '../lib/activeExamStore';
 
+import { DynamicVectorCard } from './DynamicVectorCard';
+
 interface TopicConfidenceMatrixProps {
   userId?: string;
   onLaunchTopicPractice?: (topicName: string) => void;
@@ -46,10 +48,11 @@ export const TopicConfidenceMatrix: React.FC<TopicConfidenceMatrixProps> = ({
   const hasMoreTopics = allTopicConfidence.length > mobileVisibleCount;
 
   return (
-    <div className="p-5 sm:p-7 text-white rounded-[2.2rem] bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/20 shadow-xl shadow-indigo-950/20 space-y-4 relative overflow-hidden card-3d-deep">
-      {/* Radial Grid & Floating Watermark Icon */}
-      <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
-      <Zap className="absolute -right-8 -bottom-8 w-52 h-52 opacity-15 stroke-[1.2] text-amber-300 pointer-events-none transition-transform duration-700 hover:scale-110 hover:rotate-6 z-0" />
+    <DynamicVectorCard glowColor="rgba(99, 102, 241, 0.15)" className="mb-6 sm:mb-8">
+      <div className="p-5 sm:p-7 text-white rounded-[2.2rem] bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/20 shadow-xl shadow-indigo-950/20 space-y-4 relative overflow-hidden">
+        {/* Radial Grid & Floating Watermark Icon */}
+        <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
+        <Zap className="absolute -right-8 -bottom-8 w-52 h-52 opacity-15 stroke-[1.2] text-amber-300 pointer-events-none transition-transform duration-700 hover:scale-110 hover:rotate-6 z-0" />
 
       {/* Top Header Bar */}
       <div className="flex items-center justify-between gap-2 relative z-10">
@@ -250,6 +253,7 @@ export const TopicConfidenceMatrix: React.FC<TopicConfidenceMatrixProps> = ({
           <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
         </button>
       )}
-    </div>
+      </div>
+    </DynamicVectorCard>
   );
 };

@@ -7,6 +7,8 @@ import { Button } from './Button';
 
 import { useActiveExamContext } from '../lib/activeExamStore';
 
+import { DynamicVectorCard } from './DynamicVectorCard';
+
 interface SmartRecommendationCardProps {
   userId?: string;
   onLaunchPractice?: (topicName: string) => void;
@@ -41,11 +43,12 @@ export const SmartRecommendationCard: React.FC<SmartRecommendationCardProps> = (
   if (!primaryRecommendation) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="p-5 sm:p-7 text-white rounded-[2.2rem] bg-gradient-to-br from-slate-950 via-teal-950 to-slate-900 border border-teal-500/30 shadow-xl shadow-teal-950/20 relative overflow-hidden group mb-6 sm:mb-8 card-3d-deep"
-    >
+    <DynamicVectorCard glowColor="rgba(20, 184, 166, 0.15)" className="mb-6 sm:mb-8">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="p-5 sm:p-7 text-white rounded-[2.2rem] bg-gradient-to-br from-slate-950 via-teal-950 to-slate-900 border border-teal-500/30 shadow-xl shadow-teal-950/20 relative overflow-hidden group"
+      >
       {/* Radial Grid & Floating Watermark Icon */}
       <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
       <Sparkles className="absolute -right-8 -bottom-8 w-52 h-52 opacity-15 stroke-[1.2] text-teal-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
@@ -144,5 +147,6 @@ export const SmartRecommendationCard: React.FC<SmartRecommendationCardProps> = (
         </div>
       </div>
     </motion.div>
+  </DynamicVectorCard>
   );
 };

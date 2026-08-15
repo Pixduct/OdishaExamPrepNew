@@ -16,6 +16,8 @@ import {
   ALL_30_ODISHA_DISTRICTS
 } from '../lib/profileManager';
 
+import { DynamicVectorCard } from './DynamicVectorCard';
+
 interface OdishaLeaderboardCardProps {
   userId?: string;
 }
@@ -76,13 +78,14 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
   };
 
   return (
-    <div className="p-5 sm:p-7 text-white rounded-[2.2rem] bg-gradient-to-br from-slate-900 via-amber-950/40 to-slate-900 border border-amber-500/20 shadow-xl shadow-amber-950/20 space-y-4 sm:space-y-5 mb-6 sm:mb-8 relative overflow-hidden card-3d-deep">
-      {/* Radial Grid & Floating Watermark Icon */}
-      <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
-      <Trophy className="absolute -right-8 -bottom-8 w-52 h-52 opacity-15 stroke-[1.2] text-amber-300 pointer-events-none transition-transform duration-700 hover:scale-110 hover:rotate-6 z-0" />
+    <DynamicVectorCard glowColor="rgba(245, 158, 11, 0.15)" className="mb-6 sm:mb-8">
+      <div className="p-5 sm:p-7 text-white rounded-[2.2rem] bg-gradient-to-br from-slate-900 via-amber-950/40 to-slate-900 border border-amber-500/20 shadow-xl shadow-amber-950/20 space-y-4 sm:space-y-5 relative overflow-hidden">
+        {/* Radial Grid & Floating Watermark Icon */}
+        <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
+        <Trophy className="absolute -right-8 -bottom-8 w-52 h-52 opacity-15 stroke-[1.2] text-amber-300 pointer-events-none transition-transform duration-700 hover:scale-110 hover:rotate-6 z-0" />
 
-      {/* Top Header Bar (Inline on Mobile & Desktop) */}
-      <div className="flex items-center justify-between gap-2 relative z-10">
+        {/* Top Header Bar (Inline on Mobile & Desktop) */}
+        <div className="flex items-center justify-between gap-2 relative z-10">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-orange-600 text-slate-950 flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/30 border border-amber-300/60 font-black">
             <Trophy className="w-6 h-6 stroke-[2.2]" />
@@ -457,6 +460,7 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
           </div>
         )}
       </AnimatePresence>
-    </div>
+      </div>
+    </DynamicVectorCard>
   );
 };

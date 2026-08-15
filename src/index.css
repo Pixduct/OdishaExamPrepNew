@@ -203,7 +203,6 @@ body[data-premium-blur="true"] #root {
     will-change: transform;
   }
   .card-3d-deep:hover {
-    transform: perspective(1200px) rotateX(-1.5deg) rotateY(2.5deg) translateY(-8px);
     box-shadow:
       0 60px 120px rgba(124,58,237,0.12),
       0 20px 60px rgba(0,0,0,0.03);

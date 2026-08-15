@@ -6,6 +6,7 @@ import { SmartRecommendationCard } from './components/SmartRecommendationCard';
 import { TopicConfidenceMatrix } from './components/TopicConfidenceMatrix';
 import { OdishaLeaderboardCard } from './components/OdishaLeaderboardCard';
 import { PersonalBestCard } from './components/PersonalBestCard';
+import { DynamicVectorCard } from './components/DynamicVectorCard';
 import { stagger } from './lib/animations';
 
 import { ActiveExamContextBar } from './components/ActiveExamContextBar';
@@ -47,32 +48,34 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
         className="w-full mx-auto space-y-6 sm:space-y-8 pb-32 sm:pb-24 relative z-10 max-w-7xl"
       >
         {/* Executive Bright Study Vector Header Card */}
-        <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 border border-slate-200/80 shadow-xl shadow-slate-200/40 rounded-[2.2rem] relative overflow-hidden z-10">
-          {/* Radial Grid & Floating Header Watermark */}
-          <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none" />
-          <Calendar className="absolute -right-8 -bottom-8 w-52 h-52 sm:w-64 sm:h-64 opacity-10 stroke-[1.2] text-brand-600 pointer-events-none rotate-12" />
+        <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)">
+          <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 border border-slate-200/80 shadow-xl shadow-slate-200/40 rounded-[2.2rem] relative overflow-hidden z-10">
+            {/* Radial Grid & Floating Header Watermark */}
+            <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none" />
+            <Calendar className="absolute -right-8 -bottom-8 w-52 h-52 sm:w-64 sm:h-64 opacity-10 stroke-[1.2] text-brand-600 pointer-events-none rotate-12" />
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-brand-500 via-indigo-600 to-brand-700 text-white flex items-center justify-center shrink-0 shadow-lg shadow-brand-500/25 border border-white/40">
-                <Target className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.2]" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-brand-500 via-indigo-600 to-brand-700 text-white flex items-center justify-center shrink-0 shadow-lg shadow-brand-500/25 border border-white/40">
+                  <Target className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.2]" />
+                </div>
+                <div>
+                  <h2 className="text-xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight uppercase">
+                    Study Plan & Preparation Hub
+                  </h2>
+                  <p className="text-slate-600 text-xs sm:text-sm font-medium mt-1">
+                    Your daily time-boxed schedule, weak subject drills, and Odisha student rankings
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight uppercase">
-                  Study Plan & Preparation Hub
-                </h2>
-                <p className="text-slate-600 text-xs sm:text-sm font-medium mt-1">
-                  Your daily time-boxed schedule, weak subject drills, and Odisha student rankings
-                </p>
-              </div>
+
+              <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black text-brand-700 bg-brand-50/80 border border-brand-200/70 shrink-0 font-mono shadow-2xs backdrop-blur-md">
+                <Sparkles className="w-4 h-4 text-brand-600 animate-pulse" />
+                Personalized Hub
+              </span>
             </div>
-
-            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black text-brand-700 bg-brand-50/80 border border-brand-200/70 shrink-0 font-mono shadow-2xs backdrop-blur-md">
-              <Sparkles className="w-4 h-4 text-brand-600 animate-pulse" />
-              Personalized Hub
-            </span>
           </div>
-        </div>
+        </DynamicVectorCard>
 
         {/* Hero Context Bar for Multi-Exam Selection */}
         <ActiveExamContextBar />

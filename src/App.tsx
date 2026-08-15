@@ -74,6 +74,8 @@ import { StreakDetailModal } from './components/StreakDetailModal';
 import { ExamReadinessCard } from './components/ExamReadinessCard';
 import { SmartRecommendationCard } from './components/SmartRecommendationCard';
 import { AIStudyPlanCard } from './components/AIStudyPlanCard';
+import { DynamicVectorCard } from './components/DynamicVectorCard';
+import { stagger } from './lib/animations';
 import { StudyPlanView } from './StudyPlanView';
 import { useActiveExamContext } from './lib/activeExamStore';
 import { ActiveExamContextBar } from './components/ActiveExamContextBar';
@@ -480,346 +482,397 @@ const HistoryView = ({
 
   if (!examFilteredActivities || examFilteredActivities.length === 0) {
     return (
-      <div className="space-y-5">
-        <ActiveExamContextBar />
-        <div className="flex flex-col items-center justify-center p-12 sm:p-16 text-center space-y-6 bg-gradient-to-b from-white to-slate-50/40 rounded-[2.5rem] border border-slate-200/40 shadow-[0_20px_50px_rgba(0,0,0,0.02),inset_0_1px_0_rgba(255,255,255,1)] relative overflow-hidden py-16">
-          <div className="absolute inset-0 grid-bg opacity-[0.01]" />
-          <div className="relative flex items-center justify-center w-24 h-24 rounded-full bg-brand-50/50 mb-2">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-100 to-brand-50 flex items-center justify-center shadow-inner">
-              <History className="w-8 h-8 text-brand-600 animate-float-sm" />
+      <div className="relative w-full min-h-screen bg-[#F8FAFC] overflow-x-hidden" style={{ isolation: 'isolate' }}>
+        <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 pointer-events-none z-0" />
+        <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 rounded-full blur-3xl pointer-events-none z-0" />
+        <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 rounded-full blur-3xl pointer-events-none z-0" />
+
+        <div className="w-full mx-auto space-y-6 relative z-10">
+          <ActiveExamContextBar />
+          <div className="flex flex-col items-center justify-center p-12 sm:p-16 text-center space-y-6 bg-gradient-to-b from-white to-slate-50/40 rounded-[2.5rem] border border-slate-200/40 shadow-xl relative overflow-hidden py-16">
+            <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none" />
+            <div className="relative flex items-center justify-center w-24 h-24 rounded-full bg-brand-50/50 mb-2">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-100 to-brand-50 flex items-center justify-center shadow-inner">
+                <History className="w-8 h-8 text-brand-600 animate-float-sm" />
+              </div>
             </div>
-          </div>
-          <div className="space-y-2 relative z-10 max-w-sm">
-            <h2 className="text-2xl font-serif font-extrabold bg-gradient-to-r from-brand-700 to-brand-500 bg-clip-text text-transparent">No History For This Exam</h2>
-            <p className="text-slate-500 font-semibold text-xs sm:text-sm leading-relaxed">
-              No test attempts recorded under <strong className="text-slate-800">{activeContext.activeExamName}</strong>. Switch to "All Exams Combined" or take a test for this target exam.
-            </p>
-          </div>
-          <button
-            onClick={() => {
-              if (onNavigate) {
-                onNavigate('home');
-                setTimeout(() => {
+            <div className="space-y-2 relative z-10 max-w-sm">
+              <h2 className="text-2xl font-serif font-extrabold bg-gradient-to-r from-brand-700 to-brand-500 bg-clip-text text-transparent">No History For This Exam</h2>
+              <p className="text-slate-500 font-semibold text-xs sm:text-sm leading-relaxed">
+                No test attempts recorded under <strong className="text-slate-800">{activeContext.activeExamName}</strong>. Switch to "All Exams Combined" or take a test for this target exam.
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                if (onNavigate) {
+                  onNavigate('home');
+                  setTimeout(() => {
+                    scrollToElement('exams', { block: 'start' });
+                  }, 100);
+                } else {
                   scrollToElement('exams', { block: 'start' });
-                }, 100);
-              } else {
-                scrollToElement('exams', { block: 'start' });
-              }
-            }}
-            className="relative z-10 premium-gradient text-white flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-widest hover:premium-glow hover:scale-[1.02] active:scale-98 transition-all duration-300 shadow-md cursor-pointer border-none"
-          >
-            Explore Mock Tests
-          </button>
+                }
+              }}
+              className="relative z-10 premium-gradient text-white flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-widest hover:premium-glow hover:scale-[1.02] active:scale-98 transition-all duration-300 shadow-md cursor-pointer border-none"
+            >
+              Explore Mock Tests
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-5">
-      {/* ── Section header ── */}
-      <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-100">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-50 border border-slate-200/50 flex items-center justify-center shrink-0">
-            <History className="w-4 h-4 sm:w-5 sm:h-5 text-[#2563EB]" />
-          </div>
-          <div className="min-w-0">
-            <h2 className="text-base sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-tight">
-              Activity History
-            </h2>
-            <p className="text-[10px] font-semibold text-slate-400 leading-none mt-0.5 hidden sm:block">
-              Manage and track your exam sessions
-            </p>
-          </div>
-        </div>
+    <div className="relative w-full min-h-screen bg-[#F8FAFC] overflow-x-hidden" style={{ isolation: 'isolate' }}>
+      {/* Full-Screen Edge-to-Edge Academic Vector Canvas Grid & HSL Glows */}
+      <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 pointer-events-none z-0" />
+      <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 rounded-full blur-3xl pointer-events-none z-0" />
+      <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 rounded-full blur-3xl pointer-events-none z-0" />
 
-        {examFilteredActivities.length > 0 && (
-          <div className="shrink-0">
-            {confirmClearAll ? (
-              <div className="flex items-center gap-1.5 animate-in fade-in duration-200">
-                <button
-                  onClick={async () => { await handleClearAll(); }}
-                  className="px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-black uppercase tracking-wider cursor-pointer border-none shadow-sm"
-                >
-                  Confirm
-                </button>
-                <button
-                  onClick={() => setConfirmClearAll(false)}
-                  className="px-2.5 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-black uppercase tracking-wider cursor-pointer border-none"
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setConfirmClearAll(true)}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-slate-50 hover:bg-rose-50/70 text-slate-400 hover:text-rose-600 border border-slate-200/60 text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-xs"
-              >
-                <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                <span className="hidden sm:inline">Clear All</span>
-              </button>
-            )}
-          </div>
-        )}
+      {/* Floating Viewport Academic Study Vector Watermarks */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-20">
+        <History className="absolute top-24 left-[5%] w-44 h-44 text-slate-800 opacity-[0.08] stroke-[1.2] rotate-12" />
+        <Calendar className="absolute top-1/3 right-[5%] w-48 h-48 text-brand-600 opacity-[0.08] stroke-[1.2] -rotate-6" />
+        <CheckCircle2 className="absolute bottom-1/3 left-[6%] w-44 h-44 text-amber-600 opacity-[0.08] stroke-[1.2] rotate-45" />
+        <Clock className="absolute bottom-28 right-[6%] w-36 h-36 text-indigo-600 opacity-[0.08] stroke-[1.2] -rotate-12" />
       </div>
 
-      {/* Hero Context Bar for Multi-Exam Context Selection (Placed BELOW header, ABOVE filters) */}
-      <ActiveExamContextBar className="my-1 sm:my-2" />
+      <motion.div 
+        variants={stagger.containerDelay(0.1, 0.1)}
+        initial="hidden"
+        animate="show"
+        className="w-full mx-auto space-y-6 sm:space-y-8 pb-32 sm:pb-24 relative z-10"
+      >
+        {/* Executive Bright Study Vector Header Card */}
+        <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)">
+          <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 border border-slate-200/80 shadow-xl shadow-slate-200/40 rounded-3xl sm:rounded-[2.5rem] relative overflow-hidden z-10">
+            {/* Radial Grid & Floating Header Watermark */}
+            <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none" />
+            <History className="absolute -right-8 -bottom-8 w-52 h-52 sm:w-64 sm:h-64 opacity-10 stroke-[1.2] text-brand-600 pointer-events-none rotate-12" />
 
-      {/* ── Filter Pills ── */}
-      {examFilteredActivities.length > 0 && (() => {
-        const filterCounts = {
-          all:        examFilteredActivities.length,
-          completed:  examFilteredActivities.filter(a => !!a.metadata && a.type !== 'question_bank_accessed' && a.type !== 'test_incomplete' && a.type !== 'practice_test_completed').length,
-          incomplete: examFilteredActivities.filter(a => a.type === 'test_incomplete').length,
-          ai_quiz:    examFilteredActivities.filter(a => a.type === 'practice_test_completed').length,
-          download:   examFilteredActivities.filter(a => a.type === 'question_bank_accessed').length,
-        };
-        const filters: { id: typeof activeFilter; label: string; icon: React.ReactNode }[] = [
-          { id: 'all',        label: 'All',        icon: <LayoutDashboard className="w-3 h-3" /> },
-          { id: 'completed',  label: 'Completed',  icon: <CheckCircle2 className="w-3 h-3" /> },
-          { id: 'incomplete', label: 'Incomplete', icon: <Clock className="w-3 h-3" /> },
-          { id: 'ai_quiz',    label: 'AI Quiz',    icon: <Sparkles className="w-3 h-3" /> },
-          { id: 'download',   label: 'Downloads',  icon: <Download className="w-3 h-3" /> },
-        ];
-        return (
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5 -mx-0.5 px-0.5">
-            {filters.map(f => {
-              const count = filterCounts[f.id];
-              const isActive = activeFilter === f.id;
-              return (
-                <motion.button
-                  key={f.id}
-                  onClick={() => setActiveFilter(f.id)}
-                  disabled={count === 0}
-                  whileTap={count > 0 ? { scale: 0.94 } : undefined}
-                  className={cn(
-                    "relative flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-[9px] sm:text-[10px] font-black whitespace-nowrap border shrink-0 overflow-hidden transition-colors",
-                    isActive
-                      ? "text-white border-brand-600"
-                      : count === 0
-                        ? "bg-white text-slate-300 border-slate-100 cursor-not-allowed"
-                        : "bg-white text-slate-500 border-slate-200 hover:border-brand-300 hover:text-brand-600 cursor-pointer"
-                  )}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="historyFilterActivePill"
-                      className="absolute inset-0 bg-brand-600"
-                      transition={{ type: 'spring', stiffness: 400, damping: 30, mass: 0.8 }}
-                    />
-                  )}
-                  <span className="relative z-10 flex items-center gap-1.5">
-                    {f.icon}
-                    <span className="uppercase tracking-wider">{f.label}</span>
-                    <span className={cn(
-                      "px-1.5 py-0.5 rounded-md text-[8px] font-black min-w-[16px] text-center",
-                      isActive ? "bg-white/25 text-white" : "bg-slate-100 text-slate-400"
-                    )}>{count}</span>
-                  </span>
-                </motion.button>
-              );
-            })}
-          </div>
-        );
-      })()}
-
-      {/* ── Activity cards ── */}
-      {(() => {
-        const filteredActivities = examFilteredActivities.filter(a => {
-          if (activeFilter === 'all')        return true;
-          if (activeFilter === 'completed')  return !!a.metadata && a.type !== 'question_bank_accessed' && a.type !== 'test_incomplete' && a.type !== 'practice_test_completed';
-          if (activeFilter === 'incomplete') return a.type === 'test_incomplete';
-          if (activeFilter === 'ai_quiz')    return a.type === 'practice_test_completed';
-          if (activeFilter === 'download')   return a.type === 'question_bank_accessed';
-          return true;
-        });
-        return (
-          <AnimatePresence mode="wait" initial={false}>
-            {filteredActivities.length === 0 ? (
-              <motion.div
-                key={`empty-${activeFilter}`}
-                initial={{ opacity: 0, y: 12, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -8, transition: { duration: 0.14 } }}
-                transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
-                className="flex flex-col items-center justify-center py-14 text-center space-y-3 bg-slate-50/50 rounded-2xl border border-slate-100"
-              >
-                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center">
-                  <History className="w-6 h-6 text-slate-300" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-brand-500 via-indigo-600 to-brand-700 text-white flex items-center justify-center shrink-0 shadow-lg shadow-brand-500/25 border border-white/40">
+                  <History className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.2]" />
                 </div>
-                <p className="text-sm font-bold text-slate-400">No {activeFilter === 'ai_quiz' ? 'AI Quiz' : activeFilter} history yet</p>
-                <button onClick={() => setActiveFilter('all')} className="text-[10px] font-black uppercase tracking-wider text-brand-600 hover:text-brand-700 transition-colors cursor-pointer">View All History</button>
-              </motion.div>
-            ) : (
-              <motion.div
-                key={activeFilter}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8, transition: { duration: 0.14 } }}
-                transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                className="grid gap-2.5 sm:gap-3"
-              >
-                {filteredActivities.map((a, i) => {
-          const isTestResult = !!a.metadata && a.type !== 'question_bank_accessed';
-          const isAiQuiz = a.type === 'practice_test_completed';
-          const isDownloadable = a.type === 'question_bank_accessed' && !!a.metadata?.pdfUrl;
-          const isInteractive = isTestResult || isDownloadable || a.type === 'test_incomplete';
-
-          // Left accent stripe colour by type
-          const accentColor =
-            a.type === 'test_incomplete'        ? 'bg-amber-400' :
-            isAiQuiz                             ? 'bg-purple-500' :
-            a.type === 'question_bank_accessed'  ? 'bg-blue-400'  :
-                                                   'bg-brand-500';
-
-          // Compact timestamp: "3 Jul · 08:10"
-          const d = new Date(a.timestamp);
-          const compactDate =
-            d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) +
-            ' · ' +
-            d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-
-          const titleText =
-            !isNaN(Number(a.title)) && a.metadata?.testCategory?.toLowerCase().includes('mock')
-              ? `Mock Test #${a.title}`
-              : a.title;
-
-          return (
-            <motion.div
-              key={a.id || i}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04, duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
-              onClick={() => {
-                if (isDownloadable) {
-                  window.open(a.metadata.pdfUrl, '_blank');
-                } else if (a.type === 'test_incomplete' && onResumeTest) {
-                  onResumeTest(a.metadata.test, a.metadata);
-                } else if (isTestResult && onViewResults) {
-                  onViewResults(a.metadata);
-                }
-              }}
-              className={cn(
-                "relative bg-white rounded-2xl border border-slate-200/50 overflow-hidden transition-colors group shadow-[0_1px_4px_rgba(0,0,0,0.03)] hover:shadow-md flex",
-                isInteractive ? "cursor-pointer hover:border-brand-400/50 hover:shadow-brand-500/5" : ""
-              )}
-            >
-              {/* ── Left accent stripe ── */}
-              <div className={cn("w-[3px] shrink-0 self-stretch", accentColor)} />
-
-              {/* ── Card body ── */}
-              <div className="flex-1 min-w-0 px-3.5 py-3 sm:px-5 sm:py-4 flex flex-col gap-1.5">
-
-                {/* Confirm delete overlay */}
-                {confirmDeleteId === a.id && (
-                  <div
-                    className="absolute inset-0 bg-white/97 backdrop-blur-sm flex flex-col items-center justify-center gap-3 px-6 z-20 animate-in fade-in duration-200 rounded-2xl"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <span className="text-xs font-bold text-slate-800 text-center">Delete this activity?</span>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={async () => { await handleDeleteActivity(a.id); }}
-                        className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-black uppercase tracking-wider cursor-pointer border-none shadow-md active:scale-95 transition-all"
-                      >Delete</button>
-                      <button
-                        onClick={() => setConfirmDeleteId(null)}
-                        className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-black uppercase tracking-wider cursor-pointer border-none active:scale-95 transition-all"
-                      >Cancel</button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Row 1 — title + action buttons */}
-                <div className="flex items-start justify-between gap-2">
-                  <h4 className="font-extrabold text-sm sm:text-base text-slate-900 leading-snug group-hover:text-brand-600 transition-colors line-clamp-2 flex-1 min-w-0">
-                    {titleText}
-                  </h4>
-                  <div className="flex items-center gap-1 shrink-0 -mt-0.5 -mr-1.5">
-                    {(isTestResult || a.type === 'test_incomplete') && (
-                      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center bg-brand-50 text-brand-600 group-hover:bg-brand-600 group-hover:text-white transition-all shrink-0 border border-brand-100/30">
-                        {a.type === 'test_incomplete'
-                          ? <Play className="w-2.5 h-2.5 sm:w-3 sm:h-3 ml-px fill-current" />
-                          : <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 ml-px" />}
-                      </div>
-                    )}
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(a.id); }}
-                      className="delete-btn p-1.5 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50/50 active:text-rose-600 transition-all cursor-pointer border-none bg-transparent shrink-0"
-                      title="Delete from history"
-                    >
-                      <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                    </button>
-                  </div>
+                <div>
+                  <h2 className="text-xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight uppercase">
+                    Activity History
+                  </h2>
+                  <p className="text-slate-600 text-xs sm:text-sm font-medium mt-1">
+                    Manage, review, and track all your exam practice sessions
+                  </p>
                 </div>
-
-                {/* Row 2 — compact date */}
-                <div className="flex items-center gap-1">
-                  <Clock className="w-2.5 h-2.5 text-slate-300 shrink-0" />
-                  <span className="text-[9px] sm:text-[10px] font-medium text-slate-400">{compactDate}</span>
-                </div>
-
-                {/* Row 3 — badges (left) + score/status (right) */}
-                <div className="flex items-center justify-between gap-2 pt-0.5">
-                  <div className="flex flex-wrap items-center gap-1 min-w-0">
-                    {a.metadata?.testCategory && (
-                      <span className="inline-flex items-center px-1.5 py-0.5 bg-brand-50/80 text-brand-700 rounded text-[8px] font-black uppercase tracking-wider leading-none">
-                        {a.metadata.testCategory}
-                      </span>
-                    )}
-                    {a.metadata?.examName && (
-                      <span className="inline-flex items-center px-1.5 py-0.5 bg-slate-50 text-slate-500 rounded text-[8px] font-bold uppercase tracking-wider leading-none max-w-[100px] sm:max-w-[160px] truncate" title={a.metadata.examName}>
-                        {a.metadata.examName}
-                      </span>
-                    )}
-                    {a.type === 'test_incomplete' && (
-                      <span className="inline-flex items-center px-1.5 py-0.5 bg-amber-50 text-amber-600 rounded text-[8px] font-bold uppercase tracking-wider leading-none">
-                        Incomplete
-                      </span>
-                    )}
-                    {a.type === 'question_bank_accessed' && (
-                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-blue-50/80 text-blue-600 rounded text-[8px] font-bold">
-                        <Download className="w-2.5 h-2.5" />
-                        {isDownloadable ? 'Download' : 'Downloaded'}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="shrink-0">
-                    {a.type === 'test_incomplete' && (
-                      <div className="flex items-center gap-0.5">
-                        <Clock className="w-2.5 h-2.5 text-brand-400" />
-                        <span className="text-[9px] font-bold text-brand-600">
-                          {Object.keys(a.metadata?.answers || {}).length} answered
-                        </span>
-                      </div>
-                    )}
-                    {((isTestResult || isAiQuiz) && a.score !== undefined && a.score !== null) && (
-                      <div className="flex items-baseline gap-0.5">
-                        <span className="font-black text-slate-900 text-sm leading-none">
-                          {typeof a.score === 'number' ? Number(a.score.toFixed(2)) : a.score}
-                        </span>
-                        <span className="text-slate-400 text-[9px] font-bold">/{a.totalMarks}</span>
-                        {!isAiQuiz && (
-                          <span className="ml-1 text-[8px] font-bold text-slate-400">
-                            · {Math.round(a.accuracy || 0)}%
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
               </div>
-            </motion.div>
+
+              {examFilteredActivities.length > 0 && (
+                <div className="shrink-0">
+                  {confirmClearAll ? (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={async () => { await handleClearAll(); }}
+                        className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider cursor-pointer border-none shadow-md"
+                      >
+                        Confirm Clear
+                      </button>
+                      <button
+                        onClick={() => setConfirmClearAll(false)}
+                        className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-black uppercase tracking-wider cursor-pointer border-none"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmClearAll(true)}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200/80 text-xs font-black uppercase tracking-wider transition-all cursor-pointer shadow-2xs"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Clear All History
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </DynamicVectorCard>
+
+        {/* Hero Context Bar for Multi-Exam Context Selection */}
+        <ActiveExamContextBar />
+
+        {/* Filter Pills Bar */}
+        {examFilteredActivities.length > 0 && (() => {
+          const filterCounts = {
+            all:        examFilteredActivities.length,
+            completed:  examFilteredActivities.filter(a => !!a.metadata && a.type !== 'question_bank_accessed' && a.type !== 'test_incomplete' && a.type !== 'practice_test_completed').length,
+            incomplete: examFilteredActivities.filter(a => a.type === 'test_incomplete').length,
+            ai_quiz:    examFilteredActivities.filter(a => a.type === 'practice_test_completed').length,
+            download:   examFilteredActivities.filter(a => a.type === 'question_bank_accessed').length,
+          };
+          const filters: { id: typeof activeFilter; label: string; icon: React.ReactNode }[] = [
+            { id: 'all',        label: 'All',        icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
+            { id: 'completed',  label: 'Completed',  icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
+            { id: 'incomplete', label: 'Incomplete', icon: <Clock className="w-3.5 h-3.5" /> },
+            { id: 'ai_quiz',    label: 'AI Quiz',    icon: <Sparkles className="w-3.5 h-3.5" /> },
+            { id: 'download',   label: 'Downloads',  icon: <Download className="w-3.5 h-3.5" /> },
+          ];
+          return (
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+              {filters.map(f => {
+                const count = filterCounts[f.id];
+                const isActive = activeFilter === f.id;
+                return (
+                  <motion.button
+                    key={f.id}
+                    onClick={() => setActiveFilter(f.id)}
+                    disabled={count === 0}
+                    whileTap={count > 0 ? { scale: 0.94 } : undefined}
+                    className={cn(
+                      "relative flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black whitespace-nowrap border shrink-0 overflow-hidden transition-all duration-200 shadow-2xs",
+                      isActive
+                        ? "text-white border-brand-600 shadow-md shadow-brand-500/20"
+                        : count === 0
+                          ? "bg-slate-100/60 text-slate-300 border-slate-200/50 cursor-not-allowed"
+                          : "bg-white text-slate-600 border-slate-200/80 hover:border-brand-300 hover:text-brand-600 hover:bg-slate-50 cursor-pointer"
+                    )}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="historyFilterActivePill"
+                        className="absolute inset-0 bg-gradient-to-r from-brand-600 to-indigo-600"
+                        transition={{ type: 'spring', stiffness: 400, damping: 30, mass: 0.8 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-2">
+                      {f.icon}
+                      <span className="uppercase tracking-wider font-mono">{f.label}</span>
+                      <span className={cn(
+                        "px-2 py-0.5 rounded-md text-[10px] font-mono font-black min-w-[20px] text-center",
+                        isActive ? "bg-white/25 text-white" : "bg-slate-100 text-slate-500"
+                      )}>{count}</span>
+                    </span>
+                  </motion.button>
+                );
+              })}
+            </div>
           );
-        })}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        );
-      })()}
+        })()}
+
+        {/* Activity Cards List */}
+        {(() => {
+          const filteredActivities = examFilteredActivities.filter(a => {
+            if (activeFilter === 'all')        return true;
+            if (activeFilter === 'completed')  return !!a.metadata && a.type !== 'question_bank_accessed' && a.type !== 'test_incomplete' && a.type !== 'practice_test_completed';
+            if (activeFilter === 'incomplete') return a.type === 'test_incomplete';
+            if (activeFilter === 'ai_quiz')    return a.type === 'practice_test_completed';
+            if (activeFilter === 'download')   return a.type === 'question_bank_accessed';
+            return true;
+          });
+          return (
+            <AnimatePresence mode="wait" initial={false}>
+              {filteredActivities.length === 0 ? (
+                <motion.div
+                  key={`empty-${activeFilter}`}
+                  initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, transition: { duration: 0.14 } }}
+                  transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex flex-col items-center justify-center py-16 text-center space-y-4 bg-white/80 rounded-3xl border border-slate-200/80 shadow-sm"
+                >
+                  <div className="w-14 h-14 rounded-2xl bg-brand-50 flex items-center justify-center border border-brand-100">
+                    <History className="w-7 h-7 text-brand-600" />
+                  </div>
+                  <p className="text-base font-bold text-slate-600">No {activeFilter === 'ai_quiz' ? 'AI Quiz' : activeFilter} history recorded yet</p>
+                  <button onClick={() => setActiveFilter('all')} className="text-xs font-black uppercase tracking-wider text-brand-600 hover:text-brand-700 transition-colors cursor-pointer border-none bg-transparent">View All History</button>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key={activeFilter}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8, transition: { duration: 0.14 } }}
+                  transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                  className="grid grid-cols-1 gap-4"
+                >
+                  {filteredActivities.map((a, i) => {
+                    const isTestResult = !!a.metadata && a.type !== 'question_bank_accessed';
+                    const isAiQuiz = a.type === 'practice_test_completed';
+                    const isDownloadable = a.type === 'question_bank_accessed' && !!a.metadata?.pdfUrl;
+                    const isInteractive = isTestResult || isDownloadable || a.type === 'test_incomplete';
+
+                    const d = new Date(a.timestamp);
+                    const compactDate =
+                      d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) +
+                      ' · ' +
+                      d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+                    const titleText =
+                      !isNaN(Number(a.title)) && a.metadata?.testCategory?.toLowerCase().includes('mock')
+                        ? `Mock Test #${a.title}`
+                        : a.title;
+
+                    return (
+                      <DynamicVectorCard key={a.id || i} glowColor="rgba(59, 130, 246, 0.08)" className="w-full">
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.03, duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
+                          onClick={() => {
+                            if (isDownloadable) {
+                              window.open(a.metadata.pdfUrl, '_blank');
+                            } else if (a.type === 'test_incomplete' && onResumeTest) {
+                              onResumeTest(a.metadata.test, a.metadata);
+                            } else if (isTestResult && onViewResults) {
+                              onViewResults(a.metadata);
+                            }
+                          }}
+                          className={cn(
+                            "relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-6 shadow-xl border border-slate-800 flex flex-col gap-4 group",
+                            isInteractive ? "cursor-pointer hover:border-brand-500/40 hover:shadow-brand-500/10 transition-all duration-300" : ""
+                          )}
+                        >
+                          {/* Radial Grid & Floating Background Watermark Icon */}
+                          <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
+                          
+                          {a.type === 'test_incomplete' ? (
+                            <Clock className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-amber-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                          ) : isAiQuiz ? (
+                            <Sparkles className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-purple-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                          ) : isDownloadable ? (
+                            <Download className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-blue-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                          ) : (
+                            <CheckCircle2 className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-emerald-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                          )}
+
+                          {/* Confirm delete overlay */}
+                          {confirmDeleteId === a.id && (
+                            <div
+                              className="absolute inset-0 bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center gap-3 px-6 z-30 rounded-[inherit]"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <span className="text-sm font-bold text-white text-center">Delete this activity from history?</span>
+                              <div className="flex gap-3">
+                                <button
+                                  onClick={async () => { await handleDeleteActivity(a.id); }}
+                                  className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider cursor-pointer border-none shadow-md active:scale-95 transition-all"
+                                >
+                                  Delete
+                                </button>
+                                <button
+                                  onClick={() => setConfirmDeleteId(null)}
+                                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-black uppercase tracking-wider cursor-pointer border-none active:scale-95 transition-all"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Row 1 — Title & Action Badge */}
+                          <div className="relative z-10 flex items-start justify-between gap-3">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <div className={cn(
+                                "p-3 rounded-2xl shrink-0 shadow-2xs border",
+                                a.type === 'test_incomplete' ? "bg-amber-500/20 text-amber-300 border-amber-500/40" :
+                                isAiQuiz ? "bg-purple-500/20 text-purple-300 border-purple-500/40" :
+                                isDownloadable ? "bg-blue-500/20 text-blue-300 border-blue-500/40" :
+                                "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                              )}>
+                                {a.type === 'test_incomplete' ? <Clock className="w-5 h-5" /> :
+                                 isAiQuiz ? <Sparkles className="w-5 h-5" /> :
+                                 isDownloadable ? <Download className="w-5 h-5" /> :
+                                 <CheckCircle2 className="w-5 h-5" />}
+                              </div>
+
+                              <div className="min-w-0 flex-1">
+                                <h4 className="font-black text-white text-base sm:text-lg leading-snug tracking-tight group-hover:text-brand-300 transition-colors line-clamp-2 uppercase">
+                                  {titleText}
+                                </h4>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Clock className="w-3 h-3 text-slate-300 shrink-0" />
+                                  <span className="text-xs font-semibold text-slate-200">{compactDate}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0">
+                              {(isTestResult || a.type === 'test_incomplete') && (
+                                <div className="px-3 py-1.5 rounded-xl bg-brand-500/20 text-brand-300 border border-brand-500/40 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 group-hover:bg-brand-500 group-hover:text-white transition-all">
+                                  <span>{a.type === 'test_incomplete' ? 'Resume' : 'View Results'}</span>
+                                  {a.type === 'test_incomplete' ? <Play className="w-3.5 h-3.5 fill-current" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                                </div>
+                              )}
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(a.id); }}
+                                className="p-2 rounded-xl text-slate-300 hover:text-rose-400 hover:bg-rose-500/20 transition-all cursor-pointer border-none bg-transparent shrink-0"
+                                title="Delete activity"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Row 2 — Badges & Scores */}
+                          <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/80">
+                            <div className="flex flex-wrap items-center gap-2">
+                              {a.metadata?.testCategory && (
+                                <span className="px-2.5 py-1 bg-brand-500/20 text-brand-300 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider border border-brand-500/30">
+                                  {a.metadata.testCategory}
+                                </span>
+                              )}
+                              {a.metadata?.examName && (
+                                <span className="px-2.5 py-1 bg-slate-800/80 text-slate-200 rounded-lg text-[10px] font-semibold uppercase tracking-wider border border-slate-700/60 max-w-[180px] sm:max-w-[220px] truncate" title={a.metadata.examName}>
+                                  {a.metadata.examName}
+                                </span>
+                              )}
+                              {a.type === 'test_incomplete' && (
+                                <span className="px-2.5 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider border border-amber-500/40">
+                                  Incomplete
+                                </span>
+                              )}
+                              {a.type === 'question_bank_accessed' && (
+                                <span className="px-2.5 py-1 bg-blue-500/20 text-blue-300 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider border border-blue-500/40 flex items-center gap-1">
+                                  <Download className="w-3 h-3" />
+                                  {isDownloadable ? 'Download Available' : 'PDF Downloaded'}
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="shrink-0">
+                              {a.type === 'test_incomplete' && (
+                                <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 rounded-xl border border-amber-500/30">
+                                  <Clock className="w-3.5 h-3.5 text-amber-300" />
+                                  <span className="text-xs font-mono font-black text-amber-300">
+                                    {Object.keys(a.metadata?.answers || {}).length} answered
+                                  </span>
+                                </div>
+                              )}
+                              {((isTestResult || isAiQuiz) && a.score !== undefined && a.score !== null) && (
+                                <div className="flex items-baseline gap-1 px-3.5 py-1 bg-slate-950/80 rounded-xl border border-slate-800">
+                                  <span className="font-mono font-black text-white text-base sm:text-lg">
+                                    {typeof a.score === 'number' ? Number(a.score.toFixed(2)) : a.score}
+                                  </span>
+                                  <span className="text-slate-300 text-xs font-mono font-bold">/{a.totalMarks}</span>
+                                  {!isAiQuiz && (
+                                    <span className="ml-1.5 text-xs font-mono font-black text-emerald-300">
+                                      · {Math.round(a.accuracy || 0)}%
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      </DynamicVectorCard>
+                    );
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          );
+        })()}
+      </motion.div>
     </div>
   );
 };

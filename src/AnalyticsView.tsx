@@ -285,14 +285,14 @@ const AccuracyRow = React.memo(({ label, value, total, color }: { label: string,
   const circleColor = color === "bg-rose-500" ? "bg-rose-500" : color;
 
   return (
-    <div className="flex items-center justify-between p-2.5 sm:p-3.5 bg-white/80 border border-slate-100/50 rounded-[1.25rem] hover:bg-white hover:border-slate-200/50 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.025)] hover:-translate-y-0.5 transition-[transform,background-color,border-color,box-shadow] duration-300 group">
+    <div className="flex items-center justify-between p-2.5 sm:p-3.5 bg-white/80 dark:bg-slate-800/80 border border-slate-100/50 dark:border-slate-700/50 rounded-[1.25rem] hover:bg-white dark:hover:bg-slate-800 hover:border-slate-200/50 dark:hover:border-slate-600 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.025)] hover:-translate-y-0.5 transition-[transform,background-color,border-color,box-shadow] duration-300 group">
        <div className="flex items-center gap-3 font-sans">
-          <div className={cn("w-2.5 h-2.5 rounded-full border-2 border-white shadow-[0_0_6px_rgba(0,0,0,0.05)]", circleColor)} />
-          <span className="text-[10px] font-black text-slate-500 group-hover:text-slate-800 transition-colors uppercase tracking-wider">{label}</span>
+          <div className={cn("w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-900 shadow-[0_0_6px_rgba(0,0,0,0.05)]", circleColor)} />
+          <span className="text-[10px] font-black text-slate-500 dark:text-slate-300 group-hover:text-slate-800 dark:group-hover:text-white transition-colors uppercase tracking-wider">{label}</span>
        </div>
        <div className="flex items-center gap-4 font-sans">
-          <span className="text-xs font-black text-slate-800">{value}</span>
-          <span className="text-[10px] font-black text-slate-400 px-2 py-0.5 sm:px-2.5 sm:py-0.5 bg-white border border-slate-100 rounded-lg leading-none">{percentage}%</span>
+          <span className="text-xs font-black text-slate-800 dark:text-white">{value}</span>
+          <span className="text-[10px] font-black text-slate-400 dark:text-slate-300 px-2 py-0.5 sm:px-2.5 sm:py-0.5 bg-white dark:bg-slate-700 border border-slate-100 dark:border-slate-600 rounded-lg leading-none">{percentage}%</span>
        </div>
     </div>
   );
@@ -308,15 +308,15 @@ const SubjectRow = React.memo(({ subject }: { subject: any }) => {
     <div 
       onClick={() => setIsExpanded(!isExpanded)}
       className={cn(
-        "flex flex-col p-3.5 sm:p-4 bg-slate-50/90 rounded-2xl border border-slate-200/80 shadow-xs text-slate-900 hover:border-slate-300 transition-all duration-300 group cursor-pointer relative overflow-hidden",
-        isExpanded && "bg-white border-brand-300 shadow-md"
+        "flex flex-col p-3.5 sm:p-4 bg-slate-50/90 dark:bg-slate-800/90 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-xs text-slate-900 dark:text-white hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-300 group cursor-pointer relative overflow-hidden",
+        isExpanded && "bg-white dark:bg-slate-800 border-brand-300 dark:border-indigo-500 shadow-md"
       )}
     >
        <div className="flex items-center justify-between gap-3 relative z-10">
           <div className="flex flex-col min-w-0 flex-1">
              <span 
                 className={cn(
-                   "font-black text-slate-900 group-hover:text-brand-600 transition-colors text-xs sm:text-sm", 
+                   "font-black text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors text-xs sm:text-sm", 
                    isExpanded ? "" : "truncate"
                 )} 
                 title={subject.name}
@@ -325,22 +325,22 @@ const SubjectRow = React.memo(({ subject }: { subject: any }) => {
              </span>
           </div>
           <div className="flex items-center gap-3 shrink-0">
-            <span className="text-xs sm:text-sm font-mono font-black text-slate-900 group-hover:text-brand-600 transition-colors">{subject.avgScore}%</span>
+            <span className="text-xs sm:text-sm font-mono font-black text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">{subject.avgScore}%</span>
             <span className={cn(
               "px-2.5 py-1 rounded-lg text-[9px] font-mono font-black uppercase tracking-wider leading-none shadow-2xs border", 
               subject.status === 'Strong' 
-                 ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
-                 : "bg-rose-50 text-rose-700 border-rose-200"
+                 ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" 
+                 : "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800"
             )}>
                {subject.status}
             </span>
-            <ChevronDown className={cn("w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-300", isExpanded && "rotate-180")} />
+            <ChevronDown className={cn("w-4 h-4 text-slate-400 dark:text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-transform duration-300", isExpanded && "rotate-180")} />
           </div>
        </div>
        
        {/* Subtle Accuracy Meter underneath */}
        {!isExpanded && (
-          <div className="w-full h-1.5 bg-slate-200/80 rounded-full overflow-hidden mt-2.5 border border-slate-200">
+          <div className="w-full h-1.5 bg-slate-200/80 dark:bg-slate-700 rounded-full overflow-hidden mt-2.5 border border-slate-200 dark:border-slate-600">
              <motion.div 
                 initial={{ width: 0 }}
                 animate={{ width: `${subject.avgScore}%` }}
@@ -362,27 +362,27 @@ const SubjectRow = React.memo(({ subject }: { subject: any }) => {
                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                className="overflow-hidden"
              >
-               <div className="pt-4 mt-3 border-t border-slate-200/80 relative z-10">
+               <div className="pt-4 mt-3 border-t border-slate-200/80 dark:border-slate-700/80 relative z-10">
                   <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
                     {/* Attempted stat box */}
-                    <div className="p-2.5 bg-slate-100/80 border border-slate-200/80 rounded-xl text-center flex flex-col justify-between items-center">
-                      <span className="text-slate-500 font-mono font-black uppercase tracking-widest text-[8px] leading-none mb-1">Attempted</span>
-                      <span className="text-slate-900 font-mono font-black text-xs sm:text-sm">{subject.attempted}</span>
-                      <span className="text-[7.5px] font-bold text-slate-400 uppercase mt-1 leading-none">Questions</span>
+                    <div className="p-2.5 bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-700/80 rounded-xl text-center flex flex-col justify-between items-center">
+                      <span className="text-slate-500 dark:text-slate-400 font-mono font-black uppercase tracking-widest text-[8px] leading-none mb-1">Attempted</span>
+                      <span className="text-slate-900 dark:text-white font-mono font-black text-xs sm:text-sm">{subject.attempted}</span>
+                      <span className="text-[7.5px] font-bold text-slate-400 dark:text-slate-400 uppercase mt-1 leading-none">Questions</span>
                     </div>
                     
                     {/* Correct stat box */}
-                    <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-center flex flex-col justify-between items-center">
-                      <span className="text-emerald-700 font-mono font-black uppercase tracking-widest text-[8px] leading-none mb-1">Correct</span>
-                      <span className="text-emerald-600 font-mono font-black text-xs sm:text-sm">{subject.correct}</span>
-                      <span className="text-[7.5px] font-mono font-black text-emerald-700 uppercase mt-1 leading-none">{correctPct}% Acc</span>
+                    <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 rounded-xl text-center flex flex-col justify-between items-center">
+                      <span className="text-emerald-700 dark:text-emerald-300 font-mono font-black uppercase tracking-widest text-[8px] leading-none mb-1">Correct</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-mono font-black text-xs sm:text-sm">{subject.correct}</span>
+                      <span className="text-[7.5px] font-mono font-black text-emerald-700 dark:text-emerald-300 uppercase mt-1 leading-none">{correctPct}% Acc</span>
                     </div>
                     
                     {/* Incorrect stat box */}
-                    <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-center flex flex-col justify-between items-center">
-                      <span className="text-rose-700 font-mono font-black uppercase tracking-widest text-[8px] leading-none mb-1">Incorrect</span>
-                      <span className="text-rose-600 font-mono font-black text-xs sm:text-sm">{incorrect}</span>
-                      <span className="text-[7.5px] font-mono font-black text-rose-700 uppercase mt-1 leading-none">{incorrectPct}% Pct</span>
+                    <div className="p-2.5 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800/80 rounded-xl text-center flex flex-col justify-between items-center">
+                      <span className="text-rose-700 dark:text-rose-300 font-mono font-black uppercase tracking-widest text-[8px] leading-none mb-1">Incorrect</span>
+                      <span className="text-rose-600 dark:text-rose-400 font-mono font-black text-xs sm:text-sm">{incorrect}</span>
+                      <span className="text-[7.5px] font-mono font-black text-rose-700 dark:text-rose-300 uppercase mt-1 leading-none">{incorrectPct}% Pct</span>
                     </div>
                   </div>
                </div>
@@ -1791,26 +1791,26 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
            <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.08)" className="lg:col-span-8">
              <motion.div 
                variants={stagger.itemFadeUp} 
-               className="relative overflow-hidden bg-white/90 lg:bg-white/80 backdrop-blur-xl text-slate-900 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl border border-slate-200/80 group"
+               className="relative overflow-hidden bg-white/90 lg:bg-white/80 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 backdrop-blur-xl text-slate-900 dark:text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl shadow-slate-200/50 dark:shadow-indigo-950/20 border border-slate-200/80 dark:border-indigo-500/20 group"
              >
                 {/* Radial Grid & 3D Watermark */}
-                <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none z-0" />
-                <TrendingUp className="absolute -right-8 -bottom-8 w-52 h-52 opacity-10 stroke-[1.2] text-[#2563eb] pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
+                <TrendingUp className="absolute -right-8 -bottom-8 w-52 h-52 opacity-10 dark:opacity-15 stroke-[1.2] text-[#2563eb] dark:text-indigo-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
                 
                 <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                    <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2.5">
                         <div className="w-1.5 h-5 bg-[#2563eb] rounded-full shrink-0" />
-                        <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase">Performance Trend</h3>
+                        <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase">Performance Trend</h3>
                       </div>
-                      <p className="text-xs font-semibold text-slate-500 leading-none mt-1">Your mock exam score progression history</p>
+                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-300 leading-none mt-1">Your mock exam score progression history</p>
                    </div>
                    {stats.impScore !== 0 && (
                      <div className={cn(
                        "px-3 py-1.5 rounded-xl flex items-center gap-1.5 text-[10px] font-mono font-black uppercase tracking-widest shadow-2xs border transition-all duration-300 group-hover:scale-103",
                        stats.impScore > 0 
-                         ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
-                         : "bg-rose-50 text-rose-700 border-rose-200"
+                         ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" 
+                         : "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800"
                      )}>
                         {stats.impScore > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
                         {Math.abs(Math.round(stats.impScore))}% {stats.impScore > 0 ? 'Improvement' : 'Drop'}
@@ -1821,8 +1821,8 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
                 {stats.chartData.length > 0 ? (
                   <PerformanceTrendChart chartData={stats.chartData} />
                 ) : (
-                   <div className="w-full h-[300px] flex items-center justify-center bg-slate-50 rounded-2xl border border-slate-200">
-                      <p className="text-slate-500 font-bold text-sm">Not enough data to plot a trend.</p>
+                   <div className="w-full h-[300px] flex items-center justify-center bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700">
+                      <p className="text-slate-500 dark:text-slate-300 font-bold text-sm">Not enough data to plot a trend.</p>
                    </div>
                 )}
              </motion.div>
@@ -1832,22 +1832,22 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
            <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.08)" className="lg:col-span-4">
              <motion.div 
                variants={stagger.itemFadeUp} 
-               className="relative overflow-hidden bg-white/90 lg:bg-white/80 backdrop-blur-xl text-slate-900 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl border border-slate-200/80 group"
+               className="relative overflow-hidden bg-white/90 lg:bg-white/80 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 backdrop-blur-xl text-slate-900 dark:text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl shadow-slate-200/50 dark:shadow-indigo-950/20 border border-slate-200/80 dark:border-indigo-500/20 group"
              >
                 {/* Radial Grid Watermark */}
-                <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none z-0" />
-                <Target className="absolute -right-6 -bottom-6 w-44 h-44 opacity-10 stroke-[1.2] text-[#2563eb] pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
+                <Target className="absolute -right-6 -bottom-6 w-44 h-44 opacity-10 dark:opacity-15 stroke-[1.2] text-[#2563eb] dark:text-indigo-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
                 
                 <div className="flex items-center gap-2.5 mb-6 justify-center relative z-10">
                   <div className="w-1.5 h-5 bg-[#2563eb] rounded-full shrink-0" />
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight text-center uppercase">Accuracy Breakdown</h3>
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight text-center uppercase">Accuracy Breakdown</h3>
                 </div>
                 
                 <div className="relative z-10">
                   {stats.totalQuestions > 0 ? (
                     <AccuracyBreakdownChart pieData={stats.pieData} totalQuestions={stats.totalQuestions} totalCorrect={stats.totalCorrect} totalWrong={stats.totalWrong} totalSkipped={stats.totalSkipped} />
                   ) : (
-                     <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center text-xs font-bold text-slate-500">
+                     <div className="p-4 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 text-center text-xs font-bold text-slate-500 dark:text-slate-300">
                         No question breakdown history available.
                      </div>
                   )}
@@ -1859,20 +1859,20 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
               <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)" className="lg:col-span-12">
                 <motion.div 
                   variants={stagger.itemFadeUp} 
-                  className="relative overflow-hidden bg-white/90 lg:bg-white/80 backdrop-blur-xl text-slate-900 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-9 shadow-xl border border-slate-200/80 group"
+                  className="relative overflow-hidden bg-white/90 lg:bg-white/80 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 backdrop-blur-xl text-slate-900 dark:text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-9 shadow-xl shadow-slate-200/50 dark:shadow-indigo-950/20 border border-slate-200/80 dark:border-indigo-500/20 group"
                 >
                    {/* Radial Grid Watermark */}
-                   <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none z-0" />
-                   <Crosshair className="absolute -right-8 -bottom-8 w-56 h-56 opacity-10 stroke-[1.2] text-[#2563eb] pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                   <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
+                   <Crosshair className="absolute -right-8 -bottom-8 w-56 h-56 opacity-10 dark:opacity-15 stroke-[1.2] text-[#2563eb] dark:text-indigo-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
                    
                    <div className="flex flex-col gap-1.5 mb-6 text-center relative z-10">
                      <div className="flex justify-center">
-                       <span className="text-[9px] font-mono font-black text-brand-700 uppercase tracking-widest bg-brand-50 px-3 py-1 rounded-full border border-brand-200 leading-none">
+                       <span className="text-[9px] font-mono font-black text-brand-700 dark:text-indigo-300 uppercase tracking-widest bg-brand-50 dark:bg-indigo-950/60 px-3 py-1 rounded-full border border-brand-200 dark:border-indigo-800 leading-none">
                           Metrics Overview
                        </span>
                      </div>
-                     <h3 className="text-xl font-black text-slate-900 tracking-tight mt-1.5 uppercase">Overall Skill Profile</h3>
-                     <p className="text-xs font-bold text-slate-500">Analysis of your core exam-taking dimensions</p>
+                     <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight mt-1.5 uppercase">Overall Skill Profile</h3>
+                     <p className="text-xs font-bold text-slate-500 dark:text-slate-300">Analysis of your core exam-taking dimensions</p>
                    </div>
                    
                    {stats.skillProfile && stats.totalQuestions > 0 ? (
@@ -1882,59 +1882,59 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
                         {/* Detailed breakdown items */}
                         <div className="lg:col-span-7 space-y-3.5 relative z-10">
                           {stats.skillProfile.map((skill: any, idx: number) => {
-                             let icon = <Target className="w-4 h-4 text-emerald-600" />;
+                             let icon = <Target className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />;
                              let colorClass = "from-emerald-500 to-emerald-400";
                              let desc = "Correctness rate on attempts";
-                             let bgClass = "bg-emerald-50 border-emerald-200";
-                             let textClass = "text-emerald-700";
+                             let bgClass = "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800";
+                             let textClass = "text-emerald-700 dark:text-emerald-300";
 
                              if (skill.name === "Accuracy") {
-                                icon = <Target className="w-4 h-4 text-emerald-600" />;
+                                icon = <Target className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />;
                                 colorClass = "from-emerald-500 to-emerald-400";
                                 desc = "Accuracy on attempted questions";
-                                bgClass = "bg-emerald-50 border-emerald-200";
-                                textClass = "text-emerald-700";
+                                bgClass = "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800";
+                                textClass = "text-emerald-700 dark:text-emerald-300";
                              } else if (skill.name === "Precision") {
-                                icon = <Crosshair className="w-4 h-4 text-blue-600" />;
+                                icon = <Crosshair className="w-4 h-4 text-blue-600 dark:text-blue-400" />;
                                 colorClass = "from-blue-500 to-blue-400";
                                 desc = "Consistency & focus in answers";
-                                bgClass = "bg-blue-50 border-blue-200";
-                                textClass = "text-blue-700";
+                                bgClass = "bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-800";
+                                textClass = "text-blue-700 dark:text-blue-300";
                              } else if (skill.name === "Speed") {
-                                icon = <Timer className="w-4 h-4 text-amber-600" />;
+                                icon = <Timer className="w-4 h-4 text-amber-600 dark:text-amber-400" />;
                                 colorClass = "from-amber-500 to-amber-400";
                                 desc = "Pace answering questions";
-                                bgClass = "bg-amber-50 border-amber-200";
-                                textClass = "text-amber-700";
+                                bgClass = "bg-amber-50 dark:bg-amber-950/60 border-amber-200 dark:border-amber-800";
+                                textClass = "text-amber-700 dark:text-amber-300";
                              } else if (skill.name === "Endurance") {
-                                icon = <Flame className="w-4 h-4 text-indigo-600" />;
+                                icon = <Flame className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />;
                                 colorClass = "from-indigo-500 to-indigo-400";
                                 desc = "Volume of questions practiced";
-                                bgClass = "bg-indigo-50 border-indigo-200";
-                                textClass = "text-indigo-700";
+                                bgClass = "bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-800";
+                                textClass = "text-indigo-700 dark:text-indigo-300";
                              } else if (skill.name === "Momentum") {
-                                icon = <TrendingUp className="w-4 h-4 text-cyan-600" />;
+                                icon = <TrendingUp className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />;
                                 colorClass = "from-cyan-500 to-cyan-400";
                                 desc = "Test-to-test improvement rate";
-                                bgClass = "bg-cyan-50 border-cyan-200";
-                                textClass = "text-cyan-700";
+                                bgClass = "bg-cyan-50 dark:bg-cyan-950/60 border-cyan-200 dark:border-cyan-800";
+                                textClass = "text-cyan-700 dark:text-cyan-300";
                              }
 
                              return (
-                                <div key={idx} className="p-3.5 bg-slate-50/90 border border-slate-200/80 rounded-2xl flex flex-col gap-2 hover:border-slate-300 transition-all duration-350">
+                                <div key={idx} className="p-3.5 bg-slate-50/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl flex flex-col gap-2 hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-350">
                                    <div className="flex items-center justify-between">
                                       <div className="flex items-center gap-2.5">
                                          <div className={cn("p-1.5 rounded-xl border shrink-0", bgClass)}>
                                             {icon}
                                          </div>
                                          <div className="flex flex-col min-w-0">
-                                            <span className="text-xs font-black text-slate-900 leading-none">{skill.name}</span>
-                                            <span className="text-[9.5px] font-bold text-slate-500 leading-none mt-1 truncate">{desc}</span>
+                                            <span className="text-xs font-black text-slate-900 dark:text-white leading-none">{skill.name}</span>
+                                            <span className="text-[9.5px] font-bold text-slate-500 dark:text-slate-300 leading-none mt-1 truncate">{desc}</span>
                                          </div>
                                       </div>
                                       <span className={cn("text-xs font-mono font-black tracking-tight", textClass)}>{skill.value}%</span>
                                    </div>
-                                   <div className="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden border border-slate-200">
+                                   <div className="w-full h-2 bg-slate-200/80 dark:bg-slate-700 rounded-full overflow-hidden border border-slate-200 dark:border-slate-600">
                                       <motion.div 
                                          initial={{ width: 0 }}
                                          animate={{ width: `${skill.value}%` }}
@@ -1948,7 +1948,7 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
                         </div>
                      </div>
                   ) : (
-                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center text-xs font-bold text-slate-500">
+                    <div className="p-4 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 text-center text-xs font-bold text-slate-500 dark:text-slate-300">
                        Complete tests to compile your skill profile.
                     </div>
                  )}
@@ -1978,23 +1978,23 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
 
                   return (
                      <DynamicVectorCard key={idx} glowColor="rgba(37, 99, 235, 0.12)" className="w-full">
-                       <motion.div variants={stagger.itemFadeUp} className="bg-white/90 lg:bg-white/80 backdrop-blur-xl text-slate-900 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl border border-slate-200/80 relative overflow-hidden flex flex-col shrink-0 group">
+                       <motion.div variants={stagger.itemFadeUp} className="bg-white/90 lg:bg-white/80 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 backdrop-blur-xl text-slate-900 dark:text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl shadow-slate-200/50 dark:shadow-indigo-950/20 border border-slate-200/80 dark:border-indigo-500/20 relative overflow-hidden flex flex-col shrink-0 group">
                          {/* Radial Grid Watermark */}
-                         <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none z-0" />
-                         <Layers className="absolute -right-8 -bottom-8 w-52 h-52 opacity-10 stroke-[1.2] text-[#2563eb] pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                         <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
+                         <Layers className="absolute -right-8 -bottom-8 w-52 h-52 opacity-10 dark:opacity-15 stroke-[1.2] text-[#2563eb] dark:text-indigo-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
 
                          <div className="mb-6 relative z-10 flex flex-col gap-3">
                             <div>
-                               <span className="px-3 py-1.5 bg-brand-50 text-brand-700 text-[9px] font-mono font-black rounded-xl uppercase tracking-widest border border-brand-200 shadow-2xs leading-none">
+                               <span className="px-3 py-1.5 bg-brand-50 dark:bg-indigo-950/60 text-brand-700 dark:text-indigo-300 text-[9px] font-mono font-black rounded-xl uppercase tracking-widest border border-brand-200 dark:border-indigo-800 shadow-2xs leading-none">
                                   {exam.examName}
                                </span>
                             </div>
                             <div>
-                               <h3 className="text-xl font-black text-slate-900 leading-tight mb-1 uppercase">Performance Breakdown</h3>
-                               <p className="text-xs text-slate-500 font-bold flex items-center gap-1.5">
-                                  Attempts: <span className="text-amber-700 font-mono font-black">{exam.totalAttempts}</span>
-                                  <span className="text-slate-300">•</span>
-                                  Last Attempt: <span className="text-brand-600 font-mono font-black">{exam.lastAttemptDate}</span>
+                               <h3 className="text-xl font-black text-slate-900 dark:text-white leading-tight mb-1 uppercase">Performance Breakdown</h3>
+                               <p className="text-xs text-slate-500 dark:text-slate-300 font-bold flex items-center gap-1.5">
+                                  Attempts: <span className="text-amber-700 dark:text-amber-300 font-mono font-black">{exam.totalAttempts}</span>
+                                  <span className="text-slate-300 dark:text-slate-600">•</span>
+                                  Last Attempt: <span className="text-brand-600 dark:text-brand-400 font-mono font-black">{exam.lastAttemptDate}</span>
                                </p>
                             </div>
                          </div>
@@ -2007,14 +2007,14 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
       
                             {/* Divider on mobile only */}
                             {uniqueSubjects.length > 0 && (
-                              <div className="w-full h-px bg-slate-200/80 my-1 lg:hidden" />
+                              <div className="w-full h-px bg-slate-200/80 dark:bg-slate-700 my-1 lg:hidden" />
                             )}
       
                             {/* Right column: Expandable List */}
                             <div className={cn("space-y-4 max-h-[380px] overflow-y-auto custom-scrollbar pr-1", uniqueSubjects.length > 0 ? "lg:col-span-7" : "lg:col-span-12")} style={{ overscrollBehaviorY: 'contain' }}>
                                {exam.mockTests && exam.mockTests.length > 0 && (
                                  <div className="space-y-3">
-                                   <h4 className="text-[9.5px] font-mono font-black text-slate-400 uppercase tracking-widest pl-1">Mock Tests</h4>
+                                   <h4 className="text-[9.5px] font-mono font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest pl-1">Mock Tests</h4>
                                    <div className="space-y-3">
                                      {exam.mockTests.map((subject: any, i: number) => (
                                         <SubjectRow key={`m-${i}`} subject={subject} />
@@ -2025,7 +2025,7 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
           
                                {exam.practiceTests && exam.practiceTests.length > 0 && (
                                  <div className="space-y-3">
-                                   <h4 className="text-[9.5px] font-mono font-black text-slate-400 uppercase tracking-widest pl-1 mt-2">Practice Sessions</h4>
+                                   <h4 className="text-[9.5px] font-mono font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest pl-1 mt-2">Practice Sessions</h4>
                                    <div className="space-y-3">
                                      {exam.practiceTests.map((subject: any, i: number) => (
                                         <SubjectRow key={`p-${i}`} subject={subject} />
@@ -2035,7 +2035,7 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
                                )}
           
                                {(!exam.practiceTests || exam.practiceTests.length === 0) && (!exam.mockTests || exam.mockTests.length === 0) && (
-                                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center text-xs font-bold text-slate-500">
+                                 <div className="p-4 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 text-center text-xs font-bold text-slate-500 dark:text-slate-300">
                                    No subject metrics compiled yet.
                                  </div>
                                )}
@@ -2051,27 +2051,27 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
              {/* Visual Action cards */}
              <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                <DynamicVectorCard glowColor="rgba(16, 185, 129, 0.12)" className="w-full">
-                 <motion.div variants={stagger.itemFadeUp} className="bg-white/90 lg:bg-white/80 backdrop-blur-xl rounded-3xl sm:rounded-[2rem] p-5 sm:p-6 shadow-xl border border-slate-200/80 flex gap-4 sm:gap-5 items-start text-slate-900 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none z-0" />
-                    <div className={cn("p-3 rounded-2xl shrink-0 shadow-2xs border relative z-10", stats.impScore >= 0 ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200")}>
-                       {stats.impScore >= 0 ? <TrendingUp className="w-5 h-5 text-emerald-600" /> : <TrendingDown className="w-5 h-5 text-rose-600" />}
+                 <motion.div variants={stagger.itemFadeUp} className="bg-white/90 lg:bg-white/80 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 backdrop-blur-xl rounded-3xl sm:rounded-[2rem] p-5 sm:p-6 shadow-xl shadow-slate-200/50 dark:shadow-indigo-950/20 border border-slate-200/80 dark:border-indigo-500/20 flex gap-4 sm:gap-5 items-start text-slate-900 dark:text-white relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
+                    <div className={cn("p-3 rounded-2xl shrink-0 shadow-2xs border relative z-10", stats.impScore >= 0 ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" : "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800")}>
+                       {stats.impScore >= 0 ? <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" /> : <TrendingDown className="w-5 h-5 text-rose-600 dark:text-rose-400" />}
                    </div>
                    <div className="relative z-10">
-                      <h4 className="font-black text-slate-900 mb-1 tracking-tight text-sm sm:text-base uppercase">{stats.impScore >= 0 ? "You are improving" : "Scores dropped recently"}</h4>
-                      <p className="text-xs sm:text-sm font-medium text-slate-600 leading-relaxed">{stats.impScore >= 0 ? "Your latest test scores show positive momentum. Keep up the good work!" : "Review your recent mistakes to get back on track."}</p>
+                      <h4 className="font-black text-slate-900 dark:text-white mb-1 tracking-tight text-sm sm:text-base uppercase">{stats.impScore >= 0 ? "You are improving" : "Scores dropped recently"}</h4>
+                      <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed">{stats.impScore >= 0 ? "Your latest test scores show positive momentum. Keep up the good work!" : "Review your recent mistakes to get back on track."}</p>
                    </div>
                 </motion.div>
                </DynamicVectorCard>
 
                <DynamicVectorCard glowColor="rgba(245, 158, 11, 0.12)" className="w-full">
-                 <motion.div variants={stagger.itemFadeUp} className="bg-white/90 lg:bg-white/80 backdrop-blur-xl rounded-3xl sm:rounded-[2rem] p-5 sm:p-6 shadow-xl border border-slate-200/80 flex gap-4 sm:gap-5 items-start text-slate-900 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none z-0" />
-                    <div className={cn("p-3 rounded-2xl shrink-0 shadow-2xs border relative z-10", stats.avgTimePerQuestion > 60 ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-brand-50 text-brand-700 border-brand-200")}>
-                      <Timer className="w-5 h-5 text-amber-600" />
+                 <motion.div variants={stagger.itemFadeUp} className="bg-white/90 lg:bg-white/80 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 backdrop-blur-xl rounded-3xl sm:rounded-[2rem] p-5 sm:p-6 shadow-xl shadow-slate-200/50 dark:shadow-indigo-950/20 border border-slate-200/80 dark:border-indigo-500/20 flex gap-4 sm:gap-5 items-start text-slate-900 dark:text-white relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
+                    <div className={cn("p-3 rounded-2xl shrink-0 shadow-2xs border relative z-10", stats.avgTimePerQuestion > 60 ? "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800" : "bg-brand-50 dark:bg-indigo-950/60 text-brand-700 dark:text-indigo-300 border-brand-200 dark:border-indigo-800")}>
+                      <Timer className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                    </div>
                    <div className="relative z-10">
-                      <h4 className="font-black text-slate-900 mb-1 tracking-tight text-sm sm:text-base uppercase">{stats.avgTimePerQuestion > 60 ? "Improve Question Speed" : "Optimal Solving Pace"}</h4>
-                      <p className="text-xs sm:text-sm font-medium text-slate-600 leading-relaxed">Averaging {stats.avgTimePerQuestion.toFixed(1)}s per question. {stats.avgTimePerQuestion > 60 ? "Try to solve familiar questions faster." : "Excellent pacing, maintain this rate in real exams."}</p>
+                      <h4 className="font-black text-slate-900 dark:text-white mb-1 tracking-tight text-sm sm:text-base uppercase">{stats.avgTimePerQuestion > 60 ? "Improve Question Speed" : "Optimal Solving Pace"}</h4>
+                      <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed">Averaging {stats.avgTimePerQuestion.toFixed(1)}s per question. {stats.avgTimePerQuestion > 60 ? "Try to solve familiar questions faster." : "Excellent pacing, maintain this rate in real exams."}</p>
                    </div>
                 </motion.div>
                </DynamicVectorCard>

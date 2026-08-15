@@ -63,13 +63,13 @@ export const ExamReadinessCard: React.FC<ExamReadinessCardProps> = ({
             onClick={() => setIsModalOpen(true)}
           >
             <div className="flex items-center gap-2 min-w-0 flex-1">
-              <span className="flex items-center gap-1 font-mono font-black text-brand-600 shrink-0 bg-brand-50 px-2 py-0.5 rounded-lg border border-brand-200">
-                <Target className="w-3.5 h-3.5 text-brand-600" />
+              <span className="flex items-center gap-1 font-mono font-black text-brand-600 dark:text-brand-400 shrink-0 bg-brand-50 dark:bg-slate-800 px-2 py-0.5 rounded-lg border border-brand-200 dark:border-slate-700">
+                <Target className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
                 {score}%
               </span>
 
               <div className="flex-1 min-w-0">
-                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200">
+                <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-200 dark:border-slate-700">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-brand-500 to-indigo-500"
                     style={{ width: `${score}%` }}
@@ -77,12 +77,12 @@ export const ExamReadinessCard: React.FC<ExamReadinessCardProps> = ({
                 </div>
               </div>
 
-              <span className="text-[10px] font-mono text-slate-700 shrink-0 font-bold">
+              <span className="text-[10px] font-mono text-slate-700 dark:text-slate-300 shrink-0 font-bold">
                 {rankBadgeIcon} {rankTitle.split(' ')[0]}
               </span>
             </div>
 
-            <span className="text-[10px] font-black text-brand-600 hover:text-brand-700 uppercase tracking-wider shrink-0">
+            <span className="text-[10px] font-black text-brand-600 dark:text-brand-400 hover:text-brand-700 uppercase tracking-wider shrink-0">
               Details →
             </span>
           </div>
@@ -100,7 +100,7 @@ export const ExamReadinessCard: React.FC<ExamReadinessCardProps> = ({
                     cx="50"
                     cy="50"
                     r={radius}
-                    className="stroke-slate-200"
+                    className="stroke-slate-200 dark:stroke-slate-800"
                     strokeWidth="8"
                     fill="transparent"
                   />
@@ -120,16 +120,16 @@ export const ExamReadinessCard: React.FC<ExamReadinessCardProps> = ({
                 </svg>
 
                 <div className="absolute flex flex-col items-center justify-center text-center">
-                  <span className="text-2xl font-black font-mono text-[#2563eb] tracking-tight leading-none">
+                  <span className="text-2xl font-black font-mono text-[#2563eb] dark:text-brand-400 tracking-tight leading-none">
                     {score}%
                   </span>
-                  <span className="text-[8.5px] font-black uppercase text-slate-400 tracking-wider mt-0.5">Ready</span>
+                  <span className="text-[8.5px] font-black uppercase text-slate-400 dark:text-slate-400 tracking-wider mt-0.5">Ready</span>
                 </div>
               </div>
 
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-black text-base text-slate-900 tracking-tight leading-tight group-hover/title:text-brand-600 transition-colors uppercase">
+                  <h3 className="font-black text-base text-slate-900 dark:text-white tracking-tight leading-tight group-hover/title:text-brand-600 dark:group-hover/title:text-brand-400 transition-colors uppercase">
                     Exam Readiness Score
                   </h3>
                   <span className={`px-2.5 py-0.5 rounded-full text-[9.5px] font-black uppercase tracking-wider border ${rankBadgeBg} ${rankBadgeColor} ${rankBadgeBorder}`}>
@@ -137,7 +137,7 @@ export const ExamReadinessCard: React.FC<ExamReadinessCardProps> = ({
                   </span>
                 </div>
 
-                <p className="text-xs text-slate-600 font-medium">
+                <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">
                   Real-time exam readiness score based on your study progress.
                 </p>
               </div>
@@ -145,54 +145,54 @@ export const ExamReadinessCard: React.FC<ExamReadinessCardProps> = ({
 
             {/* 4 Mini Component Indicators */}
             <div className="flex-1 max-w-md grid grid-cols-2 gap-3">
-              <div className="p-2.5 rounded-xl bg-slate-50/90 border border-slate-200/80 space-y-1">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-700">
-                  <span className="flex items-center gap-1 text-emerald-700 font-black">
-                    <Target className="w-3.5 h-3.5 text-emerald-600" />
+              <div className="p-2.5 rounded-xl bg-slate-50/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 space-y-1">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                  <span className="flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-black">
+                    <Target className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                     Accuracy
                   </span>
-                  <span className="font-mono text-emerald-700 font-black">{breakdown.accuracy.percentage}%</span>
+                  <span className="font-mono text-emerald-700 dark:text-emerald-400 font-black">{breakdown.accuracy.percentage}%</span>
                 </div>
-                <div className="w-full h-1.5 bg-slate-200/80 rounded-full overflow-hidden border border-slate-200">
+                <div className="w-full h-1.5 bg-slate-200/80 dark:bg-slate-700 rounded-full overflow-hidden border border-slate-200 dark:border-slate-600">
                   <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${breakdown.accuracy.percentage}%` }} />
                 </div>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-slate-50/90 border border-slate-200/80 space-y-1">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-700">
-                  <span className="flex items-center gap-1 text-indigo-700 font-black">
-                    <BookOpen className="w-3.5 h-3.5 text-indigo-600" />
+              <div className="p-2.5 rounded-xl bg-slate-50/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 space-y-1">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                  <span className="flex items-center gap-1 text-indigo-700 dark:text-indigo-400 font-black">
+                    <BookOpen className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                     Subjects
                   </span>
-                  <span className="font-mono text-indigo-700 font-black">{readiness.topicsAttemptedCount}/10</span>
+                  <span className="font-mono text-indigo-700 dark:text-indigo-400 font-black">{readiness.topicsAttemptedCount}/10</span>
                 </div>
-                <div className="w-full h-1.5 bg-slate-200/80 rounded-full overflow-hidden border border-slate-200">
+                <div className="w-full h-1.5 bg-slate-200/80 dark:bg-slate-700 rounded-full overflow-hidden border border-slate-200 dark:border-slate-600">
                   <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${breakdown.syllabus.percentage}%` }} />
                 </div>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-slate-50/90 border border-slate-200/80 space-y-1">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-700">
-                  <span className="flex items-center gap-1 text-amber-800 font-black">
-                    <Layers className="w-3.5 h-3.5 text-amber-600" />
+              <div className="p-2.5 rounded-xl bg-slate-50/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 space-y-1">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                  <span className="flex items-center gap-1 text-amber-800 dark:text-amber-300 font-black">
+                    <Layers className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                     Questions
                   </span>
-                  <span className="font-mono text-amber-800 font-black">{readiness.questionsSolved} Qs</span>
+                  <span className="font-mono text-amber-800 dark:text-amber-300 font-black">{readiness.questionsSolved} Qs</span>
                 </div>
-                <div className="w-full h-1.5 bg-slate-200/80 rounded-full overflow-hidden border border-slate-200">
+                <div className="w-full h-1.5 bg-slate-200/80 dark:bg-slate-700 rounded-full overflow-hidden border border-slate-200 dark:border-slate-600">
                   <div className="h-full bg-amber-500 rounded-full" style={{ width: `${breakdown.volume.percentage}%` }} />
                 </div>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-slate-50/90 border border-slate-200/80 space-y-1">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-700">
-                  <span className="flex items-center gap-1 text-cyan-800 font-black">
-                    <Award className="w-3.5 h-3.5 text-cyan-600" />
+              <div className="p-2.5 rounded-xl bg-slate-50/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 space-y-1">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                  <span className="flex items-center gap-1 text-cyan-800 dark:text-cyan-300 font-black">
+                    <Award className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
                     Mocks
                   </span>
-                  <span className="font-mono text-cyan-800 font-black">{readiness.mocksCompleted} Taken</span>
+                  <span className="font-mono text-cyan-800 dark:text-cyan-300 font-black">{readiness.mocksCompleted} Taken</span>
                 </div>
-                <div className="w-full h-1.5 bg-slate-200/80 rounded-full overflow-hidden border border-slate-200">
+                <div className="w-full h-1.5 bg-slate-200/80 dark:bg-slate-700 rounded-full overflow-hidden border border-slate-200 dark:border-slate-600">
                   <div className="h-full bg-cyan-500 rounded-full" style={{ width: `${breakdown.mocks.percentage}%` }} />
                 </div>
               </div>

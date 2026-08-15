@@ -1834,7 +1834,7 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
            <DynamicVectorCard glowColor="rgba(59, 130, 246, 0.08)" className="lg:col-span-8">
              <motion.div 
                variants={stagger.itemFadeUp} 
-               className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 text-white rounded-[inherit] p-5 sm:p-7 lg:p-8 shadow-xl border border-indigo-500/30 group"
+               className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl border border-indigo-500/30 group"
              >
                 {/* Radial Grid & 3D Watermark */}
                 <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
@@ -1875,7 +1875,7 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
            <DynamicVectorCard glowColor="rgba(59, 130, 246, 0.08)" className="lg:col-span-4">
              <motion.div 
                variants={stagger.itemFadeUp} 
-               className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 text-white rounded-[inherit] p-5 sm:p-7 lg:p-8 shadow-xl border border-indigo-500/30 group"
+               className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl border border-indigo-500/30 group"
              >
                 {/* Radial Grid Watermark */}
                 <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />

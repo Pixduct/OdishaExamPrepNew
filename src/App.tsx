@@ -713,7 +713,7 @@ const HistoryView = ({
                         : a.title;
 
                     return (
-                      <DynamicVectorCard key={a.id || i} glowColor="rgba(59, 130, 246, 0.08)" className="w-full">
+                      <DynamicVectorCard key={a.id || i} glowColor="rgba(37, 99, 235, 0.08)" className="w-full">
                         <motion.div
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -728,30 +728,30 @@ const HistoryView = ({
                             }
                           }}
                           className={cn(
-                            "relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-6 shadow-xl border border-slate-800 flex flex-col gap-4 group",
-                            isInteractive ? "cursor-pointer hover:border-brand-500/40 hover:shadow-brand-500/10 transition-all duration-300" : ""
+                            "relative overflow-hidden bg-white/90 lg:bg-white/80 backdrop-blur-xl rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-6 shadow-lg shadow-slate-200/50 border border-slate-200/80 flex flex-col gap-4 group transition-all duration-300",
+                            isInteractive ? "cursor-pointer hover:border-brand-300 hover:shadow-xl hover:shadow-brand-500/10" : ""
                           )}
                         >
                           {/* Radial Grid & Floating Background Watermark Icon */}
-                          <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />
+                          <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none z-0" />
                           
                           {a.type === 'test_incomplete' ? (
-                            <Clock className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-amber-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                            <Clock className="absolute -right-6 -bottom-6 w-44 h-44 opacity-10 stroke-[1.2] text-amber-500 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
                           ) : isAiQuiz ? (
-                            <Sparkles className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-purple-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                            <Sparkles className="absolute -right-6 -bottom-6 w-44 h-44 opacity-10 stroke-[1.2] text-purple-500 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
                           ) : isDownloadable ? (
-                            <Download className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-blue-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                            <Download className="absolute -right-6 -bottom-6 w-44 h-44 opacity-10 stroke-[1.2] text-blue-500 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
                           ) : (
-                            <CheckCircle2 className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-emerald-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                            <CheckCircle2 className="absolute -right-6 -bottom-6 w-44 h-44 opacity-10 stroke-[1.2] text-brand-600 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
                           )}
 
                           {/* Confirm delete overlay */}
                           {confirmDeleteId === a.id && (
                             <div
-                              className="absolute inset-0 bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center gap-3 px-6 z-30 rounded-[inherit]"
+                              className="absolute inset-0 bg-white/95 backdrop-blur-md flex flex-col items-center justify-center gap-3 px-6 z-30 rounded-[inherit]"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <span className="text-sm font-bold text-white text-center">Delete this activity from history?</span>
+                              <span className="text-sm font-bold text-slate-800 text-center">Delete this activity from history?</span>
                               <div className="flex gap-3">
                                 <button
                                   onClick={async () => { await handleDeleteActivity(a.id); }}
@@ -761,7 +761,7 @@ const HistoryView = ({
                                 </button>
                                 <button
                                   onClick={() => setConfirmDeleteId(null)}
-                                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-black uppercase tracking-wider cursor-pointer border-none active:scale-95 transition-all"
+                                  className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-black uppercase tracking-wider cursor-pointer border-none active:scale-95 transition-all"
                                 >
                                   Cancel
                                 </button>
@@ -774,10 +774,10 @@ const HistoryView = ({
                             <div className="flex items-center gap-3 flex-1 min-w-0">
                               <div className={cn(
                                 "p-3 rounded-2xl shrink-0 shadow-2xs border",
-                                a.type === 'test_incomplete' ? "bg-amber-500/20 text-amber-300 border-amber-500/40" :
-                                isAiQuiz ? "bg-purple-500/20 text-purple-300 border-purple-500/40" :
-                                isDownloadable ? "bg-blue-500/20 text-blue-300 border-blue-500/40" :
-                                "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                                a.type === 'test_incomplete' ? "bg-amber-50 text-amber-600 border-amber-200" :
+                                isAiQuiz ? "bg-purple-50 text-purple-600 border-purple-200" :
+                                isDownloadable ? "bg-blue-50 text-blue-600 border-blue-200" :
+                                "bg-brand-50 text-brand-600 border-brand-200"
                               )}>
                                 {a.type === 'test_incomplete' ? <Clock className="w-5 h-5" /> :
                                  isAiQuiz ? <Sparkles className="w-5 h-5" /> :
@@ -786,26 +786,26 @@ const HistoryView = ({
                               </div>
 
                               <div className="min-w-0 flex-1">
-                                <h4 className="font-black text-white text-base sm:text-lg leading-snug tracking-tight group-hover:text-brand-300 transition-colors line-clamp-2 uppercase">
+                                <h4 className="font-extrabold text-slate-900 text-base sm:text-lg leading-snug tracking-tight group-hover:text-brand-600 transition-colors line-clamp-2 uppercase">
                                   {titleText}
                                 </h4>
                                 <div className="flex items-center gap-2 mt-1">
-                                  <Clock className="w-3 h-3 text-slate-300 shrink-0" />
-                                  <span className="text-xs font-semibold text-slate-200">{compactDate}</span>
+                                  <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                  <span className="text-xs font-semibold text-slate-500">{compactDate}</span>
                                 </div>
                               </div>
                             </div>
 
                             <div className="flex items-center gap-2 shrink-0">
                               {(isTestResult || a.type === 'test_incomplete') && (
-                                <div className="px-3 py-1.5 rounded-xl bg-brand-500/20 text-brand-300 border border-brand-500/40 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 group-hover:bg-brand-500 group-hover:text-white transition-all">
+                                <div className="px-3 py-1.5 rounded-xl bg-brand-50 text-brand-600 border border-brand-200 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 group-hover:bg-brand-600 group-hover:text-white transition-all shadow-2xs">
                                   <span>{a.type === 'test_incomplete' ? 'Resume' : 'View Results'}</span>
                                   {a.type === 'test_incomplete' ? <Play className="w-3.5 h-3.5 fill-current" /> : <ChevronRight className="w-3.5 h-3.5" />}
                                 </div>
                               )}
                               <button
                                 onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(a.id); }}
-                                className="p-2 rounded-xl text-slate-300 hover:text-rose-400 hover:bg-rose-500/20 transition-all cursor-pointer border-none bg-transparent shrink-0"
+                                className="p-2 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all cursor-pointer border-none bg-transparent shrink-0"
                                 title="Delete activity"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -814,25 +814,25 @@ const HistoryView = ({
                           </div>
 
                           {/* Row 2 — Badges & Scores */}
-                          <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/80">
+                          <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
                             <div className="flex flex-wrap items-center gap-2">
                               {a.metadata?.testCategory && (
-                                <span className="px-2.5 py-1 bg-brand-500/20 text-brand-300 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider border border-brand-500/30">
+                                <span className="px-2.5 py-1 bg-brand-50 text-brand-700 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider border border-brand-100">
                                   {a.metadata.testCategory}
                                 </span>
                               )}
                               {a.metadata?.examName && (
-                                <span className="px-2.5 py-1 bg-slate-800/80 text-slate-200 rounded-lg text-[10px] font-semibold uppercase tracking-wider border border-slate-700/60 max-w-[180px] sm:max-w-[220px] truncate" title={a.metadata.examName}>
+                                <span className="px-2.5 py-1 bg-slate-100/80 text-slate-600 rounded-lg text-[10px] font-semibold uppercase tracking-wider border border-slate-200/60 max-w-[180px] sm:max-w-[220px] truncate" title={a.metadata.examName}>
                                   {a.metadata.examName}
                                 </span>
                               )}
                               {a.type === 'test_incomplete' && (
-                                <span className="px-2.5 py-1 bg-amber-500/20 text-amber-300 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider border border-amber-500/40">
+                                <span className="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider border border-amber-200">
                                   Incomplete
                                 </span>
                               )}
                               {a.type === 'question_bank_accessed' && (
-                                <span className="px-2.5 py-1 bg-blue-500/20 text-blue-300 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider border border-blue-500/40 flex items-center gap-1">
+                                <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider border border-blue-200 flex items-center gap-1">
                                   <Download className="w-3 h-3" />
                                   {isDownloadable ? 'Download Available' : 'PDF Downloaded'}
                                 </span>
@@ -841,21 +841,21 @@ const HistoryView = ({
 
                             <div className="shrink-0">
                               {a.type === 'test_incomplete' && (
-                                <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 rounded-xl border border-amber-500/30">
-                                  <Clock className="w-3.5 h-3.5 text-amber-300" />
-                                  <span className="text-xs font-mono font-black text-amber-300">
+                                <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 rounded-xl border border-amber-200">
+                                  <Clock className="w-3.5 h-3.5 text-amber-600" />
+                                  <span className="text-xs font-mono font-black text-amber-700">
                                     {Object.keys(a.metadata?.answers || {}).length} answered
                                   </span>
                                 </div>
                               )}
                               {((isTestResult || isAiQuiz) && a.score !== undefined && a.score !== null) && (
-                                <div className="flex items-baseline gap-1 px-3.5 py-1 bg-slate-950/80 rounded-xl border border-slate-800">
-                                  <span className="font-mono font-black text-white text-base sm:text-lg">
+                                <div className="flex items-baseline gap-1 px-3.5 py-1 bg-slate-50 rounded-xl border border-slate-200/80">
+                                  <span className="font-mono font-black text-slate-900 text-base sm:text-lg">
                                     {typeof a.score === 'number' ? Number(a.score.toFixed(2)) : a.score}
                                   </span>
-                                  <span className="text-slate-300 text-xs font-mono font-bold">/{a.totalMarks}</span>
+                                  <span className="text-slate-400 text-xs font-mono font-bold">/{a.totalMarks}</span>
                                   {!isAiQuiz && (
-                                    <span className="ml-1.5 text-xs font-mono font-black text-emerald-300">
+                                    <span className="ml-1.5 text-xs font-mono font-black text-brand-600">
                                       · {Math.round(a.accuracy || 0)}%
                                     </span>
                                   )}

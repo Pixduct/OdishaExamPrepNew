@@ -12,8 +12,8 @@ interface DynamicVectorCardProps {
 export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
   children,
   className = '',
-  glowColor = 'rgba(255, 255, 255, 0.14)',
-  roundedClass = 'rounded-[2rem] sm:rounded-[2.5rem]',
+  glowColor = 'rgba(59, 130, 246, 0.08)',
+  roundedClass = 'rounded-3xl sm:rounded-[2.5rem]',
   onClick,
   style = {}
 }) => {
@@ -51,14 +51,14 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
         MozOsxFontSmoothing: 'grayscale',
         ...style
       }}
-      className={`relative ${roundedClass} transition-all duration-300 ${className}`}
+      className={`relative overflow-hidden ${roundedClass} transition-all duration-300 ${className}`}
     >
-      {/* Dynamic Cursor Light Reflection Spotlight (Tracks mouse coordinates in 1:1 crisp native resolution) */}
+      {/* Dynamic Cursor Light Reflection Spotlight (Tracks mouse coordinates in 1:1 crisp native resolution, z-[1] under content) */}
       <div
-        className="pointer-events-none absolute inset-0 rounded-[inherit] transition-opacity duration-300 z-30 overflow-hidden"
+        className="pointer-events-none absolute inset-0 rounded-[inherit] transition-opacity duration-500 z-[1] overflow-hidden mix-blend-soft-light"
         style={{
           opacity: isHovered ? 1 : 0,
-          background: `radial-gradient(600px circle at ${cursorPos.x}% ${cursorPos.y}%, ${glowColor}, transparent 60%)`
+          background: `radial-gradient(500px circle at ${cursorPos.x}% ${cursorPos.y}%, ${glowColor}, transparent 70%)`
         }}
       />
       {children}

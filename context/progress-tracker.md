@@ -27,6 +27,8 @@
 - [x] Guaranteed Practice MCQ Engine & Reader Modal Fallback Synthesizer (`src/components/CurrentAffairsReaderModal.tsx`)
 - [x] Public Telegram Channel CTA Broadcast & Admin Confirmation Alert Pipeline ([`commit 7436e55`](https://github.com/Pixduct/odisha-mcq-engine/commit/7436e55)) (`automations/shared/telegram.py`)
 - [x] Home Tab Full Edge-to-Edge Vector Canvas Background & Home Section Vector Cards Upgrade (`src/App.tsx`)
+- [x] Site-Wide Global Viewport Mouse Tracking Canvas, 3D Perspective Card Tilt & Vector Cursor Follower Ring (`MouseTrackingCanvas.tsx`, `VectorCursorFollower.tsx`, `DynamicVectorCard.tsx`)
+- [x] Full-Width Executive Header Navigation Container (`src/App.tsx`)
 
 
 

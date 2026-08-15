@@ -1,53 +1,53 @@
-# Memory — Workflow 5 Exam Visual Context Intelligence & Smart Image Engine (v4.0.0)
+# Memory — Executive 3D Vector Cards & Full-Screen Academic Canvas Engine (v6.0.0)
 
-Last updated: 2026-08-14T19:19:00+05:30
+Last updated: 2026-08-15T08:46:40+05:30
 
 ## What was built
 
-### 1. Workflow 5 — Two Independent Autonomous Content Engines
-- **Engine 1 (`automations/exam_update_engine.py`)**: Autonomous official recruitment notification scraper and publisher running 3 times daily (08:47 AM, 02:47 PM, 08:47 PM IST).
-- **Engine 2 (`automations/seo_blog_engine.py`)**: Autonomous strategic evergreen educational article engine running daily at 12:07 PM IST.
+### 1. 1:1 Pixel Crisp Dynamic Cursor Spotlight Card Engine (`src/components/DynamicVectorCard.tsx`)
+- **Real-Time Cursor Tracking**: Built reusable `<DynamicVectorCard>` component in `src/components/DynamicVectorCard.tsx` calculating exact mouse percentage coordinates (`posX`, `posY`) to drive real-time cursor reflection spotlights (`radial-gradient`).
+- **Spotlight z-Index Isolation (`z-[1]`)**: Isolated cursor reflection spotlight to `z-[1]` layer (under content `z-10`, above card background `z-0`) with `mix-blend-soft-light` and soft ambient glow opacity (`rgba(59, 130, 246, 0.08)`), eliminating top-corner diagonal glare line washouts.
+- **Unified Vector Border Radius (`rounded-3xl sm:rounded-[2.5rem]`)**: Applied explicit `rounded-3xl sm:rounded-[2.5rem]` across root containers and child card `<motion.div>` elements, eliminating subpixel parent clip-path border collisions and ensuring 100% smooth, anti-aliased vector corner curves.
 
-### 2. Exam Visual Context Intelligence Layer (`automations/shared/exam_visual_context.py`)
-- **Master `EXAM_VISUAL_CONTEXT` Registry**: Maps target exams (OSSSC Nursing Officer, OSSC CGL, OSSSC CTSRE, OPSC, SSC, Railway, Banking, Defence, Teaching, Police) to visual domains, preferred photographic concepts, and negative exclusion keywords.
-- **Dynamic Context Inference**: Auto-derives visual domain for unlisted exams (`AIIMS Nursing` -> Nursing, `RRB ALP` -> Technical/Railway, `CTET` -> Teaching).
-- **Query Combination**: Combines Exam Context + Article Subject + Real-World Activity (e.g. `"Indian nursing student studying pharmacology textbook"`).
+### 2. Full-Screen Edge-to-Edge Academic Vector Canvas (`src/StudyPlanView.tsx` & `src/AnalyticsView.tsx`)
+- **Viewport Canvas Spanning**: Structured `StudyPlanView.tsx` and `AnalyticsView.tsx` with full-screen edge-to-edge page canvases (`relative w-full min-h-screen bg-[#F8FAFC] overflow-x-hidden`).
+- **Fixed Geometric Dot Grid**: Grid matrix uses `fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40`, spanning 100% of the viewport behind all hub cards without side margins.
+- **Fixed Floating Vector Watermarks**: Positioned floating study vector watermarks (`GraduationCap`, `Calendar`, `Trophy`, `TrendingUp`, `Activity`, `Brain`) at `fixed inset-0` viewport edges.
 
-### 3. Smart, Relevant, Copyright-Safe Image Engine (`automations/shared/pexels_image_fetcher.py` & `automations/shared/wikimedia_fetcher.py`)
-- **Pexels API Primary Search & 100-Point Scoring**: Scores candidate photos on Exam Match (25%), Article Match (30%), Profession Match (20%), Activity Match (15%), Quality (5%), and Uniqueness (5%).
-- **Negative Keyword Filter**: Hard exclusion of home decor and living room furniture (`furniture`, `living room`, `cabinet`, `sofa`, `couch`).
-- **Persistent Image History (`automations/published_image_history.json`)**: Tracks `blog_id`, `slug`, `exam`, `content_type`, `image_source`, `image_id`, `image_url`, `photographer`, `search_query`, `published_at` to enforce 30-blog cooldown and previous blog photo ID hard rejection.
-- **Secondary Fallback (Wikimedia Commons API)**: Verifies open CC BY / Public Domain licenses and records author, source URL, and license attribution.
-- **Hand-Curated Verified Exam Stock Directory**: Fallback pool of 100% verified academic exam desk study, nursing, and technical photos.
-- **Safe Failure Mode**: `IMAGE_NOT_FOUND` fallback safely publishes article without forcing an irrelevant image.
+### 3. Analytics Tab Executive 3D Vector Cards & Modal Upgrades (`src/AnalyticsView.tsx`)
+- **Executive Card Transformations**: Converted `ExamReadinessCard`, `StatCard` (4 metrics), `AI Performance Lab`, `Performance Trend Card`, `Accuracy Breakdown Card`, `Overall Skill Profile Card`, `Performance Breakdown Card`, and `SubjectRow` cards into Executive 3D Vector Cards wrapped in `<DynamicVectorCard>`.
+- **Niche-Aligned Vector Background Watermark Logos**: Assigned unique watermark logos matching each card's niche:
+  - `Average Score`: `<Zap className="w-36 h-36 opacity-15 text-slate-300" />`
+  - `Accuracy`: `<Target className="w-36 h-36 opacity-15 text-slate-300" />`
+  - `Time per Question`: `<Timer className="w-36 h-36 opacity-15 text-slate-300" />`
+  - `Total Attempts`: `<History className="w-36 h-36 opacity-15 text-slate-300" />`
+- **Active Exam Context Bar & Modal**: Upgraded `ActiveExamContextBar.tsx` and `ExamContextSelectorModal.tsx` into Executive Dark Vector Cards with radial grid watermarks and floating 3D `Target` background icons.
+- **Readiness Detail Modal**: Transformed `ReadinessDetailModal.tsx` into an Executive Dark Vector Card Modal featuring radial SVG score ring, live study audit banner, and 4 step progress cards.
 
-### 4. Content Quality Upgrade & Documentation Imprint
-- **100-Point Quality Gate (`automations/shared/seo_validator.py`)**: Enforces minimum score of 85/100, 1400–2500+ word depth, HTML Error Log tables, decision frameworks, action checklists, and 4–6 FAQs.
-- **Documentation Sync (`context/ui-registry.md`)**: Imprinted Section 45 (`ExamVisualContextImageEngine`).
+### 4. Accessibility High-Contrast Text Upgrade
+- **High-Contrast Text System**: Replaced low-contrast gray text across all cards with bright high-contrast typography (`text-white`, `text-amber-200/90`, `text-indigo-200/90`, `text-amber-300 font-mono font-black`).
+
+### 5. UI Registry & Progress Tracker Imprints (`context/ui-registry.md` & `context/progress-tracker.md`)
+- **Updated Section 47**: Imprinted `DynamicVectorCard` and `AcademicVectorCanvas` standard tokens, spotlight rules, and corner radius alignment standards.
 
 ## Decisions made
-- **Two Independent Engines**: Exam update notifications and evergreen educational content operate as two separate autonomous runners sharing common infrastructure.
-- **Exam Visual Context Translation**: Translates literal exam acronyms into real-world visual domains (`OSSC CGL` -> Competitive exam study desk, `OSSSC Nursing` -> Healthcare clinical education, `OSSSC CTSRE` -> Technical engineering study).
-- **Strict Real Stock Photo Rule**: Zero AI image generation; uses only free stock photography from Pexels API and Wikimedia Commons API.
-- **Hard Furniture Exclusion**: Automatically rejects any image tagged with living room furniture or interior decor keywords.
-- **Persistent History Sync**: `published_image_history.json` and `used_blog_images.json` are automatically committed back to GitHub Actions after every run.
+- **Subtle Spotlight Glow (`z-[1]`)**: Set cursor spotlight overlay to `z-[1]` under content with soft opacity (`0.08`) and `mix-blend-soft-light` to illuminate card backgrounds without painting over borders or text.
+- **Full-Screen Canvas Viewport Spanning**: Page background canvases use `fixed inset-0` with `bg-[#F8FAFC]` to ensure consistent edge-to-edge canvas backgrounds across laptop screens.
+- **Explicit Matching Border Radii**: Every card container and child `<motion.div>` explicitly declares `rounded-3xl sm:rounded-[2.5rem]` to avoid subpixel clipping collisions.
 
 ## Problems solved
-- **Generic Campus Student Photos**: Replaced generic university campus images with exact profession-first stock photos matching the exam subject (Nursing, Engineering, Exam Study Desk).
-- **Irrelevant Furniture Photos**: Added negative keyword filtering to eliminate living room cabinet/furniture images.
-- **Duplicate Pexels Image Selection**: Enforced persistent 30-blog cooldown and previous blog photo ID hard rejection.
-- **Missing License Information**: Integrated Wikimedia Commons API with automated CC BY / Public Domain license verification.
+- **Card Edge Clipping & Boxy Hover Edges**: Solved by removing root `overflow-hidden` from `DynamicVectorCard` and unifying parent/child border radius to `rounded-3xl sm:rounded-[2.5rem]`.
+- **Top Corner Glare Washouts**: Resolved by lowering spotlight z-index from `z-30` to `z-[1]` and setting `glowColor` to `rgba(59, 130, 246, 0.08)`.
+- **Study Hub Inset Canvas Gap**: Resolved by changing `StudyPlanView.tsx` root container to full-screen `fixed inset-0` vector dot grid matching `AnalyticsView.tsx`.
+- **Low-Contrast Gray Reading Strain**: Resolved by upgrading low-contrast gray text to bright white, amber-gold, and indigo typography.
 
 ## Current state
-- Python Compilation: **0 errors** across all automation scripts (`py_compile` passes cleanly).
-- Workflows: `.github/workflows/blog_cron.yml` & `.github/workflows/exam_update_cron.yml` configured and verified live on GitHub Actions (`blog_cron.yml` run #31806020997 completed cleanly in 25s).
-- Repositories: All code committed and pushed to `Pixduct/odisha-mcq-engine.git` and `nareshsamal99384-cpu/OdishaExamPrepWebsite.git`.
+- TypeScript Validation: `npx tsc --noEmit` passes with **0 errors**.
+- Repositories: All website code committed and pushed to `Pixduct/OdishaExamPrepNew.git` (Latest commit `1a2a5f6`).
+- Live Website: `https://www.odishaexamprep.in/` verified working cleanly.
 
 ## Next session starts with
-- Monitor automated daily execution:
-  - Engine 1 (Exam Updates): 08:47 AM, 02:47 PM, 08:47 PM IST.
-  - Engine 2 (Evergreen Blogs): 12:07 PM IST.
-- Proceed with any new features, UI refinements, or administrative tools requested by the user.
+- Assist the user with any new feature requests, card enhancements, administrative tools, or content updates.
 
 ## Open questions
 - None.

@@ -82,48 +82,138 @@ import { examService } from './lib/examService';
 const getQuestionBankVectorTheme = (title: string = '', category: string = '') => {
   const t = (title + ' ' + (category || '')).toLowerCase();
   
-  if (t.includes('anatom') || t.includes('nurs') || t.includes('health') || t.includes('medic') || t.includes('pharm') || t.includes('biolog') || t.includes('pathol')) {
+  if (t.includes('anatom') || t.includes('nurs') || t.includes('health') || t.includes('medic') || t.includes('pharm') || t.includes('biolog') || t.includes('pathol') || t.includes('doctor') || t.includes('physiol') || t.includes('pediatr') || t.includes('microbio')) {
     return {
       gradient: 'bg-gradient-to-br from-teal-700 via-emerald-800 to-slate-950 text-teal-50',
       badgeBg: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
       badgeText: 'HEALTHCARE & NURSING SPECIAL',
-      examTag: 'OSSSC NURSING • AIIMS • ANM/GNM',
+      examTag: 'OSSSC NURSING • AIIMS • ANM / GNM • DHS',
       MainIcon: Activity,
       WatermarkIcon: HeartPulse,
     };
-  } else if (t.includes('comput') || t.includes('code') || t.includes('tech') || t.includes('data') || t.includes('cyber') || t.includes('it ') || t.includes('software')) {
+  } else if (t.includes('comput') || t.includes('code') || t.includes('tech') || t.includes('data') || t.includes('cyber') || t.includes('it ') || t.includes('software') || t.includes('program') || t.includes('network') || t.includes('excel') || t.includes('dbms')) {
     return {
       gradient: 'bg-gradient-to-br from-cyan-800 via-blue-900 to-slate-950 text-cyan-50',
       badgeBg: 'bg-cyan-400/20 text-cyan-200 border-cyan-400/40',
-      badgeText: 'COMPUTER KNOWLEDGE EXAM',
-      examTag: 'OSSC CGL • OSSSC CTSRE • RRB',
+      badgeText: 'COMPUTER KNOWLEDGE & IT',
+      examTag: 'OSSC CGL • OSSSC CTSRE • RRB • SSC',
       MainIcon: Code,
       WatermarkIcon: Laptop,
     };
-  } else if (t.includes('odisha') || t.includes('opsc') || t.includes('ossc') || t.includes('osssc') || t.includes('state')) {
+  } else if (t.includes('odisha') || t.includes('opsc') || t.includes('ossc') || t.includes('osssc') || t.includes('kalinga') || t.includes('utkal') || t.includes('puri') || t.includes('bhubaneswar')) {
     return {
       gradient: 'bg-gradient-to-br from-amber-700 via-amber-800 to-orange-950 text-amber-50',
       badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
       badgeText: 'ODISHA STATE GK & GOVERNANCE',
-      examTag: 'OPSC • OSSC • OSSSC RELEVANT',
+      examTag: 'OPSC OAS • OSSC CGL • OSSSC RI / AMIN',
       MainIcon: MapPin,
       WatermarkIcon: Building2,
     };
-  } else if (t.includes('math') || t.includes('aptitud') || t.includes('quant') || t.includes('reason') || t.includes('number') || t.includes('algebr') || t.includes('geomet')) {
+  } else if (t.includes('math') || t.includes('aptitud') || t.includes('quant') || t.includes('arithmet') || t.includes('algebr') || t.includes('geomet') || t.includes('calculus') || t.includes('number system') || t.includes('percentage') || t.includes('ratio')) {
     return {
       gradient: 'bg-gradient-to-br from-indigo-800 via-purple-900 to-slate-950 text-purple-50',
       badgeBg: 'bg-purple-400/20 text-purple-200 border-purple-400/40',
-      badgeText: 'QUANTITATIVE & REASONING',
-      examTag: 'SSC CGL • BANKING • RAILWAYS',
+      badgeText: 'QUANTITATIVE APTITUDE',
+      examTag: 'SSC CGL • BANKING PO / CLERK • RAILWAYS',
       MainIcon: PieChart,
       WatermarkIcon: Calculator,
+    };
+  } else if (t.includes('reason') || t.includes('logic') || t.includes('analytical') || t.includes('puzzle') || t.includes('syllogism') || t.includes('seating') || t.includes('mental ability')) {
+    return {
+      gradient: 'bg-gradient-to-br from-purple-800 via-violet-950 to-slate-950 text-purple-50',
+      badgeBg: 'bg-purple-400/20 text-purple-200 border-purple-400/40',
+      badgeText: 'REASONING & MENTAL ABILITY',
+      examTag: 'SSC CGL • IBPS PO • OSSC CGL • RAILWAYS',
+      MainIcon: Target,
+      WatermarkIcon: Zap,
+    };
+  } else if (t.includes('odia') || t.includes('sahitya') || t.includes('vyakaran') || t.includes('bhasa')) {
+    return {
+      gradient: 'bg-gradient-to-br from-orange-700 via-amber-900 to-slate-950 text-orange-50',
+      badgeBg: 'bg-orange-400/20 text-orange-200 border-orange-400/40',
+      badgeText: 'ODIA LANGUAGE & VYAKARAN',
+      examTag: 'OSSSC RI / ARI / AMIN • OSSC CGL • OPSC',
+      MainIcon: Award,
+      WatermarkIcon: BookOpen,
+    };
+  } else if (t.includes('english') || t.includes('grammar') || t.includes('vocab') || t.includes('comprehension') || t.includes('synonym') || t.includes('antonym')) {
+    return {
+      gradient: 'bg-gradient-to-br from-blue-800 via-indigo-950 to-slate-950 text-blue-50',
+      badgeBg: 'bg-blue-400/20 text-blue-200 border-blue-400/40',
+      badgeText: 'ENGLISH LANGUAGE & COMPREHENSION',
+      examTag: 'SSC CGL • BANKING IBPS • OSSC CGL',
+      MainIcon: FileText,
+      WatermarkIcon: BookOpen,
+    };
+  } else if (t.includes('polity') || t.includes('constitution') || t.includes('law') || t.includes('judiciary') || t.includes('court') || t.includes('amendment') || t.includes('parliament')) {
+    return {
+      gradient: 'bg-gradient-to-br from-amber-800 via-yellow-950 to-slate-950 text-amber-50',
+      badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
+      badgeText: 'INDIAN POLITY & CONSTITUTION',
+      examTag: 'UPSC • OPSC OAS • OSSC • SSC CGL',
+      MainIcon: Scale,
+      WatermarkIcon: Building2,
+    };
+  } else if (t.includes('histor') || t.includes('ancient') || t.includes('medieval') || t.includes('modern') || t.includes('freedom') || t.includes('heritage') || t.includes('culture')) {
+    return {
+      gradient: 'bg-gradient-to-br from-orange-800 via-amber-950 to-slate-950 text-orange-50',
+      badgeBg: 'bg-orange-400/20 text-orange-200 border-orange-400/40',
+      badgeText: 'INDIAN HISTORY & HERITAGE',
+      examTag: 'UPSC • OPSC OAS • SSC CGL • RAILWAYS',
+      MainIcon: Compass,
+      WatermarkIcon: Building2,
+    };
+  } else if (t.includes('geograph') || t.includes('environment') || t.includes('ecolog') || t.includes('climate') || t.includes('river') || t.includes('forest') || t.includes('ocean')) {
+    return {
+      gradient: 'bg-gradient-to-br from-emerald-800 via-teal-950 to-slate-950 text-emerald-50',
+      badgeBg: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
+      badgeText: 'GEOGRAPHY & ENVIRONMENT',
+      examTag: 'UPSC • OPSC OAS • FOREST GUARD • SSC',
+      MainIcon: Globe,
+      WatermarkIcon: Compass,
+    };
+  } else if (t.includes('econom') || t.includes('finance') || t.includes('banking') || t.includes('rbi') || t.includes('budget') || t.includes('gdp') || t.includes('market')) {
+    return {
+      gradient: 'bg-gradient-to-br from-emerald-700 via-slate-900 to-slate-950 text-emerald-50',
+      badgeBg: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
+      badgeText: 'INDIAN ECONOMY & BANKING',
+      examTag: 'RBI GRADE B • IBPS PO • SBI PO • UPSC',
+      MainIcon: Receipt,
+      WatermarkIcon: TrendingUp,
+    };
+  } else if (t.includes('science') || t.includes('physic') || t.includes('chemistr') || t.includes('space') || t.includes('isro') || t.includes('drdo') || t.includes('atom')) {
+    return {
+      gradient: 'bg-gradient-to-br from-violet-800 via-indigo-950 to-slate-950 text-violet-50',
+      badgeBg: 'bg-violet-400/20 text-violet-200 border-violet-400/40',
+      badgeText: 'GENERAL SCIENCE & TECH',
+      examTag: 'RRB NTPC • GROUP D • OSSC CGL • SSC',
+      MainIcon: Zap,
+      WatermarkIcon: Sparkles,
+    };
+  } else if (t.includes('police') || t.includes('sub inspector') || t.includes('si ') || t.includes('constable') || t.includes('defence') || t.includes('army') || t.includes('navy') || t.includes('airforce') || t.includes('nda') || t.includes('cds')) {
+    return {
+      gradient: 'bg-gradient-to-br from-slate-800 via-amber-950 to-slate-950 text-amber-50',
+      badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
+      badgeText: 'DEFENCE & POLICE EXAMS',
+      examTag: 'ODISHA POLICE SI • CONSTABLE • NDA • CDS',
+      MainIcon: ShieldCheck,
+      WatermarkIcon: Target,
+    };
+  } else if (t.includes('teach') || t.includes('pedagog') || t.includes('otet') || t.includes('osstet') || t.includes('ctet') || t.includes('b.ed') || t.includes('tgt') || t.includes('pgt')) {
+    return {
+      gradient: 'bg-gradient-to-br from-indigo-700 via-blue-900 to-slate-950 text-indigo-50',
+      badgeBg: 'bg-indigo-400/20 text-indigo-200 border-indigo-400/40',
+      badgeText: 'TEACHING & PEDAGOGY',
+      examTag: 'OTET • OSSTET • CTET • OPSC LECTURER',
+      MainIcon: BookOpen,
+      WatermarkIcon: Award,
     };
   } else {
     return {
       gradient: 'bg-gradient-to-br from-slate-800 via-indigo-900 to-slate-950 text-indigo-50',
       badgeBg: 'bg-indigo-400/20 text-indigo-200 border-indigo-400/40',
-      badgeText: 'GENERAL STUDIES & PYQ',
-      examTag: 'CIVIL SERVICES • ALL EXAMS',
+      badgeText: 'GENERAL KNOWLEDGE & PYQ',
+      examTag: 'ALL ODISHA & CENTRAL GOVT EXAMS',
       MainIcon: Globe,
       WatermarkIcon: BookOpen,
     };

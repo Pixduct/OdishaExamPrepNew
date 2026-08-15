@@ -52,7 +52,9 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`AdminQuestionEditModalForm`** | Admin / Form Modal | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L2445-L2595) | Dynamic question form editor with optgroup target selector & active radio answer selector | AdminPanel.tsx | Active |
 | **`CurrentAffairsPage`** | Page View | [`src/pages/CurrentAffairs.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/CurrentAffairs.tsx) | Multi-period time range toolbar & category grid view | Router (`/current-affairs`) | Active |
 | **`CurrentAffairsReaderModal`** | Overlay / Modal | [`src/components/CurrentAffairsReaderModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/CurrentAffairsReaderModal.tsx) | Glassmorphic 360° article reader with guaranteed self-test MCQs | CurrentAffairs.tsx | Active |
-| **`TopHeaderNavigation`** | Navigation | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L2085-L2285) | Executive Full-Width (`w-full px-4 sm:px-6 lg:px-8`), Glass Navbar | App.tsx | Active |
+| **`TopHeaderNavigation`** | Navigation | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L2085-L2285) | Executive Widescreen (`w-full px-4 sm:px-6 lg:px-8`), Viewport-Fixed Glass Navbar | App.tsx | Active |
+| **`ExamRegistryStatusBadges`** | Data Display | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L1013-L1020) | Adaptive Dual-Theme Status Badges (Notification, Admit Card, Applications, Result, Postponed, Upcoming) | App.tsx (Recruitment Bulletin) | Active |
+| **`WidescreenLayoutBoundary`** | Layout System | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) | Executive Widescreen (`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`), Responsive 3-Column Grid | App.tsx | Active |
 | **`DynamicVectorCard`** | Container / Utility | [`src/components/DynamicVectorCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/DynamicVectorCard.tsx) | 3D Magnetic Parallax, Surface Spotlight, Edge Ring Illumination | StudyPlanView, AnalyticsView, App.tsx | Active |
 | **`MouseTrackingCanvas`** | Background / Canvas | [`src/components/MouseTrackingCanvas.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MouseTrackingCanvas.tsx) | 60fps Lerp Viewport Ambient Light Orb | App.tsx (Root) | Active |
 | **`VectorCursorFollower`** | Utility / Feedback | [`src/components/VectorCursorFollower.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/VectorCursorFollower.tsx) | Interactive Ring Follower + Center Precision Pointer Dot | App.tsx (Root) | Active |
@@ -796,6 +798,66 @@ Last updated: 2026-08-07
 ### 23. `StreakDetailModal` (Daily Study Streak & Gamification Retention Drawer)
 
 File: [`src/components/StreakDetailModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/StreakDetailModal.tsx)
+
+---
+
+### 24. `TopHeaderNavigation` (Executive Viewport-Fixed Glass Navigation)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L2085-L2285)
+Last updated: 2026-08-15
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Container (Top)** | `w-full z-[60] sticky top-0 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border-b border-slate-200/40 dark:border-slate-800/40 transition-all duration-300` |
+| **Container (Scrolled)** | `w-full z-[60] fixed top-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800 shadow-md shadow-slate-900/10 dark:shadow-black/60 transition-all duration-300` |
+| **Height (Top vs Scrolled)** | `h-16 sm:h-20` (top) ➔ `h-14 sm:h-16` (scrolled) |
+| **Nav Pill Container** | `flex items-center gap-1 bg-slate-100/80 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/60 rounded-2xl p-1 shadow-xs` |
+| **Active Nav Link** | `bg-white dark:bg-slate-900 text-[#2563EB] dark:text-brand-400 shadow-xs font-black px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider` |
+| **Inactive Nav Link** | `text-slate-600 dark:text-slate-300 hover:text-[#2563EB] dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-800 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider` |
+| **Sign In CTA Button** | `px-6 h-10 text-xs font-black uppercase tracking-widest rounded-xl bg-[#2563EB] hover:bg-brand-700 text-white shadow-md hover:shadow-[#2563EB]/25 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300` |
+
+**Pattern notes:**
+- **Flexbox Positioning**: On scroll down, navigation switches from `sticky top-0` to `fixed top-0 left-0 right-0` to bypass flexbox height bounds, ensuring 100% viewport anchoring.
+- **Signed-Out Clean View**: Hides `Search` button and `NotificationCenter` bell when `!user`, showing only `ThemeToggle` and `SIGN IN` for an uncluttered guest experience.
+- **Unified Nav Links**: Combines `Exams`, `Syllabus`, `Achievers`, `Current Affairs`, and `Blog` into a single container pill bar with dynamic dark/light active states.
+
+---
+
+### 25. `ExamRegistryStatusBadges` (Dual-Theme Adaptive Recruitment Bulletin Badges)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L1013-L1020)
+Last updated: 2026-08-15
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Notification Released** | `bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800` |
+| **Admit Card Out** | `bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800` |
+| **Applications Active** | `bg-blue-50 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800` |
+| **Result Declared** | `bg-purple-50 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800` |
+| **Postponed** | `bg-rose-50 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800` |
+| **Upcoming** | `bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700` |
+| **Action CTA Button** | `bg-[#2563EB] dark:bg-[#2563EB] hover:bg-brand-500 dark:hover:bg-brand-500 text-white border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_rgba(15,23,42,1)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)]` |
+
+**Pattern notes:**
+- **Dual-Theme High Contrast**: Status badges use deep dark backgrounds (`bg-*-950/70`) with light pastel text (`text-*-300`) in dark mode to maintain 7:1 AAA contrast accessibility.
+- **Action CTA Token**: `FREE TEST →` action buttons remain luminous blue (`bg-[#2563EB]`) with 3D drop shadows (`shadow-[4px_4px_0px_rgba(37,99,235,0.4)]`) in dark mode for maximum conversion pop.
+
+---
+
+### 26. `WidescreenLayoutBoundary` (Executive 1440px Grid System)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
+Last updated: 2026-08-15
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Main Widescreen Container** | `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8` |
+| **Section Boundary** | `py-12 md:py-16 scroll-mt-24 border-b border-slate-200/50 dark:border-slate-800` |
+| **3-Column Grid Layout** | `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-4 max-w-7xl mx-auto` |
+
+**Pattern notes:**
+- **Full Widescreen Expansion**: All primary landing sections (`Exams`, `Syllabus`, `Achievers Journal`, `Exam Registry`) expand to `max-w-7xl` (1280px / 1440px) to utilize ultra-wide monitors cleanly.
+- **3-Column Grid System**: Cards in Syllabus and Achievers sections tile into responsive 3-column layouts on desktop screens (`lg:grid-cols-3`).
 Last updated: 2026-08-07
 
 | Property | Class |
@@ -1520,5 +1582,61 @@ Last updated: August 15, 2026
 
 **Pattern notes:**
 - **Interactive Element Detection**: Automatically expands ring scale (`1.45x`) when hovering over `button`, `a`, `input`, `[role="button"]`, `.cursor-pointer`, or `.group/card`.
+
+---
+
+### 26. `ExamRegistryStatusBadge & ActionButtons`
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L1015-L1165)
+Last updated: August 15, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Notification Badge** | `bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800` |
+| **Admit Card Badge** | `bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800` |
+| **Applications Active Badge** | `bg-blue-50 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800` |
+| **Result Declared Badge** | `bg-purple-50 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800` |
+| **Practice Action Button — Desktop** | `bg-[#2563EB] dark:bg-[#2563EB] hover:bg-brand-500 dark:hover:bg-brand-500 text-white border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_rgba(15,23,42,1)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)]` |
+| **Practice Action Button — Mobile** | `bg-[#2563EB] hover:bg-brand-600 text-white text-xs font-black uppercase tracking-widest border border-[#2563EB] shadow-sm active:scale-[0.97]` |
+
+**Pattern notes:**
+- **High-Contrast Dual-Theme**: Practice buttons feature luminous blue background with white text (`text-white`) and hard-edge vector shadows (`shadow-[4px_4px_0px_rgba(37,99,235,0.4)]`), ensuring 100% legibility in both Light and Night Mode.
+- **Deep Slate Status Pill Bases**: Status badges use deep tinted backgrounds (`dark:bg-emerald-950/70`, `dark:bg-amber-950/70`) with matching border accents to eliminate washed-out light mode badges on dark vector cards.
+
+---
+
+### 27. `DualThemeVectorButton`
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L1640-L1650)
+Last updated: August 15, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Button Base** | `font-black uppercase tracking-widest text-xs sm:text-sm rounded-xl border-2 transition-all duration-200 cursor-pointer` |
+| **Desktop Background** | `bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800` |
+| **Desktop Typography** | `text-slate-900 dark:text-white` |
+| **Desktop Border & Shadow** | `border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_#2563EB] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.5)]` |
+| **Mobile Button Variant** | `w-full py-3 bg-[#2563EB] dark:bg-[#2563EB] text-white border-[#2563EB] shadow-sm active:scale-[0.98]` |
+
+**Pattern notes:**
+- **Universal Adaptation**: Replaces legacy light-only buttons. In Light Mode, renders crisp white card buttons with dark borders and blue offset shadows. In Night Mode, renders dark slate card buttons (`dark:bg-slate-900`) with white text and glowing blue offset vector shadows.
+
+---
+
+### 28. `LenisScrollEngine`
+
+File: [`src/lib/lenisScroll.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/lenisScroll.ts)
+Last updated: August 15, 2026
+
+| Property | Value |
+| :--- | :--- |
+| **Duration / Smoothness** | `1.05s` (lerp `0.1`) |
+| **Easing Function** | `(t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))` |
+| **Orientation** | `vertical`, smoothTouch `false` (native touch preservation) |
+| **Scroll Guard Lock** | `.is-scrolling * { pointer-events: none !important; }` |
+
+**Pattern notes:**
+- **120 FPS Zero Re-Render Loop**: Integrates Lenis smooth scrolling globally while locking pointer events during active inertia scrolling (`is-scrolling`), preventing hover jank and ensuring butter-smooth 120 FPS performance across all viewports.
+
 
 

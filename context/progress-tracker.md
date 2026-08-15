@@ -40,6 +40,7 @@
 - [x] Viewport-Anchored Fixed Sticky Navigation Header (Guaranteed top-0 viewport pinning on scroll across all flexbox containers & screen sizes) (`src/App.tsx`)
 - [x] Completely Removed Top EXAM UPDATES Announcement Ticker Bar (`src/App.tsx`)
 - [x] Official Exam Registry Section Dark Mode Dual-Theme Fix: High-contrast luminous blue `FREE TEST →` action buttons, dark mode status badges (`bg-emerald-950/70`, `bg-amber-950/70`, `bg-blue-950/70`), and crisp date typography (`src/App.tsx`)
+- [x] Achievers' Journal "Load More preparation journals" Button Dark Mode Fix: Converted to dual-theme vector button (`bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_#2563EB] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.5)]`) (`src/App.tsx`)
 
 
 

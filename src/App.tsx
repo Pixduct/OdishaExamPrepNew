@@ -490,7 +490,7 @@ const HistoryView = ({
 
         <div className="w-full mx-auto space-y-6 relative z-10">
           <ActiveExamContextBar />
-          <div className="flex flex-col items-center justify-center p-12 sm:p-16 text-center space-y-6 bg-gradient-to-b from-white to-slate-50/40 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 rounded-[2.5rem] border border-slate-200/40 dark:border-indigo-500/20 shadow-xl relative overflow-hidden py-16">
+          <div className="flex flex-col items-center justify-center p-12 sm:p-16 text-center space-y-6 bg-gradient-to-b from-white to-slate-50/40 dark:bg-slate-900 rounded-[2.5rem] border border-slate-200/40 dark:border-slate-800 shadow-xl relative overflow-hidden py-16">
             <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none" />
             <div className="relative flex items-center justify-center w-24 h-24 rounded-full bg-brand-50/50 mb-2">
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-100 to-brand-50 flex items-center justify-center shadow-inner">
@@ -547,7 +547,7 @@ const HistoryView = ({
       >
         {/* Executive Bright Study Vector Header Card */}
         <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)">
-          <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 border border-slate-200/80 dark:border-indigo-500/20 shadow-xl shadow-slate-200/40 dark:shadow-indigo-950/20 rounded-3xl sm:rounded-[2.5rem] relative overflow-hidden z-10">
+          <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none rounded-3xl sm:rounded-[2.5rem] relative overflow-hidden z-10">
             {/* Radial Grid & Floating Header Watermark */}
             <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none" />
             <History className="absolute -right-8 -bottom-8 w-52 h-52 sm:w-64 sm:h-64 opacity-10 dark:opacity-15 stroke-[1.2] text-brand-600 dark:text-indigo-300 pointer-events-none rotate-12" />
@@ -729,8 +729,8 @@ const HistoryView = ({
                             }
                           }}
                           className={cn(
-                            "relative overflow-hidden bg-white/90 lg:bg-white/80 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 backdrop-blur-xl rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-6 shadow-lg shadow-slate-200/50 dark:shadow-indigo-950/20 border border-slate-200/80 dark:border-indigo-500/20 flex flex-col gap-4 group transition-all duration-300",
-                            isInteractive ? "cursor-pointer hover:border-brand-300 dark:hover:border-indigo-400 hover:shadow-xl hover:shadow-brand-500/10" : ""
+                            "relative overflow-hidden bg-white dark:bg-slate-900 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-6 shadow-lg shadow-slate-200/50 dark:shadow-none border border-slate-200/80 dark:border-slate-800 flex flex-col gap-4 group transition-all duration-300 text-slate-900 dark:text-white",
+                            isInteractive ? "cursor-pointer hover:border-brand-300 dark:hover:border-indigo-500 hover:shadow-xl" : ""
                           )}
                         >
                           {/* Radial Grid & Floating Background Watermark Icon */}

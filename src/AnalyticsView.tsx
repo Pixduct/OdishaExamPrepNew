@@ -237,7 +237,7 @@ const StatCard = React.memo(({ icon, title, value, suffix = "", trend, decimals 
     >
       <DynamicVectorCard glowColor={glowColor} className="w-full">
         <div
-          className="relative w-full p-4 sm:p-6 text-slate-900 dark:text-white rounded-[2rem] bg-white/90 lg:bg-white/80 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 backdrop-blur-xl border border-slate-200/80 dark:border-indigo-500/20 shadow-lg shadow-slate-200/50 dark:shadow-indigo-950/20 flex flex-col justify-between overflow-hidden group min-h-[120px] sm:min-h-[170px]"
+          className="relative w-full p-4 sm:p-6 text-slate-900 dark:text-white rounded-[2rem] bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-lg shadow-slate-200/50 dark:shadow-none flex flex-col justify-between overflow-hidden group min-h-[120px] sm:min-h-[170px]"
         >
           {/* Radial Grid Watermark */}
           <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
@@ -1417,7 +1417,7 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
         <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.15)">
           <motion.div
             variants={stagger.itemFadeUp}
-            className="relative overflow-hidden bg-white/90 lg:bg-white/80 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 backdrop-blur-xl text-slate-900 dark:text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-9 border border-slate-200/80 dark:border-indigo-500/20 shadow-xl shadow-slate-200/50 dark:shadow-indigo-950/20 group"
+            className="relative overflow-hidden bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-9 border border-slate-200/80 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none group"
           >
             {/* Radial Grid & 3D Floating Watermark Icon */}
             <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
@@ -1791,7 +1791,7 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
            <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.08)" className="lg:col-span-8">
              <motion.div 
                variants={stagger.itemFadeUp} 
-               className="relative overflow-hidden bg-white/90 lg:bg-white/80 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 backdrop-blur-xl text-slate-900 dark:text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl shadow-slate-200/50 dark:shadow-indigo-950/20 border border-slate-200/80 dark:border-indigo-500/20 group"
+               className="relative overflow-hidden bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200/80 dark:border-slate-800 group"
              >
                 {/* Radial Grid & 3D Watermark */}
                 <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
@@ -1832,7 +1832,7 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
            <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.08)" className="lg:col-span-4">
              <motion.div 
                variants={stagger.itemFadeUp} 
-               className="relative overflow-hidden bg-white/90 lg:bg-white/80 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 backdrop-blur-xl text-slate-900 dark:text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl shadow-slate-200/50 dark:shadow-indigo-950/20 border border-slate-200/80 dark:border-indigo-500/20 group"
+               className="relative overflow-hidden bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200/80 dark:border-slate-800 group"
              >
                 {/* Radial Grid Watermark */}
                 <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
@@ -1859,7 +1859,7 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
               <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)" className="lg:col-span-12">
                 <motion.div 
                   variants={stagger.itemFadeUp} 
-                  className="relative overflow-hidden bg-white/90 lg:bg-white/80 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 backdrop-blur-xl text-slate-900 dark:text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-9 shadow-xl shadow-slate-200/50 dark:shadow-indigo-950/20 border border-slate-200/80 dark:border-indigo-500/20 group"
+                  className="relative overflow-hidden bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-9 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200/80 dark:border-slate-800 group"
                 >
                    {/* Radial Grid Watermark */}
                    <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
@@ -1978,7 +1978,7 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
 
                   return (
                      <DynamicVectorCard key={idx} glowColor="rgba(37, 99, 235, 0.12)" className="w-full">
-                       <motion.div variants={stagger.itemFadeUp} className="bg-white/90 lg:bg-white/80 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 backdrop-blur-xl text-slate-900 dark:text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl shadow-slate-200/50 dark:shadow-indigo-950/20 border border-slate-200/80 dark:border-indigo-500/20 relative overflow-hidden flex flex-col shrink-0 group">
+                       <motion.div variants={stagger.itemFadeUp} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-7 lg:p-8 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200/80 dark:border-slate-800 relative overflow-hidden flex flex-col shrink-0 group">
                          {/* Radial Grid Watermark */}
                          <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
                          <Layers className="absolute -right-8 -bottom-8 w-52 h-52 opacity-10 dark:opacity-15 stroke-[1.2] text-[#2563eb] dark:text-indigo-300 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
@@ -2051,7 +2051,7 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
              {/* Visual Action cards */}
              <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                <DynamicVectorCard glowColor="rgba(16, 185, 129, 0.12)" className="w-full">
-                 <motion.div variants={stagger.itemFadeUp} className="bg-white/90 lg:bg-white/80 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 backdrop-blur-xl rounded-3xl sm:rounded-[2rem] p-5 sm:p-6 shadow-xl shadow-slate-200/50 dark:shadow-indigo-950/20 border border-slate-200/80 dark:border-indigo-500/20 flex gap-4 sm:gap-5 items-start text-slate-900 dark:text-white relative overflow-hidden group">
+                 <motion.div variants={stagger.itemFadeUp} className="bg-white dark:bg-slate-900 rounded-3xl sm:rounded-[2rem] p-5 sm:p-6 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200/80 dark:border-slate-800 flex gap-4 sm:gap-5 items-start text-slate-900 dark:text-white relative overflow-hidden group">
                     <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
                     <div className={cn("p-3 rounded-2xl shrink-0 shadow-2xs border relative z-10", stats.impScore >= 0 ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" : "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800")}>
                        {stats.impScore >= 0 ? <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" /> : <TrendingDown className="w-5 h-5 text-rose-600 dark:text-rose-400" />}
@@ -2064,7 +2064,7 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
                </DynamicVectorCard>
 
                <DynamicVectorCard glowColor="rgba(245, 158, 11, 0.12)" className="w-full">
-                 <motion.div variants={stagger.itemFadeUp} className="bg-white/90 lg:bg-white/80 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 backdrop-blur-xl rounded-3xl sm:rounded-[2rem] p-5 sm:p-6 shadow-xl shadow-slate-200/50 dark:shadow-indigo-950/20 border border-slate-200/80 dark:border-indigo-500/20 flex gap-4 sm:gap-5 items-start text-slate-900 dark:text-white relative overflow-hidden group">
+                 <motion.div variants={stagger.itemFadeUp} className="bg-white dark:bg-slate-900 rounded-3xl sm:rounded-[2rem] p-5 sm:p-6 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200/80 dark:border-slate-800 flex gap-4 sm:gap-5 items-start text-slate-900 dark:text-white relative overflow-hidden group">
                     <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
                     <div className={cn("p-3 rounded-2xl shrink-0 shadow-2xs border relative z-10", stats.avgTimePerQuestion > 60 ? "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800" : "bg-brand-50 dark:bg-indigo-950/60 text-brand-700 dark:text-indigo-300 border-brand-200 dark:border-indigo-800")}>
                       <Timer className="w-5 h-5 text-amber-600 dark:text-amber-400" />

@@ -201,11 +201,28 @@ body[data-premium-blur="true"] #root {
     transform-style: preserve-3d;
     transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.5s ease;
     will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
   }
   .card-3d-deep:hover {
     box-shadow:
       0 60px 120px rgba(124,58,237,0.12),
       0 20px 60px rgba(0,0,0,0.03);
+  }
+
+  .crisp-vector-card {
+    backface-visibility: hidden !important;
+    -webkit-backface-visibility: hidden !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+  .crisp-vector-card * {
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    backface-visibility: hidden !important;
   }
   
   .card-lift {

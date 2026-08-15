@@ -13,7 +13,7 @@ interface DynamicVectorCardProps {
 export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
   children,
   className = '',
-  maxTilt = 5,
+  maxTilt = 3.5,
   glowColor = 'rgba(255, 255, 255, 0.12)',
   onClick,
   style = {}
@@ -22,10 +22,10 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [cursorPos, setCursorPos] = useState({ x: 50, y: 50 });
 
-  // Spring physics configuration for butter-smooth motion without lag or sudden jerks
-  const rotateX = useSpring(0, { stiffness: 220, damping: 22 });
-  const rotateY = useSpring(0, { stiffness: 220, damping: 22 });
-  const scale = useSpring(1, { stiffness: 220, damping: 22 });
+  // Spring physics configuration tuned for butter-smooth movement & zero text blur
+  const rotateX = useSpring(0, { stiffness: 260, damping: 24 });
+  const rotateY = useSpring(0, { stiffness: 260, damping: 24 });
+  const scale = useSpring(1, { stiffness: 260, damping: 24 });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
@@ -46,7 +46,7 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
     // Hovering BOTTOM (mouseY > 0) -> rotates X NEGATIVELY
     rotateX.set(-mouseY * maxTilt * 2);
     rotateY.set(mouseX * maxTilt * 2);
-    scale.set(1.012);
+    scale.set(1.008);
 
     // Percentage coordinates for cursor reflection spotlight
     const posX = Math.max(0, Math.min(100, ((e.clientX - rect.left) / width) * 100));
@@ -73,10 +73,15 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
         rotateY,
         scale,
         transformStyle: 'preserve-3d',
-        perspective: 1000,
+        perspective: 1200,
+        backfaceVisibility: 'hidden',
+        WebkitBackfaceVisibility: 'hidden',
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
+        willChange: 'transform',
         ...style
       }}
-      className={`relative transform-gpu transition-shadow duration-300 ${className}`}
+      className={`relative transform-gpu transition-shadow duration-300 crisp-vector-card ${className}`}
     >
       {/* Dynamic Cursor Light Reflection Spotlight */}
       <div

@@ -1640,10 +1640,10 @@ const AchieversJournalSection = () => {
             <button 
               onClick={() => setVisibleCount(prev => prev + 6)}
               className={cn(
-                "transition-all duration-200 cursor-pointer font-extrabold uppercase tracking-widest text-xs sm:text-sm",
+                "transition-all duration-200 cursor-pointer font-black uppercase tracking-widest text-xs sm:text-sm rounded-xl border-2 transition-all duration-200",
                 isMobile
-                  ? "w-full py-3 rounded-xl border border-[#2563EB]/30 text-[#2563EB] bg-white shadow-sm active:bg-brand-50/40 active:scale-[0.98]"
-                  : "px-6 py-3 rounded-xl border-2 border-slate-900 bg-white hover:bg-slate-50 text-slate-900 shadow-[3px_3px_0px_#2563EB] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
+                  ? "w-full py-3 bg-[#2563EB] dark:bg-[#2563EB] hover:bg-brand-600 text-white border-[#2563EB] shadow-sm active:scale-[0.98]"
+                  : "px-8 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-900 dark:text-white border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_#2563EB] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.5)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
               )}
             >
               Load More preparation journals (+{filteredStories.length - visibleCount} remaining)

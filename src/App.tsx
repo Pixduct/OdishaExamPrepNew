@@ -8129,6 +8129,10 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               <div 
                 ref={continuePracticeRef}
                 className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pt-1 pb-3 px-4 sm:px-6"
+                style={{
+                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)',
+                  maskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)'
+                }}
               >
                 {incompleteTests.slice(0, 6).map((a: any, i: number) => {
                   // Support both full-question activities (local) and lite cloud-synced ones
@@ -8311,6 +8315,10 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               <div 
                 ref={recentActivityRef}
                 className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pt-1 pb-3 px-4 sm:px-6"
+                style={{
+                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)',
+                  maskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)'
+                }}
               >
                 {activities.filter((a: any) => a.type !== 'test_incomplete').slice(0, 6).map((a: any, i: number) => {
                   const isTestResult = a.type === 'mock_test_completed' || a.type === 'practice_test_completed';

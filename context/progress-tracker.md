@@ -56,6 +56,8 @@
 - [x] Home Tab 120 FPS Zero-Cost GPU Card Optimization: Eliminated `WebkitMaskComposite: xor` and `mix-blend-soft-light` from `DynamicVectorCard.tsx` across 20+ cards, promoted ambient blur spheres to hardware compositor layers (`transform: translateZ(0)`), and added vector card scroll guard lock (`src/components/DynamicVectorCard.tsx`, `src/App.tsx`, `src/index.css`)
 - [x] Card Slicing & Vertical Line Clipping Resolution: Removed `w-24` / `w-8` edge overlay divs in `YouTubeCarousel.tsx` and removed `.cv-auto` GPU containment wrappers in `App.tsx` and `index.css`, completely eliminating card clipping lines (`YouTubeCarousel.tsx`, `App.tsx`, `index.css`)
 - [x] Smooth Card-Revealing Edge-Fade Mask Engine: Applied CSS `maskImage` / `WebkitMaskImage` alpha gradients across `YouTubeCarousel`, `Continue Practice`, and `Recent Activity` horizontal scroll tracks for a seamless, elegant card-dissolve effect without hard box clipping (`src/components/YouTubeCarousel.tsx`, `src/App.tsx`)
+- [x] Admin Panel Exams Manager Filtering Fix: Case-insensitively excluded `current_affairs`, `current-affairs`, `blog`, and `system` items from `activeTab === 'exams'` list and `actualExams` selector helper in `AdminPanel.tsx`, ensuring only genuine competitive exams are listed in the Exams section.
+
 
 
 

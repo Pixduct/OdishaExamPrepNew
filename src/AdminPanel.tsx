@@ -688,7 +688,11 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       }
       list = filtered;
     } else if (activeTab === 'exams') {
-      let filtered = exams.filter(e => !(e.name || '').startsWith('SYSTEM_SETTINGS_') && e.category !== 'blog');
+      let filtered = exams.filter(e => {
+        const cat = (e.category || '').toLowerCase();
+        const name = e.name || '';
+        return cat !== 'blog' && cat !== 'system' && cat !== 'current_affairs' && cat !== 'current-affairs' && !name.startsWith('SYSTEM_SETTINGS_');
+      });
       if (examFilter !== 'all') filtered = filtered.filter(e => e.category === examFilter);
       if (searchQuery.trim()) {
         const lowerQ = searchQuery.toLowerCase();
@@ -785,7 +789,11 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   }, [activeTab, questions, series, mockTests, exams, banks, users, filterExamId, searchQuery, examFilter, questionFilter, testFilter, bankFilter, bankTargetModeFilter, bankSubTab, testSortDirection, selectedExamIdForTests, selectedCategoryForTests, selectedExamIdForBanks, selectedExamIdForSeries, selectedExamIdForQuestions, selectedTypeForQuestions, selectedCategoryForQuestions, selectedTargetIdForQuestions]);
 
   const actualExams = React.useMemo(() => {
-    return exams.filter(e => e.category !== 'blog' && e.category !== 'system' && !(e.name || '').startsWith('SYSTEM_SETTINGS_'));
+    return exams.filter(e => {
+      const cat = (e.category || '').toLowerCase();
+      const name = e.name || '';
+      return cat !== 'blog' && cat !== 'system' && cat !== 'current_affairs' && cat !== 'current-affairs' && !name.startsWith('SYSTEM_SETTINGS_');
+    });
   }, [exams]);
 
   const validateChangeBeforePublish = (type: 'exam' | 'series' | 'test' | 'bank', payload: any, isEdit: boolean) => {

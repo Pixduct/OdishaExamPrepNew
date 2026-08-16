@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { Reorder } from 'framer-motion';
 import { examService, Question, TestSeries, MockTest, Exam } from './lib/examService';
+import { destroyLenis, initLenis } from './lib/lenisScroll';
 import { DEFAULT_ACHIEVERS_JOURNAL, AchieverStory } from './lib/defaultAchievers';
 import { cn, getDirectImageUrl } from './lib/utils';
 import { supabase } from './lib/supabase';
@@ -157,6 +158,13 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const [bankTargetModeFilter, setBankTargetModeFilter] = useState<'all' | 'bank' | 'practice' | 'both'>('all');
   const [bankSubTab, setBankSubTab] = useState<'banks' | 'practice' | 'all'>('banks');
   const [searchQuery, setSearchQuery] = useState('');
+
+  React.useEffect(() => {
+    destroyLenis();
+    return () => {
+      initLenis();
+    };
+  }, []);
   const [filterExamId, setFilterExamId] = useState(() => {
     const savedActiveTab = sessionStorage.getItem('oep_adminActiveTab');
     if (savedActiveTab === 'questions') {
@@ -2885,7 +2893,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   };
 
   return (
-    <div className="fixed inset-0 bg-[#F8FAFC] z-50 flex flex-col font-sans">
+    <div className="fixed inset-0 bg-[#F8FAFC] z-50 flex flex-col font-sans" data-lenis-prevent>
       {/* Header */}
       <header className="h-16 glass border-b border-slate-200/50 flex items-center justify-between px-6 shrink-0 sticky top-0 z-10 shadow-sm">
         <div className="flex items-center gap-6 min-w-0 flex-1">
@@ -2927,7 +2935,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       </header>
 
       {/* Content */}
-      <main className="flex-1 overflow-y-auto p-8 sm:p-12">
+      <main className="flex-1 overflow-y-auto p-8 sm:p-12 overscroll-contain" data-lenis-prevent>
         <div className="max-w-7xl mx-auto space-y-8">
           <div className="flex justify-between items-end">
             <div className="space-y-1">
@@ -6204,7 +6212,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         {showBulkUploadModal && (
           <div className="fixed inset-0 bg-slate-950/40 z-[60] flex items-center justify-center p-4 backdrop-blur-sm pt-20">
             <motion.div {...modalContent}
-              className="bg-white rounded-[2rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto premium-shadow border border-slate-100 my-auto"
+              className="bg-white rounded-[2rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto overscroll-contain premium-shadow border border-slate-100 my-auto"
+              data-lenis-prevent
             >
               <div className="p-8">
                 <div className="flex justify-between items-center mb-6">
@@ -6366,7 +6375,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       {/* Dynamic Add Modal */}
       <AnimatePresence>
         {showAddModal && (
-          <div className="fixed inset-0 bg-slate-950/60 z-[60] flex items-center justify-center p-4 sm:p-6 backdrop-blur-md overflow-y-auto">
+          <div className="fixed inset-0 bg-slate-950/60 z-[60] flex items-center justify-center p-4 sm:p-6 backdrop-blur-md overflow-y-auto overscroll-contain" data-lenis-prevent>
             <motion.div {...modalContent}
               className={cn(
                 "bg-white rounded-[2.5rem] w-full overflow-hidden shadow-[0_25px_60px_-15px_rgba(0,0,0,0.25)] border border-slate-100 my-auto relative",
@@ -6565,7 +6574,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+              <div className="p-6 space-y-6 overflow-y-auto overscroll-contain custom-scrollbar flex-1" data-lenis-prevent>
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1">
                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Target Account</p>
                    <p className="font-extrabold text-slate-900 text-lg truncate" title={grantTargetUser.email}>{grantTargetUser.email}</p>

@@ -45,6 +45,22 @@ export function getLenis(): Lenis | null {
   return lenisInstance;
 }
 
+export function stopLenis() {
+  if (lenisInstance) {
+    lenisInstance.stop();
+  }
+  if (typeof document !== 'undefined') {
+    document.body.classList.remove('is-scrolling');
+  }
+}
+
+export function startLenis() {
+  if (lenisInstance) {
+    lenisInstance.start();
+  }
+}
+
+
 export function destroyLenis() {
   if (rafId) {
     cancelAnimationFrame(rafId);
@@ -54,4 +70,9 @@ export function destroyLenis() {
     lenisInstance.destroy();
     lenisInstance = null;
   }
+  if (typeof document !== 'undefined') {
+    document.body.classList.remove('is-scrolling');
+    document.documentElement.classList.remove('lenis', 'lenis-stopped', 'lenis-smooth', 'lenis-scrolling');
+  }
 }
+

@@ -404,7 +404,7 @@ import { activityMatchesExam } from './lib/examMatcher';
 import { MathTextRenderer, DiagramRenderer } from './components/MathTextRenderer';
 
 const AdminPanel = React.lazy(() => import('./AdminPanel'));
-import MockTestSystem from './MockTestSystem';
+import MockTestSystem, { requestUniversalFullscreen } from './MockTestSystem';
 const TestResultsView = React.lazy(() => import('./TestResultsView'));
 import AnalyticsView from './AnalyticsView';
 const AdminLoginPage = React.lazy(() => import('./pages/AdminLoginPage'));
@@ -2413,7 +2413,8 @@ export const Navbar = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute top-full left-0 right-0 bg-white border-b border-slate-200/80 shadow-2xl overflow-y-auto no-scrollbar md:hidden max-h-[calc(100vh-80px)] rounded-b-[2.25rem] z-[60]"
+              className="absolute top-full left-0 right-0 bg-white border-b border-slate-200/80 shadow-2xl overflow-y-auto overscroll-contain no-scrollbar md:hidden max-h-[calc(100vh-80px)] rounded-b-[2.25rem] z-[60]"
+              data-lenis-prevent
             >
               {/* Content Container */}
               <div className="p-4 flex flex-col gap-1.5">
@@ -3030,7 +3031,8 @@ const AuthModal = ({ isOpen, onClose, hideCloseButton = false }: { isOpen: boole
                 damping: 32,
                 mass: 0.9,
               }}
-              className="glass rounded-t-[2rem] sm:rounded-3xl w-full max-w-md p-6 sm:p-10 pb-10 sm:pb-10 space-y-6 sm:space-y-8 shadow-2xl border-x-0 border-b-0 sm:border border-white/40 max-h-[92vh] overflow-y-auto no-scrollbar pointer-events-auto"
+              className="glass rounded-t-[2rem] sm:rounded-3xl w-full max-w-md p-6 sm:p-10 pb-10 sm:pb-10 space-y-6 sm:space-y-8 shadow-2xl border-x-0 border-b-0 sm:border border-white/40 max-h-[92vh] overflow-y-auto overscroll-contain no-scrollbar pointer-events-auto"
+              data-lenis-prevent
               style={{ willChange: 'transform, opacity' }}
             >
             {/* Drag handle (mobile only) */}
@@ -4048,7 +4050,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
       exit={isMobile ? undefined : { opacity: 0, scale: 0.95 }}
       whileHover={isMobile || isScheduledUpcoming ? undefined : whileHover.liftTap}
       whileTap={isScheduledUpcoming ? undefined : whileTap.press}
-      className="w-full h-full"
+      className="w-full h-full cv-card-auto"
     >
       {isMobile ? (
         <div
@@ -4056,7 +4058,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
             if (!isScheduledUpcoming) handleStartDirectPractice(bank);
           }}
           className={cn(
-            "p-4 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center justify-between gap-4 transition-all duration-300 relative overflow-hidden text-slate-900 dark:text-white",
+            "p-4 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center justify-between gap-4 transition-all duration-300 relative overflow-hidden text-slate-900 dark:text-white cv-card-auto",
             isScheduledUpcoming
               ? "border-amber-200 dark:border-amber-800 bg-amber-50/20 dark:bg-amber-950/20 cursor-not-allowed opacity-90"
               : isCompleted
@@ -4096,20 +4098,17 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
                 {isScheduledUpcoming ? (
                   <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[8.5px] font-black rounded border border-amber-200 dark:border-amber-800 uppercase tracking-wider shrink-0">📅 UPCOMING</span>
                 ) : isCompleted ? (
-                  <span className="px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[8.5px] font-black rounded border border-emerald-200 dark:border-emerald-800 uppercase tracking-wider shrink-0 flex items-center gap-1"><CheckCircle2 className="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400" /> COMPLETED</span>
+                  <span className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[8.5px] font-black rounded border border-emerald-100/60 dark:border-emerald-800 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" /> COMPLETED</span>
                 ) : isInProgress ? (
-                  <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[8.5px] font-black rounded border border-amber-200 dark:border-amber-800 uppercase tracking-wider shrink-0">IN PROGRESS ({progressPercent}%)</span>
+                  <span className="px-1.5 py-0.5 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-[8.5px] font-black rounded border border-amber-100 dark:border-amber-800 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><Clock className="w-2.5 h-2.5 animate-pulse" /> {progressPercent}%</span>
                 ) : (
-                  <span className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-100 dark:border-slate-700 whitespace-nowrap">Practice Set</span>
+                  <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[8.5px] font-black rounded border border-slate-200/50 dark:border-slate-700 uppercase tracking-wider shrink-0">PRACTICE SET</span>
+                )}
+                {suffix && (
+                  <span className="px-1.5 py-0.5 bg-brand-50 dark:bg-indigo-950/60 text-brand-700 dark:text-indigo-300 text-[8.5px] font-black rounded border border-brand-100/60 dark:border-indigo-800 uppercase tracking-wider shrink-0">SET {suffix}</span>
                 )}
               </div>
-
-              {isScheduledUpcoming ? (
-                <div className="mt-1.5 text-[11px] font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
-                  <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
-                  <span>Starts in <strong className="font-mono text-amber-900 dark:text-amber-200">{countdown.formattedCountdown}</strong></span>
-                </div>
-              ) : (
+              {totalQs > 0 && (
                 <div className="flex items-center gap-2 mt-2 text-[10px] font-extrabold text-slate-555 dark:text-slate-300 flex-wrap">
                   <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-0.5 rounded-lg border border-slate-100/60 dark:border-slate-700/60"><FileText className="w-3 h-3 text-slate-400" /> {totalQs} Questions</span>
                   <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-0.5 rounded-lg border border-slate-100/60 dark:border-slate-700/60"><Clock className="w-3 h-3 text-slate-400" /> {totalQs > 0 ? `${totalQs} Mins` : 'Soon'}</span>
@@ -4133,7 +4132,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
       ) : (
         <Card 
           className={cn(
-            "p-6 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 border border-slate-200/80 dark:border-indigo-500/20 shadow-lg shadow-slate-200/30 dark:shadow-indigo-950/20 rounded-[1.5rem] transition-all duration-500 flex flex-col justify-between gap-6 relative overflow-hidden premium-shine-container h-full text-slate-900 dark:text-white", 
+            "p-6 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 border border-slate-200/80 dark:border-indigo-500/20 shadow-lg shadow-slate-200/30 dark:shadow-indigo-950/20 rounded-[1.5rem] transition-all duration-500 flex flex-col justify-between gap-6 relative overflow-hidden premium-shine-container h-full text-slate-900 dark:text-white cv-card-auto", 
             isScheduledUpcoming
               ? "border-amber-200 dark:border-amber-800 bg-amber-50/10 dark:bg-amber-950/20 cursor-not-allowed"
               : isCompleted
@@ -4324,21 +4323,32 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
   const isLocked = !isScheduledUpcoming && isPremium && !hasAccessTo(test, testExamId);
   const isPremiumUnlocked = !isScheduledUpcoming && isPremium && hasAccessTo(test, testExamId);
 
-  const completedAct = !isScheduledUpcoming && activities?.find((act: any) => 
-    (act.type === 'mock_test_completed' || act.type === 'practice_test_completed') && 
-    act.metadata?.test?.id === test.id
-  );
+  const completedAct = useMemo(() => {
+    if (isScheduledUpcoming || !activities) return null;
+    return activities.find((act: any) => 
+      (act.type === 'mock_test_completed' || act.type === 'practice_test_completed') && 
+      act.metadata?.test?.id === test.id
+    );
+  }, [isScheduledUpcoming, activities, test.id]);
   const isCompleted = !isScheduledUpcoming && !!completedAct;
 
-  const incompleteAct = !isCompleted && !isScheduledUpcoming && activities?.find((act: any) => 
-    act.type === 'test_incomplete' && 
-    act.metadata?.test?.id === test.id
-  );
+  const incompleteAct = useMemo(() => {
+    if (isCompleted || isScheduledUpcoming || !activities) return null;
+    return activities.find((act: any) => 
+      act.type === 'test_incomplete' && 
+      act.metadata?.test?.id === test.id
+    );
+  }, [isCompleted, isScheduledUpcoming, activities, test.id]);
   const isInProgress = !isScheduledUpcoming && !!incompleteAct;
 
   const actualQs = test.practiceQuestionCount || test.actualQuestionCount || 0;
   const adminQs = test.questionCount || test.question_count || test.totalQuestions || 0;
   const totalQs = actualQs > 0 ? actualQs : (adminQs > 0 ? adminQs : (test.questions?.length || test._questionCount || 0));
+
+  const solvedCount = incompleteAct ? Object.keys(incompleteAct.metadata?.answersById || incompleteAct.metadata?.answers || {}).length : 0;
+  const currentQuestionIndex = incompleteAct ? (incompleteAct.metadata?.currentQuestionIndex || 0) : 0;
+  const activeProgressCount = solvedCount > 0 ? solvedCount : (incompleteAct ? (currentQuestionIndex + 1) : 0);
+  const progressPercent = totalQs > 0 ? Math.min(100, Math.round((activeProgressCount / totalQs) * 100)) : 0;
 
   const suffixMatch = test.title.match(/(?:\s+|-\s*)(I{1,3}|IV|V|VI{0,3}|IX|X|\d{1,2})\s*$/i);
   let mainTitle = test.title;
@@ -4350,8 +4360,6 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
       mainTitle = mainTitle.substring(0, mainTitle.length - 1).trim();
     }
   }
-  const currentQuestionIndex = incompleteAct ? ((incompleteAct.metadata?.currentQuestionIndex || 0) + 1) : 0;
-  const progressPercent = totalQs > 0 ? Math.min(100, Math.round((currentQuestionIndex / totalQs) * 100)) : 0;
 
   return (
     <motion.div
@@ -4360,7 +4368,7 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={isMobile || isScheduledUpcoming ? undefined : whileHover.liftTap}
       whileTap={isScheduledUpcoming ? undefined : whileTap.press}
-      className="w-full"
+      className="w-full cv-card-auto"
     >
       {isMobile ? (
         <div
@@ -5021,7 +5029,7 @@ const PurchasesView = ({ user, profile, exams, mockTests, testSeries, dynamicQue
                 {/* Content Items Container */}
                 {totalItems > 0 && (
                   <div className="bg-white/95 border-x border-b border-slate-100 p-4 md:p-6 rounded-b-[1.5rem] md:rounded-b-[2rem]">
-                    <div className="md:max-h-[380px] md:overflow-y-auto overflow-y-visible custom-scrollbar pr-0 md:pr-2 -mr-0 md:-mr-2">
+                    <div className="md:max-h-[380px] md:overflow-y-auto overflow-y-visible custom-scrollbar overscroll-contain pr-0 md:pr-2 -mr-0 md:-mr-2" data-lenis-prevent>
                       
                       {/* Desktop Grid Layout (visible on sm and up) */}
                       <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-2">
@@ -5696,7 +5704,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                             transition: { staggerChildren: isMobile ? 0 : 0.08 }
                           }
                         }}
-                        className="overflow-y-auto flex-1 pr-1 space-y-2 custom-scrollbar min-h-[100px] max-h-[280px] sm:max-h-none"
+                        className="overflow-y-auto overscroll-contain flex-1 pr-1 space-y-2 custom-scrollbar min-h-[100px] max-h-[280px] sm:max-h-none"
+                        data-lenis-prevent
                       >
                         {selectedBankItem.pdfLinks && selectedBankItem.pdfLinks.length > 0 ? (
                           selectedBankItem.pdfLinks.map((link: any, idx: number) => (
@@ -5901,7 +5910,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                 {/* Drag handle (mobile only) */}
                 <div className="sm:hidden w-10 h-1 bg-slate-200 rounded-full mx-auto mt-3 mb-0 shrink-0" />
 
-                <div className="p-4 sm:p-7 md:p-9 overflow-y-auto no-scrollbar relative z-10 flex flex-col">
+                <div className="p-4 sm:p-7 md:p-9 overflow-y-auto overscroll-contain no-scrollbar relative z-10 flex flex-col" data-lenis-prevent>
                   <div className="flex justify-between items-start mb-4 md:mb-8 border-b border-slate-100 pb-3 md:pb-5">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 sm:w-12 sm:h-12 premium-gradient rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-brand-500/10">
@@ -7351,67 +7360,66 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       return;
     }
 
+    requestUniversalFullscreen();
+
     const actMeta = resumeState?.metadata || resumeState;
-    if (actMeta && (actMeta.isStarted || actMeta.answers || actMeta.currentQuestionIndex !== undefined)) {
-      const resumeTest = actMeta.test || test;
-      setActiveTestState({
-        ...actMeta,
-        isStarted: true
-      });
-      setActiveTest({
-        ...resumeTest,
-        durationMinutes: resumeTest.durationMinutes || 60,
-      });
-      return;
-    }
-    
-    // Prioritize explicitly passed examId (like from PurchasesView's _resolvedExamId)
-    let testExamId = test.examId || test._resolvedExamId || '';
-    if (!testExamId && test.seriesId) {
-      try { testExamId = JSON.parse(test.seriesId).examId || ''; } catch(e){}
+    const targetTest = actMeta?.test || test || {};
+    const targetTestId = targetTest.id || test?.id || actMeta?.testId;
+
+    // Prioritize explicitly passed examId
+    let testExamId = targetTest.examId || targetTest._resolvedExamId || test?.examId || '';
+    if (!testExamId && (targetTest.seriesId || test?.seriesId)) {
+      try { testExamId = JSON.parse(targetTest.seriesId || test?.seriesId).examId || ''; } catch(e){}
     }
 
-    if (test.isPremium && !hasAccessTo(test, testExamId)) {
-      setPaywallPrice(test.price || 499);
-      setPaywallOriginalPrice(test.originalPrice || ((test.price || 499) * 2));
-      setPaywallItemTitle(test.title || 'Premium Test');
+    if (targetTest.isPremium && !hasAccessTo(targetTest, testExamId)) {
+      setPaywallPrice(targetTest.price || 499);
+      setPaywallOriginalPrice(targetTest.originalPrice || ((targetTest.price || 499) * 2));
+      setPaywallItemTitle(targetTest.title || 'Premium Test');
       setPaywallFeatures([
-        `${test.durationMinutes || 60} Minutes Duration`,
-        `${test.totalMarks || 100} Total Marks`,
+        `${targetTest.durationMinutes || 60} Minutes Duration`,
+        `${targetTest.totalMarks || 100} Total Marks`,
         `Detailed Step-by-Step Solutions`,
         `Advanced Performance Analytics`
       ]);
-      setPaywallItemId(test.id);
+      setPaywallItemId(targetTest.id);
       setPaywallProductType('mock_test');
       setShowPaywall(true);
       return;
     }
 
     try {
-      let finalTest = { ...test };
-      
-      // If questions are not loaded yet, fetch them from the database
-      if (!finalTest.questions || finalTest.questions.length === 0) {
-        if (!finalTest.id.startsWith('practice-')) {
-          const fetchedQs = await examService.getQuestionsForMockTest(finalTest.id);
-          finalTest.questions = fetchedQs;
-          
-          if (fetchedQs.length === 0) {
-            showPremiumAlert(
-              "No Questions in Test",
-              "This practice set does not contain any questions yet. We are updating the question files now."
-            );
-            return;
-          }
-        }
+      let finalTest = { ...targetTest };
+
+      // Immediately set active test & state synchronously within user gesture callstack
+      if (actMeta && (actMeta.isStarted || actMeta.answers || actMeta.answersById || actMeta.currentQuestionIndex !== undefined)) {
+        setActiveTestState({
+          ...actMeta,
+          isStarted: true
+        });
+        setActiveTest({
+          ...finalTest,
+          durationMinutes: finalTest.durationMinutes || 60,
+        });
+      } else {
+        if (isGuest) incrementGuestUsage('tests');
+        setActiveTestState({ resumeSessionId: `session-${Date.now()}` });
+        setActiveTest({
+          ...finalTest,
+          durationMinutes: finalTest.durationMinutes || 60,
+        });
       }
 
-      if (isGuest) incrementGuestUsage('tests'); // This could be removed since we block guests entirely, but to avoid TS errors
-      setActiveTestState({ resumeSessionId: `session-${Date.now()}` });
-      setActiveTest({
-        ...finalTest,
-        durationMinutes: finalTest.durationMinutes || 60, // Fallback duration
-      });
+      // Dynamically fetch latest questions in background if missing or resuming real test
+      if (!finalTest.questions || finalTest.questions.length === 0 || (targetTestId && !targetTestId.startsWith('practice-'))) {
+        if (targetTestId && !targetTestId.startsWith('practice-')) {
+          examService.getQuestionsForMockTest(targetTestId).then((fetchedQs) => {
+            if (fetchedQs && fetchedQs.length > 0) {
+              setActiveTest(prev => prev ? { ...prev, questions: fetchedQs, questionCount: fetchedQs.length } : prev);
+            }
+          }).catch(console.error);
+        }
+      }
     } catch (error) {
       console.error(error);
       alert('Failed to start test.');
@@ -7544,6 +7552,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       setShowLoginPrompt(true);
       return;
     }
+
+    requestUniversalFullscreen();
 
     const topicBank = typeof topicBankInput === 'string'
       ? { id: `practice-${Date.now()}`, title: topicBankInput, name: topicBankInput }
@@ -8184,43 +8194,16 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         whileTap={whileTap.press}
                         onClick={async () => {
                           if (!canResume) return;
+                          requestUniversalFullscreen();
                           
                           let testToResume = { ...a.metadata?.test };
                           if (!testToResume.title && a.title) {
                             testToResume.title = a.title;
                           }
-                          if (!Array.isArray(testToResume.questions) || testToResume.questions.length === 0) {
-                            const testId = testToResume.id || '';
-                            if (testId.startsWith('practice-') || !testId) {
-                              const topicName = (testToResume.title || a.title || '').replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
-                              const reqCount = a.metadata?.totalQuestions || 20;
-                              const instantQs = getInstantQuestionsForTopic(topicName, reqCount);
-                              testToResume.questions = instantQs.map(q => ({
-                                id: q.id,
-                                questionText: q.questionText,
-                                options: q.options,
-                                correctAnswerIndex: q.correctAnswerIndex,
-                                explanation: q.explanation
-                              }));
-                            } else {
-                              try {
-                                const freshQs = await examService.getQuestionsForMockTest(testId);
-                                if (freshQs && freshQs.length > 0) {
-                                  testToResume.questions = freshQs;
-                                }
-                              } catch (e) {
-                                console.error("Failed to fetch fresh questions on Continue resume:", e);
-                              }
-                            }
+                          if (!testToResume.id && a.metadata?.testId) {
+                            testToResume.id = a.metadata.testId;
                           }
-
-                          if (!Array.isArray(testToResume.questions) || testToResume.questions.length === 0) {
-                            alert("Could not load test questions to resume. Please select the test from Mock Tests or Practice Mode.");
-                            return;
-                          }
-                          
-                          setActiveTestState({ ...a.metadata, resumeSessionId: a.metadata?.resumeSessionId || a.metadata?.test?.id });
-                          setActiveTest(testToResume);
+                          handleStartTest(testToResume, a);
                         }}
                         className={`w-full h-full rounded-2xl border border-slate-100/90 sm:border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 hover:border-brand-300/60 dark:hover:border-brand-600/50 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container relative overflow-hidden ${
                           canResume ? 'cursor-pointer active:scale-[0.98]' : 'opacity-60 cursor-not-allowed'
@@ -10376,7 +10359,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       {/* Sectional Mocks List */}
                       <div className="space-y-5 sm:space-y-10">
                         {filteredGroupedBySubject.map(([subject, tests]) => (
-                          <div key={subject} className="space-y-2.5 sm:space-y-5">
+                          <div key={subject} className="space-y-2.5 sm:space-y-5 cv-card-auto">
                             <h4 className="text-[13px] sm:text-xl font-black text-brand-700 dark:text-indigo-300 px-3 py-1.5 sm:px-5 sm:py-2.5 bg-brand-50/80 dark:bg-indigo-950/60 rounded-lg sm:rounded-xl inline-flex items-center gap-1.5 border border-brand-100/50 dark:border-indigo-800 shadow-sm">{subject}</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6">
                               {(tests as any[]).map(test => (

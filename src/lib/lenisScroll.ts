@@ -8,13 +8,12 @@ export function initLenis(): Lenis | null {
   if (typeof window === 'undefined') return null;
   if (lenisInstance) return lenisInstance;
 
-  // Initialize Lenis Smooth Scroll Engine
+  // Initialize Lenis Smooth Scroll Engine — Antigravity Micro-Distance Continuous Flow Engine
   lenisInstance = new Lenis({
-    duration: 0.6,
-    easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    lerp: 0.18,
     smoothWheel: true,
-    wheelMultiplier: 1.1,
-    touchMultiplier: 1.2,
+    wheelMultiplier: 0.60,
+    touchMultiplier: 0,
   });
 
   // High performance RAF loop

@@ -9,11 +9,19 @@ import { DynamicVectorCard } from './components/DynamicVectorCard';
 
 import { evaluatePersonalBestImprovements, PersonalBestImprovement } from './lib/personalBestManager';
 import { getUserXpState } from './lib/xpManager';
+import { destroyLenis, initLenis } from './lib/lenisScroll';
 
 export default function TestResultsView({ results, onClose }: { results: any, onClose: () => void }) {
   const resultsTestId = results?.test?.id || '';
   const savedTestId = sessionStorage.getItem('oep_reviewTestId');
   const isSameTest = savedTestId === resultsTestId;
+
+  React.useEffect(() => {
+    destroyLenis();
+    return () => {
+      initLenis();
+    };
+  }, []);
 
   // Evaluate Personal Best improvements
   const pbImprovements: PersonalBestImprovement[] = React.useMemo(() => {
@@ -421,9 +429,10 @@ export default function TestResultsView({ results, onClose }: { results: any, on
         sessionStorage.setItem('oep_reviewScrollTop', e.currentTarget.scrollTop.toString());
       }}
       className={cn(
-        "fixed inset-0 z-[200] overflow-y-auto bg-[#F8FAFC] font-sans",
+        "fixed inset-0 z-[200] overflow-y-auto overscroll-contain bg-[#F8FAFC] font-sans",
         showQuestionNav ? "pb-18 sm:pb-20" : "pb-12"
       )}
+      data-lenis-prevent
       style={{ isolation: 'isolate' }}
     >
       {/* Full-Screen Edge-to-Edge Academic Vector Canvas Grid & HSL Glows */}

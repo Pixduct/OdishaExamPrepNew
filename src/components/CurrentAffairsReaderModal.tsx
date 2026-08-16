@@ -81,7 +81,7 @@ export const CurrentAffairsReaderModal: React.FC<Props> = ({ article, onClose })
         </div>
 
         {/* Scrollable Reader Body with Hardware-Accelerated Momentum Scrolling */}
-        <div className="overflow-y-auto overscroll-contain p-5 sm:p-8 space-y-6 text-slate-800 scroll-smooth [will-change:transform] [webkit-overflow-scrolling:touch]">
+        <div className="overflow-y-auto overscroll-contain p-5 sm:p-8 space-y-6 text-slate-800 scroll-smooth [will-change:transform] [webkit-overflow-scrolling:touch]" data-lenis-prevent>
           
           {/* Article Title */}
           <h1 className="text-2xl sm:text-3xl font-serif font-black text-slate-900 leading-snug">

@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { cacheService } from './cacheService';
 
 let schemaHasDiagram: boolean | null = null;
 
@@ -41,48 +42,59 @@ async function callAdminDbProxy(table: string, action: 'insert' | 'update' | 'de
 
 // --- Topic Count Helper ---
 async function fetchTopicCounts(topics: string[]): Promise<Record<string, number>> {
-  const countMap: Record<string, number> = {};
-  const normMap: Record<string, number> = {};
   const validTopics = (topics || []).filter(Boolean);
-  if (validTopics.length === 0) return countMap;
+  if (validTopics.length === 0) return new Proxy({}, { get: () => 0 });
 
-  const chunkSize = 50;
-  for (let i = 0; i < validTopics.length; i += chunkSize) {
-    const chunk = validTopics.slice(i, i + chunkSize);
-    const pageSize = 1000;
-    let page = 0;
-    let keepFetching = true;
+  const sortedKey = [...validTopics].sort().join('|');
+  const cacheKey = `topic_counts_${sortedKey}`;
+  const cachedData = cacheService.get<{ countMap: Record<string, number>; normMap: Record<string, number> }>(cacheKey);
 
-    while (keepFetching) {
-      try {
-        const { data, error } = await supabase
-          .from('questions')
-          .select('topic')
-          .in('topic', chunk)
-          .range(page * pageSize, (page + 1) * pageSize - 1);
+  let countMap: Record<string, number> = {};
+  let normMap: Record<string, number> = {};
 
-        if (error || !data || data.length === 0) {
-          keepFetching = false;
-        } else {
-          data.forEach(q => {
-            if (q.topic) {
-              const exact = q.topic;
-              countMap[exact] = (countMap[exact] || 0) + 1;
-              const norm = q.topic.toLowerCase().trim();
-              normMap[norm] = (normMap[norm] || 0) + 1;
-            }
-          });
-          if (data.length < pageSize) {
+  if (cachedData) {
+    countMap = cachedData.countMap;
+    normMap = cachedData.normMap;
+  } else {
+    const chunkSize = 50;
+    for (let i = 0; i < validTopics.length; i += chunkSize) {
+      const chunk = validTopics.slice(i, i + chunkSize);
+      const pageSize = 1000;
+      let page = 0;
+      let keepFetching = true;
+
+      while (keepFetching) {
+        try {
+          const { data, error } = await supabase
+            .from('questions')
+            .select('topic')
+            .in('topic', chunk)
+            .range(page * pageSize, (page + 1) * pageSize - 1);
+
+          if (error || !data || data.length === 0) {
             keepFetching = false;
           } else {
-            page++;
+            data.forEach(q => {
+              if (q.topic) {
+                const exact = q.topic;
+                countMap[exact] = (countMap[exact] || 0) + 1;
+                const norm = q.topic.toLowerCase().trim();
+                normMap[norm] = (normMap[norm] || 0) + 1;
+              }
+            });
+            if (data.length < pageSize) {
+              keepFetching = false;
+            } else {
+              page++;
+            }
           }
+        } catch (err) {
+          console.error("Error fetching topic counts chunk:", err);
+          keepFetching = false;
         }
-      } catch (err) {
-        console.error("Error fetching topic counts chunk:", err);
-        keepFetching = false;
       }
     }
+    cacheService.set(cacheKey, { countMap, normMap });
   }
 
   return new Proxy(countMap, {
@@ -293,16 +305,21 @@ export const examService = {
 
   // Test Series
   async createTestSeries(series: TestSeries) {
+    cacheService.clear('all_test_series');
     const data = await callAdminDbProxy('testSeries', 'insert', series);
     return data?.[0] || data;
   },
 
   async getAllTestSeries() {
+    const cached = cacheService.get<TestSeries[]>('all_test_series');
+    if (cached) return cached;
+
     const { data, error } = await supabase
       .from('testSeries')
       .select('*')
       .order('sortOrder', { ascending: true });
     if (error) throw error;
+    cacheService.set('all_test_series', data as TestSeries[]);
     return data as TestSeries[];
   },
 
@@ -422,9 +439,12 @@ export const examService = {
    * Use this for listing tests; use getQuestionsForMockTest() when starting a test.
    */
   async getAllMockTestsLite() {
+    const cached = cacheService.get<MockTest[]>('all_mock_tests_lite');
+    if (cached) return cached;
+
     const { data: tests, error } = await supabase
       .from('mockTests')
-      .select('*')
+      .select('id, title, durationMinutes, totalMarks, negativeMarking, seriesId, sortOrder, is_archived, scheduled_at')
       .order('sortOrder', { ascending: true });
     if (error) throw error;
 
@@ -437,7 +457,7 @@ export const examService = {
     //   - A JSON/JSONB object like {examId, isPremium, category, price, ...}
     //     (used by the admin panel to store exam metadata inline)
     // Parse it to expose virtual `examId` and `isPremium` fields on each test.
-    return (tests ?? []).map((t: any) => {
+    const result = (tests ?? []).map((t: any) => {
       let examId: string | null = t.examId || null;
       let isPremium = t.isPremium ?? false;
       let category: string | null = t.category || null;
@@ -457,6 +477,9 @@ export const examService = {
 
       return { ...t, examId, isPremium, category, _questionCount };
     }) as MockTest[];
+
+    cacheService.set('all_mock_tests_lite', result);
+    return result;
   },
 
   async deleteMockTest(id: string) {
@@ -542,18 +565,22 @@ export const examService = {
   },
 
   // Exams
-  // Exams
   async addExam(exam: Exam) {
+    cacheService.clear('all_exams');
     const data = await callAdminDbProxy('exams', 'insert', exam);
     return data?.[0] || data;
   },
 
   async getAllExams() {
+    const cached = cacheService.get<Exam[]>('all_exams');
+    if (cached) return cached;
+
     const { data, error } = await supabase
       .from('exams')
       .select('*')
       .order('sortOrder', { ascending: true });
     if (error) throw error;
+    cacheService.set('all_exams', data as Exam[]);
     return data as Exam[];
   },
   async deleteExam(id: string) {
@@ -745,16 +772,23 @@ export const examService = {
 
   // Question Banks
   async createQuestionBank(bank: QuestionBank) {
+    cacheService.clear('all_question_banks');
+    cacheService.clear('topic_counts');
     const data = await callAdminDbProxy('questionBanks', 'insert', bank);
     return data?.[0] || data;
   },
 
   async getAllQuestionBanks() {
-    const { data: banks, error } = await supabase
+    const cached = cacheService.get<QuestionBank[]>('all_question_banks');
+    if (cached) return cached;
+
+    const { data, error } = await supabase
       .from('questionBanks')
-      .select('*')
+      .select('id, examId, type, title, questionCount, tagline, image, isPremium, pdfUrl, hasPracticeMode, target_mode, sortOrder, createdAt, is_archived, scheduled_at')
       .order('sortOrder', { ascending: true });
     if (error) throw error;
+
+    const banks = (data || []) as QuestionBank[];
 
     if (banks && banks.length > 0) {
       try {
@@ -775,6 +809,7 @@ export const examService = {
         console.error("Failed to fetch actual question counts for question banks:", err);
       }
     }
+    cacheService.set('all_question_banks', banks as QuestionBank[]);
     return banks as QuestionBank[];
   },
 

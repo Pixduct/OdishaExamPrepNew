@@ -57,10 +57,7 @@ html.lenis, html.lenis body {
   pointer-events: none;
 }
 
-/* Active Scroll Guard: Temporarily lock hover pointer-events and pause heavy keyframe animations during fast scrolling for 120 FPS performance */
-body.is-scrolling * {
-  pointer-events: none !important;
-}
+/* Active Scroll Guard: Temporarily pause heavy keyframe animations during fast scrolling for 120 FPS performance */
 
 body.is-scrolling .animate-spin-slow,
 body.is-scrolling .animate-orb,
@@ -405,6 +402,11 @@ body[data-premium-blur="true"] #root {
   .content-visibility-auto {
     content-visibility: auto;
     contain-intrinsic-size: auto 250px;
+  }
+
+  .cv-card-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 140px;
   }
 
   .transition-colors-shadow {

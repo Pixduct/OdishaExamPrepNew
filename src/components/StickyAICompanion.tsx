@@ -2084,6 +2084,7 @@ const StickyAICompanion: React.FC<StickyAICompanionProps> = ({
                 {/* Messages */}
                 <div 
                   className="flex-1 overflow-y-auto px-3 py-3 space-y-3 overscroll-contain" 
+                  data-lenis-prevent
                   style={{ 
                     scrollbarWidth: 'none',
                     WebkitOverflowScrolling: 'touch',

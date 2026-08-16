@@ -28,6 +28,31 @@ import { useAuth } from './lib/AuthContext';
 import { MathTextRenderer, DiagramRenderer } from './components/MathTextRenderer';
 import { fadeSlideUp, modalContent } from './lib/animations';
 import { recordQuestionSolved, completeDailyGoalDirectly } from './lib/streakManager';
+import { destroyLenis, initLenis } from './lib/lenisScroll';
+
+export const requestUniversalFullscreen = () => {
+  if (typeof document === 'undefined') return;
+  const doc = document as any;
+  const fsElement = doc.fullscreenElement || 
+                    doc.webkitFullscreenElement || 
+                    doc.mozFullScreenElement || 
+                    doc.msFullscreenElement;
+
+  if (!fsElement) {
+    const el = (document.documentElement || document.body) as any;
+    if (el.requestFullscreen) {
+      el.requestFullscreen().catch((err: any) => {
+        console.warn("Auto-fullscreen failed:", err);
+      });
+    } else if (el.webkitRequestFullscreen) {
+      el.webkitRequestFullscreen();
+    } else if (el.mozRequestFullScreen) {
+      el.mozRequestFullScreen();
+    } else if (el.msRequestFullscreen) {
+      el.msRequestFullscreen();
+    }
+  }
+};
 
 // ─────────────────────────────────────────────────────────────
 // Layout Detection Helpers
@@ -209,6 +234,14 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
   const [timeSpent, setTimeSpent] = useState<Record<number, number>>(mappedInitialState?.timeSpent || {});
   const [timeLeft, setTimeLeft] = useState(mappedInitialState?.timeLeft ?? test.durationMinutes * 60);
   const [visited, setVisited] = useState<number[]>(mappedInitialState?.visited || [0]);
+  
+  useEffect(() => {
+    destroyLenis();
+    requestUniversalFullscreen();
+    return () => {
+      initLenis();
+    };
+  }, []);
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
@@ -319,8 +352,8 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
   const [currentMode, setCurrentMode] = useState<'mock' | 'practice'>(mappedInitialState?.currentMode || mode);
   const [untimedPractice, setUntimedPractice] = useState(mappedInitialState?.untimedPractice || false);
   const [targetScore, setTargetScore] = useState(() => {
-    const totalQs = test.questions.length;
-    const testTotalMarks = test.totalMarks || totalQs;
+    const totalQs = (test?.questions || []).length;
+    const testTotalMarks = test?.totalMarks || totalQs;
     return Math.round(testTotalMarks * 0.8);
   });
   const questionTextRef = useRef<HTMLDivElement>(null);
@@ -399,11 +432,11 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
   }, [isStarted, test, currentQuestionIndex, answers, markedForReview, timeSpent, timeLeft, visited, currentMode, untimedPractice, initialState?.resumeSessionId, user]);
 
   // Derived test settings used on both overview & sidebar
-  const totalQs = test.questions.length;
-  const testTotalMarks = useMemo(() => test.totalMarks || totalQs, [test.totalMarks, totalQs]);
+  const totalQs = (test?.questions || []).length;
+  const testTotalMarks = useMemo(() => test?.totalMarks || totalQs, [test?.totalMarks, totalQs]);
   const marksPerQ = useMemo(() => totalQs > 0 ? testTotalMarks / totalQs : 1, [totalQs, testTotalMarks]);
-  const negMarkVal = useMemo(() => test.negativeMarking || 0, [test.negativeMarking]);
-  const avgSecsPerQ = useMemo(() => totalQs > 0 ? Math.round((test.durationMinutes * 60) / totalQs) : 0, [totalQs, test.durationMinutes]);
+  const negMarkVal = useMemo(() => test?.negativeMarking || 0, [test?.negativeMarking]);
+  const avgSecsPerQ = useMemo(() => totalQs > 0 ? Math.round(((test?.durationMinutes || 60) * 60) / totalQs) : 0, [totalQs, test?.durationMinutes]);
 
   const answeredCount = useMemo(() => Object.keys(answers).length, [answers]);
   const markedCount = useMemo(() => markedForReview.length, [markedForReview]);
@@ -547,8 +580,9 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
     let math = 0;
     let general = 0;
 
-    test.questions.forEach(q => {
-      const txt = (q.questionText || '').toLowerCase();
+    const questionsList = test?.questions || [];
+    questionsList.forEach((q: any) => {
+      const txt = (q?.questionText || '').toLowerCase();
       if (txt.includes('article') || txt.includes('president') || txt.includes('governor') || txt.includes('amendment') || txt.includes('constitution') || txt.includes('legislature') || txt.includes('parliament') || txt.includes('court') || txt.includes('high court')) {
         polity++;
       } else if (txt.includes('river') || txt.includes('lake') || txt.includes('soil') || txt.includes('district') || txt.includes('forest') || txt.includes('dam') || txt.includes('national park') || txt.includes('climate') || txt.includes('geography') || txt.includes('mineral')) {
@@ -562,7 +596,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
       }
     });
 
-    const total = test.questions.length;
+    const total = questionsList.length;
     if (total === 0) return [];
 
     return [
@@ -575,15 +609,18 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
       ...t,
       percentage: Math.round((t.count / total) * 100)
     }));
-  }, [test.questions]);
+  }, [test?.questions]);
 
   const handleSubmit = useCallback(() => {
-    const totalQuestions = test.questions.length;
+    const questionsList = test?.questions || [];
+    const totalQuestions = questionsList.length;
     const correctCount = Object.entries(answers).reduce((acc, [index, answer]) => {
-      return acc + (answer === test.questions[parseInt(index)].correctAnswerIndex ? 1 : 0);
+      const q = questionsList[parseInt(index)];
+      return acc + (q && answer === q.correctAnswerIndex ? 1 : 0);
     }, 0);
     const incorrectCount = Object.entries(answers).reduce((acc, [index, answer]) => {
-      const isCorrect = answer === test.questions[parseInt(index)].correctAnswerIndex;
+      const q = questionsList[parseInt(index)];
+      const isCorrect = q && answer === q.correctAnswerIndex;
       return acc + (answer !== null && answer !== undefined && !isCorrect ? 1 : 0);
     }, 0);
     const unansweredCount = totalQuestions - (correctCount + incorrectCount);
@@ -678,13 +715,14 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
   }, [answers, timeLeft, timeSpent, markedForReview, visited, currentQuestionIndex, test, currentMode, untimedPractice, onExit]);
 
   const nextQuestion = useCallback(() => {
-    if (currentQuestionIndex < test.questions.length - 1) {
+    const totalCount = (test?.questions || []).length;
+    if (currentQuestionIndex < totalCount - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
       setShowExplanation(false);
     } else {
       setShowSubmitConfirm(true);
     }
-  }, [currentQuestionIndex, test.questions.length]);
+  }, [currentQuestionIndex, test?.questions?.length]);
 
   const prevQuestion = useCallback(() => {
     if (currentQuestionIndex > 0) {
@@ -693,7 +731,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
     }
   }, [currentQuestionIndex]);
 
-  const currentQuestion = test.questions[currentQuestionIndex] || { id: '', questionText: '', options: [], correctAnswerIndex: 0, explanation: '' };
+  const currentQuestion = (test?.questions || [])[currentQuestionIndex] || { id: '', questionText: '', options: [], correctAnswerIndex: 0, explanation: '' };
 
   // Keyboard Shortcuts for CBT Usability (30% Modern Usability Improvements)
   useEffect(() => {
@@ -721,7 +759,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
   if (!isStarted) {
     const fmt = (n: number) => Number.isInteger(n) ? String(n) : n.toFixed(2);
     return (
-      <div className="fixed inset-0 bg-[#FBF9F6] z-[100] flex flex-col font-sans overflow-hidden">
+      <div className="fixed inset-0 bg-[#FBF9F6] dark:bg-slate-950 z-[100] flex flex-col font-sans overflow-hidden" data-lenis-prevent>
         {/* Subtle grid and gradient meshes overlay */}
         <div className="absolute inset-0 pointer-events-none z-[1] opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle, rgba(37,99,235,0.3) 0.5px, transparent 0.5px)', backgroundSize: '24px 24px' }} />
         <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-[#2563eb]/5 to-transparent pointer-events-none z-[1]" />
@@ -1106,20 +1144,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
         <div className="shrink-0 px-4 py-3 sm:p-6 bg-white/80 backdrop-blur-md border-t border-slate-200/60 z-20 flex justify-center shadow-[0_-8px_30px_rgba(0,0,0,0.02)]">
           <button
             onClick={() => {
-              if (window.innerWidth >= 1024) {
-                const el = document.body as any;
-                if (el.requestFullscreen) {
-                  el.requestFullscreen().catch((err: any) => {
-                    console.warn("Auto-fullscreen failed:", err);
-                  });
-                } else if (el.webkitRequestFullscreen) {
-                  el.webkitRequestFullscreen();
-                } else if (el.mozRequestFullScreen) {
-                  el.mozRequestFullScreen();
-                } else if (el.msRequestFullscreen) {
-                  el.msRequestFullscreen();
-                }
-              }
+              requestUniversalFullscreen();
               setIsStarted(true);
             }}
             className="max-w-3xl w-full py-3.5 sm:py-4.5 rounded-xl sm:rounded-2xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-black text-sm sm:text-base transition-all duration-300 shadow-lg shadow-[#2563eb]/20 flex items-center justify-center gap-2.5 active:scale-[0.98] cursor-pointer premium-btn-transition"
@@ -1130,7 +1155,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
       </div>
     );
   }  return (
-    <div className="fixed inset-0 bg-[#FBF9F6] z-[100] flex flex-col font-sans overflow-hidden">
+    <div className="fixed inset-0 bg-[#FBF9F6] z-[100] flex flex-col font-sans overflow-hidden" data-lenis-prevent>
       {/* Subtle print grid texture overlay */}
       <div className="absolute inset-0 pointer-events-none z-[1] opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle, rgba(37,99,235,0.3) 0.5px, transparent 0.5px)', backgroundSize: '24px 24px' }} />
       
@@ -1238,9 +1263,9 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
 
             return (
               <main className={cn(
-                "flex-1 px-3 py-3 sm:p-5 lg:p-6 relative bg-[#FBF9F6] flex flex-col",
+                "flex-1 px-3 py-3 sm:p-5 lg:p-6 relative bg-[#FBF9F6] flex flex-col overscroll-contain",
                 (mathHeavy || showExplanation) ? "overflow-y-auto no-scrollbar" : "overflow-hidden"
-              )}>
+              )} data-lenis-prevent>
                 <div className={cn(
                   "w-full flex flex-col space-y-2.5 sm:space-y-3 lg:space-y-4 mx-auto transition-all duration-300",
                   isPaletteCollapsed ? "max-w-[96%] lg:max-w-[94%]" : "max-w-4xl lg:max-w-6xl",
@@ -1272,7 +1297,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-[#2563EB] bg-[#2563EB]/5 rounded-lg border border-[#2563EB]/15">
                               <FileText className="w-3.5 h-3.5 animate-pulse-soft" />
-                              Question {currentQuestionIndex + 1} of {test.questions.length}
+                              Question {currentQuestionIndex + 1} of {(test?.questions || []).length}
                             </span>
                             {currentMode === 'practice' && answers[currentQuestionIndex] !== undefined && (
                               <button
@@ -1466,7 +1491,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                     onClick={nextQuestion}
                     className="col-span-3 bg-[#2563eb] hover:bg-[#1d4ed8] text-white py-3 rounded-xl text-[11px] font-extrabold uppercase tracking-wider transition-all shadow-md shadow-[#2563eb]/10 active:scale-95 flex items-center justify-center gap-1 cursor-pointer"
                   >
-                    {currentQuestionIndex === test.questions.length - 1 ? 'Save & Submit' : 'Save & Next'} <ChevronRight className="w-4 h-4" />
+                    {currentQuestionIndex === (test?.questions || []).length - 1 ? 'Save & Submit' : 'Save & Next'} <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -1507,7 +1532,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                     onClick={nextQuestion}
                     className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-md shadow-[#2563eb]/10 hover:shadow-lg active:scale-95 flex items-center gap-1 font-extrabold"
                   >
-                    {currentQuestionIndex === test.questions.length - 1 ? 'Save & Submit' : 'Save & Next'} <ChevronRight className="w-4 h-4" />
+                    {currentQuestionIndex === (test?.questions || []).length - 1 ? 'Save & Submit' : 'Save & Next'} <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -1562,13 +1587,13 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
           <div className="p-4.5 border-b border-slate-100 flex items-center justify-between shrink-0">
             <h3 className="font-serif font-black text-xs text-slate-900 uppercase tracking-wider">Question Palette</h3>
             <span className="text-[10px] font-black text-[#2563EB] bg-[#2563EB]/5 border border-[#2563EB]/10 px-2 py-0.5 rounded-md tracking-wider tabular-nums">
-              {answeredCount}/{test.questions.length} Saved
+              {answeredCount}/{(test?.questions || []).length} Saved
             </span>
           </div>
 
-          <div ref={desktopPaletteRef} className="flex-1 overflow-y-auto px-5 py-4 no-scrollbar palette-scroll">
+          <div ref={desktopPaletteRef} className="flex-1 overflow-y-auto px-5 py-4 no-scrollbar palette-scroll overscroll-contain" data-lenis-prevent>
             <div className="grid grid-cols-4 gap-3">
-              {test.questions.map((_, idx) => {
+              {(test?.questions || []).map((_, idx) => {
                 const isAnswered = answers[idx] !== undefined;
                 const isMarked = markedForReview.includes(idx);
                 const isCurrent = currentQuestionIndex === idx;
@@ -1700,7 +1725,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                     </span>
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-500 rounded-md text-[9px] font-black uppercase tracking-wider">
                       <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
-                      {test.questions.length - answeredCount} Left
+                      {((test?.questions || []).length) - answeredCount} Left
                     </span>
                   </div>
                 </div>
@@ -1710,9 +1735,9 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
               </div>
               
               {/* Palette grid */}
-              <div ref={mobilePaletteRef} className="overflow-y-auto px-4 py-3 flex-1 no-scrollbar palette-scroll">
+              <div ref={mobilePaletteRef} className="overflow-y-auto px-4 py-3 flex-1 no-scrollbar palette-scroll overscroll-contain" data-lenis-prevent>
                 <div className="grid grid-cols-5 sm:grid-cols-6 gap-2.5">
-                  {test.questions.map((_, idx) => {
+                  {(test?.questions || []).map((_, idx) => {
                     const isAnswered = answers[idx] !== undefined;
                     const isMarked = markedForReview.includes(idx);
                     const isCurrent = currentQuestionIndex === idx;
@@ -1807,7 +1832,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                 <div className="space-y-2">
                   <h3 className="text-xl sm:text-2xl font-serif font-black text-slate-900 tracking-tight">Confirm Submission</h3>
                   <p className="text-slate-500 text-sm font-medium">
-                    You have answered <span className="text-[#2563EB] font-extrabold">{answeredCount}</span> out of <span className="text-slate-900 font-extrabold">{test.questions.length}</span> questions.
+                    You have answered <span className="text-[#2563EB] font-extrabold">{answeredCount}</span> out of <span className="text-slate-900 font-extrabold">{(test?.questions || []).length}</span> questions.
                   </p>
                 </div>
 
@@ -1815,7 +1840,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                   <motion.div
                     className="h-full bg-[#2563EB] rounded-full"
                     initial={{ width: 0 }}
-                    animate={{ width: `${(answeredCount / test.questions.length) * 100}%` }}
+                    animate={{ width: `${(answeredCount / ((test?.questions || []).length || 1)) * 100}%` }}
                     transition={{ duration: 0.6, ease: 'easeOut' }}
                   />
                 </div>
@@ -1860,7 +1885,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-slate-50 rounded-xl border border-slate-200/60 shadow-sm">
                   <BookOpen className="w-4 h-4 text-slate-400" />
                   <span className="text-xs font-bold text-slate-600">
-                    {answeredCount} of {test.questions.length} answered
+                    {answeredCount} of {(test?.questions || []).length} answered
                   </span>
                 </div>
 

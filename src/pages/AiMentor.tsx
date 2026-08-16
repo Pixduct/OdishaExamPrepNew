@@ -4382,7 +4382,8 @@ JSON structure:
 
             <div 
               ref={chatConsoleRef} 
-              className="flex-1 overflow-y-auto p-3 sm:p-5 lg:p-6 space-y-4 md:space-y-5 no-scrollbar smooth-scroll-gpu"
+              className="flex-1 overflow-y-auto overscroll-contain p-3 sm:p-5 lg:p-6 space-y-4 md:space-y-5 no-scrollbar smooth-scroll-gpu"
+              data-lenis-prevent
               style={{ scrollBehavior: loading ? 'auto' : 'smooth' }}
             >
               {messages.map((m, idx) => (
@@ -4949,7 +4950,7 @@ JSON structure:
           </div>
 
           {/* Scrollable content pane */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-12 sm:p-6 sm:pb-12 no-scrollbar relative z-10 flex flex-col smooth-scroll-gpu" style={{ contain: 'layout paint' }}>
+          <div className="flex-1 overflow-y-auto overscroll-contain overflow-x-hidden p-4 pb-12 sm:p-6 sm:pb-12 no-scrollbar relative z-10 flex flex-col smooth-scroll-gpu" data-lenis-prevent style={{ contain: 'layout paint' }}>
             <AnimatePresence mode="wait">
               {activeRightTab === 'planner' && (
                 <motion.div

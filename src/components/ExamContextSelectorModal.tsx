@@ -188,7 +188,7 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
           </div>
 
           {/* Scrollable Content Body */}
-          <div className="p-4 sm:p-6 overflow-y-auto overscroll-contain space-y-4 sm:space-y-5 flex-1 premium-scrollbar max-h-[55vh] sm:max-h-[60vh] relative z-10">
+          <div className="p-4 sm:p-6 overflow-y-auto overscroll-contain space-y-4 sm:space-y-5 flex-1 premium-scrollbar max-h-[55vh] sm:max-h-[60vh] relative z-10" data-lenis-prevent>
             
             {/* Option 1: Global All Exams Combined Card */}
             <div>

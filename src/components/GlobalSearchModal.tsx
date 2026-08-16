@@ -175,7 +175,7 @@ export const GlobalSearchModal = ({
           </div>
 
           {/* Search Results Area */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 premium-scrollbar scroll-smooth overscroll-contain [transform:translate3d(0,0,0)] [backface-visibility:hidden] [-webkit-overflow-scrolling:touch]">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 premium-scrollbar scroll-smooth overscroll-contain [transform:translate3d(0,0,0)] [backface-visibility:hidden] [-webkit-overflow-scrolling:touch]" data-lenis-prevent>
             {q && totalResults === 0 ? (
               <div className="py-12 text-center space-y-3">
                 <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto text-slate-400">

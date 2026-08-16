@@ -1753,6 +1753,41 @@ Last updated: August 16, 2026
 - **Zero-Cost Offscreen Rendering**: `content-visibility: auto` instructs browser rendering engines (Chromium & WebKit) to completely bypass layout calculation, styling, and painting for offscreen test cards.
 - **120 FPS Large-List Stability**: Out of 86+ cards rendered in Sectional Tests, only the 6–9 cards visible inside the active viewport consume rendering resources. Offscreen paint overhead drops to **0 ms**, maintaining locked 120 FPS scrolling across large mock test grids.
 
+---
+
+### 35. `YouTubeCarouselAlphaMaskEngine`
+
+File: [`src/components/YouTubeCarousel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/YouTubeCarousel.tsx) & [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
+Last updated: August 16, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Track Mask Image** | `WebkitMaskImage: linear-gradient(to right, transparent 0%, black 24px, black calc(100% - 32px), transparent 100%)` |
+| **Mask Image Fallback** | `maskImage: linear-gradient(to right, transparent 0%, black 24px, black calc(100% - 32px), transparent 100%)` |
+| **Track Class** | `relative overflow-hidden cursor-grab active:cursor-grabbing py-2` |
+| **Target Tracks** | `YouTubeCarousel`, `Continue Practice` track (`continuePracticeRef`), `Recent Activity` track (`recentActivityRef`) |
+
+**Pattern notes:**
+- **Zero Slicing Line Artifacts**: Replaced fixed-width overlay divs (`w-24`, `w-8`) with CSS hardware-accelerated `maskImage` / `WebkitMaskImage` alpha gradients.
+- **Card-Dissolve Edge Transition**: Cards dissolve seamlessly into transparent track edges without vertical clipping lines or border slicing visual bugs.
+
+---
+
+### 36. `TouchScrollBypassViewportEngine`
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx), [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx), [`src/MockTestSystem.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/MockTestSystem.tsx)
+Last updated: August 16, 2026
+
+| Property | Attribute / Utility |
+| :--- | :--- |
+| **Lenis Scroll Bypass** | `data-lenis-prevent` |
+| **Touch Boundary Lock** | `overscroll-contain` |
+| **Admin Mount Lifecycle** | `destroyLenis()` on mount, `initLenis()` on unmount |
+| **Protected Containers** | Mobile Navigation Drawer, Auth Sheet, Exam list, Syllabus topic list, Question Bank item scrollable lists, Analytics table, AI Mentor stream, Question Palette sidebars, All Modal dialogs |
+
+**Pattern notes:**
+- **100% Site-Wide Trackpad & Touch Hardening**: Every nested scroll container declares `data-lenis-prevent` and `overscroll-contain` to unbind Lenis smooth wheel listeners locally, allowing 100% native 120 FPS trackpad 2-finger swipe and touch momentum scrolling.
+
 
 
 

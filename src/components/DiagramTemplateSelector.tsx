@@ -573,7 +573,7 @@ export default function DiagramTemplateSelector({
               </span>
             </div>
 
-            <div className="max-h-80 overflow-y-auto custom-scrollbar p-1.5 space-y-1">
+            <div className="max-h-80 overflow-y-auto overscroll-contain custom-scrollbar p-1.5 space-y-1" data-lenis-prevent>
               {Object.keys(DIAGRAM_TEMPLATES).map((key) => {
                 const k = key as keyof typeof DIAGRAM_TEMPLATES;
                 const item = DIAGRAM_TEMPLATES[k];

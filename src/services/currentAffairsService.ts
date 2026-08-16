@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { cacheService } from '../lib/cacheService';
 
 export interface CurrentAffairsMCQ {
   question: string;
@@ -414,7 +415,12 @@ export function normalizeCategoryScope(title: string, summary: string, rawCatego
 }
 
 export async function fetchCurrentAffairsDigests(): Promise<CurrentAffairsItem[]> {
+  const cached = cacheService.get<CurrentAffairsItem[]>('current_affairs_digests');
+  if (cached) return cached;
+
   try {
+    let result: CurrentAffairsItem[] = [];
+
     // 1. Try querying dedicated 'current_affairs' table
     const { data, error } = await supabase
       .from('current_affairs')
@@ -422,7 +428,7 @@ export async function fetchCurrentAffairsDigests(): Promise<CurrentAffairsItem[]
       .order('created_at', { ascending: false });
 
     if (!error && data && data.length > 0) {
-      return (data as CurrentAffairsItem[]).map(item => {
+      result = (data as CurrentAffairsItem[]).map(item => {
         const cat = normalizeCategoryScope(item.title, item.summary || '', item.category || '');
         return {
           ...item,
@@ -430,63 +436,67 @@ export async function fetchCurrentAffairsDigests(): Promise<CurrentAffairsItem[]
           image_url: getSmartRealImage(item.title, cat, item.image_url)
         };
       });
-    }
+    } else {
+      // 2. Fallback to 'exams' catalog table (category = 'current_affairs')
+      const { data: examData, error: examError } = await supabase
+        .from('exams')
+        .select('*')
+        .eq('category', 'current_affairs')
+        .order('createdAt', { ascending: false });
 
-    // 2. Fallback to 'exams' catalog table (category = 'current_affairs')
-    const { data: examData, error: examError } = await supabase
-      .from('exams')
-      .select('*')
-      .eq('category', 'current_affairs')
-      .order('createdAt', { ascending: false });
+      if (!examError && examData && examData.length > 0) {
+        result = examData.map((item: any) => {
+          const title = item.name || '';
+          const rawCat = item.targetExamId || 'National';
+          const summary = item.metaDescription || '';
+          const cat = normalizeCategoryScope(title, summary, rawCat);
+          const dateStr = item.examDate || (item.createdAt ? item.createdAt.substring(0, 10) : new Date().toISOString().substring(0, 10));
+          
+          const descRaw = item.description || '';
+          let fullContext = descRaw;
+          let mcqs: any[] = [];
 
-    if (!examError && examData && examData.length > 0) {
-      const mapped: CurrentAffairsItem[] = examData.map((item: any) => {
-        const title = item.name || '';
-        const rawCat = item.targetExamId || 'National';
-        const summary = item.metaDescription || '';
-        const cat = normalizeCategoryScope(title, summary, rawCat);
-        const dateStr = item.examDate || (item.createdAt ? item.createdAt.substring(0, 10) : new Date().toISOString().substring(0, 10));
-        
-        const descRaw = item.description || '';
-        let fullContext = descRaw;
-        let mcqs: any[] = [];
-
-        const mcqMatch = descRaw.match(/<!--MCQ_JSON:(.*?)-->/s);
-        if (mcqMatch && mcqMatch[1]) {
-          try {
-            mcqs = JSON.parse(mcqMatch[1]);
-            fullContext = descRaw.replace(/<!--MCQ_JSON:.*?-->/s, '').trim();
-          } catch (e) {
-            console.warn("Failed parsing MCQ_JSON", e);
+          const mcqMatch = descRaw.match(/<!--MCQ_JSON:(.*?)-->/s);
+          if (mcqMatch && mcqMatch[1]) {
+            try {
+              mcqs = JSON.parse(mcqMatch[1]);
+              fullContext = descRaw.replace(/<!--MCQ_JSON:.*?-->/s, '').trim();
+            } catch (e) {
+              console.warn("Failed parsing MCQ_JSON", e);
+            }
           }
-        }
 
-        return {
-          id: item.id,
-          slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
-          title: title,
-          category: cat,
-          event_date: dateStr,
-          summary: summary || title,
-          full_context: fullContext,
-          mcqs: mcqs,
-          image_url: getSmartRealImage(title, cat, item.icon),
-          is_published: true,
-          created_at: item.createdAt
-        };
-      });
-      return mapped;
+          return {
+            id: item.id,
+            slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
+            title: title,
+            category: cat,
+            event_date: dateStr,
+            summary: summary || title,
+            full_context: fullContext,
+            mcqs: mcqs,
+            image_url: getSmartRealImage(title, cat, item.icon),
+            is_published: true,
+            created_at: item.createdAt
+          };
+        });
+      } else {
+        // 3. Fallback dataset
+        result = FALLBACK_CURRENT_AFFAIRS.map(item => {
+          const cat = normalizeCategoryScope(item.title, item.summary || '', item.category || '');
+          return {
+            ...item,
+            category: cat,
+            image_url: getSmartRealImage(item.title, cat, item.image_url)
+          };
+        });
+      }
     }
 
-    // 3. Fallback dataset
-    return FALLBACK_CURRENT_AFFAIRS.map(item => {
-      const cat = normalizeCategoryScope(item.title, item.summary || '', item.category || '');
-      return {
-        ...item,
-        category: cat,
-        image_url: getSmartRealImage(item.title, cat, item.image_url)
-      };
-    });
+    if (result.length > 0) {
+      cacheService.set('current_affairs_digests', result);
+    }
+    return result;
   } catch (err) {
     console.error("Error fetching current affairs:", err);
     return FALLBACK_CURRENT_AFFAIRS.map(item => {

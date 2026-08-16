@@ -58,7 +58,8 @@ export const ReadinessDetailModal: React.FC<ReadinessDetailModalProps> = ({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 100, scale: 0.95 }}
           transition={{ type: 'spring', damping: 26, stiffness: 360 }}
-          className="relative w-full sm:max-w-lg bg-slate-900 border border-blue-500/30 text-white rounded-t-[2.5rem] sm:rounded-[2.5rem] p-5 sm:p-7 shadow-2xl shadow-slate-950/60 overflow-hidden z-10 space-y-4 sm:space-y-5 max-h-[90vh] sm:max-h-none overflow-y-auto no-scrollbar group"
+          className="relative w-full sm:max-w-lg bg-slate-900 border border-blue-500/30 text-white rounded-t-[2.5rem] sm:rounded-[2.5rem] p-5 sm:p-7 shadow-2xl shadow-slate-950/60 overflow-hidden z-10 space-y-4 sm:space-y-5 max-h-[90vh] sm:max-h-none overflow-y-auto overscroll-contain no-scrollbar group"
+          data-lenis-prevent
         >
           {/* Radial Grid & 3D Background Watermark */}
           <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none z-0" />

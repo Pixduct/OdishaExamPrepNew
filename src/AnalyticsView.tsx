@@ -1710,7 +1710,8 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
 
                     <div
                       ref={chatContainerRef}
-                      className="h-[320px] sm:h-[380px] overflow-y-auto p-3 sm:p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-3 custom-scrollbar"
+                      className="h-[320px] sm:h-[380px] overflow-y-auto overscroll-contain p-3 sm:p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-3 custom-scrollbar"
+                      data-lenis-prevent
                     >
                       {chatHistory.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-3">
@@ -2011,7 +2012,7 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
                             )}
       
                             {/* Right column: Expandable List */}
-                            <div className={cn("space-y-4 max-h-[380px] overflow-y-auto custom-scrollbar pr-1", uniqueSubjects.length > 0 ? "lg:col-span-7" : "lg:col-span-12")} style={{ overscrollBehaviorY: 'contain' }}>
+                            <div className={cn("space-y-4 max-h-[380px] overflow-y-auto overscroll-contain custom-scrollbar pr-1", uniqueSubjects.length > 0 ? "lg:col-span-7" : "lg:col-span-12")} data-lenis-prevent style={{ overscrollBehaviorY: 'contain' }}>
                                {exam.mockTests && exam.mockTests.length > 0 && (
                                  <div className="space-y-3">
                                    <h4 className="text-[9.5px] font-mono font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest pl-1">Mock Tests</h4>

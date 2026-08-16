@@ -285,7 +285,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
               </div>
 
               {/* List Content */}
-              <div className="max-h-[380px] overflow-y-auto divide-y divide-slate-100/60 premium-scrollbar scroll-smooth overscroll-contain [transform:translate3d(0,0,0)] [backface-visibility:hidden] [-webkit-overflow-scrolling:touch]">
+              <div className="max-h-[380px] overflow-y-auto divide-y divide-slate-100/60 premium-scrollbar scroll-smooth overscroll-contain [transform:translate3d(0,0,0)] [backface-visibility:hidden] [-webkit-overflow-scrolling:touch]" data-lenis-prevent>
                 {visibleNotifications.length === 0 ? (
                   <div className="p-8 text-center space-y-2 py-14">
                     <Sparkles className="w-8 h-8 text-brand-500/60 mx-auto animate-bounce" />

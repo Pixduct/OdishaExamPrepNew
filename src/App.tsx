@@ -2096,15 +2096,15 @@ export const Navbar = ({
 
   return (
     <header className={cn(
-      "w-full z-[60] transition-all duration-300", 
+      "fixed top-0 left-0 right-0 w-full z-[60] transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300 ease-out will-change-[transform,height]", 
       mobileMenuOpen 
-        ? "fixed top-0 left-0 right-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800" 
+        ? "bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800" 
         : (scrolled 
-            ? "fixed top-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800 shadow-md shadow-slate-900/10 dark:shadow-black/60" 
-            : "sticky top-0 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border-b border-slate-200/40 dark:border-slate-800/40")
+            ? "bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800 shadow-md shadow-slate-900/10 dark:shadow-black/60" 
+            : "bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50")
     )}>
       <div className={cn(
-        "w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between relative z-[65] transition-all duration-300",
+        "w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between relative z-[65] transition-[height] duration-300 ease-out will-change-[height]",
         scrolled ? "h-14 sm:h-16" : "h-16 sm:h-20"
       )}>
         <div
@@ -2204,43 +2204,51 @@ export const Navbar = ({
               </Link>
             </div>
           ) : (
-            <>
-              {/* Current Affairs Link for Authenticated Users */}
+            <div className="flex items-center gap-1 bg-slate-100/80 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/60 rounded-2xl p-1 shadow-xs">
               <Link 
                 to="/current-affairs"
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 dark:border-amber-500/40 text-xs font-black uppercase tracking-wider transition-all group shrink-0 cursor-pointer shadow-2xs"
+                className={cn(
+                  "flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer select-none",
+                  location.pathname === '/current-affairs' 
+                    ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-xs font-black" 
+                    : "text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-300 hover:bg-white/60 dark:hover:bg-slate-800"
+                )}
                 title="Daily 360° Current Affairs"
               >
-                <Globe className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 group-hover:rotate-12 transition-transform" />
+                <Globe className="w-3.5 h-3.5 text-amber-500" />
                 <span>Current Affairs</span>
               </Link>
 
-              {/* Blog Link for Authenticated Users */}
               <Link 
                 to="/blog"
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100/90 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-[#2563EB] dark:hover:text-white border border-slate-200/80 dark:border-slate-700 text-xs font-black uppercase tracking-wider transition-all group shrink-0 cursor-pointer"
+                className={cn(
+                  "flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer select-none",
+                  isBlogActive 
+                    ? "bg-white dark:bg-slate-900 text-[#2563EB] dark:text-brand-400 shadow-xs font-black" 
+                    : "text-slate-600 dark:text-slate-300 hover:text-[#2563EB] dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-800"
+                )}
                 title="Official Educational Blog"
               >
-                <FileText className="w-3.5 h-3.5 text-slate-400 dark:text-slate-400 group-hover:text-[#2563EB] dark:group-hover:text-brand-400 transition-colors" />
+                <FileText className="w-3.5 h-3.5 text-[#2563EB] dark:text-brand-400" />
                 <span>Blog</span>
               </Link>
-            </>
+            </div>
           )}
           
-          <div className="flex items-center gap-2.5 sm:gap-3 pl-2 sm:pl-3 border-l border-slate-200 dark:border-slate-700">
-            <ThemeToggle />
-
-            {user && (
-              <>
+          <div className="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-3 border-l border-slate-200 dark:border-slate-700">
+            {!user ? (
+              <ThemeToggle />
+            ) : (
+              <div className="flex items-center gap-1.5 bg-slate-100/80 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/60 rounded-2xl p-1 shadow-xs">
                 <button
                   type="button"
                   onClick={() => setIsSearchModalOpen(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-white transition-all text-xs font-black cursor-pointer border border-slate-200/80 dark:border-slate-700 group shrink-0"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:text-[#2563EB] dark:hover:text-white transition-all text-xs font-black cursor-pointer shadow-xs border border-transparent hover:border-slate-200 dark:hover:border-slate-700 group shrink-0"
                   title="Search exams, tests, practice sets (Ctrl+K)"
                 >
-                  <Search className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400 group-hover:scale-110 transition-transform" />
-                  <span className="hidden md:inline text-slate-700 dark:text-slate-200 group-hover:text-brand-600 dark:group-hover:text-brand-400">Search</span>
-                  <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[9px] font-black text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700 shadow-2xs">⌘K</kbd>
+                  <Search className="w-3.5 h-3.5 text-[#2563EB] dark:text-brand-400 group-hover:scale-110 transition-transform" />
+                  <span className="hidden md:inline font-black uppercase text-[11px] tracking-wider">Search</span>
+                  <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[9px] font-black text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">⌘K</kbd>
                 </button>
 
                 <NotificationCenter
@@ -2251,12 +2259,7 @@ export const Navbar = ({
                   onLaunchMockTest={(test: any) => window.dispatchEvent(new CustomEvent('oep-launch-mock-test', { detail: test }))}
                   onLaunchBank={(bank: any) => window.dispatchEvent(new CustomEvent('oep-launch-bank', { detail: bank }))}
                 />
-              </>
-            )}
 
-            {/* Header Streak Flame Pill Button — Only visible when LOGGED IN */}
-            {user && (
-              <>
                 <button
                   type="button"
                   onClick={() => setIsStreakModalOpen(true)}
@@ -2264,39 +2267,43 @@ export const Navbar = ({
                   title="Daily Preparation Streak — Click for details"
                 >
                   <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 fill-current animate-pulse group-hover:scale-110 transition-transform" />
-                  <span className="font-mono text-[11px] sm:text-xs text-amber-700 font-extrabold">
+                  <span className="font-mono text-[11px] sm:text-xs text-amber-700 dark:text-amber-300 font-extrabold">
                     <span className="sm:hidden">{streakState.currentStreak}d</span>
                     <span className="hidden sm:inline">{streakState.currentStreak} {streakState.currentStreak === 1 ? 'Day' : 'Days'}</span>
                   </span>
                 </button>
 
-                <StreakDetailModal
-                  isOpen={isStreakModalOpen}
-                  onClose={() => setIsStreakModalOpen(false)}
-                  streakState={streakState}
-                  onSolveMoreClick={() => {
-                    if (window.location.pathname === '/') {
-                      scrollToElement('exams', { block: 'start', delay: 50 });
-                    } else {
-                      navigate('/');
-                    }
-                  }}
-                />
-              </>
+                <ThemeToggle />
+              </div>
+            )}
+
+            {user && (
+              <StreakDetailModal
+                isOpen={isStreakModalOpen}
+                onClose={() => setIsStreakModalOpen(false)}
+                streakState={streakState}
+                onSolveMoreClick={() => {
+                  if (window.location.pathname === '/') {
+                    scrollToElement('exams', { block: 'start', delay: 50 });
+                  } else {
+                    navigate('/');
+                  }
+                }}
+              />
             )}
 
             {user ? (
                <div className="relative">
                   <div 
-                    className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 p-1.5 pr-3 rounded-full transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                    className="flex items-center gap-2.5 cursor-pointer bg-slate-100/80 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-900 p-1.5 pr-3 rounded-2xl transition-all border border-slate-200/80 dark:border-slate-700/60 shadow-xs"
                     onClick={() => setShowProfileDropdown(!showProfileDropdown)}
                   >
-                    <UserAvatar profile={profile} user={user} className="w-9 h-9" />
+                    <UserAvatar profile={profile} user={user} className="w-8 h-8 rounded-xl" />
                     <div className="hidden sm:block text-left">
-                      <p className="text-xs font-black text-slate-700 dark:text-white leading-none mb-0.5">{profile?.displayName || user?.email?.split('@')[0]}</p>
+                      <p className="text-xs font-black text-slate-800 dark:text-white leading-none mb-0.5">{profile?.displayName || user?.email?.split('@')[0]}</p>
                       <p className="text-[10px] font-bold text-slate-400 dark:text-slate-400 leading-none">{user?.email}</p>
                     </div>
-                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showProfileDropdown ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${showProfileDropdown ? 'rotate-180' : ''}`} />
                   </div>
 
                   <AnimatePresence>
@@ -3368,7 +3375,7 @@ const LandingPage = () => {
 
       <main className="flex-1 bg-transparent transition-colors duration-300 relative z-10">
         {/* Elite Split-Layout Hero Section */}
-        <section className="relative overflow-hidden pt-6 pb-12 lg:pt-10 lg:pb-16 border-b border-slate-200/50 dark:border-slate-800">
+        <section className="relative overflow-hidden pt-20 sm:pt-24 lg:pt-28 pb-12 lg:pb-16 border-b border-slate-200/50 dark:border-slate-800">
           {/* Animated Mesh + Grid Background */}
           <div className="absolute inset-0 -z-10 mesh-bg opacity-100 dark:opacity-30" />
           <div className="absolute inset-0 -z-10 grid-bg opacity-60 dark:opacity-20" />
@@ -3664,7 +3671,6 @@ const LandingPage = () => {
         {/* 4. Achievers' Journal Section */}
         <AchieversJournalSection />
       </main>
-
 
       <Footer />
 
@@ -8036,8 +8042,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent overflow-x-hidden" style={{ isolation: 'isolate' }}>
         {/* Full-Screen Edge-to-Edge Academic Vector Canvas Grid & HSL Glows */}
         <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-[0.03] pointer-events-none z-0" />
-        <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none z-0" />
-        <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none z-0" />
+        <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none z-0 gpu-accelerated" />
+        <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none z-0 gpu-accelerated" />
 
         {/* Floating Viewport Academic Vector Watermarks */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-20">
@@ -8047,7 +8053,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           <Compass className="absolute bottom-28 right-[6%] w-36 h-36 text-indigo-600 opacity-[0.08] stroke-[1.2] -rotate-12" />
         </div>
 
-        <div className="w-full mx-auto space-y-6 sm:space-y-10 pb-32 sm:pb-24 relative z-10">
+        <div className="w-full mx-auto space-y-6 sm:space-y-10 pt-2 sm:pt-4 pb-32 sm:pb-24 relative z-10">
           <YouTubeCarousel videoIds={globalVideoIds} />
         
         {isAdmin && (
@@ -8123,10 +8129,6 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               <div 
                 ref={continuePracticeRef}
                 className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pt-1 pb-3 px-4 sm:px-6"
-                style={{
-                  WebkitMaskImage: 'linear-gradient(to right, transparent, white 24px, white calc(100% - 24px), transparent)',
-                  maskImage: 'linear-gradient(to right, transparent, white 24px, white calc(100% - 24px), transparent)'
-                }}
               >
                 {incompleteTests.slice(0, 6).map((a: any, i: number) => {
                   // Support both full-question activities (local) and lite cloud-synced ones
@@ -8309,10 +8311,6 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               <div 
                 ref={recentActivityRef}
                 className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pt-1 pb-3 px-4 sm:px-6"
-                style={{
-                  WebkitMaskImage: 'linear-gradient(to right, transparent, white 24px, white calc(100% - 24px), transparent)',
-                  maskImage: 'linear-gradient(to right, transparent, white 24px, white calc(100% - 24px), transparent)'
-                }}
               >
                 {activities.filter((a: any) => a.type !== 'test_incomplete').slice(0, 6).map((a: any, i: number) => {
                   const isTestResult = a.type === 'mock_test_completed' || a.type === 'practice_test_completed';
@@ -8448,20 +8446,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           </div>
 
           <div className="relative group -mx-2 px-2">
-            {/* Top Fade */}
-            <div className="absolute top-0.5 left-0.5 right-0.5 h-8 bg-gradient-to-b from-[#FAF8F5] dark:from-[#0b0f19] to-transparent z-20 pointer-events-none rounded-t-3xl hidden sm:block" />
-
             <div 
-              className="max-h-[420px] sm:max-h-[500px] md:max-h-[600px] overflow-y-auto no-scrollbar pb-2 pt-2 px-1 sm:pb-6 sm:pt-6 sm:px-4 rounded-3xl border-0 sm:border-2 border-transparent sm:border-slate-900 dark:sm:border-slate-700/80 bg-transparent sm:bg-[#FAF8F5] dark:sm:bg-slate-900/40 shadow-none sm:shadow-[6px_6px_0px_rgba(37,99,235,0.15)]"
-              style={{ scrollbarGutter: 'stable' }}
-              onWheel={(e) => {
-                const el = e.currentTarget;
-                const isAtBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 2;
-                const isAtTop = el.scrollTop <= 2;
-                if ((e.deltaY > 0 && isAtBottom) || (e.deltaY < 0 && isAtTop)) {
-                  window.scrollBy(0, e.deltaY);
-                }
-              }}
+              className="pb-2 pt-2 px-1 sm:pb-6 sm:pt-6 sm:px-4 rounded-3xl border-0 sm:border-2 border-transparent sm:border-slate-900 dark:sm:border-slate-700/80 bg-transparent sm:bg-[#FAF8F5] dark:sm:bg-slate-900/40 shadow-none sm:shadow-[6px_6px_0px_rgba(37,99,235,0.15)]"
             >
               <motion.div 
                 className={cn(
@@ -10852,7 +10838,7 @@ const ExamDetailPage = () => {
 
         <Navbar user={null} isAdmin={false} onSignIn={() => setShowAuthModal(true)} />
 
-        <main className="flex-1 px-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pt-6 md:pt-10 pb-16" style={{background: 'linear-gradient(160deg, #FAF8F5 0%, #FAF8F5 40%, #FAF8F5 100%)'}}>
+        <main className="flex-1 px-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pt-20 sm:pt-24 md:pt-28 pb-16" style={{background: 'linear-gradient(160deg, #FAF8F5 0%, #FAF8F5 40%, #FAF8F5 100%)'}}>
           <DashboardContent 
             isGuest={true} 
             onSignIn={() => setShowAuthModal(true)} 
@@ -10873,7 +10859,7 @@ const ExamDetailPage = () => {
       <Navbar user={user} isAdmin={isAdmin} onHomeClick={handleHomeClick} />
 
       <main className={cn(
-        "relative flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pt-4 md:pt-8 overflow-x-hidden",
+        "relative flex-1 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full pt-24 sm:pt-28 md:pt-32 overflow-x-hidden",
         isBottomNavVisible 
           ? "pb-28 sm:pb-24 lg:pb-32" 
           : "pb-12 sm:pb-16 lg:pb-20"
@@ -11626,7 +11612,7 @@ function AppContent() {
                 <Navbar user={user} isAdmin={isAdmin} onHomeClick={handleHomeClick} />
 
                 <main className={cn(
-                  "relative flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pt-4 md:pt-8 overflow-x-hidden",
+                  "relative flex-1 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full pt-24 sm:pt-28 md:pt-32 overflow-x-hidden",
                   isBottomNavVisible 
                     ? "pb-28 sm:pb-24 lg:pb-32" 
                     : "pb-12 sm:pb-16 lg:pb-20"

@@ -30,10 +30,69 @@
    GLOBAL BASE
    ============================================================ */
 html {
-  scroll-behavior: auto; /* Custom RAF easing in scrollManager.ts handles programmatic scrolling */
+  scroll-behavior: auto; /* Lenis handles smooth physics scrolling */
   overscroll-behavior-y: auto; /* Allow native pull-to-refresh on mobile devices */
   overflow-x: hidden;
   max-width: 100%;
+}
+
+/* ---------- Lenis Smooth Scroll Core Rules ---------- */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* Active Scroll Guard: Temporarily lock hover pointer-events and pause heavy keyframe animations during fast scrolling for 120 FPS performance */
+body.is-scrolling * {
+  pointer-events: none !important;
+}
+
+body.is-scrolling .animate-spin-slow,
+body.is-scrolling .animate-orb,
+body.is-scrolling .animate-pulse-soft,
+body.is-scrolling .animate-float,
+body.is-scrolling .animate-float-sm,
+body.is-scrolling .animate-float-xy,
+body.is-scrolling .animate-gradient-x,
+body.is-scrolling .animate-gradient {
+  animation-play-state: paused !important;
+}
+
+body.is-scrolling .group\/vector-card * {
+  transition: none !important;
+}
+
+/* Scroll-Active Blur Offloading: Bypasses GPU backdrop-blur rasterization while actively scrolling for 0 frame drops */
+body.is-scrolling .backdrop-blur-xl,
+body.is-scrolling .backdrop-blur-2xl,
+body.is-scrolling .backdrop-blur-lg,
+body.is-scrolling .backdrop-blur-md,
+body.is-scrolling .backdrop-blur-sm,
+body.is-scrolling .backdrop-blur {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Force GPU Layer Compositing */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
 }
 
 @media (min-width: 768px) {

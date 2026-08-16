@@ -134,8 +134,9 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
     const isModalOpen = typeof document !== 'undefined' && 
       (document.body.getAttribute('data-premium-blur') === 'true' || 
        document.body.getAttribute('data-modal-open') === 'true');
+    const isScrolling = typeof document !== 'undefined' && document.body.classList.contains('is-scrolling');
 
-    if (!isPaused.current && !isDragging.current && isVisible && !isModalOpen) {
+    if (!isPaused.current && !isDragging.current && isVisible && !isModalOpen && !isScrolling) {
       offsetRef.current += AUTO_SPEED;
       applyOffset();
     }
@@ -289,27 +290,10 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
 
       {/* ── DRAGGABLE CAROUSEL TRACK ──────────────────────────────────── */}
       <div
-        className="relative overflow-hidden cursor-grab active:cursor-grabbing"
+        className="relative overflow-hidden cursor-grab active:cursor-grabbing py-2"
         onMouseDown={onMouseDown}
         onTouchStart={onTouchStart}
       >
-        {/* Edge fade masks — desktop always, mobile soft version */}
-        {!isMobile ? (
-          <>
-            <div className="absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
-              style={{ background: `linear-gradient(to right, ${isDark ? '#0f172a' : '#F2EFE9'}, transparent)` }} />
-            <div className="absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
-              style={{ background: `linear-gradient(to left, ${isDark ? '#0f172a' : '#F2EFE9'}, transparent)` }} />
-          </>
-        ) : (
-          <>
-            {/* Soft left fade on mobile so partial cards look intentional */}
-            <div className="absolute left-0 top-0 bottom-0 w-8 z-10 pointer-events-none"
-              style={{ background: `linear-gradient(to right, ${isDark ? '#0f172a' : '#F2EFE9'} 30%, transparent)` }} />
-            <div className="absolute right-0 top-0 bottom-0 w-8 z-10 pointer-events-none"
-              style={{ background: `linear-gradient(to left, ${isDark ? '#0f172a' : '#F2EFE9'} 30%, transparent)` }} />
-          </>
-        )}
 
         {/* Scrolling track */}
         <div

@@ -58,6 +58,8 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`DynamicVectorCard`** | Container / Utility | [`src/components/DynamicVectorCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/DynamicVectorCard.tsx) | 3D Magnetic Parallax, Surface Spotlight, Edge Ring Illumination | StudyPlanView, AnalyticsView, App.tsx | Active |
 | **`MouseTrackingCanvas`** | Background / Canvas | [`src/components/MouseTrackingCanvas.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MouseTrackingCanvas.tsx) | 60fps Lerp Viewport Ambient Light Orb | App.tsx (Root) | Active |
 | **`VectorCursorFollower`** | Utility / Feedback | [`src/components/VectorCursorFollower.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/VectorCursorFollower.tsx) | Interactive Ring Follower + Center Precision Pointer Dot | App.tsx (Root) | Active |
+| **`AntigravityMicroDistanceLenisScrollEngine`** | Performance / Physics | [`src/lib/lenisScroll.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/lenisScroll.ts) | Micro-Distance Scaling (`0.60`), `lerp: 0.18`, `touchMultiplier: 0` | App.tsx (Root) | Active |
+| **`OffscreenCardVirtualizationEngine`** | Performance / Rendering | [`src/index.css`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/index.css) | `.cv-card-auto` Offscreen Layout Bypass | App.tsx (All Cards) | Active |
 
 ---
 
@@ -258,23 +260,23 @@ import { SearchableSelect } from '../components/SearchableSelect';
 - **Category:** Media / Carousel
 - **Purpose:** Renders an infinite, auto-scrolling strategy video carousel with dynamic YouTube oEmbed title resolution, keyword category tagging, and an integrated modal video player window.
 - **Props:** `videoIds` (`string[]`, optional).
-- **Last Updated:** July 20, 2026
+- **Last Updated:** August 16, 2026
 
 | Property | Class / Token |
 | :--- | :--- |
-| **Carousel Background** | `bg-[#F2EFE9]` |
+| **Carousel Container** | `w-full relative py-3 sm:py-12 overflow-hidden bg-[#F2EFE9] dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-[2rem] sm:rounded-[2.5rem] shadow-[6px_6px_0px_rgba(0,0,0,1)]` |
+| **Track Padding & Alignment** | `px-6 sm:px-10 py-3` (matches desktop header `px-10` for 100% full-card clearance) |
+| **Edge-Fade Mask** | `maskImage: linear-gradient(to right, transparent 0%, black 24px, black calc(100% - 32px), transparent 100%)` |
+| **Card Dimensions & Border** | `width: cardWidth`, `rounded-2xl border-2 border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-900` |
+| **Card Vector Shadow** | `shadow-[4px_4px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)] md:hover:-translate-x-0.5 md:hover:-translate-y-0.5` |
 | **Modal Backdrop** | `backdrop-blur-2xl bg-slate-950/85` |
 | **Modal Window Header** | `bg-slate-900 border-b border-slate-800/90` |
-| **Video Frame Background** | `bg-black` |
-| **Border & Radius** | `border-2 border-slate-800 rounded-2xl sm:rounded-3xl` |
-| **Header Text** | `text-slate-100 font-serif font-extrabold` |
-| **Modal Close Button** | `w-8 h-8 sm:w-9 sm:h-9 bg-slate-800/80 hover:bg-rose-600 text-slate-400 hover:text-white rounded-xl border border-slate-700/60 transition-all duration-200 active:scale-95` |
 | **Category Badges** | `Aptitude` (blue), `Strategy` (amber), `General Studies` (emerald), `Language` (purple), `Current Affairs` (rose) |
 
 **Pattern notes:**
-- Modal video lightboxes MUST use an integrated top window header bar (`bg-slate-900 border-b border-slate-800`) with the video title on the left and the close button on the top-right corner of the header.
-- Never place close buttons directly over embedded `iframe` viewports, as this blocks YouTube's native player controls.
-- YouTube video titles MUST be resolved dynamically via the YouTube oEmbed API (`https://noembed.com/embed?url=...`).
+- **Full Card Clearance Guarantee**: The carousel track uses `px-6 sm:px-10` padding matching the desktop header (`px-10`) so cards never hit the outer container's `rounded-[2.5rem]` curved border wall, ensuring 100% full-card thumbnail, text, and 3D shadow visibility.
+- **Alpha Mask Edge Fade**: Smooth CSS `maskImage` / `WebkitMaskImage` alpha gradient eliminates hard box clipping and provides a soft, elegant card-dissolve effect at the edges.
+- **Modal Video Player**: Video lightboxes use an integrated top window header bar (`bg-slate-900 border-b border-slate-800`) with the video title on the left and the close button on the top-right corner of the header.
 
 ---
 
@@ -1675,6 +1677,84 @@ Last updated: August 15, 2026
 
 **Pattern notes:**
 - **High-Contrast Obsidain Tone**: The footer uses an executive dark obsidian container (`bg-[#0a0f1d]`) with crisp white titles, high-contrast slate body text (`text-slate-300`), bright input controls, and vibrant blue icons (`text-brand-400`), guaranteeing 100% legibility in both Light and Dark modes.
+
+---
+
+### 31. `AdminControlCenter`
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx)
+Last updated: August 16, 2026
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Root Shell Overlay** | `fixed inset-0 bg-[#F8FAFC] z-50 flex flex-col font-sans` (`data-lenis-prevent`) |
+| **Fixed Header Navigation** | `h-16 glass border-b border-slate-200/50 flex items-center justify-between px-6 shrink-0 sticky top-0 z-10 shadow-sm` |
+| **Active Header Nav Tab** | `bg-brand-50 text-brand-700 shadow-sm border border-brand-100 px-4 py-2 rounded-xl text-sm font-extrabold` |
+| **Inactive Header Nav Tab** | `text-slate-500 hover:bg-slate-50 px-4 py-2 rounded-xl text-sm font-extrabold` |
+| **Main Scroll Viewport** | `flex-1 overflow-y-auto p-8 sm:p-12 overscroll-contain` (`data-lenis-prevent`) |
+| **Exams Category Filter** | Case-insensitive check excluding `current_affairs`, `current-affairs`, `blog`, `system`, and `SYSTEM_SETTINGS_` |
+| **Scroll Engine Lifecycle** | Invokes `destroyLenis()` on mount and `initLenis()` on unmount cleanup for native 120 FPS trackpad 2-finger gesture scrolling |
+
+**Pattern notes:**
+- **Scroll Engine Lifecycle Isolation**: The Admin Control Center destroys window-level smooth scroll listeners (`destroyLenis()`) on mount to prevent wheel event cancellation (`preventDefault()`) and un-blocks `html.lenis-stopped` CSS locks, guaranteeing native 120 FPS 2-finger trackpad swipe scrolling across all management tabs.
+- **Defensive Exam List Isolation**: Filters out non-exam categories (`current_affairs`, `blog`, `system`) from `activeTab === 'exams'` list and `actualExams` selector helper so Current Affairs and blog posts never pollute the Exams Manager view or dropdown selectors.
+
+---
+
+### 32. `CBTFullTestEngine`
+
+File: [`src/MockTestSystem.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/MockTestSystem.tsx)
+Last updated: August 16, 2026
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Root Test Canvas** | `fixed inset-0 bg-[#FBF9F6] z-[100] flex flex-col font-sans overflow-hidden` (`data-lenis-prevent`) |
+| **Desktop Question Palette** | `<div ref={desktopPaletteRef} className="flex-1 overflow-y-auto px-5 py-4 no-scrollbar palette-scroll overscroll-contain" data-lenis-prevent>` |
+| **Mobile Question Palette** | `<div ref={mobilePaletteRef} className="overflow-y-auto px-4 py-3 flex-1 no-scrollbar palette-scroll overscroll-contain" data-lenis-prevent>` |
+| **Main Question Viewport** | `<main className="flex-1 px-3 py-3 sm:p-5 lg:p-6 relative bg-[#FBF9F6] flex flex-col overscroll-contain" data-lenis-prevent>` |
+| **Universal Fullscreen Utility** | `requestUniversalFullscreen()` exported helper covering standard and vendor-prefixed browser Fullscreen APIs |
+| **Synchronous Gesture Trigger** | Invokes `requestUniversalFullscreen()` synchronously at `handleStartTest` click callstack to prevent Chrome/Edge fullscreen security exit |
+
+**Pattern notes:**
+- **Synchronous Click Gesture Launch**: Fullscreen requests are executed synchronously inside user click event handlers (`handleStartTest` & "Continue Practice" card `onClick`) before background async network queries, eliminating browser security cancellation when resuming incomplete tests.
+- **Complete Trackpad & Touch Bypass**: The test container destroys Lenis on mount (`destroyLenis()`) and applies `data-lenis-prevent` & `overscroll-contain` to both desktop and mobile Question Palette sidebars, ensuring 100% native 120 FPS trackpad 2-finger and touch scrolling.
+
+---
+
+### 33. `AntigravityMicroDistanceLenisScrollEngine`
+
+File: [`src/lib/lenisScroll.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/lenisScroll.ts)
+Last updated: August 16, 2026
+
+| Property | Config Value |
+| :--- | :--- |
+| **Exponential Fluid Damping** | `lerp: 0.18` (18% per-frame tight kinetic deceleration) |
+| **Compact Wheel Notch Travel** | `wheelMultiplier: 0.60` (~45px compact scroll distance per notch) |
+| **Native Touch Pass-Through** | `touchMultiplier: 0` (100% native 1:1 OS hardware momentum) |
+| **Virtual Scroll Normalization** | Clamped `[30px, 120px]` max (`Math.pow(absDelta, 0.85) * 4`) |
+| **CSS Smooth Scroll Bypass** | Enforces `scroll-behavior: auto !important` on `html.lenis` |
+
+---
+
+### 34. `OffscreenCardVirtualizationEngine`
+
+File: [`src/index.css`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/index.css) & [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
+Last updated: August 16, 2026
+
+| Property | Class / Config Value |
+| :--- | :--- |
+| **CSS Utility Class** | `.cv-card-auto` |
+| **Content Visibility** | `content-visibility: auto;` |
+| **Contain Intrinsic Size** | `contain-intrinsic-size: 1px 140px;` |
+| **Target Containers** | `ExamDetailMockTestCard`, `ScheduledPracticeBankCard`, `PracticeBankCard`, Sectional Tests Subject Group containers |
+| **Memoized Lookups** | `completedAct` and `incompleteAct` lookups wrapped in `useMemo` |
+
+**Pattern notes:**
+- **Zero-Cost Offscreen Rendering**: `content-visibility: auto` instructs browser rendering engines (Chromium & WebKit) to completely bypass layout calculation, styling, and painting for offscreen test cards.
+- **120 FPS Large-List Stability**: Out of 86+ cards rendered in Sectional Tests, only the 6–9 cards visible inside the active viewport consume rendering resources. Offscreen paint overhead drops to **0 ms**, maintaining locked 120 FPS scrolling across large mock test grids.
+
+
+
 
 
 

@@ -9,6 +9,7 @@ import {
   Settings,
   X,
   Check,
+  CheckCircle,
   AlertCircle,
   ChevronRight,
   ChevronDown,
@@ -170,6 +171,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const [bulkExamId, setBulkExamId] = useState('');
   const [bulkTopic, setBulkTopic] = useState('');
   const [bulkFileContent, setBulkFileContent] = useState('');
+  const [bulkFileNames, setBulkFileNames] = useState<string[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   // Push Notification Composer State
@@ -1359,6 +1361,194 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     }
   };
 
+  // --- Universal, Future-Proof Question JSON Parser & Normalizer ---
+  const parseUniversalQuestionJson = (rawInput: string): any[] => {
+    if (!rawInput || !rawInput.trim()) {
+      throw new Error("Please upload a file or paste JSON.");
+    }
+
+    const cleaned = cleanJsonString(rawInput).trim();
+    let parsedRaw: any = null;
+
+    // Try 1: Standard JSON parse
+    try {
+      parsedRaw = JSON.parse(cleaned);
+    } catch (e1) {
+      // Try 2: Fix concatenated arrays [...][...] -> [[...],[...]]
+      try {
+        if (cleaned.includes('][') || /\]\s*\[/.test(cleaned)) {
+          const wrappedArray = '[' + cleaned.replace(/\]\s*\[/g, '],[') + ']';
+          parsedRaw = JSON.parse(wrappedArray);
+        }
+      } catch (e2) {
+        // Try 3: Function evaluation fallback for JS object literals
+        try {
+          parsedRaw = new Function('return ' + cleaned)();
+        } catch (e3) {
+          // Try 4: Fix concatenated arrays with Function evaluation
+          try {
+            if (cleaned.includes('][') || /\]\s*\[/.test(cleaned)) {
+              const wrappedArray = '[' + cleaned.replace(/\]\s*\[/g, '],[') + ']';
+              parsedRaw = new Function('return ' + wrappedArray)();
+            }
+          } catch (e4) {
+            // Try 5: Extract all JSON objects or arrays via regex
+            const extractedItems: any[] = [];
+            const matches = cleaned.match(/\{[\s\S]*?\}(?=\s*[\,\{\[\}]|$)|\[[\s\S]*?\]/g);
+            if (matches && matches.length > 0) {
+              for (const match of matches) {
+                try {
+                  const item = JSON.parse(match);
+                  extractedItems.push(item);
+                } catch (e5) {
+                  try {
+                    const item = new Function('return ' + match)();
+                    extractedItems.push(item);
+                  } catch (e6) {}
+                }
+              }
+            }
+            if (extractedItems.length > 0) {
+              parsedRaw = extractedItems;
+            } else {
+              throw new Error("Unable to parse JSON format. Please check syntax or formatting.");
+            }
+          }
+        }
+      }
+    }
+
+    // Flatten & unwrap objects
+    const rawList: any[] = [];
+    if (Array.isArray(parsedRaw)) {
+      const flattenRecursive = (arr: any[]) => {
+        arr.forEach(item => {
+          if (Array.isArray(item)) {
+            flattenRecursive(item);
+          } else if (item && typeof item === 'object') {
+            const wrapperKey = ['questions', 'data', 'items', 'results', 'quiz', 'questionList'].find(k => Array.isArray(item[k]));
+            if (wrapperKey) {
+              flattenRecursive(item[wrapperKey]);
+            } else {
+              rawList.push(item);
+            }
+          }
+        });
+      };
+      flattenRecursive(parsedRaw);
+    } else if (parsedRaw && typeof parsedRaw === 'object') {
+      const wrapperKey = ['questions', 'data', 'items', 'results', 'quiz', 'questionList'].find(k => Array.isArray(parsedRaw[k]));
+      if (wrapperKey) {
+        rawList.push(...parsedRaw[wrapperKey]);
+      } else {
+        rawList.push(parsedRaw);
+      }
+    }
+
+    if (!rawList || rawList.length === 0) {
+      throw new Error("No question objects found in the provided JSON.");
+    }
+
+    // Normalize each question object into standard schema
+    const normalizedQuestions = rawList.map((q: any) => {
+      if (!q || typeof q !== 'object') return null;
+
+      // 1. Question Text
+      let rawQuestionText = q.questionText || q.question || q.question_text || q.title || q.stem || q.text || '';
+      if (typeof rawQuestionText !== 'string') {
+        rawQuestionText = String(rawQuestionText);
+      }
+
+      let diagram = q.diagram || null;
+      const extraction = extractEmbeddedDiagram(rawQuestionText);
+      if (extraction.diagram) {
+        diagram = extraction.diagram;
+        rawQuestionText = extraction.cleanedText;
+      }
+
+      if (diagram) {
+        diagram = diagramValidator(diagram);
+      }
+
+      // 2. Options
+      let options: string[] = [];
+      if (Array.isArray(q.options)) {
+        options = q.options.map((opt: any) => String(opt ?? '').trim());
+      } else if (q.options && typeof q.options === 'object') {
+        const optsObj = q.options;
+        const keys = ['A', 'B', 'C', 'D', 'a', 'b', 'c', 'd', '1', '2', '3', '4'];
+        const collected = keys.map(k => optsObj[k]).filter(v => v !== undefined && v !== null);
+        if (collected.length >= 2) {
+          options = collected.map((opt: any) => String(opt ?? '').trim());
+        }
+      } else {
+        const optA = q.optionA ?? q.option_a ?? q.optA ?? q.opt_a ?? q.a;
+        const optB = q.optionB ?? q.option_b ?? q.optB ?? q.opt_b ?? q.b;
+        const optC = q.optionC ?? q.option_c ?? q.optC ?? q.opt_c ?? q.c;
+        const optD = q.optionD ?? q.option_d ?? q.optD ?? q.opt_d ?? q.d;
+
+        if (optA !== undefined || optB !== undefined) {
+          options = [
+            String(optA ?? '').trim(),
+            String(optB ?? '').trim(),
+            String(optC ?? '').trim(),
+            String(optD ?? '').trim()
+          ].filter(Boolean);
+        }
+      }
+
+      while (options.length < 4) {
+        options.push('');
+      }
+
+      // 3. Correct Answer Index
+      let correctAnswerIndex = 0;
+      const rawAnswer = q.correctAnswerIndex ?? q.correctAnswer ?? q.answer ?? q.correct_option ?? q.correct_answer ?? q.ans;
+
+      if (typeof rawAnswer === 'number') {
+        if (rawAnswer >= 0 && rawAnswer < options.length) {
+          correctAnswerIndex = rawAnswer;
+        } else if (rawAnswer >= 1 && rawAnswer <= options.length) {
+          correctAnswerIndex = rawAnswer - 1;
+        }
+      } else if (typeof rawAnswer === 'string') {
+        const trimmedAns = rawAnswer.trim();
+        const upperAns = trimmedAns.toUpperCase();
+
+        if (upperAns === 'A' || upperAns === 'OPTION A' || upperAns === 'OPTION 1') correctAnswerIndex = 0;
+        else if (upperAns === 'B' || upperAns === 'OPTION B' || upperAns === 'OPTION 2') correctAnswerIndex = 1;
+        else if (upperAns === 'C' || upperAns === 'OPTION C' || upperAns === 'OPTION 3') correctAnswerIndex = 2;
+        else if (upperAns === 'D' || upperAns === 'OPTION D' || upperAns === 'OPTION 4') correctAnswerIndex = 3;
+        else if (/^[1-4]$/.test(trimmedAns)) {
+          correctAnswerIndex = parseInt(trimmedAns, 10) - 1;
+        } else {
+          const matchIdx = options.findIndex(opt => opt.toLowerCase() === trimmedAns.toLowerCase());
+          if (matchIdx !== -1) {
+            correctAnswerIndex = matchIdx;
+          }
+        }
+      }
+
+      // 4. Explanation
+      const explanation = String(q.explanation || q.solution || q.rationale || q.answer_explanation || q.exp || '').trim();
+
+      return {
+        questionText: rawQuestionText,
+        options,
+        correctAnswerIndex,
+        explanation,
+        difficulty: q.difficulty || 'medium',
+        ...(diagram ? { diagram } : {})
+      };
+    }).filter(Boolean);
+
+    if (normalizedQuestions.length === 0) {
+      throw new Error("No valid question objects could be normalized from the upload data.");
+    }
+
+    return normalizedQuestions;
+  };
+
   const handleMockBulkUpload = async () => {
     try {
       if (!attachMockTestId) {
@@ -1370,48 +1560,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
          return;
       }
       
-      let parsed;
-      try {
-        parsed = JSON.parse(cleanJsonString(bulkFileContent));
-      } catch (e) {
-        try {
-          parsed = new Function('return ' + cleanJsonString(bulkFileContent))();
-        } catch (e2) {
-          alert("Invalid format. Please ensure the file is valid JSON or a JavaScript array.");
-          return;
-        }
-      }
-      
-      let questionArray = parsed;
-      if (!Array.isArray(questionArray)) {
-        if (questionArray && typeof questionArray === 'object') {
-          questionArray = [questionArray];
-        } else {
-          alert("The JSON must be an array of question objects or a single question object.");
-          return;
-        }
-      }
-      
-      const processedQuestions = questionArray.map((q: any) => {
-        let diagram = q.diagram || null;
-        let questionText = q.questionText || q.question || '';
-        
-        const extraction = extractEmbeddedDiagram(questionText);
-        if (extraction.diagram) {
-          diagram = extraction.diagram;
-          questionText = extraction.cleanedText;
-        }
-        
-        if (diagram) {
-          diagram = diagramValidator(diagram);
-        }
-        
-        return {
-          ...q,
-          questionText,
-          diagram
-        };
-      });
+      const processedQuestions = parseUniversalQuestionJson(bulkFileContent);
 
       const targetTest = mockTests.find(mt => mt.id === attachMockTestId);
       let targetExamId = 'generic';
@@ -1422,7 +1571,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       } catch(e) {}
       
       await examService.addQuestionsToMockTest(attachMockTestId, targetExamId, processedQuestions);
-      alert(`Successfully added ${questionArray.length} questions to Mock Test!`);
+      alert(`Successfully added ${processedQuestions.length} questions to Mock Test!`);
       setShowMockUploadModal(false);
       setBulkFileContent('');
       setAttachMockTestId(null);
@@ -1443,68 +1592,31 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
          return;
       }
       
-      let parsed;
-      try {
-        parsed = JSON.parse(cleanJsonString(bulkFileContent));
-      } catch (e) {
-        try {
-          parsed = new Function('return ' + cleanJsonString(bulkFileContent))();
-        } catch (e2) {
-          alert("Invalid format. Please ensure the file is valid JSON or a JavaScript array.");
-          return;
-        }
-      }
+      const questionArray = parseUniversalQuestionJson(bulkFileContent);
       
-      let questionArray = parsed;
-      if (!Array.isArray(questionArray)) {
-        if (questionArray && typeof questionArray === 'object') {
-          questionArray = [questionArray];
-        } else {
-          alert("The JSON must be an array of question objects or a single question object.");
-          return;
-        }
-      }
-      
-      const formatted = questionArray.map(q => {
-        let diagram = q.diagram || null;
-        let questionText = q.questionText || q.question || '';
-        
-        const extraction = extractEmbeddedDiagram(questionText);
-        if (extraction.diagram) {
-          diagram = extraction.diagram;
-          questionText = extraction.cleanedText;
-        }
-        
-        if (diagram) {
-          diagram = diagramValidator(diagram);
-        }
-
-        const item: any = {
-          examId: bulkExamId,
-          topic: bulkTopic,
-          difficulty: q.difficulty || 'medium',
-          questionText: questionText,
-          options: Array.isArray(q.options) ? q.options : ['', '', '', ''],
-          correctAnswerIndex: Number(q.correctAnswerIndex) || 0,
-          explanation: q.explanation || ''
-        };
-        if (diagram !== undefined && diagram !== null) {
-          item.diagram = diagram;
-        }
-        return item;
-      });
+      const formatted = questionArray.map(q => ({
+        ...q,
+        examId: bulkExamId,
+        topic: bulkTopic
+      }));
       
       await examService.addQuestionsBulk(formatted);
       alert(`Successfully added ${formatted.length} questions!`);
       
-      // Auto-navigate to show the newly uploaded exam and content bank topic
+      // Auto-navigate to show the newly uploaded exam and target content/mock test
       setSelectedExamIdForQuestions(bulkExamId);
-      setSelectedTypeForQuestions('bank');
-      setSelectedTargetIdForQuestions(bulkTopic);
+      if (bulkTopic.startsWith('mockTest__')) {
+        setSelectedTypeForQuestions('mock');
+        setSelectedTargetIdForQuestions(bulkTopic.replace('mockTest__', ''));
+      } else {
+        setSelectedTypeForQuestions('bank');
+        setSelectedTargetIdForQuestions(bulkTopic);
+      }
       setFilterExamId(bulkExamId);
 
       setShowBulkUploadModal(false);
       setBulkFileContent('');
+      setBulkFileNames([]);
       setBulkExamId('');
       setBulkTopic('');
       await fetchData();
@@ -2326,6 +2438,162 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        );
+      case 'questions':
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Exam */}
+              <div className="space-y-2">
+                <label className={labelClass}>Select Exam *</label>
+                <SearchableDropdown
+                  required
+                  value={formData.examId}
+                  onChange={v => setFormData({ ...formData, examId: v })}
+                  options={actualExams.map(ex => ({ value: ex.id as string, label: ex.name }))}
+                  placeholder="-- Choose Exam --"
+                />
+              </div>
+
+              {/* Topic / Target */}
+              <div className="space-y-2">
+                <label className={labelClass}>Target Bank or Mock Test *</label>
+                <div className={selectWrapperClass}>
+                  <select 
+                    required
+                    value={formData.topic} 
+                    onChange={e => setFormData({ ...formData, topic: e.target.value })} 
+                    className={selectClass}
+                  >
+                    <option value="">-- Choose Target --</option>
+                    <optgroup label="📦 Question Banks & Practice Sets">
+                      {banks
+                        .filter(b => !formData.examId || b.examId === formData.examId)
+                        .map(b => (
+                          <option key={b.id} value={b.title}>
+                            [Bank] {b.title}
+                          </option>
+                        ))}
+                    </optgroup>
+                    <optgroup label="📝 Mock Tests">
+                      {mockTests
+                        .filter(mt => {
+                          if (!formData.examId) return true;
+                          try {
+                            if (mt.seriesId) {
+                              const parsed = JSON.parse(mt.seriesId);
+                              return parsed.examId === formData.examId;
+                            }
+                          } catch(e) {}
+                          return true;
+                        })
+                        .map(mt => (
+                          <option key={mt.id} value={`mockTest__${mt.id}`}>
+                            [Mock Test] {mt.title}
+                          </option>
+                        ))}
+                    </optgroup>
+                  </select>
+                  <ChevronDown className="w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Difficulty */}
+              <div className="space-y-2">
+                <label className={labelClass}>Difficulty Level</label>
+                <div className={selectWrapperClass}>
+                  <select 
+                    value={formData.difficulty} 
+                    onChange={e => setFormData({ ...formData, difficulty: e.target.value })} 
+                    className={selectClass}
+                  >
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                  </select>
+                  <ChevronDown className="w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+              </div>
+            </div>
+
+            {/* Question Text */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <label className={labelClass}>Question Text *</label>
+                <DiagramTemplateSelector onSelect={(jsonStr) => setDiagramText(jsonStr)} />
+              </div>
+              <textarea 
+                required
+                rows={4} 
+                value={formData.questionText} 
+                onChange={e => setFormData({ ...formData, questionText: e.target.value })} 
+                className={textareaClass} 
+                placeholder="Enter question text here..."
+              />
+            </div>
+
+            {/* Options */}
+            <div className="space-y-3">
+              <label className={labelClass}>Answer Options (Select Correct Answer Radio) *</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[0, 1, 2, 3].map(idx => (
+                  <div key={idx} className={cn(
+                    "flex items-center gap-3 p-3.5 rounded-2xl border transition-all",
+                    formData.correctAnswerIndex === idx 
+                      ? "bg-brand-50/80 border-brand-300 ring-2 ring-brand-500/20" 
+                      : "bg-slate-50/40 border-slate-200"
+                  )}>
+                    <input 
+                      type="radio" 
+                      name="correctAnswerIndex"
+                      checked={formData.correctAnswerIndex === idx}
+                      onChange={() => setFormData({ ...formData, correctAnswerIndex: idx })}
+                      className="w-4 h-4 text-brand-600 focus:ring-brand-500 cursor-pointer shrink-0"
+                    />
+                    <span className="text-xs font-black text-slate-600 uppercase shrink-0">
+                      Opt {String.fromCharCode(65 + idx)}:
+                    </span>
+                    <input 
+                      required
+                      type="text" 
+                      value={(formData.options && formData.options[idx]) || ''} 
+                      onChange={e => {
+                        const newOpts = [...(formData.options || ['', '', '', ''])];
+                        newOpts[idx] = e.target.value;
+                        setFormData({ ...formData, options: newOpts });
+                      }} 
+                      className="w-full bg-transparent text-slate-800 font-semibold outline-none text-sm" 
+                      placeholder={`Option ${String.fromCharCode(65 + idx)}`} 
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Explanation */}
+            <div className="space-y-2">
+              <label className={labelClass}>Explanation / Solution</label>
+              <textarea 
+                rows={3} 
+                value={formData.explanation} 
+                onChange={e => setFormData({ ...formData, explanation: e.target.value })} 
+                className={textareaClass} 
+                placeholder="Detailed solution or explanation for the correct answer..."
+              />
+            </div>
+
+            {/* Diagram JSON (Optional) */}
+            <div className="space-y-2">
+              <label className={labelClass}>Diagram Data (Optional JSON)</label>
+              <textarea 
+                rows={3} 
+                value={diagramText} 
+                onChange={e => setDiagramText(e.target.value)} 
+                className="w-full px-5 py-3 rounded-2xl border border-slate-200 bg-slate-50/30 text-slate-800 font-mono text-xs outline-none focus:border-brand-500 transition-all" 
+                placeholder='{"type": "geometry", "title": "...", "elements": [...]}'
+              />
             </div>
           </div>
         );
@@ -5040,12 +5308,28 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                      <p className="text-xs text-slate-400 font-bold mt-1 uppercase tracking-wider">{mt.durationMinutes} Mins • {mt.totalMarks} Marks</p>
                                    </div>
                                  </div>
-                                 <div className="flex justify-between items-center pt-6 mt-6 border-t border-slate-100">
-                                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-slate-50 text-slate-500 group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors border border-slate-100">
-                                     {count} Questions
-                                   </span>
-                                   <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-brand-500 group-hover:translate-x-1 transition-all" />
-                                 </div>
+                                 <div className="flex justify-between items-center pt-6 mt-6 border-t border-slate-100 relative z-10 gap-2">
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-slate-50 text-slate-500 group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors border border-slate-100">
+                                      {count} Questions
+                                    </span>
+                                    
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setBulkExamId(selectedExamIdForQuestions);
+                                          setBulkTopic(`mockTest__${mt.id}`);
+                                          setShowBulkUploadModal(true);
+                                        }}
+                                        className="px-3 py-1.5 rounded-xl text-xs font-black bg-brand-50 text-brand-600 hover:bg-brand-600 hover:text-white border border-brand-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
+                                        title="Upload questions directly to this mock test"
+                                      >
+                                        <Upload className="w-3.5 h-3.5" />
+                                        <span>Upload Qs</span>
+                                      </button>
+                                      <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-brand-500 group-hover:translate-x-1 transition-all" />
+                                    </div>
+                                  </div>
                                </motion.div>
                              );
                            })}
@@ -5949,42 +6233,98 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                         disabled={!bulkExamId}
                       >
                         <option value="">-- Choose Target Topic --</option>
-                        {banks.filter((b: any) => b.examId === bulkExamId).map((bank: any) => {
-                          const categoryLabels: Record<string, string> = {
-                            'topic-wise': 'Chapter-Wise',
-                            'exam-focused': 'High-Yield',
-                            'revision-sets': 'Daily Quizzes',
-                            'pyq-collections': 'Topic PYQ'
-                          };
-                          const catName = categoryLabels[bank.type] || bank.type;
-                          return (
-                            <option key={bank.id} value={bank.title}>
-                              [{catName}] {bank.title} ({bank.questionCount || 0} Qs)
-                            </option>
-                          );
-                        })}
+                        {banks.filter((b: any) => b.examId === bulkExamId).length > 0 && (
+                          <optgroup label="📦 Question Banks & Practice Sets">
+                            {banks.filter((b: any) => b.examId === bulkExamId).map((bank: any) => {
+                              const categoryLabels: Record<string, string> = {
+                                'topic-wise': 'Chapter-Wise',
+                                'exam-focused': 'High-Yield',
+                                'revision-sets': 'Daily Quizzes',
+                                'pyq-collections': 'Topic PYQ'
+                              };
+                              const catName = categoryLabels[bank.type] || bank.type;
+                              return (
+                                <option key={bank.id} value={bank.title}>
+                                  [{catName}] {bank.title} ({bank.questionCount || 0} Qs)
+                                </option>
+                              );
+                            })}
+                          </optgroup>
+                        )}
+                        {mockTests.filter((mt: any) => {
+                          try {
+                            if (mt.seriesId) {
+                              const parsed = JSON.parse(mt.seriesId);
+                              return parsed.examId === bulkExamId;
+                            }
+                          } catch(e){}
+                          return false;
+                        }).length > 0 && (
+                          <optgroup label="📝 Mock Tests">
+                            {mockTests.filter((mt: any) => {
+                              try {
+                                if (mt.seriesId) {
+                                  const parsed = JSON.parse(mt.seriesId);
+                                  return parsed.examId === bulkExamId;
+                                }
+                              } catch(e){}
+                              return false;
+                            }).map((mt: any) => {
+                              const count = mt._questionCount || mt.questions?.length || 0;
+                              return (
+                                <option key={mt.id} value={`mockTest__${mt.id}`}>
+                                  [Mock Test] {mt.title} ({count} Qs)
+                                </option>
+                              );
+                            })}
+                          </optgroup>
+                        )}
                       </select>
                     </div>
                   </div>
 
                   <div className="space-y-3">
-                    <label className="text-sm font-extrabold text-slate-700 uppercase tracking-wider">Upload JSON File</label>
+                    <label className="text-sm font-extrabold text-slate-700 uppercase tracking-wider">Upload JSON File(s)</label>
                     <div className="relative p-6 border-2 border-dashed border-slate-200 rounded-2xl text-center bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer group">
                       <input 
                         type="file" 
                         accept=".json"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          const reader = new FileReader();
-                          reader.onload = (event) => setBulkFileContent(event.target?.result as string);
-                          reader.readAsText(file);
+                        multiple
+                        onChange={async (e) => {
+                          const files = e.target.files;
+                          if (!files || files.length === 0) return;
+                          const fileArray = Array.from(files) as File[];
+                          const names = fileArray.map(f => f.name);
+                          setBulkFileNames(names);
+
+                          const readPromises = fileArray.map((file: File) => {
+                            return new Promise<string>((resolve, reject) => {
+                              const reader = new FileReader();
+                              reader.onload = (evt) => resolve((evt.target?.result as string) || '');
+                              reader.onerror = (err) => reject(err);
+                              reader.readAsText(file);
+                            });
+                          });
+
+                          try {
+                            const fileContents = await Promise.all(readPromises);
+                            setBulkFileContent(fileContents.filter(Boolean).join('\n'));
+                          } catch (err) {
+                            console.error("Error reading JSON files:", err);
+                            alert("Failed to read one or more files.");
+                          }
                         }}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                       />
                       <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2 group-hover:text-brand-500 transition-colors" />
-                      <p className="text-sm font-extrabold text-slate-700">Click or drag JSON file here</p>
-                      <p className="text-xs text-slate-500 mt-2 font-medium">Or paste JSON directly below</p>
+                      <p className="text-sm font-extrabold text-slate-700">Click or drag JSON file(s) here</p>
+                      <p className="text-xs text-slate-500 mt-1 font-medium">Select single or multiple .json files at once</p>
+                      {bulkFileNames.length > 0 && (
+                        <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold animate-fadeIn relative z-20">
+                          <CheckCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          <span>{bulkFileNames.length} file{bulkFileNames.length > 1 ? 's' : ''} loaded: {bulkFileNames.join(', ')}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 

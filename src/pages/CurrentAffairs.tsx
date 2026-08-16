@@ -29,14 +29,57 @@ export const CurrentAffairsPage: React.FC = () => {
     { label: 'World / International', value: 'World', icon: Globe }
   ];
 
+  const [timePreset, setTimePreset] = useState<string>('all');
+
   const filteredArticles = articles.filter(art => {
     const matchesCategory = selectedCategory === 'All' || art.category.toLowerCase().includes(selectedCategory.toLowerCase());
     const matchesQuery = searchQuery === '' || 
       art.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
       art.summary.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesDate = selectedDate === '' || (art.event_date && art.event_date.includes(selectedDate));
-    return matchesCategory && matchesQuery && matchesDate;
+
+    const artDateStr = art.event_date || (art.created_at ? art.created_at.substring(0, 10) : '');
+    const artDate = artDateStr ? new Date(artDateStr) : null;
+    const now = new Date();
+    const todayStr = now.toISOString().substring(0, 10);
+    const createdAtDateStr = art.created_at ? art.created_at.substring(0, 10) : '';
+
+    let matchesTimePreset = true;
+    if (timePreset === 'today') {
+      matchesTimePreset = artDateStr === todayStr || createdAtDateStr === todayStr;
+    } else if (timePreset === '7days') {
+      if (artDate) {
+        const diffMs = now.getTime() - artDate.getTime();
+        matchesTimePreset = diffMs <= 7 * 86400 * 1000 && diffMs >= 0;
+      }
+    } else if (timePreset === 'thisMonth') {
+      if (artDate) {
+        matchesTimePreset = artDate.getFullYear() === now.getFullYear() && artDate.getMonth() === now.getMonth();
+      }
+    } else if (timePreset === '3months') {
+      if (artDate) {
+        const diffMs = now.getTime() - artDate.getTime();
+        matchesTimePreset = diffMs <= 90 * 86400 * 1000 && diffMs >= 0;
+      }
+    } else if (timePreset === '6months') {
+      if (artDate) {
+        const diffMs = now.getTime() - artDate.getTime();
+        matchesTimePreset = diffMs <= 180 * 86400 * 1000 && diffMs >= 0;
+      }
+    }
+
+    const matchesDateInput = selectedDate === '' || (artDateStr && artDateStr.includes(selectedDate));
+
+    return matchesCategory && matchesQuery && matchesTimePreset && matchesDateInput;
   });
+
+  const timePresets = [
+    { id: 'today', label: "⚡ Today's News" },
+    { id: '7days', label: '📅 Last 7 Days' },
+    { id: 'thisMonth', label: '🗓️ This Month' },
+    { id: '3months', label: '📆 Last 3 Months' },
+    { id: '6months', label: '📊 Last 6 Months' },
+    { id: 'all', label: '📚 All Time Archives' },
+  ];
 
   return (
     <PageLayout>
@@ -74,36 +117,34 @@ export const CurrentAffairsPage: React.FC = () => {
                 />
               </div>
 
-              {/* Date Filter & Quick Preset Toggle */}
+              {/* Date Filter & Multi-Period Time-Range Preset Toolbar */}
               <div className="flex flex-wrap items-center gap-2 shrink-0">
-                <button
-                  onClick={() => setSelectedDate('2026-08-14')}
-                  className={`px-3 py-2 rounded-xl text-xs font-black transition-all border ${
-                    selectedDate === '2026-08-14'
-                      ? 'bg-brand-500 text-slate-950 border-brand-400 shadow-sm'
-                      : 'bg-slate-800/90 text-slate-300 border-slate-700/80 hover:bg-slate-700'
-                  }`}
-                >
-                  ⚡ Today's News (Aug 14)
-                </button>
-
-                <button
-                  onClick={() => setSelectedDate('')}
-                  className={`px-3 py-2 rounded-xl text-xs font-black transition-all border ${
-                    selectedDate === ''
-                      ? 'bg-brand-500 text-slate-950 border-brand-400 shadow-sm'
-                      : 'bg-slate-800/90 text-slate-300 border-slate-700/80 hover:bg-slate-700'
-                  }`}
-                >
-                  📚 All Timeline Archives
-                </button>
+                {timePresets.map((preset) => (
+                  <button
+                    key={preset.id}
+                    onClick={() => {
+                      setTimePreset(preset.id);
+                      setSelectedDate('');
+                    }}
+                    className={`px-3 py-2 rounded-xl text-xs font-black transition-all border shrink-0 ${
+                      timePreset === preset.id && selectedDate === ''
+                        ? 'bg-brand-500 text-slate-950 border-brand-400 shadow-sm'
+                        : 'bg-slate-800/90 text-slate-300 border-slate-700/80 hover:bg-slate-700'
+                    }`}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
 
                 <div className="flex items-center gap-1 bg-slate-800/90 border border-slate-700/80 rounded-xl px-2.5 py-1.5 text-xs text-white">
                   <Calendar className="w-3.5 h-3.5 text-brand-400" />
                   <input
                     type="date"
                     value={selectedDate}
-                    onChange={e => setSelectedDate(e.target.value)}
+                    onChange={e => {
+                      setSelectedDate(e.target.value);
+                      setTimePreset('custom');
+                    }}
                     className="bg-transparent text-white focus:outline-none text-xs"
                   />
                 </div>

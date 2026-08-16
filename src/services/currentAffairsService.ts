@@ -382,30 +382,120 @@ export const FALLBACK_CURRENT_AFFAIRS: CurrentAffairsItem[] = [
   }
 ];
 
+export function normalizeCategoryScope(title: string, summary: string, rawCategory: string): string {
+  const text = `${title} ${summary} ${rawCategory}`.toLowerCase();
+  
+  const odishaKeywords = [
+    "odisha", "bhubaneswar", "cuttack", "puri", "sambalpur", "berhampur", "balasore",
+    "rourkela", "koraput", "mayurbhanj", "ganjam", "kendrapara", "khordha", "dhenkanal",
+    "keonjhar", "kalahandi", "bolangir", "rayagada", "angul", "jharsuguda", "jagatsinghpur",
+    "bhadrak", "jajpur", "kandhamal", "malkangiri", "nabarangpur", "nayagarh", "nuapada",
+    "subarnapur", "sundergarh", "subhadra", "kalia", "bsuy", "mamata scheme", "opsc",
+    "ossc", "osssc", "mohan majhi", "naveen patnaik", "chilika", "similipal", "hirakud",
+    "lingaraj", "konark", "barehipani"
+  ];
+
+  if (odishaKeywords.some(kw => text.includes(kw))) {
+    return 'Odisha';
+  }
+
+  const worldKeywords = [
+    "un ", "united nations", "world bank", "imf", "g20", "g7", "brics", "nato", "asean",
+    "who ", "unesco", "cop29", "cop30", "global", "international", "us ", "usa",
+    "china", "russia", "ukraine", "israel", "gaza", "japan", "singapore", "europe",
+    "uk ", "france", "germany", "bangladesh", "nepal", "sri lanka", "pakistan"
+  ];
+
+  if (worldKeywords.some(kw => text.includes(kw)) || (rawCategory && rawCategory.toLowerCase().includes('world'))) {
+    return 'World';
+  }
+
+  return 'National';
+}
+
 export async function fetchCurrentAffairsDigests(): Promise<CurrentAffairsItem[]> {
   try {
+    // 1. Try querying dedicated 'current_affairs' table
     const { data, error } = await supabase
       .from('current_affairs')
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (error || !data || data.length === 0) {
-      console.warn("ℹ️ Falling back to default Current Affairs digests dataset.");
-      return FALLBACK_CURRENT_AFFAIRS.map(item => ({
-        ...item,
-        image_url: getSmartRealImage(item.title, item.category, item.image_url)
-      }));
+    if (!error && data && data.length > 0) {
+      return (data as CurrentAffairsItem[]).map(item => {
+        const cat = normalizeCategoryScope(item.title, item.summary || '', item.category || '');
+        return {
+          ...item,
+          category: cat,
+          image_url: getSmartRealImage(item.title, cat, item.image_url)
+        };
+      });
     }
 
-    return (data as CurrentAffairsItem[]).map(item => ({
-      ...item,
-      image_url: getSmartRealImage(item.title, item.category, item.image_url)
-    }));
+    // 2. Fallback to 'exams' catalog table (category = 'current_affairs')
+    const { data: examData, error: examError } = await supabase
+      .from('exams')
+      .select('*')
+      .eq('category', 'current_affairs')
+      .order('createdAt', { ascending: false });
+
+    if (!examError && examData && examData.length > 0) {
+      const mapped: CurrentAffairsItem[] = examData.map((item: any) => {
+        const title = item.name || '';
+        const rawCat = item.targetExamId || 'National';
+        const summary = item.metaDescription || '';
+        const cat = normalizeCategoryScope(title, summary, rawCat);
+        const dateStr = item.examDate || (item.createdAt ? item.createdAt.substring(0, 10) : new Date().toISOString().substring(0, 10));
+        
+        const descRaw = item.description || '';
+        let fullContext = descRaw;
+        let mcqs: any[] = [];
+
+        const mcqMatch = descRaw.match(/<!--MCQ_JSON:(.*?)-->/s);
+        if (mcqMatch && mcqMatch[1]) {
+          try {
+            mcqs = JSON.parse(mcqMatch[1]);
+            fullContext = descRaw.replace(/<!--MCQ_JSON:.*?-->/s, '').trim();
+          } catch (e) {
+            console.warn("Failed parsing MCQ_JSON", e);
+          }
+        }
+
+        return {
+          id: item.id,
+          slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
+          title: title,
+          category: cat,
+          event_date: dateStr,
+          summary: summary || title,
+          full_context: fullContext,
+          mcqs: mcqs,
+          image_url: getSmartRealImage(title, cat, item.icon),
+          is_published: true,
+          created_at: item.createdAt
+        };
+      });
+      return mapped;
+    }
+
+    // 3. Fallback dataset
+    return FALLBACK_CURRENT_AFFAIRS.map(item => {
+      const cat = normalizeCategoryScope(item.title, item.summary || '', item.category || '');
+      return {
+        ...item,
+        category: cat,
+        image_url: getSmartRealImage(item.title, cat, item.image_url)
+      };
+    });
   } catch (err) {
     console.error("Error fetching current affairs:", err);
-    return FALLBACK_CURRENT_AFFAIRS.map(item => ({
-      ...item,
-      image_url: getSmartRealImage(item.title, item.category, item.image_url)
-    }));
+    return FALLBACK_CURRENT_AFFAIRS.map(item => {
+      const cat = normalizeCategoryScope(item.title, item.summary || '', item.category || '');
+      return {
+        ...item,
+        category: cat,
+        image_url: getSmartRealImage(item.title, cat, item.image_url)
+      };
+    });
   }
 }

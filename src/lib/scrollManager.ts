@@ -1,3 +1,5 @@
+import { getLenis } from './lenisScroll';
+
 const isBrowser = typeof window !== 'undefined';
 
 /** Premium eased window scroll to a target Y position.
@@ -113,6 +115,13 @@ export function scrollToElement(
         return;
       }
 
+      const lenis = getLenis();
+      if (lenis && behavior !== 'instant' && behavior !== 'auto') {
+        lenis.scrollTo(lastTargetY, { duration: 1.2 });
+        resolve();
+        return;
+      }
+
       smoothScrollWindow(lastTargetY);
 
       // Continuously adjust scroll for layout shifts / animations for 1.2s
@@ -164,7 +173,13 @@ export function scrollToTop(options?: { behavior?: ScrollBehavior; delay?: numbe
         }
         resolve();
       } else {
-        smoothScrollWindow(0).then(resolve);
+        const lenis = getLenis();
+        if (lenis) {
+          lenis.scrollTo(0, { duration: 1.2 });
+          resolve();
+        } else {
+          smoothScrollWindow(0).then(resolve);
+        }
       }
     };
 

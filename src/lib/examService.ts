@@ -39,6 +39,64 @@ async function callAdminDbProxy(table: string, action: 'insert' | 'update' | 'de
   return data.data;
 }
 
+// --- Topic Count Helper ---
+async function fetchTopicCounts(topics: string[]): Promise<Record<string, number>> {
+  const countMap: Record<string, number> = {};
+  const normMap: Record<string, number> = {};
+  const validTopics = (topics || []).filter(Boolean);
+  if (validTopics.length === 0) return countMap;
+
+  const chunkSize = 50;
+  for (let i = 0; i < validTopics.length; i += chunkSize) {
+    const chunk = validTopics.slice(i, i + chunkSize);
+    const pageSize = 1000;
+    let page = 0;
+    let keepFetching = true;
+
+    while (keepFetching) {
+      try {
+        const { data, error } = await supabase
+          .from('questions')
+          .select('topic')
+          .in('topic', chunk)
+          .range(page * pageSize, (page + 1) * pageSize - 1);
+
+        if (error || !data || data.length === 0) {
+          keepFetching = false;
+        } else {
+          data.forEach(q => {
+            if (q.topic) {
+              const exact = q.topic;
+              countMap[exact] = (countMap[exact] || 0) + 1;
+              const norm = q.topic.toLowerCase().trim();
+              normMap[norm] = (normMap[norm] || 0) + 1;
+            }
+          });
+          if (data.length < pageSize) {
+            keepFetching = false;
+          } else {
+            page++;
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching topic counts chunk:", err);
+        keepFetching = false;
+      }
+    }
+  }
+
+  return new Proxy(countMap, {
+    get(target, prop: string) {
+      if (typeof prop === 'string') {
+        if (prop in target) return target[prop];
+        const norm = prop.toLowerCase().trim();
+        if (norm in normMap) return normMap[norm];
+      }
+      return 0;
+    }
+  });
+}
+
 // --- Types ---
 
 export interface Question {
@@ -370,32 +428,9 @@ export const examService = {
       .order('sortOrder', { ascending: true });
     if (error) throw error;
 
-    // Fast single query to get question counts by fetching only topic strings
+    // Fast paginated query to get exact question counts for all mock tests
     const testIds = (tests ?? []).map(t => `mockTest__${t.id}`).filter(Boolean);
-    let qTopics: any[] = [];
-    if (testIds.length > 0) {
-      try {
-        const { data, error: qErr } = await supabase
-          .from('questions')
-          .select('topic')
-          .in('topic', testIds)
-          .limit(2000);
-        if (!qErr && data) {
-          qTopics = data;
-        }
-      } catch (e) {
-        console.error("Error fetching question topics for mock tests", e);
-      }
-    }
-      
-    const countMap: Record<string, number> = {};
-    if (qTopics) {
-      qTopics.forEach(q => {
-        if (q.topic) {
-          countMap[q.topic] = (countMap[q.topic] || 0) + 1;
-        }
-      });
-    }
+    const countMap = await fetchTopicCounts(testIds);
 
     // The `seriesId` column may contain either:
     //   - A UUID string (for tests linked to a real testSeries row)
@@ -724,33 +759,18 @@ export const examService = {
     if (banks && banks.length > 0) {
       try {
         const bankTitles = banks.map(b => b.title).filter(Boolean);
-        let qCounts: any[] = [];
-        if (bankTitles.length > 0) {
-          const { data, error: qErr } = await supabase
-            .from('questions')
-            .select('topic')
-            .in('topic', bankTitles)
-            .limit(2000);
-          if (!qErr && data) {
-            qCounts = data;
-          }
-        }
+        const countMap = await fetchTopicCounts(bankTitles);
 
-        if (qCounts && qCounts.length > 0) {
-          const countMap: Record<string, number> = {};
-          qCounts.forEach(q => {
-            if (q.topic) {
-              countMap[q.topic] = (countMap[q.topic] || 0) + 1;
-            }
-          });
-          banks.forEach(b => {
-            b.practiceQuestionCount = countMap[b.title] || 0;
-            // Preserve admin-configured questionCount, fallback to practice count only if questionCount is 0/undefined
-            if (!b.questionCount || b.questionCount === 0) {
-              b.questionCount = countMap[b.title] || 0;
-            }
-          });
-        }
+        banks.forEach(b => {
+          const actualCount = countMap[b.title] || 0;
+          b.practiceQuestionCount = actualCount;
+          // Set questionCount to actual uploaded question count if actualCount > 0
+          if (actualCount > 0) {
+            b.questionCount = actualCount;
+          } else if (!b.questionCount) {
+            b.questionCount = 0;
+          }
+        });
       } catch (err) {
         console.error("Failed to fetch actual question counts for question banks:", err);
       }

@@ -38,8 +38,35 @@
     <meta property="twitter:url" content="https://odishaexamprep.in/" />
     <meta property="twitter:title" content="OdishaExamPrep - Best Platform for Odisha Exam Preparation" />
     <meta property="twitter:description" content="Prepare for OPSC, OSSC, OSSSC and other Odisha government competitive exams. Practice with expert-crafted mock tests, syllabus roadmaps, and real-time rank analytics." />
-    <meta property="twitter:image" content="https://odishaexamprep.in/android-chrome-512x512.png" />
+    <style>
+      html, body {
+        background-color: #FAF8F5;
+      }
+      html.dark, html.dark body, html[data-theme="dark"], html[data-theme="dark"] body {
+        background-color: #0b0f19 !important;
+        color: #f8fafc;
+      }
+    </style>
     <script>
+      // Anti-flicker initial theme setup: Apply dark mode class to HTML before DOM rendering
+      (function() {
+        try {
+          var saved = localStorage.getItem('oep-theme-preference');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (saved === 'dark' || (!saved && prefersDark)) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.documentElement.style.backgroundColor = '#0b0f19';
+            var metaTheme = document.querySelector('meta[name="theme-color"]');
+            if (metaTheme) metaTheme.setAttribute('content', '#0b0f19');
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.setAttribute('data-theme', 'light');
+            document.documentElement.style.backgroundColor = '#FAF8F5';
+          }
+        } catch (e) {}
+      })();
+
       // Automatically reload the page when dynamic chunk imports fail (e.g. flaky network on mobile app switches)
       (function() {
         function reloadPage() {
@@ -146,15 +173,15 @@
       }
     ]
     </script>
-    <script type="module" crossorigin src="/assets/index-BeYXExJ2.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/vendor-core-C_xwSJLA.js">
-    <link rel="modulepreload" crossorigin href="/assets/vendor-supabase-IRy-B6Di.js">
-    <link rel="modulepreload" crossorigin href="/assets/vendor-motion-CNl9upr-.js">
-    <link rel="modulepreload" crossorigin href="/assets/vendor-lucide-CauvTG64.js">
+    <script type="module" crossorigin src="/assets/index-09aTNUBv.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-core-Ct9T8Xpr.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-supabase-Cn2eIpmD.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-motion-Bzab-yHn.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-lucide-p75RMByx.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-katex-BkGmXwAI.js">
-    <link rel="modulepreload" crossorigin href="/assets/vendor-recharts-D3raOeu3.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-recharts-BHb-PB6t.js">
     <link rel="stylesheet" crossorigin href="/assets/vendor-katex-Cp579UoJ.css">
-    <link rel="stylesheet" crossorigin href="/assets/index-BanwG6ys.css">
+    <link rel="stylesheet" crossorigin href="/assets/index-DJ4KGQY5.css">
   </head>
   <body>
     <div id="root"></div>

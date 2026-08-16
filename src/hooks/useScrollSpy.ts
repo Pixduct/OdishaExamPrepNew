@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 
-export function useScrollSpy(threshold = 20): boolean {
+export function useScrollSpy(threshold = 30): boolean {
   const [scrolled, setScrolled] = useState(false);
   const ticking = useRef(false);
 

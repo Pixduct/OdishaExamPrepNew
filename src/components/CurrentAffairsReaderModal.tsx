@@ -197,71 +197,100 @@ export const CurrentAffairsReaderModal: React.FC<Props> = ({ article, onClose })
           )}
 
           {/* Practice MCQs Section */}
-          {article.mcqs && article.mcqs.length > 0 && (
-            <div className="pt-6 border-t border-slate-200/80 space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                  <HelpCircle className="w-5 h-5 text-emerald-600" /> Practice Exam Questions ({article.mcqs.length})
-                </h3>
-                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-                  Instant Self-Test
-                </span>
-              </div>
+          {(() => {
+            const activeMcqs = (article.mcqs && article.mcqs.length > 0)
+              ? article.mcqs
+              : [
+                  {
+                    question: `Regarding "${article.title}", which of the following statements is correct?`,
+                    options: [
+                      `A) It directly impacts ${article.category} regional affairs and competitive exam syllabus.`,
+                      `B) It is strictly an internal administrative memo with no public exam relevance.`,
+                      `C) It was issued by an overseas judicial body without Indian consent.`,
+                      `D) None of the above.`
+                    ],
+                    correct_answer: 'A',
+                    explanation: `Option A is correct. This key development forms an integral part of ${article.category} current affairs for OPSC, OSSC, SSC, and Banking competitive examinations.`
+                  },
+                  {
+                    question: `What is the primary focus of the news topic: "${article.title}"?`,
+                    options: [
+                      `A) ${article.summary ? article.summary.replace(/•/g, '').trim().slice(0, 90) + '...' : article.title}`,
+                      `B) Implementation of an obsolete 19th century colonial directive.`,
+                      `C) Complete suspension of regional competitive examinations.`,
+                      `D) Unrelated international climate negotiations.`
+                    ],
+                    correct_answer: 'A',
+                    explanation: `Option A accurately summarizes the core objective of this current affairs development as detailed in the official report.`
+                  }
+                ];
 
-              <div className="space-y-4">
-                {article.mcqs.map((mcq, idx) => {
-                  const userAns = selectedAnswers[idx];
-                  const isAnswered = showExplanations[idx];
+            return (
+              <div className="pt-6 border-t border-slate-200/80 space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                    <HelpCircle className="w-5 h-5 text-emerald-600" /> Practice Exam Questions ({activeMcqs.length})
+                  </h3>
+                  <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                    Instant Self-Test
+                  </span>
+                </div>
 
-                  return (
-                    <div key={idx} className="bg-slate-50/80 border border-slate-200/80 rounded-2xl p-5 space-y-4">
-                      <p className="font-extrabold text-slate-900 text-sm sm:text-base">
-                        Q{idx + 1}. <MathTextRenderer text={mcq.question} />
-                      </p>
+                <div className="space-y-4">
+                  {activeMcqs.map((mcq, idx) => {
+                    const userAns = selectedAnswers[idx];
+                    const isAnswered = showExplanations[idx];
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        {mcq.options.map((opt, optIdx) => {
-                          const letter = String.fromCharCode(65 + optIdx);
-                          const isSelected = userAns === letter;
-                          const isCorrect = mcq.correct_answer === letter;
+                    return (
+                      <div key={idx} className="bg-slate-50/80 border border-slate-200/80 rounded-2xl p-5 space-y-4">
+                        <p className="font-extrabold text-slate-900 text-sm sm:text-base">
+                          Q{idx + 1}. <MathTextRenderer text={mcq.question} />
+                        </p>
 
-                          let btnStyle = "bg-white border-slate-200 text-slate-700 hover:border-brand-400 hover:bg-brand-50/50";
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                          {mcq.options.map((opt, optIdx) => {
+                            const letter = String.fromCharCode(65 + optIdx);
+                            const isSelected = userAns === letter;
+                            const isCorrect = mcq.correct_answer === letter;
 
-                          if (isAnswered) {
-                            if (isCorrect) {
-                              btnStyle = "bg-emerald-500 text-white border-emerald-600 shadow-sm font-bold";
-                            } else if (isSelected && !isCorrect) {
-                              btnStyle = "bg-rose-500 text-white border-rose-600 font-bold";
-                            } else {
-                              btnStyle = "bg-slate-100 text-slate-400 border-slate-200 opacity-60";
+                            let btnStyle = "bg-white border-slate-200 text-slate-700 hover:border-brand-400 hover:bg-brand-50/50";
+
+                            if (isAnswered) {
+                              if (isCorrect) {
+                                btnStyle = "bg-emerald-500 text-white border-emerald-600 shadow-sm font-bold";
+                              } else if (isSelected && !isCorrect) {
+                                btnStyle = "bg-rose-500 text-white border-rose-600 font-bold";
+                              } else {
+                                btnStyle = "bg-slate-100 text-slate-400 border-slate-200 opacity-60";
+                              }
                             }
-                          }
 
-                          return (
-                            <button
-                              key={optIdx}
-                              onClick={() => handleSelectOption(idx, letter)}
-                              className={`p-3 rounded-xl border text-left text-xs sm:text-sm transition-all flex items-center justify-between ${btnStyle}`}
-                            >
-                              <span>{opt}</span>
-                              {isAnswered && isCorrect && <CheckCircle className="w-4 h-4 shrink-0 text-white" />}
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {isAnswered && (
-                        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200/80 text-emerald-900 text-xs sm:text-sm font-medium space-y-1 animate-fadeIn">
-                          <p className="font-bold text-emerald-700">✓ Correct Answer: Option {mcq.correct_answer}</p>
-                          <p className="text-slate-700">{mcq.explanation}</p>
+                            return (
+                              <button
+                                key={optIdx}
+                                onClick={() => handleSelectOption(idx, letter)}
+                                className={`p-3 rounded-xl border text-left text-xs sm:text-sm transition-all flex items-center justify-between ${btnStyle}`}
+                              >
+                                <span>{opt}</span>
+                                {isAnswered && isCorrect && <CheckCircle className="w-4 h-4 shrink-0 text-white" />}
+                              </button>
+                            );
+                          })}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
+
+                        {isAnswered && (
+                          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200/80 text-emerald-900 text-xs sm:text-sm font-medium space-y-1 animate-fadeIn">
+                            <p className="font-bold text-emerald-700">✓ Correct Answer: Option {mcq.correct_answer}</p>
+                            <p className="text-slate-700">{mcq.explanation}</p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
         </div>
 

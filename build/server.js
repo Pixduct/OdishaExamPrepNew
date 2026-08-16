@@ -18,6 +18,7 @@ var ROUTE_PATHS = {
   REFUND_POLICY: "/refund-policy",
   BLOG: "/blog",
   BLOG_DETAIL: "/blog/:id",
+  CURRENT_AFFAIRS: "/current-affairs",
   ADMIN: "/admin",
   NOT_FOUND: "/404",
   EXAM_DETAIL: "/exams/:examId"
@@ -1558,7 +1559,8 @@ ${combinedImageContext}`
       let title = "OdishaExamPrep - Best Platform for Odisha Exam Preparation";
       let description = "Excel in OPSC, OSSC, OSSSC, and other Odisha government competitive exams. Practice with expert-crafted mock tests, real-time rank analytics, and detailed syllabus roadmaps.";
       let keywords = "Odisha Exam Prep, OPSC, OSSC, OSSSC, Odisha Government Exams, Mock Tests, Odisha GK, Competitive Exams Odisha";
-      let imageUrl = `${baseUrl}/student.webp`;
+      const dayOfWeek = (/* @__PURE__ */ new Date()).getDay() % 7 + 1;
+      let imageUrl = `${baseUrl}/student%20${dayOfWeek}.png`;
       let schemaJson = "";
       let ogType = "website";
       if (pathName.startsWith("/blog")) {

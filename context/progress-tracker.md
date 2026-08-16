@@ -55,6 +55,8 @@
 - [x] Header Clearance Fix & Instant 120 FPS Wheel Tuning: Resolved Tailwind shorthand padding conflict (`px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 md:pt-32`) to place `Free Strategy Videos` 16px-32px below fixed navbar with zero overlap, and tuned Lenis duration to `0.6s` with `wheelMultiplier: 1.1` for instant, buttery smooth scrolling (`src/App.tsx`, `src/lib/lenisScroll.ts`)
 - [x] Home Tab 120 FPS Zero-Cost GPU Card Optimization: Eliminated `WebkitMaskComposite: xor` and `mix-blend-soft-light` from `DynamicVectorCard.tsx` across 20+ cards, promoted ambient blur spheres to hardware compositor layers (`transform: translateZ(0)`), and added vector card scroll guard lock (`src/components/DynamicVectorCard.tsx`, `src/App.tsx`, `src/index.css`)
 - [x] Card Slicing & Vertical Line Clipping Resolution: Removed `w-24` / `w-8` edge overlay divs in `YouTubeCarousel.tsx` and removed `.cv-auto` GPU containment wrappers in `App.tsx` and `index.css`, completely eliminating card clipping lines (`YouTubeCarousel.tsx`, `App.tsx`, `index.css`)
+- [x] Smooth Card-Revealing Edge-Fade Mask Engine: Applied CSS `maskImage` / `WebkitMaskImage` alpha gradients across `YouTubeCarousel`, `Continue Practice`, and `Recent Activity` horizontal scroll tracks for a seamless, elegant card-dissolve effect without hard box clipping (`src/components/YouTubeCarousel.tsx`, `src/App.tsx`)
+
 
 
 

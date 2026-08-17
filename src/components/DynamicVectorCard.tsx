@@ -41,13 +41,13 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
   const isDark = theme === 'dark';
 
   // Ambient layer config  ─ wide soft spread with bright cursor-center (physics: frosted glass backlit)
-  const ambientRadius  = isDark ? 550 : 480;
-  // Core stop (0%), mid-fade (40%), transparent edge (100%)
-  const coreAlpha  = isDark ? 0.55 : 0.30;  // bright at exact cursor
-  const midAlpha   = isDark ? 0.22 : 0.10;  // soft mid-ring
+  const ambientRadius  = isDark ? 560 : 480;
+  // Core stop (0%), mid-fade (40%), transparent edge (72%)
+  const coreAlpha  = isDark ? 0.65 : 0.38;  // bright & clear at cursor
+  const midAlpha   = isDark ? 0.28 : 0.15;  // soft mid-ring
 
   // Rim border config  ─ glowing card edge
-  const rimAlpha  = isDark ? 0.95 : 0.75;
+  const rimAlpha  = isDark ? 0.95 : 0.80;
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const card = cardRef.current;

@@ -1117,9 +1117,14 @@ const ExamRegistrySection = ({
           </p>
         </div>
 
+        <DynamicVectorCard
+          glowColor="rgba(37, 99, 235, 0.35)"
+          roundedClass="rounded-[2.5rem]"
+          className="w-full"
+        >
         <div className={cn(
           "flex flex-col items-center w-full",
-          isMobile ? "gap-4" : "gap-6 md:items-stretch md:gap-0 md:bg-white dark:md:bg-slate-900/90 md:border-2 md:border-slate-900/80 dark:md:border-slate-700/80 md:rounded-[2.5rem] md:overflow-hidden md:shadow-[6px_6px_0px_rgba(37,99,235,0.15)] dark:md:shadow-[8px_8px_0px_rgba(37,99,235,0.4)] md:divide-y-2 md:divide-slate-100 dark:md:divide-slate-800"
+          isMobile ? "gap-4" : "gap-6 md:items-stretch md:gap-0 md:bg-white/90 dark:md:bg-slate-900/90 md:backdrop-blur-md md:border-2 md:border-slate-900/80 dark:md:border-slate-700/80 md:rounded-[2.5rem] md:overflow-hidden md:shadow-[6px_6px_0px_rgba(37,99,235,0.15)] dark:md:shadow-[8px_8px_0px_rgba(37,99,235,0.4)] md:divide-y-2 md:divide-slate-100 dark:md:divide-slate-800"
         )}>
           {announcements.map((item, idx) => {
             const statusMeta = EXAM_REGISTRY_STATUS_MAP[item.status] || {
@@ -1131,7 +1136,7 @@ const ExamRegistrySection = ({
               <div 
                 key={idx} 
                 className={cn(
-                  "w-full flex flex-col items-center text-center md:flex-row md:items-center md:text-left md:justify-between bg-white dark:bg-slate-900",
+                  "w-full flex flex-col items-center text-center md:flex-row md:items-center md:text-left md:justify-between bg-white/90 dark:bg-slate-900/90 backdrop-blur-md",
                   isMobile 
                     ? cn("p-5 border border-slate-250/60 dark:border-slate-800 border-l-4 rounded-2xl shadow-sm gap-5", statusBorderColor)
                     : "p-6 sm:p-8 border-2 border-slate-900/80 dark:border-slate-800 rounded-3xl md:rounded-none md:border-none shadow-[4px_4px_0px_rgba(37,99,235,0.15)] md:shadow-none hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors gap-6"
@@ -1166,6 +1171,7 @@ const ExamRegistrySection = ({
             );
           })}
         </div>
+        </DynamicVectorCard>
       </div>
     </section>
   );
@@ -1321,8 +1327,8 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
                   <DynamicVectorCard
                     className={cn(
                       isMobile 
-                        ? "bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 border-l-4 border-l-[#2563EB] rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3 relative active:scale-[0.98] transition-transform duration-200"
-                        : "bg-white dark:bg-slate-900 border-2 border-slate-900/80 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 shadow-[4px_4px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)] flex items-start justify-between gap-4"
+                        ? "bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-200/60 dark:border-slate-800 border-l-4 border-l-[#2563EB] rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3 relative active:scale-[0.98] transition-transform duration-200"
+                        : "bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-2 border-slate-900/80 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 shadow-[4px_4px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)] flex items-start justify-between gap-4"
                     )}
                   >
                     <div className="space-y-1">
@@ -1545,7 +1551,7 @@ const AchieversJournalSection = () => {
                   >
                     <DynamicVectorCard
                       className={cn(
-                        "bg-white dark:bg-slate-900 text-slate-900 dark:text-white flex flex-col justify-between transition-all duration-300",
+                        "bg-white/90 dark:bg-slate-900/90 backdrop-blur-md text-slate-900 dark:text-white flex flex-col justify-between transition-all duration-300",
                         isMobile
                           ? "border border-slate-200/60 dark:border-slate-800 rounded-2xl p-4 shadow-md shadow-slate-100/80 dark:shadow-none active:scale-[0.99]"
                           : "border-2 border-slate-900/80 dark:border-slate-700/80 rounded-[2rem] p-6 sm:p-8 shadow-[6px_6px_0px_rgba(37,99,235,0.1)] dark:shadow-[8px_8px_0px_rgba(37,99,235,0.4)] md:hover:-translate-y-1 md:hover:-translate-x-1"
@@ -3514,7 +3520,7 @@ const LandingPage = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
-                  <DynamicVectorCard className="bg-slate-900 border-2 border-slate-800 text-white p-3.5 sm:p-5 shadow-xl shadow-slate-950/20 relative overflow-hidden group">
+                  <DynamicVectorCard className="bg-slate-900/90 backdrop-blur-md border-2 border-slate-800 text-white p-3.5 sm:p-5 shadow-xl shadow-slate-950/20 relative overflow-hidden group">
                   <div className="absolute -right-16 -top-16 w-48 h-48 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
 
                   {/* Mobile View: Thin 44px 1-line bar */}
@@ -3607,7 +3613,7 @@ const LandingPage = () => {
           </section>
         ) : (
           <section className="relative z-10 py-8 sm:py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-slate-200/50 dark:border-slate-800">
-            <DynamicVectorCard className="bg-white dark:bg-slate-900 border-2 border-slate-900/80 dark:border-slate-700/80 p-6 sm:p-8 text-slate-900 dark:text-white shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
+            <DynamicVectorCard className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-2 border-slate-900/80 dark:border-slate-700/80 p-6 sm:p-8 text-slate-900 dark:text-white shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
               <div className="space-y-2 text-center sm:text-left max-w-2xl">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-brand-500/10 dark:bg-brand-500/20 text-brand-600 dark:text-brand-300 border border-brand-500/20 dark:border-brand-500/30">
                   <Sparkles className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />

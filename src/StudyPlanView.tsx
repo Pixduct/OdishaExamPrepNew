@@ -41,7 +41,7 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
         variants={stagger.containerDelay(0.1, 0.1)}
         initial="hidden"
         animate="show"
-        className="w-full mx-auto space-y-6 sm:space-y-8 pb-32 sm:pb-24 relative z-10"
+        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8 pb-32 sm:pb-24 relative z-10"
       >
         {/* Executive Bright Study Vector Header Card */}
         <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)">

@@ -291,6 +291,10 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
       {/* ── DRAGGABLE CAROUSEL TRACK ──────────────────────────────────── */}
       <div
         className="relative overflow-hidden cursor-grab active:cursor-grabbing py-2"
+        style={{
+          WebkitMaskImage: 'linear-gradient(to right, transparent 0px, black 36px, black calc(100% - 36px), transparent 100%)',
+          maskImage: 'linear-gradient(to right, transparent 0px, black 36px, black calc(100% - 36px), transparent 100%)'
+        }}
         onMouseDown={onMouseDown}
         onTouchStart={onTouchStart}
       >

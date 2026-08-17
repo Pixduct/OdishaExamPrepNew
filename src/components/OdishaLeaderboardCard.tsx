@@ -78,8 +78,8 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
   };
 
   return (
-    <DynamicVectorCard glowColor="rgba(245, 158, 11, 0.15)" className="mb-6 sm:mb-8">
-      <div className="p-5 sm:p-7 text-slate-900 dark:text-white rounded-[2.2rem] bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none space-y-4 sm:space-y-5 relative overflow-hidden">
+    <DynamicVectorCard glowColor="rgba(245, 158, 11, 0.28)" className="mb-6 sm:mb-8">
+      <div className="p-5 sm:p-7 text-slate-900 dark:text-white rounded-[2.2rem] bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none space-y-4 sm:space-y-5 relative overflow-hidden">
         {/* Radial Grid & Floating Watermark Icon */}
         <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-10 pointer-events-none z-0" />
         <Trophy className="absolute -right-8 -bottom-8 w-52 h-52 opacity-10 dark:opacity-15 stroke-[1.2] text-amber-500 dark:text-amber-300 pointer-events-none transition-transform duration-700 hover:scale-110 hover:rotate-6 z-0" />

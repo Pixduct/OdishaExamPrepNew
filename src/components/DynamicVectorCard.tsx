@@ -59,15 +59,14 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
     }
   };
 
-  // Helper functions to guarantee valid RGBA opacities for light mode spotlight & border rings
   const getLightHalo = (color: string) => {
     if (color.includes('rgba')) {
-      return color.replace(/[\d\.]+\)$/, '0.16)');
+      return color.replace(/[\d\.]+\)$/, '0.14)');
     }
     if (color.includes('rgb')) {
-      return color.replace('rgb', 'rgba').replace(')', ', 0.16)');
+      return color.replace('rgb', 'rgba').replace(')', ', 0.14)');
     }
-    return 'rgba(37, 99, 235, 0.16)';
+    return 'rgba(37, 99, 235, 0.14)';
   };
 
   const getBorderRing = (color: string, dark: boolean) => {
@@ -91,34 +90,36 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
         willChange: 'transform',
         ...style
       }}
-      className={`relative ${roundedClass} ${className} group/vector-card transition-transform duration-200 ease-out [.is-card-hovered_&]:[transform:perspective(1000px)_rotateX(var(--rotate-x,0deg))_rotateY(var(--rotate-y,0deg))_scale3d(1.015,1.015,1.015)]`}
+      className={`relative isolate ${roundedClass} ${className} group/vector-card transition-transform duration-200 ease-out [.is-card-hovered_&]:[transform:perspective(1000px)_rotateX(var(--rotate-x,0deg))_rotateY(var(--rotate-y,0deg))_scale3d(1.015,1.015,1.015)]`}
     >
-      {/* 1. Base Children Content Layer */}
-      {children}
-
-      {/* 2. Dynamic Cursor Surface Light Spotlight Overlay (z-20 pointer-events-none renders ON TOP of card surface) */}
+      {/* 1. Glassmorphic Surface Spotlight & Light Glow (Layer z-0 UNDERNEATH z-10 children) */}
       <div
-        className={`pointer-events-none absolute inset-0 ${roundedClass} transition-opacity duration-300 z-20 overflow-hidden opacity-0 group-hover/vector-card:opacity-100`}
+        className={`pointer-events-none absolute inset-0 ${roundedClass} transition-opacity duration-300 z-0 overflow-hidden opacity-0 group-hover/vector-card:opacity-100`}
         style={{
           background: isDark
-            ? `radial-gradient(360px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), ${glowColor}, transparent 75%)`
-            : `radial-gradient(360px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), ${getLightHalo(glowColor)}, transparent 75%)`
+            ? `radial-gradient(380px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), ${glowColor}, transparent 75%)`
+            : `radial-gradient(380px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), ${getLightHalo(glowColor)}, transparent 75%)`
         }}
       />
 
-      {/* 3. Ambient Flare Layer */}
+      {/* 2. Glassmorphic Specular Sheen Layer (Layer z-0 UNDERNEATH z-10 children) */}
       <div
-        className={`pointer-events-none absolute inset-0 ${roundedClass} transition-opacity duration-300 z-20 overflow-hidden opacity-0 group-hover/vector-card:opacity-40`}
+        className={`pointer-events-none absolute inset-0 ${roundedClass} transition-opacity duration-300 z-0 overflow-hidden opacity-0 group-hover/vector-card:opacity-60`}
         style={{
           background: isDark
-            ? `radial-gradient(260px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), ${glowColor}, transparent 70%)`
-            : `radial-gradient(260px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), ${getLightHalo(glowColor)}, transparent 70%)`
+            ? `radial-gradient(280px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.12) 0%, transparent 65%)`
+            : `radial-gradient(280px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.45) 0%, transparent 60%)`
         }}
       />
 
-      {/* 4. High-Precision Cursor Border Illumination Ring */}
+      {/* 3. Base Children Content Layer (z-10 guarantees all text, avatars, badges, and buttons sit ABOVE the light glow) */}
+      <div className="relative z-10 w-full h-full">
+        {children}
+      </div>
+
+      {/* 4. High-Precision Glowing Border Illumination Ring (z-20 pointer-events-none around card edge) */}
       <div
-        className={`pointer-events-none absolute inset-0 ${roundedClass} border border-transparent transition-opacity duration-300 z-30 opacity-0 group-hover/vector-card:opacity-100`}
+        className={`pointer-events-none absolute inset-0 ${roundedClass} border border-transparent transition-opacity duration-300 z-20 opacity-0 group-hover/vector-card:opacity-100`}
         style={{
           background: `radial-gradient(240px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), ${getBorderRing(glowColor, isDark)}, transparent 80%) border-box`
         }}

@@ -291,10 +291,6 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
       {/* ── DRAGGABLE CAROUSEL TRACK ──────────────────────────────────── */}
       <div
         className="relative overflow-hidden cursor-grab active:cursor-grabbing py-2"
-        style={{
-          WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 24px, black calc(100% - 32px), transparent 100%)',
-          maskImage: 'linear-gradient(to right, transparent 0%, black 24px, black calc(100% - 32px), transparent 100%)'
-        }}
         onMouseDown={onMouseDown}
         onTouchStart={onTouchStart}
       >
@@ -302,7 +298,7 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
         {/* Scrolling track */}
         <div
           ref={trackRef}
-          className={cn("flex will-change-transform", isMobile ? "gap-3 pl-5 pr-5 pb-1" : "gap-6 pl-6")}
+          className={cn("flex will-change-transform", isMobile ? "gap-3 px-4 pb-1" : "gap-6 px-10 py-2")}
           style={{ width: `${totalWidth}px` }}
         >
           {items.map((video, idx) => {

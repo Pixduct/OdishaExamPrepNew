@@ -8063,7 +8063,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           <Compass className="absolute bottom-28 right-[6%] w-36 h-36 text-indigo-600 opacity-[0.08] stroke-[1.2] -rotate-12" />
         </div>
 
-        <div className="w-full mx-auto space-y-6 sm:space-y-10 pt-2 sm:pt-4 pb-32 sm:pb-24 relative z-10">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-10 pt-2 sm:pt-4 pb-32 sm:pb-24 relative z-10">
           <YouTubeCarousel videoIds={globalVideoIds} />
         
         {isAdmin && (

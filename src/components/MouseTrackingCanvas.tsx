@@ -53,10 +53,10 @@ export const MouseTrackingCanvas: React.FC = () => {
         className="absolute top-0 left-0 w-[500px] h-[500px] -ml-[250px] -mt-[250px] rounded-full transition-opacity duration-700 blur-[75px] will-change-transform"
         style={{
           transform: 'translate3d(-500px, -500px, 0)',
-          opacity: isDark ? 0.16 : 0.03,
+          opacity: isDark ? 0.16 : 0.08,
           background: isDark
             ? 'radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, rgba(37, 99, 235, 0.18) 45%, transparent 70%)'
-            : 'radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(37, 99, 235, 0.05) 45%, transparent 70%)'
+            : 'radial-gradient(circle, rgba(37, 99, 235, 0.18) 0%, rgba(99, 102, 241, 0.08) 45%, transparent 70%)'
         }}
       />
     </div>

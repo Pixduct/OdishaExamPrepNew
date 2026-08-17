@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { useTheme } from '../lib/themeStore';
 
 interface DynamicVectorCardProps {
   children: React.ReactNode;
@@ -20,6 +21,8 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
   style = {}
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
+  const [theme] = useTheme();
+  const isDark = theme === 'dark';
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current || (typeof document !== 'undefined' && document.body.classList.contains('is-scrolling'))) return;
@@ -56,6 +59,10 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
     }
   };
 
+  // Derive light mode low-opacity halo and border ring matching card theme color
+  const lightColorHalo = glowColor.replace(/[\d\.]+\)$/, '0.07)');
+  const lightBorderRing = glowColor.replace(/[\d\.]+\)$/, '0.35)');
+
   return (
     <div
       ref={cardRef}
@@ -72,32 +79,40 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
       }}
       className={`relative ${roundedClass} ${className} group/vector-card transition-transform duration-200 ease-out [.is-card-hovered_&]:[transform:perspective(1000px)_rotateX(var(--rotate-x,0deg))_rotateY(var(--rotate-y,0deg))_scale3d(1.015,1.015,1.015)]`}
     >
-      {/* 1. Base Children Content Layer */}
-      {children}
-
-      {/* 2. Dynamic Cursor Surface Light Spotlight Overlay */}
+      {/* 1. Dynamic Cursor Surface Light Spotlight Overlay (Layered behind z-10 children) */}
       <div
-        className={`pointer-events-none absolute inset-0 ${roundedClass} transition-opacity duration-300 z-20 overflow-hidden opacity-0 group-hover/vector-card:opacity-100`}
+        className={`pointer-events-none absolute inset-0 ${roundedClass} transition-opacity duration-300 z-0 overflow-hidden opacity-0 group-hover/vector-card:opacity-100`}
         style={{
-          background: `radial-gradient(360px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), ${glowColor}, transparent 75%)`
+          background: isDark
+            ? `radial-gradient(360px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), ${glowColor}, transparent 75%)`
+            : `radial-gradient(320px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.90) 0%, ${lightColorHalo} 55%, transparent 80%)`
         }}
       />
 
-      {/* 3. Subtle Ambient Light Flare Layer */}
+      {/* 2. Ambient Flare Layer */}
       <div
-        className={`pointer-events-none absolute inset-0 ${roundedClass} transition-opacity duration-300 z-20 overflow-hidden opacity-0 group-hover/vector-card:opacity-30`}
+        className={`pointer-events-none absolute inset-0 ${roundedClass} transition-opacity duration-300 z-0 overflow-hidden opacity-0 group-hover/vector-card:opacity-30`}
         style={{
-          background: `radial-gradient(260px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), ${glowColor}, transparent 70%)`
+          background: isDark
+            ? `radial-gradient(260px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), ${glowColor}, transparent 70%)`
+            : `radial-gradient(240px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), ${lightColorHalo}, transparent 70%)`
         }}
       />
 
-      {/* 4. High-Precision Cursor Border Illumination Ring */}
+      {/* 3. High-Precision Cursor Border Illumination Ring */}
       <div
-        className={`pointer-events-none absolute inset-0 ${roundedClass} border border-transparent transition-opacity duration-300 z-30 opacity-0 group-hover/vector-card:opacity-100`}
+        className={`pointer-events-none absolute inset-0 ${roundedClass} border border-transparent transition-opacity duration-300 z-0 opacity-0 group-hover/vector-card:opacity-100`}
         style={{
-          background: `radial-gradient(240px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), ${glowColor.replace(/[\d\.]+\)$/, '0.6)')}, transparent 80%) border-box`
+          background: isDark
+            ? `radial-gradient(240px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), ${glowColor.replace(/[\d\.]+\)$/, '0.6)')}, transparent 80%) border-box`
+            : `radial-gradient(240px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), ${lightBorderRing}, transparent 80%) border-box`
         }}
       />
+
+      {/* 4. Base Children Content Layer (z-10 guarantees dark text stays 100% crisp & un-shadowed in Light Mode) */}
+      <div className="relative z-10 w-full h-full">
+        {children}
+      </div>
     </div>
   );
 };

@@ -549,8 +549,8 @@ const HistoryView = ({
         className="w-full mx-auto space-y-6 sm:space-y-8 pb-32 sm:pb-24 relative z-10"
       >
         {/* Executive Bright Study Vector Header Card */}
-        <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)">
-          <div className="p-6 sm:p-8 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none rounded-3xl sm:rounded-[2.5rem] relative overflow-hidden z-10">
+        <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.30)">
+          <div className="p-6 sm:p-8 bg-white/88 dark:bg-slate-900/88 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none rounded-3xl sm:rounded-[2.5rem] relative overflow-hidden z-10">
             {/* Radial Grid & Floating Header Watermark */}
             <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none" />
             <History className="absolute -right-8 -bottom-8 w-52 h-52 sm:w-64 sm:h-64 opacity-10 dark:opacity-15 stroke-[1.2] text-brand-600 dark:text-indigo-300 pointer-events-none rotate-12" />
@@ -717,7 +717,7 @@ const HistoryView = ({
                         : a.title;
 
                     return (
-                      <DynamicVectorCard key={a.id || i} glowColor="rgba(37, 99, 235, 0.08)" className="w-full">
+                      <DynamicVectorCard key={a.id || i} glowColor="rgba(37, 99, 235, 0.28)" className="w-full">
                         <motion.div
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -3883,16 +3883,19 @@ const ScheduledMockTestCard = ({ test, onLaunchMockTest }: any) => {
       whileTap={isScheduledUpcoming ? undefined : whileTap.press}
       className="w-full h-full"
     >
+      <DynamicVectorCard
+        roundedClass="rounded-2xl"
+        glowColor="rgba(99, 102, 241, 0.28)"
+        className="w-full h-full"
+        onClick={() => { if (!isScheduledUpcoming) onLaunchMockTest(test); }}
+      >
       <div
         className={cn(
-          "group premium-shine-container relative bg-white rounded-2xl border p-5 transition-[background-color,border-color,box-shadow] duration-500 flex flex-col justify-between gap-4 overflow-hidden h-full",
+          "group relative bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl border p-5 transition-[background-color,border-color,box-shadow] duration-500 flex flex-col justify-between gap-4 overflow-hidden h-full",
           isScheduledUpcoming
             ? "border-amber-200/90 bg-amber-50/20 cursor-not-allowed"
-            : "border-slate-200/60 hover:bg-white hover:border-brand-300 hover:shadow-2xl hover:shadow-brand-500/20 cursor-pointer"
+            : "border-slate-200/60 hover:border-brand-300 cursor-pointer"
         )}
-        onClick={() => {
-          if (!isScheduledUpcoming) onLaunchMockTest(test);
-        }}
       >
         <div className="flex items-start gap-4 relative z-10">
           <div 
@@ -3968,6 +3971,7 @@ const ScheduledMockTestCard = ({ test, onLaunchMockTest }: any) => {
           </button>
         )}
       </div>
+      </DynamicVectorCard>
     </motion.div>
   );
 };
@@ -4130,20 +4134,23 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
           </div>
         </div>
       ) : (
-        <Card 
+        <DynamicVectorCard
+          roundedClass="rounded-[1.5rem]"
+          glowColor="rgba(99, 102, 241, 0.28)"
+          className="w-full h-full cv-card-auto"
+          onClick={() => { if (!isScheduledUpcoming) handleStartDirectPractice(bank); }}
+        >
+        <div
           className={cn(
-            "p-6 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 border border-slate-200/80 dark:border-indigo-500/20 shadow-lg shadow-slate-200/30 dark:shadow-indigo-950/20 rounded-[1.5rem] transition-all duration-500 flex flex-col justify-between gap-6 relative overflow-hidden premium-shine-container h-full text-slate-900 dark:text-white cv-card-auto", 
+            "p-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-200/80 dark:border-indigo-500/20 shadow-lg shadow-slate-200/30 dark:shadow-indigo-950/20 rounded-[1.5rem] transition-all duration-300 flex flex-col justify-between gap-6 relative overflow-hidden h-full text-slate-900 dark:text-white cv-card-auto",
             isScheduledUpcoming
-              ? "border-amber-200 dark:border-amber-800 bg-amber-50/10 dark:bg-amber-950/20 cursor-not-allowed"
+              ? "border-amber-200 dark:border-amber-800 cursor-not-allowed"
               : isCompleted
-                ? "border-emerald-200 dark:border-emerald-800 shadow-emerald-500/5 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10 hover:border-emerald-300 cursor-pointer"
+                ? "border-emerald-200 dark:border-emerald-800 cursor-pointer"
                 : isInProgress
-                  ? "border-amber-250 dark:border-amber-800 shadow-amber-500/5 hover:-translate-y-2 hover:shadow-2xl hover:shadow-amber-500/10 hover:border-amber-300 cursor-pointer"
-                  : "border-slate-200 dark:border-indigo-500/20 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 hover:-translate-y-2 hover:shadow-2xl hover:shadow-brand-500/10 hover:border-brand-200 cursor-pointer"
+                  ? "border-amber-250 dark:border-amber-800 cursor-pointer"
+                  : "border-slate-200 dark:border-indigo-500/20 cursor-pointer"
           )}
-          onClick={() => {
-            if (!isScheduledUpcoming) handleStartDirectPractice(bank);
-          }}
         >
           <div className="flex items-start justify-between relative z-10 w-full">
             <div className="flex items-start gap-4 min-w-0 flex-1">
@@ -4279,7 +4286,8 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
               </span>
             </Button>
           )}
-        </Card>
+        </div>
+        </DynamicVectorCard>
       )}
 
       <AttemptPerformanceModal
@@ -8185,7 +8193,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   );
 
                   return (
-                    <DynamicVectorCard key={i} glowColor="rgba(37, 99, 235, 0.12)" roundedClass="rounded-2xl" className="snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px]">
+                    <DynamicVectorCard key={i} glowColor="rgba(37, 99, 235, 0.28)" roundedClass="rounded-2xl" className="snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px]">
                       <motion.div
                         initial={{ opacity: 0, y: 15, scale: 0.96 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -8322,7 +8330,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400'
                     : 'bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400';
                   return (
-                    <DynamicVectorCard key={i} glowColor="rgba(37, 99, 235, 0.12)" roundedClass="rounded-2xl" className="snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px]">
+                    <DynamicVectorCard key={i} glowColor="rgba(37, 99, 235, 0.28)" roundedClass="rounded-2xl" className="snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px]">
                       <motion.div
                         initial={{ opacity: 0, y: 15, scale: 0.96 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -8522,7 +8530,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         >
                           {isMobile ? (
                             // Sleek Premium Mobile Row Item
-                            <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)" roundedClass="rounded-2xl" className="w-full">
+                            <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.28)" roundedClass="rounded-2xl" className="w-full">
                               <div className="p-3.5 bg-white dark:bg-slate-900/90 border border-slate-100/90 dark:border-slate-800 rounded-2xl flex flex-row items-center justify-between gap-3.5 relative shadow-[0_4px_16px_rgba(0,0,0,0.035)] active:scale-[0.98] active:border-brand-300 transition-all duration-300 overflow-hidden">
                                 {/* Inner Vector Grid Overlay */}
                                 <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />

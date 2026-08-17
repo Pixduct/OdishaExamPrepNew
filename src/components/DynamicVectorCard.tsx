@@ -41,14 +41,14 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
   const isDark = theme === 'dark';
 
   // Ambient layer config  ─ large soft spread (physics: indirect bounce light)
-  const ambientRadius  = isDark ? 480 : 420;
-  const ambientAlpha   = isDark ? 0.30 : 0.13;
+  const ambientRadius  = isDark ? 500 : 440;
+  const ambientAlpha   = isDark ? 0.45 : 0.20;
 
   // Specular hotspot config  ─ tight bright core (physics: direct point-light on glass)
-  const hotAlpha  = isDark ? 0.18 : 0.22;
+  const hotAlpha  = isDark ? 0.28 : 0.32;
 
   // Rim border config  ─ glowing card edge
-  const rimAlpha  = isDark ? 0.75 : 0.55;
+  const rimAlpha  = isDark ? 0.90 : 0.70;
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const card = cardRef.current;

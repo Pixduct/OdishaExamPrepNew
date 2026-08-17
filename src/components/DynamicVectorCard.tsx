@@ -40,15 +40,14 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
   const [theme] = useTheme();
   const isDark = theme === 'dark';
 
-  // Ambient layer config  ─ large soft spread (physics: indirect bounce light)
-  const ambientRadius  = isDark ? 520 : 460;
-  const ambientAlpha   = isDark ? 0.60 : 0.28;
-
-  // Specular hotspot config  ─ tight bright core (physics: direct point-light on glass)
-  const hotAlpha  = isDark ? 0.40 : 0.45;
+  // Ambient layer config  ─ wide soft spread with bright cursor-center (physics: frosted glass backlit)
+  const ambientRadius  = isDark ? 550 : 480;
+  // Core stop (0%), mid-fade (40%), transparent edge (100%)
+  const coreAlpha  = isDark ? 0.55 : 0.30;  // bright at exact cursor
+  const midAlpha   = isDark ? 0.22 : 0.10;  // soft mid-ring
 
   // Rim border config  ─ glowing card edge
-  const rimAlpha  = isDark ? 1.0 : 0.85;
+  const rimAlpha  = isDark ? 0.95 : 0.75;
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const card = cardRef.current;
@@ -63,22 +62,13 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
     const pctX = Math.max(0, Math.min(100, (pxX / rect.width) * 100));
     const pctY = Math.max(0, Math.min(100, (pxY / rect.height) * 100));
 
-    // ── Ambient Layer ──────────────────────────────────────────────
+    // ── Ambient + Cursor Warmth (single merged layer) ─────────────
     if (ambientRef.current) {
       ambientRef.current.style.background =
         `radial-gradient(${ambientRadius}px circle at ${pctX.toFixed(1)}% ${pctY.toFixed(1)}%,` +
-        ` ${withAlpha(glowColor, ambientAlpha)} 0%,` +
-        ` ${withAlpha(glowColor, ambientAlpha * 0.45)} 45%,` +
-        ` transparent 75%)`;
-    }
-
-    // ── Specular Hotspot ───────────────────────────────────────────
-    if (hotspotRef.current) {
-      hotspotRef.current.style.background =
-        `radial-gradient(130px circle at ${pctX.toFixed(1)}% ${pctY.toFixed(1)}%,` +
-        ` rgba(255,255,255,${hotAlpha}) 0%,` +
-        ` ${withAlpha(glowColor, hotAlpha * 0.6)} 40%,` +
-        ` transparent 70%)`;
+        ` ${withAlpha(glowColor, coreAlpha)} 0%,` +
+        ` ${withAlpha(glowColor, midAlpha)} 40%,` +
+        ` transparent 72%)`;
     }
 
     // ── Rim Border Glow ────────────────────────────────────────────
@@ -105,7 +95,7 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
       });
       card.classList.add('is-card-hovered');
     }
-  }, [isDark, glowColor, ambientRadius, ambientAlpha, hotAlpha, rimAlpha, enableTilt]);
+  }, [isDark, glowColor, ambientRadius, coreAlpha, midAlpha, rimAlpha, enableTilt]);
 
   const handleMouseLeave = useCallback(() => {
     const card = cardRef.current;
@@ -147,15 +137,9 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
       }}
       className={`relative isolate ${roundedClass} ${className} group/vector-card transition-transform duration-200 ease-out [.is-card-hovered_&]:[transform:perspective(1000px)_rotateX(var(--rotate-x,0deg))_rotateY(var(--rotate-y,0deg))_scale3d(1.015,1.015,1.015)]`}
     >
-      {/* ── Layer A: Ambient spread  (z-0, behind content) ─────────── */}
+      {/* ── Layer A: Ambient + cursor warmth (z-0, behind content) ───── */}
       <div
         ref={ambientRef}
-        style={{ ...layerBase, zIndex: 0, overflow: 'hidden' }}
-      />
-
-      {/* ── Layer B: Specular hot-spot  (z-0, behind content) ──────── */}
-      <div
-        ref={hotspotRef}
         style={{ ...layerBase, zIndex: 0, overflow: 'hidden' }}
       />
 

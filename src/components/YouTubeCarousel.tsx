@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { modalBackdrop, modalContent } from '../lib/animations';
 import { cn } from '../lib/utils';
 import { useTheme } from '../lib/themeStore';
+import { DynamicVectorCard } from './DynamicVectorCard';
 
 const AUTO_SPEED = 0.6;  // px per animation frame (~36px/s at 60fps)
 const RESUME_DELAY_MS = 2000; // ms after last user interaction before auto-scroll resumes
@@ -230,6 +231,11 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
   if (sourceVideos.length === 0) return null;
 
   return (
+    <DynamicVectorCard
+      glowColor="rgba(37, 99, 235, 0.28)"
+      roundedClass="rounded-[2rem] sm:rounded-[2.5rem]"
+      className="w-full select-none"
+    >
     <div ref={containerRef} className="w-full relative py-3 sm:py-12 overflow-hidden bg-[#F2EFE9] dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-[2rem] sm:rounded-[2.5rem] shadow-[6px_6px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_rgba(0,0,0,1)] select-none">
       {/* Editorial Decorative Grid overlay — desktop only */}
       {!isMobile && <div className="absolute inset-0 grid-bg opacity-[0.02] pointer-events-none" />}
@@ -308,18 +314,23 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
           {items.map((video, idx) => {
             const catStyle = categoryColours[video.category] ?? defaultCatStyle;
             return (
-              <div
+              <DynamicVectorCard
                 key={`${video.id}-${idx}`}
+                glowColor="rgba(37, 99, 235, 0.28)"
+                roundedClass="rounded-2xl"
+                className="shrink-0"
+                style={{ width: cardWidth }}
                 onClick={() => {
                   if (!isDragging.current) setActiveVideo(video.id);
                 }}
+              >
+              <div
                 className={cn(
-                  "relative shrink-0 rounded-2xl overflow-hidden border-2 border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-900 group/video transition-all cursor-pointer flex flex-col",
+                  "relative w-full h-full shrink-0 rounded-2xl overflow-hidden border-2 border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-900 group/video transition-all cursor-pointer flex flex-col",
                   isMobile
                     ? "shadow-[3px_3px_0px_rgba(0,0,0,0.85)] dark:shadow-[3px_3px_0px_rgba(37,99,235,0.4)] active:shadow-[1px_1px_0px_rgba(0,0,0,0.85)] active:translate-x-[2px] active:translate-y-[2px]"
                     : "shadow-[4px_4px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)] md:hover:-translate-x-0.5 md:hover:-translate-y-0.5 md:hover:shadow-[6px_6px_0px_rgba(37,99,235,0.4)]"
                 )}
-                style={{ width: cardWidth }}
               >
                 {/* Thumbnail with aspect ratio */}
                 <div className={cn(
@@ -400,6 +411,7 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
                   </div>
                 </div>
               </div>
+              </DynamicVectorCard>
             );
           })}
         </div>
@@ -428,22 +440,18 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
             >
               {/* Modal Window Header Bar */}
               <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 bg-slate-900 border-b border-slate-800/90 shrink-0">
-                <div className="flex items-center gap-3 min-w-0 pr-4">
-                  <div className="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20 flex items-center justify-center shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500">
                     <Youtube className="w-4 h-4 fill-rose-500 text-rose-500" />
                   </div>
-                  <h3 className="text-xs sm:text-sm md:text-base font-extrabold text-slate-100 truncate font-serif tracking-tight">
-                    {sourceVideos.find(v => v.id === activeVideo)?.title || 'OdishaExamPrep Video Lecture'}
-                  </h3>
+                  <span className="font-extrabold text-sm text-white tracking-tight">Strategy Lecture Video</span>
                 </div>
-
-                {/* Integrated Close Button */}
                 <button
+                  type="button"
                   onClick={() => setActiveVideo(null)}
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-800/80 hover:bg-rose-600 text-slate-400 hover:text-white transition-all duration-200 flex items-center justify-center shrink-0 border border-slate-700/60 active:scale-95 cursor-pointer shadow-sm"
-                  title="Close Video"
+                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 >
-                  <X className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
@@ -464,5 +472,6 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
         )}
       </AnimatePresence>
     </div>
+    </DynamicVectorCard>
   );
 }

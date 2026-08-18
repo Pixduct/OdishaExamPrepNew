@@ -56,6 +56,7 @@
 - [x] Home Tab 120 FPS Zero-Cost GPU Card Optimization: Eliminated `WebkitMaskComposite: xor` and `mix-blend-soft-light` from `DynamicVectorCard.tsx` across 20+ cards, promoted ambient blur spheres to hardware compositor layers (`transform: translateZ(0)`), and added vector card scroll guard lock (`src/components/DynamicVectorCard.tsx`, `src/App.tsx`, `src/index.css`)
 - [x] Card Slicing & Vertical Line Clipping Resolution: Removed `w-24` / `w-8` edge overlay divs in `YouTubeCarousel.tsx` and removed `.cv-auto` GPU containment wrappers in `App.tsx` and `index.css`, completely eliminating card clipping lines (`YouTubeCarousel.tsx`, `App.tsx`, `index.css`)
 - [x] Under-Text Glassmorphism Cursor Lighting Engine: Placed radial cursor spotlight & specular glass sheen layers at `z-0` underneath `<div className="relative z-10">{children}</div>`, elevated text, avatars, badges, rankings, and buttons to `relative z-10`, and applied translucent glass card backgrounds (`bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl`), ensuring cursor light shines **underneath** text and UI elements for zero reading difficulty and a modern glassmorphic look (`src/components/DynamicVectorCard.tsx`, `src/components/OdishaLeaderboardCard.tsx`, `src/components/AIStudyPlanCard.tsx`, `src/components/PersonalBestCard.tsx`)
+- [x] Telegram AI Model Usage Reporting & GitHub Actions Workflow Reliability Audit (All 7 workflows audited, secret mappings updated, Pexels API key connected, and Playwright browser caching optimized)
 
 
 

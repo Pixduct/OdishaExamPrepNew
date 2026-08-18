@@ -261,7 +261,7 @@ import { SearchableSelect } from '../components/SearchableSelect';
 - **Category:** Media / Carousel
 - **Purpose:** Renders an infinite, auto-scrolling strategy video carousel with dynamic YouTube oEmbed title resolution, keyword category tagging, and an integrated modal video player window.
 - **Props:** `videoIds` (`string[]`, optional).
-- **Last Updated:** August 16, 2026
+- **Last Updated:** August 18, 2026
 
 | Property | Class / Token |
 | :--- | :--- |

@@ -9415,9 +9415,9 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               className={cn(
-                "relative rounded-2xl sm:rounded-[2.2rem] text-white p-4 sm:p-8 md:p-10 shadow-2xl border transition-all duration-500 card-3d-deep group mb-6 sm:mb-10",
+                "relative rounded-2xl sm:rounded-[2.2rem] text-white p-4 sm:p-8 md:p-10 shadow-2xl border border-white/10 transition-all duration-500 card-3d-deep group mb-6 sm:mb-10",
                 recVecTheme.gradient,
-                "border-white/20 shadow-slate-950/30"
+                "shadow-slate-950/30"
               )}
             >
               {/* Inner Watermark & Grid Background Wrapper */}
@@ -9504,9 +9504,9 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               className={cn(
-                "relative rounded-2xl sm:rounded-[2.2rem] text-white p-4 sm:p-8 md:p-10 shadow-2xl border transition-all duration-500 card-3d-deep group mb-6 sm:mb-10",
+                "relative rounded-2xl sm:rounded-[2.2rem] text-white p-4 sm:p-8 md:p-10 shadow-2xl border border-white/10 transition-all duration-500 card-3d-deep group mb-6 sm:mb-10",
                 recVecTheme.gradient,
-                "border-white/20 shadow-slate-950/30"
+                "shadow-slate-950/30"
               )}
             >
               {/* Inner Watermark & Grid Background Wrapper */}
@@ -9981,7 +9981,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         ) : (
                           <div 
                             className={cn(
-                              "p-6 sm:p-7 lg:p-8 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative h-full border border-white/20 shadow-slate-950/20 card-3d-deep",
+                              "p-6 sm:p-7 lg:p-8 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative h-full border border-white/10 shadow-slate-950/20 card-3d-deep",
                               vecTheme.gradient
                             )}
                             onClick={() => {
@@ -10236,7 +10236,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       ) : (
                         <div 
                           className={cn(
-                            "p-6 sm:p-7 lg:p-8 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative h-full border border-white/20 shadow-slate-950/20 card-3d-deep",
+                            "p-6 sm:p-7 lg:p-8 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative h-full border border-white/10 shadow-slate-950/20 card-3d-deep",
                             vecTheme.gradient
                           )}
                           onClick={() => {
@@ -10550,7 +10550,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     <div
                       onClick={() => setSelectedBankType(item.id)}
                       className={cn(
-                        "p-5 sm:p-6 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-5 relative h-full border border-white/20 shadow-slate-950/20 card-3d-deep min-h-[260px]",
+                        "p-5 sm:p-6 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-5 relative h-full border border-white/10 shadow-slate-950/20 card-3d-deep min-h-[260px]",
                         vecTheme.gradient
                       )}
                     >

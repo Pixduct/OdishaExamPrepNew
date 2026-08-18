@@ -135,7 +135,7 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
         willChange:           'transform',
         ...style
       }}
-      className={`relative isolate ${roundedClass} ${className} group/vector-card transition-transform duration-200 ease-out [.is-card-hovered_&]:[transform:perspective(1000px)_rotateX(var(--rotate-x,0deg))_rotateY(var(--rotate-y,0deg))_scale3d(1.015,1.015,1.015)]`}
+      className={`relative isolate ${roundedClass} ${className} group/vector-card transition-transform duration-200 ease-out [&.is-card-hovered]:[transform:perspective(1000px)_rotateX(var(--rotate-x,0deg))_rotateY(var(--rotate-y,0deg))_scale3d(1.015,1.015,1.015)]`}
     >
       {/* ── Layer A: Ambient + cursor warmth (z-0, behind content) ───── */}
       <div

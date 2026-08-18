@@ -9421,7 +9421,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               )}
             >
               {/* Inner Watermark & Grid Background Wrapper */}
-              <div className="absolute inset-0 overflow-hidden rounded-2xl sm:rounded-[2.2rem] pointer-events-none z-0">
+              <div className="absolute inset-0 pointer-events-none z-0 rounded-2xl sm:rounded-[2.2rem] [clip-path:inset(0_round_2.2rem)]">
                 <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
                 <RecWatermarkIcon className="absolute -right-6 -bottom-6 w-48 h-48 sm:w-64 sm:h-64 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
               </div>
@@ -9510,7 +9510,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               )}
             >
               {/* Inner Watermark & Grid Background Wrapper */}
-              <div className="absolute inset-0 overflow-hidden rounded-2xl sm:rounded-[2.2rem] pointer-events-none z-0">
+              <div className="absolute inset-0 pointer-events-none z-0 rounded-2xl sm:rounded-[2.2rem] [clip-path:inset(0_round_2.2rem)]">
                 <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
                 <RecWatermarkIcon className="absolute -right-6 -bottom-6 w-48 h-48 sm:w-64 sm:h-64 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
               </div>
@@ -9990,7 +9990,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                             }}
                           >
                             {/* Inner Watermark & Grid Background Wrapper */}
-                            <div className="absolute inset-0 overflow-hidden rounded-[2.2rem] pointer-events-none z-0">
+                            <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.2rem] [clip-path:inset(0_round_2.2rem)]">
                               <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:14px_14px]" />
                               <WatermarkIcon className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
                             </div>
@@ -10245,7 +10245,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           }}
                         >
                           {/* Inner Watermark & Grid Background Wrapper */}
-                          <div className="absolute inset-0 overflow-hidden rounded-[2.2rem] pointer-events-none z-0">
+                          <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.2rem] [clip-path:inset(0_round_2.2rem)]">
                             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:14px_14px]" />
                             <WatermarkIcon className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
                           </div>
@@ -10555,7 +10555,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       )}
                     >
                       {/* Inner Watermark & Grid Background Wrapper */}
-                      <div className="absolute inset-0 overflow-hidden rounded-[2.2rem] pointer-events-none z-0">
+                      <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.2rem] [clip-path:inset(0_round_2.2rem)]">
                         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:14px_14px]" />
                         <WatermarkIcon className="absolute -right-6 -bottom-6 w-40 h-40 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
                       </div>

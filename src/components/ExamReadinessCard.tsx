@@ -51,7 +51,7 @@ export const ExamReadinessCard: React.FC<ExamReadinessCardProps> = ({
           className="p-5 sm:p-7 text-slate-900 dark:text-white rounded-[2.2rem] bg-white dark:bg-slate-900 border-none shadow-xl shadow-slate-900/10 relative group"
         >
           {/* Inner Watermark & Grid Background Wrapper */}
-          <div className="absolute inset-0 overflow-hidden rounded-[2.2rem] pointer-events-none z-0">
+          <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.2rem] [clip-path:inset(0_round_2.2rem)]">
             <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-10" />
             <Gauge className="absolute -right-8 -bottom-8 w-52 h-52 opacity-10 dark:opacity-15 stroke-[1.2] text-[#2563eb] dark:text-indigo-300 transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
             <div className="absolute -right-20 -top-20 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl" />

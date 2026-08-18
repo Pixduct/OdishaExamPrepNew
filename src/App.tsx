@@ -63,7 +63,11 @@ import {
   Building2,
   PieChart,
   Calculator,
-  GraduationCap
+  GraduationCap,
+  Wrench,
+  HardHat,
+  Cpu,
+  Sprout
 } from 'lucide-react';
 import { Toaster, toast, useToasterStore } from 'react-hot-toast';
 import { useAuth } from './lib/AuthContext';
@@ -89,145 +93,316 @@ import { QuestionBankReaderModal } from './components/QuestionBankReaderModal';
 import { exportQuestionBankToPdf } from './lib/pdfExportEngine';
 import { PdfExportGuideModal } from './components/PdfExportGuideModal';
 
-const getQuestionBankVectorTheme = (title: string = '', category: string = '') => {
-  const t = (title + ' ' + (category || '')).toLowerCase();
-  
-  if (t.includes('anatom') || t.includes('nurs') || t.includes('health') || t.includes('medic') || t.includes('pharm') || t.includes('biolog') || t.includes('pathol') || t.includes('doctor') || t.includes('physiol') || t.includes('pediatr') || t.includes('microbio')) {
+const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName: string = '') => {
+  let title = '';
+  let category = '';
+  let explicitSubject = '';
+  let examId = '';
+
+  if (typeof itemInput === 'string') {
+    title = itemInput;
+    category = fallbackExamName || '';
+  } else if (itemInput && typeof itemInput === 'object') {
+    title = itemInput.title || '';
+    category = itemInput.category || '';
+    examId = itemInput.examId || '';
+
+    if (itemInput.tagline && typeof itemInput.tagline === 'string') {
+      try {
+        const parsed = JSON.parse(itemInput.tagline);
+        if (parsed?.subject && typeof parsed.subject === 'string') {
+          explicitSubject = parsed.subject.trim();
+        }
+      } catch (e) {
+        if (!itemInput.tagline.startsWith('{')) {
+          explicitSubject = itemInput.tagline.trim();
+        }
+      }
+    }
+  }
+
+  // Resolve dynamic exam name tag
+  let resolvedExamTag = '';
+  if (fallbackExamName && fallbackExamName.trim()) {
+    resolvedExamTag = fallbackExamName.trim().toUpperCase();
+  } else if (examId) {
+    resolvedExamTag = String(examId).replace(/-/g, ' ').toUpperCase();
+  } else {
+    resolvedExamTag = 'ALL ODISHA & CENTRAL GOVT EXAMS';
+  }
+
+  const t = (title + ' ' + (explicitSubject || '') + ' ' + (category || '')).toLowerCase();
+
+  // 1. Civil & Structural Engineering
+  if (
+    t.includes('civil') || t.includes('fluid') || t.includes('structure') || t.includes('concrete') ||
+    t.includes('highway') || t.includes('survey') || t.includes('soil') || t.includes('foundation') ||
+    t.includes('hydraul') || t.includes('building material') || t.includes('construction') ||
+    t.includes('estimation') || t.includes('steel') || t.includes('rcc') || t.includes('som') ||
+    t.includes('pollution') || t.includes('environmental engineering') || t.includes('sanitary') ||
+    t.includes('irrigation') || t.includes('mechanics of solids') || t.includes('strength of material') ||
+    t.includes('geotechnical') || t.includes('transportation')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-blue-900 via-slate-900 to-indigo-950 text-blue-50',
+      badgeBg: 'bg-blue-400/20 text-blue-200 border-blue-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'CIVIL ENGINEERING',
+      examTag: resolvedExamTag,
+      MainIcon: HardHat,
+      WatermarkIcon: Building2,
+    };
+  } 
+  // 2. Mechanical Engineering
+  else if (
+    t.includes('mechanic') || t.includes('thermo') || t.includes('manufacturing') ||
+    t.includes('tom') || t.includes('machine design') || t.includes('automobile') ||
+    t.includes('ic engine') || t.includes('refrigeration') || t.includes('cad') || t.includes('cam') ||
+    t.includes('welding') || t.includes('workshop') || t.includes('fluid machinery') ||
+    t.includes('power plant') || t.includes('heat transfer')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-amber-900 via-slate-900 to-stone-950 text-amber-50',
+      badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'MECHANICAL ENGINEERING',
+      examTag: resolvedExamTag,
+      MainIcon: Wrench,
+      WatermarkIcon: Settings,
+    };
+  } 
+  // 3. Electrical & Electronics Engineering
+  else if (
+    t.includes('electric') || t.includes('circuit') || t.includes('power system') ||
+    t.includes('electromagnet') || t.includes('transformer') || t.includes('generator') ||
+    t.includes('motor') || t.includes('control system') || t.includes('switchgear') ||
+    t.includes('analog') || t.includes('digital electronics') || t.includes('microprocessor') ||
+    t.includes('signal') || t.includes('semiconductor') || t.includes('vlsi') || t.includes('sensor')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-cyan-900 via-slate-900 to-indigo-950 text-cyan-50',
+      badgeBg: 'bg-cyan-400/20 text-cyan-200 border-cyan-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'ELECTRICAL & ELECTRONICS',
+      examTag: resolvedExamTag,
+      MainIcon: Cpu,
+      WatermarkIcon: Zap,
+    };
+  } 
+  // 4. Healthcare, Nursing & Medical
+  else if (
+    t.includes('anatom') || t.includes('nurs') || t.includes('health') || t.includes('medic') ||
+    t.includes('pharm') || t.includes('biolog') || t.includes('pathol') || t.includes('doctor') ||
+    t.includes('physiol') || t.includes('pediatr') || t.includes('microbio') || t.includes('surgery') ||
+    t.includes('pharmacology') || t.includes('obstetric') || t.includes('community health')
+  ) {
     return {
       gradient: 'bg-gradient-to-br from-teal-700 via-emerald-800 to-slate-950 text-teal-50',
       badgeBg: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
-      badgeText: 'HEALTHCARE & NURSING SPECIAL',
-      examTag: 'OSSSC NURSING • AIIMS • ANM / GNM • DHS',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'HEALTHCARE & NURSING SPECIAL',
+      examTag: resolvedExamTag,
       MainIcon: Activity,
       WatermarkIcon: HeartPulse,
     };
-  } else if (t.includes('comput') || t.includes('code') || t.includes('tech') || t.includes('data') || t.includes('cyber') || t.includes('it ') || t.includes('software') || t.includes('program') || t.includes('network') || t.includes('excel') || t.includes('dbms')) {
+  } 
+  // 5. Computer Knowledge & IT
+  else if (
+    t.includes('comput') || t.includes('code') || t.includes('tech') || t.includes('data') ||
+    t.includes('cyber') || t.includes('it ') || t.includes('software') || t.includes('program') ||
+    t.includes('network') || t.includes('excel') || t.includes('dbms') || t.includes('sql') ||
+    t.includes('operating system') || t.includes('hardware') || t.includes('internet')
+  ) {
     return {
       gradient: 'bg-gradient-to-br from-cyan-800 via-blue-900 to-slate-950 text-cyan-50',
       badgeBg: 'bg-cyan-400/20 text-cyan-200 border-cyan-400/40',
-      badgeText: 'COMPUTER KNOWLEDGE & IT',
-      examTag: 'OSSC CGL • OSSSC CTSRE • RRB • SSC',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'COMPUTER KNOWLEDGE & IT',
+      examTag: resolvedExamTag,
       MainIcon: Code,
       WatermarkIcon: Laptop,
     };
-  } else if (t.includes('odisha') || t.includes('opsc') || t.includes('ossc') || t.includes('osssc') || t.includes('kalinga') || t.includes('utkal') || t.includes('puri') || t.includes('bhubaneswar')) {
+  } 
+  // 6. Odisha GK & Governance
+  else if (
+    t.includes('odisha') || t.includes('opsc') || t.includes('ossc') || t.includes('osssc') ||
+    t.includes('kalinga') || t.includes('utkal') || t.includes('puri') || t.includes('bhubaneswar') ||
+    t.includes('cuttack') || t.includes('jagannath') || t.includes('odisha history') || t.includes('odisha geography')
+  ) {
     return {
       gradient: 'bg-gradient-to-br from-amber-700 via-amber-800 to-orange-950 text-amber-50',
       badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
-      badgeText: 'ODISHA STATE GK & GOVERNANCE',
-      examTag: 'OPSC OAS • OSSC CGL • OSSSC RI / AMIN',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'ODISHA GK & GOVERNANCE',
+      examTag: resolvedExamTag,
       MainIcon: MapPin,
       WatermarkIcon: Building2,
     };
-  } else if (t.includes('math') || t.includes('aptitud') || t.includes('quant') || t.includes('arithmet') || t.includes('algebr') || t.includes('geomet') || t.includes('calculus') || t.includes('number system') || t.includes('percentage') || t.includes('ratio')) {
+  } 
+  // 7. Quantitative Aptitude & Math
+  else if (
+    t.includes('math') || t.includes('aptitud') || t.includes('quant') || t.includes('arithmet') ||
+    t.includes('algebr') || t.includes('geomet') || t.includes('calculus') || t.includes('number system') ||
+    t.includes('percentage') || t.includes('ratio') || t.includes('trigonometr') || t.includes('mensuration')
+  ) {
     return {
       gradient: 'bg-gradient-to-br from-indigo-800 via-purple-900 to-slate-950 text-purple-50',
       badgeBg: 'bg-purple-400/20 text-purple-200 border-purple-400/40',
-      badgeText: 'QUANTITATIVE APTITUDE',
-      examTag: 'SSC CGL • BANKING PO / CLERK • RAILWAYS',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'QUANTITATIVE APTITUDE',
+      examTag: resolvedExamTag,
       MainIcon: PieChart,
       WatermarkIcon: Calculator,
     };
-  } else if (t.includes('reason') || t.includes('logic') || t.includes('analytical') || t.includes('puzzle') || t.includes('syllogism') || t.includes('seating') || t.includes('mental ability')) {
+  } 
+  // 8. Reasoning & Mental Ability
+  else if (
+    t.includes('reason') || t.includes('logic') || t.includes('analytical') || t.includes('puzzle') ||
+    t.includes('syllogism') || t.includes('seating') || t.includes('mental ability') || t.includes('analogy') ||
+    t.includes('blood relation') || t.includes('direction') || t.includes('coding decoding')
+  ) {
     return {
       gradient: 'bg-gradient-to-br from-purple-800 via-violet-950 to-slate-950 text-purple-50',
       badgeBg: 'bg-purple-400/20 text-purple-200 border-purple-400/40',
-      badgeText: 'REASONING & MENTAL ABILITY',
-      examTag: 'SSC CGL • IBPS PO • OSSC CGL • RAILWAYS',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'REASONING & MENTAL ABILITY',
+      examTag: resolvedExamTag,
       MainIcon: Target,
       WatermarkIcon: Zap,
     };
-  } else if (t.includes('odia') || t.includes('sahitya') || t.includes('vyakaran') || t.includes('bhasa')) {
+  } 
+  // 9. Odia Language & Sahitya
+  else if (t.includes('odia') || t.includes('sahitya') || t.includes('vyakaran') || t.includes('bhasa') || t.includes('shabda')) {
     return {
       gradient: 'bg-gradient-to-br from-orange-700 via-amber-900 to-slate-950 text-orange-50',
       badgeBg: 'bg-orange-400/20 text-orange-200 border-orange-400/40',
-      badgeText: 'ODIA LANGUAGE & VYAKARAN',
-      examTag: 'OSSSC RI / ARI / AMIN • OSSC CGL • OPSC',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'ODIA LANGUAGE & VYAKARAN',
+      examTag: resolvedExamTag,
       MainIcon: Award,
       WatermarkIcon: BookOpen,
     };
-  } else if (t.includes('english') || t.includes('grammar') || t.includes('vocab') || t.includes('comprehension') || t.includes('synonym') || t.includes('antonym')) {
+  } 
+  // 10. English Language & Comprehension
+  else if (t.includes('english') || t.includes('grammar') || t.includes('vocab') || t.includes('comprehension') || t.includes('synonym') || t.includes('antonym') || t.includes('idiom')) {
     return {
       gradient: 'bg-gradient-to-br from-blue-800 via-indigo-950 to-slate-950 text-blue-50',
       badgeBg: 'bg-blue-400/20 text-blue-200 border-blue-400/40',
-      badgeText: 'ENGLISH LANGUAGE & COMPREHENSION',
-      examTag: 'SSC CGL • BANKING IBPS • OSSC CGL',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'ENGLISH LANGUAGE & COMPREHENSION',
+      examTag: resolvedExamTag,
       MainIcon: FileText,
       WatermarkIcon: BookOpen,
     };
-  } else if (t.includes('polity') || t.includes('constitution') || t.includes('law') || t.includes('judiciary') || t.includes('court') || t.includes('amendment') || t.includes('parliament')) {
+  } 
+  // 11. Indian Polity, Constitution & Law
+  else if (t.includes('polity') || t.includes('constitution') || t.includes('law') || t.includes('judiciary') || t.includes('court') || t.includes('amendment') || t.includes('parliament') || t.includes('crpc') || t.includes('ipc')) {
     return {
       gradient: 'bg-gradient-to-br from-amber-800 via-yellow-950 to-slate-950 text-amber-50',
       badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
-      badgeText: 'INDIAN POLITY & CONSTITUTION',
-      examTag: 'UPSC • OPSC OAS • OSSC • SSC CGL',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'INDIAN POLITY & CONSTITUTION',
+      examTag: resolvedExamTag,
       MainIcon: Scale,
       WatermarkIcon: Building2,
     };
-  } else if (t.includes('histor') || t.includes('ancient') || t.includes('medieval') || t.includes('modern') || t.includes('freedom') || t.includes('heritage') || t.includes('culture')) {
+  } 
+  // 12. Indian History & Freedom Movement
+  else if (t.includes('histor') || t.includes('ancient') || t.includes('medieval') || t.includes('modern') || t.includes('freedom') || t.includes('heritage') || t.includes('culture') || t.includes('national movement')) {
     return {
       gradient: 'bg-gradient-to-br from-orange-800 via-amber-950 to-slate-950 text-orange-50',
       badgeBg: 'bg-orange-400/20 text-orange-200 border-orange-400/40',
-      badgeText: 'INDIAN HISTORY & HERITAGE',
-      examTag: 'UPSC • OPSC OAS • SSC CGL • RAILWAYS',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'INDIAN HISTORY & HERITAGE',
+      examTag: resolvedExamTag,
       MainIcon: Compass,
       WatermarkIcon: Building2,
     };
-  } else if (t.includes('geograph') || t.includes('environment') || t.includes('ecolog') || t.includes('climate') || t.includes('river') || t.includes('forest') || t.includes('ocean')) {
+  } 
+  // 13. Geography & Ecology
+  else if (t.includes('geograph') || t.includes('environment') || t.includes('ecolog') || t.includes('climate') || t.includes('river') || t.includes('forest') || t.includes('ocean') || t.includes('wildlife') || t.includes('national park')) {
     return {
       gradient: 'bg-gradient-to-br from-emerald-800 via-teal-950 to-slate-950 text-emerald-50',
       badgeBg: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
-      badgeText: 'GEOGRAPHY & ENVIRONMENT',
-      examTag: 'UPSC • OPSC OAS • FOREST GUARD • SSC',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'GEOGRAPHY & ENVIRONMENT',
+      examTag: resolvedExamTag,
       MainIcon: Globe,
       WatermarkIcon: Compass,
     };
-  } else if (t.includes('econom') || t.includes('finance') || t.includes('banking') || t.includes('rbi') || t.includes('budget') || t.includes('gdp') || t.includes('market')) {
+  } 
+  // 14. Indian Economy & Commerce
+  else if (t.includes('econom') || t.includes('finance') || t.includes('banking') || t.includes('rbi') || t.includes('budget') || t.includes('gdp') || t.includes('market') || t.includes('commerce') || t.includes('accountancy') || t.includes('audit')) {
     return {
       gradient: 'bg-gradient-to-br from-emerald-700 via-slate-900 to-slate-950 text-emerald-50',
       badgeBg: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
-      badgeText: 'INDIAN ECONOMY & BANKING',
-      examTag: 'RBI GRADE B • IBPS PO • SBI PO • UPSC',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'INDIAN ECONOMY & COMMERCE',
+      examTag: resolvedExamTag,
       MainIcon: Receipt,
       WatermarkIcon: TrendingUp,
     };
-  } else if (t.includes('science') || t.includes('physic') || t.includes('chemistr') || t.includes('space') || t.includes('isro') || t.includes('drdo') || t.includes('atom')) {
+  } 
+  // 15. Agriculture & Allied Sciences
+  else if (t.includes('agri') || t.includes('crop') || t.includes('horticult') || t.includes('farming') || t.includes('agronomy') || t.includes('soil science')) {
+    return {
+      gradient: 'bg-gradient-to-br from-emerald-800 via-green-950 to-slate-950 text-emerald-50',
+      badgeBg: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'AGRICULTURE & ALLIED SCIENCES',
+      examTag: resolvedExamTag,
+      MainIcon: Sprout,
+      WatermarkIcon: Compass,
+    };
+  } 
+  // 16. General Science & Tech
+  else if (t.includes('science') || t.includes('physic') || t.includes('chemistr') || t.includes('space') || t.includes('isro') || t.includes('drdo') || t.includes('atom') || t.includes('inventions')) {
     return {
       gradient: 'bg-gradient-to-br from-violet-800 via-indigo-950 to-slate-950 text-violet-50',
       badgeBg: 'bg-violet-400/20 text-violet-200 border-violet-400/40',
-      badgeText: 'GENERAL SCIENCE & TECH',
-      examTag: 'RRB NTPC • GROUP D • OSSC CGL • SSC',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'GENERAL SCIENCE & TECH',
+      examTag: resolvedExamTag,
       MainIcon: Zap,
       WatermarkIcon: Sparkles,
     };
-  } else if (t.includes('police') || t.includes('sub inspector') || t.includes('si ') || t.includes('constable') || t.includes('defence') || t.includes('army') || t.includes('navy') || t.includes('airforce') || t.includes('nda') || t.includes('cds')) {
+  } 
+  // 17. Defence & Police (strict check)
+  else if (
+    (t.includes('police') || t.includes('sub inspector') || t.includes('constable') || t.includes('defence') || t.includes('army') || t.includes('navy') || t.includes('airforce') || t.includes('nda') || t.includes('cds')) &&
+    !t.includes('mechanic') && !t.includes('civil') && !t.includes('engineering')
+  ) {
     return {
       gradient: 'bg-gradient-to-br from-slate-800 via-amber-950 to-slate-950 text-amber-50',
       badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
-      badgeText: 'DEFENCE & POLICE EXAMS',
-      examTag: 'ODISHA POLICE SI • CONSTABLE • NDA • CDS',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'DEFENCE & POLICE EXAMS',
+      examTag: resolvedExamTag,
       MainIcon: ShieldCheck,
       WatermarkIcon: Target,
     };
-  } else if (t.includes('teach') || t.includes('pedagog') || t.includes('otet') || t.includes('osstet') || t.includes('ctet') || t.includes('b.ed') || t.includes('tgt') || t.includes('pgt')) {
+  } 
+  // 18. Teaching & Pedagogy
+  else if (t.includes('teach') || t.includes('pedagog') || t.includes('otet') || t.includes('osstet') || t.includes('ctet') || t.includes('b.ed') || t.includes('tgt') || t.includes('pgt')) {
     return {
       gradient: 'bg-gradient-to-br from-indigo-700 via-blue-900 to-slate-950 text-indigo-50',
       badgeBg: 'bg-indigo-400/20 text-indigo-200 border-indigo-400/40',
-      badgeText: 'TEACHING & PEDAGOGY',
-      examTag: 'OTET • OSSTET • CTET • OPSC LECTURER',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'TEACHING & PEDAGOGY',
+      examTag: resolvedExamTag,
       MainIcon: BookOpen,
       WatermarkIcon: Award,
     };
-  } else {
+  } 
+  // 19. Clean fallback
+  else {
     return {
       gradient: 'bg-gradient-to-br from-slate-800 via-indigo-900 to-slate-950 text-indigo-50',
       badgeBg: 'bg-indigo-400/20 text-indigo-200 border-indigo-400/40',
-      badgeText: 'GENERAL KNOWLEDGE & PYQ',
-      examTag: 'ALL ODISHA & CENTRAL GOVT EXAMS',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'CHAPTER PRACTICE BANK',
+      examTag: resolvedExamTag,
       MainIcon: Globe,
       WatermarkIcon: BookOpen,
     };
   }
+};
+
+const getBankDisplayTagline = (tagline: any, defaultText: string = 'Comprehensive') => {
+  if (!tagline) return defaultText;
+  if (typeof tagline === 'string') {
+    if (tagline.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(tagline);
+        return parsed.text || parsed.subject || defaultText;
+      } catch (e) {
+        return tagline;
+      }
+    }
+    return tagline;
+  }
+  return defaultText;
 };
 
 const getPracticeModeVectorTheme = (modeId: string) => {
@@ -5698,8 +5873,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     </div>
                     <div className="p-3 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md shadow-sm">
                       <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Highlight</p>
-                      <p className="text-[10px] font-black text-brand-400 line-clamp-2 leading-tight" title={selectedBankItem.tagline || "Comprehensive"}>
-                        {selectedBankItem.tagline || "Comprehensive"}
+                      <p className="text-[10px] font-black text-brand-400 line-clamp-2 leading-tight" title={getBankDisplayTagline(selectedBankItem.tagline, "Comprehensive")}>
+                        {getBankDisplayTagline(selectedBankItem.tagline, "Comprehensive")}
                       </p>
                     </div>
                   </div>
@@ -5745,8 +5920,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         </div>
                         <div className="p-3 bg-white dark:bg-slate-800/90 border border-slate-200/60 dark:border-slate-700/60 rounded-2xl shadow-sm">
                           <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Highlight</p>
-                          <p className="text-[10px] font-black text-[#2563EB] dark:text-brand-400 line-clamp-2 leading-tight" title={selectedBankItem.tagline || "Comprehensive"}>
-                            {selectedBankItem.tagline || "Comprehensive"}
+                          <p className="text-[10px] font-black text-[#2563EB] dark:text-brand-400 line-clamp-2 leading-tight" title={getBankDisplayTagline(selectedBankItem.tagline, "Comprehensive")}>
+                            {getBankDisplayTagline(selectedBankItem.tagline, "Comprehensive")}
                           </p>
                         </div>
                       </div>
@@ -8857,7 +9032,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             >
           {items.map((item) => {
             const isLocked = item.isPremium && !hasAccessTo(item);
-            const vecTheme = getQuestionBankVectorTheme(item.title, item.category);
+            const vecTheme = getQuestionBankVectorTheme(item, currentExam?.name);
             const VecMainIcon = vecTheme.MainIcon;
             const VecWatermarkIcon = vecTheme.WatermarkIcon;
 
@@ -8924,13 +9099,13 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         <div className="flex items-center gap-1.5 mt-1.5 text-[11px] font-bold text-slate-455 dark:text-slate-300 flex-wrap">
                           <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-100/50 dark:border-slate-700">
                             <FileText className="w-3 h-3 text-slate-400" />
-                            {item.questionCount || item.questions} Qs
+                            {(item.questionCount || (Array.isArray(item.questions) ? item.questions.length : 0))} Qs
                           </span>
                           
-                          {item.tagline && (
+                          {getBankDisplayTagline(item.tagline, '') && (
                             <span className="flex items-center gap-0.5 bg-brand-50/50 dark:bg-indigo-950/60 text-brand-650 dark:text-indigo-300 px-1.5 py-0.5 rounded border border-brand-100/20 dark:border-indigo-800 text-[9.5px] font-black uppercase tracking-wider">
                               <Zap className="w-2.5 h-2.5 fill-brand-650 text-brand-650 shrink-0" />
-                              {item.tagline}
+                              {getBankDisplayTagline(item.tagline, '')}
                             </span>
                           )}
                         </div>
@@ -8992,9 +9167,13 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           <span className="line-clamp-1">{vecTheme.examTag}</span>
                         </div>
                         <div className="text-[10.5px] text-white/75 font-semibold tracking-wide flex items-center gap-1">
-                          <span>{item.questionCount || item.questions || 250} Practice Questions</span>
+                          <span>
+                            {(item.questionCount || (Array.isArray(item.questions) ? item.questions.length : 0)) > 0
+                              ? `${item.questionCount || item.questions.length} Practice Questions`
+                              : 'Chapter Practice Bank'}
+                          </span>
                           <span>•</span>
-                          <span>Answer Key</span>
+                          <span>Answer Key & Solutions</span>
                         </div>
                       </div>
                       
@@ -9427,7 +9606,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             handleStartDirectPractice(targetTest, incompleteActivity);
           };
 
-          const recVecTheme = getQuestionBankVectorTheme(recTitle, recCategoryPill);
+          const recVecTheme = getQuestionBankVectorTheme(testTitle || recTitle, currentExam?.name || recCategoryPill);
           const RecWatermarkIcon = recVecTheme.WatermarkIcon;
 
           return (
@@ -9516,7 +9695,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             handleStartDirectPractice(firstTopicBank);
           };
 
-          const recVecTheme = getQuestionBankVectorTheme(recTitle, recCategoryPill);
+          const recVecTheme = getQuestionBankVectorTheme(firstTopicBank || cleanBankTitle, currentExam?.name || recCategoryPill);
           const RecWatermarkIcon = recVecTheme.WatermarkIcon;
 
           return (

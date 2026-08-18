@@ -2015,6 +2015,44 @@ Last updated: August 18, 2026
 - **Isolated Fieldset Elevation**: Enclosed within a muted rounded container (`bg-slate-100/60 border border-slate-200/80 rounded-3xl p-6`) to visually differentiate temporal lifecycle controls from static content and pricing fields.
 - **Icon Anchored**: Uses `Calendar` with brand blue accent (`text-brand-600`) in the section heading to maintain visual alignment with other admin modular panels.
 
+---
+
+### 43. `QuestionBankMobileReader` (Edge-to-Edge Responsive Reader)
+
+File: [`src/components/QuestionBankReaderModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/QuestionBankReaderModal.tsx)
+Last updated: August 18, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Mobile Modal Outer** | `fixed inset-0 z-[120] flex items-center justify-center overflow-hidden bg-slate-950/85 backdrop-blur-md p-0 sm:p-4 md:p-6` |
+| **Mobile Modal Panel** | `w-full h-full sm:h-[92vh] sm:max-h-[920px] sm:max-w-5xl rounded-none sm:rounded-[2rem] border-0 sm:border border-slate-200/80 dark:border-slate-800 pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]` |
+| **Mobile Top App Bar** | `px-3.5 sm:px-8 py-2.5 sm:py-4 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-xl` |
+| **Mobile Back Button** | `sm:hidden p-2 -ml-1 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-800 active:scale-90` |
+| **Mobile PDF Action** | `px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-brand-600 text-white text-xs font-black` |
+| **Collapsible Filter Strip** | `px-3.5 sm:px-8 py-2.5 sm:py-3 border-b border-slate-200/60 dark:border-slate-800/80` with horizontal scroll chips |
+| **Mobile Question Item** | `p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800` |
+| **Option Touch Targets** | `p-2.5 sm:p-3 rounded-xl border text-left text-xs sm:text-sm active:scale-[0.99]` with `w-5.5 h-5.5 sm:w-6 sm:h-6` badges |
+| **Mobile Bottom Bar** | `px-3.5 sm:px-8 py-2.5 sm:py-3.5 bg-slate-50/95 dark:bg-slate-900/95 border-t border-slate-200/80 dark:border-slate-800 text-[11px] sm:text-xs` |
+
+**Pattern notes:**
+- **Full-Bleed Native Transition**: On mobile devices (`< sm`), outer padding and card borders are stripped to deliver an edge-to-edge native reading experience without floating margins or clipped viewports.
+- **Adaptive App Bar**: Desktop window controls (Fullscreen and top-right close button) are replaced with a mobile-native left Back arrow button and a compact `PDF` action pill.
+- **Thumb Ergonomics**: Touch targets and solution accordions are scaled down in padding (`p-4` vs `p-7`) to maximize visible questions on screen while keeping option tap targets above 44px height.
+- **100% Full-Width Question Architecture**: Question numbering is rendered on a dedicated top metadata row (`Q. 01`, `Q. 02`) with padded indices, allowing the question body, KaTeX formulas, tables, and diagrams to occupy 100% full width without left-side blank indentation.
+- **True Hardware Fullscreen API Integration**: Fullscreen toggle uses `document.documentElement.requestFullscreen()` and `document.exitFullscreen()`, hiding browser address bar, tabs, and OS taskbars. Native `fullscreenchange` event listeners auto-sync state with keyboard shortcuts (`Esc`).
+- **Dynamic Wide Canvas Fullscreen Scaling**: In Fullscreen mode, the reading canvas expands to `max-w-7xl` (~1400px), card padding increases to `p-7 md:p-9`, question typography scales to `text-base md:text-xl font-bold`, option tiles expand to `p-4.5` with `w-8 h-8` letter badges, and header elements dynamically resize for widescreen laptop displays.
+- **Precision 4-Section Grid Alignment**: In windowed modal mode, all sections align within `max-w-5xl`. In Fullscreen mode, the Top App Bar, Sub-Header Toolbar, and Footer Status Bar span 100% full-bleed across the screen, anchoring elements cleanly to the physical left and right corners (`px-4 sm:px-6 md:px-8`).
+- **High-Capacity Scale Architecture (1,000–2,000+ Questions)**: Chunked 50-question batched sets with previous/next set pagination, direct `"Jump to Q#"` form input, auto-resume banner restoring the student's exact last practiced position, persistent 1-click star bookmarks with a dedicated `⭐️ Saved (N)` filter chip, and real-time progress mastery bar (`src/components/QuestionBankReaderModal.tsx`).
+- **Symmetric PDF Print Engine**: Executive single-block branding header, unified A4 margins (`12mm 14mm`), full-width 2-column option grid with 0 left offset, discrete page-break control, 5-column answer key summary table, and promotional footer (`src/lib/pdfExportEngine.ts`).
+- **Dynamic Domain Vector Cover & SVG Texture Engine**: Over 35 specialized academic/engineering sub-disciplines (e.g. Wastewater & Sanitary, Water Supply & Hydraulics, Environmental, Geotechnical, Highway, Concrete/RCC, Surveying, Fluid Mechanics, Structural Analysis, Thermal, Electrical, Electronics, CS/IT, Law, Medical, Agronomy). Equipped with procedural SVG textures (`hydro-waves`, `sanitary-flow`, `blueprint-grid`, `topographic`, `circuit-matrix`, `orbital-rings`, `hex-mesh`, `heritage-arch`), dynamic active exam binding, and intelligent titlecased fallback (`src/lib/vectorCoverThemes.tsx`, `src/App.tsx`).
+
+
+
+
+
+
+
+
 
 
 

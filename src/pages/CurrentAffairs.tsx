@@ -154,7 +154,15 @@ export const CurrentAffairsPage: React.FC = () => {
           </div>
 
           {/* Category Filter Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+          <div 
+            data-lenis-prevent
+            onWheel={(e) => {
+              if (e.deltaY !== 0) {
+                e.currentTarget.scrollLeft += e.deltaY * 0.85;
+              }
+            }}
+            className="flex items-center gap-2 overflow-x-auto overscroll-contain touch-pan-x pb-2 no-scrollbar"
+          >
             {categories.map((cat, idx) => {
               const Icon = cat.icon;
               const isSelected = selectedCategory === cat.value;
@@ -187,10 +195,10 @@ export const CurrentAffairsPage: React.FC = () => {
               <h3 className="text-base font-extrabold text-slate-800">No Current Affairs Found</h3>
               <p className="text-xs text-slate-500">Try adjusting your category filter, date, or search query.</p>
               <button
-                onClick={() => { setSelectedCategory('All'); setSearchQuery(''); setSelectedDate(''); }}
-                className="px-4 py-2 bg-brand-600 text-white font-bold text-xs rounded-xl shadow-xs"
+                onClick={() => { setSelectedCategory('All'); setSearchQuery(''); setSelectedDate(''); setTimePreset('all'); }}
+                className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
               >
-                Reset All Filters
+                Reset All Filters & View All Archives
               </button>
             </div>
           ) : (

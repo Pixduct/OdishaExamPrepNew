@@ -1,35 +1,41 @@
-# Memory — Card Slicing & Edge Fade Resolution (v7.7.0)
+# Memory — Telegram AI Model Reporting & GitHub Actions Workflow Optimization
 
-Last updated: 2026-08-16T15:21:00+05:30
+Last updated: 2026-08-18T10:45:00+05:30
 
 ## What was built
 
-### 1. Card Slicing & Vertical Line Clipping Resolution (`src/components/YouTubeCarousel.tsx`, `src/App.tsx`, `src/index.css`)
-- **Removed Opaque Overlay Divs:** Removed the `w-24` and `w-8` solid `#F2EFE9` / `#0f172a` overlay `div`s from `YouTubeCarousel.tsx` that sat on top of the carousel track and drew hard vertical lines across cards as they scrolled beneath.
-- **Removed GPU Layout Containment (`.cv-auto`):** Removed `.cv-auto` (`content-visibility: auto`) wrappers in `src/App.tsx` and `src/index.css` that caused Chromium GPU paint containment clipping on card drop shadows, borders, and horizontal scroll tracks.
+### 1. Telegram AI Model Usage Reporting Across All 6 Automation Engines
+- **Transparent AI Reporting:** Updated all 6 python automation scripts (`ca_formatter.py`, `ca_publisher.py`, `breaking_engine.py`, `engagement_engine.py`, `seo_blog_engine.py`, `exam_update_engine.py`) and `shared/telegram.py` to track and report the exact model used.
+- **Admin Alerts:** Every Telegram admin notification now clearly shows whether the primary model or fallback model was used:
+  - `🤖 AI Model: ✅ PRIMARY — nvidia/nemotron-3-super-120b-a12b`
+  - `🤖 AI Model: ⚠️ FALLBACK — openai/gpt-oss-120b`
 
-### 2. Smooth Card-Revealing Edge-Fade Mask Engine (`src/components/YouTubeCarousel.tsx`, `src/App.tsx`)
-- **`YouTubeCarousel` Full-Card Clearance & Alpha Mask:** Applied CSS `maskImage` / `-webkit-mask-image: linear-gradient(to right, transparent 0%, black 24px, black calc(100% - 32px), transparent 100%)` to `YouTubeCarousel.tsx` and updated track padding to `px-6 sm:px-10 py-3` matching the header padding (`px-10`), guaranteeing 100% full-card, border, and 3D shadow clearance without right-wall clipping.
-- **`Continue Practice` & `Recent Activity` Card Revealing Masks:** Added smooth CSS alpha-mask gradients to both `continuePracticeRef` and `recentActivityRef` horizontal scroll tracks in `src/App.tsx`, restoring the soft "card-revealing smoke" fade effect as cards enter and exit the viewport edges.
+### 2. GitHub Actions Workflow Reliability Audit & Timeout Fixes
+- **`daily_ca_website.yml` & `ca_website_publisher.py`:** Resolved GitHub Actions timeout cancellation `(!)` by adding an 8-item batch cap (`MAX_ITEMS_PER_RUN = 8`), a 10-minute script runtime guard (`MAX_RUN_TIME_SECONDS = 600`), reducing AI API timeouts from 90s to 40s, and extending workflow timeout to 30 minutes.
+- **Standardized Permissions:** Added `permissions: contents: write` across all 7 workflow files to ensure automated git history commits never fail with HTTP 403.
+- **Complete Secret Mappings:** Mapped `PEXELS_API_KEY`, `NVIDIA_NEMOTRON_KEY`, `NVIDIA_GPT_OSS_KEY`, and `DEEPSEEK_API_KEY` across all workflows that fetch stock images or run dual-model AI failover.
+- **History Sync for `daily_mcq.yml`:** Added automated `Commit and Push Updated History` step to `daily_mcq.yml` so MCQ deduplication records persist across runs.
+- **Playwright Browser Cache Optimization:** Updated `daily_ca.yml`, `daily_mcq.yml`, and `engagement_engine.yml` with `cache-hit` checks (`if [ "$CACHE_HIT" != "true" ]`), skipping the 150MB Chromium download when cached and saving 30–45s per run.
 
-### 3. Imprinted Design Registry & Progress Tracker (`context/ui-registry.md`, `context/progress-tracker.md`)
-- **UI Registry Entry Updated:** Updated `YouTubeCarousel` (#7) in `context/ui-registry.md` with exact track padding (`px-6 sm:px-10 py-3`), full-card clearance rules, and `maskImage` edge-fade specifications.
-- **Progress Tracker Logged:** Recorded completed tasks in `context/progress-tracker.md`.
+### 3. GitHub Actions Runtime & Quota Audit
+- **30-Day Budget Analysis:** Verified that all 7 workflows combined consume ~982.5 minutes/month, staying well under the 2,000 free minute quota for private repositories (and 0 cost if public).
 
 ## Decisions made
-- **Alpha Masking over Solid Overlays:** Use CSS `maskImage` alpha transparency directly on scroll track containers instead of fixed-width solid color overlay `div`s, eliminating hard background color blocks while providing a smooth 24px–32px edge fade.
-- **Header-Track Padding Synchronization:** Match `YouTubeCarousel` track padding (`px-6 sm:px-10`) with the header padding (`px-10`) so the rightmost card sits with 40px clearance from the outer container's `rounded-[2.5rem]` curved border.
+- **Dual-Model Reporting:** Always pass `model_used` and `used_fallback` into Telegram `details` dictionaries to provide full visibility into AI execution.
+- **Script-Level Runtime Guards:** Place 10-minute execution limits inside Python processing loops so scripts exit cleanly and save history to Git before workflow timeout limits trigger.
+- **Conditional Browser Caching:** Use `actions/cache@v4` for Playwright Chromium binaries with explicit `cache-hit` checks to maximize workflow execution speed.
 
 ## Problems solved
-- **Card Slicing & Invisible Line Defect:** Fixed the issue where cards in `YouTubeCarousel` and horizontal activity rows were being sliced in half or cut off by overlay `div`s and GPU `content-visibility: auto` containment boundaries.
-- **Right-Edge Card Clipping:** Fixed right-side card clipping in `YouTubeCarousel` by adding `px-10` track padding and removing hard outer overflow walls.
+- **Workflow Timeout Cancellation `(!)`:** Fixed the issue where `daily_ca_website.yml` timed out at 15 minutes and was cancelled by GitHub Actions due to un-capped processing loops.
+- **Missing Secrets in Workflows:** Restored missing `PEXELS_API_KEY` and `NVIDIA_NEMOTRON_KEY` mappings in workflow files.
+- **MCQ History Persistence:** Resolved missing history sync step in `daily_mcq.yml`.
 
 ## Current state
-- 100% clean production build verified (`npx tsc --noEmit` completed with 0 errors).
-- All changes committed to Git repository (`c59fb63`, `4aaa677`, `4203306`, `7d2288b`, `48c2df6`).
+- 100% clean Python syntax verified (`py_compile` exit code 0 across all automation scripts).
+- All changes committed and pushed to GitHub (`Pixduct/odisha-mcq-engine` and `Pixduct/OdishaExamPrepNew`).
 
 ## Next session starts with
-- Assist the user with any new feature requests, page layout updates, or administrative enhancements.
+- Assist the user with any new feature requests, automation monitoring, or UI enhancements.
 
 ## Open questions
 - None.

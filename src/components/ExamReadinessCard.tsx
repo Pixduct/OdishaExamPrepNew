@@ -48,7 +48,7 @@ export const ExamReadinessCard: React.FC<ExamReadinessCardProps> = ({
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-5 sm:p-7 text-slate-900 dark:text-white rounded-[2.2rem] bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none relative group"
+          className="p-5 sm:p-7 text-slate-900 dark:text-white rounded-[2.2rem] bg-white dark:bg-slate-900 border-none shadow-xl shadow-slate-900/10 relative group"
         >
           {/* Inner Watermark & Grid Background Wrapper */}
           <div className="absolute inset-0 overflow-hidden rounded-[2.2rem] pointer-events-none z-0">

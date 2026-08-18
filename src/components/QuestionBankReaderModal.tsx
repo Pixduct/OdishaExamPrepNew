@@ -232,6 +232,7 @@ export const QuestionBankReaderModal: React.FC<QuestionBankReaderModalProps> = (
   const [expandedExplanations, setExpandedExplanations] = useState<Record<number, boolean>>({});
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isToolsExpanded, setIsToolsExpanded] = useState(true);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const modalScrollRef = useRef<HTMLDivElement | null>(null);
 
   // Modal Lenis Kinetic Scroll Engine — Match main website smooth scroll physics
@@ -379,21 +380,26 @@ export const QuestionBankReaderModal: React.FC<QuestionBankReaderModalProps> = (
     }));
   }, []);
 
-  const handleDownloadPdf = () => {
-    if (!bank) return;
+  const handleDownloadPdf = async () => {
+    if (!bank || isGeneratingPdf) return;
     if (!hasAccess && onUnlockRequired) {
       onUnlockRequired();
       return;
     }
 
-    exportQuestionBankToPdf({
-      title: bank.title,
-      subtitle: bankMeta.subtitle,
-      subject: bankMeta.subject,
-      examName: examName,
-      totalQuestions: questions.length,
-      questions: questions
-    });
+    setIsGeneratingPdf(true);
+    try {
+      await exportQuestionBankToPdf({
+        title: bank.title,
+        subtitle: bankMeta.subtitle,
+        subject: bankMeta.subject,
+        examName: examName,
+        totalQuestions: questions.length,
+        questions: questions
+      });
+    } finally {
+      setIsGeneratingPdf(false);
+    }
   };
 
   if (!isOpen || !bank) return null;
@@ -462,11 +468,21 @@ export const QuestionBankReaderModal: React.FC<QuestionBankReaderModalProps> = (
               <button
                 type="button"
                 onClick={handleDownloadPdf}
-                className="flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-95 text-white text-xs font-black tracking-wide shadow-md shadow-brand-500/20 transition-all cursor-pointer"
+                disabled={isGeneratingPdf}
+                className="flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-95 disabled:opacity-80 disabled:cursor-wait text-white text-xs font-black tracking-wide shadow-md shadow-brand-500/20 transition-all cursor-pointer"
                 title="Download Question Bank PDF Booklet"
               >
-                <Download className="w-4 h-4" />
-                <span className="hidden sm:inline">Download PDF</span>
+                {isGeneratingPdf ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Saving PDF...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4" />
+                    <span className="hidden sm:inline">Download PDF</span>
+                  </>
+                )}
               </button>
 
               <button

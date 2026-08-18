@@ -36,7 +36,7 @@ export const PersonalBestCard: React.FC<PersonalBestCardProps> = ({ userId }) =>
 
   return (
     <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.28)">
-      <div className="p-5 sm:p-7 text-slate-900 dark:text-white rounded-[2.2rem] bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl border border-slate-200/80 dark:border-amber-500/20 shadow-xl shadow-slate-200/50 dark:shadow-amber-950/20 space-y-4 relative group">
+      <div className="p-5 sm:p-7 text-slate-900 dark:text-white rounded-[2.2rem] bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl border-none shadow-xl shadow-slate-900/10 space-y-4 relative group">
         {/* Inner Watermark & Grid Background Wrapper */}
         <div className="absolute inset-0 overflow-hidden rounded-[2.2rem] pointer-events-none z-0">
           <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-10" />

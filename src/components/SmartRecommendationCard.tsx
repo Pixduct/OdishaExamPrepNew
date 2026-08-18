@@ -47,7 +47,7 @@ export const SmartRecommendationCard: React.FC<SmartRecommendationCardProps> = (
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="p-5 sm:p-7 text-white rounded-[2.2rem] bg-gradient-to-br from-slate-950 via-teal-950 to-slate-900 border border-teal-500/30 shadow-xl shadow-teal-950/20 relative group"
+        className="p-5 sm:p-7 text-white rounded-[2.2rem] bg-gradient-to-br from-slate-950 via-teal-950 to-slate-900 border-none shadow-xl shadow-teal-950/20 relative group"
       >
         {/* Inner Watermark & Grid Background Wrapper */}
         <div className="absolute inset-0 overflow-hidden rounded-[2.2rem] pointer-events-none z-0">

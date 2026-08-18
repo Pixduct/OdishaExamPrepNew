@@ -748,6 +748,26 @@ Last updated: 2026-07-26
 
 ---
 
+### 45. `DirectClientPdfExportEngine`
+
+File: [`src/lib/pdfExportEngine.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/pdfExportEngine.ts), [`src/components/QuestionBankReaderModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/QuestionBankReaderModal.tsx)
+Last updated: August 18, 2026
+
+| Property | Implementation Pattern |
+| :--- | :--- |
+| **PDF Compilation** | `html2pdf().set(opt).from(pdfContainer).save()` |
+| **Canvas Options** | `scale: 2, useCORS: true, letterRendering: true, windowWidth: 800` |
+| **Document Geometry** | `unit: 'mm', format: 'a4', orientation: 'portrait', margin: [12, 12, 14, 12]` |
+| **Auto File Naming** | `${cleanTitle} - OdishaExamPrep.pdf` directly saved to client Downloads |
+| **Page Break Avoidance** | `pagebreak: { mode: ['avoid-all', 'css', 'legacy'], avoid: ['.question-card', '.title-card', '.promotional-footer-card', '.hero-banner'] }` |
+| **Button Loading Indicator** | `isGeneratingPdf` spinner with `"Saving PDF..."` state |
+
+**Pattern notes:**
+- **Zero Print Spooler Lag**: Bypasses the native OS print screen and Windows `spoolsv.exe` completely, eliminating the blank file name dialog and saving the `.pdf` file with 1 single click.
+- **Full Vector & LaTeX Integrity**: KaTeX formulas, SVG logo marks, and hyperlink annotations are compiled in memory without browser header/footer leaks.
+
+---
+
 ### 21. `AttemptPerformanceModal` (Attempt Performance & Progress Detail Overlay)
 
 File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)

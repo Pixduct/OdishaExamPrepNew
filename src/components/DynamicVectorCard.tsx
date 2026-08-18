@@ -33,8 +33,6 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
 }) => {
   const cardRef      = useRef<HTMLDivElement>(null);
   const ambientRef   = useRef<HTMLDivElement>(null);
-  const hotspotRef   = useRef<HTMLDivElement>(null);
-  const rimRef       = useRef<HTMLDivElement>(null);
   const isHovered    = useRef(false);
 
   const [theme] = useTheme();
@@ -45,9 +43,6 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
   // Core stop (0%), mid-fade (40%), transparent edge (100%)
   const coreAlpha  = isDark ? 0.55 : 0.30;  // bright at exact cursor
   const midAlpha   = isDark ? 0.22 : 0.10;  // soft mid-ring
-
-  // Rim border config  ─ glowing card edge
-  const rimAlpha  = isDark ? 0.95 : 0.75;
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const card = cardRef.current;
@@ -71,14 +66,6 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
         ` transparent 72%)`;
     }
 
-    // ── Rim Border Glow ────────────────────────────────────────────
-    if (rimRef.current) {
-      rimRef.current.style.background =
-        `radial-gradient(220px circle at ${pctX.toFixed(1)}% ${pctY.toFixed(1)}%,` +
-        ` ${withAlpha(glowColor, rimAlpha)},` +
-        ` transparent 70%)`;
-    }
-
     // ── 3-D Tilt ──────────────────────────────────────────────────
     if (enableTilt && window.matchMedia('(pointer: fine)').matches) {
       const cX = rect.width  / 2;
@@ -89,22 +76,17 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
 
     if (!isHovered.current) {
       isHovered.current = true;
-      // Fade in all layers at GPU speed (no React re-render)
-      [ambientRef, hotspotRef, rimRef].forEach(r => {
-        if (r.current) r.current.style.opacity = '1';
-      });
+      if (ambientRef.current) ambientRef.current.style.opacity = '1';
       card.classList.add('is-card-hovered');
     }
-  }, [isDark, glowColor, ambientRadius, coreAlpha, midAlpha, rimAlpha, enableTilt]);
+  }, [isDark, glowColor, ambientRadius, coreAlpha, midAlpha, enableTilt]);
 
   const handleMouseLeave = useCallback(() => {
     const card = cardRef.current;
     if (!card) return;
     isHovered.current = false;
 
-    [ambientRef, hotspotRef, rimRef].forEach(r => {
-      if (r.current) r.current.style.opacity = '0';
-    });
+    if (ambientRef.current) ambientRef.current.style.opacity = '0';
     card.style.setProperty('--rotate-x', '0deg');
     card.style.setProperty('--rotate-y', '0deg');
     card.classList.remove('is-card-hovered');
@@ -147,22 +129,6 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
       <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%' }}>
         {children}
       </div>
-
-      {/* ── Layer D: Rim border glow  (z-20, painted as 1-px inset border light) */}
-      {/*    Technique: 1px inset box-shadow uses the radial gradient as its colour */}
-      {/*    We paint it as a border-box background on a 1px-bordered div           */}
-      <div
-        ref={rimRef}
-        style={{
-          ...layerBase,
-          zIndex:      20,
-          padding:     '1px',
-          background:  `radial-gradient(220px circle at 50% 50%, ${withAlpha(glowColor, rimAlpha)}, transparent 70%)`,
-          WebkitMask:  'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-          WebkitMaskComposite: 'xor',
-          maskComposite: 'exclude',
-        }}
-      />
     </div>
   );
 };

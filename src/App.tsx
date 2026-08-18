@@ -9421,7 +9421,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               )}
             >
               {/* Inner Watermark & Grid Background Wrapper */}
-              <div className="absolute inset-0 pointer-events-none z-0 rounded-2xl sm:rounded-[2.2rem] [clip-path:inset(0_round_2.2rem)]">
+              <div className="absolute inset-0 overflow-hidden rounded-2xl sm:rounded-[2.2rem] pointer-events-none z-0">
                 <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
                 <RecWatermarkIcon className="absolute -right-6 -bottom-6 w-48 h-48 sm:w-64 sm:h-64 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
               </div>
@@ -9510,7 +9510,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               )}
             >
               {/* Inner Watermark & Grid Background Wrapper */}
-              <div className="absolute inset-0 pointer-events-none z-0 rounded-2xl sm:rounded-[2.2rem] [clip-path:inset(0_round_2.2rem)]">
+              <div className="absolute inset-0 overflow-hidden rounded-2xl sm:rounded-[2.2rem] pointer-events-none z-0">
                 <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
                 <RecWatermarkIcon className="absolute -right-6 -bottom-6 w-48 h-48 sm:w-64 sm:h-64 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
               </div>
@@ -9911,7 +9911,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   className={cn(
                     isMobile
                       ? "flex flex-col gap-3.5"
-                      : "grid grid-cols-1 sm:grid-cols-2 lg:gap-8 gap-4 sm:gap-6 p-1.5 -m-1.5"
+                      : "grid grid-cols-1 sm:grid-cols-2 lg:gap-8 gap-4 sm:gap-6"
                   )}
                 >
                   {[
@@ -9981,7 +9981,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         ) : (
                           <div 
                             className={cn(
-                              "p-6 sm:p-7 lg:p-8 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative h-full border-none shadow-slate-950/20 card-3d-deep",
+                              "p-6 sm:p-7 lg:p-8 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative w-full h-full border-none shadow-slate-950/20 card-3d-deep",
                               vecTheme.gradient
                             )}
                             onClick={() => {
@@ -9990,7 +9990,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                             }}
                           >
                             {/* Inner Watermark & Grid Background Wrapper */}
-                            <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.2rem] [clip-path:inset(0_round_2.2rem)]">
+                            <div className="absolute inset-0 overflow-hidden rounded-[2.2rem] pointer-events-none z-0">
                               <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:14px_14px]" />
                               <WatermarkIcon className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
                             </div>
@@ -10236,7 +10236,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       ) : (
                         <div 
                           className={cn(
-                            "p-6 sm:p-7 lg:p-8 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative h-full border-none shadow-slate-950/20 card-3d-deep",
+                            "p-6 sm:p-7 lg:p-8 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative w-full h-full border-none shadow-slate-950/20 card-3d-deep",
                             vecTheme.gradient
                           )}
                           onClick={() => {
@@ -10245,7 +10245,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           }}
                         >
                           {/* Inner Watermark & Grid Background Wrapper */}
-                          <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.2rem] [clip-path:inset(0_round_2.2rem)]">
+                          <div className="absolute inset-0 overflow-hidden rounded-[2.2rem] pointer-events-none z-0">
                             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:14px_14px]" />
                             <WatermarkIcon className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
                           </div>
@@ -10550,12 +10550,12 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     <div
                       onClick={() => setSelectedBankType(item.id)}
                       className={cn(
-                        "p-5 sm:p-6 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-5 relative h-full border-none shadow-slate-950/20 card-3d-deep min-h-[260px]",
+                        "p-5 sm:p-6 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-5 relative w-full h-full border-none shadow-slate-950/20 card-3d-deep min-h-[260px]",
                         vecTheme.gradient
                       )}
                     >
                       {/* Inner Watermark & Grid Background Wrapper */}
-                      <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.2rem] [clip-path:inset(0_round_2.2rem)]">
+                      <div className="absolute inset-0 overflow-hidden rounded-[2.2rem] pointer-events-none z-0">
                         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:14px_14px]" />
                         <WatermarkIcon className="absolute -right-6 -bottom-6 w-40 h-40 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
                       </div>

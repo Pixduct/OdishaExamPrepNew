@@ -179,7 +179,7 @@ export async function exportQuestionBankToPdf(data: QuestionBankExportData): Pro
       <style>
         @page {
           size: A4 portrait;
-          margin: 0;
+          margin: 14mm 14mm 14mm 14mm;
         }
 
         * {
@@ -197,14 +197,12 @@ export async function exportQuestionBankToPdf(data: QuestionBankExportData): Pro
           background: #ffffff;
           color: #0f172a;
           font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-          font-size: 9pt;
+          font-size: 9.5pt;
           line-height: 1.5;
         }
 
         .print-document-wrapper {
           width: 100%;
-          max-width: 100%;
-          padding: 14mm 15mm;
           position: relative;
         }
 
@@ -216,29 +214,29 @@ export async function exportQuestionBankToPdf(data: QuestionBankExportData): Pro
           transform: translate(-50%, -50%) rotate(-25deg);
           z-index: -999;
           pointer-events: none;
-          opacity: 0.032;
+          opacity: 0.038;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
           text-align: center;
-          width: 500px;
+          width: 550px;
           user-select: none;
         }
 
         .watermark-logo-box {
-          width: 80px;
-          height: 80px;
+          width: 96px;
+          height: 96px;
           background: #1e3a8a;
-          border-radius: 18px;
+          border-radius: 22px;
           display: flex;
           align-items: center;
           justify-content: center;
-          margin-bottom: 8px;
+          margin-bottom: 12px;
         }
 
         .watermark-name {
-          font-size: 28pt;
+          font-size: 32pt;
           font-weight: 900;
           color: #1e3a8a;
           letter-spacing: 3px;
@@ -246,7 +244,7 @@ export async function exportQuestionBankToPdf(data: QuestionBankExportData): Pro
         }
 
         .watermark-sub {
-          font-size: 11pt;
+          font-size: 13pt;
           font-weight: 800;
           color: #2563eb;
           letter-spacing: 1.5px;
@@ -254,38 +252,159 @@ export async function exportQuestionBankToPdf(data: QuestionBankExportData): Pro
           margin-top: 2px;
         }
 
-        /* ── Master Document Header ── */
-        .master-header {
-          border: 1.5px solid #cbd5e1;
-          border-radius: 12px;
-          padding: 14px 18px;
-          margin-bottom: 16px;
-          background: #ffffff;
+        /* ── Master Print Layout Structure ── */
+        table.print-layout-table {
+          width: 100%;
+          border-collapse: collapse;
+          border: none;
+        }
+
+        table.print-layout-table > thead {
+          display: table-header-group;
+        }
+
+        table.print-layout-table > tfoot {
+          display: table-footer-group;
+        }
+
+        table.print-layout-table > tbody {
+          display: table-row-group;
+        }
+
+        /* ── Running Page Header (Repeats at top of EVERY page) ── */
+        .running-header-box {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding-bottom: 8px;
+          margin-bottom: 12px;
+          border-bottom: 1.5px solid #cbd5e1;
+          font-size: 8pt;
+          color: #64748b;
+          font-weight: 700;
+        }
+
+        .running-header-left {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .running-logo-badge {
+          width: 18px;
+          height: 18px;
+          background: #2563eb;
+          border-radius: 4px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+
+        .running-logo {
+          font-size: 8.5pt;
+          font-weight: 900;
+          color: #1e3a8a;
+          letter-spacing: 0.5px;
+          text-transform: uppercase;
+          line-height: 1;
+          display: inline-flex;
+          align-items: center;
+        }
+
+        .running-logo span {
+          color: #2563eb;
+        }
+
+        .running-badge {
+          background: #eff6ff;
+          color: #1d4ed8;
+          padding: 2px 7px;
+          border-radius: 4px;
+          font-size: 7.5pt;
+          font-weight: 800;
+          text-transform: uppercase;
+          border: 1px solid #bfdbfe;
+          display: inline-flex;
+          align-items: center;
+          line-height: 1;
+        }
+
+        .running-header-right {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          text-align: right;
+        }
+
+        .running-topic {
+          color: #334155;
+          max-width: 250px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .running-portal-url {
+          color: #2563eb;
+          text-decoration: none;
+        }
+
+        /* ── Running Page Footer (Repeats at bottom of EVERY page) ── */
+        .running-footer-box {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding-top: 8px;
+          margin-top: 14px;
+          border-top: 1.5px solid #e2e8f0;
+          font-size: 7.5pt;
+          color: #64748b;
+          font-weight: 600;
+        }
+
+        .running-footer-box a {
+          color: #2563eb;
+          text-decoration: none;
+          font-weight: 800;
+        }
+
+        /* ── Page 1 Executive Hero Header Banner ── */
+        .hero-banner {
+          border-bottom: 2.5px solid #2563eb;
+          padding-bottom: 12px;
+          margin-bottom: 14px;
           display: flex;
           align-items: center;
           justify-content: space-between;
         }
 
-        .brand-section {
+        .hero-brand {
           display: flex;
           align-items: center;
           gap: 12px;
         }
 
         .brand-logo-badge {
-          width: 44px;
-          height: 44px;
-          background: linear-gradient(135deg, #1e3a8a, #2563eb);
-          border-radius: 10px;
+          width: 40px;
+          height: 40px;
+          background: #2563eb;
+          border-radius: 9px;
           display: flex;
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
-          box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+          box-shadow: 0 3px 8px rgba(37, 99, 235, 0.25);
+        }
+
+        .brand-titles {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
         }
 
         .brand-titles h1 {
-          font-size: 15pt;
+          font-size: 16pt;
           font-weight: 900;
           color: #1e3a8a;
           letter-spacing: -0.2px;
@@ -303,15 +422,15 @@ export async function exportQuestionBankToPdf(data: QuestionBankExportData): Pro
           font-weight: 800;
           color: #64748b;
           text-transform: uppercase;
-          letter-spacing: 0.6px;
+          letter-spacing: 0.8px;
+          line-height: 1;
         }
 
-        .header-meta {
+        .hero-meta {
           text-align: right;
           display: flex;
           flex-direction: column;
           align-items: flex-end;
-          gap: 3px;
         }
 
         .exam-badge {
@@ -321,25 +440,26 @@ export async function exportQuestionBankToPdf(data: QuestionBankExportData): Pro
           border: 1px solid #bfdbfe;
           font-size: 8pt;
           font-weight: 800;
-          padding: 2.5px 8px;
+          padding: 3px 9px;
           border-radius: 6px;
           text-transform: uppercase;
           letter-spacing: 0.5px;
+          margin-bottom: 3px;
         }
 
-        .doc-date {
+        .hero-date {
           font-size: 7.5pt;
           color: #64748b;
           font-weight: 600;
         }
 
-        /* ── Topic Title Card ── */
+        /* ── Title Card ── */
         .title-card {
           background: #f8fafc;
-          border: 1px solid #e2e8f0;
-          border-left: 4px solid #2563eb;
+          border: 1.5px solid #e2e8f0;
+          border-left: 4.5px solid #2563eb;
           padding: 12px 16px;
-          border-radius: 8px;
+          border-radius: 10px;
           margin-bottom: 16px;
           display: flex;
           justify-content: space-between;
@@ -357,50 +477,52 @@ export async function exportQuestionBankToPdf(data: QuestionBankExportData): Pro
           font-size: 8.5pt;
           color: #475569;
           font-weight: 600;
-          margin-top: 2px;
+          margin-top: 3px;
         }
 
         .qcount-chip {
           background: #2563eb;
           color: #ffffff;
-          font-size: 8pt;
+          font-size: 8.5pt;
           font-weight: 800;
-          padding: 3px 10px;
-          border-radius: 16px;
+          padding: 4px 12px;
+          border-radius: 20px;
           white-space: nowrap;
+          box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25);
         }
 
-        /* ── Questions List ── */
+        /* ── Question Cards (Polished & Spacious) ── */
         .questions-container {
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 14px;
         }
 
         .question-card {
-          border: 1px solid #e2e8f0;
+          border: 1.5px solid #e2e8f0;
           background: #ffffff;
-          border-radius: 8px;
-          padding: 12px 16px;
+          border-radius: 10px;
+          padding: 13px 15px;
           page-break-inside: avoid;
           break-inside: avoid;
           position: relative;
+          margin-bottom: 2px;
         }
 
         .question-header {
           display: flex;
-          gap: 8px;
+          gap: 9px;
           align-items: flex-start;
-          margin-bottom: 8px;
+          margin-bottom: 9px;
         }
 
         .question-badge {
           background: #f1f5f9;
           color: #1e293b;
-          font-size: 8pt;
+          font-size: 8.5pt;
           font-weight: 900;
-          padding: 2px 6px;
-          border-radius: 4px;
+          padding: 2px 7px;
+          border-radius: 5px;
           border: 1px solid #cbd5e1;
           flex-shrink: 0;
           margin-top: 1px;
@@ -410,27 +532,34 @@ export async function exportQuestionBankToPdf(data: QuestionBankExportData): Pro
           font-size: 9.5pt;
           font-weight: 700;
           color: #0f172a;
-          line-height: 1.45;
+          line-height: 1.48;
           flex-grow: 1;
         }
 
         .options-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 6px 12px;
-          margin-top: 6px;
+          gap: 7px 14px;
+          margin-left: 32px;
+          margin-top: 4px;
           margin-bottom: 6px;
+        }
+
+        @media screen and (max-width: 600px) {
+          .options-grid {
+            grid-template-columns: 1fr;
+          }
         }
 
         .option-item {
           display: flex;
           align-items: flex-start;
-          gap: 6px;
+          gap: 7px;
           font-size: 8.5pt;
           color: #334155;
-          line-height: 1.35;
-          padding: 3.5px 7px;
-          border-radius: 5px;
+          line-height: 1.38;
+          padding: 3px 6px;
+          border-radius: 6px;
           background: #fafafa;
           border: 1px solid #f1f5f9;
         }
@@ -446,7 +575,7 @@ export async function exportQuestionBankToPdf(data: QuestionBankExportData): Pro
           font-weight: 900;
           color: #2563eb;
           flex-shrink: 0;
-          min-width: 15px;
+          min-width: 16px;
         }
 
         .option-item.option-correct .option-letter {
@@ -458,109 +587,112 @@ export async function exportQuestionBankToPdf(data: QuestionBankExportData): Pro
         }
 
         .answer-tag {
-          margin-top: 6px;
-          font-size: 7.5pt;
+          margin-left: 32px;
+          margin-top: 7px;
+          font-size: 8pt;
           color: #047857;
           background: #ecfdf5;
           border: 1px solid #a7f3d0;
-          padding: 2px 8px;
-          border-radius: 4px;
+          padding: 2.5px 9px;
+          border-radius: 5px;
           display: inline-block;
         }
 
         .explanation-box {
-          margin-top: 6px;
+          margin-left: 32px;
+          margin-top: 9px;
           background: #f8fafc;
           border: 1px solid #e2e8f0;
-          border-left: 3px solid #10b981;
-          padding: 7px 10px;
+          border-left: 3.5px solid #059669;
+          padding: 7px 12px;
           border-radius: 6px;
-          font-size: 8pt;
+          font-size: 8.5pt;
           color: #334155;
+          line-height: 1.45;
         }
 
         .explanation-title {
-          font-weight: 800;
+          font-weight: 900;
           color: #047857;
+          margin-bottom: 3px;
+          font-size: 7.5pt;
           text-transform: uppercase;
-          font-size: 7pt;
-          margin-bottom: 2px;
+          letter-spacing: 0.5px;
         }
 
-        .explanation-content {
-          line-height: 1.4;
-        }
-
-        /* ── Answer Key Summary Table ── */
+        /* ── Answer Key Summary Grid ── */
         .page-break {
           page-break-before: always;
           break-before: page;
         }
 
         .answer-key-section {
-          margin-top: 20px;
-          padding: 16px;
-          background: #f8fafc;
-          border: 1.5px solid #cbd5e1;
-          border-radius: 12px;
-          page-break-inside: avoid;
-          break-inside: avoid;
+          margin-top: 22px;
+          padding-top: 10px;
         }
 
         .section-divider-title {
           text-align: center;
+          border-bottom: 2.5px solid #0f172a;
+          line-height: 0.1em;
+          margin: 22px 0 18px;
+        }
+
+        .section-divider-title span {
+          background: #ffffff;
+          padding: 0 16px;
           font-size: 11pt;
           font-weight: 900;
-          color: #1e3a8a;
-          letter-spacing: 1px;
-          margin-bottom: 14px;
-          text-transform: uppercase;
+          color: #0f172a;
+          letter-spacing: 1.2px;
         }
 
         .key-grid {
           display: flex;
           flex-direction: column;
-          gap: 6px;
+          gap: 7px;
+          max-width: 620px;
+          margin: 0 auto;
         }
 
         .key-row {
-          display: grid;
-          grid-template-columns: repeat(5, 1fr);
-          gap: 6px;
+          display: flex;
+          gap: 8px;
+          justify-content: space-between;
         }
 
         .key-cell {
-          background: #ffffff;
-          border: 1px solid #cbd5e1;
-          border-radius: 6px;
-          padding: 6px 8px;
+          flex: 1;
           display: flex;
-          justify-content: space-between;
           align-items: center;
+          justify-content: space-between;
+          background: #f8fafc;
+          border: 1.5px solid #cbd5e1;
+          padding: 5px 10px;
+          border-radius: 6px;
           font-size: 8.5pt;
         }
 
         .key-qno {
           font-weight: 800;
-          color: #64748b;
+          color: #475569;
         }
 
         .key-ans {
           font-weight: 900;
-          color: #2563eb;
-          background: #eff6ff;
-          padding: 1px 6px;
+          color: #1d4ed8;
+          background: #dbeafe;
+          padding: 1.5px 7px;
           border-radius: 4px;
-          border: 1px solid #bfdbfe;
         }
 
-        /* ── Promotional Footer Card ── */
+        /* ── Promotional Interactive Footer Card ── */
         .promotional-footer-card {
-          margin-top: 20px;
-          background: #ffffff;
+          margin-top: 28px;
+          padding: 16px 18px;
+          background: #f8fafc;
           border: 1.5px solid #cbd5e1;
           border-radius: 12px;
-          padding: 16px 20px;
           page-break-inside: avoid;
           break-inside: avoid;
         }
@@ -569,6 +701,8 @@ export async function exportQuestionBankToPdf(data: QuestionBankExportData): Pro
           display: flex;
           justify-content: space-between;
           align-items: center;
+          border-bottom: 1px solid #e2e8f0;
+          padding-bottom: 10px;
           margin-bottom: 12px;
         }
 
@@ -578,14 +712,14 @@ export async function exportQuestionBankToPdf(data: QuestionBankExportData): Pro
           border: 1px solid #bfdbfe;
           font-size: 7.5pt;
           font-weight: 800;
-          padding: 2px 8px;
+          padding: 3px 9px;
           border-radius: 6px;
           text-transform: uppercase;
         }
 
         .promo-links-grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: 1fr 1fr 1fr;
           gap: 10px;
           margin-bottom: 12px;
         }
@@ -593,29 +727,41 @@ export async function exportQuestionBankToPdf(data: QuestionBankExportData): Pro
         .promo-link-pill {
           display: flex;
           align-items: center;
-          gap: 8px;
-          padding: 8px 10px;
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
-          border-radius: 8px;
+          gap: 9px;
+          padding: 9px 12px;
+          background: #ffffff;
+          border: 1.5px solid #cbd5e1;
+          border-radius: 9px;
           text-decoration: none;
-          color: inherit;
+          color: #0f172a;
+          position: relative;
+          z-index: 20;
+          pointer-events: auto;
+          transition: all 0.2s;
         }
 
         .promo-icon {
-          font-size: 12pt;
+          font-size: 16pt;
+        }
+
+        .promo-info {
+          display: flex;
+          flex-direction: column;
+          min-width: 0;
         }
 
         .promo-info strong {
-          display: block;
           font-size: 8pt;
           color: #0f172a;
+          font-weight: 800;
+          line-height: 1.2;
         }
 
         .promo-info span {
-          display: block;
-          font-size: 6.5pt;
+          font-size: 7pt;
           color: #2563eb;
+          font-weight: 700;
+          text-decoration: underline;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -623,145 +769,208 @@ export async function exportQuestionBankToPdf(data: QuestionBankExportData): Pro
 
         .promo-footer-bar {
           text-align: center;
-          font-size: 7pt;
+          font-size: 7.5pt;
           font-weight: 700;
-          color: #64748b;
-          border-top: 1px solid #f1f5f9;
-          padding-top: 8px;
+          color: #475569;
+          padding-top: 6px;
         }
       </style>
     </head>
     <body>
-      <!-- Repeating Watermark on all pages -->
-      <div class="page-watermark">
-        <div class="watermark-logo-box">
-          <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-          </svg>
-        </div>
-        <div class="watermark-name">OdishaExamPrep</div>
-        <div class="watermark-sub">Official Study Booklet</div>
-      </div>
-
       <div class="print-document-wrapper">
-        <!-- Master Header Banner -->
-        <div class="master-header">
-          <div class="brand-section">
-            <div class="brand-logo-badge">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-              </svg>
-            </div>
-            <div class="brand-titles">
-              <h1>ODISHAEXAM<span>PREP</span></h1>
-              <div class="brand-tagline">OFFICIAL EXAM PRACTICE &amp; QUESTION BANK PORTAL</div>
-            </div>
+        <!-- Repeating Background Watermark (Every Page) -->
+        <div class="page-watermark">
+          <div class="watermark-logo-box">
+            <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
           </div>
-          <div class="header-meta">
-            <div class="exam-badge">${examLabel}</div>
-            <div class="doc-date">Generated: ${dateStr}</div>
-          </div>
+          <div class="watermark-name">ODISHAEXAMPREP</div>
+          <div class="watermark-sub">WWW.ODISHAEXAMPREP.IN</div>
         </div>
 
-        <!-- Title Block -->
-        <div class="title-card">
-          <div>
-            <h2>${title}</h2>
-            <p>${subLabel}</p>
-          </div>
-          <div class="qcount-chip">${questions.length} Questions</div>
-        </div>
+        <!-- Master Layout Table (Enables Native Repeating Headers & Footers on Every Printed Page) -->
+        <table class="print-layout-table">
+          <thead>
+            <tr>
+              <td>
+                <div class="running-header-box">
+                  <div class="running-header-left">
+                    <div class="running-logo-badge">
+                      <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                      </svg>
+                    </div>
+                    <span class="running-logo">ODISHAEXAM<span>PREP</span></span>
+                    <span class="running-badge">${examLabel}</span>
+                  </div>
+                  <div class="running-header-right">
+                    <span class="running-topic">${title}</span>
+                    <span>•</span>
+                    <a href="https://www.odishaexamprep.in" target="_blank" class="running-portal-url">www.odishaexamprep.in</a>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </thead>
 
-        <!-- Questions List -->
-        <div class="questions-container">
-          ${questionsHtml}
-        </div>
+          <tfoot>
+            <tr>
+              <td>
+                <div class="running-footer-box">
+                  <span>Official Study Material — <a href="https://www.odishaexamprep.in" target="_blank">OdishaExamPrep.in</a></span>
+                  <span>Dedicated to Odisha Competitive Exam Aspirants</span>
+                  <span>Visit: <a href="https://www.odishaexamprep.in" target="_blank">www.odishaexamprep.in</a></span>
+                </div>
+              </td>
+            </tr>
+          </tfoot>
 
-        <!-- Optional Answer Key Summary Appendix -->
-        ${answerKeyTableHtml}
+          <tbody>
+            <tr>
+              <td>
+                <!-- Page 1 Hero Header Banner -->
+                <div class="hero-banner">
+                  <div class="hero-brand">
+                    <div class="brand-logo-badge">
+                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                      </svg>
+                    </div>
+                    <div class="brand-titles">
+                      <h1>ODISHAEXAM<span>PREP</span></h1>
+                      <div class="brand-tagline">OFFICIAL EXAM PRACTICE &amp; QUESTION BANK PORTAL</div>
+                    </div>
+                  </div>
+                  <div class="hero-meta">
+                    <div class="exam-badge">${examLabel}</div>
+                    <div class="hero-date">Generated: ${dateStr}</div>
+                  </div>
+                </div>
 
-        <!-- Promotional Footer Card -->
-        <div class="promotional-footer-card">
-          <div class="promo-header">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <div style="width: 32px; height: 32px; background: #2563eb; border-radius: 7px; display: flex; align-items: center; justify-content: center;">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                </svg>
-              </div>
-              <div>
-                <h3 style="font-size: 11.5pt; font-weight: 900; color: #1e3a8a; text-transform: uppercase; line-height: 1.1; margin-bottom: 2px;">ODISHAEXAM<span style="color: #2563eb;">PREP</span></h3>
-                <p style="font-size: 7pt; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Odisha's Premier Competitive Exam Preparation Platform</p>
-              </div>
-            </div>
-            <div class="promo-badge">Official Study Material</div>
-          </div>
+                <!-- Title Block -->
+                <div class="title-card">
+                  <div>
+                    <h2>${title}</h2>
+                    <p>${subLabel}</p>
+                  </div>
+                  <div class="qcount-chip">${questions.length} Questions</div>
+                </div>
 
-          <div class="promo-links-grid">
-            <a href="https://www.odishaexamprep.in" target="_blank" class="promo-link-pill">
-              <span class="promo-icon">🌐</span>
-              <div class="promo-info">
-                <strong>Web Portal</strong>
-                <span>odishaexamprep.in</span>
-              </div>
-            </a>
+                <!-- Questions List -->
+                <div class="questions-container">
+                  ${questionsHtml}
+                </div>
 
-            <a href="https://t.me/odishaexamprep" target="_blank" class="promo-link-pill">
-              <span class="promo-icon">📱</span>
-              <div class="promo-info">
-                <strong>Telegram</strong>
-                <span>t.me/odishaexamprep</span>
-              </div>
-            </a>
+                <!-- Optional Answer Key Summary Appendix -->
+                ${answerKeyTableHtml}
 
-            <a href="https://www.youtube.com/@OdishaExamPrep" target="_blank" class="promo-link-pill">
-              <span class="promo-icon">📺</span>
-              <div class="promo-info">
-                <strong>YouTube</strong>
-                <span>@OdishaExamPrep</span>
-              </div>
-            </a>
-          </div>
+                <!-- Promotional Interactive Footer Card -->
+                <div class="promotional-footer-card">
+                  <div class="promo-header">
+                    <div class="promo-brand" style="display: flex; align-items: center; gap: 10px;">
+                      <div style="width: 32px; height: 32px; background: #2563eb; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 style="font-size: 12pt; font-weight: 900; color: #1e3a8a; text-transform: uppercase; line-height: 1.1; margin-bottom: 2px;">ODISHAEXAM<span style="color: #2563eb;">PREP</span></h3>
+                        <p style="font-size: 7.5pt; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Odisha's Premier Competitive Exam Preparation Platform</p>
+                      </div>
+                    </div>
+                    <div class="promo-badge">Official Study Material</div>
+                  </div>
 
-          <div class="promo-footer-bar">
-            ✨ Full Mock Tests • Subject-Wise Practice • Previous Year Questions (PYQ)
-          </div>
-        </div>
+                  <div class="promo-links-grid">
+                    <a href="https://www.odishaexamprep.in" target="_blank" rel="noopener noreferrer" class="promo-link-pill">
+                      <span class="promo-icon">🌐</span>
+                      <div class="promo-info">
+                        <strong>Official Web Portal</strong>
+                        <span>https://www.odishaexamprep.in</span>
+                      </div>
+                    </a>
+
+                    <a href="https://t.me/odishaexamprep" target="_blank" rel="noopener noreferrer" class="promo-link-pill">
+                      <span class="promo-icon">📱</span>
+                      <div class="promo-info">
+                        <strong>Telegram Channel</strong>
+                        <span>https://t.me/odishaexamprep</span>
+                      </div>
+                    </a>
+
+                    <a href="https://www.youtube.com/@OdishaExamPrep" target="_blank" rel="noopener noreferrer" class="promo-link-pill">
+                      <span class="promo-icon">📺</span>
+                      <div class="promo-info">
+                        <strong>YouTube Classes</strong>
+                        <span>https://youtube.com/@OdishaExamPrep</span>
+                      </div>
+                    </a>
+                  </div>
+
+                  <div class="promo-footer-bar">
+                    ✨ Full Mock Tests • Subject-Wise Practice • Previous Year Questions (PYQ) • Daily Odisha Current Affairs
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <script>
-        async function triggerDocumentPrint() {
-          try {
-            if (document.fonts) {
-              await document.fonts.ready;
-            }
-          } catch (e) {}
-          setTimeout(function() {
+        // Instant trigger as soon as resources and KaTeX styles are ready
+        if (document.readyState === 'complete') {
+          window.focus();
+          window.print();
+        } else {
+          window.addEventListener('load', function() {
             window.focus();
             window.print();
-          }, 300);
-        }
-
-        if (document.readyState === 'complete') {
-          triggerDocumentPrint();
-        } else {
-          window.addEventListener('load', triggerDocumentPrint);
+          });
         }
       </script>
     </body>
     </html>
   `;
 
-  // Open in a new visible tab — gives a clean, full-screen print preview
-  const win = window.open('', '_blank');
-  if (win) {
-    win.document.open();
-    win.document.write(printDocumentHtml);
-    win.document.close();
+  // Use hidden iframe to trigger high-definition native print / PDF save
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.right = '0';
+  iframe.style.bottom = '0';
+  iframe.style.width = '0';
+  iframe.style.height = '0';
+  iframe.style.border = '0';
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentWindow?.document;
+  if (doc) {
+    doc.title = safeFilename;
+    doc.open();
+    doc.write(printDocumentHtml);
+    doc.close();
+
+    // Clean up iframe after print dialog closes
+    setTimeout(() => {
+      try {
+        document.body.removeChild(iframe);
+      } catch (e) {}
+    }, 60000);
     return true;
+  } else {
+    // Fallback: Open in new window
+    const win = window.open('', '_blank');
+    if (win) {
+      win.document.title = safeFilename;
+      win.document.write(printDocumentHtml);
+      win.document.close();
+      return true;
+    }
+    return false;
   }
-  return false;
 }

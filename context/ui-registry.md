@@ -60,6 +60,9 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`VectorCursorFollower`** | Utility / Feedback | [`src/components/VectorCursorFollower.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/VectorCursorFollower.tsx) | Interactive Ring Follower + Center Precision Pointer Dot | App.tsx (Root) | Active |
 | **`AntigravityMicroDistanceLenisScrollEngine`** | Performance / Physics | [`src/lib/lenisScroll.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/lenisScroll.ts) | Micro-Distance Scaling (`0.60`), `lerp: 0.18`, `touchMultiplier: 0` | App.tsx (Root) | Active |
 | **`OffscreenCardVirtualizationEngine`** | Performance / Rendering | [`src/index.css`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/index.css) | `.cv-card-auto` Offscreen Layout Bypass | App.tsx (All Cards) | Active |
+| **`AdminSWRControlCenterEngine`** | Admin / Performance | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx) | 0ms SWR Catalog Caching (`getAllMockTestsLite`), Skeleton Shimmer | AdminPanel.tsx | Active |
+| **`AdminRefreshPersistenceEngine`** | Admin / Navigation | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx) | URL Param State Sync (`replaceState`), Session Persistence | AdminPanel.tsx | Active |
+| **`AdminSubjectSelector`** | Admin / Form Control | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L2160-L2199) | Academic Subject Dropdown Filter + Custom Input (`✏️ + Enter Custom Subject...`) | AdminPanel.tsx | Active |
 
 ---
 
@@ -164,7 +167,7 @@ import { UniversalMathDiagramEngine } from '../components/UniversalMathDiagramEn
 - **Reference Library Vector Selection Cards (`getReferenceLibraryVectorTheme`)**: Step 3 Reference Library cards (`src/App.tsx`) feature relatable 3D glassmorphic vector emblems (`Layers` + `BookOpen`, `Target` + `Zap`, `BookMarked` + `FileText`, `History` + `Award`), mode-matched HSL vector header gradients, radial dot grid watermarks, 3D floating background icons (`w-40 h-40 opacity-15 stroke-[1.2]`), and glassmorphic resource count pills.
 - **Academic Vector Canvas Page & Executive Header Card (`src/App.tsx`)**: Wraps the exam dashboard view in a bright academic vector canvas with geometric dot grid watermarks (`bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)]`), ambient HSL soft glows (`from-brand-300/20 via-indigo-200/15`), floating study vector watermarks (`GraduationCap`, `BookOpen`, `Award`, `Compass`), and an Executive Vector Header Banner Card with a 3D `GraduationCap` logo watermark emblem.
 - **Study Plan Hub Academic Vector Canvas & 3D Vector Cards (`src/StudyPlanView.tsx`)**: Wraps the Study Plan Hub page in a bright Academic Vector Canvas (`GraduationCap`, `Calendar`, `Trophy`, `TrendingUp`) and transforms all 5 child cards (`AIStudyPlanCard`, `OdishaLeaderboardCard`, `SmartRecommendationCard`, `TopicConfidenceMatrix`, `PersonalBestCard`) into Executive 3D Vector Cards with HSL gradients, radial grid watermarks, and floating background icons (`w-52 h-52 opacity-15`).
-- **Dynamic Bi-Directional 3D Vector Card Hover & Theme-Aware Spotlight (`DynamicVectorCard.tsx`)**: Real-time cursor tracking engine (`onMouseMove`) calculating relative card coordinates to dynamically tilt cards bi-directionally (stiffness 220, damping 22). In Light Mode, renders a bright white specular highlight core (`rgba(255,255,255,0.90)`) with a soft 7% card-matched theme color halo layered at `z-0` behind `<div className="relative z-10">{children}</div>`, guaranteeing 100% crisp black text readability and theme color matching. In Dark Mode, renders rich HSL neon glows (`25%` to `35%` opacity).
+- **Dynamic Bi-Directional 3D Vector Card Hover & Theme-Aware Spotlight (`DynamicVectorCard.tsx`)**: Real-time cursor tracking engine (`onMouseMove`) calculating relative card coordinates to dynamically tilt cards bi-directionally (stiffness 220, damping 22). Renders a smooth, professional 3-stop ambient gradient (`core → mid-ring → transparent edge`) at `z-0` behind `<div className="relative z-10">{children}</div>`, guaranteeing 100% crisp text readability and theme color matching without harsh floating orb artifacts. Features a 1px glowing rim border illumination ring at `z-20` using CSS `maskComposite: exclude` for crisp edge lighting.
 
 - **Multimodal Image Attachment Upload**: Uploaded image files (`.png`, `.jpg`, `.jpeg`, `.webp`) convert to base64 Data URLs (`data:image/...`). Express body parser in `server.ts` enforces `limit: '50mb'` to handle high-resolution image uploads cleanly, routing vision payloads `{ type: 'image_url', image_url: { url } }` to `meta/llama-3.2-11b-vision-instruct` with seamless text-model fallback.
 - **ChatGPT-Inspired Attachment Tray**: Attached files render inside a clean horizontal flex strip (`overflow-x-auto gap-2.5 py-1 px-1`). Images display as square 64x64px rounded thumbnail tiles (`w-16 h-16 rounded-xl border border-slate-200/90 shadow-xs object-cover`) with hover-overlay `✕` close buttons. Documents display as horizontal mini-cards (`rounded-xl bg-slate-50 border border-slate-200/80 max-w-[220px]`) with a red PDF badge icon, filename, size, and close icon. Sitting inside the input container, 1, 2, 3, or more files line up side-by-side without vertical stacking or overlapping Quick/Best mode buttons.
@@ -1788,6 +1791,102 @@ Last updated: August 16, 2026
 
 **Pattern notes:**
 - **100% Site-Wide Trackpad & Touch Hardening**: Every nested scroll container declares `data-lenis-prevent` and `overscroll-contain` to unbind Lenis smooth wheel listeners locally, allowing 100% native 120 FPS trackpad 2-finger swipe and touch momentum scrolling.
+
+---
+
+### 37. `AdminSWRControlCenterEngine`
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx)
+Last updated: August 18, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Catalog Query Utility** | `getAllMockTestsLite()` (fetches metadata without 15MB+ question payload) |
+| **Session Cache Key** | `oep_admin_catalog_cache_v1` (5-minute TTL `sessionStorage` caching) |
+| **Skeleton Loader Table** | `animate-pulse bg-slate-100 dark:bg-slate-800 rounded-xl h-12 w-full` |
+| **Parallel Unblocked Auth** | Invokes SWR catalog query in parallel with Supabase auth session check |
+
+**Pattern notes:**
+- **Instant 0ms Admin Load**: Eliminates heavy 15MB question payload downloads during catalog browsing.
+- **Cold Start Shimmer**: Renders skeleton row placeholders while cold SWR queries revalidate in the background.
+
+---
+
+### 38. `AdminRefreshPersistenceEngine`
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx)
+Last updated: August 18, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **URL Sync Method** | `window.history.replaceState` (Syncs `?tab=...&series_examId=...&subTab=...`) |
+| **State Storage Key** | `oep_admin_active_view_v1` (`sessionStorage` active tab & filter state) |
+| **F5 Refresh Restoration** | Auto-restores active tab, sub-tab, category filter, and target exam drill-down view on page refresh |
+
+**Pattern notes:**
+- **Zero View Disruption**: Pressing Refresh (F5) reloads the admin user on the exact same tab, sub-tab, and drill-down view without dropping state back to dashboard defaults.
+
+---
+
+### 39. `AdminSubjectSelector`
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L2160-L2199)
+Last updated: August 18, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Select Wrapper Container** | `space-y-2 col-span-1 md:col-span-2 bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/80` |
+| **Dropdown Class** | `selectClass` with `selectWrapperClass` |
+| **Custom Input Class** | `inputClass` (`bg-white border border-slate-200/80 rounded-xl px-4 py-2.5 text-sm font-medium`) |
+| **Title Filter Regex** | `/Solved PYQ|Master Practice|Daily Quiz|Set \d+/i` |
+| **Custom Option Trigger** | `<option value="__custom__">✏️ + Enter Custom Subject...</option>` |
+
+**Pattern notes:**
+- **Academic Name Filtering**: Automatically filters out generic titles (`"Solved PYQ"`, `"Master Practice"`, `"Set 1"`, `"Daily Quiz"`) from the subject dropdown list, leaving only genuine academic subject names.
+- **Custom Input Fallback**: Selecting `✏️ + Enter Custom Subject...` automatically clears the preset selection and renders a text input (`inputClass`), allowing admins to type new academic subjects seamlessly.
+
+---
+
+### 40. `UniversalScrollIsolationEngine`
+
+File: [`src/lib/lenisScroll.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/lenisScroll.ts), [`src/index.css`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/index.css) & [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
+Last updated: August 18, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Lenis Prevent Callback** | `prevent: (node) => Boolean(node.closest('.overflow-x-auto, .overflow-y-auto, [data-lenis-prevent], .no-scrollbar'))` |
+| **Global CSS Containment** | `.overflow-x-auto, .overflow-y-auto, [data-lenis-prevent] { overscroll-behavior: contain; }` |
+| **Wheel Translation** | `onWheel={(e) => { if (e.deltaY !== 0) e.currentTarget.scrollLeft += e.deltaY * 0.85; }}` |
+| **Touch Gesture Panning** | `touch-pan-x` / `touch-pan-y` |
+
+**Pattern notes:**
+- **Automated Node Filtering**: `prevent` callback in `lenisScroll.ts` automatically inspects event targets and releases Lenis wheel interception whenever the cursor is inside any `overflow-x-auto` or `overflow-y-auto` sub-container.
+- **Active Mouse Wheel Delta Translation**: Horizontal containers (`Sectional Mock Tests`, `Continue Practice`, `Recent Activity`, `Blog`, `Current Affairs`, `AI Mentor`) translate vertical mouse wheel rotation (`deltaY`) directly into horizontal scroll position (`scrollLeft += deltaY * 0.85`).
+
+---
+
+### 41. `DynamicVectorCard`
+
+File: [`src/components/DynamicVectorCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/DynamicVectorCard.tsx)
+Last updated: August 18, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Container** | `relative isolate ${roundedClass} ${className} group/vector-card transition-transform duration-200 ease-out` |
+| **Border Radius Default** | `rounded-3xl sm:rounded-[2.5rem]` (configurable via `roundedClass` prop) |
+| **Perspective & 3D Tilt** | `perspective: 1000px`, `transformStyle: preserve-3d`, `--rotate-x`, `--rotate-y` (max ~3.5deg) |
+| **Ambient Glow Layer (z-0)** | `radial-gradient(550px circle at mouseX mouseY, color coreAlpha 0%, color midAlpha 40%, transparent 72%)` |
+| **Rim Border Glow (z-20)** | `radial-gradient(220px circle at mouseX mouseY, color rimAlpha, transparent 70%)` with `WebkitMaskComposite: 'xor'`, `maskComposite: 'exclude'` |
+| **Content Container (z-10)** | `<div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%' }}>{children}</div>` |
+| **Dark Mode Alphas** | `coreAlpha: 0.55`, `midAlpha: 0.22`, `rimAlpha: 0.95`, `radius: 550px` |
+| **Light Mode Alphas** | `coreAlpha: 0.30`, `midAlpha: 0.10`, `rimAlpha: 0.75`, `radius: 480px` |
+| **Performance** | Direct DOM `ref.current.style` mutation, 0 React re-renders, 60-120fps GPU accelerated |
+
+**Pattern notes:**
+- **Layer Stacking**: Ambient light sits at `z-0` beneath content at `z-10`, and Rim Border Glow sits at `z-20` over the card perimeter.
+- **Orb Artifact Prevention**: No separate tight white specular point-light is used. The spotlight uses a smooth 3-stop falloff matched to the card theme color, ensuring text legibility without floating circular blobs.
+- **Full Frontend Consistency**: Used across landing page cards, dashboard hero banners, question bank cards, practice bank items, and YouTube video carousel cards.
+
 
 
 

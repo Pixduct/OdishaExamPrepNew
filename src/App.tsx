@@ -87,6 +87,7 @@ import { ThemeToggle } from './components/ThemeToggle';
 import { initLenis, destroyLenis } from './lib/lenisScroll';
 import { QuestionBankReaderModal } from './components/QuestionBankReaderModal';
 import { exportQuestionBankToPdf } from './lib/pdfExportEngine';
+import { PdfExportGuideModal } from './components/PdfExportGuideModal';
 
 const getQuestionBankVectorTheme = (title: string = '', category: string = '') => {
   const t = (title + ' ' + (category || '')).toLowerCase();
@@ -488,7 +489,7 @@ const HistoryView = ({
 
   if (!examFilteredActivities || examFilteredActivities.length === 0) {
     return (
-      <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent overflow-x-hidden" style={{ isolation: 'isolate' }}>
+      <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent" style={{ isolation: 'isolate' }}>
         <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-[0.03] pointer-events-none z-0" />
         <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none z-0" />
         <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none z-0" />
@@ -530,7 +531,7 @@ const HistoryView = ({
   }
 
   return (
-    <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent overflow-x-hidden" style={{ isolation: 'isolate' }}>
+    <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent" style={{ isolation: 'isolate' }}>
       {/* Full-Screen Edge-to-Edge Academic Vector Canvas Grid & HSL Glows */}
       <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-[0.03] pointer-events-none z-0" />
       <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none z-0" />
@@ -5516,28 +5517,11 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     setTestResults(finalResults);
   };
   // Stats for comparisons
-  // (Moving these inside the component so activities is in scope)
-  // NOTE: selectedBankItem is intentionally NOT restored from sessionStorage on mount.
-  // Restoring it caused a persistent blur/scroll-lock race condition where the body blur
-  // was applied before renderCommonModals() had a chance to render the modal panel.
   const [selectedBankItem, setSelectedBankItem] = useState<any | null>(null);
   const [activeReadingBank, setActiveReadingBank] = useState<any | null>(null);
+  const [pdfGuideItem, setPdfGuideItem] = useState<any | null>(null);
 
-  const handleExportPdfForBank = async (bankItem: any) => {
-    if (isGuest) {
-      setShowLoginPrompt(true);
-      return;
-    }
-    if (bankItem.isPremium && !hasAccessTo(bankItem)) {
-      setPaywallPrice(bankItem.price || 499);
-      setPaywallOriginalPrice(bankItem.originalPrice || ((bankItem.price || 499) * 2));
-      setPaywallItemTitle(bankItem.title || 'Premium Content');
-      setPaywallItemId(bankItem.id);
-      setPaywallProductType('question_bank');
-      setShowPaywall(true);
-      return;
-    }
-
+  const executeExportPdf = async (bankItem: any) => {
     const toastId = toast.loading('Compiling Question Bank PDF booklet with KaTeX formulas...', { icon: '📄' });
     try {
       const fetchedQs = await examService.getQuestionsForQuestionBank(bankItem.id, bankItem.title, bankItem.examId || selectedExam);
@@ -5559,11 +5543,35 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         totalQuestions: fetchedQs.length,
         questions: fetchedQs,
       });
-      toast.success('PDF booklet downloaded directly to your device!', { id: toastId });
+      toast.success('PDF booklet generated successfully! Ready to save.', { id: toastId });
     } catch (err: any) {
       console.error('PDF export failed:', err);
       toast.error('Could not generate PDF booklet: ' + (err?.message || 'Error'), { id: toastId });
     }
+  };
+
+  const handleExportPdfForBank = async (bankItem: any) => {
+    if (isGuest) {
+      setShowLoginPrompt(true);
+      return;
+    }
+    if (bankItem.isPremium && !hasAccessTo(bankItem)) {
+      setPaywallPrice(bankItem.price || 499);
+      setPaywallOriginalPrice(bankItem.originalPrice || ((bankItem.price || 499) * 2));
+      setPaywallItemTitle(bankItem.title || 'Premium Content');
+      setPaywallItemId(bankItem.id);
+      setPaywallProductType('question_bank');
+      setShowPaywall(true);
+      return;
+    }
+
+    const hasSeenGuide = typeof window !== 'undefined' && localStorage.getItem('oep_seen_pdf_export_guide') === 'true';
+    if (!hasSeenGuide) {
+      setPdfGuideItem(bankItem);
+      return;
+    }
+
+    executeExportPdf(bankItem);
   };
 
   useEffect(() => {
@@ -6801,6 +6809,18 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               setShowPaywall(true);
             }
           }}
+        />
+
+        {/* Global Student PDF Export Quick Guide Modal */}
+        <PdfExportGuideModal
+          isOpen={!!pdfGuideItem}
+          onClose={() => setPdfGuideItem(null)}
+          onConfirm={() => {
+            const item = pdfGuideItem;
+            setPdfGuideItem(null);
+            if (item) executeExportPdf(item);
+          }}
+          title={pdfGuideItem?.title}
         />
       </>,
       document.body
@@ -8084,7 +8104,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     }
 
     return (
-      <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent overflow-x-hidden" style={{ isolation: 'isolate' }}>
+      <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent" style={{ isolation: 'isolate' }}>
         {/* Full-Screen Edge-to-Edge Academic Vector Canvas Grid & HSL Glows */}
         <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-[0.03] pointer-events-none z-0" />
         <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none z-0 gpu-accelerated" />
@@ -9084,7 +9104,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
     return (
       <ErrorBoundary>
-      <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent overflow-x-hidden" style={{ isolation: 'isolate' }}>
+      <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent" style={{ isolation: 'isolate' }}>
         {/* Full-Screen Edge-to-Edge Academic Vector Canvas Grid & HSL Glows */}
         <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-[0.03] pointer-events-none z-0" />
         <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none z-0" />

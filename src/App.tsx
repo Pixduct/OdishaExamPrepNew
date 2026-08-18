@@ -5450,6 +5450,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     ? propsSelectedExam
     : internalSelectedExam;
 
+  const currentExam = useMemo(() => exams.find((e: any) => e.id === selectedExam), [exams, selectedExam]);
+
   const setSelectedExam = (val: string | null) => {
     if (val === null) {
       sessionStorage.setItem('oep_auto_navigated_dismissed', 'true');
@@ -5597,7 +5599,6 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       document.body.style.overflow = '';
       return;
     }
-    const currentExam = exams.find((e: any) => e.id === selectedExam);
     let hasBundle = false;
     if (currentExam) {
       const examDesc = currentExam.description || '';
@@ -9259,8 +9260,6 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       </div>
     );
   }
-
-    const currentExam = exams.find(e => e.id === selectedExam);
 
     if (loadingDashboardData && !currentExam) {
       return <LoadingPortal />;

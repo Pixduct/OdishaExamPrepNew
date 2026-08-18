@@ -1,43 +1,48 @@
-# Memory — Admin Control Center, Exam Monitoring Tracker & UI Imprints
+# Memory — DynamicVectorCard Borderless Elevation & Overflow Clipping Resolution
 
-Last updated: 2026-08-18T15:37:45+05:30
+Last updated: 2026-08-18T21:13:30+05:30
 
 ## What was built
 
-### 1. Admin Exam Monitoring & Countdown Tracker (`src/AdminPanel.tsx#L140-L223, #L6430-L6465`)
-- Built `getExamAdminTracker()` helper and real-time double-deck badges in the Exams Manager Details column.
-- Color-coded countdown badges: `⏳ Days Remaining`, `🔥 Urgent (≤15d)` *(pulsing)*, `🔥 Exam Conducted Today!` *(pulsing)*, `✅ Exam Conducted`, `📢 Date TBA`, `🔮 Tentative`.
-- Color-coded form fill-up lifecycle badges: `📝 Form Open`, `🔒 Form Closed`, `🔔 Notification Awaited`, `⏳ Dates TBA`.
+### 1. DynamicVectorCard Borderless Elevation Engine (`src/components/DynamicVectorCard.tsx`)
+- Stripped Layer D (`rimRef`) 1px mask composite border layer (`maskComposite: 'exclude'`), eliminating static 1px border lines and halo box outlines around cards.
+- Calibrated ambient radial gradient falloff to `radius: 300px` (light) / `360px` (dark) with stops `0% core → 30% mid → 60% transparent`. Light reaches 0.000 alpha inside the card footprint, mathematically preventing rectangular edge clipping lines.
+- Fixed Tailwind hover selector variant from `[.is-card-hovered_&]` to `[&.is-card-hovered]`, ensuring 3D perspective tilt and scale trigger smoothly on card hover.
 
-### 2. Admin Exam Monitoring Fieldset Modal (`src/AdminPanel.tsx#L1935-L1985`)
-- Embedded temporal lifecycle controls in the Add/Edit Exam modal with `Calendar` icon header: `Exam Date Status`, `Exam Target Date`, `Form Fill-up Status`, and `Form Fill-up End Date`.
-- Correctly persists all metadata inside `JSON_METADATA_` serialized description, parses on edit, and invalidates in-memory and storage caches on update.
+### 2. Standardized Borderless Card Design Across All Hub Cards
+- Removed static `border border-white/20`, `border-white/10`, and `border-slate-200` classes across:
+  - `src/App.tsx` (Guided Recommendation Hero, Step 1 Practice Tests, Step 2 Mock Tests, Step 3 Reference Library)
+  - `src/components/AIStudyPlanCard.tsx`
+  - `src/components/ExamReadinessCard.tsx`
+  - `src/components/SmartRecommendationCard.tsx`
+  - `src/components/PersonalBestCard.tsx`
+  - `src/components/TopicConfidenceMatrix.tsx`
+- Replaced rigid border lines with soft elevation shadow tokens (`shadow-xl shadow-slate-900/10 dark:shadow-slate-950/30` / `hover:shadow-2xl`).
 
-### 3. Route Refresh Persistence & Auth Guard Synchronization (`src/lib/AuthContext.tsx` & `src/components/ProtectedRoute.tsx`)
-- Resolved redirect-to-home issue on page reload inside `/admin` by eagerly initializing `manualAdmin` from `localStorage`, computing `isAdmin` deterministically across email/manual session/metadata/profile, awaiting `fetchProfile` prior to `loading: false`, and adding an admin session backup check in `ProtectedRoute`.
+### 3. Root Viewport Overflow & Grid Negative Margin Resolution (`src/App.tsx`)
+- Removed `overflow-x-hidden` from all 4 `DashboardContent` root container instances (`lines 492, 534, 8107, 9107`), which was the root cause of cards getting sliced on the right edge.
+- Removed `p-1.5 -m-1.5` negative margins from the Step 1 Practice Tests grid container and set explicit `relative w-full h-full min-h-full` sizing.
 
-### 4. UI Registry Imprints (`context/ui-registry.md`)
-- **Entry #43**: `AdminExamMonitoringBadges` (Exams Manager Countdown & Lifecycle Badges).
-- **Entry #44**: `AdminExamMonitoringModalSection` (Schedule & Form Fill-up Monitoring Fieldset).
+### 4. UI Registry & Progress Tracker Imprints (`context/ui-registry.md`, `context/progress-tracker.md`)
+- Updated Entry #41 with the complete Borderless Elevation & Viewport Overflow Protection pattern specifications.
 
 ## Decisions made
-- **JSON Metadata Serialization for Exam Attributes**: Stored exam dates and form lifecycle states inside `JSON_METADATA_` within the `description` column, guaranteeing compatibility with Supabase without altering PostgreSQL table schema.
-- **Immediate Deterministic Admin Auth Resolution**: Initialized `manualAdmin` directly from `localStorage` on initial React state render and evaluated `isAdmin` across admin email (`odishaexamprep365@gmail.com`), `manualAdmin`, and user metadata, preventing auth flash redirects on page reload.
-- **In-Memory & Storage Cache Invalidation on Mutations**: Added explicit `cacheService.clear('all_exams')` and cleared `sessionStorage` catalog caches on exam additions, edits, and deletions.
+- **Borderless Elevation Over Rigid 1px Strokes**: Rely on ambient light backlighting and multi-layer elevation shadows rather than 1px border lines on dark/glass cards over light canvas backgrounds.
+- **Top-Level Root Viewport Isolation**: Keep `overflow-x: hidden` strictly on `html, body` in `index.css`. Inner page containers must not use `overflow-x-hidden` to avoid clipping 3D hover scale transformations.
+- **Zero-Alpha Edge Rule**: Dynamic cursor lighting layers must fade to `transparent` at ≤60% of radius so no non-zero alpha pixels contact `inset: 0` bounding boxes.
 
 ## Problems solved
-- **`ReferenceError: Calendar is not defined`**: Added `Calendar` to `lucide-react` imports in `src/AdminPanel.tsx` (L27).
-- **Exam Date disappearing after Save**: Serialized `examDate` into `metaObj` in `handleSubmit` and parsed `parsedExamMeta.examDate` in `handleEditClick`.
-- **Admin Control Center Refresh redirecting to Home**: Synchronized profile resolution and added deterministic admin role checks in `AuthContext.tsx` and `ProtectedRoute.tsx`.
+- **Card Right-Edge & Corner Slicing**: Fixed by removing `overflow-x-hidden` on `DashboardContent` root divs and removing `-m-1.5` negative margins.
+- **1px Border Line & Rectangular Halo Edge**: Fixed by removing `rimRef` mask layer and recalibrating radial gradient stops in `DynamicVectorCard.tsx`.
+- **Card Hover Selector Inaction**: Fixed by updating the Tailwind selector variant to `[&.is-card-hovered]`.
 
 ## Current state
-- Project compiles cleanly with 0 errors (`npm run build` verified — Exit Code 0).
-- `ui-registry.md` has 44 entries, fully up to date.
-- Refreshing anywhere in `/admin` maintains exact tab, exam, filter, and drill-down state.
+- TypeScript builds cleanly (`npx tsc --noEmit` — 0 errors).
+- All cards float 100% borderless with clean rounded corners and smooth 3D hover lighting across all screen sizes.
+- `ui-registry.md` and `progress-tracker.md` are up to date.
 
 ## Next session starts with
-- Ready for any new feature, page, or UI component requested by the developer.
+- Ready for any new feature, page, or UI refinement requested by the developer.
 
 ## Open questions
 - None.
-

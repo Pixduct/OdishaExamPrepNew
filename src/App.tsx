@@ -85,6 +85,8 @@ import { getInstantQuestionsForTopic } from './lib/instantQuestionCompiler';
 import { examService } from './lib/examService';
 import { ThemeToggle } from './components/ThemeToggle';
 import { initLenis, destroyLenis } from './lib/lenisScroll';
+import { QuestionBankReaderModal } from './components/QuestionBankReaderModal';
+import { exportQuestionBankToPdf } from './lib/pdfExportEngine';
 
 const getQuestionBankVectorTheme = (title: string = '', category: string = '') => {
   const t = (title + ' ' + (category || '')).toLowerCase();
@@ -622,7 +624,10 @@ const HistoryView = ({
             { id: 'download',   label: 'Downloads',  icon: <Download className="w-3.5 h-3.5" /> },
           ];
           return (
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+            <div 
+              className="flex items-center gap-2 overflow-x-auto overscroll-contain touch-pan-x no-scrollbar py-1"
+              data-lenis-prevent
+            >
               {filters.map(f => {
                 const count = filterCounts[f.id];
                 const isActive = activeFilter === f.id;
@@ -1117,14 +1122,9 @@ const ExamRegistrySection = ({
           </p>
         </div>
 
-        <DynamicVectorCard
-          glowColor="rgba(37, 99, 235, 0.35)"
-          roundedClass="rounded-[2.5rem]"
-          className="w-full"
-        >
         <div className={cn(
           "flex flex-col items-center w-full",
-          isMobile ? "gap-4" : "gap-6 md:items-stretch md:gap-0 md:bg-white/90 dark:md:bg-slate-900/90 md:backdrop-blur-md md:border-2 md:border-slate-900/80 dark:md:border-slate-700/80 md:rounded-[2.5rem] md:overflow-hidden md:shadow-[6px_6px_0px_rgba(37,99,235,0.15)] dark:md:shadow-[8px_8px_0px_rgba(37,99,235,0.4)] md:divide-y-2 md:divide-slate-100 dark:md:divide-slate-800"
+          isMobile ? "gap-4" : "gap-6 md:items-stretch md:gap-0 md:bg-white dark:md:bg-slate-900/90 md:border-2 md:border-slate-900/80 dark:md:border-slate-700/80 md:rounded-[2.5rem] md:overflow-hidden md:shadow-[6px_6px_0px_rgba(37,99,235,0.15)] dark:md:shadow-[8px_8px_0px_rgba(37,99,235,0.4)] md:divide-y-2 md:divide-slate-100 dark:md:divide-slate-800"
         )}>
           {announcements.map((item, idx) => {
             const statusMeta = EXAM_REGISTRY_STATUS_MAP[item.status] || {
@@ -1136,7 +1136,7 @@ const ExamRegistrySection = ({
               <div 
                 key={idx} 
                 className={cn(
-                  "w-full flex flex-col items-center text-center md:flex-row md:items-center md:text-left md:justify-between bg-white/90 dark:bg-slate-900/90 backdrop-blur-md",
+                  "w-full flex flex-col items-center text-center md:flex-row md:items-center md:text-left md:justify-between bg-white dark:bg-slate-900",
                   isMobile 
                     ? cn("p-5 border border-slate-250/60 dark:border-slate-800 border-l-4 rounded-2xl shadow-sm gap-5", statusBorderColor)
                     : "p-6 sm:p-8 border-2 border-slate-900/80 dark:border-slate-800 rounded-3xl md:rounded-none md:border-none shadow-[4px_4px_0px_rgba(37,99,235,0.15)] md:shadow-none hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors gap-6"
@@ -1171,7 +1171,6 @@ const ExamRegistrySection = ({
             );
           })}
         </div>
-        </DynamicVectorCard>
       </div>
     </section>
   );
@@ -1258,13 +1257,15 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
           </p>
         </div>
 
-        {/* Tab switcher */}
-        <div className={cn(
-          "flex justify-center max-w-3xl mx-auto relative z-10",
-          isMobile 
-            ? "gap-1.5 p-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-xl border border-slate-200/30 dark:border-slate-700/50 flex-nowrap overflow-x-auto no-scrollbar w-full"
-            : "gap-2 sm:gap-4 p-1.5 bg-slate-100/60 dark:bg-slate-800/60 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 flex-wrap"
-        )}>
+        <div 
+          data-lenis-prevent
+          className={cn(
+            "flex justify-center max-w-3xl mx-auto relative z-10",
+            isMobile 
+              ? "gap-1.5 p-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-xl border border-slate-200/30 dark:border-slate-700/50 flex-nowrap overflow-x-auto overscroll-contain touch-pan-x no-scrollbar w-full"
+              : "gap-2 sm:gap-4 p-1.5 bg-slate-100/60 dark:bg-slate-800/60 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 flex-wrap"
+          )}
+        >
           {tabs.map((tab, i) => {
             const isTabActive = activeTabIdx === i;
             return (
@@ -1327,8 +1328,8 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
                   <DynamicVectorCard
                     className={cn(
                       isMobile 
-                        ? "bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-200/60 dark:border-slate-800 border-l-4 border-l-[#2563EB] rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3 relative active:scale-[0.98] transition-transform duration-200"
-                        : "bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-2 border-slate-900/80 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 shadow-[4px_4px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)] flex items-start justify-between gap-4"
+                        ? "bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 border-l-4 border-l-[#2563EB] rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3 relative active:scale-[0.98] transition-transform duration-200"
+                        : "bg-white dark:bg-slate-900 border-2 border-slate-900/80 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 shadow-[4px_4px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)] flex items-start justify-between gap-4"
                     )}
                   >
                     <div className="space-y-1">
@@ -1551,7 +1552,7 @@ const AchieversJournalSection = () => {
                   >
                     <DynamicVectorCard
                       className={cn(
-                        "bg-white/90 dark:bg-slate-900/90 backdrop-blur-md text-slate-900 dark:text-white flex flex-col justify-between transition-all duration-300",
+                        "bg-white dark:bg-slate-900 text-slate-900 dark:text-white flex flex-col justify-between transition-all duration-300",
                         isMobile
                           ? "border border-slate-200/60 dark:border-slate-800 rounded-2xl p-4 shadow-md shadow-slate-100/80 dark:shadow-none active:scale-[0.99]"
                           : "border-2 border-slate-900/80 dark:border-slate-700/80 rounded-[2rem] p-6 sm:p-8 shadow-[6px_6px_0px_rgba(37,99,235,0.1)] dark:shadow-[8px_8px_0px_rgba(37,99,235,0.4)] md:hover:-translate-y-1 md:hover:-translate-x-1"
@@ -3520,7 +3521,7 @@ const LandingPage = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
-                  <DynamicVectorCard className="bg-slate-900/90 backdrop-blur-md border-2 border-slate-800 text-white p-3.5 sm:p-5 shadow-xl shadow-slate-950/20 relative overflow-hidden group">
+                  <DynamicVectorCard className="bg-slate-900 border-2 border-slate-800 text-white p-3.5 sm:p-5 shadow-xl shadow-slate-950/20 relative overflow-hidden group">
                   <div className="absolute -right-16 -top-16 w-48 h-48 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
 
                   {/* Mobile View: Thin 44px 1-line bar */}
@@ -3613,7 +3614,7 @@ const LandingPage = () => {
           </section>
         ) : (
           <section className="relative z-10 py-8 sm:py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-slate-200/50 dark:border-slate-800">
-            <DynamicVectorCard className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-2 border-slate-900/80 dark:border-slate-700/80 p-6 sm:p-8 text-slate-900 dark:text-white shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
+            <DynamicVectorCard className="bg-white dark:bg-slate-900 border-2 border-slate-900/80 dark:border-slate-700/80 p-6 sm:p-8 text-slate-900 dark:text-white shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
               <div className="space-y-2 text-center sm:text-left max-w-2xl">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-brand-500/10 dark:bg-brand-500/20 text-brand-600 dark:text-brand-300 border border-brand-500/20 dark:border-brand-500/30">
                   <Sparkles className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
@@ -5043,7 +5044,7 @@ const PurchasesView = ({ user, profile, exams, mockTests, testSeries, dynamicQue
                 {/* Content Items Container */}
                 {totalItems > 0 && (
                   <div className="bg-white/95 border-x border-b border-slate-100 p-4 md:p-6 rounded-b-[1.5rem] md:rounded-b-[2rem]">
-                    <div className="md:max-h-[380px] md:overflow-y-auto overflow-y-visible custom-scrollbar overscroll-contain pr-0 md:pr-2 -mr-0 md:-mr-2" data-lenis-prevent>
+                    <div className="md:max-h-[380px] md:overflow-y-auto overflow-y-visible custom-scrollbar overscroll-contain pr-0 md:pr-2 -mr-0 md:-mr-2">
                       
                       {/* Desktop Grid Layout (visible on sm and up) */}
                       <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-2">
@@ -5520,6 +5521,50 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
   // Restoring it caused a persistent blur/scroll-lock race condition where the body blur
   // was applied before renderCommonModals() had a chance to render the modal panel.
   const [selectedBankItem, setSelectedBankItem] = useState<any | null>(null);
+  const [activeReadingBank, setActiveReadingBank] = useState<any | null>(null);
+
+  const handleExportPdfForBank = async (bankItem: any) => {
+    if (isGuest) {
+      setShowLoginPrompt(true);
+      return;
+    }
+    if (bankItem.isPremium && !hasAccessTo(bankItem)) {
+      setPaywallPrice(bankItem.price || 499);
+      setPaywallOriginalPrice(bankItem.originalPrice || ((bankItem.price || 499) * 2));
+      setPaywallItemTitle(bankItem.title || 'Premium Content');
+      setPaywallItemId(bankItem.id);
+      setPaywallProductType('question_bank');
+      setShowPaywall(true);
+      return;
+    }
+
+    const toastId = toast.loading('Compiling Question Bank PDF booklet with KaTeX formulas...', { icon: '📄' });
+    try {
+      const fetchedQs = await examService.getQuestionsForQuestionBank(bankItem.id, bankItem.title, bankItem.examId || selectedExam);
+      if (!fetchedQs || fetchedQs.length === 0) {
+        if (bankItem.pdfLinks && bankItem.pdfLinks.length > 0 && bankItem.pdfLinks[0].url) {
+          toast.dismiss(toastId);
+          window.open(bankItem.pdfLinks[0].url, '_blank');
+          return;
+        }
+        toast.error('No questions available in this bank to generate PDF.', { id: toastId });
+        return;
+      }
+
+      const currentExamName = exams.find((e: any) => e.id === (bankItem.examId || selectedExam))?.name || 'Odisha Exam Prep';
+      await exportQuestionBankToPdf({
+        title: bankItem.title,
+        subtitle: bankItem.tagline || 'Comprehensive Topic Practice Book',
+        examName: currentExamName,
+        totalQuestions: fetchedQs.length,
+        questions: fetchedQs,
+      });
+      toast.success('PDF Booklet generated successfully! Print or Save as PDF.', { id: toastId });
+    } catch (err: any) {
+      console.error('PDF export failed:', err);
+      toast.error('Could not generate PDF booklet: ' + (err?.message || 'Error'), { id: toastId });
+    }
+  };
 
   useEffect(() => {
     if (selectedBankItem) sessionStorage.setItem('oep_selectedBankItem', JSON.stringify(selectedBankItem));
@@ -5699,188 +5744,131 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       </div>
                     </div>
 
-                    {/* Study Materials */}
-                    <div className="space-y-2 flex-1 flex flex-col min-h-0">
-                      <div className="flex items-center justify-between px-1 shrink-0">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Study Materials</p>
-                        {selectedBankItem.pdfLinks && selectedBankItem.pdfLinks.length > 2 && (
-                          <span className="text-[9px] font-bold text-[#2563EB] animate-pulse">Scroll to view all</span>
-                        )}
-                      </div>
-                      
-                      <motion.div 
-                        initial={isMobile ? "show" : "hidden"}
-                        animate="show"
-                        variants={{
-                          hidden: { opacity: 0 },
-                          show: {
-                            opacity: 1,
-                            transition: { staggerChildren: isMobile ? 0 : 0.08 }
-                          }
-                        }}
-                        className="overflow-y-auto overscroll-contain flex-1 pr-1 space-y-2 custom-scrollbar min-h-[100px] max-h-[280px] sm:max-h-none"
-                        data-lenis-prevent
-                      >
-                        {selectedBankItem.pdfLinks && selectedBankItem.pdfLinks.length > 0 ? (
-                          selectedBankItem.pdfLinks.map((link: any, idx: number) => (
-                            <motion.button 
-                              key={idx}
-                              variants={{
-                                hidden: { opacity: 0, x: -10 },
-                                show: { opacity: 1, x: 0 }
-                              }}
-                              className={cn(
-                                "w-full flex items-center justify-between p-4 sm:p-3.5 rounded-2xl bg-white border border-slate-200/60 shadow-sm cursor-pointer relative overflow-hidden transition-all duration-300 group",
-                                isMobile 
-                                  ? "active:scale-[0.98] active:border-brand-200 active:shadow-md"
-                                  : "hover:bg-brand-50/50 hover:border-brand-200/60 transition-all"
-                              )}
-                              onClick={() => {
-                                if (isGuest) {
-                                  setShowLoginPrompt(true);
-                                  return;
-                                }
-                                if (selectedBankItem.isPremium && !hasAccessTo(selectedBankItem)) {
-                                  setPaywallPrice(selectedBankItem.price || 499);
-                                  setPaywallOriginalPrice(selectedBankItem.originalPrice || ((selectedBankItem.price || 499) * 2));
-                                  setPaywallItemTitle(selectedBankItem.title || 'Premium Content');
-                                  setPaywallFeatures([
-                                    `${selectedBankItem.questionCount || selectedBankItem.questions || '500+'} Questions`,
-                                    selectedBankItem.hasPracticeMode !== false ? 'Interactive Practice Mode' : 'Instant PDF Access',
-                                    selectedBankItem.tagline || 'Detailed Solutions Provided',
-                                    'Advanced Performance Analytics'
-                                  ]);
-                                  setPaywallItemId(selectedBankItem.id);
-                                  setPaywallProductType('question_bank');
-                                  setShowPaywall(true);
-                                } else {
-                                  const currentExamName = exams.find((e: any) => e.id === selectedExam)?.name || 'General';
-                                  const bankCategories: Record<string, string> = {
-                                    'topic-wise': 'Topic-wise Question Bank',
-                                    'exam-focused': 'Exam-Focused Bank',
-                                    'revision-sets': 'Revision Sets',
-                                    'pyq-collections': 'PYQ Collection'
-                                  };
-                                  const specificCategory = selectedBankType ? (bankCategories[selectedBankType] || 'PDF Material') : 'PDF Material';
-
-                                  activityTracker.logActivity(user?.id, {
-                                    type: 'question_bank_accessed',
-                                    title: `Downloaded ${link.title || selectedBankItem.title} PDF`,
-                                    metadata: {
-                                      pdfUrl: link.url,
-                                      examId: selectedExam,
-                                      examName: currentExamName,
-                                      testCategory: specificCategory
-                                    }
-                                  });
-                                  window.open(link.url, '_blank');
-                                }
-                              }}
-                            >
-                              <div className="absolute inset-0 bg-gradient-to-r from-brand-500/0 via-brand-500/[0.012] to-brand-500/0 opacity-0 group-active:opacity-100 transition-opacity pointer-events-none" />
-                              <div className="absolute left-0 top-3 bottom-3 w-1 bg-gradient-to-b from-brand-600 to-brand-500 rounded-r-md opacity-80" />
-
-                              <div className="flex items-center gap-3 relative z-10 min-w-0 flex-1 pl-1">
-                                <div className={cn(
-                                  "w-8.5 h-8.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-[#2563EB] shadow-sm shrink-0",
-                                  !isMobile && "group-hover:scale-110 group-hover:bg-[#2563EB] group-hover:text-white transition-all"
-                                )}>
-                                  <Download className="w-4 h-4" />
-                                </div>
-                                <div className="text-left min-w-0 flex-1">
-                                  <p className="text-xs font-bold text-slate-800 line-clamp-2 pr-1 leading-snug">
-                                    {link.title || 'Download PDF'}
-                                  </p>
-                                  <p className="text-[9px] font-bold text-slate-400 mt-0.5">PDF Document</p>
-                                </div>
-                              </div>
-                              
-                              <div className={cn(
-                                "w-7 h-7 rounded-full bg-slate-50 border border-slate-100/50 flex items-center justify-center text-slate-400 shrink-0 shadow-2xs group-active:translate-x-0.5 transition-all duration-300",
-                                !isMobile && "group-hover:bg-[#2563EB] group-hover:text-white group-hover:border-transparent"
-                              )}>
-                                {selectedBankItem.isPremium && !hasAccessTo(selectedBankItem) ? (
-                                  <Lock className="w-3.5 h-3.5" />
-                                ) : (
-                                  <ChevronRight className="w-4 h-4" />
-                                )}
-                              </div>
-                            </motion.button>
-                          ))
-                        ) : (
-                          <div className="py-8 text-center bg-white rounded-2xl border border-dashed border-slate-200">
-                             <FileText className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No files available</p>
-                          </div>
-                        )}
-                      </motion.div>
-                    </div>
-
-                    {/* Bottom Action Button */}
-                    <div className="pt-2 shrink-0">
+                    {/* Unified Question Bank Action Center */}
+                    <div className="space-y-3 pt-2">
+                      {/* 1. Primary Action: Open & Read in Website */}
                       <Button 
                         variant="primary" 
                         className={cn(
-                          "w-full h-13 rounded-2xl text-xs font-black uppercase tracking-widest premium-gradient text-white shadow-lg shadow-brand-500/20",
-                          !isMobile && "hover:premium-glow",
-                          selectedBankItem.hasPracticeMode === false && "opacity-60 cursor-not-allowed"
+                          "w-full h-13 rounded-2xl text-xs sm:text-sm font-black uppercase tracking-widest premium-gradient text-white shadow-xl shadow-brand-500/25 flex items-center justify-center gap-2.5 cursor-pointer",
+                          !isMobile && "hover:premium-glow hover:scale-[1.01] transition-all"
                         )}
                         onClick={() => {
-                          if (selectedBankItem.hasPracticeMode === false) {
-                            alert("Practice mode for this topic is coming soon!");
-                            return;
-                          }
-                          
                           if (isGuest) {
                             setShowLoginPrompt(true);
                             return;
                           }
-
                           if (selectedBankItem.isPremium && !hasAccessTo(selectedBankItem)) {
                             setPaywallPrice(selectedBankItem.price || 499);
                             setPaywallOriginalPrice(selectedBankItem.originalPrice || ((selectedBankItem.price || 499) * 2));
                             setPaywallItemTitle(selectedBankItem.title || 'Premium Content');
                             setPaywallFeatures([
                               `${selectedBankItem.questionCount || selectedBankItem.questions || '500+'} Questions`,
-                              selectedBankItem.hasPracticeMode !== false ? 'Interactive Practice Mode' : 'Instant PDF Access',
+                              'Interactive Web Reader & PDF Export',
                               selectedBankItem.tagline || 'Detailed Solutions Provided',
-                              'Advanced Performance Analytics'
+                              'KaTeX Mathematical Formula Rendering'
                             ]);
                             setPaywallItemId(selectedBankItem.id);
                             setPaywallProductType('question_bank');
                             setShowPaywall(true);
                           } else {
+                            setActiveReadingBank(selectedBankItem);
                             setSelectedBankItem(null);
-                            setSelectedBankType(null);
-                            setShowPracticeConfig(true);
-                            setPracticeSettings({
-                              ...practiceSettings, 
-                              examId: selectedExam || practiceSettings.examId,
-                              category: selectedBankType || practiceSettings.category,
-                              topic: selectedBankItem.id
-                            });
-                            setMobileExamTab('practice');
-                            scrollToElement('practice-mode-section', { block: 'start', delay: 100 });
                           }
                         }}
                       >
-                        {selectedBankItem.hasPracticeMode === false ? (
-                          <>
-                            <Clock className="w-4 h-4 mr-2" />
-                            Coming Soon
-                          </>
-                        ) : selectedBankItem.isPremium && !hasAccessTo(selectedBankItem) ? (
-                          <>
-                            <Lock className="w-4 h-4 mr-2" />
-                            Unlock to Practice
-                          </>
-                        ) : (
-                          <>
-                            <Play className="w-4 h-4 mr-2 fill-current" />
-                            Practice Now
-                          </>
-                        )}
+                        <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span>Open & Read in Website</span>
                       </Button>
+
+                      {/* 2. Secondary Action Row: Download PDF Booklet & Practice Mode */}
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <button
+                          type="button"
+                          onClick={() => handleExportPdfForBank(selectedBankItem)}
+                          className={cn(
+                            "h-12 rounded-2xl text-xs font-black text-slate-800 bg-white hover:bg-slate-50 border border-slate-200/80 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm active:scale-[0.98]",
+                            !isMobile && "hover:border-brand-300 hover:text-brand-600"
+                          )}
+                        >
+                          <Download className="w-4 h-4 text-brand-600" />
+                          <span>Download PDF</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={selectedBankItem.hasPracticeMode === false}
+                          onClick={() => {
+                            if (selectedBankItem.hasPracticeMode === false) {
+                              alert("Practice mode for this topic is coming soon!");
+                              return;
+                            }
+                            
+                            if (isGuest) {
+                              setShowLoginPrompt(true);
+                              return;
+                            }
+
+                            if (selectedBankItem.isPremium && !hasAccessTo(selectedBankItem)) {
+                              setPaywallPrice(selectedBankItem.price || 499);
+                              setPaywallOriginalPrice(selectedBankItem.originalPrice || ((selectedBankItem.price || 499) * 2));
+                              setPaywallItemTitle(selectedBankItem.title || 'Premium Content');
+                              setPaywallFeatures([
+                                `${selectedBankItem.questionCount || selectedBankItem.questions || '500+'} Questions`,
+                                selectedBankItem.hasPracticeMode !== false ? 'Interactive Practice Mode' : 'Instant PDF Access',
+                                selectedBankItem.tagline || 'Detailed Solutions Provided',
+                                'Advanced Performance Analytics'
+                              ]);
+                              setPaywallItemId(selectedBankItem.id);
+                              setPaywallProductType('question_bank');
+                              setShowPaywall(true);
+                            } else {
+                              setSelectedBankItem(null);
+                              setSelectedBankType(null);
+                              setShowPracticeConfig(true);
+                              setPracticeSettings({
+                                ...practiceSettings, 
+                                examId: selectedExam || practiceSettings.examId,
+                                category: selectedBankType || practiceSettings.category,
+                                topic: selectedBankItem.id
+                              });
+                              setMobileExamTab('practice');
+                              scrollToElement('practice-mode-section', { block: 'start', delay: 100 });
+                            }
+                          }}
+                          className={cn(
+                            "h-12 rounded-2xl text-xs font-black flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm active:scale-[0.98]",
+                            selectedBankItem.hasPracticeMode === false
+                              ? "bg-slate-50 text-slate-400 border border-slate-200 cursor-not-allowed opacity-60"
+                              : "bg-brand-50 hover:bg-brand-100/80 text-brand-600 border border-brand-200/80"
+                          )}
+                        >
+                          <Play className="w-4 h-4 fill-current" />
+                          <span>Practice Mode</span>
+                        </button>
+                      </div>
+
+                      {/* 3. Optional Extra Attached Materials (Only if admin explicitly added external links) */}
+                      {selectedBankItem.pdfLinks && selectedBankItem.pdfLinks.length > 0 && (
+                        <div className="pt-2 border-t border-slate-100 space-y-2">
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.18em]">
+                            Supplementary Attachments
+                          </p>
+                          <div className="space-y-1.5 max-h-[140px] overflow-y-auto custom-scrollbar pr-1">
+                            {selectedBankItem.pdfLinks.map((link: any, idx: number) => (
+                              <button
+                                key={idx}
+                                type="button"
+                                onClick={() => window.open(link.url, '_blank')}
+                                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-brand-50/50 border border-slate-200/60 text-xs font-bold text-slate-700 hover:text-brand-600 transition-all text-left"
+                              >
+                                <span className="truncate flex-1 pr-2">{link.title || `Attachment ${idx + 1}`}</span>
+                                <Download className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -6795,6 +6783,25 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             </>
           )}
         </AnimatePresence>
+
+        {/* Question Bank Web Reader Modal */}
+        <QuestionBankReaderModal
+          isOpen={!!activeReadingBank}
+          bank={activeReadingBank}
+          examName={exams.find((e: any) => e.id === (activeReadingBank?.examId || selectedExam))?.name || 'Odisha Exam Prep'}
+          onClose={() => setActiveReadingBank(null)}
+          hasAccess={!activeReadingBank?.isPremium || hasAccessTo(activeReadingBank)}
+          onUnlockRequired={() => {
+            if (activeReadingBank) {
+              setPaywallPrice(activeReadingBank?.price || 499);
+              setPaywallOriginalPrice(activeReadingBank?.originalPrice || ((activeReadingBank?.price || 499) * 2));
+              setPaywallItemTitle(activeReadingBank?.title || 'Premium Content');
+              setPaywallItemId(activeReadingBank?.id);
+              setPaywallProductType('question_bank');
+              setShowPaywall(true);
+            }
+          }}
+        />
       </>,
       document.body
     );
@@ -6913,7 +6920,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
   // Hide WhatsApp button on mobile when any dashboard modal is open, lock body scroll, and apply background blur
   useEffect(() => {
-    const isAnyModalOpen = !!(showPaywall || showLoginPrompt || showPracticeConfig || selectedBankItem || (infoModal && infoModal.isOpen));
+    const isAnyModalOpen = !!(showPaywall || showLoginPrompt || showPracticeConfig || selectedBankItem || activeReadingBank || (infoModal && infoModal.isOpen));
     if (isAnyModalOpen) {
       document.body.style.overflow = 'hidden';
       document.documentElement.style.overflow = 'hidden'; // Lock html too to prevent swipe horizontal panning on mobile
@@ -6933,7 +6940,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       document.body.removeAttribute('data-premium-blur');
       document.body.removeAttribute('data-modal-open');
     };
-  }, [showPaywall, showLoginPrompt, showPracticeConfig, selectedBankItem, infoModal]);
+  }, [showPaywall, showLoginPrompt, showPracticeConfig, selectedBankItem, activeReadingBank, infoModal]);
   const [topicMaxQuestions, setTopicMaxQuestions] = useState<number>(0);
   const [practiceSettings, setPracticeSettings] = useState(() => {
     const saved = sessionStorage.getItem('oep_practiceSettings');
@@ -7125,10 +7132,24 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               if (!bank.pdfUrl) return [];
               try {
                 const parsed = JSON.parse(bank.pdfUrl);
-                if (Array.isArray(parsed)) return parsed;
-                return [{ title: 'Download PDF', url: bank.pdfUrl }];
+                if (Array.isArray(parsed)) {
+                  return parsed.filter((l: any) => l && typeof l.url === 'string' && (l.url.startsWith('http://') || l.url.startsWith('https://') || l.url.startsWith('/')));
+                }
+                if (parsed && typeof parsed === 'object') {
+                  if (Array.isArray(parsed.pdfLinks)) {
+                    return parsed.pdfLinks.filter((l: any) => l && typeof l.url === 'string' && (l.url.startsWith('http://') || l.url.startsWith('https://') || l.url.startsWith('/')));
+                  }
+                  return [];
+                }
+                if (typeof bank.pdfUrl === 'string' && (bank.pdfUrl.startsWith('http://') || bank.pdfUrl.startsWith('https://'))) {
+                  return [{ title: 'Download Attached PDF', url: bank.pdfUrl }];
+                }
+                return [];
               } catch (e) {
-                return [{ title: 'Download PDF', url: bank.pdfUrl }];
+                if (typeof bank.pdfUrl === 'string' && (bank.pdfUrl.startsWith('http://') || bank.pdfUrl.startsWith('https://'))) {
+                  return [{ title: 'Download Attached PDF', url: bank.pdfUrl }];
+                }
+                return [];
               }
             })(),
             sortOrder: bank.sortOrder ?? bank.sort_order ?? null,
@@ -8152,7 +8173,15 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
               <div 
                 ref={continuePracticeRef}
-                className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory py-3 sm:py-4 px-4 sm:px-6"
+                onWheel={(e) => {
+                  const container = e.currentTarget;
+                  const isAtRightEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 2;
+                  const isAtLeftEnd = container.scrollLeft <= 2;
+                  if ((e.deltaY > 0 && !isAtRightEnd) || (e.deltaY < 0 && !isAtLeftEnd)) {
+                    container.scrollLeft += e.deltaY * 0.85;
+                  }
+                }}
+                className="flex gap-3 sm:gap-4 overflow-x-auto overscroll-contain touch-pan-x no-scrollbar snap-x snap-mandatory py-3 sm:py-4 px-4 sm:px-6"
                 style={{
                   WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)',
                   maskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)'
@@ -8311,7 +8340,15 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
               <div 
                 ref={recentActivityRef}
-                className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory py-3 sm:py-4 px-4 sm:px-6"
+                onWheel={(e) => {
+                  const container = e.currentTarget;
+                  const isAtRightEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 2;
+                  const isAtLeftEnd = container.scrollLeft <= 2;
+                  if ((e.deltaY > 0 && !isAtRightEnd) || (e.deltaY < 0 && !isAtLeftEnd)) {
+                    container.scrollLeft += e.deltaY * 0.85;
+                  }
+                }}
+                className="flex gap-3 sm:gap-4 overflow-x-auto overscroll-contain touch-pan-x no-scrollbar snap-x snap-mandatory py-3 sm:py-4 px-4 sm:px-6"
                 style={{
                   WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)',
                   maskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)'
@@ -9874,7 +9911,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   className={cn(
                     isMobile
                       ? "flex flex-col gap-3.5"
-                      : "grid grid-cols-1 sm:grid-cols-2 lg:gap-8 gap-4 sm:gap-6"
+                      : "grid grid-cols-1 sm:grid-cols-2 lg:gap-8 gap-4 sm:gap-6 p-1.5 -m-1.5"
                   )}
                 >
                   {[
@@ -9944,7 +9981,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         ) : (
                           <div 
                             className={cn(
-                              "p-6 sm:p-7 lg:p-8 text-white rounded-[2.2rem] hover:-translate-y-2 hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative overflow-hidden h-full border border-white/20 shadow-slate-950/20 card-3d-deep",
+                              "p-6 sm:p-7 lg:p-8 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative overflow-hidden h-full border border-white/20 shadow-slate-950/20 card-3d-deep",
                               vecTheme.gradient
                             )}
                             onClick={() => {
@@ -10199,7 +10236,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       ) : (
                         <div 
                           className={cn(
-                            "p-6 sm:p-7 lg:p-8 text-white rounded-[2.2rem] hover:-translate-y-2 hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative overflow-hidden h-full border border-white/20 shadow-slate-950/20 card-3d-deep",
+                            "p-6 sm:p-7 lg:p-8 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative overflow-hidden h-full border border-white/20 shadow-slate-950/20 card-3d-deep",
                             vecTheme.gradient
                           )}
                           onClick={() => {
@@ -10350,7 +10387,17 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   return (
                     <div className="space-y-6 sm:space-y-8">
                       {/* Horizontal Scrollable Subject Tabs */}
-                      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-1 -mx-1 sm:mx-0">
+                      <div 
+                        className="flex items-center gap-2 overflow-x-auto overscroll-contain touch-pan-x no-scrollbar py-1 px-1 -mx-1 sm:mx-0"
+                        onWheel={(e) => {
+                          const container = e.currentTarget;
+                          const isAtRightEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 2;
+                          const isAtLeftEnd = container.scrollLeft <= 2;
+                          if ((e.deltaY > 0 && !isAtRightEnd) || (e.deltaY < 0 && !isAtLeftEnd)) {
+                            container.scrollLeft += e.deltaY * 0.85;
+                          }
+                        }}
+                      >
                         {subjectsList.map((subj) => {
                           const isActive = selectedSectionalSubject === subj;
                           return (
@@ -10503,7 +10550,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     <div
                       onClick={() => setSelectedBankType(item.id)}
                       className={cn(
-                        "p-5 sm:p-6 text-white rounded-[2.2rem] hover:-translate-y-2 hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-5 relative overflow-hidden h-full border border-white/20 shadow-slate-950/20 card-3d-deep min-h-[260px]",
+                        "p-5 sm:p-6 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-5 relative overflow-hidden h-full border border-white/20 shadow-slate-950/20 card-3d-deep min-h-[260px]",
                         vecTheme.gradient
                       )}
                     >

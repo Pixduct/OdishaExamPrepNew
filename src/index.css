@@ -85,6 +85,15 @@ body.is-scrolling .backdrop-blur {
   -webkit-backdrop-filter: none !important;
 }
 
+/* Universal Scroll Isolation: Keeps horizontal scroll isolated while allowing vertical page scrolling */
+.overflow-x-auto {
+  overscroll-behavior-x: contain;
+}
+.overflow-y-auto,
+[data-lenis-prevent] {
+  overscroll-behavior-y: contain;
+}
+
 /* Force GPU Layer Compositing */
 .gpu-accelerated {
   transform: translateZ(0);
@@ -268,17 +277,16 @@ body[data-premium-blur="true"] #root {
   }
 
   .card-3d-deep {
-    transform-style: preserve-3d;
-    transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.5s ease;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     will-change: transform;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
+    isolation: isolate;
+    transform: translateZ(0);
     -webkit-font-smoothing: antialiased;
   }
   .card-3d-deep:hover {
     box-shadow:
-      0 60px 120px rgba(124,58,237,0.12),
-      0 20px 60px rgba(0,0,0,0.03);
+      0 40px 80px -12px rgba(124, 58, 237, 0.22),
+      0 20px 45px -15px rgba(0, 0, 0, 0.4);
   }
 
   .crisp-vector-card {
@@ -406,7 +414,7 @@ body[data-premium-blur="true"] #root {
 
   .cv-card-auto {
     content-visibility: auto;
-    contain-intrinsic-size: 1px 140px;
+    contain-intrinsic-size: auto 280px;
   }
 
   .transition-colors-shadow {

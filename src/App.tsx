@@ -1237,7 +1237,7 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
   const activeTab = tabs[activeTabIdx] || tabs[0];
 
   return (
-    <section id="syllabus-paths" className={cn("scroll-mt-24 border-b border-slate-200/50 dark:border-slate-800", isMobile ? "py-10" : "py-12 md:py-16")}>
+    <section id="syllabus-paths" className={cn("scroll-mt-24", isMobile ? "py-10" : "py-12 md:py-16")}>
       <div className={cn("max-w-7xl mx-auto space-y-6 md:space-y-12", isMobile ? "px-4" : "px-6")}>
         <div className="flex flex-col items-center space-y-4 text-center">
           <span className="section-chip">
@@ -3384,7 +3384,7 @@ const LandingPage = () => {
 
       <main className="flex-1 bg-transparent transition-colors duration-300 relative z-10">
         {/* Elite Split-Layout Hero Section */}
-        <section className="relative overflow-hidden pt-20 sm:pt-24 lg:pt-28 pb-12 lg:pb-16 border-b border-slate-200/50 dark:border-slate-800">
+        <section className="relative overflow-hidden pt-20 sm:pt-24 lg:pt-28 pb-12 lg:pb-16">
           {/* Animated Mesh + Grid Background */}
           <div className="absolute inset-0 -z-10 mesh-bg opacity-100 dark:opacity-30" />
           <div className="absolute inset-0 -z-10 grid-bg opacity-60 dark:opacity-20" />
@@ -3506,7 +3506,7 @@ const LandingPage = () => {
 
         {/* Home Dashboard Exam Readiness, Smart Recommendation & AI Study Plan System — Only render for LOGGED-IN users */}
         {user ? (
-          <section className="relative z-10 py-8 sm:py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 border-b border-slate-200/50 dark:border-slate-800">
+          <section className="relative z-10 py-8 sm:py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
             <ExamReadinessCard userId={user?.id} onStartPracticeClick={() => scrollToElement('exams', { block: 'start', delay: 50 })} />
             <AIStudyPlanCard userId={user?.id} />
             <SmartRecommendationCard userId={user?.id} onLaunchPractice={(topic) => scrollToElement('exams', { block: 'start', delay: 50 })} />
@@ -3613,7 +3613,7 @@ const LandingPage = () => {
             })()}
           </section>
         ) : (
-          <section className="relative z-10 py-8 sm:py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-slate-200/50 dark:border-slate-800">
+          <section className="relative z-10 py-8 sm:py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <DynamicVectorCard className="bg-white dark:bg-slate-900 border-2 border-slate-900/80 dark:border-slate-700/80 p-6 sm:p-8 text-slate-900 dark:text-white shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
               <div className="space-y-2 text-center sm:text-left max-w-2xl">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-brand-500/10 dark:bg-brand-500/20 text-brand-600 dark:text-brand-300 border border-brand-500/20 dark:border-brand-500/30">
@@ -3642,7 +3642,7 @@ const LandingPage = () => {
         )}
 
         {/* 1. Practice Core (Explore Exams) */}
-        <section id="exams" className="py-12 md:py-16 scroll-mt-24 border-b border-slate-200/50 dark:border-slate-800 bg-transparent">
+        <section id="exams" className="py-12 md:py-16 scroll-mt-24 bg-transparent">
           <div id="exam-gateway-wrapper" data-tour="exam-search" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 sm:space-y-10">
             <div id="exam-gateway-header" className="flex flex-col items-center space-y-4 text-center">
               <span className="section-chip">
@@ -9192,7 +9192,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
           {/* Mobile Premium Segmented Tab Switcher */}
           {isMobile && (
-            <div className="sticky top-16 z-20 -mx-4 px-4 py-2.5 bg-slate-50/95 backdrop-blur-md border-b border-slate-200/50 mt-1">
+            <div className="sticky top-16 z-20 -mx-4 px-4 py-2.5 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md mt-1">
               <div className="flex bg-slate-100 p-1 rounded-xl relative shadow-inner">
                 <button
                   type="button"

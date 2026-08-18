@@ -1,41 +1,43 @@
-# Memory — Telegram AI Model Reporting & GitHub Actions Workflow Optimization
+# Memory — Admin Control Center, Exam Monitoring Tracker & UI Imprints
 
-Last updated: 2026-08-18T10:45:00+05:30
+Last updated: 2026-08-18T15:37:45+05:30
 
 ## What was built
 
-### 1. Telegram AI Model Usage Reporting Across All 6 Automation Engines
-- **Transparent AI Reporting:** Updated all 6 python automation scripts (`ca_formatter.py`, `ca_publisher.py`, `breaking_engine.py`, `engagement_engine.py`, `seo_blog_engine.py`, `exam_update_engine.py`) and `shared/telegram.py` to track and report the exact model used.
-- **Admin Alerts:** Every Telegram admin notification now clearly shows whether the primary model or fallback model was used:
-  - `🤖 AI Model: ✅ PRIMARY — nvidia/nemotron-3-super-120b-a12b`
-  - `🤖 AI Model: ⚠️ FALLBACK — openai/gpt-oss-120b`
+### 1. Admin Exam Monitoring & Countdown Tracker (`src/AdminPanel.tsx#L140-L223, #L6430-L6465`)
+- Built `getExamAdminTracker()` helper and real-time double-deck badges in the Exams Manager Details column.
+- Color-coded countdown badges: `⏳ Days Remaining`, `🔥 Urgent (≤15d)` *(pulsing)*, `🔥 Exam Conducted Today!` *(pulsing)*, `✅ Exam Conducted`, `📢 Date TBA`, `🔮 Tentative`.
+- Color-coded form fill-up lifecycle badges: `📝 Form Open`, `🔒 Form Closed`, `🔔 Notification Awaited`, `⏳ Dates TBA`.
 
-### 2. GitHub Actions Workflow Reliability Audit & Timeout Fixes
-- **`daily_ca_website.yml` & `ca_website_publisher.py`:** Resolved GitHub Actions timeout cancellation `(!)` by adding an 8-item batch cap (`MAX_ITEMS_PER_RUN = 8`), a 10-minute script runtime guard (`MAX_RUN_TIME_SECONDS = 600`), reducing AI API timeouts from 90s to 40s, and extending workflow timeout to 30 minutes.
-- **Standardized Permissions:** Added `permissions: contents: write` across all 7 workflow files to ensure automated git history commits never fail with HTTP 403.
-- **Complete Secret Mappings:** Mapped `PEXELS_API_KEY`, `NVIDIA_NEMOTRON_KEY`, `NVIDIA_GPT_OSS_KEY`, and `DEEPSEEK_API_KEY` across all workflows that fetch stock images or run dual-model AI failover.
-- **History Sync for `daily_mcq.yml`:** Added automated `Commit and Push Updated History` step to `daily_mcq.yml` so MCQ deduplication records persist across runs.
-- **Playwright Browser Cache Optimization:** Updated `daily_ca.yml`, `daily_mcq.yml`, and `engagement_engine.yml` with `cache-hit` checks (`if [ "$CACHE_HIT" != "true" ]`), skipping the 150MB Chromium download when cached and saving 30–45s per run.
+### 2. Admin Exam Monitoring Fieldset Modal (`src/AdminPanel.tsx#L1935-L1985`)
+- Embedded temporal lifecycle controls in the Add/Edit Exam modal with `Calendar` icon header: `Exam Date Status`, `Exam Target Date`, `Form Fill-up Status`, and `Form Fill-up End Date`.
+- Correctly persists all metadata inside `JSON_METADATA_` serialized description, parses on edit, and invalidates in-memory and storage caches on update.
 
-### 3. GitHub Actions Runtime & Quota Audit
-- **30-Day Budget Analysis:** Verified that all 7 workflows combined consume ~982.5 minutes/month, staying well under the 2,000 free minute quota for private repositories (and 0 cost if public).
+### 3. Route Refresh Persistence & Auth Guard Synchronization (`src/lib/AuthContext.tsx` & `src/components/ProtectedRoute.tsx`)
+- Resolved redirect-to-home issue on page reload inside `/admin` by eagerly initializing `manualAdmin` from `localStorage`, computing `isAdmin` deterministically across email/manual session/metadata/profile, awaiting `fetchProfile` prior to `loading: false`, and adding an admin session backup check in `ProtectedRoute`.
+
+### 4. UI Registry Imprints (`context/ui-registry.md`)
+- **Entry #43**: `AdminExamMonitoringBadges` (Exams Manager Countdown & Lifecycle Badges).
+- **Entry #44**: `AdminExamMonitoringModalSection` (Schedule & Form Fill-up Monitoring Fieldset).
 
 ## Decisions made
-- **Dual-Model Reporting:** Always pass `model_used` and `used_fallback` into Telegram `details` dictionaries to provide full visibility into AI execution.
-- **Script-Level Runtime Guards:** Place 10-minute execution limits inside Python processing loops so scripts exit cleanly and save history to Git before workflow timeout limits trigger.
-- **Conditional Browser Caching:** Use `actions/cache@v4` for Playwright Chromium binaries with explicit `cache-hit` checks to maximize workflow execution speed.
+- **JSON Metadata Serialization for Exam Attributes**: Stored exam dates and form lifecycle states inside `JSON_METADATA_` within the `description` column, guaranteeing compatibility with Supabase without altering PostgreSQL table schema.
+- **Immediate Deterministic Admin Auth Resolution**: Initialized `manualAdmin` directly from `localStorage` on initial React state render and evaluated `isAdmin` across admin email (`odishaexamprep365@gmail.com`), `manualAdmin`, and user metadata, preventing auth flash redirects on page reload.
+- **In-Memory & Storage Cache Invalidation on Mutations**: Added explicit `cacheService.clear('all_exams')` and cleared `sessionStorage` catalog caches on exam additions, edits, and deletions.
 
 ## Problems solved
-- **Workflow Timeout Cancellation `(!)`:** Fixed the issue where `daily_ca_website.yml` timed out at 15 minutes and was cancelled by GitHub Actions due to un-capped processing loops.
-- **Missing Secrets in Workflows:** Restored missing `PEXELS_API_KEY` and `NVIDIA_NEMOTRON_KEY` mappings in workflow files.
-- **MCQ History Persistence:** Resolved missing history sync step in `daily_mcq.yml`.
+- **`ReferenceError: Calendar is not defined`**: Added `Calendar` to `lucide-react` imports in `src/AdminPanel.tsx` (L27).
+- **Exam Date disappearing after Save**: Serialized `examDate` into `metaObj` in `handleSubmit` and parsed `parsedExamMeta.examDate` in `handleEditClick`.
+- **Admin Control Center Refresh redirecting to Home**: Synchronized profile resolution and added deterministic admin role checks in `AuthContext.tsx` and `ProtectedRoute.tsx`.
 
 ## Current state
-- 100% clean Python syntax verified (`py_compile` exit code 0 across all automation scripts).
-- All changes committed and pushed to GitHub (`Pixduct/odisha-mcq-engine` and `Pixduct/OdishaExamPrepNew`).
+- Project compiles cleanly with 0 errors (`npm run build` verified — Exit Code 0).
+- `ui-registry.md` has 44 entries, fully up to date.
+- Refreshing anywhere in `/admin` maintains exact tab, exam, filter, and drill-down state.
 
 ## Next session starts with
-- Assist the user with any new feature requests, automation monitoring, or UI enhancements.
+- Ready for any new feature, page, or UI component requested by the developer.
 
 ## Open questions
 - None.
+

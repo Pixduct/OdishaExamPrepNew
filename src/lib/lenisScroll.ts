@@ -14,6 +14,13 @@ export function initLenis(): Lenis | null {
     smoothWheel: true,
     wheelMultiplier: 0.60,
     touchMultiplier: 0,
+    prevent: (node: HTMLElement) => {
+      if (!node || !(node instanceof HTMLElement)) return false;
+      return (
+        node.hasAttribute('data-lenis-prevent') ||
+        Boolean(node.closest('[data-lenis-prevent]'))
+      );
+    },
   });
 
   // High performance RAF loop

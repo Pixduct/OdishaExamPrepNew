@@ -762,10 +762,12 @@ export const examService = {
     await callAdminDbProxy('mockTests', 'delete', undefined, undefined, { seriesId: { op: 'like', val: `%\"examId\":\"${id}\"%` } });
 
     // Delete the exam
+    cacheService.clear('all_exams');
     await callAdminDbProxy('exams', 'delete', undefined, id);
   },
 
   async updateExam(id: string, updates: Partial<Exam>) {
+    cacheService.clear('all_exams');
     const data = await callAdminDbProxy('exams', 'update', updates, id);
     return data?.[0] || data;
   },
@@ -868,5 +870,55 @@ export const examService = {
     }
     const data = await callAdminDbProxy('questionBanks', 'update', updates, id);
     return data?.[0] || data;
+  },
+
+  async getQuestionsForQuestionBank(bankId: string, bankTitle?: string, examId?: string): Promise<Question[]> {
+    try {
+      // 1. Try to fetch from questions table matching topic = bankTitle or topic = bankId
+      let query = supabase
+        .from('questions')
+        .select('id, examId, topic, difficulty, questionText, options, correctAnswerIndex, explanation, diagram, sortOrder');
+
+      if (bankTitle) {
+        query = query.eq('topic', bankTitle);
+      } else if (bankId) {
+        query = query.eq('topic', bankId);
+      }
+
+      if (examId) {
+        query = query.eq('examId', examId);
+      }
+
+      const { data, error } = await query.order('sortOrder', { ascending: true, nullsFirst: false });
+      if (!error && data && data.length > 0) {
+        return data;
+      }
+
+      // 2. If empty and bankId is present, check questionBanks table for embedded pdfUrl or questions
+      if (bankId) {
+        const { data: bankData } = await supabase
+          .from('questionBanks')
+          .select('pdfUrl')
+          .eq('id', bankId)
+          .single();
+
+        if (bankData?.pdfUrl) {
+          try {
+            const parsed = JSON.parse(bankData.pdfUrl);
+            if (Array.isArray(parsed) && parsed.length > 0 && (parsed[0].questionText || parsed[0].question)) {
+              return parsed;
+            }
+            if (parsed.questionsData && Array.isArray(parsed.questionsData)) {
+              return parsed.questionsData;
+            }
+          } catch (e) {}
+        }
+      }
+
+      return data || [];
+    } catch (err) {
+      console.error("Error in getQuestionsForQuestionBank:", err);
+      return [];
+    }
   }
 };

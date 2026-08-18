@@ -194,7 +194,17 @@ export default function BlogList() {
           </div>
 
           {/* Category Tabs */}
-          <div className="flex justify-start sm:justify-center overflow-x-auto no-scrollbar py-2 gap-2 scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div 
+            onWheel={(e) => {
+              const container = e.currentTarget;
+              const isAtRightEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 2;
+              const isAtLeftEnd = container.scrollLeft <= 2;
+              if ((e.deltaY > 0 && !isAtRightEnd) || (e.deltaY < 0 && !isAtLeftEnd)) {
+                container.scrollLeft += e.deltaY * 0.85;
+              }
+            }}
+            className="flex justify-start sm:justify-center overflow-x-auto overscroll-contain touch-pan-x no-scrollbar py-2 gap-2 scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0"
+          >
             {CATEGORIES.map(category => (
               <button
                 key={category}

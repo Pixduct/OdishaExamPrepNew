@@ -1,6 +1,6 @@
 {
   "type": "unhandledrejection",
   "message": "Unhandled Promise Rejection",
-  "reason": "Lock broken by another request with the 'steal' option.",
-  "stack": "AbortError: Lock broken by another request with the 'steal' option."
+  "reason": "WebSocket closed without opened.",
+  "stack": "Error: WebSocket closed without opened.\n    at WebSocket.<anonymous> (http://localhost:3000/@vite/client:454:22)"
 }

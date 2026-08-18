@@ -112,10 +112,19 @@ const AuthContext = createContext<AuthContextType>({
   refreshProfile: async () => {},
 });
 
+const ADMIN_EMAILS = ['odishaexamprep365@gmail.com'];
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
-  const [manualAdmin, setManualAdmin] = useState<any | null>(null);
+  const [manualAdmin, setManualAdmin] = useState<any | null>(() => {
+    try {
+      const storedAdmin = localStorage.getItem('admin_session');
+      return storedAdmin ? JSON.parse(storedAdmin) : null;
+    } catch (e) {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
   const [guestUsage, setGuestUsage] = useState({ questions: 0, tests: 0 });
 
@@ -295,9 +304,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         // Fallback/Default: use cached session if refresh is skipped or fails
         setUser(session.user);
-        // Force refresh the profile data to update user_metadata from server in the background.
-        // This is safe because getUser() failure does not clear the session or log the user out.
-        fetchProfile(session.user, true);
+        await fetchProfile(session.user, true);
       } else {
         setUser(null);
         setProfile(null);
@@ -305,17 +312,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        const adminEmails = ['odishaexamprep365@gmail.com'];
         const userEmail = (session.user.email || '').toLowerCase().trim();
-        if (!adminEmails.includes(userEmail)) {
+        if (!ADMIN_EMAILS.includes(userEmail)) {
           setManualAdmin(null);
           localStorage.removeItem('admin_session');
           localStorage.removeItem('oep_offline_vault');
         }
-        fetchProfile(session.user, false);
+        await fetchProfile(session.user, false);
       } else {
         setProfile(null);
         setManualAdmin(null);
@@ -453,9 +459,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const isAdmin = user 
-    ? profile?.role === 'admin' 
-    : manualAdmin?.role === 'admin';
+  const effectiveUser = user || manualAdmin;
+  const userEmail = (effectiveUser?.email || (effectiveUser as any)?.user?.email || '').toLowerCase().trim();
+  const isEmailAdmin = ADMIN_EMAILS.includes(userEmail);
+  const isManualAdmin = manualAdmin?.role === 'admin';
+  const isMetaAdmin = effectiveUser?.user_metadata?.role === 'admin' || (effectiveUser as any)?.app_metadata?.role === 'admin';
+  const isProfileAdmin = profile?.role === 'admin';
+
+  const isAdmin = isEmailAdmin || isManualAdmin || isMetaAdmin || isProfileAdmin;
   const hasFullAccess = isAdmin || profile?.hasFullAccess === true;
 
   const grantFullAccess = async () => {

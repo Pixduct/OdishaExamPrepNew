@@ -2012,7 +2012,7 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
                             )}
       
                             {/* Right column: Expandable List */}
-                            <div className={cn("space-y-4 max-h-[380px] overflow-y-auto overscroll-contain custom-scrollbar pr-1", uniqueSubjects.length > 0 ? "lg:col-span-7" : "lg:col-span-12")} data-lenis-prevent style={{ overscrollBehaviorY: 'contain' }}>
+                            <div className={cn("space-y-4 max-h-[380px] overflow-y-auto overscroll-contain custom-scrollbar pr-1", uniqueSubjects.length > 0 ? "lg:col-span-7" : "lg:col-span-12")} style={{ overscrollBehaviorY: 'contain' }}>
                                {exam.mockTests && exam.mockTests.length > 0 && (
                                  <div className="space-y-3">
                                    <h4 className="text-[9.5px] font-mono font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest pl-1">Mock Tests</h4>

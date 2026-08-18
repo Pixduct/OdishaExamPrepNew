@@ -9415,16 +9415,16 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               className={cn(
-                "relative overflow-hidden rounded-2xl sm:rounded-[2.2rem] text-white p-4 sm:p-8 md:p-10 shadow-2xl border transition-all duration-500 card-3d-deep group mb-6 sm:mb-10",
+                "relative rounded-2xl sm:rounded-[2.2rem] text-white p-4 sm:p-8 md:p-10 shadow-2xl border transition-all duration-500 card-3d-deep group mb-6 sm:mb-10",
                 recVecTheme.gradient,
                 "border-white/20 shadow-slate-950/30"
               )}
             >
-              {/* Geometric Watermark Grid */}
-              <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none z-0" />
-              
-              {/* Large Vector Watermark Icon */}
-              <RecWatermarkIcon className="absolute -right-6 -bottom-6 w-48 h-48 sm:w-64 sm:h-64 opacity-15 stroke-[1.2] text-white pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+              {/* Inner Watermark & Grid Background Wrapper */}
+              <div className="absolute inset-0 overflow-hidden rounded-2xl sm:rounded-[2.2rem] pointer-events-none z-0">
+                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
+                <RecWatermarkIcon className="absolute -right-6 -bottom-6 w-48 h-48 sm:w-64 sm:h-64 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
+              </div>
 
               <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-8">
                 <div className="space-y-2 sm:space-y-4 max-w-2xl">
@@ -9504,16 +9504,16 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               className={cn(
-                "relative overflow-hidden rounded-2xl sm:rounded-[2.2rem] text-white p-4 sm:p-8 md:p-10 shadow-2xl border transition-all duration-500 card-3d-deep group mb-6 sm:mb-10",
+                "relative rounded-2xl sm:rounded-[2.2rem] text-white p-4 sm:p-8 md:p-10 shadow-2xl border transition-all duration-500 card-3d-deep group mb-6 sm:mb-10",
                 recVecTheme.gradient,
                 "border-white/20 shadow-slate-950/30"
               )}
             >
-              {/* Geometric Watermark Grid */}
-              <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none z-0" />
-              
-              {/* Large Vector Watermark Icon */}
-              <RecWatermarkIcon className="absolute -right-6 -bottom-6 w-48 h-48 sm:w-64 sm:h-64 opacity-15 stroke-[1.2] text-white pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+              {/* Inner Watermark & Grid Background Wrapper */}
+              <div className="absolute inset-0 overflow-hidden rounded-2xl sm:rounded-[2.2rem] pointer-events-none z-0">
+                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
+                <RecWatermarkIcon className="absolute -right-6 -bottom-6 w-48 h-48 sm:w-64 sm:h-64 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
+              </div>
 
               <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-8">
                 <div className="space-y-2 sm:space-y-4 max-w-2xl">
@@ -9981,7 +9981,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         ) : (
                           <div 
                             className={cn(
-                              "p-6 sm:p-7 lg:p-8 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative overflow-hidden h-full border border-white/20 shadow-slate-950/20 card-3d-deep",
+                              "p-6 sm:p-7 lg:p-8 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative h-full border border-white/20 shadow-slate-950/20 card-3d-deep",
                               vecTheme.gradient
                             )}
                             onClick={() => {
@@ -9989,11 +9989,11 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                               scrollToElement('practice-mode-section', { block: 'start', delay: 50 });
                             }}
                           >
-                            {/* Geometric Radial Watermark Grid */}
-                            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:14px_14px] pointer-events-none z-0" />
-                            
-                            {/* 3D Floating Watermark Icon */}
-                            <WatermarkIcon className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-white pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                            {/* Inner Watermark & Grid Background Wrapper */}
+                            <div className="absolute inset-0 overflow-hidden rounded-[2.2rem] pointer-events-none z-0">
+                              <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:14px_14px]" />
+                              <WatermarkIcon className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
+                            </div>
 
                             <div className="space-y-4 relative z-10">
                               <div className="flex items-center justify-between gap-3">
@@ -10236,7 +10236,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       ) : (
                         <div 
                           className={cn(
-                            "p-6 sm:p-7 lg:p-8 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative overflow-hidden h-full border border-white/20 shadow-slate-950/20 card-3d-deep",
+                            "p-6 sm:p-7 lg:p-8 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative h-full border border-white/20 shadow-slate-950/20 card-3d-deep",
                             vecTheme.gradient
                           )}
                           onClick={() => {
@@ -10244,11 +10244,11 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                             scrollToElement('test-series', { block: 'start', delay: 50 });
                           }}
                         >
-                          {/* Geometric Radial Watermark Grid */}
-                          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:14px_14px] pointer-events-none z-0" />
-                          
-                          {/* 3D Floating Watermark Icon */}
-                          <WatermarkIcon className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-white pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                          {/* Inner Watermark & Grid Background Wrapper */}
+                          <div className="absolute inset-0 overflow-hidden rounded-[2.2rem] pointer-events-none z-0">
+                            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:14px_14px]" />
+                            <WatermarkIcon className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
+                          </div>
 
                           <div className="space-y-4 relative z-10">
                             <div className="flex items-center justify-between gap-3">
@@ -10550,15 +10550,15 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     <div
                       onClick={() => setSelectedBankType(item.id)}
                       className={cn(
-                        "p-5 sm:p-6 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-5 relative overflow-hidden h-full border border-white/20 shadow-slate-950/20 card-3d-deep min-h-[260px]",
+                        "p-5 sm:p-6 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-5 relative h-full border border-white/20 shadow-slate-950/20 card-3d-deep min-h-[260px]",
                         vecTheme.gradient
                       )}
                     >
-                      {/* Geometric Radial Watermark Grid */}
-                      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:14px_14px] pointer-events-none z-0" />
-                      
-                      {/* 3D Floating Watermark Icon */}
-                      <WatermarkIcon className="absolute -right-6 -bottom-6 w-40 h-40 opacity-15 stroke-[1.2] text-white pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                      {/* Inner Watermark & Grid Background Wrapper */}
+                      <div className="absolute inset-0 overflow-hidden rounded-[2.2rem] pointer-events-none z-0">
+                        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:14px_14px]" />
+                        <WatermarkIcon className="absolute -right-6 -bottom-6 w-40 h-40 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
+                      </div>
 
                       <div className="space-y-3.5 relative z-10">
                         <div className="flex items-center justify-between gap-3">

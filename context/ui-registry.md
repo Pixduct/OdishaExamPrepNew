@@ -63,6 +63,7 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`AdminSWRControlCenterEngine`** | Admin / Performance | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx) | 0ms SWR Catalog Caching (`getAllMockTestsLite`), Skeleton Shimmer | AdminPanel.tsx | Active |
 | **`AdminRefreshPersistenceEngine`** | Admin / Navigation | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx) | URL Param State Sync (`replaceState`), Session Persistence | AdminPanel.tsx | Active |
 | **`AdminSubjectSelector`** | Admin / Form Control | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L2160-L2199) | Academic Subject Dropdown Filter + Custom Input (`✏️ + Enter Custom Subject...`) | AdminPanel.tsx | Active |
+| **`QuestionBankReaderModal`** | Overlay / Modal | [`src/components/QuestionBankReaderModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/QuestionBankReaderModal.tsx) | Interactive Web Reader, Filter Pills, Show/Hide Solutions, KaTeX Math & 1-Click PDF Export | App.tsx | Active |
 
 ---
 
@@ -1828,7 +1829,25 @@ Last updated: August 18, 2026
 
 ---
 
-### 39. `AdminSubjectSelector`
+### 39. `UniversalScrollBoundaryIsolationEngine`
+
+File: [`src/lib/lenisScroll.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/lenisScroll.ts), [`src/index.css`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/index.css), [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
+Last updated: August 18, 2026
+
+| Property | Implementation Pattern |
+| :--- | :--- |
+| **Lenis Prevent Callback** | `prevent: (node) => node.hasAttribute('data-lenis-prevent') \|\| Boolean(node.closest('[data-lenis-prevent]'))` |
+| **CSS Axis Overscroll** | `.overflow-x-auto { overscroll-behavior-x: contain; }`, `.overflow-y-auto { overscroll-behavior-y: contain; }` |
+| **Inline Track Wheel Delta** | `onWheel={(e) => { const c = e.currentTarget; if ((e.deltaY > 0 && !(c.scrollLeft + c.clientWidth >= c.scrollWidth - 2)) \|\| (e.deltaY < 0 && !(c.scrollLeft <= 2))) { c.scrollLeft += e.deltaY * 0.85; } }}` |
+| **Dedicated Modal Lenis** | Independent `Lenis` instance with `wrapper: modalScrollRef.current`, `lerp: 0.18`, `wheelMultiplier: 0.60` |
+
+**Pattern notes:**
+- **Zero Home Page Freeze**: Inline horizontal page tracks do not declare `data-lenis-prevent` and use axis-separated `overscroll-behavior-x: contain`, allowing main page Lenis window scrolling to pass through smoothly without getting trapped on page refresh.
+- **Strict Modal Isolation**: Popups, drawers, sidebars, and test engines declare `[data-lenis-prevent]` and run their own isolated kinetic scroll instances.
+
+---
+
+### 40. `AdminSubjectSelector`
 
 File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L2160-L2199)
 Last updated: August 18, 2026
@@ -1888,7 +1907,90 @@ Last updated: August 18, 2026
 - **Full Frontend Consistency**: Used across landing page cards, dashboard hero banners, question bank cards, practice bank items, and YouTube video carousel cards.
 
 
+---
 
+### 42. `ExecutiveHeaderNavigation` (Fixed Top Header — Guest & Signed-In States)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L2102-L2320)
+Last updated: August 18, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Header Root** | `fixed top-0 left-0 right-0 w-full z-[60] transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300 ease-out will-change-[transform,height]` |
+| **Background — Scrolled** | `bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800 shadow-md shadow-slate-900/10 dark:shadow-black/60` |
+| **Background — Top** | `bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50` |
+| **Background — Mobile Menu Open** | `bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800` |
+| **Inner Row** | `w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between relative z-[65] transition-[height] duration-300 ease-out will-change-[height]` |
+| **Height — Scrolled** | `h-14 sm:h-16` |
+| **Height — Default** | `h-16 sm:h-20` |
+| **Logo Emblem** | `w-9 h-9 sm:w-11 sm:h-11 rounded-xl border-2 border-slate-900 dark:border-slate-700 bg-[#2563EB] flex items-center justify-center shadow-[3px_3px_0px_#0f172a] dark:shadow-[3px_3px_0px_rgba(99,102,241,0.3)] group-hover:rotate-3 group-hover:scale-105 transition-all duration-300` |
+| **Logo Title** | `font-serif font-black text-lg sm:text-2xl tracking-tight text-slate-900 dark:text-white group-hover:text-[#2563EB] transition-colors duration-300 uppercase` |
+| **Nav Pill Container (both states)** | `flex items-center gap-1 bg-slate-100/80 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/60 rounded-2xl p-1 shadow-xs` |
+| **Nav Link — Inactive** | `flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer select-none text-slate-600 dark:text-slate-300 hover:text-[#2563EB] dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-800` |
+| **Nav Link — Active (Brand)** | `bg-white dark:bg-slate-900 text-[#2563EB] dark:text-brand-400 shadow-xs font-black` (added to base inactive classes) |
+| **Nav Link — Active (Amber)** | `bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-xs font-black` (for Current Affairs link) |
+| **Right Utility Pill (signed-in)** | `flex items-center gap-1.5 bg-slate-100/80 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/60 rounded-2xl p-1 shadow-xs` |
+| **Search Button** | `flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:text-[#2563EB] dark:hover:text-white transition-all text-xs font-black cursor-pointer shadow-xs border border-transparent hover:border-slate-200 dark:hover:border-slate-700 group shrink-0` |
+| **Streak Flame Button** | `flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 border border-amber-500/30 shadow-2xs transition-all text-xs font-black cursor-pointer group shrink-0` |
+| **Profile Dropdown Trigger** | `flex items-center gap-2.5 cursor-pointer bg-slate-100/80 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-900 p-1.5 pr-3 rounded-2xl transition-all border border-slate-200/80 dark:border-slate-700/60 shadow-xs` |
+| **Profile Name** | `text-xs font-black text-slate-800 dark:text-white leading-none mb-0.5` |
+| **Profile Email** | `text-[10px] font-bold text-slate-400 dark:text-slate-400 leading-none` |
+| **Profile Dropdown Panel** | `absolute right-0 mt-2 w-60 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-[100]` |
+| **Divider (right side)** | `border-l border-slate-200 dark:border-slate-700` |
+| **Guest SIGN IN CTA** | `px-5 py-2.5 rounded-2xl bg-[#2563EB] hover:bg-brand-600 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-brand-500/30 hover:shadow-brand-500/50 hover:scale-[1.03] active:scale-95 transition-all border border-brand-400/40` |
+
+**Pattern notes:**
+- **Viewport-Anchored Sticky**: Header uses `fixed top-0 left-0 right-0` (not `sticky`) so it is always locked to the browser viewport, regardless of Flexbox column parent container height.
+---
+
+### 43. `AdminExamMonitoringBadges` (Exams Manager Countdown & Lifecycle Badges)
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L6430-L6465)
+Last updated: August 18, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Badge Container Stack** | `flex flex-col gap-1.5` |
+| **Base Badge Root** | `inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-black border` |
+| **Urgent Countdown (≤15d)** | `bg-red-100 text-red-700 border-red-200 animate-pulse` |
+| **Warning Countdown (≤45d)** | `bg-amber-100 text-amber-700 border-amber-200` |
+| **Normal Countdown (>45d)** | `bg-emerald-100 text-emerald-700 border-emerald-200` |
+| **Exam Day Badge** | `bg-red-100 text-red-700 border-red-200 animate-pulse` |
+| **Passed Exam Badge** | `bg-slate-100 text-slate-500 border-slate-200` |
+| **Date TBA / Not Published** | `bg-blue-50 text-blue-600 border-blue-200` |
+| **Expected / Tentative Date** | `bg-purple-50 text-purple-600 border-purple-200` |
+| **Form Open Badge** | `bg-emerald-100 text-emerald-700 border-emerald-200` |
+| **Form Closed Badge** | `bg-slate-100 text-slate-500 border-slate-200` |
+| **Notification Awaited Badge** | `bg-amber-100 text-amber-700 border-amber-200` |
+| **Form Dates TBA Badge** | `bg-blue-50 text-blue-600 border-blue-200` |
+
+**Pattern notes:**
+- **Double-Deck Lifecycle Indicator**: Each row in the Exams Manager Details column displays two stacked micro-badges: (1) Exam Date Countdown / Status, (2) Form Fill-up Status.
+- **Urgent Pulsing**: When an exam is within 15 days or conducted today, `animate-pulse` is applied alongside the red alert color token to highlight urgent action items for administrators.
+- **Semantic Color Uniformity**: Emerald (`bg-emerald-100 text-emerald-700`) signifies active/healthy states (Form Open, plenty of days left), Amber signifies transition states (Notification awaited, ≤45d countdown), Blue indicates TBA/pending statuses, and Purple indicates tentative projections.
+
+---
+
+### 44. `AdminExamMonitoringModalSection` (Schedule & Form Fill-up Monitoring Fieldset)
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L1935-L1985)
+Last updated: August 18, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Section Card Root** | `md:col-span-2 p-6 bg-slate-100/60 rounded-3xl border border-slate-200/80 space-y-4` |
+| **Header Row** | `flex items-center gap-2` |
+| **Section Icon** | `<Calendar className="w-5 h-5 text-brand-600" />` |
+| **Section Title** | `text-sm font-black text-slate-900 uppercase tracking-wider` |
+| **Controls Grid** | `grid grid-cols-1 md:grid-cols-2 gap-4 pt-2` |
+| **Field Wrapper** | `space-y-1.5` |
+| **Field Label** | `text-xs font-black text-slate-600` |
+| **Select Wrapper** | `relative` |
+| **Dropdown Chevron** | `w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none` |
+
+**Pattern notes:**
+- **Isolated Fieldset Elevation**: Enclosed within a muted rounded container (`bg-slate-100/60 border border-slate-200/80 rounded-3xl p-6`) to visually differentiate temporal lifecycle controls from static content and pricing fields.
+- **Icon Anchored**: Uses `Calendar` with brand blue accent (`text-brand-600`) in the section heading to maintain visual alignment with other admin modular panels.
 
 
 

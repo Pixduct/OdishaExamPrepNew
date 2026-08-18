@@ -23,7 +23,17 @@ import {
   Bell,
   Mail,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Calendar,
+  RotateCcw,
+  FileCode,
+  Code,
+  KeyRound,
+  Sparkles,
+  BookOpen,
+  Eye,
+  CheckCircle2,
+  HelpCircle
 } from 'lucide-react';
 import { Reorder } from 'framer-motion';
 import { examService, Question, TestSeries, MockTest, Exam } from './lib/examService';
@@ -134,11 +144,103 @@ const getMockTestScope = (t: any) => {
   return { examId: '', category: 'full-length', subject: null };
 };
 
+export const getExamAdminTracker = (exam: any) => {
+  let meta: any = {};
+  if (exam && exam.description && typeof exam.description === 'string' && exam.description.startsWith('JSON_METADATA_')) {
+    try {
+      meta = JSON.parse(exam.description.replace('JSON_METADATA_', ''));
+    } catch(e) {}
+  }
+
+  const examDateStr = meta?.examDate || exam?.examDate || '';
+  const examDateStatus = meta?.examDateStatus || (examDateStr ? 'published' : 'tba');
+  const formFillupStatus = meta?.formFillupStatus || 'tba';
+  const formFillupEndDate = meta?.formFillupEndDate || '';
+
+  // Calculate Days Remaining
+  let countdownText = '📢 Date Not Published';
+  let countdownType: 'urgent' | 'warning' | 'normal' | 'today' | 'passed' | 'tba' | 'expected' = 'tba';
+  let daysLeft: number | null = null;
+
+  if (examDateStatus === 'published' && examDateStr) {
+    const targetDate = new Date(examDateStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    targetDate.setHours(0, 0, 0, 0);
+
+    const diffTime = targetDate.getTime() - today.getTime();
+    daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (daysLeft > 0) {
+      countdownText = `⏳ ${daysLeft} Days Remaining`;
+      if (daysLeft <= 15) countdownType = 'urgent';
+      else if (daysLeft <= 45) countdownType = 'warning';
+      else countdownType = 'normal';
+    } else if (daysLeft === 0) {
+      countdownText = `🔥 Exam Conducted Today!`;
+      countdownType = 'today';
+    } else {
+      countdownText = `✅ Exam Conducted (${Math.abs(daysLeft)}d ago)`;
+      countdownType = 'passed';
+    }
+  } else if (examDateStatus === 'expected') {
+    countdownText = `🔮 Expected: ${examDateStr || 'Soon'}`;
+    countdownType = 'expected';
+  } else {
+    countdownText = `📢 Date TBA / Not Published`;
+    countdownType = 'tba';
+  }
+
+  // Form fillup badge info
+  let formText = '⏳ Form Dates TBA';
+  let formType: 'open' | 'closed' | 'awaited' | 'tba' = formFillupStatus as any;
+
+  if (formFillupStatus === 'open') {
+    if (formFillupEndDate) {
+      const fillupEnd = new Date(formFillupEndDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      fillupEnd.setHours(0, 0, 0, 0);
+      const days = Math.ceil((fillupEnd.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      if (days >= 0) {
+        formText = `📝 Form Open (${days}d left - Ends ${formFillupEndDate})`;
+      } else {
+        formText = `🔒 Form Fill-up Closed`;
+        formType = 'closed';
+      }
+    } else {
+      formText = `📝 Form Fill-up Open`;
+    }
+  } else if (formFillupStatus === 'closed') {
+    formText = `🔒 Form Fill-up Closed`;
+  } else if (formFillupStatus === 'awaited') {
+    formText = `🔔 Notification Awaited`;
+  } else {
+    formText = `⏳ Form Dates TBA`;
+  }
+
+  return {
+    examDateStr,
+    examDateStatus,
+    formFillupStatus,
+    formFillupEndDate,
+    daysLeft,
+    countdownText,
+    countdownType,
+    formText,
+    formType
+  };
+};
+
 const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () => void }) => {
   const [activeTab, setActiveTab] = useState<'questions' | 'series' | 'tests' | 'exams' | 'banks' | 'users' | 'updates' | 'settings' | 'subscribers' | 'notifications'>(() => {
-    const saved = sessionStorage.getItem('oep_adminActiveTab');
-    if (saved === 'questions' || saved === 'series' || saved === 'tests' || saved === 'exams' || saved === 'banks' || saved === 'users' || saved === 'updates' || saved === 'settings' || saved === 'subscribers' || saved === 'notifications') {
-      return saved as any;
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tabParam = urlParams.get('tab');
+      const validTabs = ['questions', 'series', 'tests', 'exams', 'banks', 'users', 'updates', 'settings', 'subscribers', 'notifications'];
+      if (tabParam && validTabs.includes(tabParam)) return tabParam as any;
+      const saved = sessionStorage.getItem('oep_adminActiveTab');
+      if (saved && validTabs.includes(saved)) return saved as any;
     }
     return 'exams';
   });
@@ -146,17 +248,82 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const [examFilter, setExamFilter] = useState<'all' | 'popular' | 'upcoming'>('all');
   const [testFilter, setTestFilter] = useState<'all' | 'full-length' | 'sectional' | 'pyq' | 'daily'>('all');
   const [testSortDirection, setTestSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [selectedExamIdForTests, setSelectedExamIdForTests] = useState<string | null>(null);
-  const [selectedCategoryForTests, setSelectedCategoryForTests] = useState<string | null>(null);
-  const [selectedExamIdForBanks, setSelectedExamIdForBanks] = useState<string | null>(null);
-  const [selectedExamIdForSeries, setSelectedExamIdForSeries] = useState<string | null>(null);
-  const [selectedExamIdForQuestions, setSelectedExamIdForQuestions] = useState<string | null>(() => sessionStorage.getItem('oep_qs_examId') || null);
-  const [selectedTypeForQuestions, setSelectedTypeForQuestions] = useState<'mock' | 'bank' | null>(() => (sessionStorage.getItem('oep_qs_type') as 'mock' | 'bank' | null) || null);
-  const [selectedCategoryForQuestions, setSelectedCategoryForQuestions] = useState<string | null>(() => sessionStorage.getItem('oep_qs_category') || null);
-  const [selectedTargetIdForQuestions, setSelectedTargetIdForQuestions] = useState<string | null>(() => sessionStorage.getItem('oep_qs_targetId') || null);
-  const [bankFilter, setBankFilter] = useState<'all' | 'topic-wise' | 'exam-focused' | 'revision-sets' | 'pyq-collections'>('all');
+  const [selectedExamIdForTests, setSelectedExamIdForTests] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('tests_examId') || sessionStorage.getItem('oep_tests_examId') || null;
+    }
+    return null;
+  });
+  const [selectedCategoryForTests, setSelectedCategoryForTests] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('tests_cat') || sessionStorage.getItem('oep_tests_category') || null;
+    }
+    return null;
+  });
+  const [selectedExamIdForBanks, setSelectedExamIdForBanks] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('banks_examId') || sessionStorage.getItem('oep_banks_examId') || null;
+    }
+    return null;
+  });
+  const [selectedExamIdForSeries, setSelectedExamIdForSeries] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('series_examId') || sessionStorage.getItem('oep_series_examId') || null;
+    }
+    return null;
+  });
+  const [selectedExamIdForQuestions, setSelectedExamIdForQuestions] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('examId') || sessionStorage.getItem('oep_qs_examId') || null;
+    }
+    return null;
+  });
+  const [selectedTypeForQuestions, setSelectedTypeForQuestions] = useState<'mock' | 'bank' | null>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const t = urlParams.get('type');
+      if (t === 'mock' || t === 'bank') return t;
+      return (sessionStorage.getItem('oep_qs_type') as 'mock' | 'bank' | null) || null;
+    }
+    return null;
+  });
+  const [selectedCategoryForQuestions, setSelectedCategoryForQuestions] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('category') || sessionStorage.getItem('oep_qs_category') || null;
+    }
+    return null;
+  });
+  const [selectedTargetIdForQuestions, setSelectedTargetIdForQuestions] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('targetId') || sessionStorage.getItem('oep_qs_targetId') || null;
+    }
+    return null;
+  });
+  const [bankFilter, setBankFilter] = useState<'all' | 'topic-wise' | 'exam-focused' | 'revision-sets' | 'pyq-collections'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('oep_bankFilter');
+      if (saved) return saved as any;
+    }
+    return 'all';
+  });
   const [bankTargetModeFilter, setBankTargetModeFilter] = useState<'all' | 'bank' | 'practice' | 'both'>('all');
-  const [bankSubTab, setBankSubTab] = useState<'banks' | 'practice' | 'all'>('banks');
+  const [bankSubTab, setBankSubTab] = useState<'banks' | 'practice' | 'all'>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const sub = urlParams.get('subTab');
+      if (sub === 'banks' || sub === 'practice' || sub === 'all') return sub;
+      const saved = sessionStorage.getItem('oep_bankSubTab');
+      if (saved === 'banks' || saved === 'practice' || saved === 'all') return saved as any;
+    }
+    return 'banks';
+  });
   const [searchQuery, setSearchQuery] = useState('');
 
   React.useEffect(() => {
@@ -180,8 +347,39 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const [bulkTopic, setBulkTopic] = useState('');
   const [bulkFileContent, setBulkFileContent] = useState('');
   const [bulkFileNames, setBulkFileNames] = useState<string[]>([]);
+  // SWR Admin Catalog Cache Helper
+  const getAdminCatalogCache = () => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = sessionStorage.getItem('oep_admin_catalog_cache');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch(e) {}
+    return null;
+  };
+
+  const saveAdminCatalogCache = (data: { ss?: any[]; ts?: any[]; ex?: any[]; bks?: any[]; fetchedUsers?: any[] }) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const existing = getAdminCatalogCache() || {};
+      const updated = {
+        ss: data.ss || existing.ss || [],
+        ts: data.ts || existing.ts || [],
+        ex: data.ex || existing.ex || [],
+        bks: data.bks || existing.bks || [],
+        fetchedUsers: data.fetchedUsers || existing.fetchedUsers || [],
+        timestamp: Date.now()
+      };
+      sessionStorage.setItem('oep_admin_catalog_cache', JSON.stringify(updated));
+    } catch(e) {}
+  };
+
+  const initialAdminCache = React.useMemo(() => getAdminCatalogCache(), []);
+
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(() => !initialAdminCache);
   // Push Notification Composer State
   const [pushTitle, setPushTitle] = useState('');
   const [pushBody, setPushBody] = useState('');
@@ -195,13 +393,13 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const [pushHistoryPage, setPushHistoryPage] = useState(1);
   const [pushHistoryTotal, setPushHistoryTotal] = useState(0);
 
-  // Data State
+  // Data State — Initialized synchronously from SWR cache for 0ms instant display
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [series, setSeries] = useState<TestSeries[]>([]);
-  const [mockTests, setMockTests] = useState<MockTest[]>([]);
-  const [exams, setExams] = useState<Exam[]>([]);
-  const [banks, setBanks] = useState<any[]>([]);
-  const [users, setUsers] = useState<any[]>([]);
+  const [series, setSeries] = useState<TestSeries[]>(() => initialAdminCache?.ss || []);
+  const [mockTests, setMockTests] = useState<MockTest[]>(() => initialAdminCache?.ts || []);
+  const [exams, setExams] = useState<Exam[]>(() => initialAdminCache?.ex || []);
+  const [banks, setBanks] = useState<any[]>(() => initialAdminCache?.bks || []);
+  const [users, setUsers] = useState<any[]>(() => initialAdminCache?.fetchedUsers || []);
   
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordTargetUser, setPasswordTargetUser] = useState<any>(null);
@@ -266,8 +464,11 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     metaDescription: '',
     keywords: '',
 
-    // Schedule
-    scheduled_at: ''
+    // Schedule & Admin Exam Tracker
+    scheduled_at: '',
+    examDateStatus: 'tba' as 'published' | 'tba' | 'expected',
+    formFillupStatus: 'tba' as 'open' | 'closed' | 'awaited' | 'tba',
+    formFillupEndDate: ''
   };
 
   const [formData, setFormData] = useState<any>(initialFormData);
@@ -275,6 +476,116 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const [newsUpdatesInput, setNewsUpdatesInput] = useState('');
   const [diagramText, setDiagramText] = useState('');
   const [showDiagramHelp, setShowDiagramHelp] = useState(false);
+
+  // --- Question Bank Creation & Answer Key State ---
+  const [bankQuestionsJson, setBankQuestionsJson] = useState('');
+  const [bankAnswerKeyJson, setBankAnswerKeyJson] = useState('');
+  const [bankQuestionsInputMode, setBankQuestionsInputMode] = useState<'file' | 'text'>('file');
+  const [bankAnswerKeyInputMode, setBankAnswerKeyInputMode] = useState<'file' | 'text'>('file');
+  const [bankQuestionsFileName, setBankQuestionsFileName] = useState('');
+  const [bankAnswerKeyFileName, setBankAnswerKeyFileName] = useState('');
+  const [showBankPreviewModal, setShowBankPreviewModal] = useState(false);
+
+  // --- Sticky Creation Memory Helpers per Tab ---
+  const getStickyFormData = (tab: string) => {
+    let sticky: any = {};
+    try {
+      const stored = sessionStorage.getItem(`oep_sticky_${tab}`);
+      if (stored) sticky = JSON.parse(stored);
+    } catch(e) {}
+
+    // Fallback to active drill-down filters if sticky doesn't have them
+    if (tab === 'banks') {
+      if (!sticky.examId && selectedExamIdForBanks) sticky.examId = selectedExamIdForBanks;
+      if (!sticky.type && bankFilter && bankFilter !== 'all') sticky.type = bankFilter;
+      if (!sticky.target_mode && bankSubTab) sticky.target_mode = bankSubTab === 'practice' ? 'practice' : 'bank';
+    } else if (tab === 'tests') {
+      if (!sticky.examId && selectedExamIdForTests) sticky.examId = selectedExamIdForTests;
+      if (!sticky.mockCategory && selectedCategoryForTests) sticky.mockCategory = selectedCategoryForTests;
+      const maxOrder = mockTests.reduce((max, t) => (t.sortOrder && t.sortOrder > max ? t.sortOrder : max), 0);
+      sticky.sortOrder = maxOrder + 1;
+    } else if (tab === 'questions') {
+      if (!sticky.targetExamId && filterExamId && filterExamId !== 'all') sticky.targetExamId = filterExamId;
+      if (!sticky.topic && selectedTargetIdForQuestions && selectedTypeForQuestions === 'bank') sticky.topic = selectedTargetIdForQuestions;
+      if (!sticky.topic && selectedTargetIdForQuestions && selectedTypeForQuestions === 'mock') sticky.topic = `mockTest__${selectedTargetIdForQuestions}`;
+    } else if (tab === 'series') {
+      if (!sticky.examId && selectedExamIdForSeries) sticky.examId = selectedExamIdForSeries;
+    } else if (tab === 'exams') {
+      if (!sticky.examCategory && examFilter && examFilter !== 'all') sticky.examCategory = examFilter;
+    }
+
+    return {
+      ...initialFormData,
+      ...sticky,
+      // Always reset unique entity fields so new entry is clean
+      title: '',
+      name: '',
+      questionText: '',
+      options: ['', '', '', ''],
+      correctAnswerIndex: 0,
+      explanation: '',
+      diagram: null,
+      pdfLinks: [],
+      scheduled_at: ''
+    };
+  };
+
+  const saveStickyFormData = (tab: string, currentData: any) => {
+    try {
+      let sticky: any = {};
+      if (tab === 'banks') {
+        sticky = {
+          examId: currentData.examId,
+          type: currentData.type,
+          target_mode: currentData.target_mode,
+          mockSubject: currentData.mockSubject,
+          isPremium: currentData.isPremium
+        };
+      } else if (tab === 'tests') {
+        sticky = {
+          examId: currentData.examId,
+          mockCategory: currentData.mockCategory,
+          mockSubject: currentData.mockSubject,
+          durationMinutes: currentData.durationMinutes,
+          totalMarks: currentData.totalMarks,
+          negativeMarking: currentData.negativeMarking,
+          isPremium: currentData.isPremium
+        };
+      } else if (tab === 'questions') {
+        sticky = {
+          targetExamId: currentData.targetExamId || currentData.examId,
+          topic: currentData.topic,
+          difficulty: currentData.difficulty
+        };
+      } else if (tab === 'series') {
+        sticky = {
+          examId: currentData.examId,
+          price: currentData.price,
+          durationDays: currentData.durationDays
+        };
+      } else if (tab === 'exams') {
+        sticky = {
+          examCategory: currentData.examCategory
+        };
+      }
+      sessionStorage.setItem(`oep_sticky_${tab}`, JSON.stringify(sticky));
+    } catch(e) {}
+  };
+
+  const resetStickyFormData = (tab: string) => {
+    try {
+      sessionStorage.removeItem(`oep_sticky_${tab}`);
+    } catch(e) {}
+    setFormData(initialFormData);
+    setDiagramText('');
+  };
+
+  const openAddModal = (targetTab = activeTab) => {
+    setEditingId(null);
+    setFormData(getStickyFormData(targetTab));
+    setDiagramText('');
+    setShowAddModal(true);
+  };
 
   // Hero Card state
   const DEFAULT_HERO_CARD = {
@@ -410,39 +721,50 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   };
 
   const fetchData = async () => {
-    setLoading(true);
+    // Only show global loading state if there is zero cached data in memory/state
+    if (!exams.length && !mockTests.length && !banks.length && !series.length) {
+      setLoading(true);
+    }
     try {
-      let usersFetchPromise = Promise.resolve([] as any[]);
-      try {
-         const session = (await supabase.auth.getSession()).data.session;
-         const token = session?.access_token;
-         if (token) {
-            usersFetchPromise = fetch('/api/admin/users', {
-               headers: {
-                  'Authorization': `Bearer ${token}`
-               }
-            }).then(res => {
-               if (!res.ok) throw new Error('Failed to fetch users');
-               return res.json();
-            });
-         }
-      } catch(e) {
-         console.error("Error setting up user fetch:", e);
-      }
-
-      // Load structural data only — questions are managed independently by fetchQuestions()
-      const [ss, ts, ex, bks, fetchedUsers] = await Promise.all([
+      // 1. Kick off catalog queries immediately in parallel
+      const catalogPromise = Promise.all([
         examService.getAllTestSeries(),
-        examService.getAllMockTests(),
+        examService.getAllMockTestsLite(),
         examService.getAllExams(),
         examService.getAllQuestionBanks(),
-        usersFetchPromise
       ]);
-      setSeries(ss);
-      setMockTests(ts);
-      setExams(ex);
-      setBanks(bks);
-      setUsers(fetchedUsers);
+
+      // 2. Kick off user fetch in parallel
+      const usersPromise = (async () => {
+        try {
+          const session = (await supabase.auth.getSession()).data.session;
+          const token = session?.access_token;
+          if (token) {
+            const res = await fetch('/api/admin/users', {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) return await res.json();
+          }
+        } catch(e) {
+          console.error("Error fetching admin users:", e);
+        }
+        return [] as any[];
+      })();
+
+      // 3. Await all promises simultaneously for minimum network latency
+      const [[ss, ts, ex, bks], fetchedUsers] = await Promise.all([
+        catalogPromise,
+        usersPromise
+      ]);
+
+      setSeries(ss || []);
+      setMockTests(ts || []);
+      setExams(ex || []);
+      setBanks(bks || []);
+      if (fetchedUsers && fetchedUsers.length > 0) setUsers(fetchedUsers);
+
+      // Persist fresh catalog snapshot to SWR cache for instant 0ms subsequent loads
+      saveAdminCatalogCache({ ss, ts, ex, bks, fetchedUsers });
 
       const settingsExam = ex.find(e => e.name === 'SYSTEM_SETTINGS_YOUTUBE_RESERVED');
       if (settingsExam && settingsExam.description) {
@@ -572,18 +894,52 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     else sessionStorage.removeItem('oep_qs_targetId');
   }, [selectedTargetIdForQuestions]);
 
-  // Keep top exam selection dropdown synchronized with sub-navigation states across tabs
+  // Deep Page Persistence & URL Query String Synchronization
   useEffect(() => {
-    if (activeTab === 'questions') {
-      setFilterExamId(selectedExamIdForQuestions || 'all');
-    } else if (activeTab === 'banks') {
-      setFilterExamId(selectedExamIdForBanks || 'all');
-    } else if (activeTab === 'series') {
-      setFilterExamId(selectedExamIdForSeries || 'all');
-    } else {
-      setFilterExamId('all');
-    }
-  }, [activeTab, selectedExamIdForQuestions, selectedExamIdForBanks, selectedExamIdForSeries]);
+    if (typeof window === 'undefined') return;
+
+    sessionStorage.setItem('oep_adminActiveTab', activeTab);
+
+    if (selectedExamIdForSeries) sessionStorage.setItem('oep_series_examId', selectedExamIdForSeries);
+    else sessionStorage.removeItem('oep_series_examId');
+
+    if (selectedExamIdForBanks) sessionStorage.setItem('oep_banks_examId', selectedExamIdForBanks);
+    else sessionStorage.removeItem('oep_banks_examId');
+
+    if (selectedExamIdForTests) sessionStorage.setItem('oep_tests_examId', selectedExamIdForTests);
+    else sessionStorage.removeItem('oep_tests_examId');
+
+    if (selectedCategoryForTests) sessionStorage.setItem('oep_tests_category', selectedCategoryForTests);
+    else sessionStorage.removeItem('oep_tests_category');
+
+    sessionStorage.setItem('oep_bankSubTab', bankSubTab);
+    sessionStorage.setItem('oep_bankFilter', bankFilter);
+
+    // Synchronize browser address bar URL query params dynamically
+    const params = new URLSearchParams();
+    params.set('tab', activeTab);
+    if (bankSubTab && bankSubTab !== 'banks') params.set('subTab', bankSubTab);
+    if (selectedExamIdForSeries) params.set('series_examId', selectedExamIdForSeries);
+    if (selectedExamIdForBanks) params.set('banks_examId', selectedExamIdForBanks);
+    if (selectedExamIdForTests) params.set('tests_examId', selectedExamIdForTests);
+    if (selectedExamIdForQuestions) params.set('examId', selectedExamIdForQuestions);
+    if (selectedTypeForQuestions) params.set('type', selectedTypeForQuestions);
+    if (selectedTargetIdForQuestions) params.set('targetId', selectedTargetIdForQuestions);
+
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState(null, '', newUrl);
+  }, [
+    activeTab,
+    selectedExamIdForSeries,
+    selectedExamIdForBanks,
+    selectedExamIdForTests,
+    selectedCategoryForTests,
+    selectedExamIdForQuestions,
+    selectedTypeForQuestions,
+    selectedTargetIdForQuestions,
+    bankSubTab,
+    bankFilter
+  ]);
 
   // Fetch questions whenever the active tab, page, filters, or selection changes
   useEffect(() => {
@@ -927,9 +1283,9 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     
     let newData = { ...initialFormData };
     if (activeTab === 'banks') {
-      let parsedTagline = { text: '', price: 499, originalPrice: 999 };
+      let parsedTagline: any = { text: '', price: 499, originalPrice: 999, subject: '' };
       try { 
-        if (item.tagline && item.tagline.includes('{"text"')) {
+        if (item.tagline && (item.tagline.includes('{"text"') || item.tagline.startsWith('{'))) {
            parsedTagline = JSON.parse(item.tagline);
         }
       } catch(e) {}
@@ -937,6 +1293,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       newData = {
         ...newData,
         examId: item.examId || '',
+        mockSubject: parsedTagline.subject || (item as any).subject || '',
         type: item.type || 'topic-wise',
         target_mode: (item.target_mode || 'both') as 'bank' | 'practice' | 'both',
         title: item.title || '',
@@ -951,10 +1308,24 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           if (!item.pdfUrl) return [];
           try {
             const parsed = JSON.parse(item.pdfUrl);
-            if (Array.isArray(parsed)) return parsed;
-            return [{ title: 'Download PDF', url: item.pdfUrl }];
+            if (Array.isArray(parsed)) {
+              return parsed.filter((l: any) => l && typeof l.url === 'string' && (l.url.startsWith('http://') || l.url.startsWith('https://') || l.url.startsWith('/')));
+            }
+            if (parsed && typeof parsed === 'object') {
+              if (Array.isArray(parsed.pdfLinks)) {
+                return parsed.pdfLinks.filter((l: any) => l && typeof l.url === 'string' && (l.url.startsWith('http://') || l.url.startsWith('https://') || l.url.startsWith('/')));
+              }
+              return [];
+            }
+            if (typeof item.pdfUrl === 'string' && (item.pdfUrl.startsWith('http://') || item.pdfUrl.startsWith('https://'))) {
+              return [{ title: 'Download Attached PDF', url: item.pdfUrl }];
+            }
+            return [];
           } catch (e) {
-            return [{ title: 'Download PDF', url: item.pdfUrl }];
+            if (typeof item.pdfUrl === 'string' && (item.pdfUrl.startsWith('http://') || item.pdfUrl.startsWith('https://'))) {
+              return [{ title: 'Download Attached PDF', url: item.pdfUrl }];
+            }
+            return [];
           }
         })(),
         hasPracticeMode: item.hasPracticeMode ?? true,
@@ -966,29 +1337,30 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         })() : ''
       };
     } else if (activeTab === 'exams') {
+      let parsedExamMeta: any = {};
+      if (item.description && typeof item.description === 'string' && item.description.startsWith('JSON_METADATA_')) {
+        try {
+          parsedExamMeta = JSON.parse(item.description.replace('JSON_METADATA_', ''));
+        } catch(e) {}
+      }
+
       newData = {
         ...newData,
         name: item.name || '',
         icon: item.icon || 'BookOpen',
         examCategory: item.category || 'popular',
-        examDate: item.examDate || '',
+        examDate: parsedExamMeta.examDate || item.examDate || '',
         metaTitle: item.metaTitle || '',
         metaDescription: item.metaDescription || '',
         keywords: item.keywords || '',
         targetExamId: item.targetExamId || '',
         isPremium: (item.description || '').startsWith('JSON_METADATA_'),
-        price: (() => {
-          if (!(item.description || '').startsWith('JSON_METADATA_')) return 499;
-          try { return JSON.parse(item.description.replace('JSON_METADATA_', '')).price || 499; } catch(e) { return 499; }
-        })(),
-        originalPrice: (() => {
-          if (!(item.description || '').startsWith('JSON_METADATA_')) return 999;
-          try { return JSON.parse(item.description.replace('JSON_METADATA_', '')).originalPrice || 999; } catch(e) { return 999; }
-        })(),
-        description: (() => {
-          if (!(item.description || '').startsWith('JSON_METADATA_')) return item.description || '';
-          try { return JSON.parse(item.description.replace('JSON_METADATA_', '')).description || ''; } catch(e) { return item.description || ''; }
-        })()
+        price: parsedExamMeta.price || 499,
+        originalPrice: parsedExamMeta.originalPrice || 999,
+        description: parsedExamMeta.description || item.description || '',
+        examDateStatus: parsedExamMeta.examDateStatus || (parsedExamMeta.examDate || item.examDate ? 'published' : 'tba'),
+        formFillupStatus: parsedExamMeta.formFillupStatus || 'tba',
+        formFillupEndDate: parsedExamMeta.formFillupEndDate || ''
       };
     } else if (activeTab === 'blogs') {
       newData = {
@@ -1205,11 +1577,18 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         });
         await Promise.all(promises);
       } else if (activeTab === 'exams' || activeTab === 'blogs') {
-        const payload = {
+        const metaObj = {
+          price: Number(formData.price),
+          originalPrice: Number(formData.originalPrice),
+          description: formData.description,
+          examDate: formData.examDate || '',
+          examDateStatus: formData.examDateStatus || 'tba',
+          formFillupStatus: formData.formFillupStatus || 'tba',
+          formFillupEndDate: formData.formFillupEndDate || ''
+        };
+        const payload: any = {
           name: formData.name,
-          description: formData.isPremium 
-            ? `JSON_METADATA_${JSON.stringify({ price: Number(formData.price), originalPrice: Number(formData.originalPrice), description: formData.description })}`
-            : formData.description,
+          description: `JSON_METADATA_${JSON.stringify(metaObj)}`,
           icon: formData.icon,
           category: activeTab === 'blogs' ? 'blog' : (formData.examCategory as 'popular' | 'upcoming' | 'blog' | 'system'),
           examDate: formData.examDate || null,
@@ -1219,30 +1598,88 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           targetExamId: formData.targetExamId
         };
         if (!validateChangeBeforePublish('exam', payload, !!editingId)) return;
-        if (editingId) await examService.updateExam(editingId, payload);
-        else await examService.addExam(payload);
+        if (editingId) {
+          await examService.updateExam(editingId, payload);
+          setExams(prev => prev.map(e => e.id === editingId ? { ...e, ...payload, id: editingId } : e));
+        } else {
+          const res = await examService.addExam(payload);
+          if (res) setExams(prev => [...prev, res]);
+        }
+        try { sessionStorage.removeItem('oep_admin_catalog_cache'); } catch(e) {}
       } else if (activeTab === 'banks') {
         if (!formData.examId) { alert("Please select an exam."); return; }
+        
+        // Merge questions and answer key if provided
+        const mergedQuestions = mergeQuestionsAndAnswerKey(bankQuestionsJson, bankAnswerKeyJson);
+        const finalQuestionCount = mergedQuestions.length > 0 ? mergedQuestions.length : Number(formData.questionCount);
+
+        let finalPdfPayload = JSON.stringify(formData.pdfLinks);
+        if (mergedQuestions.length > 0) {
+          finalPdfPayload = JSON.stringify({
+            pdfLinks: formData.pdfLinks || [],
+            questionsData: mergedQuestions
+          });
+        }
+
+        const metaTaglineObj = {
+          text: formData.tagline || '',
+          price: Number(formData.price) || 499,
+          originalPrice: Number(formData.originalPrice) || ((Number(formData.price) || 499) * 2),
+          subject: formData.mockSubject || ''
+        };
+
         const payload = {
           examId: formData.examId,
           type: formData.type,
           target_mode: formData.target_mode || 'both',
           title: formData.title,
-          questionCount: Number(formData.questionCount),
-          tagline: formData.isPremium ? JSON.stringify({ text: formData.tagline, price: Number(formData.price) || 499, originalPrice: Number(formData.originalPrice) || ((Number(formData.price) || 499) * 2) }) : formData.tagline,
+          questionCount: finalQuestionCount,
+          tagline: (formData.isPremium || formData.mockSubject || formData.tagline) ? JSON.stringify(metaTaglineObj) : '',
           image: formData.image,
           isPremium: formData.isPremium,
-          pdfUrl: JSON.stringify(formData.pdfLinks),
+          pdfUrl: finalPdfPayload,
           hasPracticeMode: formData.hasPracticeMode,
           scheduled_at: formData.scheduled_at ? new Date(formData.scheduled_at).toISOString() : null
         };
         if (!validateChangeBeforePublish('bank', payload, !!editingId)) return;
-        if (editingId) await examService.updateQuestionBank(editingId, payload);
-        else await examService.createQuestionBank(payload);
+        
+        if (editingId) {
+          await examService.updateQuestionBank(editingId, payload);
+        } else {
+          await examService.createQuestionBank(payload);
+        }
+
+        // If questions JSON was provided, bulk-upload them into questions table with topic = bank.title
+        if (mergedQuestions.length > 0) {
+          try {
+            const formattedQs: Question[] = mergedQuestions.map((q, idx) => ({
+              examId: formData.examId,
+              topic: formData.title,
+              difficulty: (q.difficulty as any) || 'medium',
+              questionText: q.questionText || q.question || '',
+              options: Array.isArray(q.options) ? q.options : [],
+              correctAnswerIndex: typeof q.correctAnswerIndex === 'number' ? q.correctAnswerIndex : 0,
+              explanation: q.explanation || '',
+              diagram: q.diagram || null,
+              sortOrder: idx + 1
+            }));
+            await examService.addQuestionsBulk(formattedQs);
+          } catch (qErr) {
+            console.warn("Questions bulk upload notice:", qErr);
+          }
+        }
       }
+
+      // Save sticky creation memory for the active tab
+      saveStickyFormData(activeTab, formData);
+
       setShowAddModal(false);
-      setFormData(initialFormData);
+      setFormData(getStickyFormData(activeTab));
       setDiagramText('');
+      setBankQuestionsJson('');
+      setBankAnswerKeyJson('');
+      setBankQuestionsFileName('');
+      setBankAnswerKeyFileName('');
       await fetchData();
     } catch (error: any) {
       console.error(error);
@@ -1375,6 +1812,111 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       alert("Error updating order: " + e.message);
       await fetchData();
     }
+  };
+
+  // --- Flexible Question Bank Questions & Answer Key Merger ---
+  const mergeQuestionsAndAnswerKey = (rawQuestionsJson: string, rawAnswerKeyJson: string): any[] => {
+    if (!rawQuestionsJson || !rawQuestionsJson.trim()) return [];
+
+    let questions: any[] = [];
+    try {
+      questions = parseUniversalQuestionJson(rawQuestionsJson);
+    } catch (err) {
+      try {
+        const parsed = JSON.parse(cleanJsonString(rawQuestionsJson));
+        questions = Array.isArray(parsed) ? parsed : (parsed.questions || []);
+      } catch {
+        return [];
+      }
+    }
+
+    if (!Array.isArray(questions) || questions.length === 0) return [];
+
+    // Parse Answer Key if provided
+    let answerKeyMap: Record<string, { answer: any; explanation?: string }> = {};
+
+    if (rawAnswerKeyJson && rawAnswerKeyJson.trim()) {
+      try {
+        const cleanedKeyStr = cleanJsonString(rawAnswerKeyJson);
+        let parsedKey: any = null;
+        try {
+          parsedKey = JSON.parse(cleanedKeyStr);
+        } catch {
+          parsedKey = new Function('return ' + cleanedKeyStr)();
+        }
+
+        if (Array.isArray(parsedKey)) {
+          parsedKey.forEach((item, index) => {
+            if (typeof item === 'object' && item !== null) {
+              const qNum = item.qNo || item.questionNo || item.id || (index + 1);
+              const ans = item.answer !== undefined ? item.answer : item.correctAnswerIndex;
+              answerKeyMap[String(qNum)] = {
+                answer: ans,
+                explanation: item.explanation || item.solution || ''
+              };
+            } else {
+              // Raw answer string/number in array index
+              answerKeyMap[String(index + 1)] = { answer: item };
+            }
+          });
+        } else if (typeof parsedKey === 'object' && parsedKey !== null) {
+          Object.entries(parsedKey).forEach(([key, val]) => {
+            const cleanKey = key.replace(/^q/i, '').trim();
+            if (typeof val === 'object' && val !== null) {
+              const v: any = val;
+              answerKeyMap[cleanKey] = {
+                answer: v.answer !== undefined ? v.answer : v.correctAnswerIndex,
+                explanation: v.explanation || v.solution || ''
+              };
+            } else {
+              answerKeyMap[cleanKey] = { answer: val };
+            }
+          });
+        }
+      } catch (e) {
+        console.warn("Could not parse answer key JSON:", e);
+      }
+    }
+
+    // Merge each question
+    return questions.map((q, idx) => {
+      const qNum = idx + 1;
+      const keyData = answerKeyMap[String(qNum)] || (q.id ? answerKeyMap[String(q.id)] : undefined);
+
+      let ansIndex = q.correctAnswerIndex !== undefined ? q.correctAnswerIndex : q.answer;
+      let explanation = q.explanation || '';
+
+      if (keyData) {
+        if (keyData.answer !== undefined && keyData.answer !== null) {
+          ansIndex = keyData.answer;
+        }
+        if (keyData.explanation) {
+          explanation = keyData.explanation;
+        }
+      }
+
+      // Convert letter options 'A', 'B', 'C', 'D', 'E' or string numbers to numeric index
+      if (typeof ansIndex === 'string') {
+        const upper = ansIndex.trim().toUpperCase();
+        const letterIdx = ['A', 'B', 'C', 'D', 'E'].indexOf(upper);
+        if (letterIdx !== -1) {
+          ansIndex = letterIdx;
+        } else {
+          const num = parseInt(upper, 10);
+          if (!isNaN(num)) {
+            ansIndex = num >= 1 && num <= (q.options?.length || 4) ? num - 1 : num;
+          }
+        }
+      }
+
+      return {
+        ...q,
+        questionText: q.questionText || q.question || '',
+        options: Array.isArray(q.options) ? q.options : [],
+        correctAnswerIndex: typeof ansIndex === 'number' && ansIndex >= 0 ? ansIndex : undefined,
+        explanation: explanation || undefined
+      };
+    });
   };
 
   // --- Universal, Future-Proof Question JSON Parser & Normalizer ---
@@ -1680,12 +2222,53 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                 <label className={labelClass}>Icon (Emoji or Image URL)</label>
                 <input required type="text" value={formData.icon} onChange={e => setFormData({ ...formData, icon: e.target.value })} className={inputClass} placeholder="🏛️ or https://..." />
               </div>
-              {formData.examCategory === 'upcoming' && (
-                <div className="space-y-2">
-                  <label className={labelClass}>Exam Date</label>
+            <div className="md:col-span-2 p-6 bg-slate-100/60 rounded-3xl border border-slate-200/80 space-y-4">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-brand-600" />
+                <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Exam Schedule & Form Fill-up Monitoring</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-black text-slate-600">Exam Date Status</label>
+                  <div className={selectWrapperClass}>
+                    <select 
+                      value={formData.examDateStatus || 'tba'} 
+                      onChange={e => setFormData({ ...formData, examDateStatus: e.target.value as any })}
+                      className={selectClass}
+                    >
+                      <option value="published">✅ Date Officially Published</option>
+                      <option value="tba">📢 To Be Announced (TBA)</option>
+                      <option value="expected">🔮 Tentative / Expected</option>
+                    </select>
+                    <ChevronDown className="w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-black text-slate-600">Exam Target Date</label>
                   <input type="date" value={formData.examDate} onChange={e => setFormData({ ...formData, examDate: e.target.value })} className={inputClass} />
                 </div>
-              )}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-black text-slate-600">Form Fill-up Status</label>
+                  <div className={selectWrapperClass}>
+                    <select 
+                      value={formData.formFillupStatus || 'tba'} 
+                      onChange={e => setFormData({ ...formData, formFillupStatus: e.target.value as any })}
+                      className={selectClass}
+                    >
+                      <option value="open">📝 Form Fill-up Open / Continuing</option>
+                      <option value="closed">🔒 Form Fill-up Closed / Ended</option>
+                      <option value="awaited">🔔 Official Notification Awaited</option>
+                      <option value="tba">⏳ Form Dates TBA / Coming Soon</option>
+                    </select>
+                    <ChevronDown className="w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-black text-slate-600">Form Fill-up End Date</label>
+                  <input type="date" value={formData.formFillupEndDate} onChange={e => setFormData({ ...formData, formFillupEndDate: e.target.value })} className={inputClass} />
+                </div>
+              </div>
+            </div>
             </div>
             
             <div className="md:col-span-2 p-6 bg-brand-50/40 rounded-3xl border border-brand-100/50 space-y-4 mt-6">
@@ -1848,20 +2431,60 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                 </div>
               </div>
               
-              {formData.mockCategory === 'sectional' && (
-                <div className="space-y-2">
-                  <label className={labelClass}>Select Subject *</label>
-                  <div className={selectWrapperClass}>
-                    <select required value={formData.mockSubject} onChange={e => setFormData({ ...formData, mockSubject: e.target.value })} className={selectClass} disabled={!formData.examId}>
-                      <option value="">-- Choose Subject --</option>
-                      {banks.filter((b: any) => b.examId === formData.examId).map((bank: any) => (
-                        <option key={bank.id} value={bank.title}>{bank.title}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              {formData.mockCategory === 'sectional' && (() => {
+                const testTitlePatterns = /Solved PYQ|Master Practice|Daily Quiz|Set \d+|Practice Set|Mock Test|Quiz \d+/i;
+                const bankSubjects = banks
+                  .filter((b: any) => b.examId === formData.examId && (b.target_mode || 'both') !== 'practice' && !testTitlePatterns.test(b.title || ''))
+                  .map((b: any) => b.title?.trim())
+                  .filter(Boolean);
+                const mockTestSubjects = mockTests
+                  .filter((t: any) => t.examId === formData.examId && t.subject)
+                  .map((t: any) => t.subject?.trim())
+                  .filter(Boolean);
+                const subjectsList = Array.from(new Set([...bankSubjects, ...mockTestSubjects]));
+                const isPreset = subjectsList.includes(formData.mockSubject);
+
+                return (
+                  <div className="space-y-2 col-span-1 md:col-span-2 bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/80">
+                    <label className={labelClass}>Select Subject *</label>
+                    <div className="space-y-2">
+                      <div className={selectWrapperClass}>
+                        <select 
+                          required={!formData.mockSubject} 
+                          value={isPreset ? formData.mockSubject : (formData.mockSubject ? '__custom__' : '')} 
+                          onChange={e => {
+                            if (e.target.value === '__custom__') {
+                              setFormData({ ...formData, mockSubject: '' });
+                            } else {
+                              setFormData({ ...formData, mockSubject: e.target.value });
+                            }
+                          }} 
+                          className={selectClass} 
+                          disabled={!formData.examId}
+                        >
+                          <option value="">-- Choose Subject --</option>
+                          {subjectsList.map((subj: string) => (
+                            <option key={subj} value={subj}>{subj}</option>
+                          ))}
+                          <option value="__custom__">✏️ + Enter Custom Subject...</option>
+                        </select>
+                        <ChevronDown className="w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+
+                      {(!isPreset) && (
+                        <input 
+                          type="text"
+                          required
+                          value={formData.mockSubject}
+                          onChange={e => setFormData({ ...formData, mockSubject: e.target.value })}
+                          placeholder="Type subject name (e.g. Medical-Surgical Nursing, Pharmacology...)"
+                          className={inputClass}
+                        />
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               <div className="space-y-2">
                 <label className={labelClass}>Test Title *</label>
@@ -1994,6 +2617,12 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         };
         const activeCategoryOptions = categoryOptions[tMode];
 
+        // Compute live merged questions preview
+        const liveMergedQuestions = mergeQuestionsAndAnswerKey(bankQuestionsJson, bankAnswerKeyJson);
+        const liveKeyedCount = liveMergedQuestions.filter(q => q.correctAnswerIndex !== undefined).length;
+        const liveExplanationCount = liveMergedQuestions.filter(q => !!q.explanation).length;
+        const liveUnkeyedCount = liveMergedQuestions.length - liveKeyedCount;
+
         return (
           <>
             {/* ── Top info row helper ── */}
@@ -2007,8 +2636,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                 <span className="text-xl shrink-0">{tMode === 'bank' ? '📦' : '🎯'}</span>
                 <span>
                   {tMode === 'bank'
-                    ? 'Question Bank Only — PDF Download Links and pricing are required. This will NOT appear in Practice Tests.'
-                    : 'Practice Mode Only — Upload questions via Questions Manager. PDF links are not needed. This will NOT appear in Step 1 Question Banks.'}
+                    ? 'Question Bank Only — Interactive web reader & PDF downloads. This will appear in Step 1 Question Banks.'
+                    : 'Practice Mode Only — Upload questions via Questions Manager. PDF links are not needed. This will appear in Step 2 Practice Sets.'}
                 </span>
               </div>
             )}
@@ -2029,8 +2658,27 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
 
               {/* Title */}
               <div className="space-y-2">
-                <label className={labelClass}>Bank Title *</label>
-                <input required type="text" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className={inputClass} placeholder={tMode === 'practice' ? 'e.g. High-Yield Pharmacology Drills' : 'e.g. Indian Polity Question Bank'} />
+                <label className={labelClass}>Question Bank Title *</label>
+                <input 
+                  required 
+                  type="text" 
+                  value={formData.title} 
+                  onChange={e => setFormData({ ...formData, title: e.target.value })} 
+                  className={inputClass} 
+                  placeholder="e.g. Indian Polity & Constitution Master Bank" 
+                />
+              </div>
+
+              {/* Subtitle / Topics */}
+              <div className="space-y-2">
+                <label className={labelClass}>Topic / Subject Subtitle</label>
+                <input 
+                  type="text" 
+                  value={formData.tagline} 
+                  onChange={e => setFormData({ ...formData, tagline: e.target.value })} 
+                  className={inputClass} 
+                  placeholder="e.g. Fundamental Rights, DPSP, Judiciary & Amendments (500 High-Yield MCQs)" 
+                />
               </div>
 
               {/* Category */}
@@ -2048,24 +2696,276 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                 </div>
               </div>
 
-              {/* Questions Count */}
-              <div className="space-y-2">
-                <label className={labelClass}>Questions Count {tMode === 'practice' && <span className="text-brand-400 font-semibold normal-case tracking-normal">(auto-updates when you upload questions)</span>}</label>
-                <input type="number" value={formData.questionCount} onChange={e => setFormData({ ...formData, questionCount: e.target.value })} className={inputClass} />
+              {/* Subject Selection */}
+              {(() => {
+                const testTitlePatterns = /Solved PYQ|Master Practice|Daily Quiz|Set \d+|Practice Set|Mock Test|Quiz \d+/i;
+                const bankSubjects = banks
+                  .filter((b: any) => b.examId === formData.examId)
+                  .map((b: any) => {
+                    if (b.tagline && b.tagline.includes('"subject"')) {
+                      try { return JSON.parse(b.tagline).subject; } catch(e) {}
+                    }
+                    if ((b.target_mode || 'both') !== 'practice' && !testTitlePatterns.test(b.title || '')) {
+                      return b.title?.trim();
+                    }
+                    return null;
+                  })
+                  .filter(Boolean);
+                const mockTestSubjects = mockTests
+                  .filter((t: any) => t.examId === formData.examId && t.subject)
+                  .map((t: any) => t.subject?.trim())
+                  .filter(Boolean);
+                const subjectsList = Array.from(new Set([...bankSubjects, ...mockTestSubjects]));
+                const isPreset = subjectsList.includes(formData.mockSubject);
+
+                return (
+                  <div className="space-y-2 col-span-1 md:col-span-2 bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/80">
+                    <label className={labelClass}>Select Subject {tMode === 'practice' ? '*' : '(Optional)'}</label>
+                    <div className="space-y-2">
+                      <div className={selectWrapperClass}>
+                        <select 
+                          value={isPreset ? formData.mockSubject : (formData.mockSubject ? '__custom__' : '')} 
+                          onChange={e => {
+                            if (e.target.value === '__custom__') {
+                              setFormData({ ...formData, mockSubject: '' });
+                            } else {
+                              setFormData({ ...formData, mockSubject: e.target.value });
+                            }
+                          }} 
+                          className={selectClass} 
+                          disabled={!formData.examId}
+                        >
+                          <option value="">-- Choose Subject --</option>
+                          {subjectsList.map((subj: string) => (
+                            <option key={subj} value={subj}>{subj}</option>
+                          ))}
+                          <option value="__custom__">✏️ + Enter Custom Subject...</option>
+                        </select>
+                        <ChevronDown className="w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+
+                      {(!isPreset) && (
+                        <input 
+                          type="text"
+                          value={formData.mockSubject}
+                          onChange={e => setFormData({ ...formData, mockSubject: e.target.value })}
+                          placeholder="Type subject name (e.g. Indian Polity, Odia Language, General Science...)"
+                          className={inputClass}
+                        />
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* ── 1. Questions JSON Input Section ── */}
+              <div className="md:col-span-2 bg-white p-5 rounded-2xl border-2 border-brand-100 shadow-sm space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <label className="text-sm font-black text-brand-900 uppercase tracking-wider flex items-center gap-2">
+                      <FileCode className="w-4 h-4 text-brand-600" />
+                      1. Upload Questions JSON (File or Code) *
+                    </label>
+                    <p className="text-xs text-slate-500 font-medium mt-0.5">
+                      Upload a questions <code className="font-mono text-brand-600 bg-brand-50 px-1 py-0.5 rounded">.json</code> file or paste JSON code. Answers can be inline or added in step 2.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center p-1 bg-slate-100 rounded-xl text-xs font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setBankQuestionsInputMode('file')}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg transition-all",
+                        bankQuestionsInputMode === 'file' ? "bg-white text-brand-600 shadow-xs font-black" : "text-slate-600 hover:text-slate-900"
+                      )}
+                    >
+                      📁 Upload File
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBankQuestionsInputMode('text')}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg transition-all",
+                        bankQuestionsInputMode === 'text' ? "bg-white text-brand-600 shadow-xs font-black" : "text-slate-600 hover:text-slate-900"
+                      )}
+                    >
+                      ✍️ Paste Code
+                    </button>
+                  </div>
+                </div>
+
+                {bankQuestionsInputMode === 'file' ? (
+                  <div className="border-2 border-dashed border-brand-200 hover:border-brand-400 bg-brand-50/20 hover:bg-brand-50/40 transition-all rounded-2xl p-6 text-center relative cursor-pointer group">
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setBankQuestionsFileName(file.name);
+                          const reader = new FileReader();
+                          reader.onload = (re) => {
+                            const text = re.target?.result as string;
+                            setBankQuestionsJson(text || '');
+                          };
+                          reader.readAsText(file);
+                        }
+                      }}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    />
+                    <Upload className="w-8 h-8 text-brand-500 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                    <p className="text-xs font-bold text-slate-800">
+                      {bankQuestionsFileName ? `Selected: ${bankQuestionsFileName}` : 'Click or drag & drop questions JSON file here'}
+                    </p>
+                    <p className="text-[10px] text-slate-400 font-semibold mt-1">
+                      Accepts standard question arrays or nested question objects
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    <textarea
+                      rows={6}
+                      value={bankQuestionsJson}
+                      onChange={e => setBankQuestionsJson(e.target.value)}
+                      placeholder='[&#10;  {&#10;    "question": "What is the capital of Odisha?",&#10;    "options": ["Cuttack", "Bhubaneswar", "Puri", "Rourkela"],&#10;    "answer": "B",&#10;    "explanation": "Bhubaneswar is the capital of Odisha."&#10;  }&#10;]'
+                      className={`${inputClass} font-mono text-xs leading-relaxed`}
+                    />
+                  </div>
+                )}
               </div>
 
-              {/* Tagline — hidden for practice-only */}
-              {showTagline && (
-                <div className="space-y-2">
-                  <label className={labelClass}>Tagline</label>
-                  <input type="text" value={formData.tagline} onChange={e => setFormData({ ...formData, tagline: e.target.value })} className={inputClass} placeholder="e.g. Concept-Focused Practice" />
+              {/* ── 2. Answer Key JSON Input Section ── */}
+              <div className="md:col-span-2 bg-white p-5 rounded-2xl border-2 border-emerald-100 shadow-sm space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <label className="text-sm font-black text-emerald-900 uppercase tracking-wider flex items-center gap-2">
+                      <KeyRound className="w-4 h-4 text-emerald-600" />
+                      2. Upload Answer Key JSON (Optional — Late / Partial Keys)
+                    </label>
+                    <p className="text-xs text-slate-500 font-medium mt-0.5">
+                      Provide answer keys and optional explanations for any subset of questions. Questions without a key will display as practice mode.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center p-1 bg-slate-100 rounded-xl text-xs font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setBankAnswerKeyInputMode('file')}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg transition-all",
+                        bankAnswerKeyInputMode === 'file' ? "bg-white text-emerald-600 shadow-xs font-black" : "text-slate-600 hover:text-slate-900"
+                      )}
+                    >
+                      📁 Upload Key File
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBankAnswerKeyInputMode('text')}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg transition-all",
+                        bankAnswerKeyInputMode === 'text' ? "bg-white text-emerald-600 shadow-xs font-black" : "text-slate-600 hover:text-slate-900"
+                      )}
+                    >
+                      ✍️ Paste Code
+                    </button>
+                  </div>
+                </div>
+
+                {bankAnswerKeyInputMode === 'file' ? (
+                  <div className="border-2 border-dashed border-emerald-200 hover:border-emerald-400 bg-emerald-50/20 hover:bg-emerald-50/40 transition-all rounded-2xl p-6 text-center relative cursor-pointer group">
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setBankAnswerKeyFileName(file.name);
+                          const reader = new FileReader();
+                          reader.onload = (re) => {
+                            const text = re.target?.result as string;
+                            setBankAnswerKeyJson(text || '');
+                          };
+                          reader.readAsText(file);
+                        }
+                      }}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    />
+                    <KeyRound className="w-8 h-8 text-emerald-500 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                    <p className="text-xs font-bold text-slate-800">
+                      {bankAnswerKeyFileName ? `Selected: ${bankAnswerKeyFileName}` : 'Click or drag & drop answer key JSON file here'}
+                    </p>
+                    <p className="text-[10px] text-slate-400 font-semibold mt-1">
+                      Supports map {`{"1": "A", "2": "C"}`} or array [ {`{"qNo": 1, "answer": "B", "explanation": "..."}`} ]
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    <textarea
+                      rows={4}
+                      value={bankAnswerKeyJson}
+                      onChange={e => setBankAnswerKeyJson(e.target.value)}
+                      placeholder='{&#10;  "1": "B",&#10;  "2": { "answer": "C", "explanation": "Detailed step-by-step solution..." },&#10;  "3": "A"&#10;}'
+                      className={`${inputClass} font-mono text-xs leading-relaxed`}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* ── Live Merged Preview Summary Card ── */}
+              {liveMergedQuestions.length > 0 && (
+                <div className="md:col-span-2 p-5 rounded-2xl bg-gradient-to-r from-brand-50/80 via-emerald-50/80 to-brand-50/80 border border-brand-200/80 shadow-xs flex flex-wrap items-center justify-between gap-4 animate-in fade-in">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-brand-600" />
+                      <span className="text-xs font-black uppercase tracking-wider text-brand-950">
+                        Live Merged Question Bank Summary
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-slate-700">
+                      <span className="bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
+                        📦 Total: <strong className="text-brand-600">{liveMergedQuestions.length} Questions</strong>
+                      </span>
+                      <span className="bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
+                        ✅ Keyed: <strong className="text-emerald-600">{liveKeyedCount}</strong> ({liveExplanationCount} with solutions)
+                      </span>
+                      {liveUnkeyedCount > 0 && (
+                        <span className="bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
+                          🎯 Practice / Un-keyed: <strong className="text-amber-600">{liveUnkeyedCount}</strong>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowBankPreviewModal(true)}
+                      className="flex items-center gap-1.5 px-4 py-2 bg-white hover:bg-slate-50 text-brand-600 border border-brand-200 rounded-xl text-xs font-black shadow-2xs transition-all cursor-pointer"
+                    >
+                      <Eye className="w-3.5 h-3.5" /> Preview Questions ({liveMergedQuestions.length})
+                    </button>
+                  </div>
                 </div>
               )}
+
+              {/* Questions Count Manual Override */}
+              <div className="space-y-2">
+                <label className={labelClass}>
+                  Questions Count {liveMergedQuestions.length > 0 ? <span className="text-emerald-600 font-semibold normal-case tracking-normal">(auto-calculated from JSON: {liveMergedQuestions.length})</span> : ''}
+                </label>
+                <input 
+                  type="number" 
+                  value={liveMergedQuestions.length > 0 ? liveMergedQuestions.length : formData.questionCount} 
+                  onChange={e => setFormData({ ...formData, questionCount: e.target.value })} 
+                  className={inputClass} 
+                />
+              </div>
 
               {/* Image URL — hidden for practice-only */}
               {tMode !== 'practice' && (
                 <div className="space-y-2">
-                  <label className={labelClass}>Image URL</label>
+                  <label className={labelClass}>Image URL (Optional)</label>
                   <input type="text" value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} className={inputClass} placeholder="https://..." />
                 </div>
               )}
@@ -2074,20 +2974,23 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
               {showPdf && (
                 <div className="md:col-span-2 space-y-4 mt-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-extrabold text-slate-700 uppercase tracking-wider">PDF Download Links</label>
+                    <div>
+                      <label className="text-sm font-extrabold text-slate-700 uppercase tracking-wider">Custom PDF Download Links (Optional)</label>
+                      <p className="text-xs text-slate-400 font-semibold mt-0.5">Students can download the auto-generated PDF or any custom PDF files attached here.</p>
+                    </div>
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, pdfLinks: [...formData.pdfLinks, { title: '', url: '' }] })}
                       className="flex items-center gap-2 px-4 py-2 bg-brand-50 text-brand-600 rounded-xl text-xs font-black hover:bg-brand-100 transition-all border border-brand-100/30"
                     >
-                      <Plus className="w-4 h-4" /> Add New Link
+                      <Plus className="w-4 h-4" /> Add Extra Link
                     </button>
                   </div>
                   <div className="space-y-3">
                     {formData.pdfLinks.length === 0 ? (
-                      <div className="py-8 border-2 border-dashed border-slate-100 rounded-2xl flex flex-col items-center justify-center text-slate-400 bg-slate-50/20">
-                        <FileText className="w-8 h-8 mb-2 opacity-20" />
-                        <p className="text-xs font-bold uppercase tracking-widest">No PDF links added yet</p>
+                      <div className="py-6 border-2 border-dashed border-slate-100 rounded-2xl flex flex-col items-center justify-center text-slate-400 bg-slate-50/20">
+                        <FileText className="w-7 h-7 mb-1.5 opacity-20" />
+                        <p className="text-xs font-bold uppercase tracking-widest">No extra external links added (Standard auto-generated PDF will be used)</p>
                       </div>
                     ) : (
                       formData.pdfLinks.map((link: any, idx: number) => (
@@ -2134,7 +3037,6 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                       ))
                     )}
                   </div>
-                  <p className="text-[10px] font-bold text-slate-400 italic">Adding multiple links allows students to download separate files for questions, answers, or different parts.</p>
                 </div>
               )}
             </div>
@@ -3192,30 +4094,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
               )}
               {(['questions', 'banks', 'exams', 'series', 'blogs'].includes(activeTab) || (activeTab === 'tests' && selectedExamIdForTests && selectedCategoryForTests)) && (
                 <button 
-                  onClick={() => {
-                    setEditingId(null);
-                    if (activeTab === 'tests') {
-                      const maxOrder = mockTests.reduce((max, t) => (t.sortOrder && t.sortOrder > max ? t.sortOrder : max), 0);
-                      setFormData({
-                        ...initialFormData,
-                        examId: selectedExamIdForTests || '',
-                        mockCategory: selectedCategoryForTests || 'full-length',
-                        sortOrder: maxOrder + 1
-                      });
-                    } else if (activeTab === 'banks') {
-                      const modeToUse = bankSubTab === 'practice' ? 'practice' : bankSubTab === 'banks' ? 'bank' : 'both';
-                      setFormData({
-                        ...initialFormData,
-                        examId: selectedExamIdForBanks || '',
-                        target_mode: modeToUse as any,
-                        hasPracticeMode: modeToUse === 'practice' || modeToUse === 'both',
-                      });
-                    } else {
-                      setFormData(initialFormData);
-                    }
-                    setDiagramText('');
-                    setShowAddModal(true);
-                  }}
+                  onClick={() => openAddModal(activeTab)}
                   className="flex items-center gap-2 px-8 py-2.5 premium-gradient text-white rounded-xl text-sm font-extrabold hover:premium-glow shadow-lg shadow-brand-500/20 transition-all active:scale-95"
                 >
                   <Plus className="w-5 h-5" /> Add New
@@ -5142,6 +6021,11 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                         {banks
                           .filter(b => b.examId === selectedExamIdForQuestions)
                           .filter(b => bankFilter === 'all' || b.type === bankFilter)
+                          .filter(b => {
+                            if (bankSubTab === 'banks') return (b.target_mode || 'both') !== 'practice';
+                            if (bankSubTab === 'practice') return (b.target_mode || 'both') !== 'bank';
+                            return true;
+                          })
                           .map(bank => {
                             const count = bank.questionCount || 0;
                             const categoryBadges: Record<string, { label: string; style: string }> = {
@@ -5211,7 +6095,12 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                           })}
 {banks
                           .filter(b => b.examId === selectedExamIdForQuestions)
-                          .filter(b => bankFilter === 'all' || b.type === bankFilter).length === 0 && (
+                          .filter(b => bankFilter === 'all' || b.type === bankFilter)
+                          .filter(b => {
+                            if (bankSubTab === 'banks') return (b.target_mode || 'both') !== 'practice';
+                            if (bankSubTab === 'practice') return (b.target_mode || 'both') !== 'bank';
+                            return true;
+                          }).length === 0 && (
                           <div className="col-span-full bg-white rounded-[2rem] border border-slate-200/50 p-12 text-center text-slate-400 font-extrabold shadow-sm flex flex-col items-center gap-4">
                             <p className="text-slate-500 font-bold text-base">
                               No {bankFilter === 'all' ? '' : ({
@@ -5224,8 +6113,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                             <button
                               onClick={() => {
                                 setActiveTab('banks');
-                                setEditingId(null);
-                                setShowAddModal(true);
+                                openAddModal('banks');
                               }}
                               className="px-6 py-3 bg-brand-600 text-white font-black text-xs uppercase tracking-wider rounded-xl hover:bg-brand-700 transition-all shadow-md shadow-brand-500/20 flex items-center gap-2 cursor-pointer"
                             >
@@ -5664,16 +6552,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                           </button>
                         )}
                         <button 
-                          onClick={() => {
-                            setEditingId(null);
-                            setFormData({
-                              ...initialFormData,
-                              examId: selectedExamIdForQuestions || '',
-                              topic: selectedTypeForQuestions === 'mock' ? `mockTest__${selectedTargetIdForQuestions}` : (selectedTargetIdForQuestions || '')
-                            });
-                            setDiagramText('');
-                            setShowAddModal(true);
-                          }}
+                          onClick={() => openAddModal('questions')}
                           className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-extrabold transition-all shadow-md flex items-center gap-2"
                         >
                           <Plus className="w-4 h-4" /> Add Question
@@ -5944,12 +6823,36 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                       )}
                   </div>
 
-                  {items.length === 0 ? (
+                  {loading && items.length === 0 ? (
+                    <div className="divide-y divide-slate-100/80 animate-pulse">
+                      {[1, 2, 3, 4, 5].map((idx) => (
+                        <div key={idx} className="px-8 py-6 grid grid-cols-12 items-center gap-4">
+                          <div className="col-span-1 flex items-center">
+                            <div className="w-4 h-4 bg-slate-200/80 rounded-lg" />
+                          </div>
+                          <div className="col-span-5 flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-slate-200/80 shrink-0" />
+                            <div className="space-y-2 flex-1 min-w-0">
+                              <div className="h-4 bg-slate-200/80 rounded-md w-3/4" />
+                              <div className="h-3 bg-slate-100 rounded-md w-1/2" />
+                            </div>
+                          </div>
+                          <div className="col-span-3">
+                            <div className="h-3.5 bg-slate-200/60 rounded-md w-2/3" />
+                          </div>
+                          <div className="col-span-3 flex items-center justify-end gap-2 pr-4">
+                            <div className="w-8 h-8 bg-slate-200/70 rounded-xl" />
+                            <div className="w-8 h-8 bg-slate-200/70 rounded-xl" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : items.length === 0 ? (
                      <div className="px-8 py-24 text-center">
                         <div className="flex flex-col items-center gap-4 text-slate-400">
                           <AlertCircle className="w-12 h-12 text-slate-300" />
                           <p className="font-extrabold text-xl text-slate-500">No items found in {activeTab}</p>
-                          <button onClick={() => { setEditingId(null); setFormData(initialFormData); setDiagramText(''); setShowAddModal(true); }} className="text-brand-600 hover:text-brand-700 font-extrabold text-sm underline mt-2">Create the first record</button>
+                          <button onClick={() => openAddModal(activeTab)} className="text-brand-600 hover:text-brand-700 font-extrabold text-sm underline mt-2">Create the first record</button>
                         </div>
                      </div>
                   ) : (
@@ -6023,7 +6926,19 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                     </div>
                                     <div className="col-span-5">
                                        <div className="font-extrabold text-slate-900 text-lg line-clamp-2 pr-4">{item.name || item.title || item.questionText || 'Untitled'}</div>
-                                       <div className="text-xs text-slate-400 font-bold mt-1 uppercase tracking-wider">{item.category || item.type || item.difficulty || 'Default'}</div>
+                                       <div className="text-xs text-slate-400 font-bold mt-1 uppercase tracking-wider">
+                                          {(() => {
+                                            if (activeTab === 'banks') {
+                                              let subj = '';
+                                              if (item.tagline && item.tagline.includes('"subject"')) {
+                                                try { subj = JSON.parse(item.tagline).subject; } catch(e) {}
+                                              }
+                                              const typeLabel = item.target_mode === 'practice' ? 'Practice' : (item.type || 'Default');
+                                              return subj ? `${subj} • ${typeLabel}` : (item.type || 'Default');
+                                            }
+                                            return item.category || item.type || item.difficulty || 'Default';
+                                          })()}
+                                        </div>
                                     </div>
                                     <div className="col-span-2">
                                        <div className="text-sm font-bold text-slate-600">
@@ -6061,7 +6976,32 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                              if (activeTab === 'series') return `₹${item.price} • ${item.durationDays} Days`;
                                              if (activeTab === 'tests') return `${item.durationMinutes} Min • ${item.totalMarks} Marks`;
                                              if (activeTab === 'exams' || activeTab === 'blogs') {
-                                               return item.examDate ? new Date(item.examDate).toLocaleDateString() : '-';
+                                                const tracker = getExamAdminTracker(item);
+                                                const countdownColorMap: Record<string, string> = {
+                                                  urgent: 'bg-red-100 text-red-700 border-red-200',
+                                                  warning: 'bg-amber-100 text-amber-700 border-amber-200',
+                                                  normal: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+                                                  today: 'bg-red-100 text-red-700 border-red-200',
+                                                  passed: 'bg-slate-100 text-slate-500 border-slate-200',
+                                                  tba: 'bg-blue-50 text-blue-600 border-blue-200',
+                                                  expected: 'bg-purple-50 text-purple-600 border-purple-200',
+                                                };
+                                                const formColorMap: Record<string, string> = {
+                                                  open: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+                                                  closed: 'bg-slate-100 text-slate-500 border-slate-200',
+                                                  awaited: 'bg-amber-100 text-amber-700 border-amber-200',
+                                                  tba: 'bg-blue-50 text-blue-600 border-blue-200',
+                                                };
+                                                return (
+                                                  <div className="flex flex-col gap-1.5">
+                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-black border ${countdownColorMap[tracker.countdownType] || 'bg-slate-100 text-slate-500 border-slate-200'} ${tracker.countdownType === 'urgent' || tracker.countdownType === 'today' ? 'animate-pulse' : ''}`}>
+                                                      {tracker.countdownText}
+                                                    </span>
+                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-black border ${formColorMap[tracker.formType] || 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+                                                      {tracker.formText}
+                                                    </span>
+                                                  </div>
+                                                );
                                              }
                                              if (activeTab === 'banks') return `${item.questionCount} Qs • ${item.isPremium ? 'Premium' : 'Free'}`;
                                              return '-';
@@ -6392,9 +7332,22 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                      <span className="text-brand-600 capitalize">{activeTab}</span>
                    </h3>
                 </div>
-                <button type="button" onClick={() => setShowAddModal(false)} className="p-2.5 text-slate-400 hover:bg-slate-50 hover:text-slate-700 rounded-xl transition-all border border-slate-200/50 shadow-sm bg-white shrink-0">
-                  <X className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                  {!editingId && (
+                    <button 
+                      type="button" 
+                      onClick={() => resetStickyFormData(activeTab)} 
+                      title="Clear prefilled memory and reset all fields"
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all border border-slate-200/60 bg-white shadow-xs"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Reset Form</span>
+                    </button>
+                  )}
+                  <button type="button" onClick={() => setShowAddModal(false)} className="p-2.5 text-slate-400 hover:bg-slate-50 hover:text-slate-700 rounded-xl transition-all border border-slate-200/50 shadow-sm bg-white shrink-0">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
               <form onSubmit={handleAdd} className="p-8 sm:p-10">
                 
@@ -6689,6 +7642,134 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                     Grant Access
                   </button>
                 </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Question Bank Questions & Answer Key Live Preview Modal */}
+      <AnimatePresence>
+        {showBankPreviewModal && (
+          <div className="fixed inset-0 bg-slate-950/70 z-[80] flex items-center justify-center p-4 sm:p-6 backdrop-blur-md overflow-hidden" data-lenis-prevent>
+            <motion.div {...modalContent}
+              className="bg-white rounded-[2.5rem] w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl border border-slate-100 relative"
+            >
+              <div className="px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/80 backdrop-blur-md shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center border border-emerald-100/50 shadow-sm shrink-0">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-lg text-slate-900">
+                      Question Bank Parsed Preview
+                    </h3>
+                    <p className="text-xs text-slate-400 font-semibold mt-0.5">
+                      Verify questions, answer keys, and explanations before saving
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  type="button" 
+                  onClick={() => setShowBankPreviewModal(false)}
+                  className="p-2.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 rounded-xl transition-all border border-slate-200/50 bg-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-4">
+                {(() => {
+                  const previewQs = mergeQuestionsAndAnswerKey(bankQuestionsJson, bankAnswerKeyJson);
+                  if (previewQs.length === 0) {
+                    return (
+                      <div className="py-16 text-center text-slate-400">
+                        <FileText className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                        <p className="text-sm font-bold">No valid questions parsed yet. Please check your JSON format.</p>
+                      </div>
+                    );
+                  }
+
+                  return previewQs.map((q: any, idx: number) => {
+                    const ansIdx = q.correctAnswerIndex;
+                    const hasKey = ansIdx !== undefined;
+
+                    return (
+                      <div key={idx} className="p-5 rounded-2xl bg-slate-50/60 border border-slate-200/80 space-y-3">
+                        <div className="flex items-start gap-3">
+                          <span className="px-2.5 py-1 rounded-lg bg-slate-200/80 text-slate-700 text-xs font-black shrink-0 mt-0.5">
+                            Q.{idx + 1}
+                          </span>
+                          <div className="text-sm font-bold text-slate-800 flex-1 leading-relaxed">
+                            <MathTextRenderer text={q.questionText || q.question || ''} />
+                          </div>
+                        </div>
+
+                        {Array.isArray(q.options) && q.options.length > 0 && (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-9">
+                            {q.options.map((opt: string, oIdx: number) => {
+                              const isCorrect = hasKey && ansIdx === oIdx;
+                              const optLetter = ['A', 'B', 'C', 'D', 'E'][oIdx] || `(${oIdx + 1})`;
+                              return (
+                                <div
+                                  key={oIdx}
+                                  className={cn(
+                                    "flex items-start gap-2 p-2.5 rounded-xl border text-xs leading-snug",
+                                    isCorrect 
+                                      ? "bg-emerald-50 border-emerald-300 text-emerald-900 font-bold shadow-2xs" 
+                                      : "bg-white border-slate-200 text-slate-700"
+                                  )}
+                                >
+                                  <span className={cn(
+                                    "w-5 h-5 rounded-md flex items-center justify-center font-black text-[10px] shrink-0 border",
+                                    isCorrect ? "bg-emerald-600 text-white border-emerald-600" : "bg-slate-100 text-slate-500 border-slate-200"
+                                  )}>
+                                    {optLetter}
+                                  </span>
+                                  <div className="flex-1 pt-0.5">
+                                    <MathTextRenderer text={opt} />
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        <div className="pl-9 pt-2 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-2 text-xs">
+                          <span className={cn(
+                            "px-2 py-0.5 rounded-md font-bold text-[11px]",
+                            hasKey ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
+                          )}>
+                            {hasKey ? `Keyed: Option (${['A','B','C','D','E'][ansIdx] || ansIdx + 1})` : 'Un-keyed (Practice Mode)'}
+                          </span>
+
+                          {q.explanation && (
+                            <span className="text-slate-500 font-medium italic">
+                              💡 Solution included
+                            </span>
+                          )}
+                        </div>
+
+                        {q.explanation && (
+                          <div className="ml-9 p-3 rounded-xl bg-emerald-50/50 border border-emerald-200 text-xs text-slate-700 leading-relaxed">
+                            <span className="font-bold text-emerald-800 uppercase text-[10px] tracking-wider block mb-1">Explanation:</span>
+                            <MathTextRenderer text={q.explanation} />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+
+              <div className="px-8 py-4 border-t border-slate-100 bg-slate-50 flex justify-end shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowBankPreviewModal(false)}
+                  className="px-6 py-2.5 rounded-xl bg-brand-600 text-white font-black text-xs hover:bg-brand-700 transition-all shadow-md shadow-brand-500/20"
+                >
+                  Close Preview
+                </button>
               </div>
             </motion.div>
           </div>

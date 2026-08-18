@@ -18,11 +18,17 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
     );
   }
 
-  if (!user) {
+  const storedAdmin = typeof window !== 'undefined' ? localStorage.getItem('admin_session') : null;
+  let hasAdminSession = false;
+  try {
+    hasAdminSession = storedAdmin ? (JSON.parse(storedAdmin)?.role === 'admin') : false;
+  } catch(e) {}
+
+  if (!user && !hasAdminSession) {
     return <Navigate to="/admin-login" replace />;
   }
 
-  if (requireAdmin && !isAdmin) {
+  if (requireAdmin && !isAdmin && !hasAdminSession) {
     return <Navigate to="/" replace />;
   }
 

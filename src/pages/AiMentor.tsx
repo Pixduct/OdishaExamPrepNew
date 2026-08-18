@@ -4576,7 +4576,15 @@ JSON structure:
                           exit={{ opacity: 0, height: 0 }}
                           className="mb-2 px-1 py-1 rounded-2xl bg-white/90 border border-slate-200/80 shadow-xs"
                         >
-                          <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1 px-1 scroll-smooth">
+                          <div 
+                            data-lenis-prevent
+                            onWheel={(e) => {
+                              if (e.deltaY !== 0) {
+                                e.currentTarget.scrollLeft += e.deltaY * 0.85;
+                              }
+                            }}
+                            className="flex items-center gap-2.5 overflow-x-auto overscroll-contain touch-pan-x no-scrollbar py-1 px-1 scroll-smooth"
+                          >
                             {attachments.map(att => (
                               <motion.div
                                 key={att.id}
@@ -5949,7 +5957,15 @@ JSON structure:
                       </div>
 
                       {/* Popular Suggestion Chips - Horizontal Scrollable Row */}
-                      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 w-full shrink-0">
+                      <div 
+                        data-lenis-prevent
+                        onWheel={(e) => {
+                          if (e.deltaY !== 0) {
+                            e.currentTarget.scrollLeft += e.deltaY * 0.85;
+                          }
+                        }}
+                        className="flex items-center gap-1.5 overflow-x-auto overscroll-contain touch-pan-x no-scrollbar py-1 w-full shrink-0"
+                      >
                         {quizTabs.map((s) => (
                           <div
                             key={s}

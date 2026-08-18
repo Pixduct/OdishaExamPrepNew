@@ -5625,19 +5625,19 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                 initial="hidden"
                 animate="visible"
                 exit="exit"
-                className="bg-[#FAF8F5] rounded-[2rem] w-full md:w-full max-w-xl md:max-w-3xl overflow-hidden shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] flex flex-col md:flex-row border border-slate-200/50 relative pointer-events-auto"
+                className="bg-[#FAF8F5] dark:bg-slate-900 rounded-[2rem] w-full md:w-full max-w-xl md:max-w-3xl overflow-hidden shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] flex flex-col md:flex-row border border-slate-200/80 dark:border-slate-800 relative pointer-events-auto"
                 style={{ willChange: 'transform, opacity' }}
               >
                   {/* Unified Close Button */}
                   <button 
                     onClick={() => setSelectedBankItem(null)}
-                    className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/30 text-white md:bg-slate-100 md:hover:bg-slate-200 md:text-slate-500 rounded-xl transition-all z-50 hover:scale-105 active:scale-95 border-none cursor-pointer"
+                    className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/30 text-white md:bg-slate-100 dark:md:bg-slate-800 md:hover:bg-slate-200 dark:md:hover:bg-slate-700 md:text-slate-500 dark:md:text-slate-300 rounded-xl transition-all z-50 hover:scale-105 active:scale-95 border-none cursor-pointer"
                   >
                     <X className="w-5 h-5" />
                 </button>
 
                 {/* Left Column: Premium Visual Branding & Stats (Fixed height on mobile, full-height banner on laptop) */}
-                <div className="relative h-28 md:h-auto md:min-h-[440px] md:w-[38%] bg-gradient-to-br from-[#12040b]/98 via-[#08020a]/99 to-[#030005]/100 border-b md:border-b-0 md:border-r border-slate-200/50 flex flex-col justify-center md:justify-between items-center p-4 md:p-8 overflow-hidden shrink-0">
+                <div className="relative h-28 md:h-auto md:min-h-[440px] md:w-[38%] bg-gradient-to-br from-[#12040b]/98 via-[#08020a]/99 to-[#030005]/100 border-b md:border-b-0 md:border-r border-slate-200/50 dark:border-slate-800 flex flex-col justify-center md:justify-between items-center p-4 md:p-8 overflow-hidden shrink-0">
                   {/* Ambient background grid and glowing orb */}
                   <div className="absolute inset-0 grid-bg opacity-[0.06] pointer-events-none" />
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-brand-500/10 rounded-full blur-[60px] pointer-events-none" />
@@ -5714,12 +5714,12 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     <div className="space-y-4">
                       {/* Topic Title (Visible on mobile and laptop) */}
                       <div className="space-y-1.5 text-left md:text-left">
-                        <span className="inline-flex items-center px-2 py-0.5 bg-brand-50 text-[#2563EB] rounded text-[9px] font-black uppercase tracking-wider border border-brand-100">
+                        <span className="inline-flex items-center px-2 py-0.5 bg-brand-50 dark:bg-brand-950/60 text-[#2563EB] dark:text-brand-400 rounded text-[9px] font-black uppercase tracking-wider border border-brand-100 dark:border-brand-800/60">
                           Topic Focus
                         </span>
                         <h2 
                           className={cn(
-                            "font-serif font-extrabold text-slate-900 leading-tight line-clamp-3 md:line-clamp-3",
+                            "font-serif font-extrabold text-slate-900 dark:text-white leading-tight line-clamp-3 md:line-clamp-3",
                             selectedBankItem.title.length > 55 ? "text-lg sm:text-xl md:text-2xl" : "text-xl sm:text-2xl md:text-3xl"
                           )}
                           title={selectedBankItem.title}
@@ -5729,7 +5729,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       </div>
 
                       {/* Description */}
-                      <p className="text-slate-500 text-sm font-medium leading-relaxed">
+                      <p className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-relaxed">
                         {selectedBankItem.description || (
                           selectedBankItem.title.length > 50 
                             ? 'Access official question banks, chapter notes, and exam practice materials customized for this topic.'
@@ -5739,13 +5739,13 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       
                       {/* Mobile Stats Cards (Rendered here on mobile viewports) */}
                       <div className="grid grid-cols-2 gap-3 md:hidden">
-                        <div className="p-3 bg-white border border-slate-200/60 rounded-2xl shadow-sm">
+                        <div className="p-3 bg-white dark:bg-slate-800/90 border border-slate-200/60 dark:border-slate-700/60 rounded-2xl shadow-sm">
                           <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Questions</p>
-                          <p className="text-base font-black text-slate-900">{selectedBankItem.questionCount || selectedBankItem.questions}</p>
+                          <p className="text-base font-black text-slate-900 dark:text-white">{selectedBankItem.questionCount || selectedBankItem.questions}</p>
                         </div>
-                        <div className="p-3 bg-white border border-slate-200/60 rounded-2xl shadow-sm">
+                        <div className="p-3 bg-white dark:bg-slate-800/90 border border-slate-200/60 dark:border-slate-700/60 rounded-2xl shadow-sm">
                           <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Highlight</p>
-                          <p className="text-[10px] font-black text-[#2563EB] line-clamp-2 leading-tight" title={selectedBankItem.tagline || "Comprehensive"}>
+                          <p className="text-[10px] font-black text-[#2563EB] dark:text-brand-400 line-clamp-2 leading-tight" title={selectedBankItem.tagline || "Comprehensive"}>
                             {selectedBankItem.tagline || "Comprehensive"}
                           </p>
                         </div>
@@ -5795,11 +5795,11 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           type="button"
                           onClick={() => handleExportPdfForBank(selectedBankItem)}
                           className={cn(
-                            "h-12 rounded-2xl text-xs font-black text-slate-800 bg-white hover:bg-slate-50 border border-slate-200/80 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm active:scale-[0.98]",
-                            !isMobile && "hover:border-brand-300 hover:text-brand-600"
+                            "h-12 rounded-2xl text-xs font-black text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm active:scale-[0.98]",
+                            !isMobile && "hover:border-brand-300 dark:hover:border-brand-500/50 hover:text-brand-600 dark:hover:text-brand-400"
                           )}
                         >
-                          <Download className="w-4 h-4 text-brand-600" />
+                          <Download className="w-4 h-4 text-brand-600 dark:text-brand-400" />
                           <span>Download PDF</span>
                         </button>
 
@@ -5847,8 +5847,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           className={cn(
                             "h-12 rounded-2xl text-xs font-black flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm active:scale-[0.98]",
                             selectedBankItem.hasPracticeMode === false
-                              ? "bg-slate-50 text-slate-400 border border-slate-200 cursor-not-allowed opacity-60"
-                              : "bg-brand-50 hover:bg-brand-100/80 text-brand-600 border border-brand-200/80"
+                              ? "bg-slate-50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-800 cursor-not-allowed opacity-60"
+                              : "bg-brand-50 dark:bg-brand-950/60 hover:bg-brand-100/80 dark:hover:bg-brand-900/80 text-brand-600 dark:text-brand-300 border border-brand-200/80 dark:border-brand-800/60"
                           )}
                         >
                           <Play className="w-4 h-4 fill-current" />
@@ -5858,8 +5858,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
                       {/* 3. Optional Extra Attached Materials (Only if admin explicitly added external links) */}
                       {selectedBankItem.pdfLinks && selectedBankItem.pdfLinks.length > 0 && (
-                        <div className="pt-2 border-t border-slate-100 space-y-2">
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.18em]">
+                        <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                          <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.18em]">
                             Supplementary Attachments
                           </p>
                           <div className="space-y-1.5 max-h-[140px] overflow-y-auto custom-scrollbar pr-1">
@@ -5868,10 +5868,10 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                 key={idx}
                                 type="button"
                                 onClick={() => window.open(link.url, '_blank')}
-                                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-brand-50/50 border border-slate-200/60 text-xs font-bold text-slate-700 hover:text-brand-600 transition-all text-left"
+                                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 hover:bg-brand-50/50 dark:hover:bg-slate-700/80 border border-slate-200/60 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-brand-600 dark:hover:text-brand-400 transition-all text-left"
                               >
                                 <span className="truncate flex-1 pr-2">{link.title || `Attachment ${idx + 1}`}</span>
-                                <Download className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+                                <Download className="w-3.5 h-3.5 shrink-0 text-slate-400 dark:text-slate-500" />
                               </button>
                             ))}
                           </div>
@@ -5880,8 +5880,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     </div>
                   </div>
                 </div>
-                </motion.div>
-              </div>
+              </motion.div>
+            </div>
           )}
         </AnimatePresence>
 

@@ -1904,27 +1904,30 @@ Last updated: August 18, 2026
 
 ---
 
-### 41. `DynamicVectorCard`
+### 41. `DynamicVectorCard` & Borderless Elevation Pattern
 
-File: [`src/components/DynamicVectorCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/DynamicVectorCard.tsx)
+File: [`src/components/DynamicVectorCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/DynamicVectorCard.tsx), [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
 Last updated: August 18, 2026
 
 | Property | Class / Token |
 | :--- | :--- |
-| **Card Container** | `relative isolate ${roundedClass} ${className} group/vector-card transition-transform duration-200 ease-out` |
-| **Border Radius Default** | `rounded-3xl sm:rounded-[2.5rem]` (configurable via `roundedClass` prop) |
-| **Perspective & 3D Tilt** | `perspective: 1000px`, `transformStyle: preserve-3d`, `--rotate-x`, `--rotate-y` (max ~3.5deg) |
-| **Ambient Glow Layer (z-0)** | `radial-gradient(550px circle at mouseX mouseY, color coreAlpha 0%, color midAlpha 40%, transparent 72%)` |
-| **Rim Border Glow (z-20)** | `radial-gradient(220px circle at mouseX mouseY, color rimAlpha, transparent 70%)` with `WebkitMaskComposite: 'xor'`, `maskComposite: 'exclude'` |
+| **Card Container** | `relative isolate ${roundedClass} ${className} group/vector-card transition-transform duration-200 ease-out [&.is-card-hovered]:[transform:perspective(1000px)_rotateX(var(--rotate-x,0deg))_rotateY(var(--rotate-y,0deg))_scale3d(1.015,1.015,1.015)]` |
+| **Border Radius Default** | `rounded-3xl sm:rounded-[2.5rem]` (configurable via `roundedClass` prop, standard child cards use `rounded-[2.2rem]`) |
+| **Border Styling** | `border-none` (100% borderless; elevation achieved via soft shadow tokens rather than hard 1px strokes) |
+| **Shadow Elevation** | `shadow-xl shadow-slate-900/10 dark:shadow-slate-950/30` / `hover:shadow-2xl` |
+| **Perspective & 3D Tilt** | `perspective: 1000px`, `transformStyle: preserve-3d`, `--rotate-x`, `--rotate-y` (max ~3.5deg dynamic tilt) |
+| **Ambient Backlit Glow (z-0)** | `radial-gradient(${ambientRadius}px circle at mouseX mouseY, ${glowColor} coreAlpha 0%, ${glowColor} midAlpha 30%, transparent 60%)` |
 | **Content Container (z-10)** | `<div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%' }}>{children}</div>` |
-| **Dark Mode Alphas** | `coreAlpha: 0.55`, `midAlpha: 0.22`, `rimAlpha: 0.95`, `radius: 550px` |
-| **Light Mode Alphas** | `coreAlpha: 0.30`, `midAlpha: 0.10`, `rimAlpha: 0.75`, `radius: 480px` |
+| **Dark Mode Ambient** | `coreAlpha: 0.40`, `midAlpha: 0.12`, `radius: 360px` |
+| **Light Mode Ambient** | `coreAlpha: 0.22`, `midAlpha: 0.06`, `radius: 300px` |
+| **Sizing & Fluid Layout** | `relative w-full h-full min-h-full` within clean CSS Grid / Flex tracks (no negative margin parent offsets) |
+| **Viewport Overflow Protection** | Parent view roots use standard `overflow-visible` (no inner `overflow-x-hidden`) to avoid clipping hover scale bounds |
 | **Performance** | Direct DOM `ref.current.style` mutation, 0 React re-renders, 60-120fps GPU accelerated |
 
 **Pattern notes:**
-- **Layer Stacking**: Ambient light sits at `z-0` beneath content at `z-10`, and Rim Border Glow sits at `z-20` over the card perimeter.
-- **Orb Artifact Prevention**: No separate tight white specular point-light is used. The spotlight uses a smooth 3-stop falloff matched to the card theme color, ensuring text legibility without floating circular blobs.
-- **Full Frontend Consistency**: Used across landing page cards, dashboard hero banners, question bank cards, practice bank items, and YouTube video carousel cards.
+- **Zero Edge Lines**: The ambient radial gradient stops at `transparent 60%` (~180px from cursor), reaching 0.000 alpha before touching the card bounding box (`inset: 0`). This mathematically eliminates rectangular halo/clipping lines against light and dark canvas backgrounds.
+- **Borderless Elevation**: Eliminates static 1px border lines (`border-white/10`, `border-slate-200`) on dark and translucent cards in favor of deep atmospheric ambient light and diffused multi-layer shadows.
+- **Unclipped Hover Space**: Grid containers avoid negative margins (`-m-*`), and root views rely on top-level `html, body { overflow-x: hidden }` rather than inner element clipping, ensuring full corner radius visibility on all screen resolutions.
 
 
 ---

@@ -38,11 +38,10 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
   const [theme] = useTheme();
   const isDark = theme === 'dark';
 
-  // Ambient layer config  ─ wide soft spread with bright cursor-center (physics: frosted glass backlit)
-  const ambientRadius  = isDark ? 550 : 480;
-  // Core stop (0%), mid-fade (40%), transparent edge (100%)
-  const coreAlpha  = isDark ? 0.55 : 0.30;  // bright at exact cursor
-  const midAlpha   = isDark ? 0.22 : 0.10;  // soft mid-ring
+  // Ambient layer config ─ soft spread fading to 0% alpha well before card edge
+  const ambientRadius  = isDark ? 360 : 300;
+  const coreAlpha  = isDark ? 0.40 : 0.22;
+  const midAlpha   = isDark ? 0.12 : 0.06;
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const card = cardRef.current;
@@ -62,8 +61,8 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
       ambientRef.current.style.background =
         `radial-gradient(${ambientRadius}px circle at ${pctX.toFixed(1)}% ${pctY.toFixed(1)}%,` +
         ` ${withAlpha(glowColor, coreAlpha)} 0%,` +
-        ` ${withAlpha(glowColor, midAlpha)} 40%,` +
-        ` transparent 72%)`;
+        ` ${withAlpha(glowColor, midAlpha)} 30%,` +
+        ` transparent 60%)`;
     }
 
     // ── 3-D Tilt ──────────────────────────────────────────────────

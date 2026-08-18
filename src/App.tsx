@@ -8737,13 +8737,13 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               : "flex flex-col sm:flex-row items-center gap-3"
           )}>
              <div className="relative flex-1 sm:w-64">
-               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
                <input 
                  type="text" 
                  placeholder="Search banks..." 
                  value={bankSearchQuery}
                  onChange={e => setBankSearchQuery(e.target.value)}
-                 className="w-full pl-10 pr-4 py-3 sm:py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 text-sm font-medium outline-none transition-all shadow-sm"
+                 className="w-full pl-10 pr-4 py-3 sm:py-2.5 bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 rounded-xl focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 dark:focus:border-brand-400 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-medium outline-none transition-all shadow-sm"
                />
              </div>
               {/* Premium Custom Sort Dropdown */}
@@ -8753,8 +8753,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   className={cn(
                     "w-full flex items-center justify-between gap-2 pl-3.5 pr-3 py-2.5 rounded-xl border text-xs font-bold tracking-wide transition-all duration-200 cursor-pointer outline-none",
                     bankSortOpen
-                      ? "bg-[#2563EB]/5 border-[#2563EB]/40 text-[#2563EB] shadow-md shadow-[#2563EB]/10"
-                      : "bg-white border-slate-200 text-slate-700 hover:border-[#2563EB]/30 hover:bg-[#2563EB]/5 hover:text-[#2563EB] shadow-sm"
+                      ? "bg-[#2563EB]/5 dark:bg-brand-950/60 border-[#2563EB]/40 dark:border-brand-800 text-[#2563EB] dark:text-brand-400 shadow-md shadow-[#2563EB]/10"
+                      : "bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:border-[#2563EB]/30 dark:hover:border-brand-500/40 hover:bg-[#2563EB]/5 dark:hover:bg-brand-950/40 hover:text-[#2563EB] dark:hover:text-brand-400 shadow-sm"
                   )}
                 >
                   <span className="flex items-center gap-1.5">
@@ -8779,7 +8779,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -6, scale: 0.97 }}
                         transition={{ duration: 0.15, ease: "easeOut" }}
-                        className="absolute right-0 top-[calc(100%+6px)] z-50 min-w-[160px] bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/70 overflow-hidden"
+                        className="absolute right-0 top-[calc(100%+6px)] z-50 min-w-[160px] bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/70 dark:shadow-black/70 overflow-hidden"
                       >
                         <div className="p-1.5">
                           {[
@@ -8793,15 +8793,15 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                               className={cn(
                                 "w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-150 cursor-pointer flex items-center gap-2.5",
                                 bankSortBy === opt.value
-                                  ? "bg-gradient-to-r from-[#2563EB]/10 to-[#2563EB]/5 text-[#2563EB]"
-                                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                  ? "bg-gradient-to-r from-[#2563EB]/10 to-[#2563EB]/5 dark:from-brand-950/60 dark:to-brand-900/40 text-[#2563EB] dark:text-brand-400"
+                                  : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
                               )}
                             >
                               {bankSortBy === opt.value && (
                                 <span className="w-1.5 h-1.5 rounded-full bg-[#2563EB] shrink-0" />
                               )}
                               {bankSortBy !== opt.value && (
-                                <span className="w-1.5 h-1.5 rounded-full bg-slate-200 shrink-0" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
                               )}
                               {opt.label}
                             </button>
@@ -8817,20 +8817,20 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
         {items.length === 0 ? (
           loadingDashboardData ? (
-            <div className="flex flex-col items-center justify-center p-24 space-y-4 bg-white rounded-[2rem] border border-slate-200/60 shadow-sm">
+            <div className="flex flex-col items-center justify-center p-24 space-y-4 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200/60 dark:border-slate-800 shadow-sm">
               <div className="relative w-12 h-12 flex items-center justify-center">
-                <div className="absolute inset-0 rounded-full border-4 border-slate-100 border-t-[#2563EB] animate-[spin_1s_linear_infinite]" />
+                <div className="absolute inset-0 rounded-full border-4 border-slate-100 dark:border-slate-800 border-t-[#2563EB] animate-[spin_1s_linear_infinite]" />
               </div>
-              <p className="text-slate-500 font-bold text-sm tracking-wide animate-pulse">Loading question banks...</p>
+              <p className="text-slate-500 dark:text-slate-400 font-bold text-sm tracking-wide animate-pulse">Loading question banks...</p>
             </div>
           ) : (
-            <div className="w-full p-12 bg-white rounded-[2rem] border border-slate-200/60 shadow-sm flex flex-col items-center justify-center text-center space-y-4">
-              <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center">
-                <Search className="w-8 h-8 text-slate-300" />
+            <div className="w-full p-12 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200/60 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center space-y-4">
+              <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center">
+                <Search className="w-8 h-8 text-slate-300 dark:text-slate-600" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-slate-900">No matching banks found</h3>
-                <p className="text-slate-500">Try adjusting your search filters.</p>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">No matching banks found</h3>
+                <p className="text-slate-500 dark:text-slate-400">Try adjusting your search filters.</p>
               </div>
             </div>
           )

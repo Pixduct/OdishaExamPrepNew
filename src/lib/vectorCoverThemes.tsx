@@ -43,6 +43,7 @@ import {
   FileText,
   Sparkles,
   ShieldCheck,
+  ShieldAlert,
   GraduationCap,
   Atom,
   FlaskConical,
@@ -51,6 +52,11 @@ import {
   Radio,
   MapPin,
   Building2,
+  Coins,
+  Wallet,
+  Briefcase,
+  Users,
+  Percent,
   LucideIcon
 } from 'lucide-react';
 
@@ -202,7 +208,7 @@ export const getBankDisplayTagline = (tagline: any, defaultText: string = 'Compr
 };
 
 /**
- * Highly dynamic, 35+ discipline classifier and artwork theme generator
+ * Universal 60+ Sub-Discipline Vector Artwork Engine
  */
 export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName: string = ''): VectorThemeConfig => {
   let title = '';
@@ -244,11 +250,221 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
 
   const t = (title + ' ' + (explicitSubject || '') + ' ' + (category || '')).toLowerCase();
 
-  // ==========================================
-  // 1. WATER & SANITARY / ENVIRONMENTAL
-  // ==========================================
+  // =========================================================================
+  // 1. TEACHING, EDUCATION & PEDAGOGY (OTET, OSSTET, CTET, OAVS, B.Ed, KVS)
+  // =========================================================================
 
-  // 1.1 Wastewater & Sewerage Engineering
+  // 1.1 Child Development & Pedagogy (CDP)
+  if (
+    t.includes('child development') || t.includes('cdp') || t.includes('piaget') ||
+    t.includes('vygotsky') || t.includes('kohlberg') || t.includes('educational psychology') ||
+    t.includes('learning theory') || t.includes('pedagogy') || t.includes('pedagog') ||
+    t.includes('inclusive education') || t.includes('special need') || t.includes('growth and development')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-indigo-900 via-purple-950 to-slate-950 text-indigo-50',
+      badgeBg: 'bg-indigo-400/20 text-indigo-200 border-indigo-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'CHILD DEVELOPMENT & PEDAGOGY',
+      examTag: resolvedExamTag,
+      pattern: 'dot-matrix',
+      MainIcon: GraduationCap,
+      WatermarkIcon: Users,
+      accentGlowColor: 'rgba(99, 102, 241, 0.25)',
+    };
+  }
+
+  // 1.2 Curriculum, Evaluation & Educational Policies (NEP 2020, NCF)
+  if (
+    t.includes('nep 2020') || t.includes('ncf') || t.includes('curriculum') ||
+    t.includes('evaluation') || t.includes('cce') || t.includes('formative assessment') ||
+    t.includes('teaching aptitude') || t.includes('classroom management') || t.includes('otet') ||
+    t.includes('osstet') || t.includes('ctet') || t.includes('oavs') || t.includes('b.ed')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-blue-900 via-indigo-950 to-slate-950 text-blue-50',
+      badgeBg: 'bg-blue-400/20 text-blue-200 border-blue-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'TEACHING APTITUDE & POLICIES',
+      examTag: resolvedExamTag,
+      pattern: 'heritage-arch',
+      MainIcon: BookOpen,
+      WatermarkIcon: Award,
+      accentGlowColor: 'rgba(59, 130, 246, 0.25)',
+    };
+  }
+
+  // =========================================================================
+  // 2. BANKING, INSURANCE & FINANCIAL REGULATORY (IBPS, SBI, RBI, NABARD, LIC)
+  // =========================================================================
+
+  // 2.1 Banking Awareness, RBI & Monetary Policy
+  if (
+    t.includes('banking awareness') || t.includes('rbi') || t.includes('monetary policy') ||
+    t.includes('repo rate') || t.includes('crr') || t.includes('slr') || t.includes('priority sector') ||
+    t.includes('psl') || t.includes('npa') || t.includes('basel') || t.includes('cheque') ||
+    t.includes('negotiable instrument') || t.includes('ibps') || t.includes('sbi po') || t.includes('sbi clerk')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-emerald-950 via-teal-950 to-slate-950 text-emerald-50',
+      badgeBg: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'BANKING AWARENESS & RBI',
+      examTag: resolvedExamTag,
+      pattern: 'dot-matrix',
+      MainIcon: Landmark,
+      WatermarkIcon: Coins,
+      accentGlowColor: 'rgba(16, 185, 129, 0.25)',
+    };
+  }
+
+  // 2.2 Insurance, IRDAI & Financial Markets
+  if (
+    t.includes('insurance') || t.includes('irdai') || t.includes('lic') ||
+    t.includes('money market') || t.includes('capital market') || t.includes('sebi') ||
+    t.includes('mutual fund') || t.includes('derivatives') || t.includes('financial awareness')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-teal-900 via-blue-950 to-slate-950 text-teal-50',
+      badgeBg: 'bg-teal-400/20 text-teal-200 border-teal-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'FINANCIAL & INSURANCE SECTOR',
+      examTag: resolvedExamTag,
+      pattern: 'dot-matrix',
+      MainIcon: TrendingUp,
+      WatermarkIcon: Wallet,
+      accentGlowColor: 'rgba(20, 184, 166, 0.25)',
+    };
+  }
+
+  // =========================================================================
+  // 3. RAILWAY RECRUITMENT BOARDS (RRB NTPC, GROUP D, JE, ALP, RPF)
+  // =========================================================================
+
+  // 3.1 Railway GK, Basic Science & Operations
+  if (
+    t.includes('railway') || t.includes('rrb') || t.includes('ntpc') ||
+    t.includes('loco pilot') || t.includes('alp') || t.includes('group d') ||
+    t.includes('train') || t.includes('rolling stock') || t.includes('signaling')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-rose-950 via-slate-900 to-amber-950 text-rose-50',
+      badgeBg: 'bg-rose-400/20 text-rose-200 border-rose-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'RAILWAYS RRB SPECIAL',
+      examTag: resolvedExamTag,
+      pattern: 'blueprint-grid',
+      MainIcon: Zap,
+      WatermarkIcon: Milestone,
+      accentGlowColor: 'rgba(244, 63, 94, 0.25)',
+    };
+  }
+
+  // =========================================================================
+  // 4. POLICE, DEFENCE, PARAMILITARY & SECURITY (SI, CONSTABLE, NDA, CDS, CAPF)
+  // =========================================================================
+  if (
+    (t.includes('police') || t.includes('sub inspector') || t.includes('constable') ||
+     t.includes('defence') || t.includes('army') || t.includes('navy') || t.includes('airforce') ||
+     t.includes('nda') || t.includes('cds') || t.includes('capf') || t.includes('irb') ||
+     t.includes('osap') || t.includes('rpf') || t.includes('internal security')) &&
+    !t.includes('civil') && !t.includes('mechanic')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-amber-950 via-stone-900 to-slate-950 text-amber-50',
+      badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'POLICE & DEFENCE FORCES',
+      examTag: resolvedExamTag,
+      pattern: 'blueprint-grid',
+      MainIcon: ShieldCheck,
+      WatermarkIcon: Target,
+      accentGlowColor: 'rgba(217, 119, 6, 0.25)',
+    };
+  }
+
+  // =========================================================================
+  // 5. MEDICAL, HEALTHCARE, NURSING & PHARMACY (AIIMS, NORCET, ANM, GNM, OSSSC)
+  // =========================================================================
+
+  // 5.1 Anatomy, Physiology & Pathology
+  if (
+    t.includes('anatom') || t.includes('physiol') || t.includes('pathol') ||
+    t.includes('histology') || t.includes('skeletal') || t.includes('cardiovascular system') ||
+    t.includes('digestive system') || t.includes('nervous system') || t.includes('endocrine')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-teal-800 via-emerald-950 to-slate-950 text-teal-50',
+      badgeBg: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'ANATOMY & PHYSIOLOGY',
+      examTag: resolvedExamTag,
+      pattern: 'hex-mesh',
+      MainIcon: HeartPulse,
+      WatermarkIcon: Dna,
+      accentGlowColor: 'rgba(16, 185, 129, 0.25)',
+    };
+  }
+
+  // 5.2 Nursing, Medical Surgical & Clinical Healthcare
+  if (
+    t.includes('nurs') || t.includes('health') || t.includes('medic') ||
+    t.includes('pharm') || t.includes('pediatr') || t.includes('surgery') ||
+    t.includes('pharmacology') || t.includes('obstetric') || t.includes('community health') ||
+    t.includes('infection control') || t.includes('hospital') || t.includes('norcet') ||
+    t.includes('anm') || t.includes('gnm')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-emerald-900 via-teal-950 to-slate-950 text-emerald-50',
+      badgeBg: 'bg-teal-400/20 text-teal-200 border-teal-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'NURSING & CLINICAL HEALTH',
+      examTag: resolvedExamTag,
+      pattern: 'hex-mesh',
+      MainIcon: Activity,
+      WatermarkIcon: HeartPulse,
+      accentGlowColor: 'rgba(20, 184, 166, 0.25)',
+    };
+  }
+
+  // =========================================================================
+  // 6. FINANCE, ACCOUNTING, AUDITING & TAXATION (ACCOUNTANT, AUDITOR, ACTO)
+  // =========================================================================
+
+  // 6.1 Financial Accounting, Costing & Auditing
+  if (
+    t.includes('account') || t.includes('audit') || t.includes('bookkeeping') ||
+    t.includes('costing') || t.includes('trial balance') || t.includes('balance sheet') ||
+    t.includes('depreciation') || t.includes('voucher') || t.includes('ratio analysis') ||
+    t.includes('cash flow') || t.includes('working capital') || t.includes('company law')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-stone-900 via-emerald-950 to-slate-950 text-emerald-50',
+      badgeBg: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'FINANCIAL ACCOUNTING & AUDIT',
+      examTag: resolvedExamTag,
+      pattern: 'dot-matrix',
+      MainIcon: Receipt,
+      WatermarkIcon: Landmark,
+      accentGlowColor: 'rgba(16, 185, 129, 0.25)',
+    };
+  }
+
+  // 6.2 Taxation, GST & Direct Tax
+  if (
+    t.includes('tax') || t.includes('gst') || t.includes('income tax') ||
+    t.includes('indirect tax') || t.includes('customs') || t.includes('excise') ||
+    t.includes('fiscal') || t.includes('budget') || t.includes('acto')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-amber-950 via-slate-900 to-emerald-950 text-amber-50',
+      badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'TAXATION & FISCAL LAWS',
+      examTag: resolvedExamTag,
+      pattern: 'dot-matrix',
+      MainIcon: Briefcase,
+      WatermarkIcon: Receipt,
+      accentGlowColor: 'rgba(245, 158, 11, 0.25)',
+    };
+  }
+
+  // =========================================================================
+  // 7. CIVIL & ENVIRONMENTAL ENGINEERING (OSSC CTSRE, OPSC AEE, SSC JE)
+  // =========================================================================
+
+  // 7.1 Wastewater & Sewerage Engineering
   if (
     t.includes('wastewater') || t.includes('waste water') || t.includes('sewage') ||
     t.includes('sewer') || t.includes('sludge') || t.includes('effluent') ||
@@ -267,7 +483,7 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
     };
   }
 
-  // 1.2 Water Supply & Treatment Engineering
+  // 7.2 Water Supply & Treatment Engineering
   if (
     t.includes('water supply') || t.includes('water treatment') || t.includes('water demand') ||
     t.includes('filtration') || t.includes('sedimentation') || t.includes('coagulation') ||
@@ -286,7 +502,7 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
     };
   }
 
-  // 1.3 Environmental & Pollution Control
+  // 7.3 Environmental Pollution & EIA
   if (
     t.includes('pollution') || t.includes('air pollution') || t.includes('noise pollution') ||
     t.includes('solid waste') || t.includes('eia') || t.includes('environmental impact') ||
@@ -299,12 +515,12 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
       examTag: resolvedExamTag,
       pattern: 'sanitary-flow',
       MainIcon: Wind,
-      WatermarkIcon: ShieldCheck,
+      WatermarkIcon: ShieldAlert,
       accentGlowColor: 'rgba(20, 184, 166, 0.25)',
     };
   }
 
-  // 1.4 Hydrology & Irrigation Engineering
+  // 7.4 Hydrology & Irrigation Engineering
   if (
     t.includes('irrigation') || t.includes('hydrology') || t.includes('dam') ||
     t.includes('spillway') || t.includes('canal') || t.includes('cross drainage') ||
@@ -323,11 +539,7 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
     };
   }
 
-  // ==========================================
-  // 2. CIVIL & STRUCTURAL ENGINEERING
-  // ==========================================
-
-  // 2.1 Fluid Mechanics & Open Channel Flow
+  // 7.5 Fluid Mechanics & Open Channel Flow
   if (
     t.includes('fluid') || t.includes('bernoulli') || t.includes('pipe flow') ||
     t.includes('laminar') || t.includes('turbulent') || t.includes('boundary layer') ||
@@ -346,7 +558,7 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
     };
   }
 
-  // 2.2 Geotechnical & Soil / Foundation Engineering
+  // 7.6 Geotechnical & Soil / Foundation Engineering
   if (
     t.includes('soil') || t.includes('foundation') || t.includes('geotechnical') ||
     t.includes('bearing capacity') || t.includes('consolidation') || t.includes('compaction') ||
@@ -365,12 +577,12 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
     };
   }
 
-  // 2.3 Highway, Transportation & Pavement Engineering
+  // 7.7 Highway, Transportation & Pavement Engineering
   if (
     t.includes('highway') || t.includes('transportation') || t.includes('pavement') ||
     t.includes('traffic') || t.includes('cbr') || t.includes('bitumen') ||
     t.includes('geometric design') || t.includes('sight distance') || t.includes('super elevation') ||
-    t.includes('railway') || t.includes('airport')
+    t.includes('airport')
   ) {
     return {
       gradient: 'bg-gradient-to-br from-indigo-900 via-slate-900 to-blue-950 text-indigo-50',
@@ -384,7 +596,7 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
     };
   }
 
-  // 2.4 Concrete Technology & RCC Structures
+  // 7.8 Concrete Technology & RCC Structures
   if (
     t.includes('concrete') || t.includes('rcc') || t.includes('reinforced concrete') ||
     t.includes('pre-stressed') || t.includes('prestressed') || t.includes('mix design') ||
@@ -403,7 +615,7 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
     };
   }
 
-  // 2.5 Building Materials & Construction Management
+  // 7.9 Building Materials & Construction Management
   if (
     t.includes('building material') || t.includes('construction') || t.includes('brick') ||
     t.includes('timber') || t.includes('cement') || t.includes('lime') ||
@@ -422,7 +634,7 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
     };
   }
 
-  // 2.6 Surveying, Leveling & Geomatics
+  // 7.10 Surveying, Leveling & Geomatics
   if (
     t.includes('survey') || t.includes('leveling') || t.includes('theodolite') ||
     t.includes('contour') || t.includes('compass survey') || t.includes('plane table') ||
@@ -441,7 +653,7 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
     };
   }
 
-  // 2.7 Structural Analysis & Strength of Materials / Steel
+  // 7.11 Structural Analysis & SOM / Steel
   if (
     t.includes('structure') || t.includes('structural analysis') || t.includes('som') ||
     t.includes('strength of material') || t.includes('mechanics of solids') || t.includes('steel') ||
@@ -460,40 +672,121 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
     };
   }
 
-  // ==========================================
-  // 3. MECHANICAL & ELECTRICAL ENGINEERING
-  // ==========================================
+  // =========================================================================
+  // 8. MECHANICAL, THERMAL & AUTOMOBILE ENGINEERING
+  // =========================================================================
 
-  // 3.1 Mechanical, Thermal & Automotive
+  // 8.1 Thermodynamics, Heat Transfer & Power Plant
   if (
-    t.includes('mechanic') || t.includes('thermo') || t.includes('manufacturing') ||
-    t.includes('tom') || t.includes('machine design') || t.includes('automobile') ||
-    t.includes('ic engine') || t.includes('refrigeration') || t.includes('cad') ||
-    t.includes('cam') || t.includes('welding') || t.includes('workshop') ||
-    t.includes('fluid machinery') || t.includes('power plant') || t.includes('heat transfer')
+    t.includes('thermo') || t.includes('heat transfer') || t.includes('entropy') ||
+    t.includes('carnot') || t.includes('steam') || t.includes('boiler') ||
+    t.includes('power plant') || t.includes('conduction') || t.includes('radiation')
   ) {
     return {
-      gradient: 'bg-gradient-to-br from-amber-900 via-slate-900 to-stone-950 text-amber-50',
-      badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
-      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'MECHANICAL ENGINEERING',
+      gradient: 'bg-gradient-to-br from-rose-900 via-amber-950 to-slate-950 text-rose-50',
+      badgeBg: 'bg-rose-400/20 text-rose-200 border-rose-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'THERMODYNAMICS & HEAT TRANSFER',
       examTag: resolvedExamTag,
       pattern: 'blueprint-grid',
-      MainIcon: Wrench,
+      MainIcon: Flame,
+      WatermarkIcon: Gauge,
+      accentGlowColor: 'rgba(244, 63, 94, 0.25)',
+    };
+  }
+
+  // 8.2 IC Engines, RAC & Automobile
+  if (
+    t.includes('ic engine') || t.includes('automobile') || t.includes('refrigeration') ||
+    t.includes('rac') || t.includes('otto cycle') || t.includes('diesel cycle') ||
+    t.includes('cop') || t.includes('psychrometric') || t.includes('chassis') ||
+    t.includes('transmission') || t.includes('clutch') || t.includes('braking')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-amber-900 via-stone-900 to-slate-950 text-amber-50',
+      badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'IC ENGINES, RAC & AUTOMOBILE',
+      examTag: resolvedExamTag,
+      pattern: 'blueprint-grid',
+      MainIcon: Gauge,
       WatermarkIcon: Settings,
       accentGlowColor: 'rgba(245, 158, 11, 0.25)',
     };
   }
 
-  // 3.2 Electrical & Power Systems
+  // 8.3 Theory of Machines, Machine Design & Vibrations
+  if (
+    t.includes('theory of machine') || t.includes('tom') || t.includes('machine design') ||
+    t.includes('gear') || t.includes('bearing') || t.includes('vibration') ||
+    t.includes('governor') || t.includes('flywheel') || t.includes('cam profile') ||
+    t.includes('fastener') || t.includes('shaft')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-stone-800 via-slate-900 to-zinc-950 text-stone-50',
+      badgeBg: 'bg-stone-400/20 text-stone-200 border-stone-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'MACHINE DESIGN & TOM',
+      examTag: resolvedExamTag,
+      pattern: 'blueprint-grid',
+      MainIcon: Settings,
+      WatermarkIcon: Wrench,
+      accentGlowColor: 'rgba(168, 162, 158, 0.25)',
+    };
+  }
+
+  // 8.4 Manufacturing, Workshop & Metallurgy
+  if (
+    t.includes('manufacturing') || t.includes('welding') || t.includes('casting') ||
+    t.includes('machining') || t.includes('lathe') || t.includes('cad') ||
+    t.includes('cam') || t.includes('metallurgy') || t.includes('material science') ||
+    t.includes('iron carbon') || t.includes('heat treatment') || t.includes('workshop')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-orange-950 via-stone-900 to-slate-950 text-orange-50',
+      badgeBg: 'bg-orange-400/20 text-orange-200 border-orange-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'MANUFACTURING & METALLURGY',
+      examTag: resolvedExamTag,
+      pattern: 'blueprint-grid',
+      MainIcon: Wrench,
+      WatermarkIcon: Factory,
+      accentGlowColor: 'rgba(249, 115, 22, 0.25)',
+    };
+  }
+
+  // =========================================================================
+  // 9. INDUSTRIAL ENGINEERING & OPERATIONS MANAGEMENT
+  // =========================================================================
+  if (
+    t.includes('industrial eng') || t.includes('operations research') || t.includes('production planning') ||
+    t.includes('ppc') || t.includes('inventory') || t.includes('eoq') || t.includes('six sigma') ||
+    t.includes('quality control') || t.includes('sqc') || t.includes('linear programming') ||
+    t.includes('work study') || t.includes('ergonomics') || t.includes('plant layout')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-slate-800 via-indigo-950 to-slate-950 text-slate-50',
+      badgeBg: 'bg-slate-400/20 text-slate-200 border-slate-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'INDUSTRIAL & OPERATIONS ENG',
+      examTag: resolvedExamTag,
+      pattern: 'blueprint-grid',
+      MainIcon: Factory,
+      WatermarkIcon: TrendingUp,
+      accentGlowColor: 'rgba(148, 163, 184, 0.25)',
+    };
+  }
+
+  // =========================================================================
+  // 10. ELECTRICAL & ELECTRONICS ENGINEERING
+  // =========================================================================
+
+  // 10.1 Electrical Machines & Power Systems
   if (
     t.includes('electric') || t.includes('circuit') || t.includes('power system') ||
     t.includes('electromagnet') || t.includes('transformer') || t.includes('generator') ||
-    t.includes('motor') || t.includes('control system') || t.includes('switchgear')
+    t.includes('motor') || t.includes('control system') || t.includes('switchgear') ||
+    t.includes('transmission line') || t.includes('fault analysis') || t.includes('optcl')
   ) {
     return {
       gradient: 'bg-gradient-to-br from-amber-800 via-yellow-950 to-slate-950 text-yellow-50',
       badgeBg: 'bg-yellow-400/20 text-yellow-200 border-yellow-400/40',
-      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'ELECTRICAL ENGINEERING',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'ELECTRICAL & POWER SYSTEMS',
       examTag: resolvedExamTag,
       pattern: 'circuit-matrix',
       MainIcon: Zap,
@@ -502,11 +795,12 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
     };
   }
 
-  // 3.3 Electronics, VLSI & Microprocessors
+  // 10.2 Electronics, VLSI & Microprocessors
   if (
     t.includes('electron') || t.includes('analog') || t.includes('digital electronics') ||
     t.includes('microprocessor') || t.includes('signal') || t.includes('semiconductor') ||
-    t.includes('vlsi') || t.includes('sensor') || t.includes('communication eng')
+    t.includes('vlsi') || t.includes('sensor') || t.includes('communication eng') ||
+    t.includes('8085') || t.includes('8086') || t.includes('op-amp') || t.includes('logic gate')
   ) {
     return {
       gradient: 'bg-gradient-to-br from-cyan-900 via-slate-900 to-indigo-950 text-cyan-50',
@@ -520,116 +814,121 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
     };
   }
 
-  // ==========================================
-  // 4. COMPUTER SCIENCE & IT
-  // ==========================================
+  // =========================================================================
+  // 11. COMPUTER SCIENCE, IT & BASIC COMPUTER AWARENESS
+  // =========================================================================
+
+  // 11.1 Programming, DSA & Software Engineering
   if (
-    t.includes('comput') || t.includes('code') || t.includes('tech') || t.includes('data') ||
-    t.includes('cyber') || t.includes('it ') || t.includes('software') || t.includes('program') ||
-    t.includes('network') || t.includes('excel') || t.includes('dbms') || t.includes('sql') ||
-    t.includes('operating system') || t.includes('hardware') || t.includes('internet')
+    t.includes('programming') || t.includes('data structure') || t.includes('dsa') ||
+    t.includes('algorithm') || t.includes('java') || t.includes('python') ||
+    t.includes('c++') || t.includes('software eng') || t.includes('sdlc') ||
+    t.includes('web tech') || t.includes('html') || t.includes('javascript')
   ) {
     return {
-      gradient: 'bg-gradient-to-br from-cyan-800 via-blue-900 to-slate-950 text-cyan-50',
-      badgeBg: 'bg-cyan-400/20 text-cyan-200 border-cyan-400/40',
-      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'COMPUTER KNOWLEDGE & IT',
+      gradient: 'bg-gradient-to-br from-blue-900 via-indigo-950 to-slate-950 text-blue-50',
+      badgeBg: 'bg-blue-400/20 text-blue-200 border-blue-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'COMPUTER SCIENCE & DSA',
       examTag: resolvedExamTag,
       pattern: 'circuit-matrix',
       MainIcon: Code,
       WatermarkIcon: Laptop,
+      accentGlowColor: 'rgba(59, 130, 246, 0.25)',
+    };
+  }
+
+  // 11.2 DBMS, SQL & Operating Systems
+  if (
+    t.includes('dbms') || t.includes('sql') || t.includes('database') ||
+    t.includes('normalization') || t.includes('rdbms') || t.includes('operating system') ||
+    t.includes('linux') || t.includes('unix') || t.includes('deadlock') ||
+    t.includes('paging') || t.includes('process scheduling')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-indigo-950 via-slate-900 to-cyan-950 text-cyan-50',
+      badgeBg: 'bg-cyan-400/20 text-cyan-200 border-cyan-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'DBMS, SQL & OPERATING SYSTEMS',
+      examTag: resolvedExamTag,
+      pattern: 'circuit-matrix',
+      MainIcon: Database,
+      WatermarkIcon: Laptop,
+      accentGlowColor: 'rgba(6, 182, 212, 0.25)',
+    };
+  }
+
+  // 11.3 Computer Fundamentals, MS Office & Cyber Security
+  if (
+    t.includes('comput') || t.includes('ms office') || t.includes('ms excel') ||
+    t.includes('ms word') || t.includes('powerpoint') || t.includes('cyber') ||
+    t.includes('malware') || t.includes('virus') || t.includes('internet') ||
+    t.includes('networking') || t.includes('tcp') || t.includes('ip') ||
+    t.includes('computer awareness') || t.includes('peo') || t.includes('cgl computer')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-cyan-800 via-blue-900 to-slate-950 text-cyan-50',
+      badgeBg: 'bg-cyan-400/20 text-cyan-200 border-cyan-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'COMPUTER AWARENESS & IT',
+      examTag: resolvedExamTag,
+      pattern: 'circuit-matrix',
+      MainIcon: Laptop,
+      WatermarkIcon: Network,
       accentGlowColor: 'rgba(14, 165, 233, 0.25)',
     };
   }
 
-  // ==========================================
-  // 5. MEDICAL, HEALTHCARE & PHARMACY
-  // ==========================================
-  if (
-    t.includes('anatom') || t.includes('nurs') || t.includes('health') || t.includes('medic') ||
-    t.includes('pharm') || t.includes('biolog') || t.includes('pathol') || t.includes('doctor') ||
-    t.includes('physiol') || t.includes('pediatr') || t.includes('microbio') || t.includes('surgery') ||
-    t.includes('pharmacology') || t.includes('obstetric') || t.includes('community health')
-  ) {
-    return {
-      gradient: 'bg-gradient-to-br from-teal-700 via-emerald-800 to-slate-950 text-teal-50',
-      badgeBg: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
-      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'HEALTHCARE & NURSING SPECIAL',
-      examTag: resolvedExamTag,
-      pattern: 'hex-mesh',
-      MainIcon: Activity,
-      WatermarkIcon: HeartPulse,
-      accentGlowColor: 'rgba(16, 185, 129, 0.25)',
-    };
-  }
+  // =========================================================================
+  // 12. QUANTITATIVE APTITUDE & MATHEMATICS
+  // =========================================================================
 
-  // ==========================================
-  // 6. LAW, JUDICIARY & CONSTITUTION
-  // ==========================================
+  // 12.1 Arithmetic & Commercial Math
   if (
-    t.includes('polity') || t.includes('constitution') || t.includes('law') ||
-    t.includes('judiciary') || t.includes('court') || t.includes('amendment') ||
-    t.includes('parliament') || t.includes('crpc') || t.includes('ipc') ||
-    t.includes('cpc') || t.includes('evidence act')
-  ) {
-    return {
-      gradient: 'bg-gradient-to-br from-amber-800 via-yellow-950 to-slate-950 text-amber-50',
-      badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
-      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'INDIAN POLITY & CONSTITUTION',
-      examTag: resolvedExamTag,
-      pattern: 'heritage-arch',
-      MainIcon: Scale,
-      WatermarkIcon: Landmark,
-      accentGlowColor: 'rgba(245, 158, 11, 0.25)',
-    };
-  }
-
-  // ==========================================
-  // 7. ODISHA GK & STATE AFFAIRS
-  // ==========================================
-  if (
-    t.includes('odisha') || t.includes('opsc') || t.includes('ossc') || t.includes('osssc') ||
-    t.includes('kalinga') || t.includes('utkal') || t.includes('puri') || t.includes('bhubaneswar') ||
-    t.includes('cuttack') || t.includes('jagannath') || t.includes('odisha history') || t.includes('odisha geography')
-  ) {
-    return {
-      gradient: 'bg-gradient-to-br from-amber-700 via-amber-800 to-orange-950 text-amber-50',
-      badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
-      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'ODISHA GK & GOVERNANCE',
-      examTag: resolvedExamTag,
-      pattern: 'heritage-arch',
-      MainIcon: MapPin,
-      WatermarkIcon: Building2,
-      accentGlowColor: 'rgba(234, 88, 12, 0.25)',
-    };
-  }
-
-  // ==========================================
-  // 8. QUANTITATIVE APTITUDE & MATH
-  // ==========================================
-  if (
-    t.includes('math') || t.includes('aptitud') || t.includes('quant') || t.includes('arithmet') ||
-    t.includes('algebr') || t.includes('geomet') || t.includes('calculus') || t.includes('number system') ||
-    t.includes('percentage') || t.includes('ratio') || t.includes('trigonometr') || t.includes('mensuration')
+    t.includes('percentage') || t.includes('profit') || t.includes('loss') ||
+    t.includes('simple interest') || t.includes('compound interest') || t.includes('ratio') ||
+    t.includes('proportion') || t.includes('time and work') || t.includes('speed and distance') ||
+    t.includes('pipe and cistern') || t.includes('train') || t.includes('boat') ||
+    t.includes('mixture') || t.includes('allegation') || t.includes('average') || t.includes('partnership')
   ) {
     return {
       gradient: 'bg-gradient-to-br from-indigo-800 via-purple-900 to-slate-950 text-purple-50',
       badgeBg: 'bg-purple-400/20 text-purple-200 border-purple-400/40',
-      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'QUANTITATIVE APTITUDE',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'ARITHMETIC & QUANTITATIVE',
       examTag: resolvedExamTag,
       pattern: 'dot-matrix',
-      MainIcon: PieChart,
+      MainIcon: Percent,
       WatermarkIcon: Calculator,
       accentGlowColor: 'rgba(168, 85, 247, 0.25)',
     };
   }
 
-  // ==========================================
-  // 9. REASONING & MENTAL ABILITY
-  // ==========================================
+  // 12.2 Advanced Math (Algebra, Geometry, Trigonometry, DI)
   if (
-    t.includes('reason') || t.includes('logic') || t.includes('analytical') || t.includes('puzzle') ||
-    t.includes('syllogism') || t.includes('seating') || t.includes('mental ability') || t.includes('analogy') ||
-    t.includes('blood relation') || t.includes('direction') || t.includes('coding decoding')
+    t.includes('math') || t.includes('quant') || t.includes('aptitud') ||
+    t.includes('algebr') || t.includes('geomet') || t.includes('trigonometr') ||
+    t.includes('mensuration') || t.includes('number system') || t.includes('simplification') ||
+    t.includes('data interpretation') || t.includes('di') || t.includes('probability') ||
+    t.includes('permutation') || t.includes('statistics') || t.includes('calculus')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-purple-800 via-indigo-950 to-slate-950 text-purple-50',
+      badgeBg: 'bg-purple-400/20 text-purple-200 border-purple-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'ADVANCED MATHEMATICS & DI',
+      examTag: resolvedExamTag,
+      pattern: 'dot-matrix',
+      MainIcon: PieChart,
+      WatermarkIcon: Calculator,
+      accentGlowColor: 'rgba(147, 51, 234, 0.25)',
+    };
+  }
+
+  // =========================================================================
+  // 13. REASONING, LOGIC & MENTAL ABILITY
+  // =========================================================================
+  if (
+    t.includes('reason') || t.includes('logic') || t.includes('puzzle') ||
+    t.includes('syllogism') || t.includes('seating') || t.includes('mental ability') ||
+    t.includes('blood relation') || t.includes('direction') || t.includes('coding decoding') ||
+    t.includes('analogy') || t.includes('classification') || t.includes('series') ||
+    t.includes('venn diagram') || t.includes('non verbal') || t.includes('mirror image')
   ) {
     return {
       gradient: 'bg-gradient-to-br from-purple-800 via-violet-950 to-slate-950 text-purple-50',
@@ -643,14 +942,18 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
     };
   }
 
-  // ==========================================
-  // 10. ODIA & ENGLISH LANGUAGES
-  // ==========================================
-  if (t.includes('odia') || t.includes('sahitya') || t.includes('vyakaran') || t.includes('bhasa') || t.includes('shabda')) {
+  // =========================================================================
+  // 14. ODIA & ENGLISH LANGUAGES
+  // =========================================================================
+  if (
+    t.includes('odia') || t.includes('sahitya') || t.includes('vyakaran') ||
+    t.includes('bhasa') || t.includes('shabda') || t.includes('sandhi') ||
+    t.includes('samasa') || t.includes('rudhi') || t.includes('lokabani')
+  ) {
     return {
       gradient: 'bg-gradient-to-br from-orange-700 via-amber-900 to-slate-950 text-orange-50',
       badgeBg: 'bg-orange-400/20 text-orange-200 border-orange-400/40',
-      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'ODIA LANGUAGE & VYAKARAN',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'ODIA LANGUAGE & SAHITYA',
       examTag: resolvedExamTag,
       pattern: 'heritage-arch',
       MainIcon: Award,
@@ -659,7 +962,12 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
     };
   }
 
-  if (t.includes('english') || t.includes('grammar') || t.includes('vocab') || t.includes('comprehension') || t.includes('synonym') || t.includes('antonym') || t.includes('idiom')) {
+  if (
+    t.includes('english') || t.includes('grammar') || t.includes('vocab') ||
+    t.includes('comprehension') || t.includes('synonym') || t.includes('antonym') ||
+    t.includes('idiom') || t.includes('cloze test') || t.includes('para jumble') ||
+    t.includes('spotting error') || t.includes('sentence improvement')
+  ) {
     return {
       gradient: 'bg-gradient-to-br from-blue-800 via-indigo-950 to-slate-950 text-blue-50',
       badgeBg: 'bg-blue-400/20 text-blue-200 border-blue-400/40',
@@ -672,10 +980,53 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
     };
   }
 
-  // ==========================================
-  // 11. HISTORY, GEOGRAPHY, ECONOMY, SCIENCE
-  // ==========================================
-  if (t.includes('histor') || t.includes('ancient') || t.includes('medieval') || t.includes('modern') || t.includes('freedom') || t.includes('heritage') || t.includes('culture') || t.includes('national movement')) {
+  // =========================================================================
+  // 15. GENERAL KNOWLEDGE, HISTORY, POLITY, GEOGRAPHY & STATE GK
+  // =========================================================================
+
+  // 15.1 Odisha GK, Culture & History
+  if (
+    t.includes('odisha') || t.includes('opsc') || t.includes('ossc') || t.includes('osssc') ||
+    t.includes('kalinga') || t.includes('utkal') || t.includes('puri') || t.includes('bhubaneswar') ||
+    t.includes('cuttack') || t.includes('jagannath') || t.includes('paika')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-amber-700 via-amber-800 to-orange-950 text-amber-50',
+      badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'ODISHA GK & GOVERNANCE',
+      examTag: resolvedExamTag,
+      pattern: 'heritage-arch',
+      MainIcon: MapPin,
+      WatermarkIcon: Building2,
+      accentGlowColor: 'rgba(234, 88, 12, 0.25)',
+    };
+  }
+
+  // 15.2 Indian Polity, Constitution & Law
+  if (
+    t.includes('polity') || t.includes('constitution') || t.includes('law') ||
+    t.includes('judiciary') || t.includes('supreme court') || t.includes('fundamental right') ||
+    t.includes('amendment') || t.includes('parliament') || t.includes('crpc') || t.includes('ipc')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-amber-800 via-yellow-950 to-slate-950 text-amber-50',
+      badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'INDIAN POLITY & CONSTITUTION',
+      examTag: resolvedExamTag,
+      pattern: 'heritage-arch',
+      MainIcon: Scale,
+      WatermarkIcon: Landmark,
+      accentGlowColor: 'rgba(245, 158, 11, 0.25)',
+    };
+  }
+
+  // 15.3 Indian History & National Movement
+  if (
+    t.includes('histor') || t.includes('ancient') || t.includes('medieval') ||
+    t.includes('modern') || t.includes('freedom') || t.includes('heritage') ||
+    t.includes('culture') || t.includes('national movement') || t.includes('gandhi') ||
+    t.includes('harappa') || t.includes('maurya') || t.includes('mughal')
+  ) {
     return {
       gradient: 'bg-gradient-to-br from-orange-800 via-amber-950 to-slate-950 text-orange-50',
       badgeBg: 'bg-orange-400/20 text-orange-200 border-orange-400/40',
@@ -688,7 +1039,13 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
     };
   }
 
-  if (t.includes('geograph') || t.includes('environment') || t.includes('ecolog') || t.includes('climate') || t.includes('river') || t.includes('forest') || t.includes('ocean') || t.includes('wildlife') || t.includes('national park')) {
+  // 15.4 Geography, Climate & Ecology
+  if (
+    t.includes('geograph') || t.includes('environment') || t.includes('ecolog') ||
+    t.includes('climate') || t.includes('river') || t.includes('forest') ||
+    t.includes('ocean') || t.includes('wildlife') || t.includes('national park') ||
+    t.includes('monsoon') || t.includes('soil type') || t.includes('mineral')
+  ) {
     return {
       gradient: 'bg-gradient-to-br from-emerald-800 via-teal-950 to-slate-950 text-emerald-50',
       badgeBg: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
@@ -701,11 +1058,16 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
     };
   }
 
-  if (t.includes('econom') || t.includes('finance') || t.includes('banking') || t.includes('rbi') || t.includes('budget') || t.includes('gdp') || t.includes('market') || t.includes('commerce') || t.includes('accountancy') || t.includes('audit')) {
+  // 15.5 Indian Economy & Commerce
+  if (
+    t.includes('econom') || t.includes('finance') || t.includes('gdp') ||
+    t.includes('inflation') || t.includes('market') || t.includes('five year plan') ||
+    t.includes('niti aayog') || t.includes('commerce') || t.includes('poverty')
+  ) {
     return {
       gradient: 'bg-gradient-to-br from-emerald-700 via-slate-900 to-slate-950 text-emerald-50',
       badgeBg: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
-      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'INDIAN ECONOMY & COMMERCE',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'INDIAN ECONOMY & PLANNING',
       examTag: resolvedExamTag,
       pattern: 'dot-matrix',
       MainIcon: Receipt,
@@ -714,7 +1076,12 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
     };
   }
 
-  if (t.includes('agri') || t.includes('crop') || t.includes('horticult') || t.includes('farming') || t.includes('agronomy') || t.includes('soil science')) {
+  // 15.6 Agriculture & Allied Sciences
+  if (
+    t.includes('agri') || t.includes('crop') || t.includes('horticult') ||
+    t.includes('farming') || t.includes('agronomy') || t.includes('soil science') ||
+    t.includes('plant pathology') || t.includes('veterinary')
+  ) {
     return {
       gradient: 'bg-gradient-to-br from-emerald-800 via-green-950 to-slate-950 text-emerald-50',
       badgeBg: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
@@ -727,11 +1094,59 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
     };
   }
 
-  if (t.includes('science') || t.includes('physic') || t.includes('chemistr') || t.includes('space') || t.includes('isro') || t.includes('drdo') || t.includes('atom') || t.includes('inventions')) {
+  // =========================================================================
+  // 16. CURRENT AFFAIRS & STATIC GK
+  // =========================================================================
+  if (
+    t.includes('current affair') || t.includes('summit') || t.includes('scheme') ||
+    t.includes('award') || t.includes('sports') || t.includes('olympics') ||
+    t.includes('book and author') || t.includes('important day') || t.includes('static gk')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-violet-800 via-fuchsia-950 to-slate-950 text-fuchsia-50',
+      badgeBg: 'bg-fuchsia-400/20 text-fuchsia-200 border-fuchsia-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'CURRENT AFFAIRS & STATIC GK',
+      examTag: resolvedExamTag,
+      pattern: 'dot-matrix',
+      MainIcon: Sparkles,
+      WatermarkIcon: Globe,
+      accentGlowColor: 'rgba(217, 70, 239, 0.25)',
+    };
+  }
+
+  // =========================================================================
+  // 17. PURE SCIENCES (PHYSICS, CHEMISTRY, BIOLOGY & SPACE)
+  // =========================================================================
+
+  // 17.1 Chemistry & Chemical Reactions
+  if (
+    t.includes('chemistr') || t.includes('organic') || t.includes('inorganic') ||
+    t.includes('periodic table') || t.includes('acid') || t.includes('base') ||
+    t.includes('metal') || t.includes('polymer') || t.includes('chemical bonding')
+  ) {
+    return {
+      gradient: 'bg-gradient-to-br from-emerald-900 via-teal-950 to-slate-950 text-teal-50',
+      badgeBg: 'bg-teal-400/20 text-teal-200 border-teal-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'CHEMISTRY & CHEMICAL SCIENCES',
+      examTag: resolvedExamTag,
+      pattern: 'hex-mesh',
+      MainIcon: FlaskConical,
+      WatermarkIcon: Atom,
+      accentGlowColor: 'rgba(20, 184, 166, 0.25)',
+    };
+  }
+
+  // 17.2 Physics, Space Science, ISRO & Nuclear
+  if (
+    t.includes('physic') || t.includes('space') || t.includes('isro') ||
+    t.includes('drdo') || t.includes('atom') || t.includes('mechanics') ||
+    t.includes('optics') || t.includes('nuclear') || t.includes('gravitation') ||
+    t.includes('sound') || t.includes('electromagnetic wave')
+  ) {
     return {
       gradient: 'bg-gradient-to-br from-violet-800 via-indigo-950 to-slate-950 text-violet-50',
       badgeBg: 'bg-violet-400/20 text-violet-200 border-violet-400/40',
-      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'GENERAL SCIENCE & TECH',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'PHYSICS & SPACE SCIENCES',
       examTag: resolvedExamTag,
       pattern: 'orbital-rings',
       MainIcon: Atom,
@@ -740,38 +1155,9 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
     };
   }
 
-  if (
-    (t.includes('police') || t.includes('sub inspector') || t.includes('constable') || t.includes('defence') || t.includes('army') || t.includes('navy') || t.includes('airforce') || t.includes('nda') || t.includes('cds')) &&
-    !t.includes('mechanic') && !t.includes('civil') && !t.includes('engineering')
-  ) {
-    return {
-      gradient: 'bg-gradient-to-br from-slate-800 via-amber-950 to-slate-950 text-amber-50',
-      badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
-      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'DEFENCE & POLICE EXAMS',
-      examTag: resolvedExamTag,
-      pattern: 'blueprint-grid',
-      MainIcon: ShieldCheck,
-      WatermarkIcon: Target,
-      accentGlowColor: 'rgba(217, 119, 6, 0.25)',
-    };
-  }
-
-  if (t.includes('teach') || t.includes('pedagog') || t.includes('otet') || t.includes('osstet') || t.includes('ctet') || t.includes('b.ed') || t.includes('tgt') || t.includes('pgt')) {
-    return {
-      gradient: 'bg-gradient-to-br from-indigo-700 via-blue-900 to-slate-950 text-indigo-50',
-      badgeBg: 'bg-indigo-400/20 text-indigo-200 border-indigo-400/40',
-      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'TEACHING & PEDAGOGY',
-      examTag: resolvedExamTag,
-      pattern: 'dot-matrix',
-      MainIcon: BookOpen,
-      WatermarkIcon: GraduationCap,
-      accentGlowColor: 'rgba(99, 102, 241, 0.25)',
-    };
-  }
-
-  // ==========================================
-  // 12. DYNAMIC TITLECASED SMART FALLBACK
-  // ==========================================
+  // =========================================================================
+  // 18. DYNAMIC TITLECASED SMART FALLBACK
+  // =========================================================================
   const fallbackBadge = explicitSubject 
     ? explicitSubject.toUpperCase() 
     : (title ? title.trim().toUpperCase() : 'COMPREHENSIVE PRACTICE');

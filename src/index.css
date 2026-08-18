@@ -745,6 +745,19 @@ body[data-premium-blur="true"] #root {
 }
 .animate-spin-slow { animation: spin-slow 20s linear infinite; }
 
+/* --- Always-on watermark animations (scroll-pause exempt) --- */
+@keyframes watermark-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes watermark-drift {
+  0%,  100% { transform: translateY(0px)   rotate(-8deg);  }
+  33%        { transform: translateY(-18px) rotate(4deg);   }
+  66%        { transform: translateY(10px)  rotate(-14deg); }
+}
+.animate-watermark-spin  { animation: watermark-spin  22s linear      infinite; will-change: transform; }
+.animate-watermark-drift { animation: watermark-drift 11s ease-in-out  infinite; will-change: transform; }
+
 /* --- Fade up --- */
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(20px); }

@@ -50,7 +50,7 @@ export const SmartRecommendationCard: React.FC<SmartRecommendationCardProps> = (
         className="p-5 sm:p-7 text-white rounded-[2.2rem] bg-gradient-to-br from-slate-950 via-teal-950 to-slate-900 border-none shadow-xl shadow-teal-950/20 relative group"
       >
         {/* Inner Watermark & Grid Background Wrapper */}
-        <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.2rem] [clip-path:inset(0_round_2.2rem)]">
+        <div className="absolute inset-0 overflow-hidden rounded-[2.2rem] pointer-events-none z-0">
           <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-10" />
           <Sparkles className="absolute -right-8 -bottom-8 w-52 h-52 opacity-15 stroke-[1.2] text-teal-300 transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
           <div className="absolute -left-20 -top-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl" />

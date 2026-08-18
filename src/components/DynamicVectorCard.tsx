@@ -33,6 +33,7 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
 }) => {
   const cardRef      = useRef<HTMLDivElement>(null);
   const ambientRef   = useRef<HTMLDivElement>(null);
+  const shineRef     = useRef<HTMLDivElement>(null);
   const isHovered    = useRef(false);
 
   const [theme] = useTheme();
@@ -42,6 +43,17 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
   const ambientRadius  = isDark ? 360 : 300;
   const coreAlpha  = isDark ? 0.40 : 0.22;
   const midAlpha   = isDark ? 0.12 : 0.06;
+
+  const triggerShineSweep = useCallback(() => {
+    const sh = shineRef.current;
+    if (!sh) return;
+    // Reset animation to allow replaying
+    sh.style.animation = 'none';
+    // Force reflow so the browser registers the reset
+    void sh.getBoundingClientRect();
+    // Trigger the sweep — identical timing to premium-shine-container::after
+    sh.style.animation = 'shine-sweep 1.2s cubic-bezier(0.4, 0, 0.2, 1)';
+  }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const card = cardRef.current;
@@ -77,8 +89,10 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
       isHovered.current = true;
       if (ambientRef.current) ambientRef.current.style.opacity = '1';
       card.classList.add('is-card-hovered');
+      // ── Premium Shine Sweep ── fires once per hover entry ────────
+      triggerShineSweep();
     }
-  }, [isDark, glowColor, ambientRadius, coreAlpha, midAlpha, enableTilt]);
+  }, [isDark, glowColor, ambientRadius, coreAlpha, midAlpha, enableTilt, triggerShineSweep]);
 
   const handleMouseLeave = useCallback(() => {
     const card = cardRef.current;
@@ -116,7 +130,7 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
         willChange:           'transform',
         ...style
       }}
-      className={`relative isolate ${roundedClass} ${className} group/vector-card transition-transform duration-200 ease-out [&.is-card-hovered]:[transform:perspective(1000px)_rotateX(var(--rotate-x,0deg))_rotateY(var(--rotate-y,0deg))_scale3d(1.015,1.015,1.015)]`}
+      className={`relative isolate overflow-hidden ${roundedClass} ${className} group/vector-card transition-transform duration-200 ease-out [&.is-card-hovered]:[transform:perspective(1000px)_rotateX(var(--rotate-x,0deg))_rotateY(var(--rotate-y,0deg))_scale3d(1.015,1.015,1.015)]`}
     >
       {/* ── Layer A: Ambient + cursor warmth (z-0, behind content) ───── */}
       <div
@@ -128,6 +142,21 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
       <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%' }}>
         {children}
       </div>
+
+      {/* ── Layer D: Shine Sweep (z-20, fires once per hover, over content) ── */}
+      <div
+        ref={shineRef}
+        style={{
+          position:      'absolute',
+          inset:         0,
+          pointerEvents: 'none',
+          zIndex:        20,
+          borderRadius:  'inherit',
+          background:    'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)',
+          transform:     'translateX(-200%) skewX(-30deg)',
+          willChange:    'transform',
+        }}
+      />
     </div>
   );
 };

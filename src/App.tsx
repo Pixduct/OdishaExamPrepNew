@@ -1005,7 +1005,7 @@ const ExamRegistrySection = ({
               <div 
                 key={idx} 
                 className={cn(
-                  "w-full flex flex-col items-center text-center md:flex-row md:items-center md:text-left md:justify-between bg-white dark:bg-slate-900",
+                  "w-full flex flex-col items-center text-center md:flex-row md:items-center md:text-left md:justify-between bg-white dark:bg-slate-900 premium-shine-container",
                   isMobile 
                     ? cn("p-5 border border-slate-250/60 dark:border-slate-800 border-l-4 rounded-2xl shadow-sm gap-5", statusBorderColor)
                     : "p-6 sm:p-8 border-2 border-slate-900/80 dark:border-slate-800 rounded-3xl md:rounded-none md:border-none shadow-[4px_4px_0px_rgba(37,99,235,0.15)] md:shadow-none hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors gap-6"
@@ -3235,11 +3235,11 @@ const LandingPage = () => {
       {/* Site-Wide Vector Canvas Grid Overlay */}
       <div className="fixed inset-0 pointer-events-none z-[0] opacity-40 dark:opacity-[0.05] bg-[radial-gradient(#94a3b8_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:24px_24px]" />
       
-      {/* Floating Ambient Academic Watermarks */}
-      <div className="fixed top-20 right-10 pointer-events-none z-[0] opacity-[0.03] dark:opacity-[0.04] text-slate-900 dark:text-white animate-spin-slow">
+      {/* Floating Ambient Academic Watermarks — scroll-pause exempt, always in motion */}
+      <div className="fixed top-20 right-10 pointer-events-none z-[0] opacity-[0.03] dark:opacity-[0.04] text-slate-900 dark:text-white animate-watermark-spin">
         <GraduationCap className="w-96 h-96" />
       </div>
-      <div className="fixed bottom-20 left-10 pointer-events-none z-[0] opacity-[0.03] dark:opacity-[0.04] text-slate-900 dark:text-white">
+      <div className="fixed bottom-20 left-10 pointer-events-none z-[0] opacity-[0.03] dark:opacity-[0.04] text-slate-900 dark:text-white animate-watermark-drift">
         <Compass className="w-80 h-80" />
       </div>
 

@@ -1617,39 +1617,205 @@ body[data-review-mode="true"] nav.fixed.bottom-0 {
   margin-top: 0.9em;
   margin-bottom: 0.9em;
 }
-.prose ol {
-  list-style-type: decimal;
-  padding-left: 1.5em;
-  margin-top: 0.9em;
-  margin-bottom: 0.9em;
+/* ============================================================
+   EXECUTIVE BLOG PROSE & TABLE FORMATTING ENGINE
+   ============================================================ */
+.prose, .oep-article-prose {
+  color: #334155;
+  font-size: 1.05rem;
+  line-height: 1.85;
 }
-.prose li {
-  margin-top: 0.4em;
-  margin-bottom: 0.4em;
-  padding-left: 0.2em;
+
+.prose h1, .oep-article-prose h1 {
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: #0f172a;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+  margin-top: 2rem;
+  margin-bottom: 1.25rem;
+}
+
+.prose h2, .oep-article-prose h2 {
+  font-size: 1.65rem;
+  font-weight: 850;
+  color: #0f172a;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  margin-top: 2.75rem;
+  margin-bottom: 1.15rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 2px solid #f1f5f9;
+  position: relative;
+}
+
+.prose h3, .oep-article-prose h3 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1.4;
+  margin-top: 2rem;
+  margin-bottom: 0.85rem;
+}
+
+.prose h4, .oep-article-prose h4 {
+  font-size: 1.125rem;
+  font-weight: 750;
+  color: #334155;
+  margin-top: 1.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.prose p, .oep-article-prose p {
+  font-size: 1.05rem;
+  line-height: 1.85;
+  color: #334155;
+  margin-top: 1.2rem;
+  margin-bottom: 1.2rem;
+  font-weight: 450;
+  letter-spacing: -0.005em;
+}
+
+.prose strong, .prose b, .oep-article-prose strong, .oep-article-prose b {
+  font-weight: 750;
+  color: #0f172a;
+}
+
+/* Executive Table Styling with Horizontal Scroll Safe Wrappers */
+.oep-table-wrapper {
+  overflow-x: auto;
+  margin: 2rem 0;
+  border-radius: 1.25rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05);
+  background: #ffffff;
+}
+
+.prose table, .oep-article-prose table {
+  width: 100%;
+  min-width: 580px;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 0;
   font-size: 0.95rem;
-  color: #475569;
+  background: #ffffff;
+}
+
+.prose thead, .oep-article-prose thead {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #ffffff;
+}
+
+.prose th, .oep-article-prose th {
+  padding: 16px 20px;
+  font-weight: 800;
+  font-size: 0.825rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #f8fafc;
+  border-bottom: 2px solid #334155;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.prose th:first-child, .oep-article-prose th:first-child {
+  border-top-left-radius: 1.25rem;
+}
+
+.prose th:last-child, .oep-article-prose th:last-child {
+  border-top-right-radius: 1.25rem;
+}
+
+.prose td, .oep-article-prose td {
+  padding: 15px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+  line-height: 1.65;
+  font-size: 0.925rem;
   font-weight: 500;
+  vertical-align: top;
 }
-.prose img {
-  border-radius: 1.5rem;
-  margin-top: 1.5em;
-  margin-bottom: 1.5em;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+
+.prose tbody tr:nth-child(even), .oep-article-prose tbody tr:nth-child(even) {
+  background: #f8fafc;
 }
-.prose blockquote {
+
+.prose tbody tr:hover, .oep-article-prose tbody tr:hover {
+  background: #eff6ff;
+  transition: background-color 0.15s ease;
+}
+
+.prose tbody tr:last-child td, .oep-article-prose tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Executive Lists */
+.prose ul, .oep-article-prose ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.prose ol, .oep-article-prose ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.prose li, .oep-article-prose li {
+  margin-top: 0.65rem;
+  margin-bottom: 0.65rem;
+  padding-left: 0.35rem;
+  font-size: 1.025rem;
+  color: #334155;
+  line-height: 1.75;
+  font-weight: 450;
+}
+
+/* Executive Callouts, Worked Examples & Blockquotes */
+.prose blockquote, .oep-article-prose blockquote {
+  background: #eff6ff;
   border-left: 4px solid var(--color-brand-500);
-  padding-left: 1em;
-  color: #64748b;
-  font-style: italic;
-  margin: 1.4em 0;
+  border-radius: 0 1rem 1rem 0;
+  padding: 1.35rem 1.65rem;
+  color: #1e40af;
+  font-weight: 500;
+  font-style: normal;
+  margin: 1.85rem 0;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.05);
+}
+
+.prose pre, .prose code, .oep-article-prose pre, .oep-article-prose code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.prose pre, .oep-article-prose pre, .worked-example-box {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-left: 4px solid var(--color-brand-500);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin: 1.85rem 0;
+  overflow-x: auto;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+}
+
+.prose img, .oep-article-prose img {
+  border-radius: 1.5rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
 }
 
 @media (max-width: 640px) {
-  .prose h1 { font-size: 1.5rem; }
-  .prose h2 { font-size: 1.3rem; }
-  .prose h3 { font-size: 1.125rem; }
-  .prose p { font-size: 0.925rem; }
-  .prose li { font-size: 0.9rem; }
+  .prose h1, .oep-article-prose h1 { font-size: 1.65rem; }
+  .prose h2, .oep-article-prose h2 { font-size: 1.35rem; }
+  .prose h3, .oep-article-prose h3 { font-size: 1.15rem; }
+  .prose p, .oep-article-prose p { font-size: 0.975rem; line-height: 1.75; }
+  .prose li, .oep-article-prose li { font-size: 0.95rem; }
+  .prose th, .oep-article-prose th { padding: 12px 14px; font-size: 0.75rem; }
+  .prose td, .oep-article-prose td { padding: 12px 14px; font-size: 0.875rem; }
 }
 

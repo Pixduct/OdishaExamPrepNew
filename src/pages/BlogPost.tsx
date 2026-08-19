@@ -179,6 +179,18 @@ export default function BlogPost() {
       });
     });
 
+    // Wrap tables in responsive executive wrapper
+    const tables = doc.querySelectorAll('table');
+    tables.forEach(table => {
+      const parent = table.parentElement;
+      if (!parent || !parent.classList.contains('oep-table-wrapper')) {
+        const wrapper = doc.createElement('div');
+        wrapper.className = 'oep-table-wrapper';
+        parent?.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+      }
+    });
+
     setToc(items);
     setProcessedDescription(doc.body.innerHTML);
   }, [blog?.description]);
@@ -338,7 +350,7 @@ export default function BlogPost() {
                 <div className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {readingTime} min read</div>
               </div>
               <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-6 sm:mb-8 leading-tight font-serif">{blog.name}</h1>
-              <div className="prose max-w-none prose-headings:font-black prose-p:text-slate-600 prose-img:rounded-3xl" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(processedDescription || blog.description) }} />
+              <div className="oep-article-prose prose max-w-none" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(processedDescription || blog.description) }} />
             </motion.article>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Share Box */}

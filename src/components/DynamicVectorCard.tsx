@@ -105,14 +105,13 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
     card.classList.remove('is-card-hovered');
   }, []);
 
-  // Shared layer style ─ absolute fill, no pointer events, GPU-composited
+  // Shared layer style ─ absolute fill, no pointer events
   const layerBase: React.CSSProperties = {
     position:         'absolute',
     inset:            0,
     pointerEvents:    'none',
     opacity:          0,
     transition:       'opacity 200ms ease',
-    willChange:       'opacity',
     borderRadius:     'inherit',
   };
 
@@ -127,10 +126,9 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
         transformStyle:       'preserve-3d',
         WebkitFontSmoothing:  'antialiased',
         MozOsxFontSmoothing:  'grayscale',
-        willChange:           'transform',
         ...style
       }}
-      className={`relative isolate overflow-hidden ${roundedClass} ${className} group/vector-card transition-transform duration-200 ease-out [&.is-card-hovered]:[transform:perspective(1000px)_rotateX(var(--rotate-x,0deg))_rotateY(var(--rotate-y,0deg))_scale3d(1.015,1.015,1.015)]`}
+      className={`relative isolate overflow-hidden ${roundedClass} ${className} group/vector-card transition-transform duration-200 ease-out hover:will-change-transform [&.is-card-hovered]:[transform:perspective(1000px)_rotateX(var(--rotate-x,0deg))_rotateY(var(--rotate-y,0deg))_scale3d(1.015,1.015,1.015)]`}
     >
       {/* ── Layer A: Ambient + cursor warmth (z-0, behind content) ───── */}
       <div
@@ -154,7 +152,6 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
           borderRadius:  'inherit',
           background:    'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)',
           transform:     'translateX(-200%) skewX(-30deg)',
-          willChange:    'transform',
         }}
       />
     </div>

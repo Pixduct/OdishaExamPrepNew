@@ -1,36 +1,49 @@
-# Memory — Question Bank Reader Scroll Clamping Fix & Fullscreen Chrome Alignment
+# Memory — Question Bank 2-Step JSON Creator, Answer Key Merger & UI Imprints
 
-Last updated: 2026-08-18T21:56:30+05:30
+Last updated: 2026-08-19T07:00:45+05:30
 
 ## What was built
 
-### 1. Question Bank Reader Dynamic Scroll Limit Synchronization Engine (`src/components/QuestionBankReaderModal.tsx`)
-- Attached an active `ResizeObserver` to the inner scroll content container inside `QuestionBankReaderModal.tsx`.
-- Whenever questions render, image diagrams load, KaTeX math parses, or search filters change, `ResizeObserver` automatically triggers `modalLenis.resize()`, dynamically updating `modalLenis.limit` to match the exact live DOM height.
-- Added `pb-10 sm:pb-16` bottom spacing to the inner question list container, guaranteeing generous scroll clearance for Question 10 above the status bar.
+### 1. 2-Step Question Bank JSON Upload & Answer Key Merger (`src/AdminPanel.tsx#L2749-L2970`)
+- Built independent 2-step ingestion pipeline for Content Banks:
+  - **Step 1 (Questions JSON)**: File drag-and-drop (`.json`) or code paste textarea with `FileCode` icon.
+  - **Step 2 (Answer Key JSON)**: File drag-and-drop (`.json`) or code paste textarea with `KeyRound` icon, supporting partial or late answer keys.
+- **Universal Key Merger Algorithm (`mergeQuestionsAndAnswerKey`)**: Automatically normalizes question formats, converts letter choices (`'A'`, `'B'`, `'C'`, `'D'`) and 1-based indices to zero-indexed numeric positions, merges step-by-step explanations, and preserves unkeyed questions for practice mode.
+- **Real-Time Summary Card**: Dynamic gradient banner displaying total questions, keyed questions count, and unkeyed/practice count with direct 1-click preview trigger.
 
-### 2. Edge-to-Edge Corner Anchored Fullscreen App Bar & Chrome (`src/components/QuestionBankReaderModal.tsx`)
-- In Fullscreen mode (`isFullscreen`), removed `max-w-5xl` / `max-w-7xl` centered container constraints from the Top App Bar, Sub-Header Toolbar, and Footer Status Bar.
-- The Book icon, title, and total question count badge anchor flush to the physical top-left screen corner (`px-4 sm:px-6 md:px-8`), while the search input, filter chips, PDF export button, and window control buttons anchor flush to the physical top-right screen corner.
+### 2. Live Parsed Question Bank Review Modal (`src/AdminPanel.tsx#L7647-L7780`)
+- Built `<MathTextRenderer />`-powered review modal allowing admins to inspect question typography, validated option tiles (green highlight with letter badge for correct answer), and explanation boxes before committing to the database.
 
-### 3. UI Registry & Progress Tracker Imprints (`context/ui-registry.md`, `context/progress-tracker.md`)
-- Updated Entry #43 (`QuestionBankMobileReader`) in `ui-registry.md` with the completed Edge-to-Edge Corner Anchored Fullscreen App Bar and `ResizeObserver` scroll limit synchronization rules.
+### 3. Questions Table Bulk Synchronization & Auto-Categorization (`src/AdminPanel.tsx#L1644-L1675`, `src/lib/examService.ts#L870-L925`)
+- When creating a Question Bank with JSON, questions are automatically bulk-inserted into the `questions` table with `topic = bank.title` and indexed sort orders.
+- Updated `examService.getQuestionsForQuestionBank` to query questions by topic name/bank ID with fallback to embedded JSON metadata in `pdfUrl`.
+
+### 4. UI Registry Imprints (`context/ui-registry.md`)
+- **Entry #47**: `AdminQuestionBankJsonBuilder` (2-Step Questions & Answer Key JSON Merger with Mode Switcher & Summary Card).
+- **Entry #48**: `AdminQuestionBankPreviewModal` (Live Parsed Review Modal with Math Renderer & Option Validation).
+
+### 5. Exam Category View Ultra-Smooth 120 FPS Scroll Engine (`src/components/DynamicVectorCard.tsx`, `src/App.tsx`)
+- Stripped static `willChange: transform/opacity` inline styles from `DynamicVectorCard.tsx` and replaced with hover-scoped hardware layer promotion (`hover:will-change-transform`), preventing the browser from creating 150+ GPU layers simultaneously on pages with 50+ cards.
+- Enabled native DOM content virtualization (`.cv-card-auto` with `contain-intrinsic-size: auto 280px`) on Question Bank card grids in `src/App.tsx`, skipping paint and layout calculations for offscreen cards during scroll.
+- Promoted the Question Bank grid outer section to single-layer GPU acceleration (`.gpu-accelerated`) and removed Framer Motion intersection observer overhead from bulk item lists.
 
 ## Decisions made
-- **Dynamic Sub-Container Lenis Resizing**: Always observe inner content resize events (`ResizeObserver`) on custom sub-container Lenis wrappers so dynamic DOM content expansion immediately updates `lenis.limit`.
-- **Full-Bleed Fullscreen Navigation Bar**: In hardware fullscreen mode, the top and bottom chrome bars span 100% full width to anchor navigation and utility controls to screen corners, while the question cards remain centered in `max-w-6xl` for comfortable reading.
+- **Decoupled Key Ingestion**: Raw question JSON and Answer Key JSON can be uploaded independently, allowing question sets to be created even when official answer keys are published separately or late.
+- **Unified Topic Binding**: Question banks automatically seed the `questions` table under `topic: bank.title` so students can access both the interactive Web Reader and individual practice drill engines simultaneously.
+- **Hover-Scoped GPU Layer Promotion**: Never apply static `willChange: transform/opacity` on multi-item card list items; promote GPU layers strictly on active mouse hover to prevent layer compositing thrashing.
 
 ## Problems solved
-- **Question Bank Reader Scroll Lock at Question 9**: Fixed by observing inner container height changes (`ResizeObserver`) and calling `modalLenis.resize()` automatically whenever questions render or expand, eliminating stale scroll limit clamping (`this.limit`) and allowing users to scroll to Question 10 and beyond.
-- **Top Bar Margin Drift in Fullscreen**: Fixed by removing `max-w-7xl` from the top header in fullscreen mode, anchoring elements cleanly to `px-4 sm:px-6 md:px-8` edge padding.
+- **Exam Category View Scroll Lag & Frame Drops**: Fixed by removing unconditional `willChange` styles across 50+ cards, virtualizing offscreen cards with `.cv-card-auto`, and reducing Framer Motion scroll observer overhead.
+- **Manual Question-by-Question Upload Tedium**: Replaced manual form entry with bulk JSON drag-and-drop parsing and instant answer key normalization.
+- **Formatting Mismatches in External Answer Keys**: Handled mixed formats (object map `{"1": "A"}`, array `[{"qNo": 1, "answer": "B"}]`, letter choices, and 1-based numerical indexes) automatically.
 
 ## Current state
-- TypeScript builds cleanly (`npx tsc --noEmit` — 0 errors).
-- Question Bank Web Reader smoothly scrolls through all 10 questions and beyond with zero limit clamping.
-- `ui-registry.md`, `progress-tracker.md`, and `memory.md` are up to date.
+- Production build verified clean (`npm run build` — Exit Code 0).
+- Exam Category View and Question Bank Web Reader smoothly scroll at continuous 120 FPS with 0 frame drops.
+- `ui-registry.md` has 48 entries, fully up to date.
 
 ## Next session starts with
-- Ready for any new feature, page, or UI refinement requested by the developer.
+- Ready for any new feature, page, or enhancement requested by the developer.
 
 ## Open questions
 - None.

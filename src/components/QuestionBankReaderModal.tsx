@@ -29,6 +29,7 @@ import { MathTextRenderer } from './MathTextRenderer';
 import UniversalMathDiagramEngine from './UniversalMathDiagramEngine';
 import { exportQuestionBankToPdf } from '../lib/pdfExportEngine';
 import { PdfExportGuideModal } from './PdfExportGuideModal';
+import { QuestionBankGuideModal } from './QuestionBankGuideModal';
 import { examService } from '../lib/examService';
 import { cn } from '../lib/utils';
 
@@ -314,6 +315,7 @@ export const QuestionBankReaderModal: React.FC<QuestionBankReaderModalProps> = (
   });
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [showPdfGuideModal, setShowPdfGuideModal] = useState(false);
+  const [showGuideModal, setShowGuideModal] = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
   
   const [bookmarkedIds, setBookmarkedIds] = useState<Record<number, boolean>>({});
@@ -501,6 +503,18 @@ export const QuestionBankReaderModal: React.FC<QuestionBankReaderModalProps> = (
             setLastReadQNum(parsedQ);
             setShowResumeBanner(true);
           }
+        }
+      } catch (e) {}
+    }
+
+    // Auto-open interactive feature guide for first-time students
+    if (typeof window !== 'undefined') {
+      try {
+        const hasSeenGuide = localStorage.getItem('oep_seen_qb_user_guide') === 'true';
+        if (!hasSeenGuide) {
+          const guideTimer = setTimeout(() => {
+            setShowGuideModal(true);
+          }, 450);
         }
       } catch (e) {}
     }
@@ -786,6 +800,20 @@ export const QuestionBankReaderModal: React.FC<QuestionBankReaderModalProps> = (
               </div>
 
               <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+                {/* Feature Guide Help Button */}
+                <button
+                  type="button"
+                  onClick={() => setShowGuideModal(true)}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-xl font-black transition-all border cursor-pointer active:scale-95 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700",
+                    isFullscreen ? "px-3 py-2.5 text-xs md:text-sm" : "px-2.5 sm:px-3 py-2 sm:py-2.5 text-xs"
+                  )}
+                  title="How to use Question Bank (Interactive Guide)"
+                >
+                  <HelpCircle className={cn(isFullscreen ? "w-4 h-4 text-brand-500" : "w-3.5 h-3.5 text-brand-500")} />
+                  <span className="hidden md:inline">Guide</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => setIsToolsExpanded(prev => !prev)}
@@ -1178,6 +1206,7 @@ export const QuestionBankReaderModal: React.FC<QuestionBankReaderModalProps> = (
           </div>
         </motion.div>
 
+        {/* ── Student Friendly PDF Export Quick Guide Modal ── */}
         <PdfExportGuideModal
           isOpen={showPdfGuideModal}
           onClose={() => setShowPdfGuideModal(false)}
@@ -1185,6 +1214,13 @@ export const QuestionBankReaderModal: React.FC<QuestionBankReaderModalProps> = (
             setShowPdfGuideModal(false);
             executePdfExport();
           }}
+          title={bank.title}
+        />
+
+        {/* ── Interactive Question Bank Feature Guide Modal ── */}
+        <QuestionBankGuideModal
+          isOpen={showGuideModal}
+          onClose={() => setShowGuideModal(false)}
           title={bank.title}
         />
       </div>

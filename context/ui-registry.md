@@ -64,6 +64,9 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`AdminRefreshPersistenceEngine`** | Admin / Navigation | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx) | URL Param State Sync (`replaceState`), Session Persistence | AdminPanel.tsx | Active |
 | **`AdminSubjectSelector`** | Admin / Form Control | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L2160-L2199) | Academic Subject Dropdown Filter + Custom Input (`✏️ + Enter Custom Subject...`) | AdminPanel.tsx | Active |
 | **`QuestionBankReaderModal`** | Overlay / Modal | [`src/components/QuestionBankReaderModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/QuestionBankReaderModal.tsx) | Interactive Web Reader, Filter Pills, Show/Hide Solutions, KaTeX Math & 1-Click PDF Export | App.tsx | Active |
+| **`AdminQuestionBankJsonBuilder`** | Admin / Creation Flow | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L2749-L2970) | 2-Step Questions & Answer Key JSON Merger with Mode Switcher & Summary Card | AdminPanel.tsx | Active |
+| **`AdminQuestionBankPreviewModal`** | Admin / Modal | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7647-L7780) | Live Parsed Question Bank Review Modal with Math Renderer & Option Validation | AdminPanel.tsx | Active |
+| **`QuestionBankGuideModal`** | Overlay / Onboarding | [`src/components/QuestionBankGuideModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/QuestionBankGuideModal.tsx) | Interactive Feature Onboarding Dialog, First-Time Auto-Trigger, Feature Badges | QuestionBankReaderModal.tsx | Active |
 
 ---
 
@@ -2043,6 +2046,80 @@ Last updated: August 18, 2026
 - **Dynamic Wide Canvas Fullscreen Scaling**: In Fullscreen mode, the reading canvas expands to `max-w-7xl` (~1400px), card padding increases to `p-7 md:p-9`, question typography scales to `text-base md:text-xl font-bold`, option tiles expand to `p-4.5` with `w-8 h-8` letter badges, and header elements dynamically resize for widescreen laptop displays.
 - **Precision 4-Section Grid Alignment**: In windowed modal mode, all sections align within `max-w-5xl`. In Fullscreen mode, the Top App Bar, Sub-Header Toolbar, and Footer Status Bar span 100% full-bleed across the screen, anchoring elements cleanly to the physical left and right corners (`px-4 sm:px-6 md:px-8`).
 - **High-Capacity Scale Architecture (1,000–2,000+ Questions)**: Chunked 50-question batched sets with previous/next set pagination, direct `"Jump to Q#"` form input, auto-resume banner restoring the student's exact last practiced position, persistent 1-click star bookmarks with a dedicated `⭐️ Saved (N)` filter chip, and real-time progress mastery bar (`src/components/QuestionBankReaderModal.tsx`).
+
+---
+
+### 47. `AdminQuestionBankJsonBuilder` (2-Step Questions & Answer Key Merger)
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L2749-L2970)
+Last updated: August 19, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Section Card 1 (Questions)** | `md:col-span-2 bg-white p-5 rounded-2xl border-2 border-brand-100 shadow-sm space-y-4` |
+| **Section Header 1** | `text-sm font-black text-brand-900 uppercase tracking-wider flex items-center gap-2` with `<FileCode className="w-4 h-4 text-brand-600" />` |
+| **Mode Switcher Container** | `flex items-center p-1 bg-slate-100 rounded-xl text-xs font-bold` |
+| **Active Mode Tab** | `bg-white text-brand-600 shadow-xs font-black px-3 py-1.5 rounded-lg transition-all` |
+| **Inactive Mode Tab** | `text-slate-600 hover:text-slate-900 px-3 py-1.5 rounded-lg transition-all` |
+| **Drag-and-Drop Dropzone** | `border-2 border-dashed border-brand-200 hover:border-brand-400 bg-brand-50/20 hover:bg-brand-50/40 transition-all rounded-2xl p-6 text-center relative cursor-pointer group` |
+| **Section Card 2 (Answer Key)** | `md:col-span-2 bg-white p-5 rounded-2xl border-2 border-emerald-100 shadow-sm space-y-4` |
+| **Section Header 2** | `text-sm font-black text-emerald-900 uppercase tracking-wider flex items-center gap-2` with `<KeyRound className="w-4 h-4 text-emerald-600" />` |
+| **Live Summary Banner** | `md:col-span-2 p-5 rounded-2xl bg-gradient-to-r from-brand-50/80 via-emerald-50/80 to-brand-50/80 border border-brand-200/80 shadow-xs flex flex-wrap items-center justify-between gap-4 animate-in fade-in` |
+| **Stat Badges** | `bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs text-xs font-bold` |
+| **Preview Trigger CTA** | `flex items-center gap-1.5 px-4 py-2 bg-white hover:bg-slate-50 text-brand-600 border border-brand-200 rounded-xl text-xs font-black shadow-2xs transition-all cursor-pointer` |
+
+**Pattern notes:**
+- **Decoupled Key Ingestion**: Supports uploading raw question arrays with missing or partial keys, followed by an independent answer key map (`{"1": "A", "2": "C"}`) or array.
+- **Dual Ingestion Channels**: Enables 1-click drag-and-drop file upload (`.json`) or instant code pasting (`textarea`) via an inline mode toggle.
+- **Real-Time Live Calculation**: Summarizes total parsed questions, keyed questions, and unkeyed questions immediately on typing/upload without blocking the form submission.
+
+---
+
+### 48. `AdminQuestionBankPreviewModal` (Live Parsed Review Modal)
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7647-L7780)
+Last updated: August 19, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Modal Backdrop** | `fixed inset-0 bg-slate-950/70 z-[80] flex items-center justify-center p-4 sm:p-6 backdrop-blur-md overflow-hidden` |
+| **Modal Container** | `bg-white rounded-[2.5rem] w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl border border-slate-100 relative` |
+| **Modal Header** | `px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/80 backdrop-blur-md shrink-0` |
+| **Question Card** | `p-5 rounded-2xl bg-slate-50/60 border border-slate-200/80 space-y-3` |
+| **Question Number Tag** | `px-2.5 py-1 rounded-lg bg-slate-200/80 text-slate-700 text-xs font-black shrink-0 mt-0.5` |
+| **Correct Option Tile** | `bg-emerald-50 border-emerald-300 text-emerald-900 font-bold shadow-2xs flex items-start gap-2 p-2.5 rounded-xl border text-xs` |
+| **Neutral Option Tile** | `bg-white border-slate-200 text-slate-700 flex items-start gap-2 p-2.5 rounded-xl border text-xs` |
+| **Option Letter Badge (Correct)** | `w-5 h-5 rounded-md flex items-center justify-center font-black text-[10px] shrink-0 bg-emerald-600 text-white border-emerald-600` |
+| **Option Letter Badge (Neutral)** | `w-5 h-5 rounded-md flex items-center justify-center font-black text-[10px] shrink-0 bg-slate-100 text-slate-500 border-slate-200` |
+| **Explanation Box** | `ml-9 p-3 rounded-xl bg-emerald-50/50 border border-emerald-200 text-xs text-slate-700 leading-relaxed` |
+| **Modal Footer** | `px-8 py-4 border-t border-slate-100 bg-slate-50 flex justify-end shrink-0` |
+
+**Pattern notes:**
+- **Visual Key Verification**: Highlighted green cards allow the administrator to instantly verify that the Answer Key JSON matched correctly with the corresponding question index.
+- **Integrated Math Rendering**: Renders KaTeX LaTeX mathematical formulas dynamically inside question texts, option choices, and step-by-step explanations via `<MathTextRenderer />`.
+
+---
+
+### 49. `QuestionBankGuideModal` (Interactive User Guide & Feature Tour)
+
+File: [`src/components/QuestionBankGuideModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/QuestionBankGuideModal.tsx)
+Last updated: August 19, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Modal Backdrop** | `fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md` |
+| **Modal Dialog Container** | `bg-white dark:bg-slate-900 rounded-[2rem] p-5 sm:p-7 max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200/90 dark:border-slate-800 relative overflow-hidden` |
+| **Header Icon Frame** | `w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-600 dark:text-brand-400 shrink-0` |
+| **Feature Card** | `p-3 sm:p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/70 flex items-start gap-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800` |
+| **Feature Icon Badge** | `w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 mt-0.5` |
+| **Micro-Badge Tag** | `text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-slate-700 text-slate-600 dark:text-slate-300` |
+| **Got It CTA Button** | `w-full py-2.5 sm:py-3 px-4 rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-98 text-white text-xs sm:text-sm font-black tracking-wide shadow-md shadow-brand-500/25 transition-all cursor-pointer flex items-center justify-center gap-2` |
+
+**Pattern notes:**
+- **First-Time Automatic Trigger**: Synchronized with `localStorage.getItem('oep_seen_qb_user_guide')` to present onboarding to first-time students on question bank open.
+- **Manual Quick Access**: Accessible at all times via the `Guide` (`HelpCircle`) button in the top app bar toolbar.
+- **Educational Badges & Clarity**: Categorizes practice capabilities into 5 actionable pillars (Auto-Save, Quick Revision, High Capacity, KaTeX Math, Export & Study).
+
 
 
 

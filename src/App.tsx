@@ -8705,7 +8705,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           )
         ) : (
           <div className="relative">
-            <div className="pb-12 pt-4">
+            <div className="pb-12 pt-4 gpu-accelerated">
             <motion.div 
               initial={isMobile ? "show" : "hidden"}
               animate={isMobile ? "show" : undefined}
@@ -8737,9 +8737,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   hidden: { opacity: 0, y: 15 },
                   show: { opacity: 1, y: 0 }
                 }}
-                whileHover={isMobile ? undefined : whileHover.liftTap}
-                whileTap={isMobile ? undefined : whileTap.press}
-                className="w-full"
+                className="w-full cv-card-auto"
               >
                 {isMobile ? (
                   <div

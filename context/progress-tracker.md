@@ -1,6 +1,7 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] Exam Relevance Filter (No Trivial Local Crimes), Redundancy Elimination Gate & 3 High-Value Bullets Engine (`automations/ca_formatter.py`, `automations/ca_website_publisher.py`)
 - [x] Executive Blog Typography Engine, Responsive Card Tables & High-Readability DOM Processor (`src/index.css`, `src/pages/BlogPost.tsx`)
 - [x] Local Playwright Virtualenv Setup, 1080x1080 PNG Slide Generation & Rich Text Digest Fallback (`automations/ca_publisher.py`, `automations/shared/telegram.py`, `automations/ca_renderer.py`)
 - [x] Fast Multi-Tier Llama 3.1 8B CA Formatter & Telegram Public Broadcast Fallback (`automations/ca_formatter.py`, `automations/ca_publisher.py`, `automations/ca_scraper.py`)

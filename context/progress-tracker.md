@@ -1,6 +1,7 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] 100% Organic, Quota-Free News Curation Engine & Fact-Checking Shield (`automations/ca_website_publisher.py`)
 - [x] Balanced News Curation Engine across Odisha State (2), National (3), and International/World (3) Domains (`automations/ca_website_publisher.py`)
 - [x] Restored Website Current Affairs DB Insertion (`category = 'current_affairs'`) & Pure REST API HTTP Client (`automations/shared/supabase_client.py` & `ca_website_publisher.py`)
 - [x] Timezone-Resilient Today's News Date Filter (`src/pages/CurrentAffairs.tsx`)

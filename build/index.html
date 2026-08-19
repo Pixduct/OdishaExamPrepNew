@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="https://odishaexamprep.in/apple-touch-icon.png" />
     <link rel="shortcut icon" href="https://odishaexamprep.in/favicon.ico" />
     <link rel="manifest" href="https://odishaexamprep.in/site.webmanifest?v=3" />
-    <meta name="theme-color" content="#2563eb" />
+    <meta name="theme-color" content="#0b0f19" />
     
     <!-- Primary Meta Tags -->
     <title>OdishaExamPrep - Best Platform for Odisha Exam Preparation</title>
@@ -40,29 +40,31 @@
     <meta property="twitter:description" content="Prepare for OPSC, OSSC, OSSSC and other Odisha government competitive exams. Practice with expert-crafted mock tests, syllabus roadmaps, and real-time rank analytics." />
     <style>
       html, body {
-        background-color: #FAF8F5;
-      }
-      html.dark, html.dark body, html[data-theme="dark"], html[data-theme="dark"] body {
-        background-color: #0b0f19 !important;
+        background-color: #0b0f19;
         color: #f8fafc;
+      }
+      html:not(.dark), html[data-theme="light"], html[data-theme="light"] body {
+        background-color: #FAF8F5 !important;
+        color: #0f172a;
       }
     </style>
     <script>
-      // Anti-flicker initial theme setup: Apply dark mode class to HTML before DOM rendering
+      // Anti-flicker initial theme setup: Default to Dark Mode unless explicitly saved as 'light'
       (function() {
         try {
           var saved = localStorage.getItem('oep-theme-preference');
-          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-          if (saved === 'dark' || (!saved && prefersDark)) {
-            document.documentElement.classList.add('dark');
-            document.documentElement.setAttribute('data-theme', 'dark');
-            document.documentElement.style.backgroundColor = '#0b0f19';
-            var metaTheme = document.querySelector('meta[name="theme-color"]');
-            if (metaTheme) metaTheme.setAttribute('content', '#0b0f19');
-          } else {
+          if (saved === 'light') {
             document.documentElement.classList.remove('dark');
             document.documentElement.setAttribute('data-theme', 'light');
             document.documentElement.style.backgroundColor = '#FAF8F5';
+            var metaThemeLight = document.querySelector('meta[name="theme-color"]');
+            if (metaThemeLight) metaThemeLight.setAttribute('content', '#2563eb');
+          } else {
+            document.documentElement.classList.add('dark');
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.documentElement.style.backgroundColor = '#0b0f19';
+            var metaThemeDark = document.querySelector('meta[name="theme-color"]');
+            if (metaThemeDark) metaThemeDark.setAttribute('content', '#0b0f19');
           }
         } catch (e) {}
       })();
@@ -173,7 +175,7 @@
       }
     ]
     </script>
-    <script type="module" crossorigin src="/assets/index-BqipsnFU.js"></script>
+    <script type="module" crossorigin src="/assets/index-D8kLR_C4.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-core-DLegquh_.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-supabase-BeRAyOGR.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-motion-DhK6IBY-.js">

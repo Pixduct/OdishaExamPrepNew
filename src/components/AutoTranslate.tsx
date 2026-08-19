@@ -8,7 +8,7 @@ interface TProps {
   fallback?: string;
   params?: Record<string, string | number>;
   className?: string;
-  as?: keyof JSX.IntrinsicElements;
+  as?: React.ElementType;
   noTranslate?: boolean;
 }
 

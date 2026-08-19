@@ -69,6 +69,8 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`QuestionBankGuideModal`** | Overlay / Onboarding | [`src/components/QuestionBankGuideModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/QuestionBankGuideModal.tsx) | Interactive Feature Onboarding Dialog, First-Time Auto-Trigger, Feature Badges | QuestionBankReaderModal.tsx | Active |
 | **`AuthModal`** | Overlay / Authentication | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L2880-L3125) | Glassmorphic Authentication Dialog, Dark-Mode Inputs, Google OAuth, Password Reset | App.tsx | Active |
 | **`ExamAlertGraphicCard`** | Graphic / Social Card | [`automations/templates/template_alert.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/templates/template_alert.html) | 20-Category 1080x1080 Adaptive Visual Themes, Official Board Badges, Direct Gov Portal Verification | automations/breaking_engine.py | Active |
+| **`ExecutiveBlogPostReader`** | Layout / Article | [`src/pages/BlogPost.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/BlogPost.tsx) & [`src/index.css`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/index.css) | `.oep-article-prose`, `.oep-table-wrapper`, Dynamic TOC anchors, Reading progress tracker | Router (`/blog/:id`) | Active |
+| **`ExamBoardVectorBanner`** | Graphic / Asset Engine | [`automations/shared/exam_logo_registry.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/exam_logo_registry.py) | 1200x630 High-Resolution Vector Card Banner, 10 Official Board Themes, Procedural Grid, Verified Badge | automations/ | Active |
 
 ---
 
@@ -2173,3 +2175,54 @@ Last updated: August 19, 2026
 - **20-Category Theme Tokens**: Dynamically shifts visual theme (Royal Blue, Emerald, Amber, Cyan, Purple, Crimson, Gold, Teal, Rose) across all 20 approved notification categories (`EXAM_CATEGORIES_CONFIG`).
 - **Authentic Board Attribution**: Injects exact short board identifier (`OSSC`, `OPSC`, `OSSSC`, `BSE ODISHA`, `SSC`, `UPSC`, `RRB`, `IBPS`, `NTA`, `SBI`) and full authority name.
 - **Direct Official Portal Verification**: Highlights the official government domain in the bottom strip and eliminates generic boilerplate.
+
+---
+
+### 52. `ExecutiveBlogPostReader` (Article & Table Formatting Engine)
+
+File: [`src/pages/BlogPost.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/BlogPost.tsx) & [`src/index.css`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/index.css)
+Last updated: August 19, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Article Card Container** | `bg-white rounded-[1.75rem] sm:rounded-[2.5rem] p-5 sm:p-10 md:p-14 shadow-xl border border-slate-100` |
+| **Table Wrapper** | `.oep-table-wrapper` (`overflow-x-auto my-8 rounded-[1.25rem] border border-slate-200 shadow-sm bg-white`) |
+| **Table Layout** | `w-full min-w-[580px] border-collapse separate border-spacing-0 text-sm sm:text-base` |
+| **Table Header (`thead`)** | `linear-gradient(135deg, #0F172A 0%, #1E293B 100%)`, `text-white font-extrabold text-xs uppercase tracking-wider` |
+| **Table Cells (`th` / `td`)** | `th`: `p-4 sm:p-5 font-bold border-b border-slate-800 text-slate-100 whitespace-nowrap`; `td`: `p-4 sm:p-5 text-slate-700 border-b border-slate-100 font-medium leading-relaxed` |
+| **Table Row Stripes** | Even rows: `bg-slate-50/50`; Row hover: `hover:bg-brand-50/30 transition-colors` |
+| **Headings (`h2`, `h3`)** | `h2`: `text-2xl sm:text-3xl font-black text-slate-900 mt-11 mb-5 pb-2.5 border-b border-slate-100`; `h3`: `text-xl sm:text-2xl font-extrabold text-slate-800 mt-8 mb-3.5` |
+| **Body Paragraphs** | `text-slate-700 leading-[1.85] text-[16px] sm:text-[17px] my-5 font-normal tracking-[-0.005em]` |
+| **Worked Examples & Code** | `bg-slate-50 border border-slate-200 border-l-4 border-l-brand-600 rounded-2xl p-6 my-7 shadow-sm text-slate-800` |
+| **Callout Badges (`blockquote`)** | `bg-brand-50/50 border-l-4 border-brand-500 rounded-r-2xl p-5 sm:p-6 text-brand-900 font-semibold my-7 shadow-sm` |
+| **Category Pill Badge** | `bg-brand-50 text-brand-700 px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider` |
+| **Progress Tracker** | `fixed top-0 left-0 h-1 bg-brand-600 z-[100] transition-all duration-75` |
+
+**Pattern notes:**
+- **Automated Table Encapsulation**: Uses DOMParser inside `useEffect` to safely wrap every raw `<table>` with `.oep-table-wrapper` before rendering, guaranteeing zero horizontal overflow clipping on mobile.
+- **Deep Slate Header Contrast**: Enforces `#0F172A` gradient table headers with pure white text and crisp borders.
+- **Prose Spacing Hygiene**: Enforces `line-height: 1.85` and comfortable `my-5` paragraph margins to eliminate dense text fatigue.
+
+---
+
+### 53. `ExamBoardVectorBanner` (1200x630px Branded Graphic Engine)
+
+File: [`automations/shared/exam_logo_registry.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/exam_logo_registry.py)
+Last updated: August 19, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Banner Dimensions** | `1200px x 630px` (High-Density OpenGraph & Blog Featured Image) |
+| **Background Matrix** | Procedural 2-Stop Gradient + 2 Ambient Radial Glow Spheres (`GaussianBlur(radius=65)`) + Vector Geometric Grid (`60px x 60px`) |
+| **Theme Palettes** | `OPSC` (Navy/Blue/Gold), `OSSC` (Dark Slate/Cyan), `OSSSC` (Deep Emerald/Teal), `ODISHA POLICE` (Crimson/Red/Gold), `BSE ODISHA` (Violet/Purple/Rose), `GENERAL_STRATEGY` (Indigo/Sky Blue/Gold) |
+| **Board Emblem Pill** | `rounded_rectangle(radius=14)`, `fill=(0, 0, 0, 120)`, `outline=theme['accent']`, `width=2` |
+| **Category Event Badge** | `rounded_rectangle(radius=14)`, `fill=theme['badge_bg']`, `outline=(255, 255, 255, 80)` (e.g. `[🚨 OFFICIAL RECRUITMENT]`, `[💡 QUANTITATIVE APTITUDE]`) |
+| **Main Headline** | `42px font-bold`, multi-line automatic wrapping (`max 3 lines`), drop shadow `(0, 0, 0, 160)` + `(255, 255, 255)` crisp fill |
+| **Metadata Tag Chips** | `rounded_rectangle(radius=12)`, `fill=(255, 255, 255, 18)`, `text=theme['gold_accent']` (`🏢 Board`, `📍 Govt`, `✓ Verification`) |
+| **Footer Strip** | Verified Trust Seal (`🛡️ 100% Verified Official Notification`), `OdishaExamPrep Official Portal`, `https://www.odishaexamprep.in` |
+
+**Pattern notes:**
+- **Zero AI-Hallucination Graphic**: Pure deterministic Pillow/SVG rendering engine without random AI artifacts.
+- **Adaptive Resolution**: Automatically maps target exam title or category to the exact official authority theme tokens.
+- **Permanent Public URL**: Outputs high-density PNG to `public/blog_covers/banner_<board>_<slug>.png`, served directly at `https://www.odishaexamprep.in/blog_covers/...`.
+

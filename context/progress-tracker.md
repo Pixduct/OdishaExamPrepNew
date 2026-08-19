@@ -1,6 +1,7 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] AI Mentor Tab (`AiMentor.tsx`) Vector Background Engine & Themed Floating Watermarks: Integrated the site-wide edge-to-edge dot-grid vector canvas (`[background-size:20px_20px]`), dual HSL ambient glow blur spheres (`bg-brand-300/20` and `bg-indigo-200/15`), stacking context isolation (`isolation: isolate`), and context-specific floating vector watermarks (`Sparkles`, `Cpu`, `Brain`, `Target`) with dark-mode typography support, delivering 100% aesthetic consistency across every single website tab (`src/pages/AiMentor.tsx`).
 - [x] Library Tab (`PurchasesView`) Vector Background Engine & Floating Academic Watermarks: Integrated the site-wide edge-to-edge dot-grid vector canvas (`[background-size:20px_20px]`), dual HSL ambient glow orbs (`bg-brand-300/20` and `bg-indigo-200/15`), stacking context isolation (`isolation: isolate`), and context-specific floating vector watermarks (`BookMarked`, `BookOpen`, `Layers`, `Award`) with dark-mode typography support, establishing 100% page consistency across all tabs (`src/App.tsx`).
 - [x] Continue Practice & Recent Activity Sliders Card Hover Clipping Resolution & Vertical Clearance (`src/App.tsx` lines 8077–8280)
 - [x] Daily MCQ Engine Twice-Daily Green Zone Scheduling (`04:27 UTC` / 9:57 AM IST & `12:37 UTC` / 6:07 PM IST) with Automated Telegram Admin Failure Alerts (`automations/.github/workflows/daily_mcq.yml`)

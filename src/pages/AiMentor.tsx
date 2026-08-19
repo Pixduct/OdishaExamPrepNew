@@ -48,7 +48,8 @@ import {
   MessageSquare,
   Edit2,
   Maximize2,
-  Minimize2
+  Minimize2,
+  Brain
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import TimePicker from '../components/TimePicker';
@@ -3936,76 +3937,88 @@ JSON structure:
   };
 
   return (
-    <div className="space-y-6 md:space-y-10">
+    <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent overflow-x-hidden" style={{ isolation: 'isolate' }}>
+      {/* Full-Screen Edge-to-Edge Academic Vector Canvas Grid & HSL Glows */}
+      <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-[0.03] pointer-events-none z-0" />
+      <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none z-0" />
+      <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none z-0" />
 
-
-      {/* Premium Custom Confirmation Dialog */}
-      <AnimatePresence>
-        {confirmDialog && (
-          <div className="fixed inset-0 bg-slate-50/80 dark:bg-slate-950/90 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-[2rem] max-w-sm w-full p-6 shadow-2xl space-y-6 text-left relative overflow-hidden text-slate-900 dark:text-white"
-            >
-              <div className="absolute -top-10 -right-10 w-20 h-20 bg-amber-500/5 rounded-full blur-xl pointer-events-none" />
-              
-              <div className="space-y-2">
-                <h4 className="font-serif font-extrabold text-slate-900 text-base flex items-center gap-2">
-                  <HelpCircle className="w-5 h-5 text-amber-650" />
-                  {confirmDialog.title}
-                </h4>
-                <p className="text-slate-500 text-xs font-semibold leading-relaxed">
-                  {confirmDialog.message}
-                </p>
-              </div>
-
-              <div className="flex gap-3 justify-end pt-2">
-                <button
-                  type="button"
-                  onClick={() => setConfirmDialog(null)}
-                  className="px-4 py-2 border border-slate-200/60 hover:border-slate-800/85 bg-white hover:bg-slate-900 text-slate-700 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 cursor-pointer active:translate-y-0.5 shadow-xs hover:shadow-sm"
-                >
-                  {confirmDialog.cancelText || 'Cancel'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    confirmDialog.onConfirm();
-                    setConfirmDialog(null);
-                  }}
-                  className={cn(
-                    "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer active:translate-y-0.5 shadow-lg",
-                    confirmDialog.variant === 'danger'
-                      ? "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white shadow-red-500/10"
-                      : confirmDialog.variant === 'success'
-                        ? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-emerald-500/10"
-                        : "bg-teal-500 hover:bg-emerald-400 text-slate-900 shadow-teal-500/10"
-                  )}
-                >
-                  {confirmDialog.confirmText || 'Confirm'}
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-      {/* Header and Chip */}
-      <div className="flex flex-col items-center text-center space-y-2 md:space-y-4 mb-2 md:mb-4">
-        <span className="section-chip text-[10px] md:text-xs">
-          <Sparkles className="w-3 md:w-3.5 h-3 md:h-3.5 animate-pulse text-[#2563EB]" />
-          Smart Study Suite
-        </span>
-        <h2 className="text-2xl md:text-5xl font-serif font-extrabold text-slate-900 tracking-tight">
-          Personal Study <span className="premium-text-gradient font-serif font-extrabold">Coach</span>
-        </h2>
-        <div className="section-divider" />
-        <p className="text-slate-500 text-xs md:text-base sm:text-lg font-medium max-w-xl mx-auto leading-relaxed px-4 md:px-0">
-          Ask questions, get core summaries, clear doubts, or schedule revision sessions directly with your personal tutor.
-        </p>
+      {/* Floating Viewport Academic AI Mentor Vector Watermarks */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-20">
+        <Sparkles className="absolute top-24 left-[5%] w-44 h-44 text-slate-800 dark:text-white opacity-[0.08] dark:opacity-[0.04] stroke-[1.2] rotate-12" />
+        <Cpu className="absolute top-1/3 right-[5%] w-48 h-48 text-brand-600 dark:text-indigo-400 opacity-[0.08] dark:opacity-[0.04] stroke-[1.2] -rotate-6" />
+        <Brain className="absolute bottom-1/3 left-[6%] w-44 h-44 text-amber-600 dark:text-amber-400 opacity-[0.08] dark:opacity-[0.04] stroke-[1.2] rotate-45" />
+        <Target className="absolute bottom-28 right-[6%] w-36 h-36 text-indigo-600 dark:text-blue-400 opacity-[0.08] dark:opacity-[0.04] stroke-[1.2] -rotate-12" />
       </div>
+
+      <div className="space-y-6 md:space-y-10 relative z-10 pb-16 md:pb-24">
+        {/* Premium Custom Confirmation Dialog */}
+        <AnimatePresence>
+          {confirmDialog && (
+            <div className="fixed inset-0 bg-slate-50/80 dark:bg-slate-950/90 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-[2rem] max-w-sm w-full p-6 shadow-2xl space-y-6 text-left relative overflow-hidden text-slate-900 dark:text-white"
+              >
+                <div className="absolute -top-10 -right-10 w-20 h-20 bg-amber-500/5 rounded-full blur-xl pointer-events-none" />
+                
+                <div className="space-y-2">
+                  <h4 className="font-serif font-extrabold text-slate-900 dark:text-white text-base flex items-center gap-2">
+                    <HelpCircle className="w-5 h-5 text-amber-650 dark:text-amber-400" />
+                    {confirmDialog.title}
+                  </h4>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs font-semibold leading-relaxed">
+                    {confirmDialog.message}
+                  </p>
+                </div>
+
+                <div className="flex gap-3 justify-end pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDialog(null)}
+                    className="px-4 py-2 border border-slate-200/60 dark:border-slate-700 hover:border-slate-800/85 bg-white dark:bg-slate-800 hover:bg-slate-900 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 cursor-pointer active:translate-y-0.5 shadow-xs hover:shadow-sm"
+                  >
+                    {confirmDialog.cancelText || 'Cancel'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      confirmDialog.onConfirm();
+                      setConfirmDialog(null);
+                    }}
+                    className={cn(
+                      "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer active:translate-y-0.5 shadow-lg",
+                      confirmDialog.variant === 'danger'
+                        ? "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white shadow-red-500/10"
+                        : confirmDialog.variant === 'success'
+                          ? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-emerald-500/10"
+                          : "bg-teal-500 hover:bg-emerald-400 text-slate-900 shadow-teal-500/10"
+                    )}
+                  >
+                    {confirmDialog.confirmText || 'Confirm'}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+        {/* Header and Chip */}
+        <div className="flex flex-col items-center text-center space-y-2 md:space-y-4 mb-2 md:mb-4">
+          <span className="section-chip text-[10px] md:text-xs">
+            <Sparkles className="w-3 md:w-3.5 h-3 md:h-3.5 animate-pulse text-[#2563EB]" />
+            Smart Study Suite
+          </span>
+          <h2 className="text-2xl md:text-5xl font-serif font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Personal Study <span className="premium-text-gradient font-serif font-extrabold">Coach</span>
+          </h2>
+          <div className="section-divider" />
+          <p className="text-slate-500 dark:text-slate-400 text-xs md:text-base sm:text-lg font-medium max-w-xl mx-auto leading-relaxed px-4 md:px-0">
+            Ask questions, get core summaries, clear doubts, or schedule revision sessions directly with your personal tutor.
+          </p>
+        </div>
 
       {/* Mobile-only View Selector Tab (only visible on mobile lg:hidden) */}
       <div className="lg:hidden flex bg-slate-100 p-0.5 rounded-xl border border-slate-200/50 shadow-inner overflow-hidden max-w-[280px] sm:max-w-xs mx-auto mb-4 relative z-20">
@@ -7847,6 +7860,7 @@ JSON structure:
         )}
       </AnimatePresence>
 
+      </div>
       </div>
     </div>
   );

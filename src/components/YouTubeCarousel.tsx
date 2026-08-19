@@ -231,12 +231,12 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
   if (sourceVideos.length === 0) return null;
 
   return (
-    <div
-      ref={containerRef}
-      onMouseEnter={pauseAuto}
-      onMouseLeave={scheduleResume}
-      className="w-full relative py-3 sm:py-12 overflow-hidden bg-[#F2EFE9] dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-[2rem] sm:rounded-[2.5rem] shadow-[6px_6px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_rgba(0,0,0,1)] select-none"
+    <DynamicVectorCard
+      glowColor="rgba(37, 99, 235, 0.28)"
+      roundedClass="rounded-[2rem] sm:rounded-[2.5rem]"
+      className="w-full select-none"
     >
+    <div ref={containerRef} className="w-full relative py-3 sm:py-12 overflow-hidden bg-[#F2EFE9] dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-[2rem] sm:rounded-[2.5rem] shadow-[6px_6px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_rgba(0,0,0,1)] select-none">
       {/* Editorial Decorative Grid overlay — desktop only */}
       {!isMobile && <div className="absolute inset-0 grid-bg opacity-[0.02] pointer-events-none" />}
 
@@ -326,10 +326,10 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
               >
               <div
                 className={cn(
-                  "relative w-full h-full shrink-0 rounded-2xl overflow-hidden border-2 border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-900 group/video cursor-pointer flex flex-col transition-colors",
+                  "relative w-full h-full shrink-0 rounded-2xl overflow-hidden border-2 border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-900 group/video transition-all cursor-pointer flex flex-col",
                   isMobile
                     ? "shadow-[3px_3px_0px_rgba(0,0,0,0.85)] dark:shadow-[3px_3px_0px_rgba(37,99,235,0.4)] active:shadow-[1px_1px_0px_rgba(0,0,0,0.85)] active:translate-x-[2px] active:translate-y-[2px]"
-                    : "shadow-[4px_4px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)]"
+                    : "shadow-[4px_4px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)] md:hover:-translate-x-0.5 md:hover:-translate-y-0.5 md:hover:shadow-[6px_6px_0px_rgba(37,99,235,0.4)]"
                 )}
               >
                 {/* Thumbnail with aspect ratio */}
@@ -472,5 +472,6 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
         )}
       </AnimatePresence>
     </div>
+    </DynamicVectorCard>
   );
 }

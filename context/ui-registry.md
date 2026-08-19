@@ -1573,20 +1573,19 @@ Last updated: August 15, 2026
 ### 23. `DynamicVectorCard`
 
 File: [`src/components/DynamicVectorCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/DynamicVectorCard.tsx)
-Last updated: August 19, 2026
+Last updated: August 15, 2026
 
 | Property | Class |
 | :--- | :--- |
-| **Card Container** | `relative isolate overflow-hidden rounded-3xl sm:rounded-[2.5rem] group/vector-card` |
-| **3D Transform Engine** | 120 FPS RAF Lerp (`LERP = 0.18`), `perspective(1000px) rotateX(...) rotateY(...) scale3d(1.015, 1.015, 1.015) translateZ(0)` |
-| **Ambient Glow Layer** | `pointer-events-none absolute inset-0 z-0 overflow-hidden` with dynamic radial gradient tracking |
-| **Content Layer** | `relative z-10 width: 100% height: 100%` |
-| **Shine Sweep Layer** | `pointer-events-none absolute inset-0 z-20` (RAF reflow-free shine sweep) |
+| **Card Container** | `relative rounded-3xl sm:rounded-[2.5rem]` |
+| **3D Transform Engine** | `perspective: 1000px, transformStyle: preserve-3d, scale3d(1.015, 1.015, 1.015)` |
+| **Surface Spotlight Overlay** | `pointer-events-none absolute inset-0 z-20 overflow-hidden mix-blend-soft-light` |
+| **Ambient Light Flare** | `pointer-events-none absolute inset-0 z-20 opacity-30 dark:opacity-40` |
+| **Border Ring Illumination** | `pointer-events-none absolute -inset-[1.5px] z-30 (WebkitMaskComposite: xor)` |
 
 **Pattern notes:**
-- **120 FPS Physics Engine**: Utilizes a dedicated `requestAnimationFrame` lerp loop (`LERP = 0.18`) directly animating hardware-composited `translateZ(0)` 3D transforms with zero React state re-renders and zero layout reflows during mouse movement.
-- **Auto-Rest Settlement**: Automatically settles back to rest state when mouse leaves and cleanly suspends the RAF loop to consume 0 CPU/GPU cycles when idle.
-- **Reflow-Free Hover Entrance**: Caches bounding rect on mouse enter/move and resets shine sweep animation via `requestAnimationFrame` rather than synchronous DOM measurements (`getBoundingClientRect`).
+- **Layering Order**: Surface spotlight overlay (`z-20`) and edge illumination ring (`z-30`) MUST sit on top of `{children}` so cursor tracking remains visible over opaque card backgrounds.
+- **Subtle 3D Perspective**: 3D magnetic parallax tilt (`rotateX`, `rotateY`) is capped at `3.5deg` max for a refined tactile response.
 
 ---
 

@@ -44,11 +44,11 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
         className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8 pb-32 sm:pb-24 relative z-10"
       >
         {/* Executive Bright Study Vector Header Card */}
-        <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)">
-          <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 border border-slate-200/80 dark:border-indigo-500/20 shadow-xl shadow-slate-200/40 dark:shadow-indigo-950/20 rounded-3xl sm:rounded-[2.5rem] relative overflow-hidden z-10">
+        <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.15)">
+          <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 dark:bg-gradient-to-br dark:from-[#0B1528] dark:via-[#112240] dark:to-[#0B1528] border border-slate-200/80 dark:border-blue-500/30 shadow-xl shadow-slate-200/40 dark:shadow-2xl dark:shadow-slate-950/60 rounded-3xl sm:rounded-[2.5rem] relative overflow-hidden z-10">
             {/* Radial Grid & Floating Header Watermark */}
-            <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none" />
-            <Calendar className="absolute -right-8 -bottom-8 w-52 h-52 sm:w-64 sm:h-64 opacity-10 dark:opacity-15 stroke-[1.2] text-brand-600 dark:text-indigo-300 pointer-events-none rotate-12" />
+            <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#60a5fa_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-10 pointer-events-none" />
+            <Calendar className="absolute -right-8 -bottom-8 w-52 h-52 sm:w-64 sm:h-64 opacity-10 dark:opacity-15 stroke-[1.2] text-brand-600 dark:text-blue-400 pointer-events-none rotate-12" />
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
               <div className="flex items-center gap-4">
@@ -65,8 +65,8 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
                 </div>
               </div>
 
-              <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black text-brand-700 bg-brand-50/80 border border-brand-200/70 shrink-0 font-mono shadow-2xs backdrop-blur-md">
-                <Sparkles className="w-4 h-4 text-brand-600 animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black text-brand-700 dark:text-blue-300 bg-brand-50/80 dark:bg-blue-900/40 border border-brand-200/70 dark:border-blue-700/50 shrink-0 font-mono shadow-2xs backdrop-blur-md">
+                <Sparkles className="w-4 h-4 text-brand-600 dark:text-blue-400 animate-pulse" />
                 Personalized Hub
               </span>
             </div>
@@ -94,7 +94,7 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
             <PersonalBestCard userId={user?.id} />
           </>
         ) : (
-          <div className="bg-gradient-to-r from-slate-900 via-brand-950 to-slate-900 border border-slate-800 rounded-2xl sm:rounded-[2.25rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="bg-gradient-to-r from-[#0B1528] via-[#112240] to-[#0B1528] border border-blue-500/30 rounded-2xl sm:rounded-[2.25rem] p-6 sm:p-10 text-white shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="space-y-2 text-center sm:text-left max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-brand-500/20 text-brand-300 border border-brand-500/30">
                 <Sparkles className="w-3.5 h-3.5 text-brand-400" />

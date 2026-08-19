@@ -1,6 +1,7 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] Fast Multi-Tier Llama 3.1 8B CA Formatter & Telegram Public Broadcast Fallback (`automations/ca_formatter.py`, `automations/ca_publisher.py`, `automations/ca_scraper.py`)
 - [x] Dual-Pathway Engaging Blog Engine with Zero Fake Countdowns & Universal Skill Masterclasses (`automations/seo_blog_engine.py`, `automations/shared/exam_logo_registry.py`, `automations/shared/telegram.py`)
 - [x] Official Exam Notification Blog Engine & Universal Vector Graphic Generator with Permanent 404 URL Resolution (`automations/shared/exam_logo_registry.py`, `automations/shared/supabase_client.py`, `automations/shared/telegram.py`, `src/pages/BlogPost.tsx`, `server.ts`)
 - [x] 20-Category Exam Notification Alert Engine with Dynamic Visual Card Themes, Direct Official Links & Admin DM Delivery (`automations/breaking_engine.py`, `templates/template_alert.html`, `shared/telegram.py`, `scraper.py`)

@@ -67,6 +67,7 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`AdminQuestionBankJsonBuilder`** | Admin / Creation Flow | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L2749-L2970) | 2-Step Questions & Answer Key JSON Merger with Mode Switcher & Summary Card | AdminPanel.tsx | Active |
 | **`AdminQuestionBankPreviewModal`** | Admin / Modal | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7647-L7780) | Live Parsed Question Bank Review Modal with Math Renderer & Option Validation | AdminPanel.tsx | Active |
 | **`QuestionBankGuideModal`** | Overlay / Onboarding | [`src/components/QuestionBankGuideModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/QuestionBankGuideModal.tsx) | Interactive Feature Onboarding Dialog, First-Time Auto-Trigger, Feature Badges | QuestionBankReaderModal.tsx | Active |
+| **`AuthModal`** | Overlay / Authentication | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L2880-L3125) | Glassmorphic Authentication Dialog, Dark-Mode Inputs, Google OAuth, Password Reset | App.tsx | Active |
 
 ---
 
@@ -411,9 +412,10 @@ import { SearchableSelect } from '../components/SearchableSelect';
 | **Premium Badge** | `px-2 py-0.5 bg-rose-50 text-[#2563EB] text-[8px] font-black uppercase tracking-wider rounded border border-rose-200/40` |
 | **Tagline Badge** | `bg-gradient-to-r from-brand-50/70 to-indigo-50/40 px-3 py-1.5 rounded-xl border border-brand-100/30 text-brand-650 text-[10px] font-black uppercase tracking-wider` |
 | **Primary Action Button** | `w-full py-3 px-6 rounded-xl font-black text-xs uppercase tracking-wider border border-brand-100 bg-brand-50/40 text-brand-600 shadow-sm` |
-| **Hover State** | `hover:border-brand-300/80 hover:-translate-y-1.5 transition-all duration-500 hover:shadow-xl` |
+| **Hover State** | `whileHover.liftTap` on parent `<motion.div>` + `hover:border-brand-300/80 hover:shadow-xl` on Card |
 
 **Pattern notes:**
+- **Hover Paint-Containment Protection**: When items use `.cv-card-auto` (`content-visibility: auto`), hover lift transformations MUST be placed on the outer `<motion.div whileHover={whileHover.liftTap}>` instead of using CSS `hover:-translate-y-*` on the child `<Card>`. This prevents the top edge from clipping against the browser's paint containment boundary.
 - **Admin `questionCount` Priority**: Question Bank cards MUST prioritize displaying `item.questionCount` (the total number of questions configured by the admin for the downloadable bank) rather than overwriting it with interactive DB practice test counts.
 - **Defensive Tagline Parsing**: Tagline values stored in `questionBanks` table can be either plain strings (`"Concept-Focused Practice"`) or JSON-encoded strings (`{"text": "...", "price": 499}`). Parsers in `App.tsx` and `AdminPanel.tsx` MUST check `trim().startsWith('{')` before parsing JSON to prevent wiping plain text taglines.
 
@@ -1519,7 +1521,7 @@ Last updated: August 15, 2026
 ### 21. `CurrentAffairsReaderModal`
 
 File: [`src/components/CurrentAffairsReaderModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/CurrentAffairsReaderModal.tsx)
-Last updated: August 15, 2026
+Last updated: August 19, 2026
 
 | Property | Class |
 | :--- | :--- |
@@ -1534,7 +1536,8 @@ Last updated: August 15, 2026
 | **MCQ Option — Correct** | `bg-emerald-500 text-white border-emerald-600 shadow-sm font-bold p-3 rounded-xl border text-left text-xs sm:text-sm transition-all flex items-center justify-between` |
 
 **Pattern notes:**
-- **Guaranteed MCQ Synthesizer**: If `article.mcqs` is missing or empty, `CurrentAffairsReaderModal` automatically synthesizes 2 high-yield self-test MCQs so practice questions are rendered for 100% of articles.
+- **Dynamic 5-MCQ High-Yield Generator**: Supports up to 5 syllabus-aligned, high-yield practice MCQs per article based on topic depth. If `article.mcqs` contains 3, 4, or 5 MCQs, `CurrentAffairsReaderModal` renders all questions dynamically with instant feedback.
+- **Dynamic Source Data Adaptability**: Gracefully renders optional fields (`data_table_html`, `static_gk_pointers`). Missing optional fields leave 0 empty containers or broken borders.
 - **Domain-Aware Callouts**: Renders distinct pastel callouts (`bg-amber-50`, `bg-emerald-50`, `bg-indigo-50`, `bg-purple-50`) matched to the news domain.
 
 ---
@@ -2043,7 +2046,7 @@ Last updated: August 18, 2026
 - **Thumb Ergonomics**: Touch targets and solution accordions are scaled down in padding (`p-4` vs `p-7`) to maximize visible questions on screen while keeping option tap targets above 44px height.
 - **100% Full-Width Question Architecture**: Question numbering is rendered on a dedicated top metadata row (`Q. 01`, `Q. 02`) with padded indices, allowing the question body, KaTeX formulas, tables, and diagrams to occupy 100% full width without left-side blank indentation.
 - **True Hardware Fullscreen API Integration**: Fullscreen toggle uses `document.documentElement.requestFullscreen()` and `document.exitFullscreen()`, hiding browser address bar, tabs, and OS taskbars. Native `fullscreenchange` event listeners auto-sync state with keyboard shortcuts (`Esc`).
-- **Dynamic Wide Canvas Fullscreen Scaling**: In Fullscreen mode, the reading canvas expands to `max-w-7xl` (~1400px), card padding increases to `p-7 md:p-9`, question typography scales to `text-base md:text-xl font-bold`, option tiles expand to `p-4.5` with `w-8 h-8` letter badges, and header elements dynamically resize for widescreen laptop displays.
+- **Dynamic Wide Canvas Fullscreen Scaling**: In Fullscreen mode, the reading canvas expands to `max-w-[1440px]` with generous `px-6 sm:px-10 md:px-12` padding. Card padding increases to `p-6 sm:p-8 md:p-10`, question typography scales to `text-base sm:text-xl md:text-2xl font-bold leading-relaxed`, option tiles expand to `p-4 sm:p-5 md:p-5.5` with `w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10` letter badges and `text-sm sm:text-base md:text-lg` option text, solutions expand to `p-5 sm:p-7 md:p-8`, diagrams expand to `p-6 md:p-8`, and header elements dynamically resize for widescreen laptop displays.
 - **Precision 4-Section Grid Alignment**: In windowed modal mode, all sections align within `max-w-5xl`. In Fullscreen mode, the Top App Bar, Sub-Header Toolbar, and Footer Status Bar span 100% full-bleed across the screen, anchoring elements cleanly to the physical left and right corners (`px-4 sm:px-6 md:px-8`).
 - **High-Capacity Scale Architecture (1,000–2,000+ Questions)**: Chunked 50-question batched sets with previous/next set pagination, direct `"Jump to Q#"` form input, auto-resume banner restoring the student's exact last practiced position, persistent 1-click star bookmarks with a dedicated `⭐️ Saved (N)` filter chip, and real-time progress mastery bar (`src/components/QuestionBankReaderModal.tsx`).
 
@@ -2119,6 +2122,32 @@ Last updated: August 19, 2026
 - **First-Time Automatic Trigger**: Synchronized with `localStorage.getItem('oep_seen_qb_user_guide')` to present onboarding to first-time students on question bank open.
 - **Manual Quick Access**: Accessible at all times via the `Guide` (`HelpCircle`) button in the top app bar toolbar.
 - **Educational Badges & Clarity**: Categorizes practice capabilities into 5 actionable pillars (Auto-Save, Quick Revision, High Capacity, KaTeX Math, Export & Study).
+
+---
+
+### 50. `AuthModal` (Glassmorphic Unified Authentication Dialog)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L2880-L3125)
+Last updated: August 19, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Modal Backdrop** | `fixed inset-0 bg-slate-950/60 z-[100] backdrop-blur-md` |
+| **Dialog Panel** | `rounded-t-[2rem] sm:rounded-3xl w-full max-w-md p-6 sm:p-10 pb-10 sm:pb-10 space-y-6 sm:space-y-8 shadow-2xl border-x-0 border-b-0 sm:border max-h-[92vh] overflow-y-auto overscroll-contain no-scrollbar pointer-events-auto bg-white/90 dark:bg-slate-900/95 border-slate-200/60 dark:border-slate-700/60 backdrop-blur-2xl` |
+| **Close / Dismiss Button** | `p-2 -mr-2 bg-slate-100/70 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 rounded-full transition-colors backdrop-blur-md border border-slate-200/40 dark:border-slate-700/60 cursor-pointer` |
+| **Heading Typography** | `text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight` |
+| **Field Labels** | `text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider pl-1` |
+| **Text Inputs** | `w-full px-4 sm:px-5 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-4 focus:ring-brand-500/15 dark:focus:ring-brand-500/20 focus:border-brand-500 dark:focus:border-brand-400 outline-none transition-all font-medium text-base` |
+| **Google Social Auth Button** | `w-full flex items-center justify-center gap-3 px-5 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-800 dark:text-slate-100 font-extrabold text-base shadow-sm hover:shadow-md dark:shadow-slate-950/40 transition-all duration-200 disabled:opacity-50 cursor-pointer group` |
+| **Divider Badge (OR)** | `bg-white/90 dark:bg-slate-800 backdrop-blur-md px-3 text-[11px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider absolute rounded-full border border-slate-200/40 dark:border-slate-700/60` |
+| **Primary Action CTA** | `w-full py-3.5 sm:py-4 rounded-xl sm:rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-extrabold text-base shadow-lg shadow-brand-500/25 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2` |
+| **Alert / Feedback Badges** | `p-4 border rounded-2xl flex items-start gap-3 text-xs font-semibold leading-relaxed shadow-sm` (`dark:bg-rose-950/50 dark:border-rose-800/60 dark:text-rose-300` for error; `dark:bg-emerald-950/50` for success) |
+
+**Pattern notes:**
+- **Full Dark Mode Resilience**: Upgraded all inputs, labels, dividers, social buttons, and alert cards with full dark theme support (`dark:bg-slate-800/80`, `dark:border-slate-700`, `dark:text-white`).
+- **Glassmorphism Backdrop**: Uses `backdrop-blur-2xl` on the modal panel with a `backdrop-blur-md` dim backdrop (`bg-slate-950/60`).
+- **Mode Switching Fluidity**: Supports seamless in-modal switching between `login`, `signup`, `forgotPassword`, and `resetPassword` without page reload or context loss.
+
 
 
 

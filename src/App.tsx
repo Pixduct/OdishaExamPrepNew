@@ -4753,58 +4753,72 @@ const PurchasesView = ({ user, profile, exams, mockTests, testSeries, dynamicQue
   const isFullAccess = profile.hasFullAccess || profile.role === 'admin';
 
   return (
-    <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-16 md:pb-20 mt-2 md:mt-8">
-      {/* Header */}
-      {/* Mobile: slim 1-row header; Desktop: centred stacked hero */}
-      <div className="mb-6 md:mb-8 relative">
-        {/* ── Mobile header (hidden on md+) ── */}
-        <div className="flex items-center justify-between gap-3 md:hidden">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
-              style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}>
-              <BookMarked className="w-4.5 h-4.5 text-white" />
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-lg font-black text-slate-900 tracking-tight leading-none">
-                My <span className="premium-text-gradient">Library</span>
-              </h2>
-              <p className="text-slate-500 text-[11px] font-medium truncate mt-0.5">Unlocked premium content</p>
-            </div>
-          </div>
-          <button
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold rounded-xl text-[10px] transition-all shadow-xs active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed select-none shrink-0"
-          >
-            <RotateCw className={cn("w-3 h-3 text-brand-600", refreshing && "animate-spin")} />
-            {refreshing ? 'Syncing…' : 'Sync'}
-          </button>
-        </div>
+    <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent overflow-x-hidden" style={{ isolation: 'isolate' }}>
+      {/* Full-Screen Edge-to-Edge Academic Vector Canvas Grid & HSL Glows */}
+      <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-[0.03] pointer-events-none z-0" />
+      <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none z-0" />
+      <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none z-0" />
 
-        {/* ── Desktop stacked hero (hidden on mobile) ── */}
-        <div className="hidden md:flex flex-col space-y-4 text-center">
-          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto shadow-inner relative"
-            style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}>
-            <BookMarked className="w-10 h-10 text-white" />
-            <div className="absolute inset-0 rounded-full animate-ping opacity-20"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }} />
-          </div>
-          <h2 className="text-5xl font-black text-slate-900 tracking-tight">
-            My <span className="premium-text-gradient">Library</span>
-          </h2>
-          <p className="text-slate-500 font-medium text-lg">All your unlocked premium content in one place.</p>
-          <div className="flex justify-center mt-2">
+      {/* Floating Viewport Academic Library Vector Watermarks */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-20">
+        <BookMarked className="absolute top-24 left-[5%] w-44 h-44 text-slate-800 dark:text-white opacity-[0.08] dark:opacity-[0.04] stroke-[1.2] rotate-12" />
+        <BookOpen className="absolute top-1/3 right-[5%] w-48 h-48 text-brand-600 dark:text-indigo-400 opacity-[0.08] dark:opacity-[0.04] stroke-[1.2] -rotate-6" />
+        <Layers className="absolute bottom-1/3 left-[6%] w-44 h-44 text-amber-600 dark:text-amber-400 opacity-[0.08] dark:opacity-[0.04] stroke-[1.2] rotate-45" />
+        <Award className="absolute bottom-28 right-[6%] w-36 h-36 text-indigo-600 dark:text-blue-400 opacity-[0.08] dark:opacity-[0.04] stroke-[1.2] -rotate-12" />
+      </div>
+
+      <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-32 sm:pb-24 mt-2 md:mt-8 relative z-10">
+        {/* Header */}
+        {/* Mobile: slim 1-row header; Desktop: centred stacked hero */}
+        <div className="mb-6 md:mb-8 relative">
+          {/* ── Mobile header (hidden on md+) ── */}
+          <div className="flex items-center justify-between gap-3 md:hidden">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
+                style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}>
+                <BookMarked className="w-4.5 h-4.5 text-white" />
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight leading-none">
+                  My <span className="premium-text-gradient">Library</span>
+                </h2>
+                <p className="text-slate-500 dark:text-slate-400 text-[11px] font-medium truncate mt-0.5">Unlocked premium content</p>
+              </div>
+            </div>
             <button
               onClick={handleRefresh}
               disabled={refreshing}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-700 font-bold rounded-xl text-xs transition-[background-color,border-color,transform,box-shadow] shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed select-none"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-700 font-bold rounded-xl text-[10px] transition-all shadow-xs active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed select-none shrink-0"
             >
-              <RotateCw className={cn("w-3.5 h-3.5 text-brand-600 dark:text-brand-400", refreshing && "animate-spin")} />
-              {refreshing ? 'Syncing Library...' : 'Sync Library'}
+              <RotateCw className={cn("w-3 h-3 text-brand-600 dark:text-brand-400", refreshing && "animate-spin")} />
+              {refreshing ? 'Syncing…' : 'Sync'}
             </button>
           </div>
+
+          {/* ── Desktop stacked hero (hidden on mobile) ── */}
+          <div className="hidden md:flex flex-col space-y-4 text-center">
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto shadow-inner relative"
+              style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}>
+              <BookMarked className="w-10 h-10 text-white" />
+              <div className="absolute inset-0 rounded-full animate-ping opacity-20"
+                style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }} />
+            </div>
+            <h2 className="text-5xl font-black text-slate-900 dark:text-white tracking-tight">
+              My <span className="premium-text-gradient">Library</span>
+            </h2>
+            <p className="text-slate-500 dark:text-slate-400 font-medium text-lg">All your unlocked premium content in one place.</p>
+            <div className="flex justify-center mt-2">
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-700 font-bold rounded-xl text-xs transition-[background-color,border-color,transform,box-shadow] shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed select-none"
+              >
+                <RotateCw className={cn("w-3.5 h-3.5 text-brand-600 dark:text-brand-400", refreshing && "animate-spin")} />
+                {refreshing ? 'Syncing Library...' : 'Sync Library'}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
 
       {loadingExams ? (
         <div className="flex justify-center items-center py-20">
@@ -5048,6 +5062,7 @@ const PurchasesView = ({ user, profile, exams, mockTests, testSeries, dynamicQue
           })}
         </div>
       )}
+      </div>
     </div>
   );
 };

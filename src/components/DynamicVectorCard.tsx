@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useEffect } from 'react';
 import { useTheme } from '../lib/themeStore';
 
 interface DynamicVectorCardProps {
@@ -31,18 +31,21 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
   onClick,
   style = {}
 }) => {
-  const cardRef      = useRef<HTMLDivElement>(null);
-  const ambientRef   = useRef<HTMLDivElement>(null);
-  const shineRef     = useRef<HTMLDivElement>(null);
-  const isHovered    = useRef(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const ambientRef = useRef<HTMLDivElement>(null);
+  const shineRef = useRef<HTMLDivElement>(null);
+  const isHovered = useRef(false);
+  const rectRef = useRef<DOMRect | null>(null);
+  const mousePosRef = useRef<{ clientX: number; clientY: number } | null>(null);
+  const rafIdRef = useRef<number | null>(null);
 
   const [theme] = useTheme();
   const isDark = theme === 'dark';
 
   // Ambient layer config ─ soft spread fading to 0% alpha well before card edge
-  const ambientRadius  = isDark ? 360 : 300;
-  const coreAlpha  = isDark ? 0.40 : 0.22;
-  const midAlpha   = isDark ? 0.12 : 0.06;
+  const ambientRadius = isDark ? 360 : 300;
+  const coreAlpha = isDark ? 0.40 : 0.22;
+  const midAlpha = isDark ? 0.12 : 0.06;
 
   const triggerShineSweep = useCallback(() => {
     const sh = shineRef.current;
@@ -55,16 +58,17 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
     sh.style.animation = 'shine-sweep 1.2s cubic-bezier(0.4, 0, 0.2, 1)';
   }, []);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  // Frame update synced to display refresh rate (60Hz/120Hz/144Hz) with 0ms lag
+  const updateCardState = useCallback(() => {
+    rafIdRef.current = null;
     const card = cardRef.current;
-    if (!card) return;
-    if (typeof document !== 'undefined' && document.body.classList.contains('is-scrolling')) return;
+    if (!card || !isHovered.current || !mousePosRef.current) return;
 
-    const rect = card.getBoundingClientRect();
+    const rect = rectRef.current || card.getBoundingClientRect();
     if (rect.width === 0 || rect.height === 0) return;
 
-    const pxX = e.clientX - rect.left;
-    const pxY = e.clientY - rect.top;
+    const pxX = mousePosRef.current.clientX - rect.left;
+    const pxY = mousePosRef.current.clientY - rect.top;
     const pctX = Math.max(0, Math.min(100, (pxX / rect.width) * 100));
     const pctY = Math.max(0, Math.min(100, (pxY / rect.height) * 100));
 
@@ -77,58 +81,120 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
         ` transparent 60%)`;
     }
 
-    // ── 3-D Tilt ──────────────────────────────────────────────────
-    if (enableTilt && window.matchMedia('(pointer: fine)').matches) {
-      const cX = rect.width  / 2;
+    // ── 3-D Tilt: Instant 0ms synchronization ─────────────────────
+    if (enableTilt && typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches) {
+      const cX = rect.width / 2;
       const cY = rect.height / 2;
-      card.style.setProperty('--rotate-x', `${(((cY - pxY) / cY) * 3.5).toFixed(2)}deg`);
-      card.style.setProperty('--rotate-y', `${(((pxX - cX) / cX) * 3.5).toFixed(2)}deg`);
+      const rotX = (((cY - pxY) / cY) * 3.5).toFixed(2);
+      const rotY = (((pxX - cX) / cX) * 3.5).toFixed(2);
+      card.style.transform = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.015, 1.015, 1.015)`;
+    } else {
+      card.style.transform = `perspective(1000px) scale3d(1.015, 1.015, 1.015)`;
     }
+  }, [ambientRadius, coreAlpha, midAlpha, glowColor, enableTilt]);
 
-    if (!isHovered.current) {
-      isHovered.current = true;
-      if (ambientRef.current) ambientRef.current.style.opacity = '1';
-      card.classList.add('is-card-hovered');
-      // ── Premium Shine Sweep ── fires once per hover entry ────────
-      triggerShineSweep();
-    }
-  }, [isDark, glowColor, ambientRadius, coreAlpha, midAlpha, enableTilt, triggerShineSweep]);
-
-  const handleMouseLeave = useCallback(() => {
+  const handleMouseEnter = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const card = cardRef.current;
     if (!card) return;
-    isHovered.current = false;
+    if (typeof document !== 'undefined' && document.body.classList.contains('is-scrolling')) return;
 
-    if (ambientRef.current) ambientRef.current.style.opacity = '0';
-    card.style.setProperty('--rotate-x', '0deg');
-    card.style.setProperty('--rotate-y', '0deg');
-    card.classList.remove('is-card-hovered');
+    isHovered.current = true;
+    rectRef.current = card.getBoundingClientRect();
+    mousePosRef.current = { clientX: e.clientX, clientY: e.clientY };
+
+    if (ambientRef.current) {
+      ambientRef.current.style.opacity = '1';
+    }
+
+    // Instant tracking: eliminate CSS transition delay so card tracks cursor with 0ms latency
+    card.style.transition = 'none';
+
+    // ── Premium Shine Sweep ── fires once per hover entry ────────
+    triggerShineSweep();
+
+    if (!rafIdRef.current) {
+      rafIdRef.current = requestAnimationFrame(updateCardState);
+    }
+  }, [triggerShineSweep, updateCardState]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (typeof document !== 'undefined' && document.body.classList.contains('is-scrolling')) return;
+
+    mousePosRef.current = { clientX: e.clientX, clientY: e.clientY };
+
+    if (!isHovered.current) {
+      handleMouseEnter(e);
+      return;
+    }
+
+    const card = cardRef.current;
+    if (card && card.style.transition !== 'none') {
+      card.style.transition = 'none';
+    }
+
+    if (!rafIdRef.current) {
+      rafIdRef.current = requestAnimationFrame(updateCardState);
+    }
+  }, [handleMouseEnter, updateCardState]);
+
+  const handleMouseLeave = useCallback(() => {
+    isHovered.current = false;
+    mousePosRef.current = null;
+    rectRef.current = null;
+
+    if (rafIdRef.current) {
+      cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = null;
+    }
+
+    const card = cardRef.current;
+    if (!card) return;
+
+    if (ambientRef.current) {
+      ambientRef.current.style.opacity = '0';
+    }
+
+    // Buttery-smooth spring return to flat resting state on exit
+    card.style.transition = 'transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s ease';
+    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+    };
   }, []);
 
   // Shared layer style ─ absolute fill, no pointer events
   const layerBase: React.CSSProperties = {
-    position:         'absolute',
-    inset:            0,
-    pointerEvents:    'none',
-    opacity:          0,
-    transition:       'opacity 200ms ease',
-    borderRadius:     'inherit',
+    position: 'absolute',
+    inset: 0,
+    pointerEvents: 'none',
+    opacity: 0,
+    transition: 'opacity 200ms ease',
+    borderRadius: 'inherit',
   };
 
   return (
     <div
       ref={cardRef}
+      onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
       style={{
-        perspective:          '1000px',
-        transformStyle:       'preserve-3d',
-        WebkitFontSmoothing:  'antialiased',
-        MozOsxFontSmoothing:  'grayscale',
+        perspective: '1000px',
+        transformStyle: 'preserve-3d',
+        transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
+        transition: 'transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s ease',
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
         ...style
       }}
-      className={`relative isolate overflow-hidden ${roundedClass} ${className} group/vector-card transition-transform duration-200 ease-out hover:will-change-transform [&.is-card-hovered]:[transform:perspective(1000px)_rotateX(var(--rotate-x,0deg))_rotateY(var(--rotate-y,0deg))_scale3d(1.015,1.015,1.015)]`}
+      className={`relative isolate overflow-hidden ${roundedClass} ${className} group/vector-card will-change-transform`}
     >
       {/* ── Layer A: Ambient + cursor warmth (z-0, behind content) ───── */}
       <div
@@ -145,13 +211,13 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
       <div
         ref={shineRef}
         style={{
-          position:      'absolute',
-          inset:         0,
+          position: 'absolute',
+          inset: 0,
           pointerEvents: 'none',
-          zIndex:        20,
-          borderRadius:  'inherit',
-          background:    'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)',
-          transform:     'translateX(-200%) skewX(-30deg)',
+          zIndex: 20,
+          borderRadius: 'inherit',
+          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)',
+          transform: 'translateX(-200%) skewX(-30deg)',
         }}
       />
     </div>

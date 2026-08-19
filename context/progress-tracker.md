@@ -1,6 +1,8 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] Restored Website Current Affairs DB Insertion (`category = 'current_affairs'`) & Pure REST API HTTP Client (`automations/shared/supabase_client.py` & `ca_website_publisher.py`)
+- [x] Timezone-Resilient Today's News Date Filter (`src/pages/CurrentAffairs.tsx`)
 - [x] Python 3.11 UnboundLocalError Variable Scope Resolution & Full Traceback Alerts (`automations/ca_formatter.py` & `ca_publisher.py`)
 - [x] Dynamic & Unrestricted News Category Engine & Website Publishing (`automations/ca_website_publisher.py` & `ca_renderer.py`)
 - [x] Organic, Story-Driven Dynamic Slide Count & Anti-Hallucination Shield (`automations/ca_formatter.py`)

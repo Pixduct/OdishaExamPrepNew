@@ -71,6 +71,9 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`ExamAlertGraphicCard`** | Graphic / Social Card | [`automations/templates/template_alert.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/templates/template_alert.html) | 20-Category 1080x1080 Adaptive Visual Themes, Official Board Badges, Direct Gov Portal Verification | automations/breaking_engine.py | Active |
 | **`ExecutiveBlogPostReader`** | Layout / Article | [`src/pages/BlogPost.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/BlogPost.tsx) & [`src/index.css`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/index.css) | `.oep-article-prose`, `.oep-table-wrapper`, Dynamic TOC anchors, Reading progress tracker | Router (`/blog/:id`) | Active |
 | **`ExamBoardVectorBanner`** | Graphic / Asset Engine | [`automations/shared/exam_logo_registry.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/exam_logo_registry.py) | 1200x630 High-Resolution Vector Card Banner, 10 Official Board Themes, Procedural Grid, Verified Badge | automations/ | Active |
+| **`ContinuePracticeSliderCard`** | Data Display / Slider | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L8124-L8180) | Horizontal Snap-Scroll Slider Card, Progress Bar, Resume Trigger | App.tsx (Home) | Active |
+| **`RecentActivitySliderCard`** | Data Display / Slider | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L8269-L8310) | Horizontal Snap-Scroll Slider Card, Score Chip, Activity Detail Trigger | App.tsx (Home) | Active |
+| **`InteractiveHeroDemoCard`** | Interactive / CBT Hero | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L2618-L3370) | Live Interactive CBT Mock Question Demo, Option Selector, 3D Vector Shell | App.tsx (Hero) | Active |
 
 ---
 
@@ -1570,19 +1573,20 @@ Last updated: August 15, 2026
 ### 23. `DynamicVectorCard`
 
 File: [`src/components/DynamicVectorCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/DynamicVectorCard.tsx)
-Last updated: August 15, 2026
+Last updated: August 19, 2026
 
 | Property | Class |
 | :--- | :--- |
-| **Card Container** | `relative rounded-3xl sm:rounded-[2.5rem]` |
-| **3D Transform Engine** | `perspective: 1000px, transformStyle: preserve-3d, scale3d(1.015, 1.015, 1.015)` |
-| **Surface Spotlight Overlay** | `pointer-events-none absolute inset-0 z-20 overflow-hidden mix-blend-soft-light` |
-| **Ambient Light Flare** | `pointer-events-none absolute inset-0 z-20 opacity-30 dark:opacity-40` |
-| **Border Ring Illumination** | `pointer-events-none absolute -inset-[1.5px] z-30 (WebkitMaskComposite: xor)` |
+| **Card Container** | `relative isolate overflow-hidden rounded-3xl sm:rounded-[2.5rem] group/vector-card` |
+| **3D Transform Engine** | 120 FPS RAF Lerp (`LERP = 0.18`), `perspective(1000px) rotateX(...) rotateY(...) scale3d(1.015, 1.015, 1.015) translateZ(0)` |
+| **Ambient Glow Layer** | `pointer-events-none absolute inset-0 z-0 overflow-hidden` with dynamic radial gradient tracking |
+| **Content Layer** | `relative z-10 width: 100% height: 100%` |
+| **Shine Sweep Layer** | `pointer-events-none absolute inset-0 z-20` (RAF reflow-free shine sweep) |
 
 **Pattern notes:**
-- **Layering Order**: Surface spotlight overlay (`z-20`) and edge illumination ring (`z-30`) MUST sit on top of `{children}` so cursor tracking remains visible over opaque card backgrounds.
-- **Subtle 3D Perspective**: 3D magnetic parallax tilt (`rotateX`, `rotateY`) is capped at `3.5deg` max for a refined tactile response.
+- **120 FPS Physics Engine**: Utilizes a dedicated `requestAnimationFrame` lerp loop (`LERP = 0.18`) directly animating hardware-composited `translateZ(0)` 3D transforms with zero React state re-renders and zero layout reflows during mouse movement.
+- **Auto-Rest Settlement**: Automatically settles back to rest state when mouse leaves and cleanly suspends the RAF loop to consume 0 CPU/GPU cycles when idle.
+- **Reflow-Free Hover Entrance**: Caches bounding rect on mouse enter/move and resets shine sweep animation via `requestAnimationFrame` rather than synchronous DOM measurements (`getBoundingClientRect`).
 
 ---
 
@@ -2225,4 +2229,73 @@ Last updated: August 19, 2026
 - **Zero AI-Hallucination Graphic**: Pure deterministic Pillow/SVG rendering engine without random AI artifacts.
 - **Adaptive Resolution**: Automatically maps target exam title or category to the exact official authority theme tokens.
 - **Permanent Public URL**: Outputs high-density PNG to `public/blog_covers/banner_<board>_<slug>.png`, served directly at `https://www.odishaexamprep.in/blog_covers/...`.
+
+---
+
+### 54. `ContinuePracticeSliderCard`
+
+File: [`src/App.tsx#L8124-L8180`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L8124-L8180)
+Last updated: August 19, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Container** | `DynamicVectorCard glowColor="rgba(37, 99, 235, 0.28)" roundedClass="rounded-2xl"` |
+| **Inner Card Box** | `w-full h-full rounded-2xl border border-slate-100/90 sm:border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/80` |
+| **Padding & Spacing** | `p-3.5 sm:p-5 flex flex-col gap-2.5` |
+| **Slider Track** | `py-4 sm:py-5 px-4 sm:px-6 flex gap-3 sm:gap-4 overflow-x-auto snap-x snap-mandatory` |
+| **Play Icon Badge** | `w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 shadow-md shadow-brand-500/20` |
+| **Text — Primary** | `font-extrabold text-[13.5px] sm:text-sm text-slate-900 dark:text-white line-clamp-2 sm:line-clamp-1 group-hover:text-brand-600` |
+| **Text — Secondary**| `text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 font-medium` |
+| **Category Pill** | `text-[8.5px] sm:text-[9px] font-black uppercase tracking-widest text-brand-600 dark:text-brand-400 bg-brand-50/70 dark:bg-brand-950/50 border border-brand-100/40 dark:border-brand-800/50 px-1.5 py-0.5 rounded` |
+| **Progress Bar** | Track: `bg-slate-100 dark:bg-slate-700 rounded-full h-1.5`; Fill: `bg-gradient-to-r from-brand-600 to-brand-400 rounded-full` |
+| **Hover State** | GPU 3D perspective tilt + surface spotlight on `DynamicVectorCard` + `hover:border-brand-300/60 dark:hover:border-brand-600/50 shadow-brand-500/8` |
+| **Shadow** | `shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)] sm:hover:shadow-2xl` |
+
+**Pattern notes:**
+- **Zero Inner Hover Translation**: Do NOT use `whileHover={whileHover.subtle}` (`y: -5`) on inner `<motion.div>` elements inside `DynamicVectorCard` or horizontal snap-scroll sliders. Doing so causes the card to translate outside `DynamicVectorCard`'s `overflow-hidden` container and get clipped at the top.
+- **Slider Track Headroom**: The horizontal scroll track uses `py-4 sm:py-5` to grant generous headroom for 3D perspective tilts without clipping on screen bounds.
+
+---
+
+### 55. `RecentActivitySliderCard`
+
+File: [`src/App.tsx#L8269-L8310`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L8269-L8310)
+Last updated: August 19, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Container** | `DynamicVectorCard glowColor="rgba(37, 99, 235, 0.28)" roundedClass="rounded-2xl"` |
+| **Inner Card Box** | `w-full h-full rounded-2xl border border-slate-100/90 sm:border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/80` |
+| **Padding & Spacing** | `p-3.5 sm:p-5 flex flex-col gap-2.5` |
+| **Slider Track** | `py-4 sm:py-5 px-4 sm:px-6 flex gap-3 sm:gap-4 overflow-x-auto snap-x snap-mandatory` |
+| **Status Icon Badge**| `w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 border border-brand-100 dark:border-brand-800/50` |
+| **Text — Primary** | `font-extrabold text-[13.5px] sm:text-sm text-slate-900 dark:text-white line-clamp-2 sm:line-clamp-1 group-hover:text-brand-600` |
+| **Text — Secondary**| `text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 font-medium` |
+| **Score Chip** | `text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-lg` (`bg-emerald-50 text-emerald-700` >=60%, `bg-amber-50 text-amber-700` >=35%, `bg-red-50 text-red-600` <35%) |
+| **Hover State** | GPU 3D perspective tilt + surface spotlight on `DynamicVectorCard` + `hover:border-brand-300/60 dark:hover:border-brand-600/50 shadow-brand-500/8` |
+| **Shadow** | `shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)] sm:hover:shadow-2xl` |
+
+**Pattern notes:**
+- **Zero Inner Hover Translation**: Rely strictly on `DynamicVectorCard`'s GPU perspective transformation rather than inner Framer Motion `y: -5` lifts.
+
+---
+
+### 56. `InteractiveHeroDemoCard` (Hero CBT Test Preview)
+
+File: [`src/App.tsx#L2618-L3370`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L2618-L3370)
+Last updated: August 19, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Outer Card Wrapper** | `DynamicVectorCard glowColor="rgba(37, 99, 235, 0.25)" roundedClass="rounded-[2rem]"` |
+| **Card Shell Classes** | `w-full bg-white dark:bg-slate-900 border-2 border-slate-900/80 dark:border-slate-700/80 shadow-[8px_8px_0px_rgba(37,99,235,1)] dark:shadow-[8px_8px_0px_rgba(37,99,235,0.4)]` |
+| **Content Spacing** | `p-6 sm:p-8 relative font-sans` |
+| **Header Status Strip** | `border-b-2 border-slate-100 dark:border-slate-800 pb-4 mb-5` |
+| **Question Heading** | `text-base sm:text-lg font-serif font-extrabold text-slate-900 dark:text-white leading-relaxed` |
+| **Option Button** | `w-full text-left p-3.5 rounded-xl border-2 font-semibold text-sm transition-all flex items-center gap-3.5 select-none relative cursor-pointer` |
+| **Footer Status Row** | `border-t-2 border-slate-100 dark:border-slate-800 pt-4 mt-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest` |
+| **Hover State** | GPU 3D perspective tilt (`rotateX`, `rotateY`), shine sweep, `scale3d(1.015,1.015,1.015)` |
+
+**Pattern notes:**
+- **Parent Row Viewport Clearance**: The parent hero container (`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10`) must NOT apply `overflow-hidden`, giving full vertical clearance for 3D perspective tilt and neo-brutalist 8px drop-shadows.
 

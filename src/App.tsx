@@ -1424,7 +1424,7 @@ const AchieversJournalSection = () => {
                         "bg-white dark:bg-slate-900 text-slate-900 dark:text-white flex flex-col justify-between transition-all duration-300",
                         isMobile
                           ? "border border-slate-200/60 dark:border-slate-800 rounded-2xl p-4 shadow-md shadow-slate-100/80 dark:shadow-none active:scale-[0.99]"
-                          : "border-2 border-slate-900/80 dark:border-slate-700/80 rounded-[2rem] p-6 sm:p-8 shadow-[6px_6px_0px_rgba(37,99,235,0.1)] dark:shadow-[8px_8px_0px_rgba(37,99,235,0.4)] md:hover:-translate-y-1 md:hover:-translate-x-1"
+                          : "border-2 border-slate-900/80 dark:border-slate-700/80 rounded-[2rem] p-6 sm:p-8 shadow-[6px_6px_0px_rgba(37,99,235,0.1)] dark:shadow-[8px_8px_0px_rgba(37,99,235,0.4)]"
                       )}
                     >
                       <div className={cn(isMobile ? "space-y-3" : "space-y-4")}>
@@ -8074,7 +8074,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     container.scrollLeft += e.deltaY * 0.85;
                   }
                 }}
-                className="flex gap-3 sm:gap-4 overflow-x-auto overscroll-contain touch-pan-x no-scrollbar snap-x snap-mandatory py-3 sm:py-4 px-4 sm:px-6"
+                className="flex gap-3 sm:gap-4 overflow-x-auto overscroll-contain touch-pan-x no-scrollbar snap-x snap-mandatory py-4 sm:py-5 px-4 sm:px-6"
                 style={{
                   WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)',
                   maskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)'
@@ -8126,7 +8126,6 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         initial={{ opacity: 0, y: 15, scale: 0.96 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         transition={{ type: 'spring', stiffness: 200, damping: 22, delay: i * 0.06 }}
-                        whileHover={whileHover.subtle}
                         whileTap={whileTap.press}
                         onClick={async () => {
                           if (!canResume) return;
@@ -8241,7 +8240,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     container.scrollLeft += e.deltaY * 0.85;
                   }
                 }}
-                className="flex gap-3 sm:gap-4 overflow-x-auto overscroll-contain touch-pan-x no-scrollbar snap-x snap-mandatory py-3 sm:py-4 px-4 sm:px-6"
+                className="flex gap-3 sm:gap-4 overflow-x-auto overscroll-contain touch-pan-x no-scrollbar snap-x snap-mandatory py-4 sm:py-5 px-4 sm:px-6"
                 style={{
                   WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)',
                   maskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)'
@@ -8271,7 +8270,6 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         initial={{ opacity: 0, y: 15, scale: 0.96 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         transition={{ type: 'spring', stiffness: 200, damping: 22, delay: i * 0.06 }}
-                        whileHover={whileHover.subtle}
                         whileTap={whileTap.press}
                         onClick={() => {
                           if (isTestResult) handleViewResults(a.metadata);

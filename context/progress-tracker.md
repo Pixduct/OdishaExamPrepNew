@@ -1,6 +1,7 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] Balanced News Curation Engine across Odisha State (2), National (3), and International/World (3) Domains (`automations/ca_website_publisher.py`)
 - [x] Restored Website Current Affairs DB Insertion (`category = 'current_affairs'`) & Pure REST API HTTP Client (`automations/shared/supabase_client.py` & `ca_website_publisher.py`)
 - [x] Timezone-Resilient Today's News Date Filter (`src/pages/CurrentAffairs.tsx`)
 - [x] Python 3.11 UnboundLocalError Variable Scope Resolution & Full Traceback Alerts (`automations/ca_formatter.py` & `ca_publisher.py`)

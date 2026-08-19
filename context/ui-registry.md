@@ -68,6 +68,7 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`AdminQuestionBankPreviewModal`** | Admin / Modal | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7647-L7780) | Live Parsed Question Bank Review Modal with Math Renderer & Option Validation | AdminPanel.tsx | Active |
 | **`QuestionBankGuideModal`** | Overlay / Onboarding | [`src/components/QuestionBankGuideModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/QuestionBankGuideModal.tsx) | Interactive Feature Onboarding Dialog, First-Time Auto-Trigger, Feature Badges | QuestionBankReaderModal.tsx | Active |
 | **`AuthModal`** | Overlay / Authentication | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L2880-L3125) | Glassmorphic Authentication Dialog, Dark-Mode Inputs, Google OAuth, Password Reset | App.tsx | Active |
+| **`ExamAlertGraphicCard`** | Graphic / Social Card | [`automations/templates/template_alert.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/templates/template_alert.html) | 20-Category 1080x1080 Adaptive Visual Themes, Official Board Badges, Direct Gov Portal Verification | automations/breaking_engine.py | Active |
 
 ---
 
@@ -2148,14 +2149,27 @@ Last updated: August 19, 2026
 - **Glassmorphism Backdrop**: Uses `backdrop-blur-2xl` on the modal panel with a `backdrop-blur-md` dim backdrop (`bg-slate-950/60`).
 - **Mode Switching Fluidity**: Supports seamless in-modal switching between `login`, `signup`, `forgotPassword`, and `resetPassword` without page reload or context loss.
 
+---
 
+### 51. `ExamAlertGraphicCard` (20-Category Adaptive 1080x1080 Notice Graphic Engine)
 
+File: [`automations/templates/template_alert.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/templates/template_alert.html) & [`automations/breaking_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/breaking_engine.py)
+Last updated: August 19, 2026
 
+| Property | Class / Token |
+| :--- | :--- |
+| **Canvas Background** | `{{THEME_BG_COLOR}}` with 3-Stop Ambient Radial Lighting (`radial-gradient(at 0% 0%, {{THEME_RADIAL_1}}...)`) |
+| **Grid Texture** | Radial dot grid overlay (`background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1.2px, transparent 1.2px); background-size: 32px 32px;`) |
+| **Category Pill Badge** | `padding: 12px 24px; border-radius: 14px; font-weight: 900; font-size: 19px; background: {{THEME_BADGE_GRADIENT}}; box-shadow: 0 6px 25px {{THEME_GLOW_COLOR}}; border: 1px solid rgba(255, 255, 255, 0.35);` |
+| **Board Identity Tag** | `background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 12px; font-weight: 800; font-size: 18px;` |
+| **Main Card Container** | `background: {{THEME_CARD_BG}}; border: 2px solid {{THEME_BORDER_COLOR}}; border-radius: 26px; padding: 40px 46px; box-shadow: 0 0 60px {{THEME_GLOW_COLOR}}, inset 0 1px 0 rgba(255, 255, 255, 0.15);` |
+| **Exam Board Title** | `font-size: 20px; font-weight: 800; color: {{THEME_ACCENT_COLOR}}; letter-spacing: 1.5px; text-transform: uppercase;` |
+| **Headline Typography** | `font-family: 'Outfit', sans-serif; font-size: 33px; font-weight: 900; line-height: 1.3; color: #FFFFFF;` |
+| **Highlight Bullets** | `font-size: 21px; line-height: 1.45; color: #F1F5F9; font-weight: 500;` with `<b>` tags in `{{THEME_ACCENT_COLOR}}` |
+| **Official Portal Strip** | `background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 14px; padding: 12px 20px; color: #38BDF8; font-weight: 800; font-size: 18px;` |
+| **Footer Brand Stamp** | `border-top: 1px solid rgba(255, 255, 255, 0.15); padding-top: 20px; font-size: 21px; font-weight: 800; color: #FFFFFF;` with verified pill badge (`rgba(16, 185, 129, 0.2)`) |
 
-
-
-
-
-
-
-
+**Pattern notes:**
+- **20-Category Theme Tokens**: Dynamically shifts visual theme (Royal Blue, Emerald, Amber, Cyan, Purple, Crimson, Gold, Teal, Rose) across all 20 approved notification categories (`EXAM_CATEGORIES_CONFIG`).
+- **Authentic Board Attribution**: Injects exact short board identifier (`OSSC`, `OPSC`, `OSSSC`, `BSE ODISHA`, `SSC`, `UPSC`, `RRB`, `IBPS`, `NTA`, `SBI`) and full authority name.
+- **Direct Official Portal Verification**: Highlights the official government domain in the bottom strip and eliminates generic boilerplate.

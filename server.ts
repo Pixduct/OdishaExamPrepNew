@@ -1950,12 +1950,16 @@ ${resultsContext}`;
         ogType = "article";
 
         if (blogId) {
-          const { data: blog, error } = await supabaseAdmin
-            .from('exams')
-            .select('*')
-            .eq('id', blogId)
-            .eq('category', 'blog')
-            .single();
+          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(blogId);
+          let query = supabaseAdmin.from('exams').select('*').eq('category', 'blog');
+          if (isUuid) {
+            query = query.eq('id', blogId);
+          } else {
+            const searchPattern = blogId.replace(/-/g, ' ').substring(0, 30);
+            query = query.ilike('name', `%${searchPattern}%`);
+          }
+          const { data: blogList, error } = await query.limit(1);
+          const blog = blogList && blogList.length > 0 ? blogList[0] : null;
 
           if (blog && !error) {
             title = blog.metaTitle || `${blog.name} | OdishaExamPrep`;

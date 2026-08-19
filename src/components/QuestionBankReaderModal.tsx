@@ -97,21 +97,21 @@ const QuestionCardItem = React.memo<QuestionCardItemProps>(({
       id={`qb-question-${idx}`}
       className={cn(
         "bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-brand-200 dark:hover:border-brand-800/80 transition-colors duration-150 cv-card-auto",
-        isFullscreen ? "p-5 sm:p-7 md:p-9 rounded-2xl md:rounded-3xl" : "p-4 sm:p-6 rounded-2xl sm:rounded-3xl"
+        isFullscreen ? "p-6 sm:p-8 md:p-10 rounded-2xl md:rounded-3xl" : "p-4 sm:p-6 rounded-2xl sm:rounded-3xl"
       )}
     >
-      <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
+      <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
         <div className="flex items-center gap-2 min-w-0">
           <span className={cn(
             "rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-black tracking-wider border border-slate-200/60 dark:border-slate-700/60 shrink-0",
-            isFullscreen ? "px-3 py-1 text-xs md:text-sm" : "px-2.5 py-0.5 sm:py-1 text-[11px] sm:text-xs"
+            isFullscreen ? "px-3.5 py-1 text-xs sm:text-sm md:text-base" : "px-2.5 py-0.5 sm:py-1 text-[11px] sm:text-xs"
           )}>
             Q. {String(qNum).padStart(2, '0')}
           </span>
           {q.topic && (
             <span className={cn(
-              "font-bold text-slate-400 dark:text-slate-500 truncate max-w-[280px]",
-              isFullscreen ? "text-xs md:text-sm" : "text-[10px] sm:text-[11px]"
+              "font-bold text-slate-400 dark:text-slate-500 truncate max-w-[320px] sm:max-w-md",
+              isFullscreen ? "text-xs sm:text-sm md:text-base" : "text-[10px] sm:text-[11px]"
             )}>
               • {q.topic}
             </span>
@@ -123,14 +123,15 @@ const QuestionCardItem = React.memo<QuestionCardItemProps>(({
             type="button"
             onClick={(e) => { e.stopPropagation(); onToggleBookmark(idx); }}
             className={cn(
-              "p-1.5 sm:px-2.5 sm:py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 text-xs font-bold active:scale-90 shrink-0",
+              "rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 font-bold active:scale-90 shrink-0",
+              isFullscreen ? "px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm" : "p-1.5 sm:px-2.5 sm:py-1 text-xs",
               isBookmarked
                 ? "bg-amber-50 dark:bg-amber-950/60 border-amber-300 dark:border-amber-700/80 text-amber-600 dark:text-amber-400 shadow-xs"
                 : "bg-slate-50 dark:bg-slate-800/80 border-slate-200/80 dark:border-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100"
             )}
             title={isBookmarked ? "Remove Bookmark" : "Bookmark for quick revision"}
           >
-            <Star className={cn("w-3.5 h-3.5", isBookmarked ? "fill-amber-400 text-amber-500" : "text-slate-400")} />
+            <Star className={cn(isFullscreen ? "w-4 h-4" : "w-3.5 h-3.5", isBookmarked ? "fill-amber-400 text-amber-500" : "text-slate-400")} />
             <span className="hidden sm:inline">{isBookmarked ? 'Bookmarked' : 'Bookmark'}</span>
           </button>
         )}
@@ -138,15 +139,15 @@ const QuestionCardItem = React.memo<QuestionCardItemProps>(({
 
       <div className={cn(
         "text-slate-900 dark:text-white font-bold leading-relaxed w-full overflow-x-auto",
-        isFullscreen ? "text-sm sm:text-base md:text-lg lg:text-xl" : "text-xs sm:text-base"
+        isFullscreen ? "text-base sm:text-lg md:text-xl lg:text-2xl mt-2" : "text-xs sm:text-base"
       )}>
         <MathTextRenderer text={rawText} />
       </div>
 
       {q.diagram && (
         <div className={cn(
-          "my-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex justify-center overflow-x-auto",
-          isFullscreen ? "p-4 md:p-6" : "p-3 sm:p-4"
+          "my-4 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex justify-center overflow-x-auto",
+          isFullscreen ? "p-6 md:p-8" : "p-3 sm:p-4"
         )}>
           <UniversalMathDiagramEngine data={q.diagram} />
         </div>
@@ -154,8 +155,8 @@ const QuestionCardItem = React.memo<QuestionCardItemProps>(({
 
       {Array.isArray(q.options) && q.options.length > 0 && (
         <div className={cn(
-          "grid grid-cols-1 sm:grid-cols-2 mt-3",
-          isFullscreen ? "gap-3 md:gap-4 mt-4" : "gap-2 sm:gap-2.5 mt-2.5 sm:mt-3"
+          "grid grid-cols-1 sm:grid-cols-2",
+          isFullscreen ? "gap-3.5 sm:gap-4 md:gap-5 mt-5 sm:mt-6" : "gap-2 sm:gap-2.5 mt-2.5 sm:mt-3"
         )}>
           {q.options.map((optionText: string, oIdx: number) => {
             const optLetter = ['A', 'B', 'C', 'D', 'E'][oIdx] || `(${oIdx + 1})`;
@@ -186,15 +187,15 @@ const QuestionCardItem = React.memo<QuestionCardItemProps>(({
                 className={cn(
                   "flex items-start border text-left transition-all duration-150 cursor-pointer relative active:scale-[0.99]",
                   isFullscreen 
-                    ? "gap-3 md:gap-4 p-3.5 sm:p-4 md:p-4.5 rounded-xl md:rounded-2xl text-sm md:text-base" 
+                    ? "gap-3.5 sm:gap-4 p-4 sm:p-5 md:p-5.5 rounded-xl md:rounded-2xl text-sm sm:text-base md:text-lg" 
                     : "gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-xl text-xs sm:text-sm",
                   tileStyle
                 )}
               >
                 <span className={cn(
-                  "rounded-lg flex items-center justify-center font-black shrink-0 border mt-0.5",
+                  "rounded-lg md:rounded-xl flex items-center justify-center font-black shrink-0 border mt-0.5",
                   isFullscreen 
-                    ? "w-6.5 h-6.5 md:w-8 md:h-8 text-xs md:text-sm" 
+                    ? "w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 text-xs sm:text-sm md:text-base" 
                     : "w-5.5 h-5.5 sm:w-6 sm:h-6 text-[11px] sm:text-xs",
                   badgeStyle
                 )}>
@@ -206,7 +207,7 @@ const QuestionCardItem = React.memo<QuestionCardItemProps>(({
                 {isRevealed && isCorrect && (
                   <CheckCircle2 className={cn(
                     "text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5",
-                    isFullscreen ? "w-5 h-5" : "w-4 h-4"
+                    isFullscreen ? "w-5 h-5 md:w-6 md:h-6" : "w-4 h-4"
                   )} />
                 )}
               </button>
@@ -216,17 +217,20 @@ const QuestionCardItem = React.memo<QuestionCardItemProps>(({
       )}
 
       {hasAnswer && (
-        <div className="mt-3.5 sm:mt-4 pt-2.5 sm:pt-3 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
+        <div className={cn(
+          "border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-2",
+          isFullscreen ? "mt-5 sm:mt-6 pt-3.5 sm:pt-4" : "mt-3.5 sm:mt-4 pt-2.5 sm:pt-3"
+        )}>
           <div className="flex items-center gap-2">
             <span className={cn(
               "font-bold text-slate-500 dark:text-slate-400",
-              isFullscreen ? "text-xs md:text-sm" : "text-[10px] sm:text-[11px]"
+              isFullscreen ? "text-xs sm:text-sm md:text-base" : "text-[10px] sm:text-[11px]"
             )}>
               Answer:
             </span>
             <span className={cn(
               "rounded-md font-black",
-              isFullscreen ? "px-3 py-1 text-xs md:text-sm" : "px-2 sm:px-2.5 py-0.5 text-[11px] sm:text-xs",
+              isFullscreen ? "px-3.5 py-1 text-xs sm:text-sm md:text-base" : "px-2 sm:px-2.5 py-0.5 text-[11px] sm:text-xs",
               isRevealed
                 ? "bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-400"
@@ -241,14 +245,14 @@ const QuestionCardItem = React.memo<QuestionCardItemProps>(({
               onClick={() => onToggleExplanation(idx)}
               className={cn(
                 "flex items-center gap-1 font-bold text-brand-600 dark:text-brand-400 hover:text-brand-700 active:scale-95 transition-transform cursor-pointer",
-                isFullscreen ? "text-xs md:text-sm" : "text-[11px] sm:text-xs"
+                isFullscreen ? "text-xs sm:text-sm md:text-base" : "text-[11px] sm:text-xs"
               )}
             >
               <span>{isExplanationExpanded || showAllAnswers ? 'Hide Solution' : '💡 View Solution'}</span>
               {isExplanationExpanded || showAllAnswers ? (
-                <ChevronUp className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                <ChevronUp className={cn(isFullscreen ? "w-4 h-4 md:w-5 md:h-5" : "w-3.5 h-3.5 md:w-4 md:h-4")} />
               ) : (
-                <ChevronDown className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                <ChevronDown className={cn(isFullscreen ? "w-4 h-4 md:w-5 md:h-5" : "w-3.5 h-3.5 md:w-4 md:h-4")} />
               )}
             </button>
           )}
@@ -261,15 +265,15 @@ const QuestionCardItem = React.memo<QuestionCardItemProps>(({
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
           className={cn(
-            "mt-3 rounded-xl md:rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/70 dark:border-emerald-900/50 text-slate-700 dark:text-slate-300",
-            isFullscreen ? "p-4 md:p-6 text-sm md:text-base" : "p-3 sm:p-4 text-xs sm:text-sm"
+            "mt-3 sm:mt-4 rounded-xl md:rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/70 dark:border-emerald-900/50 text-slate-700 dark:text-slate-300",
+            isFullscreen ? "p-5 sm:p-7 md:p-8 text-sm sm:text-base md:text-lg" : "p-3 sm:p-4 text-xs sm:text-sm"
           )}
         >
           <div className={cn(
-            "font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5",
-            isFullscreen ? "text-xs md:text-sm" : "text-[11px] sm:text-xs"
+            "font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wider mb-2 flex items-center gap-2",
+            isFullscreen ? "text-xs sm:text-sm md:text-base" : "text-[11px] sm:text-xs"
           )}>
-            <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4" /> Detailed Explanation:
+            <Sparkles className={cn(isFullscreen ? "w-4 h-4 md:w-5 md:h-5" : "w-3.5 h-3.5 md:w-4 md:h-4")} /> Detailed Explanation:
           </div>
           <div className="leading-relaxed overflow-x-auto">
             <MathTextRenderer text={q.explanation} />
@@ -980,12 +984,15 @@ export const QuestionBankReaderModal: React.FC<QuestionBankReaderModalProps> = (
 
           <div 
             ref={modalScrollRef}
-            className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6 overscroll-contain touch-pan-y custom-scrollbar gpu-accelerated"
+            className={cn(
+              "flex-1 overflow-y-auto overscroll-contain touch-pan-y custom-scrollbar gpu-accelerated",
+              isFullscreen ? "px-6 sm:px-10 md:px-12 py-5 sm:py-7" : "px-4 sm:px-6 md:px-8 py-4 sm:py-6"
+            )}
             data-lenis-prevent
           >
             <div className={cn(
               "w-full mx-auto pb-10 sm:pb-16",
-              isFullscreen ? "max-w-6xl space-y-4 sm:space-y-6" : "max-w-5xl space-y-3.5 sm:space-y-6"
+              isFullscreen ? "max-w-[1440px] space-y-5 sm:space-y-7" : "max-w-5xl space-y-3.5 sm:space-y-6"
             )}>
               <AnimatePresence>
                 {showResumeBanner && lastReadQNum && (
@@ -993,17 +1000,29 @@ export const QuestionBankReaderModal: React.FC<QuestionBankReaderModalProps> = (
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-brand-50 to-indigo-50 dark:from-brand-950/60 dark:to-indigo-950/60 border border-brand-200 dark:border-brand-800/80 flex items-center justify-between gap-3 shadow-xs"
+                    className={cn(
+                      "rounded-2xl bg-gradient-to-r from-brand-50 to-indigo-50 dark:from-brand-950/60 dark:to-indigo-950/60 border border-brand-200 dark:border-brand-800/80 flex items-center justify-between gap-3 shadow-xs",
+                      isFullscreen ? "p-4 sm:p-5" : "p-3.5 sm:p-4"
+                    )}
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-brand-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                        <Compass className="w-5 h-5 animate-spin-slow" />
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className={cn(
+                        "rounded-xl bg-brand-600 text-white flex items-center justify-center shrink-0 shadow-xs",
+                        isFullscreen ? "w-10 h-10 md:w-11 md:h-11" : "w-9 h-9"
+                      )}>
+                        <Compass className={cn(isFullscreen ? "w-5 h-5 md:w-6 md:h-6" : "w-5 h-5", "animate-spin-slow")} />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
+                        <p className={cn(
+                          "font-bold text-slate-900 dark:text-slate-100",
+                          isFullscreen ? "text-sm sm:text-base md:text-lg" : "text-xs sm:text-sm"
+                        )}>
                           Welcome back! You last practiced up to <strong>Question #{lastReadQNum}</strong>.
                         </p>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                        <p className={cn(
+                          "text-slate-500 dark:text-slate-400 truncate",
+                          isFullscreen ? "text-xs sm:text-sm mt-0.5" : "text-[11px]"
+                        )}>
                           Jump straight back in without manual scrolling.
                         </p>
                       </div>
@@ -1012,10 +1031,13 @@ export const QuestionBankReaderModal: React.FC<QuestionBankReaderModalProps> = (
                       <button
                         type="button"
                         onClick={handleResumeLastRead}
-                        className="px-3.5 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-95 text-white font-black text-xs cursor-pointer shadow-xs transition-all flex items-center gap-1.5"
+                        className={cn(
+                          "rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-95 text-white font-black cursor-pointer shadow-xs transition-all flex items-center gap-1.5",
+                          isFullscreen ? "px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm" : "px-3.5 py-1.5 text-xs"
+                        )}
                       >
                         <span>Resume Q. {lastReadQNum}</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
+                        <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </button>
                       <button
                         type="button"
@@ -1031,7 +1053,10 @@ export const QuestionBankReaderModal: React.FC<QuestionBankReaderModalProps> = (
               </AnimatePresence>
 
               {totalSets > 1 && (
-                <div className="p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2.5">
+                <div className={cn(
+                  "rounded-2xl bg-slate-50/90 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2.5",
+                  isFullscreen ? "p-3.5 sm:p-4 md:p-4.5" : "p-3 sm:p-3.5"
+                )}>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
@@ -1040,16 +1065,22 @@ export const QuestionBankReaderModal: React.FC<QuestionBankReaderModalProps> = (
                         setCurrentSetIndex(prev => Math.max(0, prev - 1));
                         modalScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
-                      className="p-1.5 sm:px-2.5 sm:py-1 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 flex items-center gap-1 cursor-pointer transition-all"
+                      className={cn(
+                        "rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 flex items-center gap-1 cursor-pointer transition-all",
+                        isFullscreen ? "px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm" : "p-1.5 sm:px-2.5 sm:py-1 text-xs"
+                      )}
                     >
                       <ChevronLeft className="w-4 h-4" />
                       <span className="hidden sm:inline">Prev Set</span>
                     </button>
 
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white dark:bg-slate-700 border border-slate-200/80 dark:border-slate-600 text-xs font-black text-slate-800 dark:text-slate-200">
-                      <Layers className="w-3.5 h-3.5 text-brand-500" />
+                    <div className={cn(
+                      "flex items-center gap-1.5 rounded-xl bg-white dark:bg-slate-700 border border-slate-200/80 dark:border-slate-600 font-black text-slate-800 dark:text-slate-200",
+                      isFullscreen ? "px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm" : "px-2.5 py-1 text-xs"
+                    )}>
+                      <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-500" />
                       <span>Set {clampedSetIndex + 1} of {totalSets}</span>
-                      <span className="text-[10px] text-slate-400 font-medium">({startQuestionNum}–{endQuestionNum})</span>
+                      <span className="text-[10px] sm:text-xs text-slate-400 font-medium">({startQuestionNum}–{endQuestionNum})</span>
                     </div>
 
                     <button
@@ -1059,7 +1090,10 @@ export const QuestionBankReaderModal: React.FC<QuestionBankReaderModalProps> = (
                         setCurrentSetIndex(prev => Math.min(totalSets - 1, prev + 1));
                         modalScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
-                      className="p-1.5 sm:px-2.5 sm:py-1 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 flex items-center gap-1 cursor-pointer transition-all"
+                      className={cn(
+                        "rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 flex items-center gap-1 cursor-pointer transition-all",
+                        isFullscreen ? "px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm" : "p-1.5 sm:px-2.5 sm:py-1 text-xs"
+                      )}
                     >
                       <span className="hidden sm:inline">Next Set</span>
                       <ChevronRight className="w-4 h-4" />
@@ -1067,7 +1101,10 @@ export const QuestionBankReaderModal: React.FC<QuestionBankReaderModalProps> = (
                   </div>
 
                   <form onSubmit={handleJumpToQuestion} className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 hidden sm:inline">
+                    <span className={cn(
+                      "font-bold text-slate-500 dark:text-slate-400 hidden sm:inline",
+                      isFullscreen ? "text-xs sm:text-sm" : "text-xs"
+                    )}>
                       Jump to Q:
                     </span>
                     <input
@@ -1077,12 +1114,18 @@ export const QuestionBankReaderModal: React.FC<QuestionBankReaderModalProps> = (
                       value={jumpQInput}
                       onChange={e => setJumpQInput(e.target.value)}
                       placeholder={`1-${questions.length}`}
-                      className="w-18 sm:w-20 px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-900 dark:text-white text-center focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+                      className={cn(
+                        "bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl font-bold text-slate-900 dark:text-white text-center focus:outline-none focus:ring-2 focus:ring-brand-500/30",
+                        isFullscreen ? "w-20 sm:w-24 px-2.5 py-1.5 text-xs sm:text-sm" : "w-18 sm:w-20 px-2 py-1 text-xs"
+                      )}
                     />
                     <button
                       type="submit"
                       disabled={!jumpQInput.trim()}
-                      className="px-2.5 py-1 rounded-xl bg-brand-600 text-white text-xs font-black hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 cursor-pointer"
+                      className={cn(
+                        "rounded-xl bg-brand-600 text-white font-black hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 cursor-pointer",
+                        isFullscreen ? "px-3.5 py-1.5 text-xs sm:text-sm" : "px-2.5 py-1 text-xs"
+                      )}
                     >
                       Go
                     </button>
@@ -1155,13 +1198,19 @@ export const QuestionBankReaderModal: React.FC<QuestionBankReaderModalProps> = (
                       setCurrentSetIndex(prev => Math.max(0, prev - 1));
                       modalScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
-                    className="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 cursor-pointer flex items-center gap-1.5 shadow-xs"
+                    className={cn(
+                      "rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold text-slate-700 dark:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 cursor-pointer flex items-center gap-1.5 shadow-xs",
+                      isFullscreen ? "px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm" : "px-3.5 py-2 text-xs"
+                    )}
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span>Previous Set</span>
                   </button>
 
-                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                  <span className={cn(
+                    "font-bold text-slate-500 dark:text-slate-400",
+                    isFullscreen ? "text-xs sm:text-sm" : "text-xs"
+                  )}>
                     Set {clampedSetIndex + 1} of {totalSets}
                   </span>
 
@@ -1172,7 +1221,10 @@ export const QuestionBankReaderModal: React.FC<QuestionBankReaderModalProps> = (
                       setCurrentSetIndex(prev => Math.min(totalSets - 1, prev + 1));
                       modalScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
-                    className="px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-xs font-bold text-white disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5 shadow-xs"
+                    className={cn(
+                      "rounded-xl bg-brand-600 hover:bg-brand-700 font-bold text-white disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5 shadow-xs",
+                      isFullscreen ? "px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm" : "px-3.5 py-2 text-xs"
+                    )}
                   >
                     <span>Next Set</span>
                     <ChevronRight className="w-4 h-4" />

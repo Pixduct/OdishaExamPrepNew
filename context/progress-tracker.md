@@ -1,6 +1,8 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] Official Exam Notification Blog Engine & Universal Vector Graphic Generator with Permanent 404 URL Resolution (`automations/shared/exam_logo_registry.py`, `automations/shared/supabase_client.py`, `automations/shared/telegram.py`, `src/pages/BlogPost.tsx`, `server.ts`)
+- [x] 20-Category Exam Notification Alert Engine with Dynamic Visual Card Themes, Direct Official Links & Admin DM Delivery (`automations/breaking_engine.py`, `templates/template_alert.html`, `shared/telegram.py`, `scraper.py`)
 - [x] Up to 5 High-Yield Exam MCQs per Current Affairs Topic (`automations/ca_website_publisher.py`)
 - [x] Dynamic Source Data Adaptability & Flexible Fact Synthesis (`automations/ca_website_publisher.py`)
 - [x] Deleted Bad Article & Enforced Strict Placeholder Elimination Gate (`[District Name]` / `[River Name]`) (`automations/ca_formatter.py` & `ca_website_publisher.py`)

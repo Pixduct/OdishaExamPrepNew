@@ -2616,7 +2616,7 @@ const InteractiveHeroPreview = () => {
   const penaltyLabel = card.penalty?.toFixed(2) ?? '0.25';
 
   return (
-    <div className="w-full bg-white dark:bg-slate-900 border-2 border-slate-900/80 dark:border-slate-700/80 rounded-[2rem] p-6 sm:p-8 shadow-[8px_8px_0px_rgba(37,99,235,1)] dark:shadow-[8px_8px_0px_rgba(37,99,235,0.4)] relative overflow-hidden font-sans">
+    <div className="w-full p-6 sm:p-8 relative font-sans">
       <div className="absolute inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.08] grid-bg" />
       
       <div className="flex items-center justify-between border-b-2 border-slate-100 dark:border-slate-800 pb-4 mb-5 shrink-0 relative z-10">
@@ -2889,7 +2889,7 @@ const AuthModal = ({ isOpen, onClose, hideCloseButton = false }: { isOpen: boole
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
-            className="fixed inset-0 bg-slate-950/50 z-[100] backdrop-blur-md"
+            className="fixed inset-0 bg-slate-950/60 z-[100] backdrop-blur-md"
             style={{ willChange: 'opacity' }}
             onClick={hideCloseButton ? undefined : onClose}
           />
@@ -2907,23 +2907,23 @@ const AuthModal = ({ isOpen, onClose, hideCloseButton = false }: { isOpen: boole
                 damping: 32,
                 mass: 0.9,
               }}
-              className="glass rounded-t-[2rem] sm:rounded-3xl w-full max-w-md p-6 sm:p-10 pb-10 sm:pb-10 space-y-6 sm:space-y-8 shadow-2xl border-x-0 border-b-0 sm:border border-white/40 max-h-[92vh] overflow-y-auto overscroll-contain no-scrollbar pointer-events-auto"
+              className="rounded-t-[2rem] sm:rounded-3xl w-full max-w-md p-6 sm:p-10 pb-10 sm:pb-10 space-y-6 sm:space-y-8 shadow-2xl border-x-0 border-b-0 sm:border max-h-[92vh] overflow-y-auto overscroll-contain no-scrollbar pointer-events-auto bg-white/90 dark:bg-slate-900/95 border-slate-200/60 dark:border-slate-700/60 backdrop-blur-2xl"
               data-lenis-prevent
               style={{ willChange: 'transform, opacity' }}
             >
             {/* Drag handle (mobile only) */}
-            <div className="sm:hidden w-10 h-1 bg-slate-200 rounded-full mx-auto -mt-2 mb-2" />
+            <div className="sm:hidden w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto -mt-2 mb-2" />
 
             <div className="flex justify-between items-center sticky top-0 bg-white/0 z-10">
-              <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 {authMode === 'login' && 'Welcome Back'}
                 {authMode === 'signup' && 'Join OdishaExamPrep'}
                 {authMode === 'forgotPassword' && 'Reset Password'}
                 {authMode === 'resetPassword' && 'Create New Password'}
               </h3>
               {!hideCloseButton && (
-                <button onClick={onClose} className="p-2 -mr-2 bg-slate-100/50 hover:bg-slate-200/50 rounded-full transition-colors backdrop-blur-md border-none cursor-pointer">
-                  <X className="w-6 h-6 text-slate-400" />
+                <button onClick={onClose} className="p-2 -mr-2 bg-slate-100/70 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 rounded-full transition-colors backdrop-blur-md border border-slate-200/40 dark:border-slate-700/60 cursor-pointer">
+                  <X className="w-6 h-6 text-slate-500 dark:text-slate-400" />
                 </button>
               )}
             </div>
@@ -2934,14 +2934,14 @@ const AuthModal = ({ isOpen, onClose, hideCloseButton = false }: { isOpen: boole
                 animate={{ opacity: 1, y: 0 }}
                 className={cn(
                   "p-4 border rounded-2xl flex items-start gap-3 text-xs font-semibold leading-relaxed shadow-sm",
-                  authMessage.type === 'error' && "bg-rose-50 border-rose-100/80 text-rose-700",
-                  authMessage.type === 'info' && "bg-blue-50 border-blue-100/80 text-blue-700",
-                  authMessage.type === 'success' && "bg-emerald-50 border-emerald-100/80 text-emerald-700"
+                  authMessage.type === 'error' && "bg-rose-50 dark:bg-rose-950/50 border-rose-100/80 dark:border-rose-800/60 text-rose-700 dark:text-rose-300",
+                  authMessage.type === 'info' && "bg-blue-50 dark:bg-blue-950/50 border-blue-100/80 dark:border-blue-800/60 text-blue-700 dark:text-blue-300",
+                  authMessage.type === 'success' && "bg-emerald-50 dark:bg-emerald-950/50 border-emerald-100/80 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300"
                 )}
               >
-                {authMessage.type === 'error' && <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />}
-                {authMessage.type === 'info' && <Info className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />}
-                {authMessage.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />}
+                {authMessage.type === 'error' && <AlertCircle className="w-4 h-4 text-rose-500 dark:text-rose-400 shrink-0 mt-0.5" />}
+                {authMessage.type === 'info' && <Info className="w-4 h-4 text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" />}
+                {authMessage.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0 mt-0.5" />}
                 <div className="flex-1">
                   {authMessage.text}
                 </div>
@@ -2954,7 +2954,7 @@ const AuthModal = ({ isOpen, onClose, hideCloseButton = false }: { isOpen: boole
                   type="button"
                   onClick={handleGoogleLogin}
                   disabled={googleLoading}
-                  className="w-full flex items-center justify-center gap-3 px-5 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-200/80 bg-white/90 hover:bg-white text-slate-800 font-extrabold text-base shadow-sm hover:shadow-md transition-all duration-200 disabled:opacity-50 cursor-pointer group"
+                  className="w-full flex items-center justify-center gap-3 px-5 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-800 dark:text-slate-100 font-extrabold text-base shadow-sm hover:shadow-md dark:shadow-slate-950/40 transition-all duration-200 disabled:opacity-50 cursor-pointer group"
                 >
                   {googleLoading ? (
                     <Loader2 className="w-5 h-5 animate-spin text-brand-600" />
@@ -2982,8 +2982,8 @@ const AuthModal = ({ isOpen, onClose, hideCloseButton = false }: { isOpen: boole
                 </button>
 
                 <div className="relative flex items-center justify-center py-1">
-                  <div className="border-t border-slate-200/80 w-full" />
-                  <span className="bg-white/80 backdrop-blur-md px-3 text-[11px] font-black uppercase text-slate-400 tracking-wider absolute rounded-full border border-slate-200/40">
+                  <div className="border-t border-slate-200/80 dark:border-slate-700/60 w-full" />
+                  <span className="bg-white/90 dark:bg-slate-800 backdrop-blur-md px-3 text-[11px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider absolute rounded-full border border-slate-200/40 dark:border-slate-700/60">
                     OR
                   </span>
                 </div>
@@ -3001,7 +3001,7 @@ const AuthModal = ({ isOpen, onClose, hideCloseButton = false }: { isOpen: boole
                 {/* Full Name field (Signup only) */}
                 {authMode === 'signup' && (
                   <div className="space-y-1.5 text-left">
-                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider pl-1">
+                    <label className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider pl-1">
                       Full Name
                     </label>
                     <input 
@@ -3010,7 +3010,7 @@ const AuthModal = ({ isOpen, onClose, hideCloseButton = false }: { isOpen: boole
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       required
-                      className="w-full px-4 sm:px-5 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-200/60 bg-white/50 focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 outline-none transition-all font-medium text-base" 
+                      className="w-full px-4 sm:px-5 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-4 focus:ring-brand-500/15 dark:focus:ring-brand-500/20 focus:border-brand-500 dark:focus:border-brand-400 outline-none transition-all font-medium text-base" 
                     />
                   </div>
                 )}
@@ -3018,7 +3018,7 @@ const AuthModal = ({ isOpen, onClose, hideCloseButton = false }: { isOpen: boole
                 {/* Email field (Login, Signup, Forgot Password) */}
                 {authMode !== 'resetPassword' && (
                   <div className="space-y-1.5 text-left">
-                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider pl-1">
+                    <label className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider pl-1">
                       Email Address
                     </label>
                     <input 
@@ -3027,7 +3027,7 @@ const AuthModal = ({ isOpen, onClose, hideCloseButton = false }: { isOpen: boole
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="w-full px-4 sm:px-5 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-200/60 bg-white/50 focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 outline-none transition-all font-medium text-base" 
+                      className="w-full px-4 sm:px-5 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-4 focus:ring-brand-500/15 dark:focus:ring-brand-500/20 focus:border-brand-500 dark:focus:border-brand-400 outline-none transition-all font-medium text-base" 
                     />
                   </div>
                 )}
@@ -3036,14 +3036,14 @@ const AuthModal = ({ isOpen, onClose, hideCloseButton = false }: { isOpen: boole
                 {authMode !== 'forgotPassword' && (
                   <div className="space-y-1.5 text-left">
                     <div className="flex justify-between items-center pl-1">
-                      <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider">
+                      <label className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                         {authMode === 'resetPassword' ? "New Password" : "Password"}
                       </label>
                       {authMode === 'login' && (
                         <button
                           type="button"
                           onClick={() => setAuthMode('forgotPassword')}
-                          className="text-[11px] font-extrabold text-brand-650 hover:text-brand-700 hover:underline transition-all focus:outline-none border-none bg-transparent cursor-pointer"
+                          className="text-[11px] font-extrabold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 hover:underline transition-all focus:outline-none border-none bg-transparent cursor-pointer"
                         >
                           Forgot Password?
                         </button>
@@ -3056,12 +3056,12 @@ const AuthModal = ({ isOpen, onClose, hideCloseButton = false }: { isOpen: boole
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        className="w-full px-4 sm:px-5 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-200/60 bg-white/50 focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 outline-none transition-all font-medium text-base pr-12" 
+                        className="w-full px-4 sm:px-5 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-4 focus:ring-brand-500/15 dark:focus:ring-brand-500/20 focus:border-brand-500 dark:focus:border-brand-400 outline-none transition-all font-medium text-base pr-12" 
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-650 focus:outline-none transition-colors"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none transition-colors"
                       >
                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
@@ -3072,7 +3072,7 @@ const AuthModal = ({ isOpen, onClose, hideCloseButton = false }: { isOpen: boole
                 {/* Confirm Password field (Reset Password only) */}
                 {authMode === 'resetPassword' && (
                   <div className="space-y-1.5 text-left">
-                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider pl-1">
+                    <label className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider pl-1">
                       Confirm New Password
                     </label>
                     <div className="relative">
@@ -3082,7 +3082,7 @@ const AuthModal = ({ isOpen, onClose, hideCloseButton = false }: { isOpen: boole
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
-                        className="w-full px-4 sm:px-5 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-200/60 bg-white/50 focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 outline-none transition-all font-medium text-base pr-12" 
+                        className="w-full px-4 sm:px-5 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-4 focus:ring-brand-500/15 dark:focus:ring-brand-500/20 focus:border-brand-500 dark:focus:border-brand-400 outline-none transition-all font-medium text-base pr-12" 
                       />
                     </div>
                   </div>
@@ -3097,11 +3097,11 @@ const AuthModal = ({ isOpen, onClose, hideCloseButton = false }: { isOpen: boole
             </form>
 
             {(authMode === 'login' || authMode === 'signup') && (
-              <p className="text-center text-sm text-slate-500 font-medium">
+              <p className="text-center text-sm text-slate-500 dark:text-slate-400 font-medium">
                 {authMode === 'login' ? "New to OdishaExamPrep? " : "Already a member? "}
                 <button 
                   onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
-                  className="text-brand-600 font-extrabold hover:underline transition-all border-none bg-transparent cursor-pointer"
+                  className="text-brand-600 dark:text-brand-400 font-extrabold hover:underline transition-all border-none bg-transparent cursor-pointer"
                 >
                   {authMode === 'login' ? 'Register' : 'Login'}
                 </button>
@@ -3109,11 +3109,11 @@ const AuthModal = ({ isOpen, onClose, hideCloseButton = false }: { isOpen: boole
             )}
 
             {authMode === 'forgotPassword' && (
-              <p className="text-center text-sm text-slate-500 font-medium">
+              <p className="text-center text-sm text-slate-500 dark:text-slate-400 font-medium">
                 Remember your password?{" "}
                 <button 
                   onClick={() => setAuthMode('login')}
-                  className="text-brand-600 font-extrabold hover:underline transition-all border-none bg-transparent cursor-pointer"
+                  className="text-brand-600 dark:text-brand-400 font-extrabold hover:underline transition-all border-none bg-transparent cursor-pointer"
                 >
                   Login
                 </button>
@@ -3261,7 +3261,7 @@ const LandingPage = () => {
           <div className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full -z-10 animate-orb" style={{background: 'radial-gradient(circle, rgba(37,99,235,0.06) 0%, transparent 70%)', filter: 'blur(40px)'}} />
           <div className="absolute bottom-0 -left-40 w-[500px] h-[500px] rounded-full -z-10 animate-orb" style={{background: 'radial-gradient(circle, rgba(0,0,0,0.02) 0%, transparent 70%)', filter: 'blur(50px)', animationDelay: '2.5s'}} />
           
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-12 lg:gap-16">
               {/* Specialized Content Column */}
               <motion.div 
@@ -3365,7 +3365,11 @@ const LandingPage = () => {
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="hidden lg:block flex-1 relative w-full lg:max-w-[500px]"
               >
-                <DynamicVectorCard roundedClass="rounded-[2rem]" className="w-full">
+                <DynamicVectorCard
+                  glowColor="rgba(37, 99, 235, 0.25)"
+                  roundedClass="rounded-[2rem]"
+                  className="w-full bg-white dark:bg-slate-900 border-2 border-slate-900/80 dark:border-slate-700/80 shadow-[8px_8px_0px_rgba(37,99,235,1)] dark:shadow-[8px_8px_0px_rgba(37,99,235,0.4)]"
+                >
                   <InteractiveHeroPreview />
                 </DynamicVectorCard>
               </motion.div>
@@ -8501,7 +8505,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           ) : (
                             // Desktop Card
                             <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.15)" roundedClass="rounded-2xl sm:rounded-3xl" className="h-full">
-                              <div className="p-3 sm:p-5 md:p-6 h-full bg-white dark:bg-gradient-to-br dark:from-[#0d1b3e] dark:via-[#0f2257] dark:to-[#0b1730] border sm:border-2 border-slate-900 dark:border-brand-800/50 rounded-2xl sm:rounded-3xl flex flex-col items-center text-center justify-center space-y-2 sm:space-y-4 md:space-y-5 relative shadow-[0_4px_16px_rgba(0,0,0,0.035)] sm:shadow-[4px_4px_0px_#2563EB] md:group-hover/card:shadow-[8px_8px_0px_#2563EB] md:group-hover/card:-translate-y-1 md:group-hover/card:-translate-x-1 transition-all duration-300 active:scale-[0.98] sm:active:scale-100 active:bg-slate-50/70 sm:active:bg-white dark:active:bg-[#0d1b3e] text-slate-900 dark:text-white overflow-hidden">
+                              <div className="p-3 sm:p-5 md:p-6 h-full bg-white dark:bg-gradient-to-br dark:from-[#0d1b3e] dark:via-[#0f2257] dark:to-[#0b1730] border sm:border-2 border-slate-900 dark:border-brand-800/50 rounded-2xl sm:rounded-3xl flex flex-col items-center text-center justify-center space-y-2 sm:space-y-4 md:space-y-5 relative shadow-[0_4px_16px_rgba(0,0,0,0.035)] sm:shadow-[4px_4px_0px_#2563EB] md:group-hover/card:shadow-[8px_8px_0px_#2563EB] transition-all duration-300 active:scale-[0.98] sm:active:scale-100 active:bg-slate-50/70 sm:active:bg-white dark:active:bg-[#0d1b3e] text-slate-900 dark:text-white overflow-hidden">
                                 {/* Inner Vector Grid Overlay */}
                                 <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
                               {/* Corner arrow - structured circle */}
@@ -8737,6 +8741,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   hidden: { opacity: 0, y: 15 },
                   show: { opacity: 1, y: 0 }
                 }}
+                whileHover={isMobile ? undefined : whileHover.liftTap}
+                whileTap={whileTap.press}
                 className="w-full cv-card-auto"
               >
                 {isMobile ? (
@@ -8819,7 +8825,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     onClick={() => setSelectedBankItem(item)}
                     className={cn(
                       "group cursor-pointer relative overflow-hidden rounded-[2rem] h-full border-slate-200/50 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex flex-col",
-                      !isMobile && "hover:border-brand-300/80 dark:hover:border-indigo-500/80 hover:-translate-y-1.5 transition-all duration-500 hover:shadow-xl hover:shadow-brand-500/5 premium-shine-container"
+                      !isMobile && "hover:border-brand-300/80 dark:hover:border-indigo-500/80 transition-all duration-500 hover:shadow-xl hover:shadow-brand-500/5 premium-shine-container"
                     )}
                   >
                     {/* Ambient grid-bg inside the card */}
@@ -10407,8 +10413,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     hidden: { y: 10, opacity: 0 },
                     show: { y: 0, opacity: 1 }
                   }}
-                  whileHover={isMobile ? undefined : { y: -5 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={isMobile ? undefined : whileHover.liftTap}
+                  whileTap={whileTap.press}
                   className="w-full h-full"
                 >
                   {isMobile ? (
@@ -10445,7 +10451,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       )}
                     >
                       {/* Inner Watermark & Grid Background Wrapper */}
-                      <div className="absolute inset-0 overflow-hidden rounded-[2.2rem] pointer-events-none z-0">
+                      <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.2rem] [clip-path:inset(0_round_2.2rem)]">
                         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:14px_14px]" />
                         <WatermarkIcon className="absolute -right-6 -bottom-6 w-40 h-40 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
                       </div>
@@ -10801,7 +10807,7 @@ const ExamDetailPage = () => {
       <Navbar user={user} isAdmin={isAdmin} onHomeClick={handleHomeClick} />
 
       <main className={cn(
-        "relative flex-1 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full pt-24 sm:pt-28 md:pt-32 overflow-x-hidden",
+        "relative flex-1 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full pt-24 sm:pt-28 md:pt-32",
         isBottomNavVisible 
           ? "pb-28 sm:pb-24 lg:pb-32" 
           : "pb-12 sm:pb-16 lg:pb-20"
@@ -11399,7 +11405,7 @@ function AppContent() {
           <Navbar user={user} isAdmin={isAdmin} onHomeClick={handleHomeClick} />
 
           <main className={cn(
-            "relative flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pt-4 md:pt-8 overflow-x-hidden",
+            "relative flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pt-4 md:pt-8",
             isBottomNavVisible 
               ? "pb-28 sm:pb-24 lg:pb-32" 
               : "pb-12 sm:pb-16 lg:pb-20"
@@ -11554,7 +11560,7 @@ function AppContent() {
                 <Navbar user={user} isAdmin={isAdmin} onHomeClick={handleHomeClick} />
 
                 <main className={cn(
-                  "relative flex-1 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full pt-24 sm:pt-28 md:pt-32 overflow-x-hidden",
+                  "relative flex-1 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full pt-24 sm:pt-28 md:pt-32",
                   isBottomNavVisible 
                     ? "pb-28 sm:pb-24 lg:pb-32" 
                     : "pb-12 sm:pb-16 lg:pb-20"

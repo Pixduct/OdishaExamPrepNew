@@ -89,7 +89,37 @@ export default function BlogPost() {
     const fetchBlog = async () => {
       try {
         const exams = await examService.getAllExams();
-        const found = exams.find(e => e.id === id && e.category === 'blog');
+        const cleanParam = (id || '').trim().toLowerCase();
+        
+        let found = exams.find(e => {
+          if (e.category !== 'blog') return false;
+          if (e.id === id) return true;
+          const slug = e.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+          const targetSlug = cleanParam.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+          return slug === targetSlug || (targetSlug.length > 8 && (slug.includes(targetSlug) || targetSlug.includes(slug)));
+        });
+
+        // Fresh DB lookup fallback for newly published articles
+        if (!found && id && id !== 'undefined') {
+          try {
+            const { supabase } = await import('../lib/supabase');
+            const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+            let query = supabase.from('exams').select('*').eq('category', 'blog');
+            if (isUuid) {
+              query = query.eq('id', id);
+            } else {
+              const searchWords = cleanParam.split('-').filter(w => w.length > 2).slice(0, 3).join('%');
+              query = query.ilike('name', `%${searchWords}%`);
+            }
+            const { data: dbData } = await query.limit(1);
+            if (dbData && dbData.length > 0) {
+              found = dbData[0];
+            }
+          } catch (dbErr) {
+            console.warn('[BlogPost] Direct DB fallback note:', dbErr);
+          }
+        }
+
         setBlog(found || null);
 
         if (found) {

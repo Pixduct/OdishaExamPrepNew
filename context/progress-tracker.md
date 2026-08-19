@@ -1,6 +1,12 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] Dynamic & Unrestricted News Category Engine & Website Publishing (`automations/ca_website_publisher.py` & `ca_renderer.py`)
+- [x] Organic, Story-Driven Dynamic Slide Count & Anti-Hallucination Shield (`automations/ca_formatter.py`)
+- [x] Zero-Fallback Automation Policy & Admin Telegram Alert Engine across all Workflows (`automations/`)
+- [x] Hero Interactive Demo Question Card Hover Clipping & Viewport Container Cleanup (`src/App.tsx`)
+- [x] Home Page Explore Exams & Step 3 Question Bank Cards Hover Top Clipping Resolution (`src/App.tsx`)
+- [x] Question Bank Card Hover Top Clipping Resolution (`src/App.tsx` lines 8734–8824)
 - [x] Exam Dashboard Header Vector Upgrade (`src/App.tsx`)
 - [x] Study Plan & Preparation Hub Academic Vector Canvas & 5 Executive 3D Cards (`src/StudyPlanView.tsx`)
 - [x] 1:1 Pixel Crisp Dynamic Cursor Spotlight Card Engine (`src/components/DynamicVectorCard.tsx`)
@@ -110,6 +116,7 @@
 - [x] Edge-to-Edge Corner Anchored Fullscreen App Bar & Chrome: Removed inner `max-w-7xl` container bounds from the Top App Bar, Sub-Header Toolbar, and Footer Status Bar in Fullscreen mode in `QuestionBankReaderModal.tsx`. The Book icon & title now anchor cleanly to the far left corner of the laptop screen, and the utility buttons and window controls anchor to the far right corner with uniform `px-4 sm:px-6 md:px-8` edge padding (`src/components/QuestionBankReaderModal.tsx`).
 - [x] High-Capacity Scale Architecture (1,000–2,000+ Questions): Implemented Batched Sets (50 questions per set for 60 FPS DOM performance and zero memory lag), persistent Bookmarking with a dedicated `⭐️ Saved (N)` filter tab, persistent Auto-Resume with a 1-click `"📍 Resume from Q. X"` banner, interactive Star bookmarks on all question cards, quick `"Jump to Q#"` input, and a top visual mastery completion progress line (`src/components/QuestionBankReaderModal.tsx`).
 - [x] Question Bank Interactive Feature Guide Modal: Built `QuestionBankGuideModal.tsx` covering Auto-Resume (`📍`), Star Bookmarking (`⭐️`), 50-Question Sets & Direct Jump (`📚`), Instant Feedback & KaTeX Math Solutions (`💡`), and Fullscreen & 1-Click PDF Export (`📥`). Features automatic first-time onboarding with localStorage memory (`oep_seen_qb_user_guide`), a "Don't show automatically" checkbox, and a dedicated `Guide` icon button in the header toolbar (`src/components/QuestionBankGuideModal.tsx`, `src/components/QuestionBankReaderModal.tsx`).
+- [x] Question Bank Fullscreen Widescreen Layout & Question Card Ergonomics: Expanded the reading canvas in Fullscreen mode to `max-w-[1440px]` with generous `px-6 sm:px-10 md:px-12` padding. Scaled question typography to `text-base sm:text-xl md:text-2xl font-bold leading-relaxed`, question cards to `p-6 sm:p-8 md:p-10`, options to `p-4 sm:p-5 md:p-5.5` with `w-8 h-8 md:w-10 md:h-10` option letter badges and `text-sm sm:text-base md:text-lg` text, scaled solution containers to `p-5 sm:p-7 md:p-8`, diagrams to `p-6 md:p-8`, and upgraded the Set Navigator and Auto-Resume banners to widescreen proportions (`src/components/QuestionBankReaderModal.tsx`).
 
 
 

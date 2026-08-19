@@ -59,6 +59,7 @@ import { scrollToElement } from '../lib/scrollManager';
 import { activityTracker } from '../lib/activityTracker';
 import { useVoiceInteraction, VoiceLanguage } from '../hooks/useVoiceInteraction';
 import { VoiceWaveVisualizer } from '../components/VoiceWaveVisualizer';
+import { useLanguage } from '../lib/LanguageContext';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 
@@ -662,6 +663,7 @@ const GENERATING_STEPS = [
 
 export default function AiMentor({ user }: { user: any }) {
   const { refreshProfile } = useAuth();
+  const { t, isOdia } = useLanguage();
   // Fullscreen mode state for desktop/laptop workspace
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [showToolsDrawerInFullScreen, setShowToolsDrawerInFullScreen] = useState(false);
@@ -4924,10 +4926,10 @@ JSON structure:
           {/* Glassmorphic Tab Bar */}
           <div className="flex border-b border-slate-200/60 dark:border-slate-800 bg-slate-50 dark:bg-[#060B16]/90 p-1.5 px-4 gap-1 shrink-0 z-10">
             {[
-              { id: 'planner', label: 'Planner', icon: Calendar, color: 'text-indigo-650 dark:text-indigo-400' },
-              { id: 'quiz', label: 'Practice', icon: HelpCircle, color: 'text-[#2563EB] dark:text-blue-400' },
-              { id: 'syllabus', label: 'Syllabus', icon: BookOpen, color: 'text-amber-650 dark:text-amber-400' },
-              { id: 'formulas', label: 'Formulas', icon: Award, color: 'text-brand-600 dark:text-blue-300' }
+              { id: 'planner', label: t('aiMentor.tabs.planner', 'Planner'), icon: Calendar, color: 'text-indigo-650 dark:text-indigo-400' },
+              { id: 'quiz', label: t('aiMentor.tabs.quizzer', 'Practice'), icon: HelpCircle, color: 'text-[#2563EB] dark:text-blue-400' },
+              { id: 'syllabus', label: t('aiMentor.tabs.syllabus', 'Syllabus'), icon: BookOpen, color: 'text-amber-650 dark:text-amber-400' },
+              { id: 'formulas', label: t('aiMentor.tabs.shortcuts', 'Formulas'), icon: Award, color: 'text-brand-600 dark:text-blue-300' }
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeRightTab === tab.id;

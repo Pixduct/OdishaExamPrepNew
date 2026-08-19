@@ -10,8 +10,10 @@ import { DynamicVectorCard } from './components/DynamicVectorCard';
 import { evaluatePersonalBestImprovements, PersonalBestImprovement } from './lib/personalBestManager';
 import { getUserXpState } from './lib/xpManager';
 import { destroyLenis, initLenis } from './lib/lenisScroll';
+import { useLanguage } from './lib/LanguageContext';
 
 export default function TestResultsView({ results, onClose }: { results: any, onClose: () => void }) {
+  const { t, isOdia } = useLanguage();
   const resultsTestId = results?.test?.id || '';
   const savedTestId = sessionStorage.getItem('oep_reviewTestId');
   const isSameTest = savedTestId === resultsTestId;

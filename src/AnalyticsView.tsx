@@ -23,6 +23,7 @@ import { ExamReadinessCard } from './components/ExamReadinessCard';
 import { useActiveExamContext } from './lib/activeExamStore';
 import { ActiveExamContextBar } from './components/ActiveExamContextBar';
 import { DynamicVectorCard } from './components/DynamicVectorCard';
+import { useLanguage } from './lib/LanguageContext';
 
 
 const MarkdownMathRenderer = ({ text, isUser = false }: { text: string; isUser?: boolean }) => {
@@ -586,6 +587,7 @@ function AnalyticsSkeleton() {
 }
 
 function AnalyticsViewInner({ user, activities: propActivities, onNavigate }: { user: any, activities?: any[], onNavigate?: (tab: any) => void }) {
+  const { t, isOdia } = useLanguage();
   const [activities, setActivities] = useState<any[]>(() => {
     const rawData = (propActivities && propActivities.length > 0)
       ? propActivities

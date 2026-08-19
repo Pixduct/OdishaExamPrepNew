@@ -88,6 +88,8 @@ import { ActiveExamContextBar } from './components/ActiveExamContextBar';
 import { getInstantQuestionsForTopic } from './lib/instantQuestionCompiler';
 import { examService } from './lib/examService';
 import { ThemeToggle } from './components/ThemeToggle';
+import { LanguageToggle } from './components/LanguageToggle';
+import { useLanguage } from './lib/LanguageContext';
 import { initLenis, destroyLenis } from './lib/lenisScroll';
 import { QuestionBankReaderModal } from './components/QuestionBankReaderModal';
 import { exportQuestionBankToPdf } from './lib/pdfExportEngine';
@@ -1969,6 +1971,7 @@ export const Navbar = ({
   const supportUrl = `https://wa.me/917377431715?text=${encodeURIComponent(userMessage)}`;
 
   const isBlogActive = location.pathname.startsWith('/blog') || activeSection === 'blog';
+  const { t, isOdia } = useLanguage();
 
   return (
     <header className={cn(
@@ -2020,7 +2023,7 @@ export const Navbar = ({
                 )}
               >
                 <Target className="w-3.5 h-3.5 text-[#2563EB] dark:text-brand-400" />
-                <span>Exams</span>
+                <span>{t('nav.exams', 'Exams')}</span>
               </a>
 
               <a 
@@ -2034,7 +2037,7 @@ export const Navbar = ({
                 )}
               >
                 <BookOpen className="w-3.5 h-3.5 text-[#2563EB] dark:text-brand-400" />
-                <span>Syllabus</span>
+                <span>{t('nav.syllabus', 'Syllabus')}</span>
               </a>
 
               <a 
@@ -2048,7 +2051,7 @@ export const Navbar = ({
                 )}
               >
                 <Award className="w-3.5 h-3.5 text-[#2563EB] dark:text-brand-400" />
-                <span>Achievers</span>
+                <span>{t('nav.achievers', 'Achievers')}</span>
               </a>
 
               <Link 
@@ -2062,7 +2065,7 @@ export const Navbar = ({
                 title="Daily 360° Current Affairs"
               >
                 <Globe className="w-3.5 h-3.5 text-amber-500" />
-                <span>Current Affairs</span>
+                <span>{t('nav.currentAffairs', 'Current Affairs')}</span>
               </Link>
 
               <Link 
@@ -2076,7 +2079,7 @@ export const Navbar = ({
                 title="Official Educational Blog"
               >
                 <FileText className="w-3.5 h-3.5 text-[#2563EB] dark:text-brand-400" />
-                <span>Blog</span>
+                <span>{t('nav.blog', 'Blog')}</span>
               </Link>
             </div>
           ) : (
@@ -2092,7 +2095,7 @@ export const Navbar = ({
                 title="Daily 360° Current Affairs"
               >
                 <Globe className="w-3.5 h-3.5 text-amber-500" />
-                <span>Current Affairs</span>
+                <span>{t('nav.currentAffairs', 'Current Affairs')}</span>
               </Link>
 
               <Link 
@@ -2106,14 +2109,17 @@ export const Navbar = ({
                 title="Official Educational Blog"
               >
                 <FileText className="w-3.5 h-3.5 text-[#2563EB] dark:text-brand-400" />
-                <span>Blog</span>
+                <span>{t('nav.blog', 'Blog')}</span>
               </Link>
             </div>
           )}
           
           <div className="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-3 border-l border-slate-200 dark:border-slate-700">
             {!user ? (
-              <ThemeToggle />
+              <div className="flex items-center gap-2">
+                <LanguageToggle />
+                <ThemeToggle />
+              </div>
             ) : (
               <div className="flex items-center gap-1.5 bg-slate-100/80 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/60 rounded-2xl p-1 shadow-xs">
                 <button
@@ -2123,7 +2129,7 @@ export const Navbar = ({
                   title="Search exams, tests, practice sets (Ctrl+K)"
                 >
                   <Search className="w-3.5 h-3.5 text-[#2563EB] dark:text-brand-400 group-hover:scale-110 transition-transform" />
-                  <span className="hidden md:inline font-black uppercase text-[11px] tracking-wider">Search</span>
+                  <span className="hidden md:inline font-black uppercase text-[11px] tracking-wider">{t('nav.search', 'Search')}</span>
                   <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[9px] font-black text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">⌘K</kbd>
                 </button>
 
@@ -2145,10 +2151,11 @@ export const Navbar = ({
                   <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 fill-current animate-pulse group-hover:scale-110 transition-transform" />
                   <span className="font-mono text-[11px] sm:text-xs text-amber-700 dark:text-amber-300 font-extrabold">
                     <span className="sm:hidden">{streakState.currentStreak}d</span>
-                    <span className="hidden sm:inline">{streakState.currentStreak} {streakState.currentStreak === 1 ? 'Day' : 'Days'}</span>
+                    <span className="hidden sm:inline">{streakState.currentStreak} {streakState.currentStreak === 1 ? t('nav.day', 'Day') : t('nav.days', 'Days')}</span>
                   </span>
                 </button>
 
+                <LanguageToggle variant="compact" />
                 <ThemeToggle />
               </div>
             )}
@@ -2199,7 +2206,7 @@ export const Navbar = ({
                           {isAdmin && (
                             <Link to="/admin" onClick={() => setShowProfileDropdown(false)} className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-xl transition-colors">
                               <Settings className="w-4 h-4 text-slate-500" />
-                              Admin Panel
+                              {t('nav.adminPanel', 'Admin Panel')}
                             </Link>
                           )}
 
@@ -2214,7 +2221,7 @@ export const Navbar = ({
                             className="w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
                           >
                             <LogOut className="w-4 h-4" />
-                            Sign Out
+                            {t('nav.signOut', 'Sign Out')}
                           </button>
                         </div>
                       </motion.div>
@@ -2227,7 +2234,7 @@ export const Navbar = ({
                   onClick={onSignIn}
                   className="px-6 h-10 text-xs font-black uppercase tracking-widest rounded-xl bg-[#2563EB] hover:bg-brand-700 text-white shadow-md hover:shadow-[#2563EB]/25 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer shrink-0"
                 >
-                  Sign In
+                  {t('nav.signIn', 'Sign In')}
                 </button>
               )
             )}
@@ -2257,7 +2264,7 @@ export const Navbar = ({
               onClick={onSignIn}
               className="hidden sm:inline-flex px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg border-2 border-slate-900 bg-[#2563EB] text-white shadow-[2px_2px_0px_#0f172a] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all duration-200 cursor-pointer shrink-0"
             >
-              Sign In
+              {t('nav.signIn', 'Sign In')}
             </button>
           )}
           <button 
@@ -2294,6 +2301,18 @@ export const Navbar = ({
             >
               {/* Content Container */}
               <div className="p-4 flex flex-col gap-1.5">
+                {/* Mobile Drawer Language & Theme Quick Bar */}
+                <div className="p-2.5 rounded-2xl bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/50 mb-2 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-200">
+                    <Globe className="w-4 h-4 text-[#2563EB]" />
+                    <span>{t('nav.language', 'Language')}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <LanguageToggle />
+                    <ThemeToggle />
+                  </div>
+                </div>
+
                 {/* Mobile Drawer Streak Goal Card */}
                 <div 
                   className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-850 to-amber-950/50 border border-amber-500/30 text-white shadow-md cursor-pointer mb-2 flex items-center justify-between gap-3"
@@ -2308,9 +2327,9 @@ export const Navbar = ({
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-extrabold text-white">Daily Study Streak</span>
+                        <span className="text-xs font-extrabold text-white">{t('nav.studyStreak', 'Daily Study Streak')}</span>
                         <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber-500/20 text-amber-300">
-                          {streakState.currentStreak} Days
+                          {streakState.currentStreak} {t('nav.days', 'Days')}
                         </span>
                       </div>
                       <p className="text-[10px] text-slate-400 font-medium">
@@ -2323,10 +2342,10 @@ export const Navbar = ({
 
                 {!user && onSignIn && (
                   <div className="p-3.5 rounded-2xl border-2 border-slate-900 bg-gradient-to-br from-slate-50 to-white shadow-[4px_4px_0px_#0f172a] mb-1">
-                    <p className="text-[10px] font-black text-[#2563EB] uppercase tracking-widest mb-1">Welcome Aspirant</p>
-                    <h4 className="text-xs font-serif font-black text-slate-800 mb-3.5 leading-snug">Master the OPSC, OSSC, and OSSSC syllabus with precision-crafted test series.</h4>
+                    <p className="text-[10px] font-black text-[#2563EB] uppercase tracking-widest mb-1">{t('nav.welcomeAspirant', 'Welcome Aspirant')}</p>
+                    <h4 className="text-xs font-serif font-black text-slate-800 mb-3.5 leading-snug">{t('nav.welcomeSubtitle', 'Master the OPSC, OSSC, and OSSSC syllabus with precision-crafted test series.')}</h4>
                     <Button variant="primary" className="w-full py-2.5 rounded-xl font-black text-[10px] uppercase tracking-wider border-2 border-slate-900 shadow-[2px_2px_0px_#0f172a] active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" onClick={() => { onSignIn(); setMobileMenuOpen(false); }}>
-                      Sign In to Account
+                      {t('nav.signInToAccount', 'Sign In to Account')}
                     </Button>
                   </div>
                 )}
@@ -2354,7 +2373,7 @@ export const Navbar = ({
                           <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0 shadow-xs">
                              <Target className="w-4 h-4" />
                           </div>
-                          <span className="tracking-wide">Exams</span>
+                          <span className="tracking-wide">{t('nav.exams', 'Exams')}</span>
                           <ChevronRight className={cn("w-4 h-4 ml-auto transition-transform duration-250", activeSection === 'exams' ? "text-emerald-500 translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
                         </a>
                       </motion.div>
@@ -2373,7 +2392,7 @@ export const Navbar = ({
                           <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0 shadow-xs">
                              <BookOpen className="w-4 h-4" />
                           </div>
-                          <span className="tracking-wide">Syllabus</span>
+                          <span className="tracking-wide">{t('nav.syllabus', 'Syllabus')}</span>
                           <ChevronRight className={cn("w-4 h-4 ml-auto transition-transform duration-250", activeSection === 'syllabus-paths' ? "text-blue-500 translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
                         </a>
                       </motion.div>
@@ -2392,7 +2411,7 @@ export const Navbar = ({
                           <div className="w-8 h-8 rounded-xl bg-[#fce7eb] border border-[#fbe1e6] flex items-center justify-center text-[#2563EB] shrink-0 shadow-xs">
                              <Clock3 className="w-4 h-4" />
                           </div>
-                          <span className="tracking-wide">Notifications</span>
+                          <span className="tracking-wide">{t('nav.notifications', 'Notifications')}</span>
                           <ChevronRight className={cn("w-4 h-4 ml-auto transition-transform duration-250", activeSection === 'exam-registry' ? "text-[#2563EB] translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
                         </a>
                       </motion.div>
@@ -2411,7 +2430,7 @@ export const Navbar = ({
                           <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 shrink-0 shadow-xs">
                              <Award className="w-4 h-4" />
                           </div>
-                          <span className="tracking-wide">Achievers</span>
+                          <span className="tracking-wide">{t('nav.achievers', 'Achievers')}</span>
                           <ChevronRight className={cn("w-4 h-4 ml-auto transition-transform duration-250", activeSection === 'achievers-journal' ? "text-amber-500 translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
                         </a>
                       </motion.div>
@@ -2432,7 +2451,7 @@ export const Navbar = ({
                       <div className="w-8 h-8 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-700 shrink-0 shadow-xs">
                          <Globe className="w-4 h-4 text-amber-600" />
                       </div>
-                      <span className="tracking-wide">Daily 360° Current Affairs</span>
+                      <span className="tracking-wide">{t('nav.currentAffairs', 'Daily 360° Current Affairs')}</span>
                       <ChevronRight className={cn("w-4 h-4 ml-auto transition-transform duration-250", location.pathname.startsWith('/current-affairs') ? "text-amber-600 translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
                     </Link>
                   </motion.div>
@@ -2451,7 +2470,7 @@ export const Navbar = ({
                       <div className="w-8 h-8 rounded-xl bg-[#fce7eb] border border-[#fbe1e6] flex items-center justify-center text-[#2563EB] shrink-0 shadow-xs">
                          <FileText className="w-4 h-4" />
                       </div>
-                      <span className="tracking-wide">Latest Updates &amp; Blog</span>
+                      <span className="tracking-wide">{t('nav.blog', 'Latest Updates & Blog')}</span>
                       <ChevronRight className={cn("w-4 h-4 ml-auto transition-transform duration-250", isBlogActive ? "text-[#2563EB] translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
                     </Link>
                   </motion.div>
@@ -2468,7 +2487,7 @@ export const Navbar = ({
                       <div className="w-8 h-8 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 shrink-0 shadow-xs">
                          <Video className="w-4 h-4" />
                       </div>
-                      <span className="tracking-wide text-left flex-1 font-bold">Watch Video Guide</span>
+                      <span className="tracking-wide text-left flex-1 font-bold">{t('nav.watchVideoGuide', 'Watch Video Guide')}</span>
                       <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
                     </button>
                   </motion.div>
@@ -2485,7 +2504,7 @@ export const Navbar = ({
                         <div className="w-8 h-8 rounded-xl bg-[#fce7eb]/50 border border-[#fce7eb]/80 flex items-center justify-center text-[#2563EB] shrink-0 shadow-xs">
                            <HelpCircle className="w-4 h-4" />
                         </div>
-                        <span className="tracking-wide">Help &amp; Support</span>
+                        <span className="tracking-wide">{t('nav.helpSupport', 'Help & Support')}</span>
                         <ChevronRight className="w-4 h-4 ml-auto text-slate-400 group-hover:translate-x-0.5 transition-transform" />
                       </a>
                     </motion.div>
@@ -2512,7 +2531,7 @@ export const Navbar = ({
                           className="flex items-center gap-3 text-xs font-black text-slate-700 py-3 px-4 bg-white border border-slate-200/80 hover:bg-slate-50 rounded-xl transition-all w-full shadow-xs active:scale-[0.98]"
                         >
                           <Settings className="w-4 h-4 text-slate-400" /> 
-                          <span>Admin Panel</span>
+                          <span>{t('nav.adminPanel', 'Admin Panel')}</span>
                           <ChevronRight className="w-3.5 h-3.5 ml-auto text-slate-400" />
                         </Link>
                       )}
@@ -2525,7 +2544,7 @@ export const Navbar = ({
                         className="flex items-center gap-3 text-xs font-black text-rose-600 py-3 px-4 bg-rose-50/50 hover:bg-rose-50 border border-rose-100/50 rounded-xl transition-all w-full text-left active:scale-[0.98]"
                       >
                         <LogOut className="w-4 h-4" /> 
-                        <span>Sign Out</span>
+                        <span>{t('nav.signOut', 'Sign Out')}</span>
                       </button>
                     </div>
                   </div>

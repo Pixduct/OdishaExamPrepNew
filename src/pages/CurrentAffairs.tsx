@@ -3,8 +3,10 @@ import PageLayout from '../components/PageLayout';
 import { fetchCurrentAffairsDigests, CurrentAffairsItem, getSmartRealImage } from '../services/currentAffairsService';
 import { CurrentAffairsReaderModal } from '../components/CurrentAffairsReaderModal';
 import { Search, Calendar, MapPin, Building2, Globe, Sparkles, BookOpen, ArrowRight, Filter } from 'lucide-react';
+import { useLanguage } from '../lib/LanguageContext';
 
 export const CurrentAffairsPage: React.FC = () => {
+  const { t } = useLanguage();
   const [articles, setArticles] = useState<CurrentAffairsItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -23,10 +25,10 @@ export const CurrentAffairsPage: React.FC = () => {
   }, []);
 
   const categories = [
-    { label: 'All Categories', value: 'All', icon: Sparkles },
-    { label: 'Odisha State', value: 'Odisha', icon: MapPin },
-    { label: 'India / National', value: 'National', icon: Building2 },
-    { label: 'World / International', value: 'World', icon: Globe }
+    { label: t('currentAffairs.categories.all', 'All Categories'), value: 'All', icon: Sparkles },
+    { label: t('currentAffairs.categories.odisha', 'Odisha State'), value: 'Odisha', icon: MapPin },
+    { label: t('currentAffairs.categories.national', 'India / National'), value: 'National', icon: Building2 },
+    { label: t('currentAffairs.categories.world', 'World / International'), value: 'World', icon: Globe }
   ];
 
   const [timePreset, setTimePreset] = useState<string>('all');
@@ -44,50 +46,43 @@ export const CurrentAffairsPage: React.FC = () => {
     const now = new Date();
     const todayStrUTC = now.toISOString().substring(0, 10);
     const todayStrLocal = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    const yesterdayDate = new Date(now.getTime() - 86400000);
-    const yesterdayStrUTC = yesterdayDate.toISOString().substring(0, 10);
-
+    
     let matchesTimePreset = true;
     if (timePreset === 'today') {
-      matchesTimePreset = 
-        artDateStr === todayStrUTC || 
-        artDateStr === todayStrLocal || 
-        createdAtDateStr === todayStrUTC ||
-        createdAtDateStr === todayStrLocal ||
-        artDateStr === yesterdayStrUTC;
+      matchesTimePreset = (artDateStr === todayStrUTC || artDateStr === todayStrLocal || createdAtDateStr === todayStrUTC || createdAtDateStr === todayStrLocal);
     } else if (timePreset === '7days') {
       if (artDate) {
-        const diffMs = now.getTime() - artDate.getTime();
-        matchesTimePreset = diffMs <= 7 * 86400 * 1000 && diffMs >= 0;
+        const diffDays = (now.getTime() - artDate.getTime()) / (1000 * 3600 * 24);
+        matchesTimePreset = diffDays >= 0 && diffDays <= 7;
       }
     } else if (timePreset === 'thisMonth') {
       if (artDate) {
-        matchesTimePreset = artDate.getFullYear() === now.getFullYear() && artDate.getMonth() === now.getMonth();
+        matchesTimePreset = artDate.getMonth() === now.getMonth() && artDate.getFullYear() === now.getFullYear();
       }
     } else if (timePreset === '3months') {
       if (artDate) {
-        const diffMs = now.getTime() - artDate.getTime();
-        matchesTimePreset = diffMs <= 90 * 86400 * 1000 && diffMs >= 0;
+        const diffDays = (now.getTime() - artDate.getTime()) / (1000 * 3600 * 24);
+        matchesTimePreset = diffDays >= 0 && diffDays <= 90;
       }
     } else if (timePreset === '6months') {
       if (artDate) {
-        const diffMs = now.getTime() - artDate.getTime();
-        matchesTimePreset = diffMs <= 180 * 86400 * 1000 && diffMs >= 0;
+        const diffDays = (now.getTime() - artDate.getTime()) / (1000 * 3600 * 24);
+        matchesTimePreset = diffDays >= 0 && diffDays <= 180;
       }
     }
 
-    const matchesDateInput = selectedDate === '' || (artDateStr && artDateStr.includes(selectedDate));
+    const matchesDateInput = selectedDate === '' || artDateStr === selectedDate || createdAtDateStr === selectedDate;
 
     return matchesCategory && matchesQuery && matchesTimePreset && matchesDateInput;
   });
 
   const timePresets = [
-    { id: 'today', label: "⚡ Today's News" },
-    { id: '7days', label: '📅 Last 7 Days' },
-    { id: 'thisMonth', label: '🗓️ This Month' },
-    { id: '3months', label: '📆 Last 3 Months' },
-    { id: '6months', label: '📊 Last 6 Months' },
-    { id: 'all', label: '📚 All Time Archives' },
+    { id: 'today', label: t('currentAffairs.timeFilters.today', "⚡ Today's News") },
+    { id: '7days', label: t('currentAffairs.timeFilters.week', '📅 Last 7 Days') },
+    { id: 'thisMonth', label: t('currentAffairs.timeFilters.month', '🗓️ This Month') },
+    { id: '3months', label: t('currentAffairs.timeFilters.threeMonths', '📆 Last 3 Months') },
+    { id: '6months', label: t('currentAffairs.timeFilters.sixMonths', '📊 Last 6 Months') },
+    { id: 'all', label: t('currentAffairs.timeFilters.all', '📚 All Time Archives') },
   ];
 
   return (
@@ -101,13 +96,13 @@ export const CurrentAffairsPage: React.FC = () => {
             
             <div className="relative z-10 max-w-3xl space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-500/20 border border-brand-400/30 rounded-full text-brand-300 text-xs font-black uppercase tracking-wider">
-                <Sparkles className="w-3.5 h-3.5" /> OdishaExamPrep Daily Intelligence
+                <Sparkles className="w-3.5 h-3.5" /> {t('currentAffairs.badge', 'OdishaExamPrep Daily Intelligence')}
               </div>
               <h1 className="text-3xl sm:text-5xl font-serif font-black tracking-tight text-white leading-tight">
-                Daily 360° Current Affairs
+                {t('currentAffairs.title', 'Daily 360° Current Affairs')}
               </h1>
               <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-                Comprehensive, exam-focused daily digests for OPSC, OSSC CGL, OSSSC, SSC, Railway, and Banking exams. In-depth background context, static GK pointers, data tables, and practice MCQs.
+                {t('currentAffairs.subtitle', 'Comprehensive, exam-focused daily digests for OPSC, OSSC CGL, OSSSC, SSC, Railway, and Banking exams. In-depth background context, static GK pointers, data tables, and practice MCQs.')}
               </p>
             </div>
 
@@ -198,18 +193,18 @@ export const CurrentAffairsPage: React.FC = () => {
           {loading ? (
             <div className="text-center py-16 space-y-3">
               <div className="w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-xs font-bold text-slate-500">Loading daily 360° current affairs digests...</p>
+              <p className="text-xs font-bold text-slate-500">{t('common.actions.loading', 'Loading daily 360° current affairs digests...')}</p>
             </div>
           ) : filteredArticles.length === 0 ? (
             <div className="bg-white border border-slate-200/80 rounded-3xl p-12 text-center space-y-3 max-w-md mx-auto">
               <Filter className="w-10 h-10 text-slate-300 mx-auto" />
-              <h3 className="text-base font-extrabold text-slate-800">No Current Affairs Found</h3>
-              <p className="text-xs text-slate-500">Try adjusting your category filter, date, or search query.</p>
+              <h3 className="text-base font-extrabold text-slate-800">{t('currentAffairs.noArticlesFound', 'No Current Affairs Found')}</h3>
+              <p className="text-xs text-slate-500">{t('currentAffairs.adjustFilter', 'Try adjusting your category filter, date, or search query.')}</p>
               <button
                 onClick={() => { setSelectedCategory('All'); setSearchQuery(''); setSelectedDate(''); setTimePreset('all'); }}
                 className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
               >
-                Reset All Filters & View All Archives
+                {t('currentAffairs.resetFilters', 'Reset All Filters & View All Archives')}
               </button>
             </div>
           ) : (
@@ -218,20 +213,20 @@ export const CurrentAffairsPage: React.FC = () => {
                 const cat = article.category.toLowerCase();
                 let categoryBadge = (
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-black text-[10px] uppercase tracking-wider rounded-md">
-                    National
+                    {t('currentAffairs.categories.national', 'National')}
                   </span>
                 );
 
                 if (cat.includes('odisha')) {
                   categoryBadge = (
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-200/60 font-black text-[10px] uppercase tracking-wider rounded-md">
-                      Odisha State
+                      {t('currentAffairs.categories.odisha', 'Odisha State')}
                     </span>
                   );
                 } else if (cat.includes('world') || cat.includes('international')) {
                   categoryBadge = (
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-200/60 font-black text-[10px] uppercase tracking-wider rounded-md">
-                      World
+                      {t('currentAffairs.categories.world', 'World')}
                     </span>
                   );
                 }
@@ -313,9 +308,9 @@ export const CurrentAffairsPage: React.FC = () => {
                     <div className="p-6 pt-0">
                       <button
                         onClick={() => setActiveArticle(article)}
-                        className="w-full py-2.5 px-4 bg-slate-50 group-hover:bg-brand-600 group-hover:text-white border border-slate-200/80 group-hover:border-brand-600 text-slate-700 text-xs font-extrabold rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-xs"
+                        className="w-full py-2.5 px-4 bg-slate-50 group-hover:bg-brand-600 group-hover:text-white border border-slate-200/80 group-hover:border-brand-600 text-slate-700 text-xs font-extrabold rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                       >
-                        Read 360° Digest <ArrowRight className="w-3.5 h-3.5" />
+                        {t('currentAffairs.readFullAnalysis', 'Read 360° Digest')} <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
 

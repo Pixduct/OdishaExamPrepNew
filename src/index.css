@@ -1,11 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Noto+Sans+Oriya:wght@400;500;600;700;800;900&family=Noto+Serif+Oriya:wght@400;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
 
 @theme {
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Fraunces", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", "Noto Sans Oriya", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Fraunces", "Noto Serif Oriya", Georgia, serif;
+  --font-odia: "Noto Sans Oriya", "Plus Jakarta Sans", sans-serif;
   
   --color-brand-50: #eff6ff;
   --color-brand-100: #dbeafe;

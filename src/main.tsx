@@ -7,9 +7,11 @@ import { AuthProvider } from './lib/AuthContext';
 import { ErrorBoundary } from './ErrorBoundary';
 import LoadingPortal from './components/LoadingPortal';
 import { applyThemeToDocument, getStoredTheme } from './lib/themeStore';
+import { LanguageProvider, applyLanguageToDocument, getStoredLanguage } from './lib/LanguageContext';
 
-// Ensure dark/light theme is synchronously applied to HTML root before React mounts
+// Ensure dark/light theme and language are synchronously applied to HTML root before React mounts
 applyThemeToDocument(getStoredTheme());
+applyLanguageToDocument(getStoredLanguage());
 
 // Global client-side error reporter for remote diagnostics
 window.onerror = function(message, source, lineno, colno, error) {
@@ -55,9 +57,11 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
       <AuthProvider>
-        <Suspense fallback={<LoadingPortal />}>
-          <App />
-        </Suspense>
+        <LanguageProvider>
+          <Suspense fallback={<LoadingPortal />}>
+            <App />
+          </Suspense>
+        </LanguageProvider>
       </AuthProvider>
     </ErrorBoundary>
   </StrictMode>,

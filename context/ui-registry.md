@@ -2324,8 +2324,114 @@ Last updated: August 20, 2026
 | **Tab 4: Formula Deck & KaTeX** | Formula Cards & Memory Deck: `dark:bg-[#0D182E] dark:border-slate-800`; Flashcard: `dark:bg-[#080F1E] dark:border-slate-700/80` |
 | **Floating Vector Watermarks** | `Sparkles`, `Cpu`, `Brain`, `Target` at `opacity-[0.08] dark:opacity-[0.04]` |
 
-**Pattern notes:**
-- **Deep Sapphire Dark Palette**: All AI Mentor workspaces, modals, quizzer cards, and toolbars MUST use `#060B16` (page shell), `#0B1528` (sidebars & headers), and `#0D182E` (cards & panels) to maintain 100% OLED dark mode contrast without metallic grey artifacts.
-- **Dual-Theme High Contrast**: Text elements MUST pair pure white (`dark:text-white`), slate-200 (`dark:text-slate-200`), and slate-400 (`dark:text-slate-400`) with subtle dark borders (`dark:border-slate-800`) to guarantee effortless readability across both light and dark themes.
+---
 
+### 58. `DynamicVectorCard` (Instant-Sync 3D Magnetic Vector Card)
+
+File: [`src/components/DynamicVectorCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/DynamicVectorCard.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Background (Container)** | `relative isolate overflow-hidden ${roundedClass} ${className} group/vector-card will-change-transform` |
+| **Background (Ambient Layer)** | `radial-gradient(${ambientRadius}px circle at ${pctX}% ${pctY}%, ${glowColor})` at `z-0` |
+| **Border** | `border-none` or passed via props (borderless vector elevation) |
+| **Border radius** | `rounded-3xl sm:rounded-[2.5rem]` (default `roundedClass` prop) |
+| **Text — primary** | Inherited in Layer C (`relative z-10 w-full h-full`) |
+| **Text — secondary** | Inherited in Layer C (`relative z-10 w-full h-full`) |
+| **Spacing** | Contained in children (`p-6`, `p-8`, etc.) |
+| **Hover / Active Tracking** | Instant 0ms latency hardware `requestAnimationFrame` tilt (`rotateX`, `rotateY`, `scale3d(1.015,1.015,1.015)`) with `transition: none` |
+| **Exit State** | Buttery-smooth spring return (`transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s ease`) |
+| **Shadow** | Preserved from props/classes (e.g., `shadow-xl shadow-slate-950/20`) |
+| **Accent / Glow** | Dynamic theme-aware `glowColor` (`rgba(37, 99, 235, 0.25)` default; dark mode `coreAlpha: 0.40`, light mode `coreAlpha: 0.22`) |
+| **Shine Effect** | Single-pass 1.2s `shine-sweep` (`linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)` at `z-20`) |
+
+**Pattern notes:**
+- **0ms Tracking Latency**: During active hover tracking, `card.style.transition` MUST remain `'none'`. Never apply CSS `transition-transform` or duration easing while the cursor is actively moving inside the card, as it causes a noticeable trailing/lagging delay.
+- **Hardware VSYNC Synchronization**: All mouse coordinates and 3D angle calculations (`rotateX`, `rotateY`, `scale3d`) and ambient spotlight updates MUST be batched via `requestAnimationFrame` to synchronize with monitor refresh rates (60Hz, 120Hz, 144Hz, 240Hz) with zero frame drops.
+- **Untransformed Bounds Caching**: Card bounding dimensions (`rectRef.current`) MUST be cached upon `onMouseEnter` to prevent 3D rotation projection feedback loops from jittering the layout calculations.
+- **Layer Stacking Hierarchy**: Always enforce Layer A Ambient Spotlight at `z-0`, Layer C Child Content at `relative z-10`, and Layer D Shine Sweep at `z-20` so cursor light glows underneath text and UI components without reducing readability.
+
+---
+
+### 59. `LanguageToggle` (Bilingual Language Switcher)
+
+File: [`src/components/LanguageToggle.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/LanguageToggle.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Pill Container (Default)** | `relative inline-flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300 cursor-pointer select-none shadow-2xs` |
+| **Pill Container (Compact)** | `flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all text-xs font-black cursor-pointer shadow-xs border select-none group shrink-0` |
+| **Active State (Odia)** | Default: `bg-brand-50/90 dark:bg-slate-900 border-brand-300/80 dark:border-brand-600/50 text-[#2563EB] dark:text-brand-300 shadow-brand-500/10`; Compact: `bg-brand-50/90 dark:bg-brand-950/60 border-brand-300/80 dark:border-brand-700/60 text-[#2563EB] dark:text-brand-300` |
+| **Inactive State (English)** | Default: `bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 shadow-slate-200/50`; Compact: `bg-white dark:bg-slate-900 border-transparent text-slate-700 dark:text-slate-200` |
+| **Globe Icon** | `w-3.5 h-3.5 transition-transform duration-300` (`text-[#2563EB] dark:text-brand-400` when Odia, `text-slate-500 dark:text-slate-400` when English, rotates 45deg on hover) |
+| **Label Typography** | `font-extrabold text-[11px] tracking-wide` |
+| **Hover State** | Default: `hover:border-brand-400/80 dark:hover:border-slate-600`; Compact: `hover:bg-brand-100/80 dark:hover:border-slate-700 hover:text-[#2563EB]` |
+
+**Pattern notes:**
+- **Dual Form Factors**: `variant="default"` renders a rounded-full pill toggle with spring layout animations for signed-out navbars and mobile drawer quick bars. `variant="compact"` embeds directly within the signed-in header utility cluster next to Streak and Theme toggles.
+- **Context-Integrated**: Powered by `useLanguage()` (`LanguageContext`), persisting preference in `localStorage` (`oep_language`) and synchronizing translated keys via `t(key, fallback)`.
+
+---
+
+### 60. `ActiveExamContextBar` (Dual-Theme Deep Sapphire Targeted Exam Bar)
+
+File: [`src/components/ActiveExamContextBar.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/ActiveExamContextBar.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Outer Container** | `relative overflow-hidden rounded-2xl bg-white/95 dark:bg-[#0B1528] border border-slate-200/80 dark:border-blue-500/30 p-3.5 sm:p-4 shadow-sm dark:shadow-slate-950/80 transition-all` |
+| **Glow Gradient Overlay** | `bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-transparent dark:from-blue-600/15 dark:via-indigo-600/10 dark:to-transparent` |
+| **Indicator Dot** | `w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 animate-ping` + core dot `bg-blue-600 dark:bg-blue-400` |
+| **Title / Label** | `text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400` |
+| **Target Exam Heading** | `text-sm sm:text-base font-serif font-extrabold text-slate-900 dark:text-white` |
+| **Switch Exam CTA Button** | `px-3.5 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-[#2563EB] dark:text-blue-300 text-[11px] font-black uppercase tracking-wider hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 transition-all cursor-pointer active:scale-95 shadow-sm` |
+| **Quick Filter Chips** | `text-[10px] font-bold px-2.5 py-1 rounded-lg border border-slate-200/70 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:border-blue-400` |
+
+**Pattern notes:**
+- **Zero Metallic Grey**: Avoid dull metallic neutral greys in dark mode. Use deep sapphire midnight (`dark:bg-[#0B1528]`) with subtle blue luminescent perimeter strokes (`dark:border-blue-500/30`).
+- **Global Synchronization**: Clicking "Switch Exam" opens `ExamContextSelectorModal`, synchronizing the active target exam across `localStorage`, `AuthContext`, Study Plan Hub, and Analytics.
+
+---
+
+### 61. `ExamContextSelectorModal` (Dual-Theme Exam Picker Modal)
+
+File: [`src/components/ExamContextSelectorModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/ExamContextSelectorModal.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Modal Backdrop** | `fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6` |
+| **Modal Shell Card** | `w-full max-w-xl bg-white dark:bg-[#0B1528] border border-slate-200 dark:border-blue-500/30 rounded-[2rem] shadow-2xl dark:shadow-slate-950/90 overflow-hidden flex flex-col max-h-[85vh]` |
+| **Modal Header** | `px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between` |
+| **Title & Subtitle** | Heading: `font-serif font-black text-lg text-slate-900 dark:text-white`; Sub: `text-xs text-slate-500 dark:text-slate-400 font-semibold` |
+| **Search Input** | `bg-slate-50 dark:bg-[#060B16] border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-blue-500` |
+| **Category Switcher Tabs** | Inactive: `text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white`; Active: `bg-[#2563EB] text-white rounded-lg shadow-sm` |
+| **Exam Selection Card** | Inactive: `bg-slate-50/70 dark:bg-[#060B16]/80 border-slate-200/60 dark:border-slate-800 hover:border-blue-400/50 dark:hover:border-blue-500/50 text-slate-800 dark:text-slate-200`; Active: `bg-blue-50 dark:bg-blue-950/60 border-blue-500 text-blue-950 dark:text-blue-200 ring-1 ring-blue-500/30` |
+| **Confirm Action Button** | `w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-500/20 active:scale-98` |
+
+**Pattern notes:**
+---
+
+### 62. `ExamDetailCategoryCards` (Dedicated Exam Page Dual-Theme Step 1, 2, 3 Cards & Hero Banner)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Shell (Desktop)** | `p-6 sm:p-7 lg:p-8 rounded-[2.2rem] transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative w-full h-full card-3d-deep group` + `bg-gradient-to-br from-white via-...-50/25 to-...-50/30 dark:from-[#0B1528] dark:via-[#081020] dark:to-[#060B16] border border-...-100/90 dark:border-slate-800/90 shadow-[0_8px_30px_rgba(0,0,0,0.035)] hover:shadow-2xl hover:border-...-300/80 dark:hover:border-blue-500/40` |
+| **Card Shell (Mobile)** | `p-4 bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center justify-between gap-4 cursor-pointer group relative overflow-hidden transition-all duration-300 shadow-sm active:scale-[0.98]` |
+| **Category Title** | `font-black text-xl sm:text-2xl text-slate-900 dark:text-white tracking-tight leading-tight transition-colors uppercase` + `group-hover:text-... dark:group-hover:text-blue-400` |
+| **Category Description** | `text-slate-600 dark:text-slate-400 font-medium text-xs sm:text-sm leading-relaxed mt-2` |
+| **Top Badge** | `px-3 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded-full border backdrop-blur-md shadow-xs` + `bg-...-50 dark:bg-...-950/70 text-...-800 dark:text-...-300 border-...-200/80 dark:border-...-800/70` |
+| **Tag & Count Chips** | `text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg backdrop-blur-xs` + `bg-slate-100/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700` |
+| **Action CTA Button** | `w-full h-[48px] sm:h-[54px] rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 font-black text-sm sm:text-base text-white transition-all relative z-10 pointer-events-none overflow-hidden cursor-pointer shadow-lg` + gradient glow |
+| **Hero Resume Banner** | `bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-850 dark:from-[#0B1528] dark:via-[#081020] dark:to-[#060B16] text-white border border-blue-500/25 dark:border-blue-500/30 rounded-2xl sm:rounded-[2.2rem] p-4 sm:p-8 md:p-10 shadow-xl shadow-blue-900/10 dark:shadow-slate-950/40` |
+
+**Pattern notes:**
+- **Zero Dark-Only Hardcoded Artifacts**: Cards in Step 1 (Practice Tests), Step 2 (Mock Tests), and Step 3 (Reference Library) automatically adapt to light mode with luminous tinted surfaces and dark mode with deep sapphire midnight (`dark:from-[#0B1528] dark:to-[#060B16]`).
+- **High-Contrast Text Hierarchy**: Titles and subtitles switch seamlessly between dark slate in light mode (`text-slate-900`, `text-slate-600`) and pure white / slate-400 in dark mode.
 

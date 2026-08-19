@@ -1,18 +1,20 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { Language, LanguageContextType } from './i18n/types';
 import { translations } from './i18n/translations';
+import { translatePhrase } from './i18n/phraseDictionary';
 
 const LANGUAGE_STORAGE_KEY = 'oep-language-preference';
 
 export const getStoredLanguage = (): Language => {
-  if (typeof window === 'undefined') return 'en';
+  if (typeof window === 'undefined') return 'or';
   try {
     const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY);
     if (saved === 'en' || saved === 'or') return saved;
   } catch {
     // fallback
   }
-  return 'en';
+  // Default to Odia for all first-time visitors / organic Google search landing
+  return 'or';
 };
 
 export const setStoredLanguage = (lang: Language): void => {
@@ -28,11 +30,11 @@ export const setStoredLanguage = (lang: Language): void => {
 
 export const applyLanguageToDocument = (lang: Language): void => {
   if (typeof document === 'undefined') return;
-  document.documentElement.lang = lang === 'or' ? 'or' : 'en';
-  if (lang === 'or') {
-    document.documentElement.setAttribute('data-language', 'or');
-  } else {
+  document.documentElement.lang = lang === 'en' ? 'en' : 'or';
+  if (lang === 'en') {
     document.documentElement.setAttribute('data-language', 'en');
+  } else {
+    document.documentElement.setAttribute('data-language', 'or');
   }
 };
 
@@ -73,13 +75,17 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [language]);
 
   /**
-   * Helper function to translate keys using dot notation.
-   * Examples:
-   *  t('common.nav.home') -> "Home" (en) / "ମୂଳପୃଷ୍ଠା" (or)
-   *  t('nav.home') -> automatically searches common.nav.home, home.nav.home, etc.
-   *  t('common.nav.daysStreak', undefined, { count: 5 }) -> "5 Days Streak" / "5 ଦିନ ଷ୍ଟ୍ରିକ୍"
+   * Helper function to translate keys or static phrases.
+   * Features:
+   *  1. Direct dot-notation lookup (e.g. 'common.nav.home')
+   *  2. Automatic section search ('nav.home')
+   *  3. Universal phrase dictionary lookup for raw English text ('Submit Test', 'Continue Practice')
+   *  4. Dynamic token replacement ({count}, {time}) with Odia numeral formatting
+   *  5. Safe fallback to original text (guarantees zero UI breakage)
    */
   const t = useCallback((key: string, fallback?: string, params?: Record<string, string | number>): string => {
+    if (!key) return fallback || '';
+
     const currentDict = translations[language] || translations.en;
     const englishDict = translations.en;
 
@@ -97,21 +103,23 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return current;
     };
 
-    // Try direct path first (e.g. 'common.nav.home')
-    let result = resolveKey(currentDict, key);
+    let result: any = undefined;
 
-    // If not found and doesn't have a section prefix, try common.*, home.*, exams.*, test.*, ai.*, analytics.*, ca.*
-    if (result === undefined && !key.includes('.')) {
-      const prefixes = ['common', 'home', 'exams', 'test', 'ai', 'analytics', 'ca'];
-      for (const prefix of prefixes) {
-        const testResult = resolveKey(currentDict, `${prefix}.${key}`);
-        if (testResult !== undefined) {
-          result = testResult;
-          break;
-        }
+    // 1. If in Odia mode, check universal phrase dictionary first for direct raw strings
+    if (language === 'or') {
+      const directPhrase = translatePhrase(key);
+      if (directPhrase !== undefined) {
+        result = directPhrase;
       }
-    } else if (result === undefined) {
-      // Try searching inside sections if top-level section wasn't specified (e.g. 'nav.home' -> 'common.nav.home')
+    }
+
+    // 2. Try direct dot path (e.g. 'common.nav.home')
+    if (result === undefined) {
+      result = resolveKey(currentDict, key);
+    }
+
+    // 3. If not found and doesn't have a section prefix, try common.*, home.*, exams.*, test.*, ai.*, analytics.*, ca.*
+    if (result === undefined) {
       const prefixes = ['common', 'home', 'exams', 'test', 'ai', 'analytics', 'ca'];
       for (const prefix of prefixes) {
         const testResult = resolveKey(currentDict, `${prefix}.${key}`);
@@ -122,7 +130,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
     }
 
-    // Fallback to English dictionary if not found in current language
+    // 4. Fallback to English dictionary if not found in current language
     if (result === undefined) {
       result = resolveKey(englishDict, key);
       if (result === undefined) {
@@ -137,15 +145,26 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
     }
 
-    // Final fallback
-    if (result === undefined || typeof result !== 'string') {
-      result = fallback || key;
+    // 5. Final fallback to phrase dictionary in Odia mode if fallback prop was passed as English
+    if (result === undefined && language === 'or' && fallback) {
+      const fallbackPhrase = translatePhrase(fallback);
+      if (fallbackPhrase !== undefined) {
+        result = fallbackPhrase;
+      }
     }
 
-    // Parameter interpolation (e.g. {count}, {exam}, {price})
+    // 6. Final fallback
+    if (result === undefined || typeof result !== 'string') {
+      result = fallback !== undefined ? fallback : key;
+    }
+
+    // 7. Parameter interpolation (e.g. {count}, {exam}, {time})
     if (params && typeof result === 'string') {
       Object.entries(params).forEach(([paramKey, paramVal]) => {
-        result = result.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), String(paramVal));
+        const valToInsert = language === 'or' && typeof paramVal === 'number'
+          ? toOdiaDigits(paramVal)
+          : String(paramVal);
+        result = result.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), valToInsert);
       });
     }
 
@@ -181,3 +200,9 @@ export const useLanguage = (): LanguageContextType => {
   }
   return context;
 };
+
+export const toOdiaDigits = (num: number | string): string => {
+  const odiaDigits = ['୦', '୧', '୨', '୩', '୪', '୫', '୬', '୭', '୮', '୯'];
+  return String(num).replace(/[0-9]/g, (d) => odiaDigits[parseInt(d, 10)]);
+};
+

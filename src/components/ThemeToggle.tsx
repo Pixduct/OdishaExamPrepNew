@@ -2,9 +2,11 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Sun, Moon } from 'lucide-react';
 import { useTheme } from '../lib/themeStore';
+import { useLanguage } from '../lib/LanguageContext';
 
 export const ThemeToggle: React.FC<{ className?: string }> = ({ className = '' }) => {
   const [theme, setTheme] = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
 
   const toggle = () => {
@@ -31,12 +33,12 @@ export const ThemeToggle: React.FC<{ className?: string }> = ({ className = '' }
         {isDark ? (
           <>
             <Moon className="w-4 h-4 text-amber-300 fill-amber-400/20" />
-            <span className="text-[10px] text-amber-200 font-mono font-black hidden sm:inline">Night Mode</span>
+            <span className="text-[10px] text-amber-200 font-mono font-black hidden sm:inline">{t('common.nav.nightMode', 'Night Mode')}</span>
           </>
         ) : (
           <>
             <Sun className="w-4 h-4 text-amber-500 fill-amber-400/30" />
-            <span className="text-[10px] text-slate-700 font-mono font-black hidden sm:inline">Day Mode</span>
+            <span className="text-[10px] text-slate-700 font-mono font-black hidden sm:inline">{t('common.nav.dayMode', 'Day Mode')}</span>
           </>
         )}
       </motion.div>

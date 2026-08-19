@@ -7,11 +7,9 @@ import {
   DailyStudyPlan,
   StudyPlanTask
 } from '../lib/studyPlannerEngine';
-
-
 import { useActiveExamContext } from '../lib/activeExamStore';
-
 import { DynamicVectorCard } from './DynamicVectorCard';
+import { useLanguage, toOdiaDigits } from '../lib/LanguageContext';
 
 interface AIStudyPlanCardProps {
   userId?: string;
@@ -23,14 +21,15 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
   const [plan, setPlan] = useState<DailyStudyPlan>(() => getTodayStudyPlan(userId, activeContext.activeExamId, activeContext.activeExamName));
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [scanMessage, setScanMessage] = useState<string | null>(null);
+  const { t, isOdia } = useLanguage();
 
   const refreshPlan = () => {
     setIsRefreshing(true);
-    setScanMessage('🔍 Scanning latest test attempts & recalculating accuracy gaps...');
+    setScanMessage(isOdia ? '🔍 ନୂତନ ଟେଷ୍ଟ ଫଳାଫଳ ଯାଞ୍ଚ ହେଉଛି ଓ ସଠିକତା ଗଣନା କରାଯାଉଛି...' : '🔍 Scanning latest test attempts & recalculating accuracy gaps...');
     setTimeout(() => {
       setPlan(getTodayStudyPlan(userId, activeContext.activeExamId, activeContext.activeExamName));
       setIsRefreshing(false);
-      setScanMessage('✅ AI Study Plan updated from your latest test attempts!');
+      setScanMessage(isOdia ? '✅ ଆପଣଙ୍କ ନୂତନ ଅଭ୍ୟାସ ଆଧାରରେ AI ଅଧ୍ୟୟନ ଯୋଜନା ଅପଡେଟ୍ ହୋଇଛି!' : '✅ AI Study Plan updated from your latest test attempts!');
       setTimeout(() => setScanMessage(null), 3000);
     }, 450);
   };
@@ -67,10 +66,35 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
     }
   };
 
+  // Helper to localize task priority badges
+  const getLocalizedPriorityLabel = (label: string) => {
+    if (!isOdia) return label;
+    if (label.includes('PRIORITY 1')) return 'ପ୍ରାଥମିକତା ୧ • ସର୍ବାଧିକ ଗୁରୁତ୍ୱ';
+    if (label.includes('PRIORITY 2')) return 'ପ୍ରାଥମିକତା ୨ • ମୁଖ୍ୟ ଅଭ୍ୟାସ';
+    if (label.includes('REVISION')) return 'ପୁନରାବୃତ୍ତି';
+    if (label.includes('DAILY TARGET')) return 'ଦୈନନ୍ଦିନ ଲକ୍ଷ୍ୟ';
+    return label;
+  };
+
+  // Helper to localize task title
+  const getLocalizedTaskTitle = (task: StudyPlanTask) => {
+    if (!isOdia) return task.title;
+    if (task.taskType === 'review') {
+      return `${task.subjectName} ରେ ${toOdiaDigits(task.questionCount)} ଟି ଭୁଲ୍ ଉତ୍ତର ଓ ସମାଧାନର ସମୀକ୍ଷା କରନ୍ତୁ`;
+    }
+    if (task.taskType === 'streak_goal') {
+      return `ଷ୍ଟ୍ରିକ୍ ବଜାୟ ରଖିବାକୁ ଆଜି ${toOdiaDigits(task.questionCount)} ଟି ପ୍ରଶ୍ନ ସମାଧାନ କରନ୍ତୁ`;
+    }
+    return `${task.subjectName} ରେ ${toOdiaDigits(task.questionCount)} ଟି ଅଭ୍ୟାସ ପ୍ରଶ୍ନ ସମାଧାନ କରନ୍ତୁ`;
+  };
+
+  const targetExamDisplayName = plan.targetExamName === 'All Exams Combined' && isOdia
+    ? 'ସମସ୍ତ ପରୀକ୍ଷା ସମ୍ମିଳିତ'
+    : plan.targetExamName;
+
   if (plan.hasContent === false || plan.tasks.length === 0) {
     return (
       <div className="bg-white dark:bg-slate-900/90 p-6 sm:p-10 rounded-2xl sm:rounded-[2.25rem] shadow-xs border border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-white mb-6 sm:mb-8 relative overflow-hidden">
-
         {/* Subtle background pattern */}
         <div className="absolute inset-0 opacity-[0.025] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #6366f1 1px, transparent 0)', backgroundSize: '28px 28px' }} />
 
@@ -83,32 +107,17 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
           {/* Badge */}
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold text-amber-700 bg-amber-50 border border-amber-200/70">
             <Flame className="w-3.5 h-3.5 text-amber-500" />
-            Content Being Prepared
+            {t('Content Being Prepared', 'Content Being Prepared')}
           </div>
 
           {/* Heading */}
           <div className="max-w-md mx-auto space-y-2">
             <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-              No Practice Content Yet for {activeContext.activeExamName}
+              {isOdia ? `${targetExamDisplayName} ପାଇଁ କୌଣସି ଅଭ୍ୟାସ ସାମଗ୍ରୀ ଉପଲବ୍ଧ ନାହିଁ` : `No Practice Content Yet for ${activeContext.activeExamName}`}
             </h3>
             <p className="text-slate-500 font-medium text-xs sm:text-sm leading-relaxed">
-              We haven't added <strong className="text-slate-700">question banks</strong> or <strong className="text-slate-700">mock tests</strong> for this exam yet.
-              Our team is actively building syllabus-aligned content — check back soon!
+              {isOdia ? 'ଆମ ଟିମ୍ ଏହି ପରୀକ୍ଷା ପାଇଁ ପାଠ୍ୟକ୍ରମ ଭିତ୍ତିକ ସାମଗ୍ରୀ ପ୍ରସ୍ତୁତ କରୁଛି — ଖୁବ୍ ଶୀଘ୍ର ଉପଲବ୍ଧ ହେବ!' : 'Our team is actively building syllabus-aligned content — check back soon!'}
             </p>
-          </div>
-
-          {/* What's missing info cards */}
-          <div className="grid grid-cols-2 gap-3 max-w-xs mx-auto text-left">
-            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-              <div className="text-slate-400 text-lg">📚</div>
-              <p className="text-xs font-bold text-slate-700">Question Banks</p>
-              <p className="text-[10px] text-slate-400 font-medium">Not available yet</p>
-            </div>
-            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-              <div className="text-slate-400 text-lg">🧪</div>
-              <p className="text-xs font-bold text-slate-700">Mock Tests</p>
-              <p className="text-[10px] text-slate-400 font-medium">Not available yet</p>
-            </div>
           </div>
 
           {/* Action Buttons */}
@@ -119,7 +128,7 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 hover:bg-brand-600 text-white font-extrabold text-xs sm:text-sm transition-all duration-200 shadow-md active:scale-95 cursor-pointer border-none"
             >
               <Target className="w-4 h-4" />
-              <span>Switch Target Exam</span>
+              <span>{t('Switch Target Exam', 'Switch Target Exam')}</span>
             </button>
             <button
               type="button"
@@ -127,14 +136,9 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
               className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs sm:text-sm transition-all duration-200 active:scale-95 cursor-pointer border border-slate-200"
             >
               <BookOpen className="w-4 h-4" />
-              <span>Browse Available Exams</span>
+              <span>{t('Browse Available Exams', 'Browse Available Exams')}</span>
             </button>
           </div>
-
-          {/* Tip */}
-          <p className="text-[10px] text-slate-400 font-medium">
-            💡 <strong className="text-slate-500">OSSSC Nursing Officer</strong> has 75+ practice question banks ready to use right now
-          </p>
         </div>
       </div>
     );
@@ -158,23 +162,23 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight leading-tight uppercase">
-                Today's AI Study Plan
+                {t("Today's AI Study Plan", "Today's AI Study Plan")}
               </h3>
               {plan.isPersonalizedFromAttempts ? (
                 <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 dark:bg-emerald-400/20 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-400/40 inline-flex items-center gap-1 backdrop-blur-md">
                   <ShieldCheck className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                  <span>Real Data Personalized</span>
+                  <span>{t('Real Data Personalized', 'Real Data Personalized')}</span>
                 </span>
               ) : (
                 <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-brand-50 text-brand-700 dark:bg-indigo-400/20 dark:text-indigo-200 border border-brand-200 dark:border-indigo-400/40 inline-flex items-center gap-1 backdrop-blur-md">
                   <Target className="w-3 h-3 text-brand-600 dark:text-indigo-300" />
-                  <span>Syllabus Daily Rotation</span>
+                  <span>{t('Syllabus Daily Rotation', 'Syllabus Daily Rotation')}</span>
                 </span>
               )}
             </div>
             <p className="text-slate-500 dark:text-white/80 text-xs font-medium pt-0.5">
-              Target: <strong className="text-slate-900 dark:text-white font-bold">{plan.targetExamName}</strong>
-              <span className="hidden sm:inline"> • Personalized schedule for maximum score gain</span>
+              {t('Target', 'Target')}: <strong className="text-slate-900 dark:text-white font-bold">{targetExamDisplayName}</strong>
+              <span className="hidden sm:inline"> • {t('Personalized schedule for maximum score gain', 'Personalized schedule for maximum score gain')}</span>
             </p>
           </div>
         </div>
@@ -187,10 +191,10 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
             onClick={refreshPlan}
             disabled={isRefreshing}
             className="px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-black text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800/90 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-all cursor-pointer inline-flex items-center gap-1 sm:gap-1.5 shadow-2xs shrink-0"
-            title="Re-analyze test results & recalculate AI study plan"
+            title={isOdia ? 'ଟେଷ୍ଟ ଫଳାଫଳ ପୁନଃ-ବିଶ୍ଳେଷଣ କରନ୍ତୁ' : 'Re-analyze test results & recalculate AI study plan'}
           >
             <RefreshCw className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${isRefreshing ? 'animate-spin text-brand-600 dark:text-brand-400' : 'text-slate-500 dark:text-slate-300'}`} />
-            <span>AI Re-Analyze</span>
+            <span>{t('AI Re-Analyze', 'AI Re-Analyze')}</span>
           </button>
 
           {/* Pill 2: Dynamic Remaining Minutes Counter */}
@@ -198,15 +202,15 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
             <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-600 dark:text-indigo-300" />
             <span>
               {plan.completedCount === plan.totalCount
-                ? '0 Mins (Done 🎉)'
-                : `${plan.remainingMinutes} Mins Left`}
+                ? (isOdia ? '୦ ମିନିଟ୍ (ସମ୍ପୂର୍ଣ୍ଣ 🎉)' : '0 Mins (Done 🎉)')
+                : (isOdia ? `${toOdiaDigits(plan.remainingMinutes)} ମିନିଟ୍ ବାକି ଅଛି` : `${plan.remainingMinutes} Mins Left`)}
             </span>
           </div>
 
           {/* Pill 3: Dynamic Score Gain Potential */}
           <div className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-black text-brand-700 dark:text-indigo-950 bg-brand-50 dark:bg-indigo-300 border border-brand-200 dark:border-indigo-400 font-mono shadow-2xs shrink-0">
             <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-600 dark:text-indigo-950 fill-current" />
-            <span>{plan.expectedScoreBoost}</span>
+            <span>{isOdia ? `+${toOdiaDigits(8)}% ସ୍କୋର ବୃଦ୍ଧି` : plan.expectedScoreBoost}</span>
           </div>
         </div>
       </div>
@@ -230,11 +234,19 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
         <div className="flex items-center justify-between text-xs font-bold text-slate-900 dark:text-slate-200">
           <span className="flex items-center gap-1.5">
             <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-600 dark:text-indigo-400" />
-            <span>Daily Task Progress</span>
+            <span>{t('Daily Task Progress', 'Daily Task Progress')}</span>
           </span>
           <span className="font-mono text-brand-700 dark:text-indigo-300 font-black text-[11px] sm:text-xs">
-            <span className="hidden sm:inline">{plan.progressPercentage}% Completed ({plan.completedCount} of {plan.totalCount} Finished)</span>
-            <span className="sm:hidden">{plan.progressPercentage}% ({plan.completedCount}/{plan.totalCount} Done)</span>
+            <span className="hidden sm:inline">
+              {isOdia
+                ? `${toOdiaDigits(plan.progressPercentage)}% ସମ୍ପୂର୍ଣ୍ଣ (${toOdiaDigits(plan.totalCount)} ରୁ ${toOdiaDigits(plan.completedCount)} ସମାପ୍ତ)`
+                : `${plan.progressPercentage}% Completed (${plan.completedCount} of ${plan.totalCount} Finished)`}
+            </span>
+            <span className="sm:hidden">
+              {isOdia
+                ? `${toOdiaDigits(plan.progressPercentage)}% (${toOdiaDigits(plan.completedCount)}/${toOdiaDigits(plan.totalCount)})`
+                : `${plan.progressPercentage}% (${plan.completedCount}/${plan.totalCount} Done)`}
+            </span>
           </span>
         </div>
         <div className="w-full h-2 bg-slate-200/80 dark:bg-slate-950 rounded-full overflow-hidden p-0.5 border border-slate-200 dark:border-slate-800">
@@ -267,7 +279,7 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
                     ? 'bg-emerald-500 border-emerald-600 text-white shadow-2xs'
                     : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 hover:border-brand-500 text-transparent'
                 }`}
-                title={task.completed ? 'Mark as incomplete' : 'Mark as completed'}
+                title={task.completed ? (isOdia ? 'ଅସମ୍ପୂର୍ଣ୍ଣ ଚିହ୍ନିତ କରନ୍ତୁ' : 'Mark as incomplete') : (isOdia ? 'ସମ୍ପୂର୍ଣ୍ଣ ଚିହ୍ନିତ କରନ୍ତୁ' : 'Mark as completed')}
               >
                 <CheckCircle2 className="w-3.5 h-3.5 fill-current stroke-[2.5]" />
               </button>
@@ -276,20 +288,20 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
                 {/* Priority Badge & Title */}
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider border shrink-0 ${task.priorityBadgeBg}`}>
-                    {task.priorityLabel}
+                    {getLocalizedPriorityLabel(task.priorityLabel)}
                   </span>
                   <span className={`text-xs sm:text-sm font-black block sm:truncate leading-snug ${task.completed ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-950 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400'}`}>
-                    {task.title}
+                    {getLocalizedTaskTitle(task)}
                   </span>
                 </div>
 
                 {/* Metadata Details */}
                 <p className="text-[10px] sm:text-xs text-slate-700 dark:text-slate-300 font-semibold leading-relaxed">
                   <span className="sm:hidden">
-                    <strong className="text-slate-950 dark:text-white font-black">{task.estimatedMinutes} Mins</strong> • <strong className="text-slate-950 dark:text-white font-black">{task.questionCount} Qs</strong> • <strong className="text-slate-950 dark:text-white font-black">{task.subjectName}</strong>
+                    <strong className="text-slate-950 dark:text-white font-black">{isOdia ? toOdiaDigits(task.estimatedMinutes) : task.estimatedMinutes} {isOdia ? 'ମିନିଟ୍' : 'Mins'}</strong> • <strong className="text-slate-950 dark:text-white font-black">{isOdia ? toOdiaDigits(task.questionCount) : task.questionCount} {isOdia ? 'ପ୍ରଶ୍ନ' : 'Qs'}</strong> • <strong className="text-slate-950 dark:text-white font-black">{task.subjectName}</strong>
                   </span>
                   <span className="hidden sm:inline">
-                    Est. Time: <strong className="text-slate-950 dark:text-white font-black">{task.estimatedMinutes} Mins</strong> • <strong className="text-slate-950 dark:text-white font-black">{task.questionCount} Questions</strong> • Subject: <strong className="text-slate-950 dark:text-white font-black">{task.subjectName}</strong>
+                    {isOdia ? 'ଆନୁମାନିକ ସମୟ:' : 'Est. Time:'} <strong className="text-slate-950 dark:text-white font-black">{isOdia ? toOdiaDigits(task.estimatedMinutes) : task.estimatedMinutes} {isOdia ? 'ମିନିଟ୍' : 'Mins'}</strong> • <strong className="text-slate-950 dark:text-white font-black">{isOdia ? toOdiaDigits(task.questionCount) : task.questionCount} {isOdia ? 'ପ୍ରଶ୍ନ' : 'Questions'}</strong> • {isOdia ? 'ବିଷୟ:' : 'Subject:'} <strong className="text-slate-950 dark:text-white font-black">{task.subjectName}</strong>
                   </span>
                 </p>
 
@@ -318,7 +330,7 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
                     : 'bg-brand-50 hover:bg-brand-100 text-brand-600 border border-brand-200 group-hover:bg-brand-600 group-hover:text-white'
                 }`}
               >
-                <span>{task.completed ? 'Review' : 'Start →'}</span>
+                <span>{task.completed ? (isOdia ? 'ସମୀକ୍ଷା' : 'Review') : (isOdia ? 'ଆରମ୍ଭ →' : 'Start →')}</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
             </div>
@@ -337,7 +349,7 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
                     : 'bg-brand-50 hover:bg-brand-100 text-brand-600 border border-brand-200 group-hover:bg-brand-600 group-hover:text-white'
                 }`}
               >
-                <span>{task.completed ? 'Review Task' : 'Start Task →'}</span>
+                <span>{task.completed ? (isOdia ? 'କାର୍ଯ୍ୟ ସମୀକ୍ଷା' : 'Review Task') : (isOdia ? 'କାର୍ଯ୍ୟ ଆରମ୍ଭ କରନ୍ତୁ →' : 'Start Task →')}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -348,3 +360,4 @@ export const AIStudyPlanCard: React.FC<AIStudyPlanCardProps> = ({ userId, onLaun
     </DynamicVectorCard>
   );
 };
+

@@ -67,7 +67,9 @@ import {
   Wrench,
   HardHat,
   Cpu,
-  Sprout
+  Sprout,
+  Youtube,
+  Send
 } from 'lucide-react';
 import { Toaster, toast, useToasterStore } from 'react-hot-toast';
 import { useAuth } from './lib/AuthContext';
@@ -89,7 +91,7 @@ import { getInstantQuestionsForTopic } from './lib/instantQuestionCompiler';
 import { examService } from './lib/examService';
 import { ThemeToggle } from './components/ThemeToggle';
 import { LanguageToggle } from './components/LanguageToggle';
-import { useLanguage } from './lib/LanguageContext';
+import { useLanguage, toOdiaDigits } from './lib/LanguageContext';
 import { initLenis, destroyLenis } from './lib/lenisScroll';
 import { QuestionBankReaderModal } from './components/QuestionBankReaderModal';
 import { exportQuestionBankToPdf } from './lib/pdfExportEngine';
@@ -104,50 +106,70 @@ const getPracticeModeVectorTheme = (modeId: string) => {
   switch (modeId) {
     case 'topic-wise':
       return {
-        gradient: 'bg-gradient-to-br from-indigo-950 via-slate-900 to-blue-950 text-indigo-50',
-        logoBg: 'bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-800 text-white shadow-lg shadow-blue-500/30 border border-blue-400/40',
-        badgeBg: 'bg-blue-400/20 text-blue-200 border-blue-400/40',
-        btnGradient: 'bg-gradient-to-r from-blue-600 via-indigo-600 to-brand-600 hover:from-blue-500 hover:to-indigo-500 shadow-blue-500/25',
+        cardBg: 'bg-gradient-to-br from-white via-indigo-50/25 to-blue-50/30 dark:from-[#0B1528] dark:via-[#081020] dark:to-[#060B16] border border-indigo-100/90 dark:border-slate-800/90 shadow-[0_8px_30px_rgba(0,0,0,0.035)] hover:shadow-2xl hover:border-indigo-300/80 dark:hover:border-blue-500/40',
+        logoBg: 'bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-800 text-white shadow-lg shadow-blue-500/25 border border-blue-400/40',
+        badgeBg: 'bg-blue-50 dark:bg-blue-950/70 text-[#2563EB] dark:text-blue-300 border border-blue-200/80 dark:border-blue-800/70',
+        tagBg: 'bg-indigo-50/80 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60',
+        countBg: 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700',
+        titleHover: 'group-hover:text-indigo-600 dark:group-hover:text-blue-400',
+        watermarkColor: 'text-indigo-900/[0.04] dark:text-white/[0.07]',
+        btnGradient: 'bg-gradient-to-r from-blue-600 via-indigo-600 to-brand-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md shadow-blue-500/20',
         badgeText: 'CHAPTER-WISE DRILLS',
         MainIcon: BookOpen,
         WatermarkIcon: Layers,
       };
     case 'exam-focused':
       return {
-        gradient: 'bg-gradient-to-br from-amber-950 via-slate-900 to-orange-950 text-amber-50',
-        logoBg: 'bg-gradient-to-br from-amber-500 via-orange-500 to-red-600 text-white shadow-lg shadow-amber-500/30 border border-amber-400/40',
-        badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
-        btnGradient: 'bg-gradient-to-r from-amber-500 via-orange-600 to-red-600 hover:from-amber-400 hover:to-orange-500 shadow-amber-500/25',
+        cardBg: 'bg-gradient-to-br from-white via-amber-50/25 to-orange-50/30 dark:from-[#0B1528] dark:via-[#081020] dark:to-[#060B16] border border-amber-100/90 dark:border-slate-800/90 shadow-[0_8px_30px_rgba(0,0,0,0.035)] hover:shadow-2xl hover:border-amber-300/80 dark:hover:border-amber-500/40',
+        logoBg: 'bg-gradient-to-br from-amber-500 via-orange-500 to-red-600 text-white shadow-lg shadow-amber-500/25 border border-amber-400/40',
+        badgeBg: 'bg-amber-50 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/70',
+        tagBg: 'bg-amber-50/80 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60',
+        countBg: 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700',
+        titleHover: 'group-hover:text-amber-600 dark:group-hover:text-amber-400',
+        watermarkColor: 'text-amber-900/[0.04] dark:text-white/[0.07]',
+        btnGradient: 'bg-gradient-to-r from-amber-500 via-orange-600 to-red-600 hover:from-amber-400 hover:to-orange-500 text-white shadow-md shadow-amber-500/20',
         badgeText: 'HIGH YIELD TOPIC BANKS',
         MainIcon: Flame,
         WatermarkIcon: Zap,
       };
     case 'revision-sets':
       return {
-        gradient: 'bg-gradient-to-br from-emerald-950 via-slate-900 to-teal-950 text-emerald-50',
-        logoBg: 'bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 text-white shadow-lg shadow-emerald-500/30 border border-emerald-400/40',
-        badgeBg: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
-        btnGradient: 'bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 hover:from-emerald-400 hover:to-teal-500 shadow-emerald-500/25',
+        cardBg: 'bg-gradient-to-br from-white via-emerald-50/25 to-teal-50/30 dark:from-[#0B1528] dark:via-[#081020] dark:to-[#060B16] border border-emerald-100/90 dark:border-slate-800/90 shadow-[0_8px_30px_rgba(0,0,0,0.035)] hover:shadow-2xl hover:border-emerald-300/80 dark:hover:border-emerald-500/40',
+        logoBg: 'bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 text-white shadow-lg shadow-emerald-500/25 border border-emerald-400/40',
+        badgeBg: 'bg-emerald-50 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/70',
+        tagBg: 'bg-emerald-50/80 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60',
+        countBg: 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700',
+        titleHover: 'group-hover:text-emerald-600 dark:group-hover:text-emerald-400',
+        watermarkColor: 'text-emerald-900/[0.04] dark:text-white/[0.07]',
+        btnGradient: 'bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-md shadow-emerald-500/20',
         badgeText: 'DAILY SPEED QUIZZES',
         MainIcon: Timer,
         WatermarkIcon: Activity,
       };
     case 'pyq-collections':
       return {
-        gradient: 'bg-gradient-to-br from-purple-950 via-slate-900 to-pink-950 text-purple-50',
-        logoBg: 'bg-gradient-to-br from-purple-600 via-pink-600 to-rose-700 text-white shadow-lg shadow-purple-500/30 border border-purple-400/40',
-        badgeBg: 'bg-purple-400/20 text-purple-200 border-purple-400/40',
-        btnGradient: 'bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:from-purple-500 hover:to-pink-500 shadow-purple-500/25',
+        cardBg: 'bg-gradient-to-br from-white via-purple-50/25 to-pink-50/30 dark:from-[#0B1528] dark:via-[#081020] dark:to-[#060B16] border border-purple-100/90 dark:border-slate-800/90 shadow-[0_8px_30px_rgba(0,0,0,0.035)] hover:shadow-2xl hover:border-purple-300/80 dark:hover:border-purple-500/40',
+        logoBg: 'bg-gradient-to-br from-purple-600 via-pink-600 to-rose-700 text-white shadow-lg shadow-purple-500/25 border border-purple-400/40',
+        badgeBg: 'bg-purple-50 dark:bg-purple-950/70 text-purple-800 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/70',
+        tagBg: 'bg-purple-50/80 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60',
+        countBg: 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700',
+        titleHover: 'group-hover:text-purple-600 dark:group-hover:text-purple-400',
+        watermarkColor: 'text-purple-900/[0.04] dark:text-white/[0.07]',
+        btnGradient: 'bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-md shadow-purple-500/20',
         badgeText: '10-YR SOLVED PYQS',
         MainIcon: Award,
         WatermarkIcon: History,
       };
     default:
       return {
-        gradient: 'bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-indigo-50',
-        logoBg: 'bg-gradient-to-br from-brand-600 to-indigo-700 text-white shadow-lg shadow-brand-500/30 border border-brand-400/40',
-        badgeBg: 'bg-indigo-400/20 text-indigo-200 border-indigo-400/40',
-        btnGradient: 'bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 shadow-brand-500/25',
+        cardBg: 'bg-gradient-to-br from-white via-indigo-50/25 to-blue-50/30 dark:from-[#0B1528] dark:via-[#081020] dark:to-[#060B16] border border-indigo-100/90 dark:border-slate-800/90 shadow-[0_8px_30px_rgba(0,0,0,0.035)] hover:shadow-2xl hover:border-indigo-300/80 dark:hover:border-blue-500/40',
+        logoBg: 'bg-gradient-to-br from-brand-600 to-indigo-700 text-white shadow-lg shadow-brand-500/25 border border-brand-400/40',
+        badgeBg: 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-800 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/70',
+        tagBg: 'bg-indigo-50/80 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60',
+        countBg: 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700',
+        titleHover: 'group-hover:text-brand-600 dark:group-hover:text-blue-400',
+        watermarkColor: 'text-indigo-900/[0.04] dark:text-white/[0.07]',
+        btnGradient: 'bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white shadow-md shadow-brand-500/20',
         badgeText: 'PRACTICE DRILLS',
         MainIcon: BookOpen,
         WatermarkIcon: Layers,
@@ -159,50 +181,70 @@ const getMockTestVectorTheme = (mockId: string) => {
   switch (mockId) {
     case 'full-length':
       return {
-        gradient: 'bg-gradient-to-br from-amber-950 via-slate-900 to-orange-950 text-amber-50',
-        logoBg: 'bg-gradient-to-br from-amber-500 via-orange-500 to-amber-700 text-white shadow-lg shadow-amber-500/30 border border-amber-400/40',
-        badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
-        btnGradient: 'bg-gradient-to-r from-amber-500 via-orange-600 to-red-600 hover:from-amber-400 hover:to-orange-500 shadow-amber-500/25',
+        cardBg: 'bg-gradient-to-br from-white via-amber-50/25 to-orange-50/30 dark:from-[#0B1528] dark:via-[#081020] dark:to-[#060B16] border border-amber-100/90 dark:border-slate-800/90 shadow-[0_8px_30px_rgba(0,0,0,0.035)] hover:shadow-2xl hover:border-amber-300/80 dark:hover:border-amber-500/40',
+        logoBg: 'bg-gradient-to-br from-amber-500 via-orange-500 to-amber-700 text-white shadow-lg shadow-amber-500/25 border border-amber-400/40',
+        badgeBg: 'bg-amber-50 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/70',
+        tagBg: 'bg-amber-50/80 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60',
+        countBg: 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700',
+        titleHover: 'group-hover:text-amber-600 dark:group-hover:text-amber-400',
+        watermarkColor: 'text-amber-900/[0.04] dark:text-white/[0.07]',
+        btnGradient: 'bg-gradient-to-r from-amber-500 via-orange-600 to-red-600 hover:from-amber-400 hover:to-orange-500 text-white shadow-md shadow-amber-500/20',
         badgeText: 'FULL-LENGTH SIMULATION',
         MainIcon: Award,
         WatermarkIcon: Sparkles,
       };
     case 'sectional':
       return {
-        gradient: 'bg-gradient-to-br from-blue-950 via-slate-900 to-indigo-950 text-blue-50',
-        logoBg: 'bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-700 text-white shadow-lg shadow-blue-500/30 border border-cyan-400/40',
-        badgeBg: 'bg-cyan-400/20 text-cyan-200 border-cyan-400/40',
-        btnGradient: 'bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-blue-500 shadow-blue-500/25',
+        cardBg: 'bg-gradient-to-br from-white via-cyan-50/25 to-blue-50/30 dark:from-[#0B1528] dark:via-[#081020] dark:to-[#060B16] border border-blue-100/90 dark:border-slate-800/90 shadow-[0_8px_30px_rgba(0,0,0,0.035)] hover:shadow-2xl hover:border-blue-300/80 dark:hover:border-blue-500/40',
+        logoBg: 'bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-700 text-white shadow-lg shadow-blue-500/25 border border-cyan-400/40',
+        badgeBg: 'bg-cyan-50 dark:bg-cyan-950/70 text-cyan-800 dark:text-cyan-300 border border-cyan-200/80 dark:border-cyan-800/70',
+        tagBg: 'bg-cyan-50/80 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300 border border-cyan-200/60 dark:border-cyan-800/60',
+        countBg: 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700',
+        titleHover: 'group-hover:text-blue-600 dark:group-hover:text-blue-400',
+        watermarkColor: 'text-blue-900/[0.04] dark:text-white/[0.07]',
+        btnGradient: 'bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-md shadow-blue-500/20',
         badgeText: 'SECTIONAL SPEED DRILLS',
         MainIcon: Target,
         WatermarkIcon: BarChart3,
       };
     case 'pyq':
       return {
-        gradient: 'bg-gradient-to-br from-purple-950 via-slate-900 to-pink-950 text-purple-50',
-        logoBg: 'bg-gradient-to-br from-purple-600 via-pink-600 to-rose-700 text-white shadow-lg shadow-purple-500/30 border border-purple-400/40',
-        badgeBg: 'bg-purple-400/20 text-purple-200 border-purple-400/40',
-        btnGradient: 'bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:from-purple-500 hover:to-pink-500 shadow-purple-500/25',
+        cardBg: 'bg-gradient-to-br from-white via-purple-50/25 to-pink-50/30 dark:from-[#0B1528] dark:via-[#081020] dark:to-[#060B16] border border-purple-100/90 dark:border-slate-800/90 shadow-[0_8px_30px_rgba(0,0,0,0.035)] hover:shadow-2xl hover:border-purple-300/80 dark:hover:border-purple-500/40',
+        logoBg: 'bg-gradient-to-br from-purple-600 via-pink-600 to-rose-700 text-white shadow-lg shadow-purple-500/25 border border-purple-400/40',
+        badgeBg: 'bg-purple-50 dark:bg-purple-950/70 text-purple-800 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/70',
+        tagBg: 'bg-purple-50/80 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60',
+        countBg: 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700',
+        titleHover: 'group-hover:text-purple-600 dark:group-hover:text-purple-400',
+        watermarkColor: 'text-purple-900/[0.04] dark:text-white/[0.07]',
+        btnGradient: 'bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-md shadow-purple-500/20',
         badgeText: '10-YR SOLVED PAPERS',
         MainIcon: History,
         WatermarkIcon: BookOpen,
       };
     case 'daily':
       return {
-        gradient: 'bg-gradient-to-br from-emerald-950 via-slate-900 to-teal-950 text-emerald-50',
-        logoBg: 'bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 text-white shadow-lg shadow-emerald-500/30 border border-emerald-400/40',
-        badgeBg: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
-        btnGradient: 'bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 hover:from-emerald-400 hover:to-teal-500 shadow-emerald-500/25',
+        cardBg: 'bg-gradient-to-br from-white via-emerald-50/25 to-teal-50/30 dark:from-[#0B1528] dark:via-[#081020] dark:to-[#060B16] border border-emerald-100/90 dark:border-slate-800/90 shadow-[0_8px_30px_rgba(0,0,0,0.035)] hover:shadow-2xl hover:border-emerald-300/80 dark:hover:border-emerald-500/40',
+        logoBg: 'bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 text-white shadow-lg shadow-emerald-500/25 border border-emerald-400/40',
+        badgeBg: 'bg-emerald-50 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/70',
+        tagBg: 'bg-emerald-50/80 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60',
+        countBg: 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700',
+        titleHover: 'group-hover:text-emerald-600 dark:group-hover:text-emerald-400',
+        watermarkColor: 'text-emerald-900/[0.04] dark:text-white/[0.07]',
+        btnGradient: 'bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-md shadow-emerald-500/20',
         badgeText: 'DAILY / WEEKLY ASSESSMENTS',
         MainIcon: Timer,
         WatermarkIcon: Activity,
       };
     default:
       return {
-        gradient: 'bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-indigo-50',
-        logoBg: 'bg-gradient-to-br from-brand-600 to-indigo-700 text-white shadow-lg shadow-brand-500/30 border border-brand-400/40',
-        badgeBg: 'bg-indigo-400/20 text-indigo-200 border-indigo-400/40',
-        btnGradient: 'bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 shadow-brand-500/25',
+        cardBg: 'bg-gradient-to-br from-white via-indigo-50/25 to-blue-50/30 dark:from-[#0B1528] dark:via-[#081020] dark:to-[#060B16] border border-indigo-100/90 dark:border-slate-800/90 shadow-[0_8px_30px_rgba(0,0,0,0.035)] hover:shadow-2xl hover:border-indigo-300/80 dark:hover:border-blue-500/40',
+        logoBg: 'bg-gradient-to-br from-brand-600 to-indigo-700 text-white shadow-lg shadow-brand-500/25 border border-brand-400/40',
+        badgeBg: 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-800 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/70',
+        tagBg: 'bg-indigo-50/80 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60',
+        countBg: 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700',
+        titleHover: 'group-hover:text-brand-600 dark:group-hover:text-blue-400',
+        watermarkColor: 'text-indigo-900/[0.04] dark:text-white/[0.07]',
+        btnGradient: 'bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white shadow-md shadow-brand-500/20',
         badgeText: 'MOCK TEST SERIES',
         MainIcon: Award,
         WatermarkIcon: Sparkles,
@@ -214,50 +256,70 @@ const getReferenceLibraryVectorTheme = (libraryId: string) => {
   switch (libraryId) {
     case 'topic-wise':
       return {
-        gradient: 'bg-gradient-to-br from-indigo-950 via-slate-900 to-blue-950 text-indigo-50',
-        logoBg: 'bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-800 text-white shadow-lg shadow-blue-500/30 border border-blue-400/40',
-        badgeBg: 'bg-blue-400/20 text-blue-200 border-blue-400/40',
-        btnGradient: 'bg-gradient-to-r from-blue-600 via-indigo-600 to-brand-600 hover:from-blue-500 hover:to-indigo-500 shadow-blue-500/25',
+        cardBg: 'bg-gradient-to-br from-white via-indigo-50/25 to-blue-50/30 dark:from-[#0B1528] dark:via-[#081020] dark:to-[#060B16] border border-indigo-100/90 dark:border-slate-800/90 shadow-[0_8px_30px_rgba(0,0,0,0.035)] hover:shadow-2xl hover:border-indigo-300/80 dark:hover:border-blue-500/40',
+        logoBg: 'bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-800 text-white shadow-lg shadow-blue-500/25 border border-blue-400/40',
+        badgeBg: 'bg-blue-50 dark:bg-blue-950/70 text-[#2563EB] dark:text-blue-300 border border-blue-200/80 dark:border-blue-800/70',
+        tagBg: 'bg-indigo-50/80 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60',
+        countBg: 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700',
+        titleHover: 'group-hover:text-blue-600 dark:group-hover:text-blue-400',
+        watermarkColor: 'text-indigo-900/[0.04] dark:text-white/[0.07]',
+        btnGradient: 'bg-gradient-to-r from-blue-600 via-indigo-600 to-brand-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md shadow-blue-500/20',
         badgeText: 'PDF TOPIC MODULES',
         MainIcon: Layers,
         WatermarkIcon: BookOpen,
       };
     case 'exam-focused':
       return {
-        gradient: 'bg-gradient-to-br from-amber-950 via-slate-900 to-orange-950 text-amber-50',
-        logoBg: 'bg-gradient-to-br from-amber-500 via-orange-500 to-red-600 text-white shadow-lg shadow-amber-500/30 border border-amber-400/40',
-        badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
-        btnGradient: 'bg-gradient-to-r from-amber-500 via-orange-600 to-red-600 hover:from-amber-400 hover:to-orange-500 shadow-amber-500/25',
+        cardBg: 'bg-gradient-to-br from-white via-amber-50/25 to-orange-50/30 dark:from-[#0B1528] dark:via-[#081020] dark:to-[#060B16] border border-amber-100/90 dark:border-slate-800/90 shadow-[0_8px_30px_rgba(0,0,0,0.035)] hover:shadow-2xl hover:border-amber-300/80 dark:hover:border-amber-500/40',
+        logoBg: 'bg-gradient-to-br from-amber-500 via-orange-500 to-red-600 text-white shadow-lg shadow-amber-500/25 border border-amber-400/40',
+        badgeBg: 'bg-amber-50 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/70',
+        tagBg: 'bg-amber-50/80 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60',
+        countBg: 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700',
+        titleHover: 'group-hover:text-amber-600 dark:group-hover:text-amber-400',
+        watermarkColor: 'text-amber-900/[0.04] dark:text-white/[0.07]',
+        btnGradient: 'bg-gradient-to-r from-amber-500 via-orange-600 to-red-600 hover:from-amber-400 hover:to-orange-500 text-white shadow-md shadow-amber-500/20',
         badgeText: 'HIGH YIELD REVISION',
         MainIcon: Target,
         WatermarkIcon: Zap,
       };
     case 'revision-sets':
       return {
-        gradient: 'bg-gradient-to-br from-emerald-950 via-slate-900 to-teal-950 text-emerald-50',
-        logoBg: 'bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 text-white shadow-lg shadow-emerald-500/30 border border-emerald-400/40',
-        badgeBg: 'bg-emerald-400/20 text-emerald-200 border-emerald-400/40',
-        btnGradient: 'bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 hover:from-emerald-400 hover:to-teal-500 shadow-emerald-500/25',
+        cardBg: 'bg-gradient-to-br from-white via-emerald-50/25 to-teal-50/30 dark:from-[#0B1528] dark:via-[#081020] dark:to-[#060B16] border border-emerald-100/90 dark:border-slate-800/90 shadow-[0_8px_30px_rgba(0,0,0,0.035)] hover:shadow-2xl hover:border-emerald-300/80 dark:hover:border-emerald-500/40',
+        logoBg: 'bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 text-white shadow-lg shadow-emerald-500/25 border border-emerald-400/40',
+        badgeBg: 'bg-emerald-50 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/70',
+        tagBg: 'bg-emerald-50/80 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60',
+        countBg: 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700',
+        titleHover: 'group-hover:text-emerald-600 dark:group-hover:text-emerald-400',
+        watermarkColor: 'text-emerald-900/[0.04] dark:text-white/[0.07]',
+        btnGradient: 'bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-md shadow-emerald-500/20',
         badgeText: 'CONCEPT SUMMARIES',
         MainIcon: BookMarked,
         WatermarkIcon: FileText,
       };
     case 'pyq-collections':
       return {
-        gradient: 'bg-gradient-to-br from-purple-950 via-slate-900 to-pink-950 text-purple-50',
-        logoBg: 'bg-gradient-to-br from-purple-600 via-pink-600 to-rose-700 text-white shadow-lg shadow-purple-500/30 border border-purple-400/40',
-        badgeBg: 'bg-purple-400/20 text-purple-200 border-purple-400/40',
-        btnGradient: 'bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:from-purple-500 hover:to-pink-500 shadow-purple-500/25',
+        cardBg: 'bg-gradient-to-br from-white via-purple-50/25 to-pink-50/30 dark:from-[#0B1528] dark:via-[#081020] dark:to-[#060B16] border border-purple-100/90 dark:border-slate-800/90 shadow-[0_8px_30px_rgba(0,0,0,0.035)] hover:shadow-2xl hover:border-purple-300/80 dark:hover:border-purple-500/40',
+        logoBg: 'bg-gradient-to-br from-purple-600 via-pink-600 to-rose-700 text-white shadow-lg shadow-purple-500/25 border border-purple-400/40',
+        badgeBg: 'bg-purple-50 dark:bg-purple-950/70 text-purple-800 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/70',
+        tagBg: 'bg-purple-50/80 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60',
+        countBg: 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700',
+        titleHover: 'group-hover:text-purple-600 dark:group-hover:text-purple-400',
+        watermarkColor: 'text-purple-900/[0.04] dark:text-white/[0.07]',
+        btnGradient: 'bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-md shadow-purple-500/20',
         badgeText: 'PAST PAPER ARCHIVES',
         MainIcon: History,
         WatermarkIcon: Award,
       };
     default:
       return {
-        gradient: 'bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-indigo-50',
-        logoBg: 'bg-gradient-to-br from-brand-600 to-indigo-700 text-white shadow-lg shadow-brand-500/30 border border-brand-400/40',
-        badgeBg: 'bg-indigo-400/20 text-indigo-200 border-indigo-400/40',
-        btnGradient: 'bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 shadow-brand-500/25',
+        cardBg: 'bg-gradient-to-br from-white via-indigo-50/25 to-blue-50/30 dark:from-[#0B1528] dark:via-[#081020] dark:to-[#060B16] border border-indigo-100/90 dark:border-slate-800/90 shadow-[0_8px_30px_rgba(0,0,0,0.035)] hover:shadow-2xl hover:border-indigo-300/80 dark:hover:border-blue-500/40',
+        logoBg: 'bg-gradient-to-br from-brand-600 to-indigo-700 text-white shadow-lg shadow-brand-500/25 border border-brand-400/40',
+        badgeBg: 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-800 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/70',
+        tagBg: 'bg-indigo-50/80 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60',
+        countBg: 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700',
+        titleHover: 'group-hover:text-brand-600 dark:group-hover:text-blue-400',
+        watermarkColor: 'text-indigo-900/[0.04] dark:text-white/[0.07]',
+        btnGradient: 'bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white shadow-md shadow-brand-500/20',
         badgeText: 'PDF REFERENCE LIBRARY',
         MainIcon: BookMarked,
         WatermarkIcon: BookOpen,
@@ -316,6 +378,7 @@ const HistoryView = ({
   onActivityDeleted?: () => void,
   onNavigate?: (tab: string) => void
 }) => {
+  const { t, isOdia } = useLanguage();
   const [activeContext] = useActiveExamContext();
   const [activities, setActivities] = useState<any[]>([]);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
@@ -374,9 +437,11 @@ const HistoryView = ({
               </div>
             </div>
             <div className="space-y-2 relative z-10 max-w-sm">
-              <h2 className="text-2xl font-serif font-extrabold bg-gradient-to-r from-brand-700 to-brand-500 dark:from-brand-300 dark:to-indigo-300 bg-clip-text text-transparent">No History For This Exam</h2>
+              <h2 className="text-2xl font-serif font-extrabold bg-gradient-to-r from-brand-700 to-brand-500 dark:from-brand-300 dark:to-indigo-300 bg-clip-text text-transparent">
+                {t('history.empty.title', 'No History For This Exam')}
+              </h2>
               <p className="text-slate-500 dark:text-slate-400 font-semibold text-xs sm:text-sm leading-relaxed">
-                No test attempts recorded under <strong className="text-slate-800 dark:text-slate-200">{activeContext.activeExamName}</strong>. Switch to "All Exams Combined" or take a test for this target exam.
+                {t('history.empty.description', `No test attempts recorded under ${activeContext.activeExamName}. Switch to "All Exams Combined" or take a test for this target exam.`, { exam: activeContext.activeExamName })}
               </p>
             </div>
             <button
@@ -392,7 +457,7 @@ const HistoryView = ({
               }}
               className="relative z-10 premium-gradient text-white flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-widest hover:premium-glow hover:scale-[1.02] active:scale-98 transition-all duration-300 shadow-md cursor-pointer border-none"
             >
-              Explore Mock Tests
+              {t('common.actions.exploreExams', 'Explore Mock Tests')}
             </button>
           </div>
         </div>
@@ -434,11 +499,11 @@ const HistoryView = ({
                   <History className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h2 className="text-xl sm:text-3xl font-black text-slate-950 dark:text-white tracking-tight leading-tight uppercase">
-                    Activity History
+                  <h2 className="text-xl sm:text-3xl font-black text-slate-955 dark:text-white tracking-tight leading-tight uppercase">
+                    {t('nav.history', 'Activity History')}
                   </h2>
                   <p className="text-slate-600 dark:text-slate-300 text-xs sm:text-sm font-medium mt-1">
-                    Manage, review, and track all your exam practice sessions
+                    {t('history.header.subtitle', 'Manage, review, and track all your exam practice sessions')}
                   </p>
                 </div>
               </div>
@@ -920,6 +985,7 @@ const ExamRegistrySection = ({
   setSelectedExam: (id: string | null) => void; 
   exams: any[] 
 }) => {
+  const { t, isOdia } = useLanguage();
   const [announcements, setAnnouncements] = useState<any[]>(EXAM_REGISTRY_DEFAULT);
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
 
@@ -977,19 +1043,19 @@ const ExamRegistrySection = ({
       <div className={cn("max-w-7xl mx-auto space-y-6 md:space-y-12", isMobile ? "px-4" : "px-6")}>
         <div className="flex flex-col items-center space-y-4 text-center">
           <span className="section-chip">
-            ⏰ ODISHA RECRUITMENT BULLETIN
+            {t('home.bulletin.sectionBadge', '⏰ ODISHA RECRUITMENT BULLETIN')}
           </span>
           <h2 className={cn("font-serif font-extrabold text-slate-955 dark:text-white tracking-tight leading-tight", isMobile ? "text-2xl" : "text-3xl md:text-5xl")}>
-            Official Exam Notifications <span className="premium-text-gradient font-serif font-extrabold">& Targeted <span className="whitespace-nowrap">Mock Tests</span></span>
+            {t('home.bulletin.title', 'Official Exam Notifications')} <span className="premium-text-gradient font-serif font-extrabold">& Targeted <span className="whitespace-nowrap">Mock Tests</span></span>
           </h2>
           {isMobile ? null : <div className="section-divider" />}
           {/* Mobile Version (Shorter & Punchier) */}
           <p className="block md:hidden text-xs leading-relaxed text-slate-500 font-medium max-w-xl mx-auto px-2">
-            Never miss an OPSC, OSSC, or OSSSC deadline. Get real-time updates and <span className="whitespace-nowrap">syllabus-specific</span> tests.
+            {t('home.bulletin.subtitle', 'Never miss an OPSC, OSSC, or OSSSC deadline. Get real-time updates and syllabus-specific tests.')}
           </p>
           {/* Desktop Version (Optimized) */}
           <p className="max-w-2xl mx-auto md:text-lg md:leading-relaxed text-slate-600 dark:text-slate-300 hidden md:block">
-            Never miss a crucial deadline. Track real-time OPSC, OSSC, and OSSSC updates and instantly unlock <span className="whitespace-nowrap">syllabus-specific</span> test series.
+            {t('home.bulletin.subtitle', 'Never miss a crucial deadline. Track real-time OPSC, OSSC, and OSSSC updates and instantly unlock syllabus-specific test series.')}
           </p>
         </div>
 
@@ -1077,6 +1143,7 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
     ],
   },
 ];const SyllabusPathsSection = () => {
+  const { t, isOdia } = useLanguage();
   const [tabs, setTabs] = useState<any[]>(SYLLABUS_ROADMAPS_DEFAULT);
   const [activeTabIdx, setActiveTabIdx] = useState(0);
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
@@ -1112,19 +1179,19 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
       <div className={cn("max-w-7xl mx-auto space-y-6 md:space-y-12", isMobile ? "px-4" : "px-6")}>
         <div className="flex flex-col items-center space-y-4 text-center">
           <span className="section-chip">
-            🎯 SYLLABUS-MAPPED PREPARATION
+            {t('exams.syllabus.badge', '🎯 SYLLABUS-MAPPED PREPARATION')}
           </span>
           <h2 className={cn("font-serif font-extrabold text-slate-955 dark:text-white tracking-tight leading-tight max-w-6xl", isMobile ? "text-2xl" : "text-3xl md:text-4xl")}>
-            Master Every Topic with <span className="premium-text-gradient font-serif font-extrabold">Targeted <span className="whitespace-nowrap">Chapter-Wise</span> Tests</span>
+            {t('exams.syllabus.title', 'Master Every Topic with Targeted Chapter-Wise Tests')}
           </h2>
           {!isMobile && <div className="section-divider" />}
           {/* Mobile Version (Shorter) */}
           <p className="block md:hidden text-xs leading-relaxed text-slate-500 font-medium max-w-2xl mx-auto px-1">
-            Stop blindly studying. Unlock full-length mock tests and PYQs designed exactly for the OPSC and OSSC curriculum.
+            {t('exams.syllabus.subtitle', 'Stop blindly studying. Unlock full-length mock tests and PYQs designed exactly for the OPSC and OSSC curriculum.')}
           </p>
           {/* Desktop Version (Optimized) */}
           <p className="max-w-2xl mx-auto md:text-lg md:leading-relaxed text-slate-600 dark:text-slate-300 hidden md:block">
-            Stop blindly studying. Master Odisha History to Indian Polity with full-length mock tests and PYQs mapped exactly to the OPSC and OSSC curriculum.
+            {t('exams.syllabus.subtitle', 'Stop blindly studying. Master Odisha History to Indian Polity with full-length mock tests and PYQs mapped exactly to the OPSC and OSSC curriculum.')}
           </p>
         </div>
 
@@ -1237,6 +1304,7 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
 };
 
 const AchieversJournalSection = () => {
+  const { t, isOdia } = useLanguage();
   const [activeFilter, setActiveFilter] = useState<'all' | 'opsc' | 'ossc' | 'osssc'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [visibleCount, setVisibleCount] = useState(4);
@@ -1294,19 +1362,19 @@ const AchieversJournalSection = () => {
       <div className={cn("max-w-7xl mx-auto space-y-6 md:space-y-10", isMobile ? "px-4" : "px-6")}>
         <div className="flex flex-col items-center space-y-4 text-center">
           <span className="section-chip">
-            🏆 VERIFIED SUCCESS STORIES
+            {t('home.achievers.sectionBadge', '🏆 VERIFIED SUCCESS STORIES')}
           </span>
           <h2 className={cn("font-serif font-extrabold text-slate-955 dark:text-white tracking-tight leading-tight max-w-6xl", isMobile ? "text-2xl" : "text-3xl md:text-4xl")}>
-            Join Hundreds of Aspirants <span className="premium-text-gradient font-serif font-extrabold">Who Cracked Their Target Exams</span>
+            {t('home.achievers.title', 'Join Hundreds of Aspirants')} <span className="premium-text-gradient font-serif font-extrabold">{t('home.achievers.subtitle', 'Who Cracked Their Target Exams')}</span>
           </h2>
           {!isMobile && <div className="section-divider" />}
           {/* Mobile Version (Shorter) */}
           <p className="block md:hidden text-xs leading-relaxed text-slate-500 font-medium max-w-2xl mx-auto px-1">
-            Explore real preparation strategies and test scores from students who conquered OPSC, OSSC, and OSSSC.
+            {t('home.achievers.description', 'Explore real preparation strategies and test scores from students who conquered OPSC, OSSC, and OSSSC.')}
           </p>
           {/* Desktop Version (Optimized) */}
           <p className="max-w-2xl mx-auto md:text-lg md:leading-relaxed text-slate-600 dark:text-slate-300 hidden md:block">
-            Explore detailed preparation strategies and actual test scores from real students who conquered OPSC, OSSC, and OSSSC.
+            {t('home.achievers.description', 'Explore detailed preparation strategies and actual test scores from real students who conquered OPSC, OSSC, and OSSSC.')}
           </p>
         </div>
 
@@ -1333,6 +1401,7 @@ const AchieversJournalSection = () => {
                       : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800"
                   )}
                 >
+                  {filter === 'all' ? t('common.actions.viewAll', 'All Journeys') : filter.toUpperCase()}
                   {isFilterActive && (
                     <motion.div
                       layoutId="activeAchieverFilterBg"
@@ -1535,6 +1604,7 @@ const AchieversJournalSection = () => {
 };
 
 export const Footer = () => {
+  const { t, isOdia } = useLanguage();
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
@@ -1589,10 +1659,10 @@ export const Footer = () => {
         {/* Pre-footer Stats Dashboard */}
         <div className={cn("grid grid-cols-2 lg:grid-cols-4 border-b border-slate-800/80", isMobile ? "gap-3 pb-8 mb-8" : "gap-4 sm:gap-6 pb-16 mb-16")}>
           {[
-            { label: "Mock Tests Attempted", value: "10,000+", icon: BarChart3, color: "text-blue-400 bg-blue-500/15 border-blue-500/30", desc: "Real exam simulations" },
-            { label: "Syllabus Coverage", value: "98.4%", icon: Target, color: "text-rose-400 bg-rose-500/15 border-rose-500/30", desc: "Mapped to state boards" },
-            { label: "Score Analytics", value: "Real-Time", icon: Zap, color: "text-amber-400 bg-amber-500/15 border-amber-500/30", desc: "Detailed rank mapping" },
-            { label: "Expert Support", value: "24/7 Support", icon: MessageSquare, color: "text-emerald-400 bg-emerald-500/15 border-emerald-500/30", desc: "Priority Telegram & Call" }
+            { label: t('footer.mockTestsAttempted', 'Mock Tests Attempted'), value: "10,000+", icon: BarChart3, color: "text-blue-400 bg-blue-500/15 border-blue-500/30", desc: t('footer.realSimulations', 'Real exam simulations') },
+            { label: t('footer.syllabusCoverage', 'Syllabus Coverage'), value: "98.4%", icon: Target, color: "text-rose-400 bg-rose-500/15 border-rose-500/30", desc: t('footer.mappedToBoards', 'Mapped to state boards') },
+            { label: t('footer.scoreAnalytics', 'Score Analytics'), value: "Real-Time", icon: Zap, color: "text-amber-400 bg-amber-500/15 border-amber-500/30", desc: t('footer.rankMapping', 'Detailed rank mapping') },
+            { label: t('footer.expertSupport', 'Expert Support'), value: "24/7 Support", icon: MessageSquare, color: "text-emerald-400 bg-emerald-500/15 border-emerald-500/30", desc: t('footer.supportChannels', 'Priority Telegram & Call') }
           ].map((stat, idx) => (
             <div 
               key={idx}
@@ -1632,16 +1702,16 @@ export const Footer = () => {
             </div>
             {/* Mobile Version (Shorter) */}
             <p className="block md:hidden text-xs leading-relaxed text-slate-300 font-medium max-w-sm">
-              Master OPSC, OSSC, and OSSSC exams with verified PYQs and a 24/7 AI Mentor.
+              {t('footer.aboutPlatform', 'Master OPSC, OSSC, and OSSSC exams with verified PYQs and a 24/7 AI Mentor.')}
             </p>
             {/* Desktop Version (Original) */}
             <p className="hidden md:block text-slate-300 font-medium leading-relaxed max-w-sm text-sm sm:text-base">
-              The ultimate state-level civil service exam prep platform. Master the OPSC, OSSC, and OSSSC with our verified PYQs, real-time analytics, and 24/7 AI Mentor.
+              {t('footer.aboutPlatform', 'The ultimate state-level civil service exam prep platform. Master the OPSC, OSSC, and OSSSC with our verified PYQs, real-time analytics, and 24/7 AI Mentor.')}
             </p>
             
             {/* Newsletter update form */}
             <div className={cn("space-y-2.5", isMobile ? "pt-2" : "space-y-3 pt-4")}>
-              <h2 className="text-xs font-black uppercase tracking-wider text-white">Never Miss an Odisha Exam Update</h2>
+              <h2 className="text-xs font-black uppercase tracking-wider text-white">{t('footer.neverMiss', 'Never Miss an Odisha Exam Update')}</h2>
               <form onSubmit={handleSubscribe} className={cn("flex max-w-md", isMobile ? "gap-1.5" : "gap-2")}>
                 <input 
                   type="email" 
@@ -1657,7 +1727,7 @@ export const Footer = () => {
                 >
                   {subscribed ? "Done!" : (
                     <>
-                      <span>Join</span>
+                      <span>{t('footer.join', 'Join')}</span>
                       <ArrowRight className="w-3.5 h-3.5 text-white" />
                     </>
                   )}
@@ -1665,11 +1735,11 @@ export const Footer = () => {
               </form>
               {/* Mobile Version (Shorter) */}
               <p className="block md:hidden text-[10px] leading-relaxed text-slate-400 font-medium">
-                Get instant alerts for OPSC, OSSC &amp; OSSSC notifications and admit card drops.
+                {t('footer.newsletterSubtitle', 'Get instant alerts for OPSC, OSSC & OSSSC notifications and admit card drops.')}
               </p>
               {/* Desktop Version (Original) */}
               <p className="hidden md:block text-[10px] text-slate-400 font-medium">
-                Join our mailing list to get instant alerts for OPSC, OSSC, and OSSSC notification drops and admit card releases.
+                {t('footer.newsletterSubtitle', 'Join our mailing list to get instant alerts for OPSC, OSSC, and OSSSC notification drops and admit card releases.')}
               </p>
             </div>
           </div>
@@ -1680,15 +1750,15 @@ export const Footer = () => {
           {/* Platform navigation */}
           <div className={cn(isMobile ? "" : "space-y-6")}>
             <h4 className={cn("text-white font-black tracking-widest uppercase text-xs sm:text-sm relative after:content-[''] after:absolute after:-bottom-2.5 after:left-0 after:w-8 after:h-[2.5px] after:bg-[#2563eb]", isMobile ? "mb-4" : "mb-6")}>
-              Platform
+              {t('footer.quickLinks', 'Platform')}
             </h4>
             <ul className={cn("font-bold text-slate-300", isMobile ? "space-y-3" : "space-y-4")}>
               {[
-                { to: "/current-affairs", label: "Daily Current Affairs", icon: Globe },
-                { to: "/blog", label: "Official Blog", icon: BookOpen },
-                { to: "/privacy-policy", label: "Privacy Policy", icon: ShieldCheck },
-                { to: "/terms-of-service", label: "Terms", icon: Scale },
-                { to: "/refund-policy", label: "Refund Policy", icon: Receipt }
+                { to: "/current-affairs", label: t('nav.currentAffairs', 'Daily Current Affairs'), icon: Globe },
+                { to: "/blog", label: t('nav.blog', 'Official Blog'), icon: BookOpen },
+                { to: "/privacy-policy", label: t('footer.privacyPolicy', 'Privacy Policy'), icon: ShieldCheck },
+                { to: "/terms-of-service", label: t('footer.termsOfService', 'Terms'), icon: Scale },
+                { to: "/refund-policy", label: t('footer.refundPolicy', 'Refund Policy'), icon: Receipt }
               ].map((link, idx) => (
                 <li key={idx}>
                   <Link 
@@ -1706,7 +1776,7 @@ export const Footer = () => {
           {/* Contact details */}
           <div className={cn(isMobile ? "" : "space-y-6")}>
             <h4 className={cn("text-white font-black tracking-widest uppercase text-xs sm:text-sm relative after:content-[''] after:absolute after:-bottom-2.5 after:left-0 after:w-8 after:h-[2.5px] after:bg-[#2563eb]", isMobile ? "mb-4" : "mb-6")}>
-              Contact
+              {t('footer.contactUs', 'Contact')}
             </h4>
             <ul className={cn("font-bold text-slate-300", isMobile ? "space-y-3" : "space-y-3.5")}>
               <li>
@@ -1748,20 +1818,15 @@ export const Footer = () => {
                   rel="noopener noreferrer" 
                   className={cn("rounded-xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center hover:bg-[#FF0000] hover:border-[#FF0000] hover:-translate-y-1 transition-all duration-300 text-slate-300 hover:text-white shadow-lg hover:shadow-red-600/20 group", isMobile ? "w-9 h-9" : "w-11 h-11")}
                 >
-                  <svg role="img" aria-label="OdishaExamPrep YouTube Channel" viewBox="0 0 24 24" fill="currentColor" className={cn("group-hover:scale-110 transition-transform", isMobile ? "w-4 h-4" : "w-5 h-5")}>
-                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                  </svg>
+                  <Youtube className={cn("text-slate-300 group-hover:text-white transition-colors", isMobile ? "w-4 h-4" : "w-5 h-5")} />
                 </a>
                 <a 
-                  href="https://wa.me/917377431715" 
+                  href="https://t.me/OdishaExamPrep_Official" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className={cn("rounded-xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center hover:bg-[#25D366] hover:border-[#25D366] hover:-translate-y-1 transition-all duration-300 text-slate-300 hover:text-white shadow-lg hover:shadow-[#25D366]/20 group", isMobile ? "w-9 h-9" : "w-11 h-11")}
+                  className={cn("rounded-xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center hover:bg-[#0088cc] hover:border-[#0088cc] hover:-translate-y-1 transition-all duration-300 text-slate-300 hover:text-white shadow-lg hover:shadow-blue-600/20 group", isMobile ? "w-9 h-9" : "w-11 h-11")}
                 >
-                  <svg role="img" aria-label="OdishaExamPrep WhatsApp Contact" viewBox="0 0 24 24" fill="currentColor" className={cn("group-hover:scale-110 transition-transform", isMobile ? "w-4 h-4" : "w-5 h-5")}>
-                    <path d="M12.031 0C5.385 0 0 5.385 0 12.029a12.022 12.022 0 001.6 6.02L0 24l6.15-1.611a12.012 12.012 0 005.881 1.523h.004c6.645 0 12.03-5.386 12.03-12.031S18.675 0 12.031 0zm0 21.936a9.988 9.988 0 01-5.086-1.385l-.364-.216-3.774.99.998-3.682-.236-.376A9.957 9.957 0 012.064 12.03c0-5.497 4.475-9.972 9.972-9.972 5.497 0 9.97 4.475 9.97 9.972s-4.473 9.97-9.97 9.97z"/>
-                    <path d="M17.481 14.159c-.297-.149-1.758-.868-2.03-.968-.27-.099-.467-.149-.665.149-.198.298-.767.967-.94 1.165-.173.198-.346.223-.644.074a8.214 8.214 0 01-4.041-2.518c-.282-.326.319-.314.901-1.479.098-.198.05-.371-.025-.52-.075-.149-.665-1.605-.91-2.196-.241-.578-.485-.5-.665-.509-.174-.01-.371-.01-.57-.01-.198 0-.52.074-.792.371C6.822 7.027 6 7.82 6 9.381c0 1.56 1.015 3.07 1.164 3.268.149.198 2.228 3.4 5.397 4.76 2.656 1.139 3.554 1.259 4.314 1.05.76-.208 2.03-.896 2.316-1.761.286-.865.286-1.605.2-1.76-.086-.15-.286-.24-.584-.388z"/>
-                  </svg>
+                  <Send className={cn("text-slate-300 group-hover:text-white transition-colors", isMobile ? "w-3.5 h-3.5" : "w-4 h-4")} />
                 </a>
               </li>
             </ul>
@@ -3148,6 +3213,7 @@ const AuthModal = ({ isOpen, onClose, hideCloseButton = false }: { isOpen: boole
 
 const LandingPage = () => {
   const { loading, user } = useAuth();
+  const { t, isOdia } = useLanguage();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showGuideToast, setShowGuideToast] = useState(false);
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
@@ -3299,21 +3365,23 @@ const LandingPage = () => {
                         </div>
                       ))}
                     </div>
-                    <span className="text-[9px] sm:text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wide truncate">🎯 Trusted by 10K+ Odisha Aspirants</span>
+                    <span className="text-[9px] sm:text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wide truncate">
+                      {t('home.hero.trustedBy', '🎯 Trusted by 10K+ Odisha Aspirants')}
+                    </span>
                   </div>
 
                   <div className="space-y-3 md:space-y-5">
                     <h1 className="text-[1.75rem] sm:text-4xl md:text-5xl xl:text-6xl font-serif font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight break-words">
-                      Crack Your Odisha Govt Exams with{" "}
-                      <span className="premium-text-gradient font-serif font-extrabold">Realistic Mock Tests</span>
+                      {t('home.hero.title1', 'Crack Your Odisha Govt Exams with')}{" "}
+                      <span className="premium-text-gradient font-serif font-extrabold">{t('home.hero.title2', 'Realistic Mock Tests')}</span>
                     </h1>
                     {/* Mobile Version (Shorter) */}
                     <p className="block md:hidden text-sm leading-relaxed text-slate-500 dark:text-slate-300 max-w-xl mx-auto lg:mx-0 font-normal">
-                      Master OPSC, OSSC, and OSSSC with verified PYQs and a 24/7 AI mentor.
+                      {t('home.hero.subtitle', 'Master OPSC, OSSC, and OSSSC with verified PYQs and a 24/7 AI mentor.')}
                     </p>
                     {/* Desktop Version (Original) */}
                     <p className="hidden md:block text-slate-600 dark:text-slate-300 text-sm sm:text-base md:text-lg max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed">
-                      Stop guessing your rank. Master the OPSC, OSSC, and OSSSC syllabus with timed test series, verified PYQs, and a 24/7 AI mentor.
+                      {t('home.hero.subtitle', 'Stop guessing your rank. Master the OPSC, OSSC, and OSSSC syllabus with timed test series, verified PYQs, and a 24/7 AI mentor.')}
                     </p>
                   </div>
                 </div>
@@ -3327,23 +3395,23 @@ const LandingPage = () => {
                       scrollToElement('exams');
                     }}
                   >
-                    <span className="relative z-10">Explore Free Mock Tests</span>
+                    <span className="relative z-10">{t('home.hero.freeMockTestBtn', 'Explore Free Mock Tests')}</span>
                     <div className="absolute inset-0 bg-white/20 translate-y-20 group-hover:translate-y-0 transition-transform" />
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="w-full sm:w-auto h-12 sm:h-16 px-6 sm:px-12 text-sm sm:text-xl rounded-2xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-900 dark:text-white transition-all font-bold"
+                    className="w-full sm:w-auto h-12 sm:h-16 px-6 sm:px-12 text-sm sm:text-xl rounded-2xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-900 dark:text-white transition-all font-bold" 
                     onClick={() => {
                       scrollToElement('syllabus-paths');
                     }}
                   >
-                    View Syllabus Paths
+                    {t('home.hero.exploreExamsBtn', 'View Syllabus Paths')}
                   </Button>
                 </div>
 
                 {/* Localized Exam Categories */}
                 <div className="pt-6 sm:pt-10 space-y-3 sm:space-y-4">
-                  <p className="text-[10px] sm:text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] lg:text-left px-4 sm:px-0">Focused Preparation For:</p>
+                  <p className="text-[10px] sm:text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] lg:text-left px-4 sm:px-0">{t('home.exploreExams.title', 'Focused Preparation For:')}</p>
                   
                   {/* Horizontal scrolling row on mobile, wrapping grid on desktop */}
                   <div className="relative w-full overflow-hidden">
@@ -3539,19 +3607,19 @@ const LandingPage = () => {
             <div id="exam-gateway-header" className="flex flex-col items-center space-y-4 text-center">
               <span className="section-chip">
                 <Zap className="w-3.5 h-3.5" />
-                Your Exam Gateway
+                {t('home.practiceModes.sectionBadge', 'Your Exam Gateway')}
               </span>
               <h2 className="text-3xl md:text-5xl font-serif font-extrabold text-slate-955 tracking-tight leading-tight">
-                Crack <span className="premium-text-gradient font-serif font-extrabold">Odisha Exams</span>
+                {t('home.hero.title1', 'Crack')} <span className="premium-text-gradient font-serif font-extrabold">{t('home.hero.title2', 'Odisha Exams')}</span>
               </h2>
               {!isMobile && <div className="section-divider" />}
               {/* Mobile Version (Ultra-Short) */}
               <p className="block md:hidden text-base leading-relaxed text-slate-500 font-medium max-w-xl mx-auto">
-                Verified PYQs & mock tests for OPSC, OSSC, and OSSSC.
+                {t('home.hero.subtitle', 'Verified PYQs & mock tests for OPSC, OSSC, and OSSSC.')}
               </p>
               {/* Desktop Version (Original) */}
               <p className="hidden md:block text-slate-500 text-base sm:text-lg font-medium max-w-xl mx-auto leading-relaxed">
-                Practice with verified PYQs and full-length mock tests for OPSC, OSSC, and OSSSC.
+                {t('home.hero.subtitle', 'Practice with verified PYQs and full-length mock tests for OPSC, OSSC, and OSSSC.')}
               </p>
             </div>
             <DashboardContent 
@@ -3876,6 +3944,7 @@ const ScheduledMockTestCard = ({ test, onLaunchMockTest }: any) => {
 };
 
 const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, handleStartDirectPractice, isMobile }: any) => {
+  const { t } = useLanguage();
   const [showAttemptModal, setShowAttemptModal] = useState(false);
   let parsedSchedule = null;
   if (bank?.seriesId && typeof bank.seriesId === 'string' && bank.seriesId.startsWith('{')) {
@@ -4001,11 +4070,11 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
                 {isScheduledUpcoming ? (
                   <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[8.5px] font-black rounded border border-amber-200 dark:border-amber-800 uppercase tracking-wider shrink-0">📅 UPCOMING</span>
                 ) : isCompleted ? (
-                  <span className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[8.5px] font-black rounded border border-emerald-100/60 dark:border-emerald-800 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" /> COMPLETED</span>
+                  <span className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[8.5px] font-black rounded border border-emerald-100/60 dark:border-emerald-800 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" /> {t('exams.cardActions.retake', 'COMPLETED')}</span>
                 ) : isInProgress ? (
                   <span className="px-1.5 py-0.5 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-[8.5px] font-black rounded border border-amber-100 dark:border-amber-800 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><Clock className="w-2.5 h-2.5 animate-pulse" /> {progressPercent}%</span>
                 ) : (
-                  <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[8.5px] font-black rounded border border-slate-200/50 dark:border-slate-700 uppercase tracking-wider shrink-0">PRACTICE SET</span>
+                  <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[8.5px] font-black rounded border border-slate-200/50 dark:border-slate-700 uppercase tracking-wider shrink-0">{t('exams.step1.chapterWiseTag', 'PRACTICE SET')}</span>
                 )}
                 {suffix && (
                   <span className="px-1.5 py-0.5 bg-brand-50 dark:bg-indigo-950/60 text-brand-700 dark:text-indigo-300 text-[8.5px] font-black rounded border border-brand-100/60 dark:border-indigo-800 uppercase tracking-wider shrink-0">SET {suffix}</span>
@@ -4013,8 +4082,8 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
               </div>
               {totalQs > 0 && (
                 <div className="flex items-center gap-2 mt-2 text-[10px] font-extrabold text-slate-555 dark:text-slate-300 flex-wrap">
-                  <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-0.5 rounded-lg border border-slate-100/60 dark:border-slate-700/60"><FileText className="w-3 h-3 text-slate-400" /> {totalQs} Questions</span>
-                  <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-0.5 rounded-lg border border-slate-100/60 dark:border-slate-700/60"><Clock className="w-3 h-3 text-slate-400" /> {totalQs > 0 ? `${totalQs} Mins` : 'Soon'}</span>
+                  <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-0.5 rounded-lg border border-slate-100/60 dark:border-slate-700/60"><FileText className="w-3 h-3 text-slate-400" /> {t('exams.details.questions', `${totalQs} Questions`, { count: totalQs })}</span>
+                  <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-0.5 rounded-lg border border-slate-100/60 dark:border-slate-700/60"><Clock className="w-3 h-3 text-slate-400" /> {t('exams.details.duration', `${totalQs} Mins`, { mins: totalQs })}</span>
                 </div>
               )}
             </div>
@@ -4073,7 +4142,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
                 <div className="absolute inset-0 border-2 border-white/20 rounded-xl" />
               </div>
               <div className="text-left min-w-0 flex-1">
-                <h4 className="font-black text-base sm:text-lg text-slate-950 dark:text-white tracking-tight group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors uppercase leading-snug line-clamp-2">{mainTitle}</h4>
+                <h4 className="font-black text-base sm:text-lg text-slate-955 dark:text-white tracking-tight group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors uppercase leading-snug line-clamp-2">{mainTitle}</h4>
                 <div className="flex items-center flex-wrap gap-1.5 mt-1">
                   {isScheduledUpcoming ? (
                     <span className="text-[10px] font-black text-amber-800 uppercase tracking-widest bg-amber-100 px-2.5 py-0.5 rounded border border-amber-200 flex items-center gap-1">
@@ -4081,7 +4150,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
                     </span>
                   ) : bank.scheduled_at ? (
                     <span className="text-[10px] font-black text-emerald-800 uppercase tracking-widest bg-emerald-100 px-2.5 py-0.5 rounded border border-emerald-200 flex items-center gap-1 animate-pulse">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> LIVE NOW
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> {t('exams.cardActions.liveNow', 'LIVE NOW')}
                     </span>
                   ) : isCompleted ? (
                     <span className="text-[10px] font-black text-emerald-800 uppercase tracking-widest bg-emerald-100 px-2.5 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
@@ -4092,7 +4161,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" /> IN PROGRESS ({progressPercent}%)
                     </span>
                   ) : (
-                    <span className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-100 dark:border-slate-700">Practice Set</span>
+                    <span className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-100 dark:border-slate-700">{t('exams.step1.chapterWiseTag', 'Practice Set')}</span>
                   )}
                   {suffix && (
                     <span className="text-[10px] font-black text-brand-700 dark:text-indigo-300 uppercase tracking-widest bg-brand-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded border border-brand-100/60 dark:border-indigo-800 shadow-2xs">Set {suffix}</span>
@@ -4115,8 +4184,8 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
           ) : (
             <div className="space-y-4 flex-1 relative z-10 pt-2 text-left">
               <div className="flex gap-4 text-xs font-bold text-slate-555 dark:text-slate-300 flex-wrap">
-                <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><FileText className="w-3.5 h-3.5 text-slate-400"/> {totalQs} Questions</span>
-                <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><Clock className="w-3.5 h-3.5 text-slate-400"/> {totalQs > 0 ? `${totalQs} Mins Session` : 'Practice Session Soon'}</span>
+                <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><FileText className="w-3.5 h-3.5 text-slate-400"/> {t('exams.details.questions', `${totalQs} Questions`, { count: totalQs })}</span>
+                <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><Clock className="w-3.5 h-3.5 text-slate-400"/> {t('exams.details.duration', `${totalQs} Mins`, { mins: totalQs })}</span>
               </div>
             </div>
           )}
@@ -4150,7 +4219,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
                 }}
                 className="flex-1 h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-xs sm:text-sm transition-all shadow-md bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-emerald-500/20 hover:shadow-emerald-500/40 cursor-pointer"
               >
-                <RotateCw className="w-4 h-4" /> Retake
+                <RotateCw className="w-4 h-4" /> {t('exams.cardActions.retake', 'Retake')}
               </Button>
             </div>
           ) : isInProgress ? (
@@ -4173,7 +4242,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
                 }}
                 className="flex-1 h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-xs sm:text-sm transition-all shadow-md bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-amber-500/20 hover:shadow-amber-500/40 cursor-pointer"
               >
-                <Play className="w-4 h-4 fill-white/20" /> Resume ({progressPercent}%)
+                <Play className="w-4 h-4 fill-white/20" /> {t('exams.cardActions.resume', 'Resume')} ({progressPercent}%)
               </Button>
             </div>
           ) : (
@@ -4181,7 +4250,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
               className="w-full h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-sm transition-all shadow-md relative z-10 mt-auto premium-gradient text-white shadow-brand-500/10 hover:shadow-brand-500/30 cursor-pointer"
             >
               <span className="relative z-10 flex items-center justify-center gap-2">
-                Start Practice <ChevronRight className="w-4 h-4 sm:ml-1 group-hover:translate-x-1 transition-transform relative z-10" />
+                {t('exams.cardActions.practiceNow', 'Start Practice')} <ChevronRight className="w-4 h-4 sm:ml-1 group-hover:translate-x-1 transition-transform relative z-10" />
               </span>
             </Button>
           )}
@@ -4209,6 +4278,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
 });
 
 const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activities, handleStartTest }: any) => {
+  const { t } = useLanguage();
   const [showAttemptModal, setShowAttemptModal] = useState(false);
   let isPremium = test.isPremium;
   let price = test.price || 499;
@@ -4350,14 +4420,14 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
             
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <h4 className="font-extrabold text-[12.5px] sm:text-[13.5px] text-slate-900 dark:text-white tracking-tight leading-snug line-clamp-1 sm:line-clamp-2 uppercase pr-1" title={test.title}>{mainTitle}</h4>
+                <h4 className="font-extrabold text-[13px] sm:text-[14px] text-slate-900 dark:text-white tracking-tight leading-snug line-clamp-2 uppercase pr-1" title={test.title}>{mainTitle}</h4>
                 {suffix && (
                   <span className="px-1.5 py-0.5 bg-brand-50 dark:bg-indigo-950/60 text-brand-700 dark:text-indigo-300 text-[8.5px] font-black rounded border border-brand-100/60 dark:border-indigo-800 uppercase tracking-wider shrink-0">Set {suffix}</span>
                 )}
                 {isScheduledUpcoming ? (
                   <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[8.5px] font-black rounded border border-amber-200 dark:border-amber-800 uppercase tracking-wider shrink-0">📅 UPCOMING</span>
                 ) : isCompleted ? (
-                  <span className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[8.5px] font-black rounded border border-emerald-100 dark:border-emerald-800 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5" /> Completed</span>
+                  <span className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[8.5px] font-black rounded border border-emerald-100/60 dark:border-emerald-800 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" /> COMPLETED</span>
                 ) : isInProgress ? (
                   <span className="px-1.5 py-0.5 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-[8.5px] font-black rounded border border-amber-100 dark:border-amber-800 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><Clock className="w-2.5 h-2.5 animate-pulse" /> {progressPercent}%</span>
                 ) : isPremium && (
@@ -4376,9 +4446,9 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
                 </div>
               ) : (
                 <div className="flex items-center gap-1.5 mt-1.5 sm:mt-2 text-[9.5px] sm:text-[10px] font-extrabold text-slate-500 dark:text-slate-300 flex-nowrap overflow-hidden">
-                  <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-slate-800/80 px-1.5 py-0.5 rounded-md border border-slate-100/60 dark:border-slate-700/60 shrink-0"><Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {test.durationMinutes}m</span>
-                  <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-slate-800/80 px-1.5 py-0.5 rounded-md border border-slate-100/60 dark:border-slate-700/60 shrink-0"><Award className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {test.totalMarks}M</span>
-                  <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-slate-800/80 px-1.5 py-0.5 rounded-md border border-slate-100/60 dark:border-slate-700/60 shrink-0"><FileText className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {totalQs}Q</span>
+                  <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-slate-800/80 px-1.5 py-0.5 rounded-md border border-slate-100/60 dark:border-slate-700/60 shrink-0"><Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {t('exams.details.duration', `${test.durationMinutes}m`, { mins: test.durationMinutes })}</span>
+                  <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-slate-800/80 px-1.5 py-0.5 rounded-md border border-slate-100/60 dark:border-slate-700/60 shrink-0"><Award className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {t('exams.details.totalMarks', `${test.totalMarks}M`, { marks: test.totalMarks })}</span>
+                  <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-slate-800/80 px-1.5 py-0.5 rounded-md border border-slate-100/60 dark:border-slate-700/60 shrink-0"><FileText className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {t('exams.details.questions', `${totalQs}Q`, { count: totalQs })}</span>
                   {isCompleted && completedAct && (
                     <span className="flex items-center gap-0.5 bg-emerald-50/50 text-emerald-700 px-1.5 py-0.5 rounded-md border border-emerald-100/30 shrink-0">
                       Score: {completedAct.score}/{completedAct.totalMarks || test.totalMarks}
@@ -4485,7 +4555,7 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
                     <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-300 uppercase tracking-widest bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded border border-emerald-100/60 dark:border-emerald-800 flex items-center gap-0.5 whitespace-nowrap"><CheckCircle2 className="w-3.5 h-3.5" /> Completed</span>
                   )}
                   {!isScheduledUpcoming && isInProgress && (
-                    <span className="text-[10px] font-black text-amber-600 dark:text-amber-300 uppercase tracking-widest bg-amber-50 dark:bg-amber-950/60 px-2.5 py-0.5 rounded border border-amber-100/60 dark:border-amber-800 flex items-center gap-0.5 whitespace-nowrap"><Clock className="w-3.5 h-3.5 animate-pulse" /> In Progress ({progressPercent}%)</span>
+                    <span className="text-[10px] font-black text-amber-600 dark:text-amber-300 uppercase tracking-widest bg-amber-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded border border-amber-100/60 dark:border-amber-800 flex items-center gap-0.5 whitespace-nowrap"><Clock className="w-3.5 h-3.5 animate-pulse" /> In Progress ({progressPercent}%)</span>
                   )}
                 </div>
               </div>
@@ -4519,9 +4589,9 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
           ) : (
             <div className="space-y-4 flex-1 relative z-10 pt-2 text-left">
               <div className="flex gap-4 text-xs font-bold text-slate-500 dark:text-slate-300 flex-wrap">
-                <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><Clock className="w-3.5 h-3.5 text-slate-400"/> {test.durationMinutes} Mins</span>
-                <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><Award className="w-3.5 h-3.5 text-slate-400"/> {test.totalMarks} Marks</span>
-                <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><FileText className="w-3.5 h-3.5 text-slate-400"/> {totalQs} Qs</span>
+                <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><Clock className="w-3.5 h-3.5 text-slate-400"/> {t('exams.details.duration', `${test.durationMinutes} Mins`, { mins: test.durationMinutes })}</span>
+                <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><Award className="w-3.5 h-3.5 text-slate-400"/> {t('exams.details.totalMarks', `${test.totalMarks} Marks`, { marks: test.totalMarks })}</span>
+                <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><FileText className="w-3.5 h-3.5 text-slate-400"/> {t('exams.details.questions', `${totalQs} Qs`, { count: totalQs })}</span>
               </div>
             </div>
           )}
@@ -4557,7 +4627,7 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
                 className="flex-1 h-[48px] rounded-xl font-black text-xs sm:text-sm border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 bg-white transition-all overflow-hidden group/btn"
               >
                 <span className="relative z-10 flex items-center justify-center gap-1.5">
-                  <RotateCw className="w-4 h-4" /> Retake
+                  <RotateCw className="w-4 h-4" /> {t('exams.cardActions.retake', 'Retake')}
                 </span>
               </Button>
             </div>
@@ -4582,7 +4652,7 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
                 className="flex-1 h-[48px] rounded-xl font-black text-xs sm:text-sm bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/20 hover:shadow-xl hover:shadow-amber-500/30 transition-all overflow-hidden group/btn"
               >
                 <span className="relative z-10 flex items-center justify-center gap-1.5">
-                  <Play className="w-4 h-4 fill-white/20" /> Resume ({progressPercent}%)
+                  <Play className="w-4 h-4 fill-white/20" /> {t('exams.cardActions.resume', 'Resume')} ({progressPercent}%)
                 </span>
               </Button>
             </div>
@@ -4606,11 +4676,11 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
                 {isLocked ? (
                   <>
                     <Lock className="w-4 h-4 mr-2" />
-                    Unlock to Access
+                    {t('exams.cardActions.unlockTest', 'Unlock to Access')}
                   </>
                 ) : (
                   <>
-                    Start Test Now
+                    {t('exams.cardActions.startMock', 'Start Test Now')}
                     <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 duration-300" />
                   </>
                 )}
@@ -4640,6 +4710,7 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
 });
 
 const PurchasesView = ({ user, profile, exams, mockTests, testSeries, dynamicQuestionBanks, hasAccessTo, onLaunchMockTest, onLaunchBank, onViewExam, loadingExams }: any) => {
+  const { t, isOdia } = useLanguage();
   const { refreshProfile } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -4799,9 +4870,9 @@ const PurchasesView = ({ user, profile, exams, mockTests, testSeries, dynamicQue
               </div>
               <div className="min-w-0">
                 <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight leading-none">
-                  My <span className="premium-text-gradient">Library</span>
+                  {t('nav.library', 'My Library')}
                 </h2>
-                <p className="text-slate-500 dark:text-slate-400 text-[11px] font-medium truncate mt-0.5">Unlocked premium content</p>
+                <p className="text-slate-500 dark:text-slate-400 text-[11px] font-medium truncate mt-0.5">{t('library.header.subtitle', 'Unlocked premium content')}</p>
               </div>
             </div>
             <button
@@ -4823,9 +4894,9 @@ const PurchasesView = ({ user, profile, exams, mockTests, testSeries, dynamicQue
                 style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }} />
             </div>
             <h2 className="text-5xl font-black text-slate-900 dark:text-white tracking-tight">
-              My <span className="premium-text-gradient">Library</span>
+              {t('nav.library', 'My Library')}
             </h2>
-            <p className="text-slate-500 dark:text-slate-400 font-medium text-lg">All your unlocked premium content in one place.</p>
+            <p className="text-slate-500 dark:text-slate-400 font-medium text-lg">{t('library.header.subtitle', 'All your unlocked premium content in one place.')}</p>
             <div className="flex justify-center mt-2">
               <button
                 onClick={handleRefresh}
@@ -4833,7 +4904,7 @@ const PurchasesView = ({ user, profile, exams, mockTests, testSeries, dynamicQue
                 className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-700 font-bold rounded-xl text-xs transition-[background-color,border-color,transform,box-shadow] shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed select-none"
               >
                 <RotateCw className={cn("w-3.5 h-3.5 text-brand-600 dark:text-brand-400", refreshing && "animate-spin")} />
-                {refreshing ? 'Syncing Library...' : 'Sync Library'}
+                {refreshing ? 'Syncing Library...' : t('library.actions.sync', 'Sync Library')}
               </button>
             </div>
           </div>
@@ -5163,6 +5234,7 @@ const premiumScaleModalVariants = {
 };
 
 const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activities = [], onNavigate, onActivityLogged, selectedExam: propsSelectedExam, setSelectedExam: propsSetSelectedExam }: { isGuest?: boolean, onSignIn?: () => void, mainTab?: string, user?: any, activities?: any[], onNavigate?: (tab: any) => void, onActivityLogged?: () => void, selectedExam?: string | null, setSelectedExam?: (val: string | null) => void }) => {
+  const { t, isOdia } = useLanguage();
   const { profile, isAdmin, hasFullAccess, grantFullAccess, hasAccessTo, unlockItem, guestUsage, incrementGuestUsage } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -8066,14 +8138,14 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             {/* Section header — bolder on mobile */}
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-[18px] sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">Continue Practice</h2>
-                <p className="text-[11px] text-slate-400 font-medium mt-0.5 sm:hidden">Pick up where you left off</p>
+                <h2 className="text-[18px] sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">{t('common.activity.continuePractice', 'Continue Practice')}</h2>
+                <p className="text-[11px] text-slate-400 font-medium mt-0.5 sm:hidden">{t('common.activity.testHistoryGlance', 'Pick up where you left off')}</p>
               </div>
               <button
                 onClick={() => onNavigate?.('history')}
                 className="text-xs sm:text-sm font-bold text-brand-600 hover:text-brand-700 transition-colors shrink-0 ml-2"
               >
-                View All
+                {t('common.activity.viewAll', 'View All')}
               </button>
             </div>
 
@@ -8140,10 +8212,12 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       const days = Math.floor(diff / 86400000);
                       const hours = Math.floor(diff / 3600000);
                       const mins = Math.floor(diff / 60000);
-                      if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
-                      if (hours > 0) return `${hours}h ago`;
-                      return `${mins}m ago`;
-                    } catch { return 'recently'; }
+                      if (days > 1) return t('common.activity.daysAgo', `${days} days ago`, { days: isOdia ? toOdiaDigits(days) : days });
+                      if (days === 1) return t('common.activity.dayAgo', '1 day ago');
+                      if (hours > 0) return t('common.activity.hoursAgo', `${hours}h ago`, { hours: isOdia ? toOdiaDigits(hours) : hours });
+                      if (mins > 0) return t('common.activity.minsAgo', `${mins}m ago`, { mins: isOdia ? toOdiaDigits(mins) : mins });
+                      return t('common.activity.justNow', 'recently');
+                    } catch { return t('common.activity.justNow', 'recently'); }
                   })();
 
                   // Can resume locally or across devices if test ID or title is present
@@ -8187,21 +8261,21 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                             <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white fill-white ml-0.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 dark:text-white line-clamp-2 sm:line-clamp-1 leading-snug group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors duration-300">{a.title || 'Practice Session'}</h4>
-                            <p className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">Last practiced <span className="text-slate-600 dark:text-slate-300 font-semibold">{timeAgo}</span></p>
+                            <h4 className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 dark:text-white line-clamp-2 sm:line-clamp-1 leading-snug group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors duration-300">{a.title || t('common.activity.continuePractice', 'Practice Session')}</h4>
+                            <p className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">{t('common.activity.lastPracticed', 'Last practiced {time}', { time: timeAgo })}</p>
                             {a.metadata?.testCategory && (
                               <span className="inline-block mt-1 text-[8.5px] sm:text-[9px] font-black uppercase tracking-widest text-brand-600 dark:text-brand-400 bg-brand-50/70 dark:bg-brand-950/50 border border-brand-100/40 dark:border-brand-800/50 px-1.5 py-0.5 rounded">{a.metadata.testCategory}</span>
                             )}
                             {!canResume && (
-                              <span className="block text-[8.5px] sm:text-[9px] font-bold text-slate-400 mt-0.5">Open app to resume</span>
+                              <span className="block text-[8.5px] sm:text-[9px] font-bold text-slate-400 mt-0.5">{t('common.activity.openAppToResume', 'Open app to resume')}</span>
                             )}
                           </div>
                         </div>
                         {/* Progress bar — taller + labelled on mobile for clarity */}
                         <div className="flex flex-col gap-1 relative z-10">
                           <div className="flex items-center justify-between mb-0.5">
-                            <span className="text-[8.5px] sm:text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Progress</span>
-                            <span className="text-[10px] sm:text-[11px] font-black text-brand-600">{progressPct}%</span>
+                            <span className="text-[8.5px] sm:text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{t('common.activity.progress', 'Progress')}</span>
+                            <span className="text-[10px] sm:text-[11px] font-black text-brand-600">{isOdia ? toOdiaDigits(progressPct) : progressPct}%</span>
                           </div>
                           <div className="w-full h-1.5 sm:h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                             <div
@@ -8219,7 +8293,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             {incompleteTests.length > 1 && (
               <div className="flex items-center justify-center gap-1.5 mt-1 sm:hidden pointer-events-none px-4">
                 <div className="h-[1px] flex-1 bg-slate-200/60" />
-                <span className="text-[8.5px] font-black uppercase tracking-widest text-slate-400">Swipe to explore</span>
+                <span className="text-[8.5px] font-black uppercase tracking-widest text-slate-400">{t('common.activity.swipeToExplore', 'Swipe to explore')}</span>
                 <div className="h-[1px] flex-1 bg-slate-200/60" />
               </div>
             )}
@@ -8232,14 +8306,14 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             {/* Section header — bolder on mobile */}
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-[18px] sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">Recent Activity</h2>
-                <p className="text-[11px] text-slate-400 font-medium mt-0.5 sm:hidden">Your test history at a glance</p>
+                <h2 className="text-[18px] sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">{t('common.activity.recentActivity', 'Recent Activity')}</h2>
+                <p className="text-[11px] text-slate-400 font-medium mt-0.5 sm:hidden">{t('common.activity.testHistoryGlance', 'Your test history at a glance')}</p>
               </div>
               <button
                 onClick={() => onNavigate?.('history')}
                 className="text-xs sm:text-sm font-bold text-brand-600 hover:text-brand-700 transition-colors shrink-0 ml-2"
               >
-                View All
+                {t('common.activity.viewAll', 'View All')}
               </button>
             </div>
 
@@ -8329,7 +8403,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       {/* Bottom row: score chip + category label */}
                       <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700 relative z-10">
                         <span className="text-[8.5px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 truncate">
-                          {a.metadata?.testCategory || 'Activity'}
+                          {a.metadata?.testCategory || t('common.activity.recentActivity', 'Activity')}
                         </span>
                         {scoreLabel && (
                           <span className={`text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-lg shrink-0 ml-2 ${scoreColour}`}>
@@ -8346,7 +8420,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             {activities.filter((a: any) => a.type !== 'test_incomplete').length > 1 && (
               <div className="flex items-center justify-center gap-1.5 mt-1 sm:hidden pointer-events-none px-4">
                 <div className="h-[1px] flex-1 bg-slate-200/60" />
-                <span className="text-[8.5px] font-black uppercase tracking-widest text-slate-400">Swipe to explore</span>
+                <span className="text-[8.5px] font-black uppercase tracking-widest text-slate-400">{t('common.activity.swipeToExplore', 'Swipe to explore')}</span>
                 <div className="h-[1px] flex-1 bg-slate-200/60" />
               </div>
             )}
@@ -8362,6 +8436,10 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   ? filteredExams.some(e => e.category === tab) 
                   : activeTab === tab;
                 
+                const tabLabel = tab === 'upcoming' 
+                  ? t('exams.upcomingTab', 'Upcoming') 
+                  : t('exams.popularTab', 'Popular');
+
                 return (
                   <button
                     key={tab}
@@ -8385,7 +8463,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         transition={{ type: "spring", stiffness: 380, damping: 30 }}
                       />
                     )}
-                    <span className="relative z-10 capitalize">{tab}</span>
+                    <span className="relative z-10 capitalize">{tabLabel}</span>
                   </button>
                 );
               })}
@@ -8395,7 +8473,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               <Search className="absolute left-3.5 sm:left-5 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-slate-400 dark:text-slate-500" />
               <input 
                 type="text"
-                placeholder="Search exams..."
+                placeholder={t('exams.searchPlaceholder', 'Search exams...')}
                 value={examSearchQuery}
                 onChange={(e) => {
                   const val = e.target.value;
@@ -8450,7 +8528,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           onClick={() => setActiveTab('popular')} 
                           className="mt-1 px-5 py-2 text-sm font-extrabold text-white bg-[#2563EB] hover:bg-[#1d4ed8] border-2 border-slate-900 rounded-xl transition-all duration-200 shadow-[2px_2px_0px_#0f172a] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_#0f172a] cursor-pointer"
                         >
-                          View Popular Exams
+                          {t('exams.viewPopular', 'View Popular Exams')}
                         </button>
                       )}
                     </motion.div>
@@ -8631,7 +8709,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             </Button>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-955 dark:text-white tracking-tight">{bankTitle}</h1>
-              <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium">Browse available question banks</p>
+              <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium">{t('exams.step3.browsePdfLibrary', 'Browse available question banks')}</p>
             </div>
           </div>
           
@@ -8645,7 +8723,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
                <input 
                  type="text" 
-                 placeholder="Search banks..." 
+                 placeholder={t('exams.step3.searchBanks', 'Search banks...')} 
                  value={bankSearchQuery}
                  onChange={e => setBankSearchQuery(e.target.value)}
                  className="w-full pl-10 pr-4 py-3 sm:py-2.5 bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 rounded-xl focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 dark:focus:border-brand-400 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-medium outline-none transition-all shadow-sm"
@@ -8665,8 +8743,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   <span className="flex items-center gap-1.5">
                     <Filter className="w-3 h-3 opacity-60" />
                     {isMobile
-                      ? (bankSortBy === "Name" ? "Sort: Name" : bankSortBy === "Most Questions" ? "Sort: Most Qs" : "Sort: Least Qs")
-                      : `Sort: ${bankSortBy}`
+                      ? (bankSortBy === "Name" ? t('exams.step3.sortName', 'Sort: Name') : bankSortBy === "Most Questions" ? t('exams.step3.sortMost', 'Sort: Most Qs') : t('exams.step3.sortLeast', 'Sort: Least Qs'))
+                      : `Sort: ${bankSortBy === "Name" ? t('exams.step3.sortName', 'Name') : bankSortBy === "Most Questions" ? t('exams.step3.sortMost', 'Most Questions') : t('exams.step3.sortLeast', 'Least Questions')}`
                     }
                   </span>
                   <motion.div animate={{ rotate: bankSortOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
@@ -8688,9 +8766,9 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       >
                         <div className="p-1.5">
                           {[
-                            { value: "Name", label: "Sort by Name" },
-                            { value: "Most Questions", label: "Most Questions" },
-                            { value: "Least Questions", label: "Least Questions" },
+                            { value: "Name", label: t('exams.step3.sortName', 'Sort by Name') },
+                            { value: "Most Questions", label: t('exams.step3.sortMost', 'Most Questions') },
+                            { value: "Least Questions", label: t('exams.step3.sortLeast', 'Least Questions') },
                           ].map((opt) => (
                             <button
                               key={opt.value}
@@ -8734,8 +8812,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                 <Search className="w-8 h-8 text-slate-300 dark:text-slate-600" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">No matching banks found</h3>
-                <p className="text-slate-500 dark:text-slate-400">Try adjusting your search filters.</p>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">{t('exams.step3.noBanks', 'No matching banks found')}</h3>
+                <p className="text-slate-500 dark:text-slate-400">{t('exams.step3.noBanksDesc', 'Try adjusting your search filters.')}</p>
               </div>
             </div>
           )
@@ -9055,7 +9133,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   {hasAccessTo(`exam_bundle_${selectedExam}`) && (
                     <span className="px-3.5 py-1 bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[10px] font-black rounded-lg uppercase tracking-wider inline-flex items-center gap-1.5 h-6">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      Premium Unlocked
+                      {t('exams.gateway.premiumUnlocked', 'Premium Unlocked')}
                     </span>
                   )}
                 </h1>
@@ -9069,7 +9147,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     <div className="mt-1.5 self-start">
                       <span className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-[9px] font-black rounded-full uppercase tracking-wider inline-flex items-center gap-1.5">
                         <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                        Premium Unlocked
+                        {t('exams.gateway.premiumUnlocked', 'Premium Unlocked')}
                       </span>
                     </div>
                   )}
@@ -9082,14 +9160,14 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       !isDescExpanded && "line-clamp-2"
                     )}
                   >
-                    {!hasBundle && examDescription ? examDescription : 'Select your preparation path'}
+                    {!hasBundle && examDescription ? examDescription : t('exams.gateway.selectPrepPath', 'Select your preparation path')}
                   </p>
                   {!hasBundle && examDescription && examDescription.length > 150 && (
                     <button 
                       onClick={() => setIsDescExpanded(!isDescExpanded)}
                       className="text-xs font-black text-brand-600 hover:text-brand-700 transition-colors uppercase tracking-wider mt-1.5 focus:outline-none inline-flex items-center gap-1 cursor-pointer"
                     >
-                      {isDescExpanded ? 'Read Less' : 'Read More'}
+                      {isDescExpanded ? t('exams.gateway.readLess', 'Read Less') : t('exams.gateway.readMore', 'Read More')}
                     </button>
                   )}
                 </div>
@@ -9104,15 +9182,15 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             >
               <Button variant="outline" className="rounded-full bg-white/90 dark:bg-slate-800/90 border-slate-200/80 dark:border-slate-700 shadow-xs text-slate-700 dark:text-slate-200 font-bold hover:bg-brand-50 dark:hover:bg-slate-700 hover:text-brand-700 dark:hover:text-white hover:border-brand-200 h-9.5 px-4.5 text-xs sm:text-sm transition-all" onClick={() => scrollToElement('question-bank-section', { block: 'start' })}>
                 <Layers className="w-4 h-4 mr-2 text-brand-500" />
-                Question Bank
+                {t('exams.gateway.quickPills.questionBank', 'Question Bank')}
               </Button>
               <Button variant="outline" className="rounded-full bg-white/90 dark:bg-slate-800/90 border-slate-200/80 dark:border-slate-700 shadow-xs text-slate-700 dark:text-slate-200 font-bold hover:bg-indigo-50 dark:hover:bg-slate-700 hover:text-indigo-700 dark:hover:text-white hover:border-indigo-200 h-9.5 px-4.5 text-xs sm:text-sm transition-all" onClick={() => scrollToElement('practice-mode-section', { block: 'start' })}>
                 <Dumbbell className="w-4 h-4 mr-2 text-indigo-500" />
-                Practice Tests
+                {t('exams.gateway.quickPills.practiceTests', 'Practice Tests')}
               </Button>
               <Button variant="outline" className="rounded-full bg-white/90 dark:bg-slate-800/90 border-slate-200/80 dark:border-slate-700 shadow-xs text-slate-700 dark:text-slate-200 font-bold hover:bg-amber-50 dark:hover:bg-slate-700 hover:text-amber-700 dark:hover:text-white hover:border-amber-200 h-9.5 px-4.5 text-xs sm:text-sm transition-all" onClick={() => scrollToElement('test-series', { block: 'start' })}>
                 <Award className="w-4 h-4 mr-2 text-amber-500" />
-                Mock Tests
+                {t('exams.gateway.quickPills.mockTests', 'Mock Tests')}
               </Button>
             </motion.div>
           </div>
@@ -9138,7 +9216,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     />
                   )}
                   <Dumbbell className="w-3.5 h-3.5 relative z-10" />
-                  <span className="relative z-10">Practice Tests</span>
+                  <span className="relative z-10">{t('exams.gateway.quickPills.practiceTests', 'Practice Tests')}</span>
                 </button>
                 <button
                   type="button"
@@ -9156,7 +9234,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     />
                   )}
                   <Award className="w-3.5 h-3.5 relative z-10" />
-                  <span className="relative z-10">Mock Tests</span>
+                  <span className="relative z-10">{t('exams.gateway.quickPills.mockTests', 'Mock Tests')}</span>
                 </button>
                 <button
                   type="button"
@@ -9174,7 +9252,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     />
                   )}
                   <Layers className="w-3.5 h-3.5 relative z-10" />
-                  <span className="relative z-10">Question Bank</span>
+                  <span className="relative z-10">{t('exams.gateway.quickPills.questionBank', 'Question Bank')}</span>
                 </button>
               </div>
             </div>
@@ -9311,21 +9389,21 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             }
           }
 
-          recTitle = `Resume: ${testTitle}`;
-          recDesc = `You have an unfinished practice session for "${testTitle}" (${solvedCount}${totalCount ? ` / ${totalCount}` : ''} questions solved). Jump back in to finish!`;
-          recBadge = "IN PROGRESS SESSION";
-          recButtonText = "Resume Practice Now";
+          recTitle = `${t('exams.cardActions.resume', 'Resume')}: ${testTitle}`;
+          recDesc = t('exams.resumeHero.unfinishedNotice', `You have an unfinished practice session for "${testTitle}" (${solvedCount}${totalCount ? ` / ${totalCount}` : ''} questions solved). Jump back in to finish!`, { title: testTitle, solved: solvedCount, total: totalCount || solvedCount });
+          recBadge = t('exams.resumeHero.inProgress', 'IN PROGRESS SESSION');
+          recButtonText = t('exams.resumeHero.resumeBtn', 'Resume Practice Now');
           recTargetScore = sessionAcc !== null
-            ? `${sessionAcc}% Session Accuracy (${solvedCount}/${totalCount} Solved)`
-            : (avgAcc > 0 ? `Your Avg: ${avgAcc}% | Goal: 85%+` : "85% Target Goal");
-          recDurationText = `${exactTimeStr} Remaining`;
-          recCategoryPill = incompleteActivity.metadata?.testCategory || 'In-Progress Practice';
+            ? t('exams.resumeHero.sessionAccuracy', `${sessionAcc}% Session Accuracy (${solvedCount}/${totalCount} Solved)`, { acc: sessionAcc, solved: solvedCount, total: totalCount || solvedCount })
+            : (avgAcc > 0 ? t('exams.resumeHero.targetScoreAvg', `Your Avg: ${avgAcc}% | Goal: 85%+`, { avg: avgAcc }) : t('exams.resumeHero.targetScore', '85% Target Goal'));
+          recDurationText = t('exams.resumeHero.timeRemaining', `${exactTimeStr} Remaining`, { time: exactTimeStr });
+          recCategoryPill = incompleteActivity.metadata?.testCategory || t('exams.step1.chapterWise', 'In-Progress Practice');
 
-          let recMobileDesc = `${solvedCount}${totalCount ? ` of ${totalCount}` : ''} questions completed. Tap to continue session.`;
+          let recMobileDesc = t('exams.resumeHero.unfinishedNoticeMobile', `${solvedCount}${totalCount ? ` of ${totalCount}` : ''} questions completed. Tap to continue session.`, { solved: solvedCount, total: totalCount || solvedCount });
           let recMobileTargetScore = sessionAcc !== null
-            ? `${sessionAcc}% Accuracy`
-            : (avgAcc > 0 ? `Avg: ${avgAcc}%` : "85% Goal");
-          let recMobileDurationText = `${exactTimeStr} Left`;
+            ? t('exams.resumeHero.accuracy', `${sessionAcc}% Accuracy`, { acc: sessionAcc })
+            : (avgAcc > 0 ? `Avg: ${avgAcc}%` : t('exams.resumeHero.targetScore', '85% Goal'));
+          let recMobileDurationText = t('exams.resumeHero.timeRemainingLeft', `${exactTimeStr} Left`, { time: exactTimeStr });
           
           recAction = () => {
             const targetTest = incompleteActivity.metadata?.test || {
@@ -9335,7 +9413,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             handleStartDirectPractice(targetTest, incompleteActivity);
           };
 
-          const recVecTheme = getQuestionBankVectorTheme(testTitle || recTitle, currentExam?.name || recCategoryPill);
+          const recVecTheme = getQuestionBankVectorTheme(incompleteActivity?.metadata?.test || testTitle || recTitle, currentExam?.name || recCategoryPill);
           const RecWatermarkIcon = recVecTheme.WatermarkIcon;
 
           return (
@@ -9818,8 +9896,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               <Dumbbell className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
             </div>
             <div>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Step 1: Practice Tests</h2>
-              <p className="text-slate-500 dark:text-slate-400 font-medium text-xs sm:text-sm mt-0.5">Master topics with instant answers, explanations & interactive drills.</p>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">{t('exams.step1.title', 'Step 1: Practice Tests')}</h2>
+              <p className="text-slate-500 dark:text-slate-400 font-medium text-xs sm:text-sm mt-0.5">{t('exams.step1.subtitle', 'Master topics with instant answers, explanations & interactive drills.')}</p>
             </div>
           </div>
 
@@ -9843,10 +9921,10 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   )}
                 >
                   {[
-                    { id: 'topic-wise', title: 'Chapter-Wise Practice', desc: 'Master individual chapters with structured question sets & instant solutions.', tag: 'Structured Drills' },
-                    { id: 'exam-focused', title: 'High-Yield Topic Banks', desc: 'Focus on most frequently asked questions and core exam topics.', tag: 'High Yield' },
-                    { id: 'revision-sets', title: 'Daily Speed & Accuracy Quizzes', desc: '10-minute micro-quizzes to boost solving speed and accuracy.', tag: 'Daily Boost' },
-                    { id: 'pyq-collections', title: 'Topic-Wise Solved PYQs', desc: 'Previous year exam questions categorized topic-by-topic.', tag: '10-Yr PYQs' },
+                    { id: 'topic-wise', title: t('exams.step1.chapterWise', 'Chapter-Wise Practice'), desc: t('exams.step1.chapterWiseDesc', 'Master individual chapters with structured question sets & instant solutions.'), tag: t('exams.step1.chapterWiseTag', 'Structured Drills') },
+                    { id: 'exam-focused', title: t('exams.step1.highYield', 'High-Yield Topic Banks'), desc: t('exams.step1.highYieldDesc', 'Focus on most frequently asked questions and core exam topics.'), tag: t('exams.step1.highYieldTag', 'High Yield') },
+                    { id: 'revision-sets', title: t('exams.step1.speedQuizzes', 'Daily Speed & Accuracy Quizzes'), desc: t('exams.step1.speedQuizzesDesc', '10-minute micro-quizzes to boost solving speed and accuracy.'), tag: t('exams.step1.speedQuizzesTag', 'Daily Boost') },
+                    { id: 'pyq-collections', title: t('exams.step1.pyqTopic', 'Topic-Wise Solved PYQs'), desc: t('exams.step1.pyqTopicDesc', 'Previous year exam questions categorized topic-by-topic.'), tag: t('exams.step1.pyqTopicTag', '10-Yr PYQs') },
                   ].map((test, i) => {
                     const vecTheme = getPracticeModeVectorTheme(test.id);
                     const MainIcon = vecTheme.MainIcon;
@@ -9876,7 +9954,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                               setSelectedPracticeCategory(test.id);
                               scrollToElement('practice-mode-section', { block: 'start', delay: 50 });
                             }}
-                            className="p-4 bg-white border border-slate-200/80 rounded-2xl flex items-center justify-between gap-4 cursor-pointer group relative overflow-hidden transition-all duration-300 shadow-sm active:scale-[0.98]"
+                            className="p-4 bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center justify-between gap-4 cursor-pointer group relative overflow-hidden transition-all duration-300 shadow-sm active:scale-[0.98]"
                           >
                             <div className="flex items-center gap-3.5 min-w-0 flex-1">
                               <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-md relative text-white", vecTheme.logoBg)}>
@@ -9885,32 +9963,32 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                               
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-1.5 flex-wrap">
-                                  <h4 className="font-extrabold text-[14.5px] text-slate-900 tracking-tight leading-snug">{test.title}</h4>
-                                  <span className="px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[8.5px] font-black uppercase tracking-wider rounded border border-slate-200/50 shrink-0">
-                                    {count} {count === 1 ? 'Set' : 'Sets'}
+                                  <h4 className="font-extrabold text-[14.5px] text-slate-900 dark:text-white tracking-tight leading-snug">{test.title}</h4>
+                                  <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[8.5px] font-black uppercase tracking-wider rounded border border-slate-200/50 dark:border-slate-700 shrink-0">
+                                    {count === 1 ? t('exams.step1.setCountSingle', '1 Set', { count: 1 }) : t('exams.step1.setsCount', `${count} Sets`, { count })}
                                   </span>
                                   {hasNewUnreadContent('practice', test.id) ? (
                                     <span className="px-1.5 py-0.5 bg-brand-500 text-white text-[8.5px] font-black uppercase tracking-wider rounded-md shrink-0 flex items-center gap-1 animate-pulse">
                                       <span className="w-1 h-1 rounded-full bg-white animate-ping shrink-0" />
-                                      New
+                                      {t('exams.step1.newBadge', 'New')}
                                     </span>
                                   ) : (
-                                    <span className="px-1.5 py-0.5 bg-slate-50 text-slate-500 text-[8.5px] font-black rounded border border-slate-200/60 uppercase tracking-wider shrink-0">{test.tag}</span>
+                                    <span className="px-1.5 py-0.5 bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 text-[8.5px] font-black rounded border border-slate-200/60 dark:border-slate-700 uppercase tracking-wider shrink-0">{test.tag}</span>
                                   )}
                                 </div>
-                                <p className="text-[11.5px] text-slate-500 font-medium leading-relaxed mt-0.5 line-clamp-2 pr-1">{test.desc}</p>
+                                <p className="text-[11.5px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed mt-0.5 line-clamp-2 pr-1">{test.desc}</p>
                               </div>
                             </div>
                             
-                            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0 group-active:translate-x-0.5 transition-all">
+                            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 shrink-0 group-active:translate-x-0.5 transition-all">
                               <ChevronRight className="w-4 h-4" />
                             </div>
                           </div>
                         ) : (
                           <div 
                             className={cn(
-                              "p-6 sm:p-7 lg:p-8 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative w-full h-full border-none shadow-slate-950/20 card-3d-deep",
-                              vecTheme.gradient
+                              "p-6 sm:p-7 lg:p-8 rounded-[2.2rem] transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative w-full h-full card-3d-deep group",
+                              vecTheme.cardBg
                             )}
                             onClick={() => {
                               setSelectedPracticeCategory(test.id);
@@ -9919,8 +9997,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           >
                             {/* Inner Watermark & Grid Background Wrapper */}
                             <div className="absolute inset-0 overflow-hidden rounded-[2.2rem] pointer-events-none z-0">
-                              <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:14px_14px]" />
-                              <WatermarkIcon className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
+                              <div className="absolute inset-0 opacity-[0.04] dark:opacity-[0.08] bg-[radial-gradient(#0f172a_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:14px_14px]" />
+                              <WatermarkIcon className={cn("absolute -right-6 -bottom-6 w-44 h-44 stroke-[1.2] transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6", vecTheme.watermarkColor)} />
                             </div>
 
                             <div className="space-y-4 relative z-10">
@@ -9939,8 +10017,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                               </div>
 
                               <div>
-                                <h4 className="font-black text-xl sm:text-2xl text-white tracking-tight leading-tight group-hover:text-amber-300 transition-colors uppercase">{test.title}</h4>
-                                <p className="text-white/80 font-medium text-xs sm:text-sm leading-relaxed mt-2">{test.desc}</p>
+                                <h4 className={cn("font-black text-xl sm:text-2xl text-slate-900 dark:text-white tracking-tight leading-tight transition-colors uppercase", vecTheme.titleHover)}>{test.title}</h4>
+                                <p className="text-slate-600 dark:text-slate-400 font-medium text-xs sm:text-sm leading-relaxed mt-2">{test.desc}</p>
                               </div>
                             </div>
                             
@@ -9949,15 +10027,15 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                 {hasNewUnreadContent('practice', test.id) ? (
                                   <span className="text-[10px] font-black uppercase tracking-wider px-3 py-1 bg-brand-500 text-white rounded-lg flex items-center gap-1 animate-pulse shadow-xs">
                                     <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping shrink-0" />
-                                    New
+                                    {t('exams.step1.newBadge', 'New')}
                                   </span>
                                 ) : (
-                                  <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 bg-white/10 text-white/90 rounded-lg border border-white/15 backdrop-blur-xs">
+                                  <span className={cn("text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg backdrop-blur-xs", vecTheme.tagBg)}>
                                     {test.tag}
                                   </span>
                                 )}
-                                <span className="text-[10px] font-black uppercase tracking-wider px-3 py-1 bg-black/20 text-white/80 rounded-lg border border-white/10 backdrop-blur-xs">
-                                  {count} {count === 1 ? 'Set' : 'Sets'}
+                                <span className={cn("text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-lg backdrop-blur-xs", vecTheme.countBg)}>
+                                  {count === 1 ? t('exams.step1.setCountSingle', '1 Set', { count: 1 }) : t('exams.step1.setsCount', `${count} Sets`, { count })}
                                 </span>
                               </div>
 
@@ -9968,7 +10046,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                 )}
                               >
                                 <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 z-10" />
-                                <span className="relative z-10">Explore Sets</span>
+                                <span className="relative z-10">{t('exams.step1.exploreSets', 'Explore Sets')}</span>
                                 <ChevronRight className="w-4 h-4 sm:ml-1 group-hover:translate-x-1.5 transition-transform relative z-10" />
                               </Button>
                             </div>
@@ -9993,10 +10071,10 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   <div className="min-w-0 flex-1">
                     <h3 className="text-lg sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white capitalize tracking-tight leading-tight">
                       {({
-                        'topic-wise': 'Chapter-Wise Practice',
-                        'exam-focused': 'High-Yield Topic Banks',
-                        'revision-sets': 'Daily Speed & Accuracy Quizzes',
-                        'pyq-collections': 'Topic-Wise Solved PYQs'
+                        'topic-wise': t('exams.step1.chapterWise', 'Chapter-Wise Practice'),
+                        'exam-focused': t('exams.step1.highYield', 'High-Yield Topic Banks'),
+                        'revision-sets': t('exams.step1.speedQuizzes', 'Daily Speed & Accuracy Quizzes'),
+                        'pyq-collections': t('exams.step1.pyqTopic', 'Topic-Wise Solved PYQs')
                       } as Record<string, string>)[selectedPracticeCategory] || selectedPracticeCategory.replace('-', ' ')}
                     </h3>
                   </div>
@@ -10021,13 +10099,13 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           <div className="relative w-12 h-12 flex items-center justify-center">
                             <div className="absolute inset-0 rounded-full border-4 border-slate-100 dark:border-slate-800 border-t-[#2563EB] animate-[spin_1s_linear_infinite]" />
                           </div>
-                          <p className="text-slate-500 dark:text-slate-400 font-bold text-sm tracking-wide animate-pulse">Loading practice sets...</p>
+                          <p className="text-slate-500 dark:text-slate-400 font-bold text-sm tracking-wide animate-pulse">{t('exams.step1.loadingSets', 'Loading practice sets...')}</p>
                         </div>
                       );
                     }
                     return (
                       <div className="p-8 text-center bg-slate-50 dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold">
-                        No practice sets found in this category for the selected exam.
+                        {t('exams.step1.noSets', 'No practice sets found in this category for the selected exam.')}
                       </div>
                     );
                   }
@@ -10060,17 +10138,17 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         <div className="space-y-3">
           <div className="hidden sm:flex items-center gap-2 text-brand-600 dark:text-indigo-300 font-black text-[10px] uppercase tracking-[0.2em] bg-brand-50 dark:bg-indigo-950/60 w-fit px-3 py-1 rounded-full border border-brand-100 dark:border-indigo-800">
             <Award className="w-3 h-3" />
-            Test Series
+            {t('exams.step2.testSeriesBadge', 'Test Series')}
           </div>
           <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4 sm:gap-6">
             <div>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-955 dark:text-white tracking-tight">Step 2: Mock Tests</h2>
-              <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-lg font-medium mt-1 sm:mt-2 leading-relaxed">Simulate the real exam environment with our expert-curated test series.</p>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-955 dark:text-white tracking-tight">{t('exams.step2.title', 'Step 2: Mock Tests')}</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-lg font-medium mt-1 sm:mt-2 leading-relaxed">{t('exams.step2.subtitle', 'Simulate the real exam environment with our expert-curated test series.')}</p>
             </div>
             <div className="flex items-center gap-2.5 sm:gap-3 bg-white dark:bg-slate-900 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full border border-slate-200/50 dark:border-slate-800 shadow-sm w-fit text-xs sm:text-sm">
               <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-500 dark:text-brand-400" />
               <span className="font-bold text-slate-700 dark:text-slate-300">
-                Updated for {new Date().getFullYear()} Exam Pattern
+                {t('exams.step2.updatedPattern', `Updated for ${new Date().getFullYear()} Exam Pattern`, { year: new Date().getFullYear() })}
               </span>
             </div>
           </div>
@@ -10095,10 +10173,10 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                 )}
               >
                 {[
-                  { id: 'full-length', title: 'Full-Length Mock Tests', desc: 'Complete exam simulation with real-time ranking.', tag: 'Most Popular' },
-                  { id: 'sectional', title: 'Sectional Tests', desc: 'Focus on specific sections to improve your score.', tag: 'Recommended' },
-                  { id: 'pyq', title: 'PYQ Tests', desc: 'Practice with actual previous year papers.', tag: 'High Yield' },
-                  { id: 'daily', title: 'Daily / Weekly Tests', desc: 'Regular assessments to track your progress.', tag: 'Consistency' },
+                  { id: 'full-length', title: t('exams.step2.fullLength', 'Full-Length Mock Tests'), desc: t('exams.step2.fullLengthDesc', 'Complete exam simulation with real-time ranking.'), tag: t('exams.step2.fullLengthTag', 'Most Popular') },
+                  { id: 'sectional', title: t('exams.step2.sectional', 'Sectional Tests'), desc: t('exams.step2.sectionalDesc', 'Focus on specific sections to improve your score.'), tag: t('exams.step2.sectionalTag', 'Recommended') },
+                  { id: 'pyq', title: t('exams.step2.pyqTests', 'PYQ Tests'), desc: t('exams.step2.pyqTestsDesc', 'Practice with actual previous year papers.'), tag: t('exams.step2.pyqTestsTag', 'High Yield') },
+                  { id: 'daily', title: t('exams.step2.dailyWeekly', 'Daily / Weekly Tests'), desc: t('exams.step2.dailyWeeklyDesc', 'Regular assessments to track your progress.'), tag: t('exams.step2.dailyWeeklyTag', 'Consistency') },
                 ].map((test, i) => {
                   const vecTheme = getMockTestVectorTheme(test.id);
                   const MainIcon = vecTheme.MainIcon;
@@ -10131,7 +10209,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                             setSelectedMockCategory(test.id);
                             scrollToElement('test-series', { block: 'start', delay: 50 });
                           }}
-                          className="p-4 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center justify-between gap-4 cursor-pointer group relative overflow-hidden transition-all duration-300 shadow-sm active:scale-[0.98]"
+                          className="p-4 bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center justify-between gap-4 cursor-pointer group relative overflow-hidden transition-all duration-300 shadow-sm active:scale-[0.98]"
                         >
                           <div className="flex items-center gap-3.5 min-w-0 flex-1">
                             <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-md relative text-white", vecTheme.logoBg)}>
@@ -10150,22 +10228,22 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                     New
                                   </span>
                                 ) : (
-                                  <span className="px-1.5 py-0.5 bg-slate-50 text-slate-500 text-[8.5px] font-black rounded border border-slate-200/60 uppercase tracking-wider shrink-0">{test.tag}</span>
+                                  <span className="px-1.5 py-0.5 bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 text-[8.5px] font-black rounded border border-slate-200/60 dark:border-slate-700 uppercase tracking-wider shrink-0">{test.tag}</span>
                                 )}
                               </div>
-                              <p className="text-[11.5px] text-slate-500 font-medium leading-relaxed mt-0.5 line-clamp-2 pr-1">{test.desc}</p>
+                              <p className="text-[11.5px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed mt-0.5 line-clamp-2 pr-1">{test.desc}</p>
                             </div>
                           </div>
                           
-                          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0 group-active:translate-x-0.5 transition-all">
+                          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 shrink-0 group-active:translate-x-0.5 transition-all">
                             <ChevronRight className="w-4 h-4" />
                           </div>
                         </div>
                       ) : (
                         <div 
                           className={cn(
-                            "p-6 sm:p-7 lg:p-8 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative w-full h-full border-none shadow-slate-950/20 card-3d-deep",
-                            vecTheme.gradient
+                            "p-6 sm:p-7 lg:p-8 rounded-[2.2rem] transition-all duration-500 cursor-pointer flex flex-col justify-between gap-6 relative w-full h-full card-3d-deep group",
+                            vecTheme.cardBg
                           )}
                           onClick={() => {
                             setSelectedMockCategory(test.id);
@@ -10174,8 +10252,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         >
                           {/* Inner Watermark & Grid Background Wrapper */}
                           <div className="absolute inset-0 overflow-hidden rounded-[2.2rem] pointer-events-none z-0">
-                            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:14px_14px]" />
-                            <WatermarkIcon className="absolute -right-6 -bottom-6 w-44 h-44 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
+                            <div className="absolute inset-0 opacity-[0.04] dark:opacity-[0.08] bg-[radial-gradient(#0f172a_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:14px_14px]" />
+                            <WatermarkIcon className={cn("absolute -right-6 -bottom-6 w-44 h-44 stroke-[1.2] transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6", vecTheme.watermarkColor)} />
                           </div>
 
                           <div className="space-y-4 relative z-10">
@@ -10194,8 +10272,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                             </div>
 
                             <div>
-                              <h4 className="font-black text-xl sm:text-2xl text-white tracking-tight leading-tight group-hover:text-amber-300 transition-colors uppercase">{test.title}</h4>
-                              <p className="text-white/80 font-medium text-xs sm:text-sm leading-relaxed mt-2">{test.desc}</p>
+                              <h4 className={cn("font-black text-xl sm:text-2xl text-slate-900 dark:text-white tracking-tight leading-tight transition-colors uppercase", vecTheme.titleHover)}>{test.title}</h4>
+                              <p className="text-slate-600 dark:text-slate-400 font-medium text-xs sm:text-sm leading-relaxed mt-2">{test.desc}</p>
                             </div>
                           </div>
                           
@@ -10207,11 +10285,11 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                   New
                                 </span>
                               ) : (
-                                <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 bg-white/10 text-white/90 rounded-lg border border-white/15 backdrop-blur-xs">
+                                <span className={cn("text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg backdrop-blur-xs", vecTheme.tagBg)}>
                                   {test.tag}
                                 </span>
                               )}
-                              <span className="text-[10px] font-black uppercase tracking-wider px-3 py-1 bg-black/20 text-white/80 rounded-lg border border-white/10 backdrop-blur-xs">
+                              <span className={cn("text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-lg backdrop-blur-xs", vecTheme.countBg)}>
                                 {count} {count === 1 ? 'Test' : 'Tests'}
                               </span>
                             </div>
@@ -10246,10 +10324,15 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                 </Button>
                 <div className="flex items-center gap-2 sm:gap-4 min-w-0">
                   <h3 className="text-lg sm:text-3xl font-black text-slate-900 dark:text-white capitalize truncate flex items-center gap-2">
-                    {selectedMockCategory.replace('-', ' ')} Tests
+                    {({
+                      'full-length': t('exams.step2.fullLength', 'Full-Length Mock Tests'),
+                      'sectional': t('exams.step2.sectional', 'Sectional Tests'),
+                      'pyq': t('exams.step2.pyqTests', 'PYQ Tests'),
+                      'daily': t('exams.step2.dailyWeekly', 'Daily / Weekly Tests')
+                    } as Record<string, string>)[selectedMockCategory] || selectedMockCategory.replace('-', ' ') + ' Tests'}
                   </h3>
                   {selectedMockCategory === 'sectional' && (
-                    <span className="bg-brand-100 dark:bg-indigo-950/60 text-brand-600 dark:text-indigo-300 text-[10px] sm:text-xs font-black uppercase tracking-widest px-2.5 py-0.5 sm:py-1 rounded-full border border-brand-200 dark:border-indigo-800 shrink-0">Subject-Wise</span>
+                    <span className="bg-brand-100 dark:bg-indigo-950/60 text-brand-600 dark:text-indigo-300 text-[10px] sm:text-xs font-black uppercase tracking-widest px-2.5 py-0.5 sm:py-1 rounded-full border border-brand-200 dark:border-indigo-800 shrink-0">{t('exams.step2.subjectWise', 'Subject-Wise')}</span>
                   )}
                 </div>
               </div>
@@ -10280,9 +10363,9 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         <Sparkles className="w-8 h-8 text-brand-600 dark:text-brand-400 animate-pulse" />
                       </div>
                       <div className="space-y-1">
-                        <h3 className="text-xl font-bold text-slate-900">Tests Coming Soon</h3>
+                        <h3 className="text-xl font-bold text-slate-900">{t('exams.step2.testsComingSoon', 'Tests Coming Soon')}</h3>
                         <p className="text-slate-500 max-w-sm mx-auto text-sm leading-relaxed">
-                          We're preparing high-quality mock tests for this category. Stay tuned—new tests will be available soon.
+                          {t('exams.step2.testsComingSoonDesc', "We're preparing high-quality mock tests for this category. Stay tuned—new tests will be available soon.")}
                         </p>
                       </div>
                     </div>
@@ -10335,11 +10418,11 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                               className={cn(
                                 "px-4 py-2 text-xs sm:text-sm font-bold rounded-xl whitespace-nowrap transition-all duration-200 border cursor-pointer shadow-sm",
                                 isActive
-                                  ? "bg-brand-600 border-brand-600 text-white font-black scale-[1.02] shadow-brand-200"
-                                  : "bg-white hover:bg-slate-50 border-slate-200/80 text-slate-600 hover:text-slate-900"
+                                    ? "bg-brand-600 border-brand-600 text-white font-black scale-[1.02] shadow-brand-200"
+                                    : "bg-white hover:bg-slate-50 border-slate-200/80 text-slate-600 hover:text-slate-900"
                               )}
                             >
-                              {subj}
+                              {subj === 'All' ? t('exams.step2.allSubjects', 'All') : subj}
                             </button>
                           );
                         })}
@@ -10398,8 +10481,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               <BookMarked className="w-5 h-5 text-slate-700 dark:text-slate-300" />
             </div>
             <div>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Step 3: Reference Library & Question Banks</h2>
-              <p className="text-slate-500 dark:text-slate-400 font-medium text-xs sm:text-sm mt-0.5">Downloadable PDF question modules, revision sets, and past paper collections.</p>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">{t('exams.step3.title', 'Step 3: Reference Library & Question Banks')}</h2>
+              <p className="text-slate-500 dark:text-slate-400 font-medium text-xs sm:text-sm mt-0.5">{t('exams.step3.subtitle', 'Downloadable PDF question modules, revision sets, and past paper collections.')}</p>
             </div>
           </div>
           
@@ -10422,10 +10505,10 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             )}
           >
             {[
-              { id: 'topic-wise', title: 'Topic-wise Question Bank', desc: 'Curated PDF modules categorized by subject topic.' },
-              { id: 'exam-focused', title: 'Exam-Focused High Yield', desc: 'Targeted high-yield questions for fast revision.' },
-              { id: 'revision-sets', title: 'Last-Minute Revision Sets', desc: 'Compact formula & key concept quick summaries.' },
-              { id: 'pyq-collections', title: 'PYQ Question Archives', desc: 'Previous year paper PDF archives with solutions.' },
+              { id: 'topic-wise', title: t('exams.step3.topicBank', 'Topic-wise Question Bank'), desc: t('exams.step3.topicBankDesc', 'Curated PDF modules categorized by subject topic.') },
+              { id: 'exam-focused', title: t('exams.step3.examFocused', 'Exam-Focused High Yield'), desc: t('exams.step3.examFocusedDesc', 'Targeted high-yield questions for fast revision.') },
+              { id: 'revision-sets', title: t('exams.step3.revisionSets', 'Last-Minute Revision Sets'), desc: t('exams.step3.revisionSetsDesc', 'Compact formula & key concept quick summaries.') },
+              { id: 'pyq-collections', title: t('exams.step3.pyqArchives', 'PYQ Question Archives'), desc: t('exams.step3.pyqArchivesDesc', 'Previous year paper PDF archives with solutions.') },
             ].map((item, i) => {
               const vecTheme = getReferenceLibraryVectorTheme(item.id);
               const MainIcon = vecTheme.MainIcon;
@@ -10452,7 +10535,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   {isMobile ? (
                     <div
                       onClick={() => setSelectedBankType(item.id)}
-                      className="p-4 bg-white border border-slate-200/80 rounded-2xl flex items-center justify-between gap-4 cursor-pointer group relative overflow-hidden transition-all duration-300 shadow-sm active:scale-[0.98]"
+                      className="p-4 bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center justify-between gap-4 cursor-pointer group relative overflow-hidden transition-all duration-300 shadow-sm active:scale-[0.98]"
                     >
                       <div className="flex items-center gap-3.5 min-w-0 flex-1">
                         <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-md relative text-white", vecTheme.logoBg)}>
@@ -10461,16 +10544,16 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <h4 className="font-extrabold text-[14.5px] text-slate-900 tracking-tight leading-snug">{item.title}</h4>
-                            <span className="px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[8.5px] font-black uppercase tracking-wider rounded border border-slate-200/50 shrink-0">
-                              {count} {count === 1 ? 'Resource' : 'Resources'}
+                            <h4 className="font-extrabold text-[14.5px] text-slate-900 dark:text-white tracking-tight leading-snug">{item.title}</h4>
+                            <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[8.5px] font-black uppercase tracking-wider rounded border border-slate-200/50 dark:border-slate-700 shrink-0">
+                              {count === 1 ? t('exams.step3.resourceCountSingle', '1 Resource', { count: 1 }) : t('exams.step3.resourceCount', `${count} Resources`, { count })}
                             </span>
                           </div>
-                          <p className="text-[11.5px] text-slate-500 font-medium leading-relaxed mt-0.5 line-clamp-2 pr-1">{item.desc}</p>
+                          <p className="text-[11.5px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed mt-0.5 line-clamp-2 pr-1">{item.desc}</p>
                         </div>
                       </div>
                       
-                      <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0 group-active:translate-x-0.5 transition-all">
+                      <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 shrink-0 group-active:translate-x-0.5 transition-all">
                         <ChevronRight className="w-4 h-4" />
                       </div>
                     </div>
@@ -10478,14 +10561,14 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     <div
                       onClick={() => setSelectedBankType(item.id)}
                       className={cn(
-                        "p-5 sm:p-6 text-white rounded-[2.2rem] hover:shadow-2xl group transition-all duration-500 cursor-pointer flex flex-col justify-between gap-5 relative w-full h-full border-none shadow-slate-950/20 card-3d-deep min-h-[260px]",
-                        vecTheme.gradient
+                        "p-5 sm:p-6 rounded-[2.2rem] transition-all duration-500 cursor-pointer flex flex-col justify-between gap-5 relative w-full h-full card-3d-deep min-h-[260px] group",
+                        vecTheme.cardBg
                       )}
                     >
                       {/* Inner Watermark & Grid Background Wrapper */}
                       <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.2rem] [clip-path:inset(0_round_2.2rem)]">
-                        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:14px_14px]" />
-                        <WatermarkIcon className="absolute -right-6 -bottom-6 w-40 h-40 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
+                        <div className="absolute inset-0 opacity-[0.04] dark:opacity-[0.08] bg-[radial-gradient(#0f172a_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:14px_14px]" />
+                        <WatermarkIcon className={cn("absolute -right-6 -bottom-6 w-40 h-40 stroke-[1.2] transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6", vecTheme.watermarkColor)} />
                       </div>
 
                       <div className="space-y-3.5 relative z-10">
@@ -10498,19 +10581,19 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                             <div className="absolute inset-0 border border-white/30 rounded-2xl animate-pulse" />
                           </div>
                           
-                          <span className="px-2.5 py-1 bg-black/20 text-white/80 text-[9px] font-black uppercase tracking-wider rounded-lg border border-white/10 backdrop-blur-xs">
-                            {count} {count === 1 ? 'Resource' : 'Resources'}
+                          <span className={cn("px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg backdrop-blur-xs", vecTheme.countBg)}>
+                            {count === 1 ? t('exams.step3.resourceCountSingle', '1 Resource', { count: 1 }) : t('exams.step3.resourceCount', `${count} Resources`, { count })}
                           </span>
                         </div>
 
                         <div>
-                          <h4 className="font-black text-lg sm:text-xl text-white tracking-tight leading-tight group-hover:text-amber-300 transition-colors uppercase">{item.title}</h4>
-                          <p className="text-white/80 font-medium text-xs leading-relaxed mt-1.5">{item.desc}</p>
+                          <h4 className={cn("font-black text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight leading-tight transition-colors uppercase", vecTheme.titleHover)}>{item.title}</h4>
+                          <p className="text-slate-600 dark:text-slate-400 font-medium text-xs leading-relaxed mt-1.5">{item.desc}</p>
                         </div>
                       </div>
 
-                      <div className="pt-3 border-t border-white/15 flex items-center justify-between text-xs font-bold text-white/90 group-hover:text-amber-300 relative z-10 transition-colors">
-                        <span>Browse PDF Library</span>
+                      <div className="pt-3 border-t border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:text-brand-600 dark:group-hover:text-blue-400 relative z-10 transition-colors">
+                        <span>{t('exams.step3.browsePdfLibrary', 'Browse PDF Library')}</span>
                         <ChevronRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
                       </div>
                     </div>
@@ -10699,8 +10782,7 @@ const ExamDetailPage = () => {
   const { examId } = useParams<{ examId: string }>();
   const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
-
-
+  const { t, isOdia } = useLanguage();
 
   const [activities, setActivities] = useState<any[]>([]);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -10899,7 +10981,7 @@ const ExamDetailPage = () => {
             )}
             <LayoutDashboard className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
           </div>
-          <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'home' ? 'font-black' : 'font-extrabold'}`}>Home</span>
+          <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'home' ? 'font-black' : 'font-extrabold'}`}>{t('nav.home', 'Home')}</span>
         </button>
         <button onClick={() => handleTabClick('courses')} className={`flex flex-col items-center gap-1 sm:gap-1.5 group ${mainTab === 'courses' ? 'text-brand-650' : 'text-slate-500 hover:text-slate-800'}`}>
           <div className="relative p-1.5 sm:p-2 rounded-xl group-hover:scale-115 transition-all duration-300 border border-transparent flex items-center justify-center">
@@ -10912,7 +10994,7 @@ const ExamDetailPage = () => {
             )}
             <Target className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
           </div>
-          <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'courses' ? 'font-black' : 'font-extrabold'}`}>Study Plan</span>
+          <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'courses' ? 'font-black' : 'font-extrabold'}`}>{t('nav.studyPlan', 'Study Plan')}</span>
         </button>
         <button onClick={() => handleTabClick('analytics')} className={`flex flex-col items-center gap-1 sm:gap-1.5 group ${mainTab === 'analytics' ? 'text-brand-650' : 'text-slate-500 hover:text-slate-800'}`}>
           <div className="relative p-1.5 sm:p-2 rounded-xl group-hover:scale-115 transition-all duration-300 border border-transparent flex items-center justify-center">
@@ -10925,7 +11007,7 @@ const ExamDetailPage = () => {
             )}
             <BarChart3 className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
           </div>
-          <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'analytics' ? 'font-black' : 'font-extrabold'}`}>Analytics</span>
+          <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'analytics' ? 'font-black' : 'font-extrabold'}`}>{t('nav.analytics', 'Analytics')}</span>
         </button>
         <button onClick={() => handleTabClick('history')} className={`flex flex-col items-center gap-1 sm:gap-1.5 group ${mainTab === 'history' ? 'text-brand-650' : 'text-slate-500 hover:text-slate-800'}`}>
           <div className="relative p-1.5 sm:p-2 rounded-xl group-hover:scale-115 transition-all duration-300 border border-transparent flex items-center justify-center">
@@ -10938,7 +11020,7 @@ const ExamDetailPage = () => {
             )}
             <History className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
           </div>
-          <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'history' ? 'font-black' : 'font-extrabold'}`}>History</span>
+          <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'history' ? 'font-black' : 'font-extrabold'}`}>{t('nav.history', 'History')}</span>
         </button>
         <button onClick={() => handleTabClick('library')} className={`flex flex-col items-center gap-1 sm:gap-1.5 group ${mainTab === 'library' ? 'text-brand-650' : 'text-slate-500 hover:text-slate-800'}`}>
           <div className="relative p-1.5 sm:p-2 rounded-xl group-hover:scale-115 transition-all duration-300 border border-transparent flex items-center justify-center">
@@ -10951,7 +11033,7 @@ const ExamDetailPage = () => {
             )}
             <BookMarked className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
           </div>
-          <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'library' ? 'font-black' : 'font-extrabold'}`}>Library</span>
+          <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'library' ? 'font-black' : 'font-extrabold'}`}>{t('nav.library', 'Library')}</span>
         </button>
         <button onClick={() => handleTabClick('ai_mentor')} className={`flex flex-col items-center gap-1 sm:gap-1.5 group ${mainTab === 'ai_mentor' ? 'text-brand-650' : 'text-slate-500 hover:text-slate-800'}`}>
           <div className="relative p-1.5 sm:p-2 rounded-xl group-hover:scale-115 transition-all duration-300 border border-transparent flex items-center justify-center">
@@ -10964,7 +11046,7 @@ const ExamDetailPage = () => {
             )}
             <Sparkles className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
           </div>
-          <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'ai_mentor' ? 'font-black' : 'font-extrabold'}`}>AI Mentor</span>
+          <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'ai_mentor' ? 'font-black' : 'font-extrabold'}`}>{t('nav.aiMentor', 'AI Mentor')}</span>
         </button>
       </motion.nav>
 
@@ -11005,6 +11087,7 @@ const tabVariants = {
 
 function AppContent() {
   const { user, loading, isAdmin, logout } = useAuth();
+  const { t, isOdia } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -11475,7 +11558,7 @@ function AppContent() {
                 )}
                 <LayoutDashboard className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
               </div>
-              <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'home' ? 'font-black' : 'font-extrabold'}`}>Home</span>
+              <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'home' ? 'font-black' : 'font-extrabold'}`}>{t('nav.home', 'Home')}</span>
             </button>
             <button data-tour="bottom-nav-courses" onClick={() => handleTabClick('courses')} className={`flex flex-col items-center gap-1 sm:gap-1.5 group ${mainTab === 'courses' ? 'text-brand-650' : 'text-slate-500 hover:text-slate-800'}`}>
               <div className="relative p-1.5 sm:p-2 rounded-xl group-hover:scale-115 transition-all duration-300 border border-transparent flex items-center justify-center">
@@ -11488,7 +11571,7 @@ function AppContent() {
                 )}
                 <Target className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
               </div>
-              <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'courses' ? 'font-black' : 'font-extrabold'}`}>Study Plan</span>
+              <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'courses' ? 'font-black' : 'font-extrabold'}`}>{t('nav.studyPlan', 'Study Plan')}</span>
             </button>
             <button data-tour="bottom-nav-analytics" onClick={() => handleTabClick('analytics')} className={`flex flex-col items-center gap-1 sm:gap-1.5 group ${mainTab === 'analytics' ? 'text-brand-650' : 'text-slate-500 hover:text-slate-800'}`}>
               <div className="relative p-1.5 sm:p-2 rounded-xl group-hover:scale-115 transition-all duration-300 border border-transparent flex items-center justify-center">
@@ -11501,7 +11584,7 @@ function AppContent() {
                 )}
                 <BarChart3 className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
               </div>
-              <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'analytics' ? 'font-black' : 'font-extrabold'}`}>Analytics</span>
+              <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'analytics' ? 'font-black' : 'font-extrabold'}`}>{t('nav.analytics', 'Analytics')}</span>
             </button>
             <button data-tour="bottom-nav-history" onClick={() => handleTabClick('history')} className={`flex flex-col items-center gap-1 sm:gap-1.5 group ${mainTab === 'history' ? 'text-brand-650' : 'text-slate-500 hover:text-slate-800'}`}>
               <div className="relative p-1.5 sm:p-2 rounded-xl group-hover:scale-115 transition-all duration-300 border border-transparent flex items-center justify-center">
@@ -11514,7 +11597,7 @@ function AppContent() {
                 )}
                 <History className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
               </div>
-              <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'history' ? 'font-black' : 'font-extrabold'}`}>History</span>
+              <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'history' ? 'font-black' : 'font-extrabold'}`}>{t('nav.history', 'History')}</span>
             </button>
             <button data-tour="bottom-nav-library" onClick={() => handleTabClick('library')} className={`flex flex-col items-center gap-1 sm:gap-1.5 group ${mainTab === 'library' ? 'text-brand-650' : 'text-slate-500 hover:text-slate-800'}`}>
               <div className="relative p-1.5 sm:p-2 rounded-xl group-hover:scale-115 transition-all duration-300 border border-transparent flex items-center justify-center">
@@ -11527,7 +11610,7 @@ function AppContent() {
                 )}
                 <BookMarked className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
               </div>
-              <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'library' ? 'font-black' : 'font-extrabold'}`}>Library</span>
+              <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'library' ? 'font-black' : 'font-extrabold'}`}>{t('nav.library', 'Library')}</span>
             </button>
             <button data-tour="bottom-nav-ai_mentor" onClick={() => handleTabClick('ai_mentor')} className={`flex flex-col items-center gap-1 sm:gap-1.5 group ${mainTab === 'ai_mentor' ? 'text-brand-650' : 'text-slate-500 hover:text-slate-800'}`}>
               <div className="relative p-1.5 sm:p-2 rounded-xl group-hover:scale-115 transition-all duration-300 border border-transparent flex items-center justify-center">
@@ -11540,7 +11623,7 @@ function AppContent() {
                 )}
                 <Sparkles className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
               </div>
-              <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'ai_mentor' ? 'font-black' : 'font-extrabold'}`}>AI Mentor</span>
+              <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'ai_mentor' ? 'font-black' : 'font-extrabold'}`}>{t('nav.aiMentor', 'AI Mentor')}</span>
             </button>
           </motion.nav>
 
@@ -11654,7 +11737,7 @@ function AppContent() {
                       )}
                       <LayoutDashboard className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
                     </div>
-                    <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'home' ? 'font-black' : 'font-extrabold'}`}>Home</span>
+                    <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'home' ? 'font-black' : 'font-extrabold'}`}>{t('nav.home', 'Home')}</span>
                   </button>
                   <button onClick={() => handleTabClick('courses')} className={`flex flex-col items-center gap-1 sm:gap-1.5 group ${mainTab === 'courses' ? 'text-brand-650' : 'text-slate-500 hover:text-slate-800'}`}>
                     <div className="relative p-1.5 sm:p-2 rounded-xl group-hover:scale-115 transition-all duration-300 border border-transparent flex items-center justify-center">
@@ -11667,7 +11750,7 @@ function AppContent() {
                       )}
                       <Target className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
                     </div>
-                    <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'courses' ? 'font-black' : 'font-extrabold'}`}>Study Plan</span>
+                    <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'courses' ? 'font-black' : 'font-extrabold'}`}>{t('nav.studyPlan', 'Study Plan')}</span>
                   </button>
                   <button onClick={() => handleTabClick('analytics')} className={`flex flex-col items-center gap-1 sm:gap-1.5 group ${mainTab === 'analytics' ? 'text-brand-650' : 'text-slate-500 hover:text-slate-800'}`}>
                     <div className="relative p-1.5 sm:p-2 rounded-xl group-hover:scale-115 transition-all duration-300 border border-transparent flex items-center justify-center">
@@ -11680,7 +11763,7 @@ function AppContent() {
                       )}
                       <BarChart3 className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
                     </div>
-                    <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'analytics' ? 'font-black' : 'font-extrabold'}`}>Analytics</span>
+                    <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'analytics' ? 'font-black' : 'font-extrabold'}`}>{t('nav.analytics', 'Analytics')}</span>
                   </button>
                   <button onClick={() => handleTabClick('history')} className={`flex flex-col items-center gap-1 sm:gap-1.5 group ${mainTab === 'history' ? 'text-brand-650' : 'text-slate-500 hover:text-slate-800'}`}>
                     <div className="relative p-1.5 sm:p-2 rounded-xl group-hover:scale-115 transition-all duration-300 border border-transparent flex items-center justify-center">
@@ -11693,7 +11776,7 @@ function AppContent() {
                       )}
                       <History className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
                     </div>
-                    <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'history' ? 'font-black' : 'font-extrabold'}`}>History</span>
+                    <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'history' ? 'font-black' : 'font-extrabold'}`}>{t('nav.history', 'History')}</span>
                   </button>
                   <button onClick={() => handleTabClick('library')} className={`flex flex-col items-center gap-1 sm:gap-1.5 group ${mainTab === 'library' ? 'text-brand-650' : 'text-slate-500 hover:text-slate-800'}`}>
                     <div className="relative p-1.5 sm:p-2 rounded-xl group-hover:scale-115 transition-all duration-300 border border-transparent flex items-center justify-center">
@@ -11706,7 +11789,7 @@ function AppContent() {
                       )}
                       <BookMarked className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
                     </div>
-                    <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'library' ? 'font-black' : 'font-extrabold'}`}>Library</span>
+                    <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'library' ? 'font-black' : 'font-extrabold'}`}>{t('nav.library', 'Library')}</span>
                   </button>
                   <button onClick={() => handleTabClick('ai_mentor')} className={`flex flex-col items-center gap-1 sm:gap-1.5 group ${mainTab === 'ai_mentor' ? 'text-brand-650' : 'text-slate-500 hover:text-slate-800'}`}>
                     <div className="relative p-1.5 sm:p-2 rounded-xl group-hover:scale-115 transition-all duration-300 border border-transparent flex items-center justify-center">
@@ -11719,7 +11802,7 @@ function AppContent() {
                       )}
                       <Sparkles className="w-5.5 h-5.5 sm:w-6 sm:h-6 relative z-10" />
                     </div>
-                    <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'ai_mentor' ? 'font-black' : 'font-extrabold'}`}>AI Mentor</span>
+                    <span className={`text-[9px] sm:text-[10px] uppercase tracking-wide sm:tracking-widest ${mainTab === 'ai_mentor' ? 'font-black' : 'font-extrabold'}`}>{t('nav.aiMentor', 'AI Mentor')}</span>
                   </button>
                 </motion.nav>
 

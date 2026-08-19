@@ -104,6 +104,21 @@ export const commonTranslations = {
       activePass: 'Active Pass',
       fullAccess: 'Full Access'
     },
+    activity: {
+      continuePractice: 'Continue Practice',
+      recentActivity: 'Recent Activity',
+      testHistoryGlance: 'Your test history at a glance',
+      lastPracticed: 'Last practiced {time}',
+      progress: 'Progress',
+      openAppToResume: 'Open app to resume',
+      swipeToExplore: 'Swipe to explore',
+      viewAll: 'View All',
+      daysAgo: '{days} days ago',
+      dayAgo: '1 day ago',
+      hoursAgo: '{hours}h ago',
+      minsAgo: '{mins}m ago',
+      justNow: 'recently'
+    },
     footer: {
       aboutPlatform: "Odisha's dedicated exam preparation platform for OPSC, OSSC, OSSSC, Police, and teaching exams. Expert mock tests, detailed solutions, and 24/7 AI tutoring.",
       quickLinks: 'Quick Links',
@@ -221,6 +236,21 @@ export const commonTranslations = {
       officialPattern: 'ଅଫିସିଆଲ ପ୍ୟାଟର୍ଣ୍ଣ',
       activePass: 'ସକ୍ରିୟ ପାସ୍',
       fullAccess: 'ସମ୍ପୂର୍ଣ୍ଣ ପ୍ରବେଶ'
+    },
+    activity: {
+      continuePractice: 'ଅଭ୍ୟାସ ଜାରି ରଖନ୍ତୁ',
+      recentActivity: 'ସାମ୍ପ୍ରତିକ କାର୍ଯ୍ୟକଳାପ',
+      testHistoryGlance: 'ଆପଣଙ୍କର ପରୀକ୍ଷା ଇତିହାସ',
+      lastPracticed: 'ଶେଷ ଅଭ୍ୟାସ: {time}',
+      progress: 'ପ୍ରଗତି',
+      openAppToResume: 'ଜାରି ରଖିବା ପାଇଁ ଖୋଲନ୍ତୁ',
+      swipeToExplore: 'ଦେଖିବା ପାଇଁ ସ୍ୱାଇପ୍ କରନ୍ତୁ',
+      viewAll: 'ସମସ୍ତ ଦେଖନ୍ତୁ',
+      daysAgo: '{days} ଦିନ ପୂର୍ବେ',
+      dayAgo: '୧ ଦିନ ପୂର୍ବେ',
+      hoursAgo: '{hours} ଘଣ୍ଟା ପୂର୍ବେ',
+      minsAgo: '{mins} ମିନିଟ୍ ପୂର୍ବେ',
+      justNow: 'କିଛି ସମୟ ପୂର୍ବେ'
     },
     footer: {
       aboutPlatform: "OPSC, OSSC, OSSSC, ପୋଲିସ ଏବଂ ଶିକ୍ଷକ ନିଯୁକ୍ତି ପରୀକ୍ଷା ପାଇଁ ଓଡ଼ିଶାର ଏକମାତ୍ର ବିଶେଷଜ୍ଞ ପ୍ରସ୍ତୁତି ପ୍ଲାଟଫର୍ମ। ଅଫିସିଆଲ ସିଲାବସ୍ ମକ୍ ଟେଷ୍ଟ, ବିସ୍ତୃତ ସମାଧାନ ଏବଂ ୨୪/୭ AI ମେଣ୍ଟର।",

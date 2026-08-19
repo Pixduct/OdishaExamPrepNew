@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Layers, CheckCircle2, ChevronRight, ChevronDown, Sparkles, Target, Trophy } from 'lucide-react';
 import { useActiveExamContext, CategorizedExams, buildCategorizedExamsFromDb } from '../lib/activeExamStore';
 import { examService } from '../lib/examService';
+import { useLanguage, toOdiaDigits } from '../lib/LanguageContext';
 
 interface ExamContextSelectorModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
   const [searchQuery, setSearchQuery] = useState('');
   const [dbExams, setDbExams] = useState<any[]>(availableExamsFromDb);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const { t, isOdia } = useLanguage();
 
   // Lock background body scroll when modal is open
   useEffect(() => {
@@ -100,8 +102,8 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
     }));
   };
 
-  const handleSelectExam = (id: string, name: string) => {
-    changeExam(id, name);
+  const handleSelectExam = (examId: string, examName: string) => {
+    changeExam(examId, examName);
     onClose();
   };
 
@@ -109,23 +111,25 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
 
   return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-[99999] overflow-hidden flex items-end sm:items-center justify-center p-0 sm:p-4 pointer-events-none">
-        {/* Ambient Glassmorphic Backdrop */}
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6 overflow-hidden">
+        
+        {/* Backdrop overlay */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-slate-950/70 dark:bg-slate-950/85 backdrop-blur-md transition-opacity pointer-events-auto z-[99998]"
+          className="fixed inset-0 bg-slate-950/75 backdrop-blur-md transition-opacity"
         />
 
-        {/* Executive 3D Vector Modal / Sliding Bottom Sheet Panel */}
+        {/* Modal / Bottom Sheet Dialog Container */}
         <motion.div
-          initial={{ y: '100%', opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: '100%', opacity: 0 }}
-          transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-          className="w-full sm:max-w-xl md:max-w-2xl bg-white dark:bg-gradient-to-b dark:from-[#0B1528] dark:to-[#080E1E] border border-slate-200/90 dark:border-blue-500/30 text-slate-900 dark:text-white rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl shadow-slate-900/20 dark:shadow-slate-950/80 overflow-hidden relative text-left flex flex-col max-h-[85vh] sm:max-h-[80vh] z-[99999] my-0 sm:my-auto pointer-events-auto group"
+          initial={{ opacity: 0, y: 100, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 80, scale: 0.95 }}
+          transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+          className="relative w-full max-w-2xl bg-white dark:bg-[#0B1528] rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl border border-slate-200/80 dark:border-blue-500/30 overflow-hidden flex flex-col max-h-[88vh] sm:max-h-[85vh] z-10 group"
+          onClick={e => e.stopPropagation()}
         >
           {/* Radial Grid & 3D Background Watermark */}
           <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#60a5fa_1px,transparent_1px)] [background-size:16px_16px] opacity-30 dark:opacity-10 pointer-events-none z-0" />
@@ -136,9 +140,8 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
             <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto" />
           </div>
 
-          {/* Sticky Header Section (Title + Subtitle + Close Button + Search Input) */}
+          {/* Sticky Header Section */}
           <div className="sticky top-0 z-20 bg-white/95 dark:bg-[#0B1528]/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 shrink-0">
-            {/* Header Title Row */}
             <div className="p-4 sm:p-6 pb-2.5 sm:pb-3 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-brand-50 dark:bg-blue-500/20 border border-brand-200/80 dark:border-blue-400/40 flex items-center justify-center text-brand-600 dark:text-blue-300 shrink-0 shadow-xs">
@@ -146,11 +149,15 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
                 </div>
                 <div className="min-w-0">
                   <h3 className="text-sm sm:text-xl font-black text-slate-950 dark:text-white tracking-tight leading-snug truncate uppercase">
-                    Switch Target Exam Context
+                    {t('Switch Target Exam Context', 'Switch Target Exam Context')}
                   </h3>
                   <p className="text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-blue-200/90 truncate">
-                    <span className="sm:hidden">Filter Study Plan & Analytics by syllabus</span>
-                    <span className="hidden sm:inline">Filter Study Plan, Analytics, and History by active syllabus</span>
+                    <span className="sm:hidden">
+                      {isOdia ? 'ପାଠ୍ୟକ୍ରମ ଅନୁସାରେ ଫିଲ୍ଟର କରନ୍ତୁ' : 'Filter Study Plan & Analytics by syllabus'}
+                    </span>
+                    <span className="hidden sm:inline">
+                      {isOdia ? 'ସକ୍ରିୟ ପାଠ୍ୟକ୍ରମ ଅନୁସାରେ ଷ୍ଟଡି ପ୍ଲାନ, ଆନାଲିଟିକ୍ସ ଓ ଇତିହାସ ଫିଲ୍ଟର କରନ୍ତୁ' : 'Filter Study Plan, Analytics, and History by active syllabus'}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -171,7 +178,7 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
                   type="text"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Search exams, e.g., OSSC, Nursing..."
+                  placeholder={isOdia ? 'ପରୀକ୍ଷା ଖୋଜନ୍ତୁ, ଯଥା: OSSC, Nursing...' : 'Search exams, e.g., OSSC, Nursing...'}
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 dark:bg-[#060B16] dark:hover:bg-[#080E1C] dark:focus:bg-[#0A1224] dark:border-slate-800 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-brand-500 dark:focus:border-blue-400 transition-all shadow-inner"
                 />
                 {searchQuery && (
@@ -190,7 +197,7 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
           {/* Scrollable Content Body */}
           <div className="p-4 sm:p-6 overflow-y-auto overscroll-contain space-y-4 sm:space-y-5 flex-1 premium-scrollbar max-h-[55vh] sm:max-h-[60vh] relative z-10" data-lenis-prevent>
             
-            {/* Option 1: Global All Exams Combined Card */}
+            {/* Global All Exams Combined Card */}
             <div>
               <button
                 type="button"
@@ -211,13 +218,15 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                      <span className="text-xs sm:text-sm font-black text-slate-950 dark:text-white truncate uppercase">All Exams Combined</span>
+                      <span className="text-xs sm:text-sm font-black text-slate-950 dark:text-white truncate uppercase">
+                        {isOdia ? 'ସମସ୍ତ ପରୀକ୍ଷା ସମ୍ମିଳିତ' : 'All Exams Combined'}
+                      </span>
                       <span className="self-start sm:self-auto px-2.5 py-0.5 rounded-full text-[8.5px] sm:text-[9px] font-mono font-black uppercase tracking-wider bg-brand-100 text-brand-700 border border-brand-200 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-400/30 shrink-0">
-                        Aggregated View
+                        {isOdia ? 'ସମ୍ମିଳିତ ଦୃଶ୍ୟ' : 'Aggregated View'}
                       </span>
                     </div>
                     <p className="text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-slate-300 mt-0.5 leading-snug truncate">
-                      View total progress, overall accuracy, and combined history across all tests
+                      {isOdia ? 'ସମସ୍ତ ଟେଷ୍ଟର ମୋଟ ପ୍ରଗତି, ସାମଗ୍ରିକ ସଠିକତା ଏବଂ ଇତିହାସ ଦେଖନ୍ତୁ' : 'View total progress, overall accuracy, and combined history across all tests'}
                     </p>
                   </div>
                 </div>
@@ -230,15 +239,17 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
               </button>
             </div>
 
-            {/* Option 2: Pinned Enrolled / Active Target Section */}
+            {/* Pinned Enrolled Targets */}
             {enrolledExams.length > 0 && !searchQuery && (
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-mono font-black uppercase tracking-wider text-slate-800 dark:text-blue-300 flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
-                    Pinned Enrolled Targets
+                    {isOdia ? 'ପିନ୍ ହୋଇଥିବା ଲକ୍ଷ୍ୟ ପରୀକ୍ଷା' : 'Pinned Enrolled Targets'}
                   </h4>
-                  <span className="text-[10px] font-bold font-mono text-slate-500 dark:text-slate-400">{enrolledExams.length} Active</span>
+                  <span className="text-[10px] font-bold font-mono text-slate-500 dark:text-slate-400">
+                    {isOdia ? `${toOdiaDigits(enrolledExams.length)} ଟି ସକ୍ରିୟ` : `${enrolledExams.length} Active`}
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -265,7 +276,7 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
                             </span>
                             {exam.readinessScore && (
                               <span className="text-[9px] font-mono font-black text-emerald-800 bg-emerald-100 border border-emerald-200 dark:text-emerald-300 dark:bg-emerald-500/20 dark:border-emerald-400/30 px-1.5 py-0.5 rounded">
-                                {exam.readinessScore}% Ready
+                                {isOdia ? `${toOdiaDigits(exam.readinessScore)}% ପ୍ରସ୍ତୁତ` : `${exam.readinessScore}% Ready`}
                               </span>
                             )}
                           </div>
@@ -282,22 +293,24 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
               </div>
             )}
 
-            {/* Option 3: Categorized Accordion / Tree List */}
+            {/* Categorized Accordion */}
             <div className="space-y-3">
               <h4 className="text-xs font-mono font-black uppercase tracking-wider text-slate-800 dark:text-blue-300 flex items-center gap-1.5">
                 <Trophy className="w-3.5 h-3.5 text-brand-600 dark:text-blue-400" />
-                All Exam Syllabus Categories
+                {isOdia ? 'ସମସ୍ତ ପରୀକ୍ଷା ପାଠ୍ୟକ୍ରମ ବର୍ଗ' : 'All Exam Syllabus Categories'}
               </h4>
 
               {filteredCategories.length === 0 ? (
                 <div className="p-8 text-center bg-slate-50 dark:bg-[#060B16]/60 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800">
-                  <p className="text-xs font-bold text-slate-500 dark:text-slate-400">No exams matched your search "{searchQuery}"</p>
+                  <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                    {isOdia ? `"${searchQuery}" ସହ କୌଣସି ପରୀକ୍ଷା ମିଳିଲା ନାହିଁ` : `No exams matched your search "${searchQuery}"`}
+                  </p>
                   <button
                     type="button"
                     onClick={() => setSearchQuery('')}
                     className="mt-2 text-xs font-black text-brand-600 dark:text-blue-400 hover:underline cursor-pointer"
                   >
-                    Clear search filter
+                    {isOdia ? 'ସର୍ଚ୍ଚ ଫିଲ୍ଟର ହଟାନ୍ତୁ' : 'Clear search filter'}
                   </button>
                 </div>
               ) : (
@@ -309,7 +322,6 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
                       key={cat.categoryName}
                       className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden bg-white dark:bg-[#060B16]/90 shadow-sm"
                     >
-                      {/* Category Header Bar */}
                       <button
                         type="button"
                         onClick={() => toggleCategory(cat.categoryName)}
@@ -321,7 +333,7 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
                             {cat.categoryName}
                           </span>
                           <span className="px-2 py-0.5 bg-slate-200/80 dark:bg-slate-800 border border-slate-300/80 dark:border-slate-700 rounded-full text-[10px] font-mono font-black text-slate-700 dark:text-amber-300">
-                            {cat.exams.length}
+                            {isOdia ? toOdiaDigits(cat.exams.length) : cat.exams.length}
                           </span>
                         </div>
                         <ChevronDown
@@ -331,7 +343,6 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
                         />
                       </button>
 
-                      {/* Category Exams List */}
                       {isExpanded && (
                         <div className="p-2 divide-y divide-slate-100 dark:divide-slate-800/60">
                           {cat.exams.map(exam => {
@@ -362,7 +373,7 @@ export const ExamContextSelectorModal: React.FC<ExamContextSelectorModalProps> =
                                     <>
                                       <span className="hidden sm:inline-flex px-2.5 py-1 rounded-full text-[10px] font-mono font-black uppercase tracking-wider bg-gradient-to-r from-brand-600 to-blue-600 text-white shadow-2xs items-center gap-1">
                                         <CheckCircle2 className="w-3 h-3 text-white" />
-                                        Active Target
+                                        {isOdia ? 'ସକ୍ରିୟ ଲକ୍ଷ୍ୟ' : 'Active Target'}
                                       </span>
                                       <CheckCircle2 className="sm:hidden w-4 h-4 text-brand-600 dark:text-blue-400 shrink-0" />
                                     </>

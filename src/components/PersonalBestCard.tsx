@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Zap, Flame, Target, BookOpen, ChevronDown, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { getPersonalBests, PersonalBestsData } from '../lib/personalBestManager';
-
 import { DynamicVectorCard } from './DynamicVectorCard';
+import { useLanguage, toOdiaDigits } from '../lib/LanguageContext';
 
 interface PersonalBestCardProps {
   userId?: string;
@@ -12,6 +12,7 @@ interface PersonalBestCardProps {
 export const PersonalBestCard: React.FC<PersonalBestCardProps> = ({ userId }) => {
   const [bests, setBests] = useState<PersonalBestsData>(() => getPersonalBests(userId));
   const [showSubjectBests, setShowSubjectBests] = useState(false);
+  const { t, isOdia } = useLanguage();
 
   useEffect(() => {
     setBests(getPersonalBests(userId));
@@ -34,6 +35,11 @@ export const PersonalBestCard: React.FC<PersonalBestCardProps> = ({ userId }) =>
 
   const { highestScore, highestAccuracy, fastestSpeed, longestStreak, subjectBests } = bests;
 
+  const formatScoreValue = (val: string) => {
+    if (!isOdia) return val;
+    return toOdiaDigits(val);
+  };
+
   return (
     <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.28)">
       <div className="p-5 sm:p-7 text-slate-900 dark:text-white rounded-[2.2rem] bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl border-none shadow-xl shadow-slate-900/10 space-y-4 relative group">
@@ -51,16 +57,18 @@ export const PersonalBestCard: React.FC<PersonalBestCardProps> = ({ userId }) =>
           </div>
           <div>
             <h3 className="text-sm sm:text-lg font-black text-slate-900 dark:text-white tracking-tight leading-tight uppercase">
-              Your Personal Records & Milestones
+              {t('Your Personal Records & Milestones', 'Your Personal Records & Milestones')}
             </h3>
-            <p className="text-slate-500 dark:text-white/80 text-[10px] sm:text-xs font-medium">Track your best achievements and beat your own records</p>
+            <p className="text-slate-500 dark:text-white/80 text-[10px] sm:text-xs font-medium">
+              {isOdia ? 'ଆପଣଙ୍କ ସର୍ବୋତ୍ତମ ସଫଳତା ଟ୍ରାକ୍ କରନ୍ତୁ ଏବଂ ନିଜ ରେକର୍ଡ ଭାଙ୍ଗନ୍ତୁ' : 'Track your best achievements and beat your own records'}
+            </p>
           </div>
         </div>
 
         {/* Live Account Data Audit Badge */}
         <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-400/20 border border-emerald-200 dark:border-emerald-400/40 shrink-0 backdrop-blur-md">
           <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <span>100% Real Account Data</span>
+          <span>{isOdia ? `${toOdiaDigits(100)}% ବାସ୍ତବ ଆକାଉଣ୍ଟ ତଥ୍ୟ` : '100% Real Account Data'}</span>
         </div>
       </div>
 
@@ -71,21 +79,23 @@ export const PersonalBestCard: React.FC<PersonalBestCardProps> = ({ userId }) =>
           <div className="flex items-center justify-between text-xs text-amber-700 dark:text-amber-300 font-bold gap-1">
             <span className="flex items-center gap-1 min-w-0 font-extrabold truncate">
               <Trophy className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
-              <span>Best Score</span>
+              <span>{isOdia ? 'ସର୍ବୋତ୍ତମ ସ୍କୋର' : 'Best Score'}</span>
             </span>
-            <span className="hidden sm:inline-block text-[10px] font-mono text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-400/20 px-1.5 py-0.5 rounded font-black shrink-0 border border-amber-200 dark:border-amber-400/30">Score</span>
+            <span className="hidden sm:inline-block text-[10px] font-mono text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-400/20 px-1.5 py-0.5 rounded font-black shrink-0 border border-amber-200 dark:border-amber-400/30">
+              {isOdia ? 'ସ୍କୋର' : 'Score'}
+            </span>
           </div>
           <div className="text-xs sm:text-xl font-black text-slate-900 dark:text-white font-mono pt-0.5 tracking-tight leading-snug">
-            {highestScore.value > 0 ? highestScore.formattedValue : <span className="text-slate-400 font-sans font-bold">No Record Yet</span>}
+            {highestScore.value > 0 ? formatScoreValue(highestScore.formattedValue) : <span className="text-slate-400 font-sans font-bold">{isOdia ? 'ରେକର୍ଡ ନାହିଁ' : 'No Record Yet'}</span>}
           </div>
           <p className="text-[10px] text-slate-500 dark:text-amber-200/90 font-medium truncate" title={highestScore.testTitle}>
             {highestScore.value > 0 && highestScore.testTitle && !highestScore.testTitle.includes('Complete a test')
               ? highestScore.testTitle
-              : 'Complete a test to unlock'}
+              : (isOdia ? 'ଅନଲକ୍ କରିବାକୁ ଏକ ଟେଷ୍ଟ ଦିଅନ୍ତୁ' : 'Complete a test to unlock')}
           </p>
           {highestScore.value > 0 && highestScore.detail && (
             <span className="text-[9px] font-bold text-amber-700 dark:text-amber-400 block pt-0.5 truncate">
-              {highestScore.detail}
+              {isOdia ? formatScoreValue(highestScore.detail) : highestScore.detail}
             </span>
           )}
         </div>
@@ -95,21 +105,23 @@ export const PersonalBestCard: React.FC<PersonalBestCardProps> = ({ userId }) =>
           <div className="flex items-center justify-between text-xs text-emerald-700 dark:text-emerald-300 font-bold gap-1">
             <span className="flex items-center gap-1 min-w-0 font-extrabold truncate">
               <Target className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span>Best Accuracy</span>
+              <span>{isOdia ? 'ସର୍ବୋତ୍ତମ ସଠିକତା' : 'Best Accuracy'}</span>
             </span>
-            <span className="hidden sm:inline-block text-[10px] font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-400/20 px-1.5 py-0.5 rounded font-black shrink-0 border border-emerald-200 dark:border-emerald-400/30">Accuracy</span>
+            <span className="hidden sm:inline-block text-[10px] font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-400/20 px-1.5 py-0.5 rounded font-black shrink-0 border border-emerald-200 dark:border-emerald-400/30">
+              {isOdia ? 'ସଠିକତା' : 'Accuracy'}
+            </span>
           </div>
           <div className="text-xs sm:text-xl font-black text-slate-900 dark:text-white font-mono pt-0.5 tracking-tight leading-snug">
-            {highestAccuracy.value > 0 ? highestAccuracy.formattedValue : <span className="text-slate-400 font-sans font-bold">No Record Yet</span>}
+            {highestAccuracy.value > 0 ? formatScoreValue(highestAccuracy.formattedValue) : <span className="text-slate-400 font-sans font-bold">{isOdia ? 'ରେକର୍ଡ ନାହିଁ' : 'No Record Yet'}</span>}
           </div>
           <p className="text-[10px] text-slate-500 dark:text-emerald-200/90 font-medium truncate" title={highestAccuracy.testTitle}>
             {highestAccuracy.value > 0 && highestAccuracy.testTitle && !highestAccuracy.testTitle.includes('Complete a test')
               ? highestAccuracy.testTitle
-              : 'Highest test accuracy'}
+              : (isOdia ? 'ସର୍ବାଧିକ ଟେଷ୍ଟ ସଠିକତା' : 'Highest test accuracy')}
           </p>
           {highestAccuracy.value > 0 && highestAccuracy.detail && (
             <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 block pt-0.5 truncate">
-              {highestAccuracy.detail}
+              {isOdia ? formatScoreValue(highestAccuracy.detail) : highestAccuracy.detail}
             </span>
           )}
         </div>
@@ -119,21 +131,23 @@ export const PersonalBestCard: React.FC<PersonalBestCardProps> = ({ userId }) =>
           <div className="flex items-center justify-between text-xs text-cyan-700 dark:text-cyan-300 font-bold gap-1">
             <span className="flex items-center gap-1 min-w-0 font-extrabold truncate">
               <Zap className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 shrink-0" />
-              <span>Fastest Speed</span>
+              <span>{isOdia ? 'ଦ୍ରୁତତମ ଗତି' : 'Fastest Speed'}</span>
             </span>
-            <span className="hidden sm:inline-block text-[10px] font-mono text-cyan-700 dark:text-cyan-300 bg-cyan-50 dark:bg-cyan-400/20 px-1.5 py-0.5 rounded font-black shrink-0 border border-cyan-200 dark:border-cyan-400/30">Speed</span>
+            <span className="hidden sm:inline-block text-[10px] font-mono text-cyan-700 dark:text-cyan-300 bg-cyan-50 dark:bg-cyan-400/20 px-1.5 py-0.5 rounded font-black shrink-0 border border-cyan-200 dark:border-cyan-400/30">
+              {isOdia ? 'ଗତି' : 'Speed'}
+            </span>
           </div>
           <div className="text-xs sm:text-xl font-black text-slate-900 dark:text-white font-mono pt-0.5 tracking-tight leading-snug">
-            {fastestSpeed.value > 0 ? fastestSpeed.formattedValue : <span className="text-slate-400 font-sans font-bold">No Record Yet</span>}
+            {fastestSpeed.value > 0 ? formatScoreValue(fastestSpeed.formattedValue) : <span className="text-slate-400 font-sans font-bold">{isOdia ? 'ରେକର୍ଡ ନାହିଁ' : 'No Record Yet'}</span>}
           </div>
           <p className="text-[10px] text-slate-500 dark:text-cyan-200/90 font-medium truncate" title={fastestSpeed.testTitle}>
             {fastestSpeed.value > 0 && fastestSpeed.testTitle && !fastestSpeed.testTitle.includes('Complete a test')
               ? fastestSpeed.testTitle
-              : 'Avg time per question'}
+              : (isOdia ? 'ପ୍ରଶ୍ନ ପ୍ରତି ହାରାହାରି ସମୟ' : 'Avg time per question')}
           </p>
           {fastestSpeed.value > 0 && fastestSpeed.detail && (
             <span className="text-[9px] font-bold text-cyan-700 dark:text-cyan-400 block pt-0.5 truncate">
-              {fastestSpeed.detail}
+              {isOdia ? formatScoreValue(fastestSpeed.detail) : fastestSpeed.detail}
             </span>
           )}
         </div>
@@ -143,20 +157,28 @@ export const PersonalBestCard: React.FC<PersonalBestCardProps> = ({ userId }) =>
           <div className="flex items-center justify-between text-xs text-orange-700 dark:text-orange-300 font-bold gap-1">
             <span className="flex items-center gap-1 min-w-0 font-extrabold truncate">
               <Flame className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
-              <span>Best Streak</span>
+              <span>{isOdia ? 'ସର୍ବୋତ୍ତମ ଷ୍ଟ୍ରିକ୍' : 'Best Streak'}</span>
             </span>
-            <span className="hidden sm:inline-block text-[10px] font-mono text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-400/20 px-1.5 py-0.5 rounded font-black shrink-0 border border-orange-200 dark:border-orange-400/30">Streak</span>
+            <span className="hidden sm:inline-block text-[10px] font-mono text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-400/20 px-1.5 py-0.5 rounded font-black shrink-0 border border-orange-200 dark:border-orange-400/30">
+              {isOdia ? 'ଷ୍ଟ୍ରିକ୍' : 'Streak'}
+            </span>
           </div>
           <div className="text-xs sm:text-xl font-black text-slate-900 dark:text-white font-mono pt-0.5 tracking-tight leading-snug">
-            <span className="sm:hidden">{longestStreak.formattedValue.replace('In A Row', 'Streak')}</span>
-            <span className="hidden sm:inline">{longestStreak.formattedValue}</span>
+            {isOdia
+              ? `${toOdiaDigits(longestStreak.value)} ଦିନ ନିରନ୍ତର`
+              : (
+                <>
+                  <span className="sm:hidden">{longestStreak.formattedValue.replace('In A Row', 'Streak')}</span>
+                  <span className="hidden sm:inline">{longestStreak.formattedValue}</span>
+                </>
+              )}
           </div>
           <p className="text-[10px] text-slate-500 dark:text-orange-200/90 font-medium truncate">
-            Max study streak
+            {isOdia ? 'ସର୍ବାଧିକ ଅଧ୍ୟୟନ ଷ୍ଟ୍ରିକ୍' : 'Max study streak'}
           </p>
           {longestStreak.detail && (
             <span className="text-[9px] font-bold text-orange-700 dark:text-orange-400 block pt-0.5 truncate">
-              {longestStreak.detail}
+              {isOdia ? formatScoreValue(longestStreak.detail) : longestStreak.detail}
             </span>
           )}
         </div>
@@ -172,7 +194,11 @@ export const PersonalBestCard: React.FC<PersonalBestCardProps> = ({ userId }) =>
           >
             <span className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-              <span>Subject-Wise Best Scores ({subjectBests.length} Subjects)</span>
+              <span>
+                {isOdia
+                  ? `ବିଷୟ-ଭିତ୍ତିକ ସର୍ବୋତ୍ତମ ସ୍କୋର (${toOdiaDigits(subjectBests.length)} ଟି ବିଷୟ)`
+                  : `Subject-Wise Best Scores (${subjectBests.length} Subjects)`}
+              </span>
             </span>
             <ChevronDown className={`w-4 h-4 text-slate-500 dark:text-slate-300 transition-transform ${showSubjectBests ? 'rotate-180' : ''}`} />
           </button>
@@ -194,12 +220,14 @@ export const PersonalBestCard: React.FC<PersonalBestCardProps> = ({ userId }) =>
                       <div className="min-w-0 pr-2">
                         <span className="font-bold text-slate-900 dark:text-white block truncate">{sub.subjectName}</span>
                         <span className="text-[10px] text-slate-500 dark:text-slate-300 font-medium">
-                          {sub.attemptCount} {sub.attemptCount === 1 ? 'practice session' : 'practice sessions'} ({sub.totalAttempted} questions)
+                          {isOdia
+                            ? `${toOdiaDigits(sub.attemptCount)} ଅଭ୍ୟାସ ସେସନ୍ (${toOdiaDigits(sub.totalAttempted)} ପ୍ରଶ୍ନ)`
+                            : `${sub.attemptCount} ${sub.attemptCount === 1 ? 'practice session' : 'practice sessions'} (${sub.totalAttempted} questions)`}
                         </span>
                       </div>
 
                       <span className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-slate-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/40 font-mono font-black text-xs shrink-0">
-                        {sub.highestAccuracy}% Correct
+                        {isOdia ? `${toOdiaDigits(sub.highestAccuracy)}% ସଠିକ୍` : `${sub.highestAccuracy}% Correct`}
                       </span>
                     </div>
                   ))}
@@ -213,3 +241,4 @@ export const PersonalBestCard: React.FC<PersonalBestCardProps> = ({ userId }) =>
     </DynamicVectorCard>
   );
 };
+

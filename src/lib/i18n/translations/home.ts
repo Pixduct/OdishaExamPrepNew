@@ -78,7 +78,17 @@ export const homeTranslations = {
     videos: {
       sectionBadge: 'Topper Masterclasses & Strategy',
       title: 'Free Video Strategy & Solution Guides',
-      subtitle: 'Watch video breakdowns by toppers and educators explaining high-weightage topics and time management.'
+      subtitle: 'Watch video breakdowns by toppers and educators explaining high-weightage topics and time management.',
+      subscribeBtn: 'Subscribe on YouTube',
+      watchNow: 'Watch Now',
+      freeLecture: 'Free Lecture',
+      categories: {
+        aptitude: 'Aptitude & Math',
+        strategy: 'Strategy & Tips',
+        generalStudies: 'General Studies',
+        language: 'Odia & English',
+        currentAffairs: 'Current Affairs'
+      }
     }
   },
   or: {
@@ -159,8 +169,18 @@ export const homeTranslations = {
     },
     videos: {
       sectionBadge: 'ଟପ୍ପର ମାଷ୍ଟରକ୍ଲାସ୍ ଓ ରଣନୀତି',
-      title: 'ମାଗଣା ପରୀକ୍ଷା ପ୍ରସ୍ତୁତି ଭିଡିଓ ଗାଇଡ୍',
-      subtitle: 'ଟପ୍ପର ଏବଂ ବିଶେଷଜ୍ଞ ଶିକ୍ଷକଙ୍କ ଦ୍ୱାରା ସଠିକ୍ ସମୟ ପରିଚାଳନା ଓ ସମାଧାନ କୌଶଳ ଶିଖନ୍ତୁ।'
+      title: 'ମାଗଣା ପରୀକ୍ଷା ରଣନୀତି ଭିଡିଓ',
+      subtitle: 'ଆମ ଚ୍ୟାନେଲରୁ ମାଗଣା ମାଷ୍ଟରକ୍ଲାସ୍ ଏବଂ ପରୀକ୍ଷା ପ୍ରସ୍ତୁତି ଟିପ୍ସ ଦେଖନ୍ତୁ।',
+      subscribeBtn: 'ୟୁଟ୍ୟୁବ୍ ରେ ସବସ୍କ୍ରାଇବ୍ କରନ୍ତୁ',
+      watchNow: 'ଦେଖନ୍ତୁ',
+      freeLecture: 'ମାଗଣା କ୍ଲାସ୍',
+      categories: {
+        aptitude: 'ଗଣିତ ଓ ଯୁକ୍ତି',
+        strategy: 'ରଣନୀତି ଓ ଟିପ୍ସ',
+        generalStudies: 'ସାଧାରଣ ଜ୍ଞାନ',
+        language: 'ଭାଷା (ଓଡ଼ିଆ/ଇଂରାଜୀ)',
+        currentAffairs: 'ସାମ୍ପ୍ରତିକ ଘଟଣାବଳୀ'
+      }
     }
   }
 };

@@ -251,6 +251,35 @@ export const getQuestionBankVectorTheme = (itemInput: any = {}, fallbackExamName
   const t = (title + ' ' + (explicitSubject || '') + ' ' + (category || '')).toLowerCase();
 
   // =========================================================================
+  // 0. MOCK TEST SERIES (FULL-LENGTH, SECTIONAL, PYQ, DAILY ASSESSMENTS)
+  // =========================================================================
+  if (t.includes('full-length') || t.includes('full length') || t.includes('grand mock')) {
+    return {
+      gradient: 'bg-gradient-to-br from-amber-950 via-orange-950 to-slate-950 text-amber-50',
+      badgeBg: 'bg-amber-400/20 text-amber-200 border-amber-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'FULL-LENGTH MOCK TEST',
+      examTag: resolvedExamTag,
+      pattern: 'blueprint-grid',
+      MainIcon: Award,
+      WatermarkIcon: Sparkles,
+      accentGlowColor: 'rgba(245, 158, 11, 0.25)',
+    };
+  }
+
+  if (t.includes('sectional') || t.includes('subject-wise') || t.includes('sectional test')) {
+    return {
+      gradient: 'bg-gradient-to-br from-cyan-950 via-blue-950 to-slate-950 text-cyan-50',
+      badgeBg: 'bg-cyan-400/20 text-cyan-200 border-cyan-400/40',
+      badgeText: explicitSubject ? explicitSubject.toUpperCase() : 'SECTIONAL MOCK TEST',
+      examTag: resolvedExamTag,
+      pattern: 'circuit-matrix',
+      MainIcon: Target,
+      WatermarkIcon: Crosshair,
+      accentGlowColor: 'rgba(6, 182, 212, 0.25)',
+    };
+  }
+
+  // =========================================================================
   // 1. TEACHING, EDUCATION & PEDAGOGY (OTET, OSSTET, CTET, OAVS, B.Ed, KVS)
   // =========================================================================
 

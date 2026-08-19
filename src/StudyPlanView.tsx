@@ -10,6 +10,7 @@ import { DynamicVectorCard } from './components/DynamicVectorCard';
 import { stagger } from './lib/animations';
 
 import { ActiveExamContextBar } from './components/ActiveExamContextBar';
+import { useLanguage } from './lib/LanguageContext';
 
 interface StudyPlanViewProps {
   user?: any;
@@ -22,6 +23,8 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
   onNavigate,
   onLaunchTopicPractice
 }) => {
+  const { t, isOdia } = useLanguage();
+
   return (
     <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent overflow-x-hidden" style={{ isolation: 'isolate' }}>
       {/* Full-Screen Edge-to-Edge Academic Vector Canvas Grid & HSL Glows */}
@@ -57,17 +60,17 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
                 </div>
                 <div>
                   <h2 className="text-xl sm:text-3xl font-black text-slate-950 dark:text-white tracking-tight leading-tight uppercase">
-                    Study Plan & Preparation Hub
+                    {t('studyPlan.header.title', 'Study Plan & Preparation Hub')}
                   </h2>
                   <p className="text-slate-600 dark:text-slate-300 text-xs sm:text-sm font-medium mt-1">
-                    Your daily time-boxed schedule, weak subject drills, and Odisha student rankings
+                    {t('studyPlan.header.subtitle', 'Your daily time-boxed schedule, weak subject drills, and Odisha student rankings')}
                   </p>
                 </div>
               </div>
 
               <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black text-brand-700 dark:text-blue-300 bg-brand-50/80 dark:bg-blue-900/40 border border-brand-200/70 dark:border-blue-700/50 shrink-0 font-mono shadow-2xs backdrop-blur-md">
                 <Sparkles className="w-4 h-4 text-brand-600 dark:text-blue-400 animate-pulse" />
-                Personalized Hub
+                {t('studyPlan.header.badge', 'Personalized Hub')}
               </span>
             </div>
           </div>
@@ -98,13 +101,13 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
             <div className="space-y-2 text-center sm:text-left max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-brand-500/20 text-brand-300 border border-brand-500/30">
                 <Sparkles className="w-3.5 h-3.5 text-brand-400" />
-                Personalized Preparation Hub
+                {t('studyPlan.header.badge', 'Personalized Preparation Hub')}
               </div>
               <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-                Sign In to Access Your Personal AI Study Plan & Score Tracker
+                {t('studyPlan.signedOut.title', 'Sign In to Access Your Personal AI Study Plan & Score Tracker')}
               </h3>
               <p className="text-xs sm:text-sm font-medium text-slate-300 leading-relaxed">
-                Your daily schedule, weak topic recommendations, Odisha student rankings, and personal performance matrix are private to your user account.
+                {t('studyPlan.signedOut.description', 'Your daily schedule, weak topic recommendations, Odisha student rankings, and personal performance matrix are private to your user account.')}
               </p>
             </div>
 
@@ -114,7 +117,7 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
                 onClick={() => window.dispatchEvent(new CustomEvent('oep-open-auth-modal'))}
                 className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-indigo-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-xs sm:text-sm shadow-lg shadow-brand-500/25 transition-all duration-200 active:scale-95 cursor-pointer border-none"
               >
-                Sign In to Access →
+                {t('common.auth.signInBtn', 'Sign In to Access →')}
               </button>
             </div>
           </div>

@@ -3,6 +3,7 @@ import { Target, ChevronDown, Layers, Sparkles } from 'lucide-react';
 import { useActiveExamContext } from '../lib/activeExamStore';
 import { ExamContextSelectorModal } from './ExamContextSelectorModal';
 import { DynamicVectorCard } from './DynamicVectorCard';
+import { useLanguage } from '../lib/LanguageContext';
 
 interface ActiveExamContextBarProps {
   availableExamsFromDb?: any[];
@@ -15,6 +16,7 @@ export const ActiveExamContextBar: React.FC<ActiveExamContextBarProps> = ({
 }) => {
   const [context] = useActiveExamContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { t, isOdia } = useLanguage();
 
   useEffect(() => {
     const handleOpen = () => setIsModalOpen(true);
@@ -23,6 +25,9 @@ export const ActiveExamContextBar: React.FC<ActiveExamContextBarProps> = ({
   }, []);
 
   const isAll = context.activeExamId === 'all';
+  const displayExamName = isAll
+    ? (isOdia ? 'ସମସ୍ତ ପରୀକ୍ଷା ସମ୍ମିଳିତ' : 'All Exams Combined')
+    : context.activeExamName;
 
   return (
     <>
@@ -52,13 +57,13 @@ export const ActiveExamContextBar: React.FC<ActiveExamContextBarProps> = ({
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <span className="text-[9px] sm:text-[10px] font-mono font-black uppercase tracking-widest text-brand-700 dark:text-blue-300">
-                    Target Exam Context
+                    {t('Target Exam Context', 'Target Exam Context')}
                   </span>
                   <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isAll ? 'bg-brand-500 dark:bg-blue-400' : 'bg-emerald-500 dark:bg-emerald-400 animate-pulse'}`} />
                 </div>
 
                 <h4 className="text-xs sm:text-base font-black text-slate-950 dark:text-white truncate leading-tight mt-0.5 uppercase tracking-tight">
-                  {context.activeExamName}
+                  {displayExamName}
                 </h4>
               </div>
             </div>
@@ -68,9 +73,9 @@ export const ActiveExamContextBar: React.FC<ActiveExamContextBarProps> = ({
               onClick={() => setIsModalOpen(true)}
               className="inline-flex items-center gap-1 sm:gap-2 px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-brand-600 via-blue-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white text-xs font-black uppercase tracking-wider transition-all duration-200 shadow-md shadow-brand-500/25 active:scale-95 shrink-0 cursor-pointer border-none"
             >
-              <span className="sm:hidden">Switch ⌄</span>
+              <span className="sm:hidden">{t('Switch ⌄', 'Switch ⌄')}</span>
               <span className="hidden sm:inline-flex items-center gap-2">
-                <span>{isAll ? 'Switch Target' : 'Change Target'}</span>
+                <span>{isAll ? t('Switch Target', 'Switch Target') : t('Change Target', 'Change Target')}</span>
                 <ChevronDown className="w-4 h-4 text-white/90" />
               </span>
             </button>

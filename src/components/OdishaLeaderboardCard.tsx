@@ -15,8 +15,8 @@ import {
   setUserStudentName,
   ALL_30_ODISHA_DISTRICTS
 } from '../lib/profileManager';
-
 import { DynamicVectorCard } from './DynamicVectorCard';
+import { useLanguage, toOdiaDigits } from '../lib/LanguageContext';
 
 interface OdishaLeaderboardCardProps {
   userId?: string;
@@ -29,6 +29,7 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
   const [isDistrictModalOpen, setIsDistrictModalOpen] = useState(false);
   const [selectedDistrict, setSelectedDistrict] = useState<string>(() => getUserDistrict());
   const [districtSearch, setDistrictSearch] = useState('');
+  const { t, isOdia } = useLanguage();
 
   useEffect(() => {
     setXpState(getUserXpState(userId, user));
@@ -77,6 +78,16 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
     return district.split(' ')[0].replace(/,/g, '');
   };
 
+  const getLocalizedLeagueName = (name: string) => {
+    if (!isOdia) return name;
+    if (name.includes('Bronze')) return 'ବ୍ରୋଞ୍ଜ ଲିଗ୍';
+    if (name.includes('Silver')) return 'ସିଲଭର ଲିଗ୍';
+    if (name.includes('Gold')) return 'ଗୋଲ୍ଡ ଲିଗ୍';
+    if (name.includes('Diamond')) return 'ଡାଇମଣ୍ଡ ଲିଗ୍';
+    if (name.includes('Master')) return 'ମାଷ୍ଟର ଲିଗ୍';
+    return name;
+  };
+
   return (
     <DynamicVectorCard glowColor="rgba(245, 158, 11, 0.28)" className="mb-6 sm:mb-8">
       <div className="p-5 sm:p-7 text-slate-900 dark:text-white rounded-[2.2rem] bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none space-y-4 sm:space-y-5 relative overflow-hidden">
@@ -92,11 +103,13 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
           </div>
           <div className="min-w-0">
             <h3 className="text-sm sm:text-lg font-black text-slate-900 dark:text-white tracking-tight leading-tight block uppercase">
-              <span className="sm:hidden">Odisha Rank & Leagues</span>
-              <span className="hidden sm:inline truncate">Odisha Rank & Student Leagues</span>
+              <span className="sm:hidden">{t('Odisha Rank & Leagues', 'Odisha Rank & Leagues')}</span>
+              <span className="hidden sm:inline truncate">{t('Odisha Rank & Student Leagues', 'Odisha Rank & Student Leagues')}</span>
             </h3>
             <p className="text-slate-600 dark:text-slate-300 text-[10px] sm:text-xs font-medium truncate hidden sm:block">
-              Earn effort XP points, unlock league tiers, and compete among 18,500 Odisha aspirants
+              {isOdia
+                ? 'ଅଭ୍ୟାସ XP ପଏଣ୍ଟ ଅର୍ଜନ କରନ୍ତୁ, ଲିଗ୍ ସ୍ତର ଅନଲକ୍ କରନ୍ତୁ ଏବଂ ଓଡ଼ିଶାର ୧୮,୫୦୦+ ଛାତ୍ରଙ୍କ ସହ ପ୍ରତିଯୋଗିତା କରନ୍ତୁ'
+                : 'Earn effort XP points, unlock league tiers, and compete among 18,500 Odisha aspirants'}
             </p>
           </div>
         </div>
@@ -104,7 +117,7 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
         {/* Current League Badge (Compact Inline) */}
         <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold border ${currentLeague.badgeBg} ${currentLeague.badgeBorder} ${currentLeague.badgeTextColor} shrink-0 font-mono shadow-2xs backdrop-blur-md`}>
           <span>{currentLeague.badgeIcon}</span>
-          <span className="truncate">{currentLeague.name}</span>
+          <span className="truncate">{getLocalizedLeagueName(currentLeague.name)}</span>
         </div>
       </div>
 
@@ -116,11 +129,12 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
           {/* User Dynamic State Rank Details */}
           <div className="flex items-center gap-3">
             {(() => {
-              const rankStr = `#${userEntry.rank.toLocaleString()}`;
+              const rawRank = userEntry.rank.toLocaleString();
+              const rankStr = `#${isOdia ? toOdiaDigits(rawRank) : rawRank}`;
               const fontClass = rankStr.length > 6 ? 'text-[10px] sm:text-xs' : rankStr.length > 4 ? 'text-xs sm:text-sm' : 'text-sm sm:text-lg';
               return (
                 <div className="min-w-[3.5rem] sm:min-w-[4rem] w-auto h-12 sm:h-14 px-2 py-1 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950 font-black flex flex-col items-center justify-center font-mono shadow-md shrink-0 leading-none">
-                  <span className="text-[9px] sm:text-[10px] uppercase font-sans tracking-wider font-extrabold text-slate-900 pb-0.5">RANK</span>
+                  <span className="text-[9px] sm:text-[10px] uppercase font-sans tracking-wider font-extrabold text-slate-900 pb-0.5">{t('Rank', 'RANK')}</span>
                   <span className={`${fontClass} font-black tracking-tight text-slate-950`}>{rankStr}</span>
                 </div>
               );
@@ -143,7 +157,7 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
                   type="button"
                   onClick={() => setIsDistrictModalOpen(true)}
                   className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 px-2 py-0.5 rounded-md border border-amber-400/40 transition-all cursor-pointer group shrink-0"
-                  title="Click to set your exact Odisha district"
+                  title={isOdia ? 'ଆପଣଙ୍କ ଓଡ଼ିଶା ଜିଲ୍ଲା ଚୟନ କରନ୍ତୁ' : 'Click to set your exact Odisha district'}
                 >
                   <MapPin className="w-2.5 h-2.5 text-amber-400 shrink-0" />
                   <span className="truncate max-w-[110px] sm:max-w-none">{userEntry.district}</span>
@@ -152,11 +166,15 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
               </div>
 
               <p className="text-[10px] sm:text-xs text-amber-400 font-mono font-bold pt-0.5 leading-snug">
-                <span className="sm:hidden">Top {percentileText.replace('in Odisha', '').trim()} • Acc: {accuracyPct}%</span>
-                <span className="hidden sm:inline">{percentileText} • Acc: {accuracyPct}%</span>
+                <span className="sm:hidden">
+                  {isOdia ? `ଓଡ଼ିଶାରେ ଟପ୍ • ସଠିକତା: ${toOdiaDigits(accuracyPct.toString())}%` : `Top ${percentileText.replace('in Odisha', '').trim()} • Acc: ${accuracyPct}%`}
+                </span>
+                <span className="hidden sm:inline">
+                  {isOdia ? `ଓଡ଼ିଶାରେ ଟପ୍ • ସଠିକତା: ${toOdiaDigits(accuracyPct.toString())}%` : `${percentileText} • Acc: ${accuracyPct}%`}
+                </span>
               </p>
               <span className="text-[9px] sm:text-[10px] text-slate-300 font-medium block pt-0.5 truncate">
-                Total Effort XP: <strong className="text-white font-bold">{userEntry.xp.toLocaleString()} XP</strong> • {userEntry.streakDays} Day Streak 🔥
+                {isOdia ? 'ମୋଟ ଅଭ୍ୟାସ XP:' : 'Total Effort XP:'} <strong className="text-white font-bold">{isOdia ? toOdiaDigits(userEntry.xp.toLocaleString()) : userEntry.xp.toLocaleString()} XP</strong> • {isOdia ? `${toOdiaDigits(userEntry.streakDays.toString())} ଦିନ ଷ୍ଟ୍ରିକ୍ 🔥` : `${userEntry.streakDays} Day Streak 🔥`}
               </span>
             </div>
           </div>
@@ -164,8 +182,8 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
           {/* League Tier Progress Bar (Compact Mobile Width) */}
           <div className="w-full md:w-64 space-y-1 bg-[#1e293b]/70 dark:bg-slate-900/90 p-3 rounded-xl border border-slate-700/60 shrink-0">
             <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold text-white">
-              <span>{currentLeague.name}</span>
-              <span className="text-amber-400 font-mono">{xpProgressPct}%</span>
+              <span>{getLocalizedLeagueName(currentLeague.name)}</span>
+              <span className="text-amber-400 font-mono">{isOdia ? toOdiaDigits(xpProgressPct.toString()) : xpProgressPct}%</span>
             </div>
             <div className="w-full h-1.5 sm:h-2 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
               <div
@@ -175,7 +193,9 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
             </div>
             {currentLeague.nextTierName && (
               <span className="text-[9px] sm:text-[10px] text-slate-400 font-medium block text-right truncate">
-                Need {xpToNextTier.toLocaleString()} XP for {currentLeague.nextTierName}
+                {isOdia
+                  ? `${getLocalizedLeagueName(currentLeague.nextTierName)} ପାଇଁ ଆହୁରି ${toOdiaDigits(xpToNextTier.toLocaleString())} XP ଆବଶ୍ୟକ`
+                  : `Need ${xpToNextTier.toLocaleString()} XP for ${currentLeague.nextTierName}`}
               </span>
             )}
           </div>
@@ -196,7 +216,7 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              Daily
+              {t('Daily', 'Daily')}
             </button>
             <button
               type="button"
@@ -207,7 +227,7 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              Weekly
+              {t('Weekly', 'Weekly')}
             </button>
             <button
               type="button"
@@ -218,21 +238,25 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              All-Time
+              {t('All-Time', 'All-Time')}
             </button>
           </div>
 
           {/* All Odisha State Leaderboard Badge */}
           <div className="inline-flex items-center gap-1 px-3 py-1 rounded-xl text-[10px] sm:text-xs font-black text-slate-700 dark:text-white bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0 font-mono shadow-2xs">
             <MapPin className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400 shrink-0" />
-            <span>All Odisha</span>
+            <span>{t('All Odisha', 'All Odisha')}</span>
           </div>
         </div>
 
         {/* Reset Notice Subtext */}
         <p className="text-xs font-semibold text-slate-500 dark:text-amber-200/90 pl-0.5 leading-snug">
-          <span className="sm:hidden">{resetNotice.replace('at 00:00 AM', '').replace('practice sprint', 'sprint')}</span>
-          <span className="hidden sm:inline">{resetNotice}</span>
+          <span className="sm:hidden">
+            {isOdia ? 'ପ୍ରତି ସୋମବାର ପୁନଃ ସେଟ୍ ହୁଏ • ୭-ଦିନର ଅଭ୍ୟାସ ପାଇଁ ପୁରସ୍କାର!' : resetNotice.replace('at 00:00 AM', '').replace('practice sprint', 'sprint')}
+          </span>
+          <span className="hidden sm:inline">
+            {isOdia ? 'ପ୍ରତି ସୋମବାର ରାତି ୧୨:୦୦ ରେ ପୁନଃ ସେଟ୍ ହୁଏ • ୭-ଦିନର ଅଭ୍ୟାସ ନିରନ୍ତରତା ପାଇଁ ପୁରସ୍କାର!' : resetNotice}
+          </span>
         </p>
       </div>
 
@@ -255,7 +279,7 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
             </span>
             <span className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-300 font-medium block truncate">{podium[1].district.split(' ')[0]}</span>
             <span className="inline-block px-1.5 py-0.5 rounded-md bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-mono font-black text-[10px] sm:text-xs border border-slate-200 dark:border-slate-700">
-              {podium[1].xp.toLocaleString()}
+              {isOdia ? toOdiaDigits(podium[1].xp.toLocaleString()) : podium[1].xp.toLocaleString()}
             </span>
           </div>
 
@@ -275,7 +299,7 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
             </span>
             <span className="text-[9px] sm:text-[10px] text-amber-700 dark:text-amber-300 font-bold block truncate">{podium[0].district.split(' ')[0]}</span>
             <span className="inline-block px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 font-mono font-black text-[10px] sm:text-xs shadow-2xs">
-              {podium[0].xp.toLocaleString()}
+              {isOdia ? toOdiaDigits(podium[0].xp.toLocaleString()) : podium[0].xp.toLocaleString()}
             </span>
           </div>
 
@@ -295,7 +319,7 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
             </span>
             <span className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-300 font-medium block truncate">{podium[2].district.split(' ')[0]}</span>
             <span className="inline-block px-1.5 py-0.5 rounded-md bg-white dark:bg-slate-950 text-amber-800 dark:text-amber-300 font-mono font-black text-[10px] sm:text-xs border border-slate-200 dark:border-slate-700">
-              {podium[2].xp.toLocaleString()}
+              {isOdia ? toOdiaDigits(podium[2].xp.toLocaleString()) : podium[2].xp.toLocaleString()}
             </span>
           </div>
         </div>
@@ -304,7 +328,11 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
       {/* Master State Toppers List */}
       <div className="space-y-2 pt-1 relative z-10">
         <h4 className="text-[10px] sm:text-xs font-black text-slate-900 dark:text-amber-300 uppercase tracking-wider pl-0.5">
-          {timeFilter === 'daily' ? "Today's Active Daily Toppers" : timeFilter === 'weekly' ? 'Weekly Sprint Leaders' : 'All-Time Master State Toppers'}
+          {timeFilter === 'daily'
+            ? (isOdia ? 'ଆଜିର ସକ୍ରିୟ ଦୈନିକ ଟପ୍ପର୍ସ' : "Today's Active Daily Toppers")
+            : timeFilter === 'weekly'
+            ? (isOdia ? 'ସାପ୍ତାହିକ ସ୍ପ୍ରିଣ୍ଟ ଲିଡର୍ସ' : 'Weekly Sprint Leaders')
+            : (isOdia ? 'ସର୍ବକାଳୀନ ରାଜ୍ୟ ଟପ୍ପର୍ସ' : 'All-Time Master State Toppers')}
         </h4>
         {rankList.map((entry) => (
           <div
@@ -316,7 +344,9 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
             }`}
           >
             <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
-              <span className="w-7 sm:w-8 font-mono font-black text-amber-600 dark:text-amber-400 text-left shrink-0 text-[11px] sm:text-xs">#{entry.rank}</span>
+              <span className="w-7 sm:w-8 font-mono font-black text-amber-600 dark:text-amber-400 text-left shrink-0 text-[11px] sm:text-xs">
+                #{isOdia ? toOdiaDigits(entry.rank.toString()) : entry.rank}
+              </span>
               <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full ${entry.avatarBg} text-white font-bold flex items-center justify-center shrink-0 text-xs overflow-hidden`}>
                 {entry.avatarUrl ? (
                   <img src={entry.avatarUrl} alt={entry.name} className="w-full h-full object-cover" />
@@ -327,14 +357,14 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
               <div className="min-w-0 pr-1">
                 <span className="font-bold text-slate-900 dark:text-white block truncate text-xs">{entry.name}</span>
                 <span className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-300 font-medium block truncate">
-                  <span className="sm:hidden">{getMobileDistrictName(entry.district)} • {entry.league}</span>
-                  <span className="hidden sm:inline">{entry.district} • {entry.league}</span>
+                  <span className="sm:hidden">{getMobileDistrictName(entry.district)} • {getLocalizedLeagueName(entry.league)}</span>
+                  <span className="hidden sm:inline">{entry.district} • {getLocalizedLeagueName(entry.league)}</span>
                 </span>
               </div>
             </div>
 
             <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-amber-300 font-mono font-black text-[10px] sm:text-xs shrink-0 shadow-2xs">
-              {entry.xp.toLocaleString()} XP
+              {isOdia ? toOdiaDigits(entry.xp.toLocaleString()) : entry.xp.toLocaleString()} XP
             </span>
           </div>
         ))}
@@ -346,9 +376,15 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
           <div className="flex items-center justify-between pl-0.5">
             <h4 className="text-[10px] sm:text-xs font-black text-slate-900 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1">
               <TargetIcon className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-              <span>Nearby Rivals (Rank #{Math.max(11, userEntry.rank - 2)} to #{userEntry.rank + 2})</span>
+              <span>
+                {isOdia
+                  ? `ନିକଟତମ ପ୍ରତିଦ୍ୱନ୍ଦ୍ୱୀ (ରେଙ୍କ୍ #${toOdiaDigits(Math.max(11, userEntry.rank - 2).toString())} ରୁ #${toOdiaDigits((userEntry.rank + 2).toString())})`
+                  : `Nearby Rivals (Rank #${Math.max(11, userEntry.rank - 2)} to #${userEntry.rank + 2})`}
+              </span>
             </h4>
-            <span className="text-[9px] text-slate-500 dark:text-amber-200/90 font-bold hidden sm:inline">Overtake +20 XP to jump rank!</span>
+            <span className="text-[9px] text-slate-500 dark:text-amber-200/90 font-bold hidden sm:inline">
+              {isOdia ? 'ରେଙ୍କ୍ ଆଗକୁ ଯିବାକୁ +୨୦ XP ଅର୍ଜନ କରନ୍ତୁ!' : 'Overtake +20 XP to jump rank!'}
+            </span>
           </div>
 
           {nearbyBracket.map((entry) => (
@@ -362,7 +398,7 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
             >
               <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
                 <span className={`w-14 sm:w-16 font-mono font-black text-left shrink-0 text-[10px] sm:text-xs ${entry.isCurrentUser ? 'text-amber-800 dark:text-amber-300 text-xs sm:text-sm font-extrabold' : 'text-amber-600 dark:text-amber-400'}`}>
-                  #{entry.rank.toLocaleString()}
+                  #{isOdia ? toOdiaDigits(entry.rank.toString()) : entry.rank.toLocaleString()}
                 </span>
                 <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full ${entry.avatarBg} text-white font-bold flex items-center justify-center shrink-0 text-xs overflow-hidden`}>
                   {entry.avatarUrl ? (
@@ -373,19 +409,17 @@ export const OdishaLeaderboardCard: React.FC<OdishaLeaderboardCardProps> = ({ us
                 </div>
                 <div className="min-w-0 pr-1">
                   <span className={`font-bold block truncate text-xs ${entry.isCurrentUser ? 'text-slate-950 dark:text-white font-black' : 'text-slate-900 dark:text-white'}`}>
-                    {entry.isCurrentUser ? `👉 ${entry.name} (You)` : entry.name}
+                    {entry.isCurrentUser ? `👉 ${entry.name} (${isOdia ? 'ଆପଣ' : 'You'})` : entry.name}
                   </span>
                   <span className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-300 font-medium block truncate">
-                    <span className="sm:hidden">{getMobileDistrictName(entry.district)} • Acc: {entry.accuracyPct}%</span>
-                    <span className="hidden sm:inline">{entry.district} • Acc: {entry.accuracyPct}%</span>
+                    <span className="sm:hidden">{getMobileDistrictName(entry.district)} • {isOdia ? 'ସଠିକତା' : 'Acc'}: {isOdia ? toOdiaDigits(entry.accuracyPct.toString()) : entry.accuracyPct}%</span>
+                    <span className="hidden sm:inline">{entry.district} • {isOdia ? 'ସଠିକତା' : 'Acc'}: {isOdia ? toOdiaDigits(entry.accuracyPct.toString()) : entry.accuracyPct}%</span>
                   </span>
                 </div>
               </div>
 
-              <span className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg border font-mono font-black text-[10px] sm:text-xs shrink-0 ${
-                entry.isCurrentUser ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-xs' : 'bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-amber-300 border-slate-200 dark:border-slate-700'
-              }`}>
-                {entry.xp.toLocaleString()} XP
+              <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-amber-300 font-mono font-black text-[10px] sm:text-xs shrink-0 shadow-2xs">
+                {isOdia ? toOdiaDigits(entry.xp.toLocaleString()) : entry.xp.toLocaleString()} XP
               </span>
             </div>
           ))}

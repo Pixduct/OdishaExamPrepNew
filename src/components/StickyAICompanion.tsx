@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { useVoiceInteraction, VoiceLanguage } from '../hooks/useVoiceInteraction';
 import { VoiceWaveVisualizer } from './VoiceWaveVisualizer';
+import { useLanguage } from '../lib/LanguageContext';
 
 /* ─────────────────────────────────────────────
    Types
@@ -824,6 +825,7 @@ const StickyAICompanion: React.FC<StickyAICompanionProps> = ({
   activeTab
 }) => {
   const { user, profile, hasAccessTo } = useAuth();
+  const { t, isOdia } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -1968,7 +1970,7 @@ const StickyAICompanion: React.FC<StickyAICompanionProps> = ({
               </motion.span>
             )}
             <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 whitespace-nowrap bg-slate-900 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
-              Ask OEP Buddy ✨
+              {t('common.nav.companionFab', 'Ask OEP Buddy ✨')}
             </span>
           </motion.div>
         )}
@@ -2021,7 +2023,7 @@ const StickyAICompanion: React.FC<StickyAICompanionProps> = ({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-white font-black text-sm leading-tight tracking-wide">OEP Buddy</p>
+                    <p className="text-white font-black text-sm leading-tight tracking-wide">{t('common.nav.companionTitle', 'OEP Buddy')}</p>
                     {dataLoading && (
                       <span className="flex items-center gap-1 bg-white/15 text-white/80 text-[9px] font-bold px-1.5 py-0.5 rounded-md">
                         <RefreshCw className="w-2.5 h-2.5 animate-spin" />
@@ -2035,7 +2037,7 @@ const StickyAICompanion: React.FC<StickyAICompanionProps> = ({
                       </span>
                     )}
                   </div>
-                  <p className="text-white/70 text-[10px] font-semibold truncate">Your AI Study Companion ✨</p>
+                  <p className="text-white/70 text-[10px] font-semibold truncate">{t('common.nav.companionSubtitle', 'Your AI Study Companion ✨')}</p>
                 </div>
                 <div className="flex items-center gap-1 relative z-10">
                   {siteData && (

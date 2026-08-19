@@ -1,57 +1,61 @@
-# Memory — Current Affairs Engine Upgrades & 2-Hour Green Zone Scheduling
+# Memory — OdishaExamPrep AI Mentor & Targeted Exam Dark Mode Overhaul
 
-Last updated: 2026-08-20T00:15:30+05:30
+Last updated: 2026-08-20T00:35:00+05:30
 
 ## What was built
 
-### 1. Senior Examiner Cognitive Benchmark & Rejection Engine (`automations/ca_formatter.py`)
-- Upgraded the AI system prompt to adopt the cognitive decision mindset of a Senior Exam Paper Setter.
-- Added strict High-Value vs. Low-Value rejection benchmarks (`REJECT`).
-- Added non-exam noise patterns in `validate_slide_quality()` for interim ED seizures, handwritten notes, vegan diets, routine police raids, political mudslinging, and minor accidents (e.g. Brazil bus crash automatically rejected).
+### 1. Targeted Exam Context Bar & Context Selector Modal Dual-Theme Overhaul
+- **`ActiveExamContextBar.tsx`**: Replaced metallic grey styling with dual-theme deep sapphire (`bg-white/95 dark:bg-[#0B1528]`, `border-slate-200/80 dark:border-blue-500/30`), blue glowing indicator dot (`animate-ping`), high-contrast typography, and styled quick-switch CTA button.
+- **`ExamContextSelectorModal.tsx`**: Overhauled modal backdrop (`dark:bg-slate-950/80 backdrop-blur-md`), dialog card (`dark:bg-[#0B1528] dark:border-blue-500/30`), category switcher tabs, exam selection cards, and search input for both light and dark themes.
+- **`StudyPlanView.tsx`**: Harmonized the study plan header exam selector to match the deep sapphire design token architecture.
 
-### 2. Dynamic 3 to 5 Bullet Point Generator (Minimum 3 Mandatory) (`automations/ca_formatter.py`)
-- Standardized AI bullet generation to require at least 3 mandatory base bullets and allow autonomous expansion to a 4th or 5th bullet point for complex, high-yield news items.
+### 2. Comprehensive AI Mentor Dark Mode Overhaul (`src/pages/AiMentor.tsx`)
+- **`MarkdownMathRenderer`**: Upgraded KaTeX formulas, inline math, markdown headers, unordered lists, and syntax blocks with `dark:text-white`, `dark:bg-slate-800`, `dark:border-slate-700`, and `dark:text-blue-300`.
+- **Mobile Tab Bar & Container Shell**: Added responsive sliding tab bar with dark theme indicators (`dark:bg-slate-900`, `dark:border-slate-800`).
+- **Left Chat Pane & Navigation**:
+  - History drawer & session items styled with `dark:bg-[#0B1528]`, `dark:bg-[#060B16]`, and `dark:border-slate-800`.
+  - Header bar, exam context dropdown, and control panel updated for high contrast.
+  - Message bubbles: AI assistant bubble styled with `dark:bg-slate-800/80 dark:border-slate-700/60 dark:text-slate-100`; User bubble with brand gradient.
+  - Prompt console & attachment tray updated with deep midnight inputs (`dark:bg-[#060B16]/95`, `dark:bg-[#0B1528]`, `dark:border-slate-700`).
+  - Fullscreen lightbox modal styled with dark blurred backdrop and crisp image framing.
+- **Focus Boards & Practice Analytics HUD**:
+  - `renderDailyFocusBoard`, `renderAiFocusProgressBoard`, and `renderPracticeAnalyticsHUD` styled with deep sapphire cards (`dark:bg-[#060B16]/80`, `dark:border-slate-800`) and high-contrast metric chips.
+- **Tab 1: Planner & Pomodoro Timer**:
+  - Manual stopwatch timer card and Circular SVG countdown timer upgraded with high-contrast digits (`dark:text-white`), dark preset pills (`dark:bg-slate-800/80`), and sapphire background gradients (`dark:from-[#060B16]/90 dark:to-[#0B1528]`).
+  - AI Plan Generator Form & Active Dashboard styled with high-contrast timeline roadmap items and goal/energy chips.
+- **Tab 2: Dynamic AI MCQ Quizzer & Bookmarks**:
+  - Custom subject input, suggestion chips, difficulty and MCQ count dropdowns, and stats accordion overhauled with `dark:bg-[#060B16]`, `dark:bg-[#0B1528]`, and `dark:border-slate-800`.
+  - Question cards, option buttons (A, B, C, D badges with active, correct, and incorrect states), star bookmarks, and solution explanation cards styled with dark mode tokens.
+- **Tab 3: Syllabus Workspace**:
+  - Subject collection switcher, AI syllabus generator form, chapter topic cards, status toggles (Pending / Doing / Done), and expanded tutor/quiz action buttons upgraded with dark midnight styling.
+- **Tab 4: Formulas & Shortcut Deck**:
+  - Action toolbar, search filter bar, AI formula preview cards, custom formula creator, memory flashcard flip mode, and formula KaTeX containers styled with `dark:bg-[#0B1528]`, `dark:bg-slate-900`, and `dark:text-white`.
 
-### 3. Dynamic & Natural Bullet Headings (2-4 Words — No Rigid Labels) (`automations/ca_formatter.py`)
-- Eliminated hardcoded rigid generic labels (`Key Development / Objective:`, `Background / Location:`, `Exam Significance / Impact:`).
-- AI autonomously generates story-matched dynamic bold headings (2-4 words) tailored directly to the story's core facts (e.g. `Varuna Naval Exercise 2026:`, `Strategic Maritime Importance:`, `Constitutional Mandate:`, `Species Discovery & Habitat:`).
-
-### 4. Dual-Context Evaluation Benchmark (`automations/ca_formatter.py`)
-- Differentiates Central/National Exams (macro-level developments, national policies, legal milestones, constitutional law) vs. State Exams (OPSC/OSSC state-specific policies, regional infrastructure, governance, and cultural milestones).
-
-### 5. 2-Hour Interval Off-Peak Green Zone Schedule (`automations/.github/workflows/daily_ca.yml` & `daily_ca_website.yml`)
-- Configured Telegram/YouTube engine (`daily_ca.yml`) to run once every 2 hours at green zone minute 23 (`23 */2 * * *`, 12 runs/day).
-- Configured Website Publisher (`daily_ca_website.yml`) to run once every 2 hours at green zone minute 47 (`47 */2 * * *`, 12 runs/day).
-
-### 6. Zero Ellipsis Caption Headline Rewriter (`automations/ca_publisher.py` & `ca_formatter.py`)
-- Implemented `shorten_headline_without_truncation()` to trim long headlines at clean word boundaries under 48 characters without appending `...` or ellipses.
-- Guaranteed 100% complete, un-truncated caption headlines for Telegram and YouTube Community posts.
-
-### 7. UI Registry & Documentation Synchronization (`context/ui-registry.md` & `progress-tracker.md`)
-- Registered `AiMentorWorkspace` (#57) in `context/ui-registry.md`.
-- Updated `context/progress-tracker.md` with all completed milestones.
-- Submodules and parent repository committed and pushed to GitHub main branch.
+### 3. Documentation & Verification
+- **`context/ui-registry.md`**: Registered `ActiveExamContextBar` (#60) and `ExamContextSelectorModal` (#61).
+- **`context/progress-tracker.md`**: Documented completed milestones.
+- **Verification**: `npx tsc --noEmit` and `npm run build` passed with 0 errors.
 
 ## Decisions made
 
-- **Zero Ellipsis Policy**: Telegram and YouTube Community captions must never contain `...` or ellipsis truncation. Headlines must be rewritten under 48 characters as complete grammatical titles.
-- **Dynamic 2-4 Word Headings**: Bullets inside visual cards must use dynamic bold headings tailored to the news item rather than static fixed templates.
-- **Green Zone Cron Offsets**: GitHub Actions cron schedules must use off-peak minutes (`23` and `47`) to bypass queue delays on the hour.
+- **Deep Sapphire Theme Token System**: Standardized on deep sapphire midnight (`dark:bg-[#0B1528]`, `dark:bg-[#060B16]`) with subtle blue luminescent perimeter strokes (`dark:border-blue-500/30`), completely eliminating dull metallic grey artifacts across cards and modals.
+- **Dual-Theme High-Contrast Invariant**: Ensured all text elements maintain high contrast in both themes (`text-slate-800 dark:text-white`, `text-slate-500 dark:text-slate-400`), preventing light-on-light or dark-on-dark unreadable states.
+- **Synchronized Global State**: Selected targeted exams persist across `localStorage`, `AuthContext`, Study Plan Hub, Analytics, and AI Mentor.
 
 ## Problems solved
 
-- Eliminated title truncation (`...`) in Telegram captions.
-- Prevented repetitive fixed bullet labels across slide carousels.
-- Resolved low-relevance noise inclusion in daily current affairs runs.
-- Prevented GitHub Actions cron runner queue delays by shifting to off-peak green zone minutes.
+- Resolved visual issue where Targeted Exam card and AI Mentor tabs/cards rendered light-mode styles in dark mode.
+- Replaced unwanted metallic grey color with premium deep sapphire styling in dark mode.
+- Fixed typo in Pomodoro status chip in `AiMentor.tsx`.
 
 ## Current state
 
-- All Current Affairs pipelines (formatting, 3-5 dynamic bullets, zero-ellipsis captions, Telegram broadcast, YouTube Community posting, 2-hour cron workflows) are 100% verified working live, tested end-to-end, committed, and pushed to GitHub main branch.
+- All tabs and modals (including Home, Study Plan, Analytics, History, Library, AI Mentor, and Targeted Exam Selector) have complete, 100% verified light and dark mode styling.
+- Zero TypeScript compiler errors; production Vite build passes cleanly.
 
 ## Next session starts with
 
-- Proceed with any new features, UI component additions, or automation updates requested by the user.
+- Proceed with any next feature, exam drill, or UI optimization requested by the user.
 
 ## Open questions
 

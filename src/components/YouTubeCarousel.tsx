@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { modalBackdrop, modalContent } from '../lib/animations';
 import { cn } from '../lib/utils';
 import { useTheme } from '../lib/themeStore';
+import { useLanguage } from '../lib/LanguageContext';
 import { DynamicVectorCard } from './DynamicVectorCard';
 
 const AUTO_SPEED = 0.6;  // px per animation frame (~36px/s at 60fps)
@@ -37,6 +38,7 @@ const categoryColours: Record<string, { bg: string; text: string; border: string
 const defaultCatStyle = { bg: 'bg-slate-100', text: 'text-slate-600', border: 'border-slate-200' };
 
 export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
+  const { t } = useLanguage();
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -44,6 +46,16 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [theme] = useTheme();
   const isDark = theme === 'dark';
+
+  const getCategoryLabel = (cat: string) => {
+    const c = cat.toLowerCase();
+    if (c.includes('aptitude')) return t('home.videos.categories.aptitude', 'Aptitude');
+    if (c.includes('strategy')) return t('home.videos.categories.strategy', 'Strategy');
+    if (c.includes('general')) return t('home.videos.categories.generalStudies', 'General Studies');
+    if (c.includes('language')) return t('home.videos.categories.language', 'Language');
+    if (c.includes('current')) return t('home.videos.categories.currentAffairs', 'Current Affairs');
+    return cat;
+  };
 
   // Fetch authentic YouTube titles dynamically via noembed endpoint
   const videoIdsKey = videoIds ? videoIds.join(',') : '';
@@ -250,10 +262,10 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="text-[13px] font-serif font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
-                Free Strategy Videos
+                {t('home.videos.title', 'Free Strategy Videos')}
               </h3>
               <p className="text-slate-500 dark:text-slate-400 font-medium text-[10px] leading-snug">
-                Masterclasses &amp; exam tips — free
+                {t('home.videos.subtitle', 'Watch free masterclasses and proven exam tips from our channel.')}
               </p>
             </div>
             {/* Subscribe pill — inline, right side */}
@@ -264,7 +276,7 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
               className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#FF0000] border-2 border-slate-900 text-white font-black uppercase text-[9px] tracking-widest rounded-lg shadow-[2px_2px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all duration-150 select-none cursor-pointer shrink-0"
             >
               <Youtube className="w-3 h-3 text-white shrink-0" />
-              <span>Subscribe</span>
+              <span>{t('home.videos.subscribeBtn', 'Subscribe')}</span>
             </a>
           </div>
         </div>
@@ -276,8 +288,12 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
               <Youtube className="w-6 h-6 text-white" />
             </div>
             <div className="min-w-0">
-              <h3 className="text-2xl font-serif font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">Free Strategy Videos</h3>
-              <p className="text-slate-600 dark:text-slate-400 font-medium text-sm mt-0.5">Watch free masterclasses and proven exam tips from our channel.</p>
+              <h3 className="text-2xl font-serif font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+                {t('home.videos.title', 'Free Strategy Videos')}
+              </h3>
+              <p className="text-slate-600 dark:text-slate-400 font-medium text-sm mt-0.5">
+                {t('home.videos.subtitle', 'Watch free masterclasses and proven exam tips from our channel.')}
+              </p>
             </div>
           </div>
 
@@ -288,7 +304,7 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
             className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#FF0000] border-2 border-slate-900 text-white font-black uppercase text-xs tracking-widest rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] md:hover:shadow-none md:hover:translate-x-0.5 md:hover:translate-y-0.5 transition-all select-none cursor-pointer duration-200 shrink-0"
           >
             <Youtube className="w-4 h-4 text-white" />
-            <span>Subscribe on YouTube</span>
+            <span>{t('home.videos.subscribeBtn', 'Subscribe on YouTube')}</span>
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-white animate-ping shrink-0" />
           </a>
         </div>
@@ -313,6 +329,7 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
         >
           {items.map((video, idx) => {
             const catStyle = categoryColours[video.category] ?? defaultCatStyle;
+            const displayCat = getCategoryLabel(video.category);
             return (
               <DynamicVectorCard
                 key={`${video.id}-${idx}`}
@@ -378,7 +395,7 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
                         isMobile ? "text-[9px] tracking-wider px-2 py-1" : "text-[8px] tracking-widest px-2 py-0.5",
                         catStyle.bg, catStyle.text, catStyle.border
                       )}>
-                        {video.category}
+                        {displayCat}
                       </span>
                     </div>
 
@@ -400,13 +417,13 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
                       "font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 font-mono",
                       isMobile ? "text-[8px]" : "text-[9px]"
                     )}>
-                      Free Lecture
+                      {t('home.videos.freeLecture', 'Free Lecture')}
                     </span>
                     <span className={cn(
                       "text-[#2563EB] flex items-center gap-1 font-bold uppercase tracking-wider",
                       isMobile ? "text-[9px]" : "text-[9px]"
                     )}>
-                      Watch Now <Play className="w-3 h-3 fill-[#2563EB] stroke-none" />
+                      {t('home.videos.watchNow', 'Watch Now')} <Play className="w-3 h-3 fill-[#2563EB] stroke-none" />
                     </span>
                   </div>
                 </div>
@@ -421,7 +438,7 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
       {isMobile && (
         <div className="flex items-center justify-center gap-1.5 mt-3 px-5 pointer-events-none">
           <div className="h-px flex-1 bg-slate-300/60" />
-          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Swipe to explore</span>
+          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">{t('common.activity.swipeToExplore', 'Swipe to explore')}</span>
           <div className="h-px flex-1 bg-slate-300/60" />
         </div>
       )}
@@ -444,7 +461,7 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
                   <div className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500">
                     <Youtube className="w-4 h-4 fill-rose-500 text-rose-500" />
                   </div>
-                  <span className="font-extrabold text-sm text-white tracking-tight">Strategy Lecture Video</span>
+                  <span className="font-extrabold text-sm text-white tracking-tight">{t('home.videos.sectionBadge', 'Strategy Lecture Video')}</span>
                 </div>
                 <button
                   type="button"

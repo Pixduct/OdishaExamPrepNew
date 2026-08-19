@@ -39,13 +39,22 @@ export const CurrentAffairsPage: React.FC = () => {
 
     const artDateStr = art.event_date || (art.created_at ? art.created_at.substring(0, 10) : '');
     const artDate = artDateStr ? new Date(artDateStr) : null;
-    const now = new Date();
-    const todayStr = now.toISOString().substring(0, 10);
     const createdAtDateStr = art.created_at ? art.created_at.substring(0, 10) : '';
+
+    const now = new Date();
+    const todayStrUTC = now.toISOString().substring(0, 10);
+    const todayStrLocal = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const yesterdayDate = new Date(now.getTime() - 86400000);
+    const yesterdayStrUTC = yesterdayDate.toISOString().substring(0, 10);
 
     let matchesTimePreset = true;
     if (timePreset === 'today') {
-      matchesTimePreset = artDateStr === todayStr || createdAtDateStr === todayStr;
+      matchesTimePreset = 
+        artDateStr === todayStrUTC || 
+        artDateStr === todayStrLocal || 
+        createdAtDateStr === todayStrUTC ||
+        createdAtDateStr === todayStrLocal ||
+        artDateStr === yesterdayStrUTC;
     } else if (timePreset === '7days') {
       if (artDate) {
         const diffMs = now.getTime() - artDate.getTime();

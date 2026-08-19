@@ -562,13 +562,13 @@ const GENERATING_STEPS = [
         
         // Check for headers
         if (trimmed.startsWith('### ')) {
-          return <h4 key={lineIdx} className={cn("text-sm font-black mt-3 mb-1", isUser ? "text-white" : "text-slate-805")}><MathTextRenderer text={trimmed.substring(4)} isUser={isUser} /></h4>;
+          return <h4 key={lineIdx} className={cn("text-sm font-black mt-3 mb-1", isUser ? "text-white" : "text-slate-900 dark:text-white")}><MathTextRenderer text={trimmed.substring(4)} isUser={isUser} /></h4>;
         }
         if (trimmed.startsWith('## ')) {
-          return <h3 key={lineIdx} className={cn("text-base font-black mt-4 mb-1.5", isUser ? "text-white" : "text-slate-900")}><MathTextRenderer text={trimmed.substring(3)} isUser={isUser} /></h3>;
+          return <h3 key={lineIdx} className={cn("text-base font-black mt-4 mb-1.5", isUser ? "text-white" : "text-slate-900 dark:text-white")}><MathTextRenderer text={trimmed.substring(3)} isUser={isUser} /></h3>;
         }
         if (trimmed.startsWith('# ')) {
-          return <h2 key={lineIdx} className={cn("text-lg font-black mt-5 mb-2", isUser ? "text-white" : "text-slate-900")}><MathTextRenderer text={trimmed.substring(2)} isUser={isUser} /></h2>;
+          return <h2 key={lineIdx} className={cn("text-lg font-black mt-5 mb-2", isUser ? "text-white" : "text-slate-900 dark:text-white")}><MathTextRenderer text={trimmed.substring(2)} isUser={isUser} /></h2>;
         }
 
         // Check for bullet lists
@@ -600,7 +600,7 @@ const GENERATING_STEPS = [
           const parts = str.split(/(\*\*.*?\*\*)/g);
           return parts.map((part, pIdx) => {
             if (part.startsWith('**') && part.endsWith('**')) {
-              return <strong key={pIdx} className={cn("font-extrabold", isUser ? "text-white" : "text-slate-900")}><MathTextRenderer text={part.slice(2, -2)} isUser={isUser} /></strong>;
+              return <strong key={pIdx} className={cn("font-extrabold", isUser ? "text-white" : "text-slate-900 dark:text-white")}><MathTextRenderer text={part.slice(2, -2)} isUser={isUser} /></strong>;
             }
             return <span key={pIdx}><MathTextRenderer text={part} isUser={isUser} /></span>;
           });
@@ -609,8 +609,8 @@ const GENERATING_STEPS = [
         if (isBullet) {
           return (
             <div key={lineIdx} className="flex items-start gap-2 pl-3 my-0.5">
-              <span className={cn("w-1.5 h-1.5 rounded-full shrink-0 mt-[7px]", isUser ? "bg-brand-200" : "bg-[#2563EB]")} />
-              <span className={cn("leading-relaxed font-medium flex-1 min-w-0 break-words text-sm md:text-[15px]", isUser ? "text-brand-50" : "text-slate-700")}>{renderInline(cleanListContent)}</span>
+              <span className={cn("w-1.5 h-1.5 rounded-full shrink-0 mt-[7px]", isUser ? "bg-brand-200" : "bg-[#2563EB] dark:bg-blue-400")} />
+              <span className={cn("leading-relaxed font-medium flex-1 min-w-0 break-words text-sm md:text-[15px]", isUser ? "text-brand-50" : "text-slate-700 dark:text-slate-200")}>{renderInline(cleanListContent)}</span>
             </div>
           );
         }
@@ -618,8 +618,8 @@ const GENERATING_STEPS = [
         if (isNumbered) {
           return (
             <div key={lineIdx} className="flex items-start gap-2 pl-3 my-0.5">
-              <span className={cn("font-black text-xs shrink-0 mt-0.5", isUser ? "text-brand-200" : "text-[#2563EB]")}>{numLabel}.</span>
-              <span className={cn("leading-relaxed font-medium flex-1 min-w-0 break-words text-sm md:text-[15px]", isUser ? "text-brand-50" : "text-slate-700")}>{renderInline(cleanListContent)}</span>
+              <span className={cn("font-black text-xs shrink-0 mt-0.5", isUser ? "text-brand-200" : "text-[#2563EB] dark:text-blue-400")}>{numLabel}.</span>
+              <span className={cn("leading-relaxed font-medium flex-1 min-w-0 break-words text-sm md:text-[15px]", isUser ? "text-brand-50" : "text-slate-700 dark:text-slate-200")}>{renderInline(cleanListContent)}</span>
             </div>
           );
         }
@@ -633,11 +633,11 @@ const GENERATING_STEPS = [
                 "flex items-center justify-center w-5 h-5 rounded-md text-[10px] font-black uppercase shrink-0 mt-0.5 border transition-all duration-200",
                 isUser 
                   ? "bg-white/10 border-white/20 text-white" 
-                  : "bg-slate-100 border-slate-200/60 text-slate-500 group-hover/option:bg-brand-50 group-hover/option:border-brand-200 group-hover/option:text-brand-650"
+                  : "bg-slate-100 dark:bg-slate-800 border-slate-200/60 dark:border-slate-700 text-slate-500 dark:text-slate-300 group-hover/option:bg-brand-50 dark:group-hover/option:bg-blue-950/50 group-hover/option:border-brand-200 dark:group-hover/option:border-blue-500/40 group-hover/option:text-brand-650 dark:group-hover/option:text-blue-300"
               )}>
                 {optionLetter}
               </span>
-              <span className={cn("leading-relaxed font-medium flex-1 text-sm md:text-[15px]", isUser ? "text-brand-50" : "text-slate-700")}>
+              <span className={cn("leading-relaxed font-medium flex-1 text-sm md:text-[15px]", isUser ? "text-brand-50" : "text-slate-700 dark:text-slate-200")}>
                 {renderInline(optionText)}
               </span>
             </div>
@@ -650,7 +650,7 @@ const GENERATING_STEPS = [
         }
 
         return (
-          <p key={lineIdx} className={cn("leading-relaxed font-medium text-sm md:text-[15px]", isUser ? "text-white" : "text-slate-700")}>
+          <p key={lineIdx} className={cn("leading-relaxed font-medium text-sm md:text-[15px]", isUser ? "text-white" : "text-slate-700 dark:text-slate-200")}>
             {renderInline(line)}
           </p>
         );
@@ -3677,20 +3677,20 @@ JSON structure:
     const TipIcon = currentTip.icon;
 
     return (
-      <div className="bg-gradient-to-b from-slate-50 to-white/70 border border-slate-200/50 rounded-2xl p-3.5 sm:p-4 mt-2.5 text-left space-y-3 sm:space-y-3.5 flex-1 flex flex-col justify-between relative overflow-hidden shadow-xs hover:shadow-sm transition-all duration-300 animate-scale-in">
-        <div className="absolute top-0 right-0 w-16 h-16 bg-rose-500/5 rounded-full blur-xl pointer-events-none" />
+      <div className="bg-gradient-to-b from-slate-50 to-white/70 dark:from-[#0B1528] dark:to-[#060B16] border border-slate-200/50 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 mt-2.5 text-left space-y-3 sm:space-y-3.5 flex-1 flex flex-col justify-between relative overflow-hidden shadow-xs hover:shadow-sm transition-all duration-300 animate-scale-in">
+        <div className="absolute top-0 right-0 w-16 h-16 bg-rose-500/5 dark:bg-blue-500/10 rounded-full blur-xl pointer-events-none" />
         
         <div className="space-y-2">
-          <div className="flex justify-between items-center text-xs sm:text-[10px] font-bold text-slate-500">
+          <div className="flex justify-between items-center text-xs sm:text-[10px] font-bold text-slate-500 dark:text-slate-400">
             <span className="flex items-center gap-1.5 uppercase tracking-wider text-[11px] sm:text-[10px]">
-              <Timer className="w-3.5 h-3.5 text-[#2563EB]" /> Focus Target Progress
+              <Timer className="w-3.5 h-3.5 text-[#2563EB] dark:text-blue-400" /> Focus Target Progress
             </span>
-            <span className="font-mono text-[#2563EB] text-xs sm:text-[11px] bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-lg font-bold">
+            <span className="font-mono text-[#2563EB] dark:text-blue-300 text-xs sm:text-[11px] bg-rose-500/10 dark:bg-blue-950/40 border border-rose-500/20 dark:border-blue-500/30 px-2 py-0.5 rounded-lg font-bold">
               {currentMins} / {dailyTargetMins} min
             </span>
           </div>
 
-          <div className="w-full bg-slate-50 rounded-full h-2 overflow-hidden border border-slate-200/50 p-0.5">
+          <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-200/50 dark:border-slate-700 p-0.5">
             <motion.div 
               className="bg-gradient-to-r from-rose-500 via-purple-500 to-indigo-500 h-full rounded-full"
               initial={{ width: 0 }}
@@ -3699,16 +3699,16 @@ JSON structure:
             />
           </div>
           
-          <p className="text-[10.5px] sm:text-[9.5px] text-slate-500 italic pl-0.5 leading-tight font-medium">
+          <p className="text-[10.5px] sm:text-[9.5px] text-slate-500 dark:text-slate-400 italic pl-0.5 leading-tight font-medium">
             {statusMessage}
           </p>
         </div>
 
-        <div className="border-t border-slate-200/50 w-full my-0.5" />
+        <div className="border-t border-slate-200/50 dark:border-slate-800 w-full my-0.5" />
 
         <div className="space-y-2.5 sm:space-y-2 text-left relative flex-1 flex flex-col justify-between">
           <div className="flex justify-between items-center shrink-0">
-            <span className="inline-flex px-2 py-0.5 rounded text-[10px] sm:text-[8px] font-black uppercase tracking-wider bg-indigo-500/15 border border-indigo-500/20 text-indigo-650">
+            <span className="inline-flex px-2 py-0.5 rounded text-[10px] sm:text-[8px] font-black uppercase tracking-wider bg-indigo-500/15 dark:bg-indigo-950/50 border border-indigo-500/20 dark:border-indigo-700 text-indigo-650 dark:text-indigo-300">
               {currentTip.category}
             </span>
             <button
@@ -3716,18 +3716,18 @@ JSON structure:
               onClick={() => {
                 setCurrentTipIdx((prev) => (prev + 1) % ODISHA_STUDY_TIPS.length);
               }}
-              className="p-1.5 sm:p-1 border border-slate-200/50 bg-slate-50 hover:bg-slate-900 text-slate-500 hover:text-white rounded-lg transition-all duration-300 cursor-pointer flex items-center justify-center shadow-xs"
+              className="p-1.5 sm:p-1 border border-slate-200/50 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-900 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 hover:text-white rounded-lg transition-all duration-300 cursor-pointer flex items-center justify-center shadow-xs"
               title="Next Strategy"
             >
               <ChevronRight className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
             </button>
           </div>
           
-          <div className="flex gap-3 bg-white/80 border border-slate-200/40 p-3 rounded-xl flex-1 items-center shadow-2xs hover:shadow-xs transition-all duration-300">
-            <div className="p-2.5 sm:p-2 bg-indigo-500/10 border border-indigo-500/15 rounded-xl text-indigo-650 shrink-0">
+          <div className="flex gap-3 bg-white/80 dark:bg-[#0B1528]/90 border border-slate-200/40 dark:border-slate-800 p-3 rounded-xl flex-1 items-center shadow-2xs hover:shadow-xs transition-all duration-300">
+            <div className="p-2.5 sm:p-2 bg-indigo-500/10 dark:bg-indigo-950/60 border border-indigo-500/15 dark:border-indigo-800 rounded-xl text-indigo-650 dark:text-indigo-300 shrink-0">
               <TipIcon className="w-5.5 h-5.5 sm:w-5 sm:h-5" />
             </div>
-            <p className="text-xs sm:text-[11px] text-slate-700 leading-relaxed font-semibold">
+            <p className="text-xs sm:text-[11px] text-slate-700 dark:text-slate-200 leading-relaxed font-semibold">
               {currentTip.tip}
             </p>
           </div>
@@ -3818,20 +3818,20 @@ JSON structure:
     const InsightIcon = currentInsight.icon;
 
     return (
-      <div className="bg-gradient-to-b from-indigo-50/30 to-white/70 border border-indigo-100/30 rounded-xl p-3 mt-2 text-left space-y-2 relative overflow-hidden shadow-xs hover:shadow-sm transition-all duration-300 animate-scale-in">
-        <div className="absolute top-0 right-0 w-12 h-12 bg-indigo-500/5 rounded-full blur-xl pointer-events-none" />
+      <div className="bg-gradient-to-b from-indigo-50/30 to-white/70 dark:from-[#0B1528] dark:to-[#060B16] border border-indigo-100/30 dark:border-slate-800 rounded-xl p-3 mt-2 text-left space-y-2 relative overflow-hidden shadow-xs hover:shadow-sm transition-all duration-300 animate-scale-in">
+        <div className="absolute top-0 right-0 w-12 h-12 bg-indigo-500/5 dark:bg-indigo-500/15 rounded-full blur-xl pointer-events-none" />
         
         <div className="space-y-1.5">
-          <div className="flex justify-between items-center text-[10px] font-bold text-slate-500">
+          <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 dark:text-slate-400">
             <span className="flex items-center gap-1 uppercase tracking-wider text-[10px]">
-              <Sparkles className="w-3 h-3 text-indigo-650 animate-pulse" /> {titleText}
+              <Sparkles className="w-3 h-3 text-indigo-650 dark:text-indigo-400 animate-pulse" /> {titleText}
             </span>
-            <span className="font-mono text-indigo-650 text-[10px] bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded font-bold">
+            <span className="font-mono text-indigo-650 dark:text-indigo-300 text-[10px] bg-indigo-500/10 dark:bg-indigo-950/50 border border-indigo-500/20 dark:border-indigo-800 px-1.5 py-0.5 rounded font-bold">
               {currentMins} / {targetMins} min
             </span>
           </div>
 
-          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
             <motion.div 
               className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 h-full rounded-full"
               initial={{ width: 0 }}
@@ -3840,16 +3840,16 @@ JSON structure:
             />
           </div>
           
-          <p className="text-[10px] text-slate-400 italic pl-0.5 leading-tight font-medium">
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 italic pl-0.5 leading-tight font-medium">
             {statusMessage}
           </p>
         </div>
 
-        <div className="border-t border-slate-100 w-full my-0.5" />
+        <div className="border-t border-slate-100 dark:border-slate-800 w-full my-0.5" />
 
         <div className="space-y-2 text-left relative">
           <div className="flex justify-between items-center shrink-0">
-            <span className="inline-flex px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-indigo-500/10 border border-indigo-500/15 text-indigo-650">
+            <span className="inline-flex px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-indigo-500/10 dark:bg-indigo-950/60 border border-indigo-500/15 dark:border-indigo-800 text-indigo-650 dark:text-indigo-300">
               {currentInsight.category}
             </span>
             <button
@@ -3857,18 +3857,18 @@ JSON structure:
               onClick={() => {
                 setCurrentTipIdx((prev) => (prev + 1) % AI_COACH_INSIGHTS.length);
               }}
-              className="p-1 border border-slate-200/50 bg-slate-50 hover:bg-slate-900 text-slate-500 hover:text-white rounded transition-all duration-300 cursor-pointer flex items-center justify-center shadow-2xs"
+              className="p-1 border border-slate-200/50 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-900 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 hover:text-white rounded transition-all duration-300 cursor-pointer flex items-center justify-center shadow-2xs"
               title="Next Strategy"
             >
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
           
-          <div className="flex gap-2.5 bg-indigo-500/5 border border-indigo-500/10 p-2.5 rounded-xl items-center">
-            <div className="p-1.5 bg-white border border-indigo-500/10 rounded-lg text-indigo-650 shrink-0">
+          <div className="flex gap-2.5 bg-indigo-500/5 dark:bg-[#0B1528]/80 border border-indigo-500/10 dark:border-slate-800 p-2.5 rounded-xl items-center">
+            <div className="p-1.5 bg-white dark:bg-slate-800 border border-indigo-500/10 dark:border-slate-700 rounded-lg text-indigo-650 dark:text-indigo-300 shrink-0">
               <InsightIcon className="w-4 h-4" />
             </div>
-            <p className="text-[11px] sm:text-[10px] text-slate-700 leading-normal font-semibold flex-1">
+            <p className="text-[11px] sm:text-[10px] text-slate-700 dark:text-slate-200 leading-normal font-semibold flex-1">
               {currentInsight.tip}
             </p>
           </div>
@@ -3879,52 +3879,52 @@ JSON structure:
 
   const renderPracticeAnalyticsHUD = () => {
     return (
-      <div className="bg-slate-50   border border-slate-200/50 rounded-2xl p-4 mt-4 text-left space-y-3 relative overflow-hidden">
-        <div className="absolute bottom-0 left-0 w-16 h-16 bg-teal-500/5 rounded-full blur-xl pointer-events-none" />
+      <div className="bg-slate-50 dark:bg-[#060B16] border border-slate-200/50 dark:border-slate-800 rounded-2xl p-4 mt-4 text-left space-y-3 relative overflow-hidden">
+        <div className="absolute bottom-0 left-0 w-16 h-16 bg-teal-500/5 dark:bg-blue-500/10 rounded-full blur-xl pointer-events-none" />
 
-        <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-          <Cpu className="w-3.5 h-3.5 text-brand-600" /> Practice Performance HUD
+        <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          <Cpu className="w-3.5 h-3.5 text-brand-600 dark:text-blue-400" /> Practice Performance HUD
         </div>
 
         <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="bg-slate-50 border border-slate-200/50 p-2 rounded-xl flex flex-col justify-center relative hover:border-teal-500/10 transition-all">
-            <span className="text-[10px] font-black text-[#2563EB] mb-0.5 flex justify-center">
+          <div className="bg-white dark:bg-[#0B1528] border border-slate-200/50 dark:border-slate-800 p-2 rounded-xl flex flex-col justify-center relative hover:border-teal-500/10 transition-all shadow-xs">
+            <span className="text-[10px] font-black text-[#2563EB] dark:text-blue-400 mb-0.5 flex justify-center">
               <Trophy className="w-3.5 h-3.5" />
             </span>
-            <span className="text-sm font-black text-slate-800 font-mono leading-none block">
+            <span className="text-sm font-black text-slate-800 dark:text-white font-mono leading-none block">
               {practiceStats.totalCompleted}
             </span>
-            <span className="text-[7.5px] font-bold uppercase tracking-widest text-slate-500 mt-1 block">
+            <span className="text-[7.5px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mt-1 block">
               Attempts
             </span>
           </div>
 
-          <div className="bg-slate-50 border border-slate-200/50 p-2 rounded-xl flex flex-col justify-center relative hover:border-teal-500/10 transition-all">
-            <span className="text-[10px] font-black text-emerald-650 mb-0.5 flex justify-center">
+          <div className="bg-white dark:bg-[#0B1528] border border-slate-200/50 dark:border-slate-800 p-2 rounded-xl flex flex-col justify-center relative hover:border-teal-500/10 transition-all shadow-xs">
+            <span className="text-[10px] font-black text-emerald-650 dark:text-emerald-400 mb-0.5 flex justify-center">
               <CheckCircle2 className="w-3.5 h-3.5" />
             </span>
-            <span className="text-sm font-black text-slate-800 font-mono leading-none block">
+            <span className="text-sm font-black text-slate-800 dark:text-white font-mono leading-none block">
               {practiceStats.avgAccuracy}%
             </span>
-            <span className="text-[7.5px] font-bold uppercase tracking-widest text-slate-500 mt-1 block">
+            <span className="text-[7.5px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mt-1 block">
               Avg Accuracy
             </span>
           </div>
 
-          <div className="bg-slate-50 border border-slate-200/50 p-2 rounded-xl flex flex-col justify-center relative hover:border-teal-500/10 transition-all">
-            <span className="text-[10px] font-black text-amber-650 mb-0.5 flex justify-center">
+          <div className="bg-white dark:bg-[#0B1528] border border-slate-200/50 dark:border-slate-800 p-2 rounded-xl flex flex-col justify-center relative hover:border-teal-500/10 transition-all shadow-xs">
+            <span className="text-[10px] font-black text-amber-650 dark:text-amber-400 mb-0.5 flex justify-center">
               <Zap className="w-3.5 h-3.5" />
             </span>
-            <span className="text-sm font-black text-slate-800 font-mono leading-none block">
+            <span className="text-sm font-black text-slate-800 dark:text-white font-mono leading-none block">
               {practiceStats.streak} {practiceStats.streak === 1 ? 'Day' : 'Days'}
             </span>
-            <span className="text-[7.5px] font-bold uppercase tracking-widest text-slate-500 mt-1 block">
+            <span className="text-[7.5px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mt-1 block">
               Streak
             </span>
           </div>
         </div>
 
-        <p className="text-[9px] text-slate-500 text-center leading-normal font-semibold">
+        <p className="text-[9px] text-slate-500 dark:text-slate-400 text-center leading-normal font-semibold">
           {practiceStats.totalCompleted === 0 
             ? "Configure a subject above and start practicing to unlock analytics!" 
             : practiceStats.avgAccuracy >= 70 
@@ -4021,19 +4021,19 @@ JSON structure:
         </div>
 
       {/* Mobile-only View Selector Tab (only visible on mobile lg:hidden) */}
-      <div className="lg:hidden flex bg-slate-100 p-0.5 rounded-xl border border-slate-200/50 shadow-inner overflow-hidden max-w-[280px] sm:max-w-xs mx-auto mb-4 relative z-20">
+      <div className="lg:hidden flex bg-slate-100 dark:bg-slate-900/90 p-0.5 rounded-xl border border-slate-200/50 dark:border-slate-800 shadow-inner overflow-hidden max-w-[280px] sm:max-w-xs mx-auto mb-4 relative z-20">
         <button
           type="button"
           onClick={() => setMobileTab('chat')}
           className={cn(
             "flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-300 cursor-pointer relative",
-            mobileTab === 'chat' ? "text-[#2563EB]" : "text-slate-500 hover:text-slate-800"
+            mobileTab === 'chat' ? "text-[#2563EB] dark:text-blue-400" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
           )}
         >
           {mobileTab === 'chat' && (
             <motion.div
               layoutId="mobileViewActiveTabBg"
-              className="absolute inset-0 bg-white border border-slate-200/60 rounded-lg shadow-md z-0"
+              className="absolute inset-0 bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 rounded-lg shadow-md z-0"
               transition={{ type: "spring", stiffness: 350, damping: 28 }}
             />
           )}
@@ -4047,13 +4047,13 @@ JSON structure:
           onClick={() => setMobileTab('tools')}
           className={cn(
             "flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-300 cursor-pointer relative",
-            mobileTab === 'tools' ? "text-indigo-650" : "text-slate-500 hover:text-slate-800"
+            mobileTab === 'tools' ? "text-indigo-650 dark:text-indigo-400" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
           )}
         >
           {mobileTab === 'tools' && (
             <motion.div
               layoutId="mobileViewActiveTabBg"
-              className="absolute inset-0 bg-white border border-slate-200/60 rounded-lg shadow-md z-0"
+              className="absolute inset-0 bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 rounded-lg shadow-md z-0"
               transition={{ type: "spring", stiffness: 350, damping: 28 }}
             />
           )}
@@ -4070,12 +4070,11 @@ JSON structure:
         {/* Left Pane: Chat Interface */}
         <div id="chat-pane" className={cn(
           isFullScreen
-            ? "fixed inset-0 z-[100] w-screen h-dvh rounded-none border-none shadow-none bg-white flex flex-col transition-all duration-300"
-            : "lg:col-span-7 bg-white text-slate-700 border border-slate-200/60 rounded-[2rem] overflow-hidden shadow-2xl flex-col h-[calc(100dvh-12rem)] min-h-[580px] lg:h-[720px] relative transition-all duration-300",
+            ? "fixed inset-0 z-[100] w-screen h-dvh rounded-none border-none shadow-none bg-white dark:bg-[#0B1528] flex flex-col transition-all duration-300"
+            : "lg:col-span-7 bg-white dark:bg-[#0B1528] text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-blue-500/30 rounded-[2rem] overflow-hidden shadow-2xl dark:shadow-slate-950/80 flex-col h-[calc(100dvh-12rem)] min-h-[580px] lg:h-[720px] relative transition-all duration-300",
           mobileTab === 'chat' ? "flex" : "hidden lg:flex"
         )}>
-          {/* Declaring dark color-scheme on the dark chat console to enable dark-themed scrollbars and select default popups */}
-          <div style={{ colorScheme: 'light' }} className="absolute inset-0 flex flex-col">
+          <div className="absolute inset-0 flex flex-col">
             
             {/* Slide-over Multi-Chat History Drawer */}
             <AnimatePresence>
@@ -4087,7 +4086,7 @@ JSON structure:
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={() => setIsHistoryDrawerOpen(false)}
-                    className="absolute inset-0 bg-slate-900/20 backdrop-blur-xs z-30"
+                    className="absolute inset-0 bg-slate-900/20 dark:bg-slate-950/60 backdrop-blur-xs z-30"
                   />
 
                   {/* Drawer */}
@@ -4096,14 +4095,14 @@ JSON structure:
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -30 }}
                     transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                    className="absolute inset-y-0 left-0 w-full sm:w-80 bg-white/95 backdrop-blur-xl border-r border-slate-200/80 shadow-2xl z-40 flex flex-col"
+                    className="absolute inset-y-0 left-0 w-full sm:w-80 bg-white/95 dark:bg-[#0B1528]/95 backdrop-blur-xl border-r border-slate-200/80 dark:border-slate-800 shadow-2xl z-40 flex flex-col"
                   >
                     {/* Drawer Header */}
-                    <div className="p-3.5 border-b border-slate-200/60 bg-slate-50/90 flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-slate-800">
-                        <History className="w-4 h-4 text-brand-600" />
+                    <div className="p-3.5 border-b border-slate-200/60 dark:border-slate-800 bg-slate-50/90 dark:bg-[#060B16]/90 flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-slate-800 dark:text-white">
+                        <History className="w-4 h-4 text-brand-600 dark:text-blue-400" />
                         <span className="text-xs font-black uppercase tracking-wider">Chat History</span>
-                        <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded-full bg-brand-100 text-brand-700">
+                        <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded-full bg-brand-100 dark:bg-blue-900/50 text-brand-700 dark:text-blue-300">
                           {sessions.length}
                         </span>
                       </div>
@@ -4111,7 +4110,7 @@ JSON structure:
                         <button
                           type="button"
                           onClick={handleCreateNewChat}
-                          className="p-1.5 hover:bg-brand-50 rounded-lg text-brand-600 transition-colors cursor-pointer"
+                          className="p-1.5 hover:bg-brand-50 dark:hover:bg-blue-900/40 rounded-lg text-brand-600 dark:text-blue-400 transition-colors cursor-pointer"
                           title="Start New Chat"
                         >
                           <Plus className="w-4 h-4" />
@@ -4119,7 +4118,7 @@ JSON structure:
                         <button
                           type="button"
                           onClick={() => setIsHistoryDrawerOpen(false)}
-                          className="p-1.5 hover:bg-slate-200/80 rounded-lg text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                          className="p-1.5 hover:bg-slate-200/80 dark:hover:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors cursor-pointer"
                         >
                           <X className="w-4 h-4" />
                         </button>
@@ -4127,15 +4126,15 @@ JSON structure:
                     </div>
 
                     {/* History Search Bar */}
-                    <div className="p-2.5 border-b border-slate-100 bg-white">
+                    <div className="p-2.5 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-[#060B16]">
                       <div className="relative">
-                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                         <input
                           type="text"
                           value={historySearchQuery}
                           onChange={(e) => setHistorySearchQuery(e.target.value)}
                           placeholder="Search past conversations..."
-                          className="w-full bg-slate-50 border border-slate-200/70 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all"
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all"
                         />
                       </div>
                     </div>
@@ -4158,12 +4157,12 @@ JSON structure:
                               className={cn(
                                 "group relative flex items-center justify-between p-2.5 rounded-xl text-xs transition-all duration-200 cursor-pointer border",
                                 isActive
-                                  ? "bg-brand-50/90 border-brand-300 text-brand-950 font-semibold shadow-xs"
-                                  : "bg-white hover:bg-slate-50 border-slate-200/50 text-slate-700 hover:border-slate-300"
+                                  ? "bg-brand-50/90 dark:bg-blue-950/60 border-brand-300 dark:border-blue-500/50 text-brand-950 dark:text-blue-200 font-semibold shadow-xs"
+                                  : "bg-white dark:bg-[#060B16]/80 hover:bg-slate-50 dark:hover:bg-slate-800/60 border-slate-200/50 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"
                               )}
                             >
                               <div className="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
-                                <MessageSquare className={cn("w-4 h-4 shrink-0", isActive ? "text-brand-600" : "text-slate-400")} />
+                                <MessageSquare className={cn("w-4 h-4 shrink-0", isActive ? "text-brand-600 dark:text-blue-400" : "text-slate-400")} />
                                 
                                 {isEditing ? (
                                   <input
@@ -4177,14 +4176,14 @@ JSON structure:
                                     }}
                                     onBlur={() => handleSaveRenameSession(session.id)}
                                     onClick={(e) => e.stopPropagation()}
-                                    className="w-full bg-white border border-brand-400 rounded px-1.5 py-0.5 text-xs text-slate-800 focus:outline-none"
+                                    className="w-full bg-white dark:bg-slate-900 border border-brand-400 dark:border-blue-400 rounded px-1.5 py-0.5 text-xs text-slate-800 dark:text-white focus:outline-none"
                                   />
                                 ) : (
                                   <div className="truncate flex-1">
-                                    <p className="truncate font-medium text-slate-800 text-xs leading-tight">
+                                    <p className="truncate font-medium text-slate-800 dark:text-slate-200 text-xs leading-tight">
                                       {session.title || 'Untitled Chat'}
                                     </p>
-                                    <p className="text-[10px] text-slate-400 mt-0.5">
+                                    <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
                                       {formatSessionDate(session.updatedAt)} • {session.messages.length} msgs
                                     </p>
                                   </div>
@@ -4196,7 +4195,7 @@ JSON structure:
                                   <button
                                     type="button"
                                     onClick={(e) => handleStartRenameSession(session, e)}
-                                    className="p-1 hover:bg-slate-200/70 rounded text-slate-400 hover:text-slate-700 transition-colors"
+                                    className="p-1 hover:bg-slate-200/70 dark:hover:bg-slate-800 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
                                     title="Rename Chat"
                                   >
                                     <Edit2 className="w-3 h-3" />
@@ -4205,7 +4204,7 @@ JSON structure:
                                 <button
                                   type="button"
                                   onClick={(e) => handleDeleteSession(session.id, e)}
-                                  className="p-1 hover:bg-rose-100 rounded text-slate-400 hover:text-rose-600 transition-colors"
+                                  className="p-1 hover:bg-rose-100 dark:hover:bg-rose-950/60 rounded text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
                                   title="Delete Chat"
                                 >
                                   <Trash2 className="w-3 h-3" />
@@ -4222,10 +4221,10 @@ JSON structure:
             </AnimatePresence>
             
             {/* Header Control Panel */}
-            <div className="p-3 border-b border-slate-200/60 bg-slate-50 flex items-center justify-between gap-3 z-10">
+            <div className="p-3 border-b border-slate-200/60 dark:border-slate-800 bg-slate-50 dark:bg-[#060B16]/90 flex items-center justify-between gap-3 z-10">
               <div className="flex items-center gap-2 shrink-0">
                 <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                <span className="text-xs font-black uppercase tracking-wider text-slate-800">OdishaExamPrep AI</span>
+                <span className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-white">OdishaExamPrep AI</span>
               </div>
 
               <div className="flex items-center gap-1.5 shrink-0">
@@ -4234,15 +4233,15 @@ JSON structure:
                   <button
                     type="button"
                     onClick={() => setIsExamDropdownOpen(!isExamDropdownOpen)}
-                    className="bg-white hover:bg-slate-100 hover:text-slate-800/90 border border-slate-200/60 text-brand-600 rounded-lg text-[9px] font-black uppercase tracking-wider py-1.5 pl-2.5 pr-6 focus:outline-none transition-all cursor-pointer flex items-center gap-1 relative shrink-0 shadow-xs active:scale-95"
+                    className="bg-white dark:bg-[#0B1528] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700 text-brand-600 dark:text-blue-300 rounded-lg text-[9px] font-black uppercase tracking-wider py-1.5 pl-2.5 pr-6 focus:outline-none transition-all cursor-pointer flex items-center gap-1 relative shrink-0 shadow-xs active:scale-95"
                   >
                     <div className="flex items-center gap-1">
-                      <Target className="w-3.5 h-3.5 text-brand-600" />
+                      <Target className="w-3.5 h-3.5 text-brand-600 dark:text-blue-400" />
                       <span className="truncate max-w-[80px]">
                         {targetExam || 'Select Exam'}
                       </span>
                     </div>
-                    <ChevronDown className={cn("w-3 h-3 text-brand-600 transition-transform duration-300 absolute right-2 top-1/2 -translate-y-1/2", isExamDropdownOpen && "rotate-180")} />
+                    <ChevronDown className={cn("w-3 h-3 text-brand-600 dark:text-blue-400 transition-transform duration-300 absolute right-2 top-1/2 -translate-y-1/2", isExamDropdownOpen && "rotate-180")} />
                   </button>
 
                   <AnimatePresence>
@@ -4252,11 +4251,11 @@ JSON structure:
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: -10 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute right-0 mt-2 w-56 rounded-xl bg-white border border-slate-200/60 shadow-2xl p-1 z-50 overflow-hidden"
+                        className="absolute right-0 mt-2 w-56 rounded-xl bg-white dark:bg-[#0B1528] border border-slate-200/60 dark:border-slate-800 shadow-2xl p-1 z-50 overflow-hidden text-slate-800 dark:text-slate-100"
                       >
                         <div className="max-h-64 overflow-y-auto pr-0.5 no-scrollbar">
                           {userExams.length === 0 ? (
-                            <div className="px-3 py-4 text-center text-[9px] text-slate-500 font-black uppercase tracking-wider">
+                            <div className="px-3 py-4 text-center text-[9px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-wider">
                               No target exams. Add one below!
                             </div>
                           ) : (
@@ -4268,8 +4267,8 @@ JSON structure:
                                   className={cn(
                                     "group w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all duration-200 cursor-pointer",
                                     isActive
-                                      ? "bg-teal-500/10 border-l-2 border-teal-500 text-brand-600 font-bold"
-                                      : "text-slate-500 hover:text-slate-800 hover:bg-slate-100"
+                                      ? "bg-teal-500/10 dark:bg-blue-500/20 border-l-2 border-teal-500 dark:border-blue-400 text-brand-600 dark:text-blue-300 font-bold"
+                                      : "text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80"
                                   )}
                                   onClick={() => {
                                     setTargetExam(exam);
@@ -4277,7 +4276,7 @@ JSON structure:
                                   }}
                                 >
                                   <div className="flex items-center gap-2 truncate flex-1">
-                                    <Target className={cn("w-3 h-3 shrink-0", isActive ? "text-brand-600" : "text-slate-600")} />
+                                    <Target className={cn("w-3 h-3 shrink-0", isActive ? "text-brand-600 dark:text-blue-400" : "text-slate-500 dark:text-slate-400")} />
                                     <span className="truncate">{exam}</span>
                                   </div>
                                   <button
@@ -4286,7 +4285,7 @@ JSON structure:
                                       e.stopPropagation();
                                       handleDeleteExam(exam);
                                     }}
-                                    className="opacity-70 md:opacity-0 md:group-hover:opacity-100 hover:opacity-100 hover:bg-rose-500/20 p-1 rounded transition-all text-slate-500 hover:text-[#2563EB] cursor-pointer flex items-center justify-center shrink-0"
+                                    className="opacity-70 md:opacity-0 md:group-hover:opacity-100 hover:opacity-100 hover:bg-rose-500/20 p-1 rounded transition-all text-slate-500 dark:text-slate-400 hover:text-[#2563EB] dark:hover:text-blue-400 cursor-pointer flex items-center justify-center shrink-0"
                                     title="Delete Target Exam"
                                   >
                                     <X className="w-3.5 h-3.5" />
@@ -4296,7 +4295,7 @@ JSON structure:
                             })
                           )}
                           
-                          <div className="border-t border-slate-200/50 mt-1.5 pt-2 px-1.5">
+                          <div className="border-t border-slate-200/50 dark:border-slate-800 mt-1.5 pt-2 px-1.5">
                             <form
                               onSubmit={(e) => {
                                 e.preventDefault();
@@ -4309,7 +4308,7 @@ JSON structure:
                                 value={newExamName}
                                 onChange={(e) => setNewExamName(e.target.value)}
                                 placeholder="Add exam (e.g. UPSC)..."
-                                className="w-full bg-slate-50 border border-slate-200/60 focus:border-teal-500/50 rounded-lg px-2 py-1 text-[9px] text-slate-800 focus:outline-none focus:ring-1 focus:ring-teal-500/30 transition-all font-semibold uppercase tracking-wider placeholder:text-slate-400"
+                                className="w-full bg-slate-50 dark:bg-[#060B16] border border-slate-200/60 dark:border-slate-800 focus:border-teal-500/50 dark:focus:border-blue-400 rounded-lg px-2 py-1 text-[9px] text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-teal-500/30 transition-all font-semibold uppercase tracking-wider placeholder:text-slate-400 dark:placeholder:text-slate-500"
                               />
                               <button
                                 type="submit"
@@ -4329,10 +4328,10 @@ JSON structure:
                 <button
                   type="button"
                   onClick={handleCreateNewChat}
-                  className="flex items-center gap-1 px-2.5 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200/80 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
+                  className="flex items-center gap-1 px-2.5 py-1.5 bg-brand-50 dark:bg-blue-950/50 hover:bg-brand-100 dark:hover:bg-blue-900/60 text-brand-700 dark:text-blue-300 border border-brand-200/80 dark:border-blue-800/60 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
                   title="Start New Chat Session"
                 >
-                  <Plus className="w-3.5 h-3.5 text-brand-600" />
+                  <Plus className="w-3.5 h-3.5 text-brand-600 dark:text-blue-400" />
                   <span className="text-[10px] font-black uppercase tracking-wider hidden xs:inline">New Chat</span>
                 </button>
 
@@ -4343,15 +4342,15 @@ JSON structure:
                   className={cn(
                     "flex items-center gap-1 px-2.5 py-1.5 border rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 shrink-0 relative",
                     isHistoryDrawerOpen
-                      ? "bg-slate-800 text-white border-slate-800"
-                      : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200/80"
+                      ? "bg-slate-800 dark:bg-blue-600 text-white border-slate-800 dark:border-blue-600"
+                      : "bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-slate-700"
                   )}
                   title="View Chat History"
                 >
                   <History className="w-3.5 h-3.5" />
                   <span className="text-[10px] font-black uppercase tracking-wider hidden xs:inline">History</span>
                   {sessions.length > 1 && (
-                    <span className="w-4 h-4 bg-brand-600 text-white text-[9px] font-black rounded-full flex items-center justify-center -ml-0.5">
+                    <span className="w-4 h-4 bg-brand-600 dark:bg-blue-500 text-white text-[9px] font-black rounded-full flex items-center justify-center -ml-0.5">
                       {sessions.length}
                     </span>
                   )}
@@ -4363,10 +4362,10 @@ JSON structure:
                     setMessages([DEFAULT_WELCOME_MESSAGE]);
                     setLoading(false);
                   }}
-                  className="flex items-center gap-1 px-2 py-1.5 bg-slate-100 hover:bg-rose-500/10 text-slate-650 hover:text-rose-600 border border-slate-200/60 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
+                  className="flex items-center gap-1 px-2 py-1.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-rose-500/10 dark:hover:bg-rose-950/40 text-slate-650 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200/60 dark:border-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
                   title="Clear Active Chat Messages"
                 >
-                  <Trash2 className="w-3.5 h-3.5 text-slate-400 hover:text-rose-500" />
+                  <Trash2 className="w-3.5 h-3.5 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400" />
                 </button>
 
                 {/* Fullscreen Workspace Toggle Button */}
@@ -4377,14 +4376,14 @@ JSON structure:
                     "flex items-center gap-1.5 px-2.5 py-1.5 border rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 shrink-0",
                     isFullScreen
                       ? "bg-[#2563EB] hover:bg-[#1d4ed8] text-white border-[#2563EB] shadow-md shadow-[#2563EB]/20 font-black"
-                      : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200/80"
+                      : "bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-slate-700"
                   )}
                   title={isFullScreen ? "Exit Fullscreen Workspace" : "Enter Fullscreen Workspace"}
                 >
                   {isFullScreen ? (
                     <Minimize2 className="w-3.5 h-3.5 text-white" />
                   ) : (
-                    <Maximize2 className="w-3.5 h-3.5 text-slate-600" />
+                    <Maximize2 className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" />
                   )}
                   <span className="text-[10px] font-black uppercase tracking-wider hidden xs:inline">
                     {isFullScreen ? "Exit Fullscreen" : "Fullscreen"}
@@ -4406,12 +4405,12 @@ JSON structure:
                     "flex flex-col rounded-2xl p-3.5 md:p-5 text-sm md:text-[15px] leading-relaxed shadow-sm transition-all duration-300 animate-fade-up",
                     m.role === 'user' 
                       ? "bg-brand-500 text-white self-end rounded-tr-none max-w-[85%] sm:max-w-[75%]" 
-                      : "bg-slate-50 border border-slate-200/60 text-slate-800 self-start rounded-tl-none w-full sm:w-auto max-w-[96%] sm:max-w-[85%] md:max-w-[80%]"
+                      : "bg-slate-50 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 text-slate-800 dark:text-slate-100 self-start rounded-tl-none w-full sm:w-auto max-w-[96%] sm:max-w-[85%] md:max-w-[80%]"
                   )}
                 >
                   <div className={cn(
                     "items-center justify-between gap-1.5 text-[10px] font-black uppercase tracking-widest flex mb-1",
-                    m.role === 'user' ? "text-brand-200" : "text-slate-500"
+                    m.role === 'user' ? "text-brand-200" : "text-slate-500 dark:text-slate-400"
                   )}>
                     <span className="inline">{m.role === 'user' ? 'Student' : 'OdishaExamPrep AI'}</span>
                     <div className="flex items-center gap-1.5">
@@ -4419,8 +4418,8 @@ JSON structure:
                         <span className={cn(
                           "text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded flex items-center gap-1",
                           m.mode === 'quick' 
-                            ? "bg-amber-500/10 text-amber-500" 
-                            : "bg-indigo-500/10 text-indigo-650"
+                            ? "bg-amber-500/10 text-amber-500 dark:text-amber-400" 
+                            : "bg-indigo-500/10 text-indigo-650 dark:text-indigo-300"
                         )}>
                           {m.mode === 'quick' ? <Zap className="w-2.5 h-2.5" /> : <Sparkles className="w-2.5 h-2.5 animate-pulse" />}
                           {m.mode === 'quick' ? 'Quick Result' : 'Best Result'}
@@ -4438,7 +4437,7 @@ JSON structure:
                               speak(m.content, () => setActiveSpeakingIdx(null));
                             }
                           }}
-                          className="p-1 hover:bg-slate-200/80 rounded-lg text-slate-500 hover:text-brand-600 transition-colors cursor-pointer"
+                          className="p-1 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 rounded-lg text-slate-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
                           title={isSpeaking && activeSpeakingIdx === idx ? "Stop Audio" : "Listen to Response"}
                         >
                           {isSpeaking && activeSpeakingIdx === idx ? (
@@ -4485,12 +4484,12 @@ JSON structure:
 
                   <div className="whitespace-pre-wrap font-sans">
                     {m.content ? <MarkdownMathRenderer text={m.content} isUser={m.role === 'user'} /> : (
-                      <span className="inline-flex gap-2 items-center text-xs font-semibold text-slate-500 py-1.5 overflow-visible">
-                        <span className="text-[10px] text-brand-600/80 font-black tracking-wider uppercase animate-pulse">OdishaExamPrep AI is responding</span>
+                      <span className="inline-flex gap-2 items-center text-xs font-semibold text-slate-500 dark:text-slate-400 py-1.5 overflow-visible">
+                        <span className="text-[10px] text-brand-600/80 dark:text-blue-400 font-black tracking-wider uppercase animate-pulse">OdishaExamPrep AI is responding</span>
                         <span className="flex gap-1 py-1 overflow-visible">
-                          <span className="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce shrink-0" style={{ animationDelay: '0ms' }} />
-                          <span className="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce shrink-0" style={{ animationDelay: '150ms' }} />
-                          <span className="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce shrink-0" style={{ animationDelay: '300ms' }} />
+                          <span className="w-1.5 h-1.5 bg-brand-400 dark:bg-blue-400 rounded-full animate-bounce shrink-0" style={{ animationDelay: '0ms' }} />
+                          <span className="w-1.5 h-1.5 bg-brand-400 dark:bg-blue-400 rounded-full animate-bounce shrink-0" style={{ animationDelay: '150ms' }} />
+                          <span className="w-1.5 h-1.5 bg-brand-400 dark:bg-blue-400 rounded-full animate-bounce shrink-0" style={{ animationDelay: '300ms' }} />
                         </span>
                       </span>
                     )}
@@ -4504,7 +4503,7 @@ JSON structure:
             <div className="relative shrink-0">
               {/* Active Voice Wave Overlay Banner (for AI TTS Speaking) */}
               {isSpeaking && (
-                <div className="px-4 py-2 bg-gradient-to-r from-slate-900 via-brand-950 to-slate-900 text-white flex items-center justify-between border-t border-brand-500/30 animate-fade-in">
+                <div className="px-4 py-2 bg-gradient-to-r from-[#0B1528] via-[#112240] to-[#0B1528] text-white flex items-center justify-between border-t border-blue-500/30 animate-fade-in">
                   <div className="flex items-center gap-2 shrink-0 whitespace-nowrap">
                     <VoiceWaveVisualizer
                       isActive={true}
@@ -4531,19 +4530,19 @@ JSON structure:
               {/* Top shimmer border */}
               <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
 
-              <div className="px-3 sm:px-4 pt-3 pb-3 sm:pb-4 bg-slate-50 border-t border-slate-200/60">
+              <div className="px-3 sm:px-4 pt-3 pb-3 sm:pb-4 bg-slate-50 dark:bg-[#060B16]/95 border-t border-slate-200/60 dark:border-slate-800">
                 <form
                   onSubmit={(e) => { e.preventDefault(); if (input.trim()) handleSendMessage(input); }}
                   className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5"
                 >
                   {/* Segmented pill stack */}
-                  <div className="relative flex bg-slate-100 p-0.5 rounded-xl border border-slate-200/50 shadow-inner overflow-hidden shrink-0 w-full sm:w-auto">
+                  <div className="relative flex bg-slate-100 dark:bg-slate-900/90 p-0.5 rounded-xl border border-slate-200/50 dark:border-slate-800 shadow-inner overflow-hidden shrink-0 w-full sm:w-auto">
                     <button
                       type="button"
                       onClick={() => setResponseMode('quick')}
                       className={cn(
                         "relative z-10 flex-1 sm:flex-initial flex items-center justify-center gap-1 py-1.5 px-3 rounded-[10px] text-[10px] font-black uppercase tracking-widest transition-colors duration-200 cursor-pointer min-w-[65px]",
-                        responseMode === 'quick' ? "bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-sm" : "text-slate-500 hover:text-slate-800"
+                        responseMode === 'quick' ? "bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
                       )}
                     >
                       <Zap className={cn(
@@ -4557,7 +4556,7 @@ JSON structure:
                       onClick={() => setResponseMode('best')}
                       className={cn(
                         "relative z-10 flex-1 sm:flex-initial flex items-center justify-center gap-1 py-1.5 px-3 rounded-[10px] text-[10px] font-black uppercase tracking-widest transition-colors duration-200 cursor-pointer min-w-[65px]",
-                        responseMode === 'best' ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-sm" : "text-slate-500 hover:text-slate-800"
+                        responseMode === 'best' ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
                       )}
                     >
                       <Sparkles className={cn(
@@ -4587,7 +4586,7 @@ JSON structure:
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
                           exit={{ opacity: 0, height: 0 }}
-                          className="mb-2 px-1 py-1 rounded-2xl bg-white/90 border border-slate-200/80 shadow-xs"
+                          className="mb-2 px-1 py-1 rounded-2xl bg-white/90 dark:bg-[#0B1528]/95 border border-slate-200/80 dark:border-slate-800 shadow-xs"
                         >
                           <div 
                             data-lenis-prevent
@@ -4608,7 +4607,7 @@ JSON structure:
                               >
                                 {att.type === 'image' && att.previewUrl ? (
                                   /* ChatGPT-style Square Image Thumbnail Tile */
-                                  <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border border-slate-200/90 shadow-xs bg-slate-100 group/thumb">
+                                  <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border border-slate-200/90 dark:border-slate-700 shadow-xs bg-slate-100 dark:bg-slate-800 group/thumb">
                                     <img
                                       src={att.previewUrl}
                                       alt={att.name}
@@ -4626,18 +4625,18 @@ JSON structure:
                                   </div>
                                 ) : (
                                   /* ChatGPT-style Document / PDF Mini Card */
-                                  <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200/80 shadow-xs max-w-[220px] group/doc">
-                                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 shrink-0">
+                                  <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs max-w-[220px] group/doc">
+                                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-rose-50 dark:bg-rose-950/50 border border-rose-100 dark:border-rose-800 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0">
                                       <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                     </div>
                                     <div className="flex flex-col min-w-0 flex-1">
-                                      <span className="text-xs font-bold text-slate-800 truncate leading-snug">{att.name}</span>
-                                      <span className="text-[10px] text-slate-400 font-medium font-mono">{(att.size / 1024).toFixed(0)} KB</span>
+                                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate leading-snug">{att.name}</span>
+                                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium font-mono">{(att.size / 1024).toFixed(0)} KB</span>
                                     </div>
                                     <button
                                       type="button"
                                       onClick={() => setAttachments(prev => prev.filter(a => a.id !== att.id))}
-                                      className="p-1 rounded-full hover:bg-rose-100/80 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer shrink-0"
+                                      className="p-1 rounded-full hover:bg-rose-100/80 dark:hover:bg-rose-950/80 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer shrink-0"
                                       title="Remove file"
                                     >
                                       <X className="w-3.5 h-3.5" />
@@ -4752,8 +4751,8 @@ JSON structure:
                             className={cn(
                               "absolute left-2.5 top-1/2 -translate-y-1/2 p-1 rounded-lg transition-all duration-300 z-10 cursor-pointer active:scale-95 flex items-center justify-center border",
                               webSearch 
-                                ? "text-brand-600 bg-brand-50 border-brand-200/50 shadow-xs hover:bg-brand-100/50" 
-                                : "text-slate-400 border-transparent hover:text-slate-600 hover:bg-slate-100",
+                                ? "text-brand-600 dark:text-blue-400 bg-brand-50 dark:bg-blue-950/60 border-brand-200/50 dark:border-blue-500/40 shadow-xs hover:bg-brand-100/50" 
+                                : "text-slate-400 dark:text-slate-500 border-transparent hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800",
                               loading && "opacity-50 cursor-not-allowed"
                             )}
                             title={webSearch ? "Web Search Active (Click to disable)" : "Web Search Disabled (Click to enable)"}
@@ -4768,8 +4767,8 @@ JSON structure:
                             placeholder="Ask about Odisha history, GS, math, grammar, or upload file…"
                             disabled={loading}
                             className={cn(
-                              "relative w-full bg-white border rounded-xl pl-9 pr-10 sm:pl-10 sm:pr-10 py-2.5 text-xs sm:text-sm text-slate-800 placeholder:text-slate-500 focus:outline-none transition-all duration-300 font-semibold shadow-inner",
-                              "border-slate-200/60 focus:border-slate-300/80",
+                              "relative w-full bg-white dark:bg-[#0B1528] border rounded-xl pl-9 pr-10 sm:pl-10 sm:pr-10 py-2.5 text-xs sm:text-sm text-slate-800 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none transition-all duration-300 font-semibold shadow-inner",
+                              "border-slate-200/60 dark:border-slate-700/80 focus:border-slate-300/80 dark:focus:border-blue-400",
                               loading && "cursor-not-allowed"
                             )}
                           />
@@ -4786,7 +4785,7 @@ JSON structure:
                                   e.stopPropagation();
                                   startListening();
                                 }}
-                                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-slate-100 transition-all cursor-pointer z-10"
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-brand-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer z-10"
                                 title="Voice Dictation (Speech-to-Text)"
                               >
                                 <Mic className="w-3.5 h-3.5" />
@@ -4799,7 +4798,7 @@ JSON structure:
                             <motion.span
                               initial={{ opacity: 0, scale: 0.8 }}
                               animate={{ opacity: 1, scale: 1 }}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-600 font-mono pointer-events-none"
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-600 dark:text-slate-400 font-mono pointer-events-none"
                             >
                               {input.length}
                             </motion.span>
@@ -4816,14 +4815,14 @@ JSON structure:
                         className={cn(
                           "relative flex items-center justify-center w-10 h-10 rounded-xl border transition-all duration-300 shrink-0 cursor-pointer overflow-hidden group shadow-xs",
                           attachments.length > 0
-                            ? "bg-brand-50 border-brand-300 text-brand-600 shadow-brand-500/10"
-                            : "bg-white hover:bg-slate-100 border-slate-200 text-slate-500 hover:text-slate-800"
+                            ? "bg-brand-50 dark:bg-blue-950/60 border-brand-300 dark:border-blue-500/50 text-brand-600 dark:text-blue-300 shadow-brand-500/10"
+                            : "bg-white dark:bg-[#0B1528] hover:bg-slate-100 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
                         )}
                         title="Upload File (PDF, Image, Screenshot)"
                       >
-                        <Paperclip className={cn("w-4 h-4 transition-transform duration-200 group-hover:scale-110", attachments.length > 0 && "text-brand-600")} />
+                        <Paperclip className={cn("w-4 h-4 transition-transform duration-200 group-hover:scale-110", attachments.length > 0 && "text-brand-600 dark:text-blue-400")} />
                         {attachments.length > 0 && (
-                          <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-brand-600 animate-pulse" />
+                          <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-brand-600 dark:bg-blue-400 animate-pulse" />
                         )}
                       </motion.button>
 
@@ -4865,7 +4864,7 @@ JSON structure:
                               "relative flex items-center justify-center w-10 h-10 rounded-xl border transition-all duration-300 shrink-0 cursor-pointer overflow-hidden group shadow-sm",
                               isLiveVoiceMode || isListening
                                 ? "bg-gradient-to-br from-emerald-500 to-teal-700 border-emerald-600 text-white shadow-emerald-500/30"
-                                : "bg-gradient-to-br from-slate-100 to-slate-200/80 hover:from-emerald-50 hover:to-emerald-100 border-slate-200/80 hover:border-emerald-300 text-slate-700 hover:text-emerald-600"
+                                : "bg-gradient-to-br from-slate-100 to-slate-200/80 dark:from-slate-800 dark:to-slate-900 hover:from-emerald-50 hover:to-emerald-100 dark:hover:from-emerald-950/40 dark:hover:to-teal-950/40 border-slate-200/80 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-600 text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400"
                             )}
                             title={isLiveVoiceMode ? "AI Live Voice Active (Click to talk)" : "Start AI Live Voice"}
                           >
@@ -4874,7 +4873,7 @@ JSON structure:
                             )}
                             <Radio className={cn(
                               "w-4 h-4 relative z-10 transition-transform duration-300 group-hover:scale-110",
-                              (isLiveVoiceMode || isListening) ? "text-white animate-pulse" : "text-slate-700 group-hover:text-emerald-600"
+                              (isLiveVoiceMode || isListening) ? "text-white animate-pulse" : "text-slate-700 dark:text-slate-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400"
                             )} />
                           </motion.button>
                         ) : (
@@ -4909,7 +4908,7 @@ JSON structure:
 
         {/* Right Pane: Interactive Study Suite */}
         <div className={cn(
-          "lg:col-span-5 bg-white text-slate-600 border border-slate-200/60 rounded-[2rem] overflow-hidden shadow-2xl flex-col h-[calc(100dvh-12rem)] min-h-[580px] lg:h-[720px] relative",
+          "lg:col-span-5 bg-white dark:bg-[#0B1528] text-slate-600 dark:text-slate-200 border border-slate-200/60 dark:border-blue-500/30 rounded-[2rem] overflow-hidden shadow-2xl dark:shadow-slate-950/80 flex-col h-[calc(100dvh-12rem)] min-h-[580px] lg:h-[720px] relative",
           mobileTab === 'tools' ? "flex" : "hidden lg:flex"
         )}>
           
@@ -4917,18 +4916,18 @@ JSON structure:
           <div className={cn(
             "absolute -top-10 -right-10 w-24 h-24 rounded-full blur-xl pointer-events-none transition-all duration-500",
             activeRightTab === 'planner'
-              ? (coachMode === 'ai' ? "bg-indigo-500/10" : "bg-rose-500/5")
-              : "bg-rose-500/5"
+              ? (coachMode === 'ai' ? "bg-indigo-500/10 dark:bg-indigo-500/20" : "bg-rose-500/5 dark:bg-rose-500/15")
+              : "bg-rose-500/5 dark:bg-rose-500/15"
           )} />
-          <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-teal-500/5 rounded-full blur-xl pointer-events-none" />
+          <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-teal-500/5 dark:bg-teal-500/15 rounded-full blur-xl pointer-events-none" />
 
           {/* Glassmorphic Tab Bar */}
-          <div className="flex border-b border-slate-200/60 bg-slate-50   p-1.5 px-4 gap-1 shrink-0 z-10">
+          <div className="flex border-b border-slate-200/60 dark:border-slate-800 bg-slate-50 dark:bg-[#060B16]/90 p-1.5 px-4 gap-1 shrink-0 z-10">
             {[
-              { id: 'planner', label: 'Planner', icon: Calendar, color: 'text-indigo-650' },
-              { id: 'quiz', label: 'Practice', icon: HelpCircle, color: 'text-[#2563EB]' },
-              { id: 'syllabus', label: 'Syllabus', icon: BookOpen, color: 'text-amber-650' },
-              { id: 'formulas', label: 'Formulas', icon: Award, color: 'text-brand-600' }
+              { id: 'planner', label: 'Planner', icon: Calendar, color: 'text-indigo-650 dark:text-indigo-400' },
+              { id: 'quiz', label: 'Practice', icon: HelpCircle, color: 'text-[#2563EB] dark:text-blue-400' },
+              { id: 'syllabus', label: 'Syllabus', icon: BookOpen, color: 'text-amber-650 dark:text-amber-400' },
+              { id: 'formulas', label: 'Formulas', icon: Award, color: 'text-brand-600 dark:text-blue-300' }
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeRightTab === tab.id;
@@ -4941,14 +4940,14 @@ JSON structure:
                     "flex-1 flex flex-row items-center justify-center gap-1 py-2 px-1 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-wider transition-all duration-200 cursor-pointer relative",
                     isActive 
                       ? tab.color 
-                      : "text-slate-500 hover:text-slate-800 hover:bg-slate-100"
+                      : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60"
                   )}
                 >
                   {/* Sliding Active Background */}
                   {isActive && (
                     <motion.div
                       layoutId="activeStudyTabBg"
-                      className="absolute inset-0 bg-slate-100 border border-slate-200/60 rounded-xl shadow-lg z-0"
+                      className="absolute inset-0 bg-slate-100 dark:bg-[#0B1528] border border-slate-200/60 dark:border-blue-500/30 rounded-xl shadow-lg z-0"
                       transition={{ type: "spring", stiffness: 350, damping: 28 }}
                     />
                   )}
@@ -4988,24 +4987,24 @@ JSON structure:
             )} />
             
             {/* Header Selector */}
-            <div className="flex justify-between items-center border-b border-slate-200/50 pb-3">
+            <div className="flex justify-between items-center border-b border-slate-200/50 dark:border-slate-800 pb-3">
               <div className="space-y-0.5 text-left">
                 <span className={cn(
                   "inline-flex px-2 py-0.5 rounded text-[10px] sm:text-[9px] font-black uppercase tracking-wider",
                   coachMode === 'ai' 
-                    ? "bg-indigo-500/15 border border-indigo-500/20 text-indigo-650" 
-                    : "bg-rose-500/10 border border-rose-500/20 text-[#2563EB]"
+                    ? "bg-indigo-500/15 dark:bg-indigo-950/50 border border-indigo-500/20 dark:border-indigo-800 text-indigo-650 dark:text-indigo-300" 
+                    : "bg-rose-500/10 dark:bg-blue-950/50 border border-rose-500/20 dark:border-blue-800 text-[#2563EB] dark:text-blue-400"
                 )}>
                   {coachMode === 'ai' ? 'AI Session Planner' : 'Focus Station'}
                 </span>
-                <h4 className="font-serif font-extrabold text-slate-900 text-base flex items-center gap-1.5 mt-0.5">
-                  {coachMode === 'ai' ? <Sparkles className="w-4.5 h-4.5 text-indigo-650 animate-pulse" /> : <Timer className="w-4.5 h-4.5 text-[#2563EB]" />}
+                <h4 className="font-serif font-extrabold text-slate-900 dark:text-white text-base flex items-center gap-1.5 mt-0.5">
+                  {coachMode === 'ai' ? <Sparkles className="w-4.5 h-4.5 text-indigo-650 dark:text-indigo-400 animate-pulse" /> : <Timer className="w-4.5 h-4.5 text-[#2563EB] dark:text-blue-400" />}
                   {coachMode === 'ai' ? 'AI Study Coach' : 'Study Timer (Pomodoro)'}
                 </h4>
               </div>
               
               {/* Switcher Toggle */}
-              <div className="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200/50 shrink-0 relative overflow-hidden">
+              <div className="flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200/50 dark:border-slate-800 shrink-0 relative overflow-hidden">
                 <button
                   type="button"
                   onClick={() => {
@@ -5017,7 +5016,7 @@ JSON structure:
                   }}
                   className={cn(
                     "px-3 py-1.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-[9px] font-black uppercase tracking-wider rounded-md transition-all cursor-pointer relative",
-                    coachMode === 'manual' ? "text-white" : "text-slate-500 hover:text-slate-800"
+                    coachMode === 'manual' ? "text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
                   )}
                 >
                   {coachMode === 'manual' && (
@@ -5040,7 +5039,7 @@ JSON structure:
                   }}
                   className={cn(
                     "px-3 py-1.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-[9px] font-black uppercase tracking-wider rounded-md transition-all cursor-pointer flex items-center gap-1 relative",
-                    coachMode === 'ai' ? "text-white" : "text-slate-500 hover:text-slate-800"
+                    coachMode === 'ai' ? "text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
                   )}
                 >
                   {coachMode === 'ai' && (
@@ -5064,7 +5063,7 @@ JSON structure:
 
                 {/* ── TIER 2: Primary Action Zone ── */}
                 {/* Timer card: larger circle, reset tucked inside, no competing buttons */}
-                <div className="relative bg-gradient-to-b from-white to-slate-50/60 border border-slate-200/50 rounded-2xl px-4 pt-5 pb-4 sm:p-3.5 flex flex-col items-center gap-4 premium-shadow overflow-hidden">
+                <div className="relative bg-gradient-to-b from-white to-slate-50/60 dark:from-[#060B16]/90 dark:to-[#0B1528] border border-slate-200/50 dark:border-slate-800 rounded-2xl px-4 pt-5 pb-4 sm:p-3.5 flex flex-col items-center gap-4 premium-shadow overflow-hidden">
                   {/* Subtle grid bg */}
                   <div className="absolute inset-0 grid-bg-fine opacity-20 pointer-events-none" />
 
@@ -5080,20 +5079,20 @@ JSON structure:
                     className={cn(
                       "relative z-10 inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all duration-300 cursor-pointer active:scale-95",
                       timerMode === 'study'
-                        ? "bg-rose-500/8 border-rose-500/20 text-[#2563eb]"
-                        : "bg-emerald-500/10 border-emerald-500/25 text-emerald-700"
+                        ? "bg-rose-500/8 dark:bg-blue-950/50 border-rose-500/20 dark:border-blue-500/30 text-[#2563eb] dark:text-blue-300"
+                        : "bg-emerald-500/10 dark:bg-emerald-950/50 border-emerald-500/25 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300"
                     )}
                   >
                     <span className={cn(
                       "w-1.5 h-1.5 rounded-full shrink-0",
-                      timerMode === 'study' ? (timerActive ? "bg-[#2563eb] animate-ping" : "bg-[#2563eb]") : "bg-emerald-600"
+                      timerMode === 'study' ? (timerActive ? "bg-[#2563eb] dark:bg-blue-400 animate-ping" : "bg-[#2563eb] dark:bg-blue-400") : "bg-emerald-600 dark:bg-emerald-400"
                     )} />
                     {timerMode === 'study' ? 'Focus Mode' : 'Break Mode'}
                     <span className="opacity-40 font-normal normal-case tracking-normal">&nbsp;· tap to switch</span>
                   </button>
 
                   {/* Circular Timer — larger on mobile for better visual impact */}
-                  <div className="relative flex items-center justify-center w-40 h-40 sm:w-28 sm:h-28 shrink-0 bg-white/80 rounded-full border border-slate-200/40 p-2 shadow-inner z-10">
+                  <div className="relative flex items-center justify-center w-40 h-40 sm:w-28 sm:h-28 shrink-0 bg-white/80 dark:bg-[#060B16] rounded-full border border-slate-200/40 dark:border-slate-800 p-2 shadow-inner z-10">
                     <svg className="w-full h-full transform -rotate-90" viewBox="0 0 112 112">
                       <defs>
                         <linearGradient id="studyTimerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -5109,7 +5108,7 @@ JSON structure:
                         cx="56"
                         cy="56"
                         r="48"
-                        className="text-slate-100"
+                        className="text-slate-100 dark:text-slate-800"
                         strokeWidth="5"
                         stroke="currentColor"
                         fill="transparent"
@@ -5130,7 +5129,7 @@ JSON structure:
                     {/* Time display */}
                     <div className="absolute flex flex-col items-center justify-center w-full px-2 text-center">
                       <span className={cn(
-                        "font-mono font-black text-slate-800 transition-all duration-200",
+                        "font-mono font-black text-slate-800 dark:text-white transition-all duration-200",
                         formatTime(timerSeconds).length > 5
                           ? (formatTime(timerSeconds).length > 6 ? "text-[17px] sm:text-[14px] tracking-tighter" : "text-xl sm:text-base tracking-tight")
                           : "text-3xl sm:text-xl tracking-tight"
@@ -5139,7 +5138,7 @@ JSON structure:
                       </span>
                       <span className={cn(
                         "text-[9px] sm:text-[8px] font-black uppercase tracking-widest mt-0.5",
-                        timerMode === 'study' ? "text-[#2563eb]" : "text-emerald-600"
+                        timerMode === 'study' ? "text-[#2563eb] dark:text-blue-400" : "text-emerald-600 dark:text-emerald-400"
                       )}>
                         {timerMode === 'study' ? 'focus' : 'break'}
                       </span>
@@ -5148,7 +5147,7 @@ JSON structure:
                     <button
                       type="button"
                       onClick={resetTimer}
-                      className="absolute -top-1.5 -right-1.5 z-20 w-7 h-7 flex items-center justify-center bg-white border border-slate-200/80 rounded-full shadow-xs text-slate-400 hover:text-slate-700 hover:border-slate-300 transition-all duration-200 cursor-pointer active:scale-90"
+                      className="absolute -top-1.5 -right-1.5 z-20 w-7 h-7 flex items-center justify-center bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-full shadow-xs text-slate-400 hover:text-slate-700 dark:hover:text-white transition-all duration-200 cursor-pointer active:scale-90"
                       title="Reset Timer"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
@@ -5173,17 +5172,17 @@ JSON structure:
                 </div>
 
                 {/* ── TIER 3: Configuration card (presets + session target) ── */}
-                <div className="bg-white border border-slate-200/50 rounded-2xl px-3.5 py-3 sm:p-3 space-y-3 premium-shadow">
+                <div className="bg-white dark:bg-[#060B16]/80 border border-slate-200/50 dark:border-slate-800 rounded-2xl px-3.5 py-3 sm:p-3 space-y-3 premium-shadow">
 
                   {/* Duration presets row with done count embedded as inline label stat */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
                         {timerMode === 'study' ? 'Study Duration' : 'Break Duration'}
                       </span>
                       {/* Done count — inline, no separate top-level card needed */}
-                      <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-amber-700 bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-full">
-                        <Trophy className="w-2.5 h-2.5 text-amber-600 shrink-0" />
+                      <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-amber-700 dark:text-amber-300 bg-amber-400/10 dark:bg-amber-950/40 border border-amber-400/20 dark:border-amber-700 px-2 py-0.5 rounded-full">
+                        <Trophy className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400 shrink-0" />
                         <span>{completedSessionsCount} done</span>
                         {completedSessionsCount > 0 && (
                           <button
@@ -5195,7 +5194,7 @@ JSON structure:
                               localStorage.removeItem('study_coach_completed_study_minutes');
                               toast.success("Sessions reset");
                             }}
-                            className="ml-0.5 text-amber-600 hover:text-amber-950 transition-colors cursor-pointer"
+                            className="ml-0.5 text-amber-600 hover:text-amber-950 dark:hover:text-white transition-colors cursor-pointer"
                             title="Reset completed count"
                           >
                             <X className="w-2.5 h-2.5 stroke-[3px]" />
@@ -5227,7 +5226,7 @@ JSON structure:
                                   "flex-1 py-2 sm:py-1.5 rounded-xl text-[11px] sm:text-[10px] font-black uppercase transition-all duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border",
                                   isSelected
                                     ? "bg-[#2563eb] text-white border-[#2563eb] shadow-sm shadow-[#2563eb]/20"
-                                    : "bg-slate-50 text-slate-500 border-slate-200/60 hover:border-slate-300 hover:text-slate-700"
+                                    : "bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-300 border-slate-200/60 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-700 dark:hover:text-white"
                                 )}
                               >
                                 {mins}m
@@ -5239,7 +5238,7 @@ JSON structure:
                             "flex-1 py-1.5 rounded-xl border flex items-center justify-center gap-0.5 transition-all duration-200",
                             ![1500, 2700, 3600].includes(timerMaxSeconds)
                               ? "bg-[#2563eb] border-[#2563eb] shadow-sm shadow-[#2563eb]/20"
-                              : "bg-slate-50 border-slate-200/60"
+                              : "bg-slate-50 dark:bg-slate-800/80 border-slate-200/60 dark:border-slate-700"
                           )}>
                             <input
                               type="number"
@@ -5254,7 +5253,7 @@ JSON structure:
                               }}
                               className={cn(
                                 "w-8 text-center bg-transparent font-black text-[11px] sm:text-[10px] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none p-0 disabled:opacity-40",
-                                ![1500, 2700, 3600].includes(timerMaxSeconds) ? "text-white" : "text-slate-500"
+                                ![1500, 2700, 3600].includes(timerMaxSeconds) ? "text-white" : "text-slate-500 dark:text-slate-300"
                               )}
                               min="1"
                               max="999"
@@ -5286,7 +5285,7 @@ JSON structure:
                                   "flex-1 py-2 sm:py-1.5 rounded-xl text-[11px] sm:text-[10px] font-black uppercase transition-all duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border",
                                   isSelected
                                     ? "bg-emerald-600 text-white border-emerald-600 shadow-sm shadow-emerald-600/20"
-                                    : "bg-slate-50 text-slate-500 border-slate-200/60 hover:border-slate-300 hover:text-slate-700"
+                                    : "bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-300 border-slate-200/60 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-700 dark:hover:text-white"
                                 )}
                               >
                                 {mins}m
@@ -5298,7 +5297,7 @@ JSON structure:
                             "flex-1 py-1.5 rounded-xl border flex items-center justify-center gap-0.5 transition-all duration-200",
                             ![300, 600, 900].includes(breakMaxSeconds)
                               ? "bg-emerald-600 border-emerald-600 shadow-sm shadow-emerald-600/20"
-                              : "bg-slate-50 border-slate-200/60"
+                              : "bg-slate-50 dark:bg-slate-800/80 border-slate-200/60 dark:border-slate-700"
                           )}>
                             <input
                               type="number"
@@ -5313,7 +5312,7 @@ JSON structure:
                               }}
                               className={cn(
                                 "w-8 text-center bg-transparent font-black text-[11px] sm:text-[10px] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none p-0 disabled:opacity-40",
-                                ![300, 600, 900].includes(breakMaxSeconds) ? "text-white" : "text-slate-500"
+                                ![300, 600, 900].includes(breakMaxSeconds) ? "text-white" : "text-slate-500 dark:text-slate-300"
                               )}
                               min="1"
                               max="999"
@@ -5329,14 +5328,14 @@ JSON structure:
                   </div>
 
                   {/* Divider */}
-                  <div className="border-t border-slate-100" />
+                  <div className="border-t border-slate-100 dark:border-slate-800" />
 
                   {/* Session Target — single clean labeled row */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Session Target</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Session Target</label>
                     {timerActive ? (
-                      <div className="bg-rose-500/5 border border-rose-500/15 px-3 py-2.5 rounded-xl text-xs font-extrabold text-[#2563eb] flex items-center gap-2 truncate">
-                        <span className="w-1.5 h-1.5 bg-[#2563eb] rounded-full animate-ping shrink-0" />
+                      <div className="bg-rose-500/5 dark:bg-blue-950/50 border border-rose-500/15 dark:border-blue-500/30 px-3 py-2.5 rounded-xl text-xs font-extrabold text-[#2563eb] dark:text-blue-300 flex items-center gap-2 truncate">
+                        <span className="w-1.5 h-1.5 bg-[#2563eb] dark:bg-blue-400 rounded-full animate-ping shrink-0" />
                         <span className="truncate">{timerGoal.trim() || "Deep Study Block"}</span>
                       </div>
                     ) : (
@@ -5345,7 +5344,7 @@ JSON structure:
                         value={timerGoal}
                         onChange={(e) => setTimerGoal(e.target.value)}
                         placeholder="e.g. History — Modern India"
-                        className="w-full bg-slate-50/80 border border-slate-200 rounded-xl px-3 py-2.5 sm:py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2563eb]/10 focus:border-[#2563eb] transition-all duration-300 font-semibold"
+                        className="w-full bg-slate-50/80 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 sm:py-2 text-xs text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2563eb]/10 dark:focus:ring-blue-500/20 focus:border-[#2563eb] dark:focus:border-blue-400 transition-all duration-300 font-semibold"
                       />
                     )}
                   </div>
@@ -5355,9 +5354,9 @@ JSON structure:
                 <button
                   type="button"
                   onClick={handleNotifyCoachTimer}
-                  className="w-full py-2.5 sm:py-2 bg-white border border-slate-200/70 hover:border-slate-800 hover:bg-slate-950 hover:text-white text-slate-600 rounded-xl text-[10px] sm:text-[9px] font-black uppercase tracking-widest transition-all duration-300 cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs hover:shadow-sm active:scale-[0.98] group"
+                  className="w-full py-2.5 sm:py-2 bg-white dark:bg-[#0B1528] border border-slate-200/70 dark:border-slate-800 hover:border-slate-800 dark:hover:border-blue-500 hover:bg-slate-950 dark:hover:bg-blue-950/60 hover:text-white text-slate-600 dark:text-slate-300 rounded-xl text-[10px] sm:text-[9px] font-black uppercase tracking-widest transition-all duration-300 cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs hover:shadow-sm active:scale-[0.98] group"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-[#2563eb] group-hover:text-rose-300 transition-colors animate-pulse shrink-0" />
+                  <Sparkles className="w-3.5 h-3.5 text-[#2563eb] dark:text-blue-400 group-hover:text-rose-300 transition-colors animate-pulse shrink-0" />
                   Notify AI Coach &middot; Get Motivation
                 </button>
 
@@ -5372,22 +5371,22 @@ JSON structure:
                   <div className="space-y-3.5 text-left animate-fade-up flex-1 flex flex-col">
                     
                     {/* Card 1: Session Duration */}
-                    <div className="bg-slate-50/50 border border-slate-200/50 rounded-2xl p-3.5 space-y-3 shadow-2xs">
-                      <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-slate-400">
+                    <div className="bg-slate-50/50 dark:bg-[#060B16]/80 border border-slate-200/50 dark:border-slate-800 rounded-2xl p-3.5 space-y-3 shadow-2xs">
+                      <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">
                         <Clock3 className="w-3.5 h-3.5" />
                         <span>Study Session Timing</span>
                       </div>
                       
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
-                          <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-0.5 block">Start Time</label>
+                          <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-0.5 block">Start Time</label>
                           <TimePicker
                             value={plannerStart}
                             onChange={setPlannerStart}
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-0.5 block">End Time</label>
+                          <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-0.5 block">End Time</label>
                           <TimePicker
                             value={plannerEnd}
                             onChange={setPlannerEnd}
@@ -5397,11 +5396,11 @@ JSON structure:
                     </div>
 
                     {/* Card 2: Preferences */}
-                    <div className="bg-slate-50/50 border border-slate-200/50 rounded-2xl p-3.5 space-y-4 shadow-2xs">
+                    <div className="bg-slate-50/50 dark:bg-[#060B16]/80 border border-slate-200/50 dark:border-slate-800 rounded-2xl p-3.5 space-y-4 shadow-2xs">
                       
                       {/* Primary Session Goal */}
                       <div className="space-y-2">
-                        <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-slate-400">
+                        <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">
                           <Target className="w-3.5 h-3.5" />
                           <span>Primary Session Goal</span>
                         </div>
@@ -5417,7 +5416,7 @@ JSON structure:
                                   "px-2.5 py-1.5 text-[10px] sm:text-[9px] font-black uppercase tracking-wider rounded-lg transition-all duration-200 cursor-pointer border relative select-none",
                                   isSelected
                                     ? "bg-indigo-600 border-indigo-600 text-white shadow-sm font-extrabold"
-                                    : "bg-white text-slate-500 border-slate-200 hover:border-slate-300 hover:text-slate-700 font-semibold"
+                                    : "bg-white dark:bg-slate-800/80 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-700 dark:hover:text-white font-semibold"
                                 )}
                               >
                                 {isSelected && (
@@ -5434,15 +5433,15 @@ JSON structure:
                         </div>
                       </div>
 
-                      <div className="border-t border-slate-200/50" />
+                      <div className="border-t border-slate-200/50 dark:border-slate-800" />
 
                       {/* Energy Level */}
                       <div className="space-y-2">
-                        <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-slate-400">
+                        <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">
                           <Zap className="w-3.5 h-3.5" />
                           <span>Your Energy Level</span>
                         </div>
-                        <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100/70 border border-slate-200/50 rounded-xl relative overflow-hidden">
+                        <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100/70 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-xl relative overflow-hidden">
                           {["Low", "Normal", "High"].map(e => {
                             const isSelected = plannerEnergy === e;
                             return (
@@ -5452,7 +5451,7 @@ JSON structure:
                                 onClick={() => setPlannerEnergy(e)}
                                 className={cn(
                                   "py-1.5 text-[10px] sm:text-[9px] font-black uppercase tracking-wider rounded-lg transition-all duration-200 cursor-pointer relative text-center select-none",
-                                  isSelected ? "text-white font-extrabold" : "text-slate-500 hover:text-slate-800 font-semibold"
+                                  isSelected ? "text-white font-extrabold" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white font-semibold"
                                 )}
                               >
                                 {isSelected && (
@@ -5474,11 +5473,11 @@ JSON structure:
                     </div>
 
                     {/* Card 3: Advanced Options Accordion */}
-                    <div className="border border-slate-200/50 rounded-2xl overflow-hidden bg-slate-50/20 shadow-2xs">
+                    <div className="border border-slate-200/50 dark:border-slate-800 rounded-2xl overflow-hidden bg-slate-50/20 dark:bg-[#060B16]/60 shadow-2xs">
                       <button
                         type="button"
                         onClick={() => setShowAdvanced(!showAdvanced)}
-                        className="w-full flex items-center justify-between px-3.5 py-2.5 text-[9px] font-black uppercase tracking-wider text-slate-500 hover:text-slate-700 bg-slate-50/50 transition-colors cursor-pointer"
+                        className="w-full flex items-center justify-between px-3.5 py-2.5 text-[9px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white bg-slate-50/50 dark:bg-[#060B16]/90 transition-colors cursor-pointer"
                       >
                         <div className="flex items-center gap-1.5">
                           <Cpu className="w-3.5 h-3.5 text-slate-400" />
@@ -5488,35 +5487,35 @@ JSON structure:
                       </button>
 
                       {showAdvanced && (
-                        <div className="p-3.5 pt-1.5 grid grid-cols-3 gap-2.5 bg-white border-t border-slate-200/40 animate-fade-down">
+                        <div className="p-3.5 pt-1.5 grid grid-cols-3 gap-2.5 bg-white dark:bg-[#0B1528] border-t border-slate-200/40 dark:border-slate-800 animate-fade-down">
                           <div className="space-y-1">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-0.5 block">Chapters</label>
+                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-0.5 block">Chapters</label>
                             <input
                               type="text"
                               value={plannerChapters}
                               onChange={(e) => setPlannerChapters(e.target.value)}
                               placeholder="e.g. Ch 4"
-                              className="w-full bg-slate-50 border border-slate-200/60 rounded-xl px-2.5 py-2 text-[10px] text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
+                              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-2.5 py-2 text-[10px] text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
                             />
                           </div>
                           <div className="space-y-1">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-0.5 block">MCQ Count</label>
+                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-0.5 block">MCQ Count</label>
                             <input
                               type="text"
                               value={plannerQuestions}
                               onChange={(e) => setPlannerQuestions(e.target.value)}
                               placeholder="e.g. 30 Qs"
-                              className="w-full bg-slate-50 border border-slate-200/60 rounded-xl px-2.5 py-2 text-[10px] text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
+                              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-2.5 py-2 text-[10px] text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
                             />
                           </div>
                           <div className="space-y-1">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-0.5 block">Target Hours</label>
+                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-0.5 block">Target Hours</label>
                             <input
                               type="text"
                               value={plannerHours}
                               onChange={(e) => setPlannerHours(e.target.value)}
                               placeholder="e.g. 5 hrs"
-                              className="w-full bg-slate-50 border border-slate-200/60 rounded-xl px-2.5 py-2 text-[10px] text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
+                              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-2.5 py-2 text-[10px] text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
                             />
                           </div>
                         </div>
@@ -5553,23 +5552,23 @@ JSON structure:
                   <div className="space-y-4 animate-fade-up">
                     
                     {/* Top Bar Info Panel */}
-                    <div className="grid grid-cols-3 gap-2 bg-slate-50 border border-slate-200/50 p-3.5 sm:p-3 rounded-2xl text-left">
+                    <div className="grid grid-cols-3 gap-2 bg-slate-50 dark:bg-[#060B16] border border-slate-200/50 dark:border-slate-800 p-3.5 sm:p-3 rounded-2xl text-left">
                       <div className="space-y-0.5">
-                        <span className="text-[9px] sm:text-[8px] font-black uppercase tracking-widest text-slate-500 block">Remaining Time</span>
-                        <span className="text-xs sm:text-[11px] font-extrabold text-slate-800 block">
+                        <span className="text-[9px] sm:text-[8px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block">Remaining Time</span>
+                        <span className="text-xs sm:text-[11px] font-extrabold text-slate-800 dark:text-white block">
                           {Math.floor(remainingPlanMinutes / 60)}h {Math.round(remainingPlanMinutes % 60)}m
                         </span>
                       </div>
-                      <div className="space-y-0.5 border-l border-slate-200/50 pl-2">
-                        <span className="text-[9px] sm:text-[8px] font-black uppercase tracking-widest text-slate-500 block">Estimated Finish</span>
-                        <span className="text-xs sm:text-[11px] font-extrabold text-slate-800 block flex items-center gap-1">
-                          <Clock3 className="w-3.5 h-3.5 text-indigo-650 shrink-0" />
+                      <div className="space-y-0.5 border-l border-slate-200/50 dark:border-slate-800 pl-2">
+                        <span className="text-[9px] sm:text-[8px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block">Estimated Finish</span>
+                        <span className="text-xs sm:text-[11px] font-extrabold text-slate-800 dark:text-white block flex items-center gap-1">
+                          <Clock3 className="w-3.5 h-3.5 text-indigo-650 dark:text-indigo-400 shrink-0" />
                           {minutesToTimeString(timeStringToMinutes(plannerEnd))}
                         </span>
                       </div>
-                      <div className="space-y-0.5 border-l border-slate-200/50 pl-2 truncate">
-                        <span className="text-[9px] sm:text-[8px] font-black uppercase tracking-widest text-slate-500 block">Focus Goal</span>
-                        <span className="text-xs sm:text-[11px] font-extrabold text-indigo-650 block truncate">
+                      <div className="space-y-0.5 border-l border-slate-200/50 dark:border-slate-800 pl-2 truncate">
+                        <span className="text-[9px] sm:text-[8px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block">Focus Goal</span>
+                        <span className="text-xs sm:text-[11px] font-extrabold text-indigo-650 dark:text-indigo-300 block truncate">
                           {plannerGoal}
                         </span>
                       </div>
@@ -5577,26 +5576,26 @@ JSON structure:
 
                     {/* AI Coaching Strategy Box */}
                     {coachStrategy && (
-                      <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-2xl p-4 sm:p-3.5 text-[11px] sm:text-[10px] text-indigo-800 font-semibold text-left leading-relaxed relative overflow-hidden">
+                      <div className="bg-indigo-500/5 dark:bg-indigo-950/40 border border-indigo-500/10 dark:border-indigo-800/60 rounded-2xl p-4 sm:p-3.5 text-[11px] sm:text-[10px] text-indigo-800 dark:text-indigo-200 font-semibold text-left leading-relaxed relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-16 h-16 bg-indigo-500/5 rounded-full blur-lg pointer-events-none" />
-                        <span className="font-black text-indigo-650 uppercase tracking-widest block mb-1 text-[9px] sm:text-[8px] flex items-center gap-1">
-                          <Sparkles className="w-3.5 h-3.5 animate-pulse text-indigo-650" /> AI Coach Strategy
+                        <span className="font-black text-indigo-650 dark:text-indigo-400 uppercase tracking-widest block mb-1 text-[9px] sm:text-[8px] flex items-center gap-1">
+                          <Sparkles className="w-3.5 h-3.5 animate-pulse text-indigo-650 dark:text-indigo-400" /> AI Coach Strategy
                         </span>
                         "{coachStrategy}"
                       </div>
                     )}
 
                     {/* Center Session Timer Widget */}
-                    <div className="flex flex-col sm:flex-row lg:flex-col items-center gap-5 sm:gap-6 bg-gradient-to-b from-white to-slate-50/50 border border-slate-200/50 p-4.5 sm:p-5 rounded-2xl">
+                    <div className="flex flex-col sm:flex-row lg:flex-col items-center gap-5 sm:gap-6 bg-gradient-to-b from-white to-slate-50/50 dark:from-[#060B16]/90 dark:to-[#0B1528] border border-slate-200/50 dark:border-slate-800 p-4.5 sm:p-5 rounded-2xl">
                       
                       {/* Progress ring svg */}
-                      <div className="relative flex items-center justify-center w-32 h-32 sm:w-28 sm:h-28 shrink-0 mx-auto sm:mx-0 lg:mx-auto bg-white/80 rounded-full border border-slate-200/40 p-1.5 shadow-inner relative z-10">
+                      <div className="relative flex items-center justify-center w-32 h-32 sm:w-28 sm:h-28 shrink-0 mx-auto sm:mx-0 lg:mx-auto bg-white/80 dark:bg-[#060B16] rounded-full border border-slate-200/40 dark:border-slate-800 p-1.5 shadow-inner relative z-10">
                         <svg className="w-full h-full transform -rotate-90" viewBox="0 0 112 112">
                           <circle
                             cx="56"
                             cy="56"
                             r="48"
-                            className="text-slate-100"
+                            className="text-slate-100 dark:text-slate-800"
                             strokeWidth="5"
                             stroke="currentColor"
                             fill="transparent"
@@ -5607,7 +5606,7 @@ JSON structure:
                             r="48"
                             className={cn(
                               "transition-all duration-300",
-                              timerMode === 'break' ? "text-brand-600" : "text-indigo-650"
+                              timerMode === 'break' ? "text-brand-600 dark:text-blue-400" : "text-indigo-650 dark:text-indigo-400"
                             )}
                             strokeWidth="5"
                             strokeDasharray="301.59"
@@ -5620,7 +5619,7 @@ JSON structure:
                         
                         <div className="absolute flex flex-col items-center justify-center text-center w-full px-2">
                           <span className={cn(
-                            "font-mono font-black text-slate-800 transition-all duration-200",
+                            "font-mono font-black text-slate-800 dark:text-white transition-all duration-200",
                             formatTime(timerSeconds).length > 5
                               ? (formatTime(timerSeconds).length > 6 ? "text-[15px] sm:text-[14px] tracking-tighter" : "text-lg sm:text-base tracking-tight")
                               : "text-2xl sm:text-xl tracking-tight"
@@ -5629,7 +5628,7 @@ JSON structure:
                           </span>
                           <span className={cn(
                             "text-[9px] sm:text-[8px] font-black uppercase tracking-wider",
-                            timerMode === 'break' ? "text-brand-600" : "text-indigo-650"
+                            timerMode === 'break' ? "text-brand-600 dark:text-blue-400" : "text-indigo-650 dark:text-indigo-400"
                           )}>
                             {timerMode === 'break' ? 'Break' : 'Focus'}
                           </span>
@@ -5639,8 +5638,8 @@ JSON structure:
                       {/* Session Details & Action Buttons */}
                       <div className="flex-1 w-full text-left space-y-3.5">
                         <div className="pl-[3px]">
-                          <span className="text-[9px] sm:text-[8px] font-black uppercase tracking-widest text-slate-500 block mb-0.5">Active Session</span>
-                          <h5 className="text-base sm:text-sm font-extrabold text-slate-900 truncate">
+                          <span className="text-[9px] sm:text-[8px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block mb-0.5">Active Session</span>
+                          <h5 className="text-base sm:text-sm font-extrabold text-slate-900 dark:text-white truncate">
                             {plannerBlocks[activeBlockIndex]?.name || "Focus Session"}
                           </h5>
                         </div>
@@ -5662,10 +5661,10 @@ JSON structure:
                           <button
                             type="button"
                             onClick={handleBlockFinish}
-                            className="p-3 sm:p-2.5 border border-slate-200/60 hover:bg-slate-100 text-slate-700 rounded-xl transition-all cursor-pointer flex items-center justify-center shrink-0"
+                            className="p-3 sm:p-2.5 border border-slate-200/60 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl transition-all cursor-pointer flex items-center justify-center shrink-0"
                             title="Skip/Complete Block"
                           >
-                            <ArrowRight className="w-4 h-4 text-slate-600" />
+                            <ArrowRight className="w-4 h-4 text-slate-600 dark:text-slate-300" />
                           </button>
                         </div>
 
@@ -5675,14 +5674,14 @@ JSON structure:
                             <button
                               type="button"
                               onClick={() => handleAdjustActiveBreak(5)}
-                              className="flex-1 py-2 sm:py-1 px-2 border border-teal-500/20 bg-teal-500/5 hover:bg-teal-500/10 text-brand-600 rounded-lg text-[10px] sm:text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                              className="flex-1 py-2 sm:py-1 px-2 border border-teal-500/20 dark:border-teal-700/60 bg-teal-500/5 dark:bg-teal-950/40 hover:bg-teal-500/10 text-brand-600 dark:text-teal-300 rounded-lg text-[10px] sm:text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer"
                             >
                               Extend +5m
                             </button>
                             <button
                               type="button"
                               onClick={() => handleAdjustActiveBreak(-2)}
-                              className="flex-1 py-2 sm:py-1 px-2 border border-teal-500/20 bg-teal-500/5 hover:bg-teal-500/10 text-brand-600 rounded-lg text-[10px] sm:text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                              className="flex-1 py-2 sm:py-1 px-2 border border-teal-500/20 dark:border-teal-700/60 bg-teal-500/5 dark:bg-teal-950/40 hover:bg-teal-500/10 text-brand-600 dark:text-teal-300 rounded-lg text-[10px] sm:text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer"
                             >
                               Shorten -2m
                             </button>
@@ -5693,12 +5692,12 @@ JSON structure:
 
                     {/* Paused warning Adapt block */}
                     {pausedSeconds > 15 && (
-                      <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 sm:p-3.5 text-left space-y-3 animate-pulse">
+                      <div className="bg-amber-500/10 dark:bg-amber-950/40 border border-amber-500/20 dark:border-amber-700 rounded-2xl p-4 sm:p-3.5 text-left space-y-3 animate-pulse">
                         <div className="space-y-0.5">
-                          <span className="text-[10px] sm:text-[9px] font-black text-amber-500 uppercase tracking-widest flex items-center gap-1">
+                          <span className="text-[10px] sm:text-[9px] font-black text-amber-500 dark:text-amber-400 uppercase tracking-widest flex items-center gap-1">
                             ⚠️ Session Idle Warning
                           </span>
-                          <p className="text-[11px] sm:text-[10px] text-slate-700 font-semibold leading-relaxed">
+                          <p className="text-[11px] sm:text-[10px] text-slate-700 dark:text-slate-200 font-semibold leading-relaxed">
                             You have been paused for {Math.floor(pausedSeconds / 60)}m {pausedSeconds % 60}s. Your remaining sessions will overflow past your target end time ({minutesToTimeString(timeStringToMinutes(plannerEnd))}).
                           </p>
                         </div>
@@ -5714,12 +5713,12 @@ JSON structure:
 
                     {/* Timeline RoadMap View */}
                     <div className="space-y-2 text-left">
-                      <span className="text-[10px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 px-1">Study Roadmap & Timeline</span>
+                      <span className="text-[10px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-1">Study Roadmap & Timeline</span>
                       <div 
                         ref={roadmapContainerRef}
-                        className="bg-slate-50 border border-slate-200/50 rounded-2xl p-4 sm:p-4 max-h-[320px] overflow-y-auto no-scrollbar scroll-smooth relative smooth-scroll-gpu"
+                        className="bg-slate-50 dark:bg-[#060B16] border border-slate-200/50 dark:border-slate-800 rounded-2xl p-4 sm:p-4 max-h-[320px] overflow-y-auto no-scrollbar scroll-smooth relative smooth-scroll-gpu"
                       >
-                        <div className="relative border-l border-slate-200/60 ml-2.5 pl-4 space-y-4 pr-1">
+                        <div className="relative border-l border-slate-200/60 dark:border-slate-800 ml-2.5 pl-4 space-y-4 pr-1">
                           {plannerBlocks.map((b, idx) => {
                             const isCompleted = b.status === 'completed';
                             const isActive = idx === activeBlockIndex;
@@ -5729,22 +5728,22 @@ JSON structure:
                                 <div className={cn(
                                   "absolute -left-[22.5px] w-4.5 h-4.5 rounded-full flex items-center justify-center border text-[9px] font-black transition-all",
                                   isCompleted 
-                                    ? "bg-emerald-500/20 border-emerald-500 text-emerald-650" 
+                                    ? "bg-emerald-500/20 border-emerald-500 text-emerald-650 dark:text-emerald-400" 
                                     : isActive 
-                                      ? "bg-indigo-500/20 border-indigo-500 text-indigo-650 animate-pulse font-extrabold scale-110 shadow-sm" 
-                                      : "bg-slate-100 border-slate-200/60 text-slate-500"
+                                      ? "bg-indigo-500/20 border-indigo-500 text-indigo-650 dark:text-indigo-300 animate-pulse font-extrabold scale-110 shadow-sm" 
+                                      : "bg-slate-100 dark:bg-slate-800 border-slate-200/60 dark:border-slate-700 text-slate-500 dark:text-slate-400"
                                 )}>
-                                  {isCompleted ? <Check className="w-2.5 h-2.5 text-emerald-650" /> : idx + 1}
+                                  {isCompleted ? <Check className="w-2.5 h-2.5 text-emerald-650 dark:text-emerald-400" /> : idx + 1}
                                 </div>
                                 
                                 <div className="space-y-0.5 pr-2 flex-1 min-w-0">
                                   <span className={cn(
-                                    "font-bold block transition-colors truncate text-slate-700",
-                                    isCompleted ? "text-slate-500 line-through" : isActive ? "text-indigo-650 font-extrabold" : ""
+                                    "font-bold block transition-colors truncate text-slate-700 dark:text-slate-200",
+                                    isCompleted ? "text-slate-500 dark:text-slate-500 line-through" : isActive ? "text-indigo-650 dark:text-indigo-300 font-extrabold" : ""
                                   )}>
                                     {b.name}
                                   </span>
-                                  <span className="text-[10px] sm:text-[9px] text-slate-500 block">
+                                  <span className="text-[10px] sm:text-[9px] text-slate-500 dark:text-slate-400 block">
                                     {b.startTimeStr} – {b.endTimeStr} ({Math.round(b.duration / 60)} mins)
                                   </span>
                                 </div>
@@ -5752,10 +5751,10 @@ JSON structure:
                                 <span className={cn(
                                   "text-[9px] sm:text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0",
                                   isCompleted 
-                                    ? "bg-emerald-500/10 text-emerald-650" 
+                                    ? "bg-emerald-500/10 dark:bg-emerald-950/50 text-emerald-650 dark:text-emerald-400" 
                                     : isActive 
-                                      ? "bg-indigo-500/10 text-indigo-650 animate-pulse" 
-                                      : "bg-slate-100 text-slate-500"
+                                      ? "bg-indigo-500/10 dark:bg-indigo-950/50 text-indigo-650 dark:text-indigo-300 animate-pulse" 
+                                      : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
                                 )}>
                                   {isCompleted ? 'Done' : isActive ? 'Active' : 'Pending'}
                                 </span>
@@ -5819,22 +5818,22 @@ JSON structure:
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3.5">
               <div className="space-y-1">
-                <span className="inline-flex px-2.5 py-0.5 bg-teal-500/10 border border-teal-500/20 text-brand-600 rounded text-[10px] sm:text-[9px] font-black uppercase tracking-wider">
+                <span className="inline-flex px-2.5 py-0.5 bg-teal-500/10 dark:bg-blue-500/20 border border-teal-500/20 dark:border-blue-500/30 text-brand-600 dark:text-blue-300 rounded text-[10px] sm:text-[9px] font-black uppercase tracking-wider">
                   Self-Assessment
                 </span>
-                <h4 className="font-serif font-extrabold text-slate-800 text-base sm:text-lg flex items-center gap-2">
-                  <Target className="w-5 h-5 text-brand-600" />
+                <h4 className="font-serif font-extrabold text-slate-800 dark:text-white text-base sm:text-lg flex items-center gap-2">
+                  <Target className="w-5 h-5 text-brand-600 dark:text-blue-400" />
                   Dynamic AI MCQ Quizzer
                 </h4>
               </div>
 
               {/* Sub-view Toggle */}
-              <div className="flex bg-slate-100 border border-slate-200/50 p-0.5 rounded-lg shrink-0 relative overflow-hidden">
+              <div className="flex bg-slate-100 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 p-0.5 rounded-lg shrink-0 relative overflow-hidden">
                 <button
                   onClick={() => setShowBookmarksOnly(false)}
                   className={cn(
                     "px-3 py-1.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-[9px] font-black uppercase tracking-wider rounded-md transition-all cursor-pointer relative",
-                    !showBookmarksOnly ? "text-white" : "text-slate-600 hover:text-slate-900"
+                    !showBookmarksOnly ? "text-white" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   )}
                 >
                   {!showBookmarksOnly && (
@@ -5850,7 +5849,7 @@ JSON structure:
                   onClick={() => setShowBookmarksOnly(true)}
                   className={cn(
                     "px-3 py-1.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-[9px] font-black uppercase tracking-wider rounded-md transition-all cursor-pointer flex items-center gap-1.5 group relative",
-                    showBookmarksOnly ? "text-white" : "text-slate-600 hover:text-slate-900"
+                    showBookmarksOnly ? "text-white" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   )}
                 >
                   {showBookmarksOnly && (
@@ -5863,7 +5862,7 @@ JSON structure:
                   <span className="relative z-10 flex items-center gap-1.5">
                     <Star className={cn(
                       "w-3 h-3 sm:w-2.5 sm:h-2.5 transition-all duration-300",
-                      showBookmarksOnly ? "fill-white text-white" : "fill-none text-slate-500 group-hover:text-amber-650 group-hover:scale-110"
+                      showBookmarksOnly ? "fill-white text-white" : "fill-none text-slate-500 dark:text-slate-400 group-hover:text-amber-400 group-hover:scale-110"
                     )} />
                     <span>Bookmarks ({bookmarkedQuestions.length})</span>
                   </span>
@@ -5876,32 +5875,32 @@ JSON structure:
               <div className="space-y-4">
                 {bookmarkedQuestions.length === 0 ? (
                   <div className="py-8 text-center space-y-2">
-                    <Star className="w-8 h-8 text-slate-600 mx-auto stroke-[1.25] animate-pulse fill-none" />
-                    <p className="text-slate-500 text-xs font-bold">No bookmarked questions yet.</p>
-                    <p className="text-slate-500 text-[11px] sm:text-[10px] max-w-[200px] mx-auto leading-relaxed">Click the star button on any quiz question to save it here for quick revision.</p>
+                    <Star className="w-8 h-8 text-slate-600 dark:text-slate-500 mx-auto stroke-[1.25] animate-pulse fill-none" />
+                    <p className="text-slate-500 dark:text-slate-400 text-xs font-bold">No bookmarked questions yet.</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-[11px] sm:text-[10px] max-w-[200px] mx-auto leading-relaxed">Click the star button on any quiz question to save it here for quick revision.</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {bookmarkedQuestions.map((bq) => (
-                      <div key={bq.id} className="content-visibility-auto bg-slate-50/70 border border-slate-200/60 rounded-2xl p-4 sm:p-5 space-y-4 text-left relative transition-colors-shadow duration-200 shadow-sm hover:shadow-md animate-fade-in">
-                        <div className="flex justify-between items-center border-b border-slate-200/40 pb-2.5">
+                      <div key={bq.id} className="content-visibility-auto bg-slate-50/70 dark:bg-[#060B16]/80 border border-slate-200/60 dark:border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4 text-left relative transition-colors-shadow duration-200 shadow-sm hover:shadow-md animate-fade-in">
+                        <div className="flex justify-between items-center border-b border-slate-200/40 dark:border-slate-800 pb-2.5">
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] sm:text-[9px] font-black uppercase tracking-wider text-brand-600 bg-brand-50 px-2.5 py-1 rounded border border-brand-100">
+                            <span className="text-[10px] sm:text-[9px] font-black uppercase tracking-wider text-brand-600 dark:text-blue-300 bg-brand-50 dark:bg-blue-950/60 px-2.5 py-1 rounded border border-brand-100 dark:border-blue-800">
                               {bq.subject}
                             </span>
-                            <span className="text-[10px] sm:text-[9px] font-bold text-slate-400 bg-white px-2 py-0.5 rounded border border-slate-200/50">
+                            <span className="text-[10px] sm:text-[9px] font-bold text-slate-400 dark:text-slate-400 bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200/50 dark:border-slate-700">
                               Saved: {bq.bookmarkedAt}
                             </span>
                           </div>
                           <button
                             onClick={() => toggleBookmark(bq)}
-                            className="p-1.5 bg-red-50/80 border border-red-200 hover:bg-red-500 hover:border-red-500 hover:text-white text-red-500 rounded-lg transition-all cursor-pointer shrink-0"
+                            className="p-1.5 bg-red-50/80 dark:bg-rose-950/50 border border-red-200 dark:border-rose-800 hover:bg-red-500 hover:border-red-500 hover:text-white text-red-500 dark:text-rose-400 rounded-lg transition-all cursor-pointer shrink-0"
                             title="Remove bookmark"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
-                        <h5 className="text-[14px] sm:text-sm font-bold text-slate-800 leading-relaxed">
+                        <h5 className="text-[14px] sm:text-sm font-bold text-slate-800 dark:text-white leading-relaxed">
                           Q. <MathTextRenderer text={bq.question} />
                         </h5>
                         {bq.diagram ? (
@@ -5918,26 +5917,26 @@ JSON structure:
                                 className={cn(
                                   "p-3 sm:p-2.5 rounded-xl border text-xs sm:text-[11px] font-medium leading-relaxed flex items-center gap-3 relative",
                                   isCorrect 
-                                    ? "bg-emerald-50 border-emerald-500/50 text-emerald-800 font-semibold ring-1 ring-emerald-500/10" 
-                                    : "bg-white border-slate-200/60 text-slate-500"
+                                    ? "bg-emerald-50 dark:bg-emerald-950/50 border-emerald-500/50 text-emerald-800 dark:text-emerald-200 font-semibold ring-1 ring-emerald-500/10" 
+                                    : "bg-white dark:bg-slate-900 border-slate-200/60 dark:border-slate-700 text-slate-500 dark:text-slate-300"
                                 )}
                               >
                                 <span className={cn(
                                   "w-5.5 h-5.5 rounded-full flex items-center justify-center text-[10px] sm:text-[9px] font-black border shrink-0",
                                   isCorrect 
                                     ? "bg-emerald-500 text-white border-emerald-500" 
-                                    : "bg-slate-50 text-slate-400 border-slate-200"
+                                    : "bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-300 border-slate-200 dark:border-slate-700"
                                 )}>
                                   {['A', 'B', 'C', 'D'][oIdx] || String.fromCharCode(65 + oIdx)}
                                 </span>
                                 <span className="flex-1 pr-6"><MathTextRenderer text={opt} isOption /></span>
-                                {isCorrect && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-650 shrink-0 absolute right-3" />}
+                                {isCorrect && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-650 dark:text-emerald-400 shrink-0 absolute right-3" />}
                               </div>
                             );
                           })}
                         </div>
-                        <div className="text-xs sm:text-[11px] text-slate-600 bg-slate-100/50 border border-slate-200/50 rounded-xl p-3.5 sm:p-3 font-medium leading-relaxed">
-                          <span className="font-bold text-brand-600 block mb-1 text-xs sm:text-[11px]">Explanation:</span>
+                        <div className="text-xs sm:text-[11px] text-slate-600 dark:text-slate-300 bg-slate-100/50 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800 rounded-xl p-3.5 sm:p-3 font-medium leading-relaxed">
+                          <span className="font-bold text-brand-600 dark:text-blue-400 block mb-1 text-xs sm:text-[11px]">Explanation:</span>
                           <MathTextRenderer text={bq.explanation} />
                         </div>
                       </div>
@@ -5952,20 +5951,20 @@ JSON structure:
                   <div className="space-y-4 text-left animate-fade-up flex-1 flex flex-col">
                     
                     {/* Card 1: Quiz Focus & Topic */}
-                    <div className="bg-slate-50/50 border border-slate-200/50 rounded-2xl p-3.5 space-y-3 shadow-2xs">
-                      <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-slate-400">
+                    <div className="bg-slate-50/50 dark:bg-[#060B16]/80 border border-slate-200/50 dark:border-slate-800 rounded-2xl p-3.5 space-y-3 shadow-2xs">
+                      <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">
                         <Target className="w-3.5 h-3.5" />
                         <span>Quiz Focus & Topic</span>
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-0.5 block">Subject / Topic</label>
+                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-0.5 block">Subject / Topic</label>
                         <input
                           type="text"
                           value={quizSubject}
                           onChange={(e) => setQuizSubject(e.target.value)}
                           placeholder="Enter subject or topic (e.g., Odisha Rivers, Trigonometry)"
-                          className="w-full bg-white border border-slate-200/60 rounded-xl px-3.5 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-teal-500/40 focus:border-teal-500 transition-all font-semibold"
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-teal-500/40 dark:focus:ring-blue-400/40 focus:border-teal-500 dark:focus:border-blue-400 transition-all font-semibold"
                         />
                       </div>
 
@@ -5985,8 +5984,8 @@ JSON structure:
                             className={cn(
                               "inline-flex items-center gap-1.5 px-2.5 py-1 border text-[9px] font-black uppercase tracking-wider rounded-lg transition-all shrink-0 select-none",
                               quizSubject.toLowerCase() === s.toLowerCase()
-                                ? "bg-teal-500/10 border-teal-500/35 text-[#2563EB] font-bold"
-                                : "bg-white border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+                                ? "bg-teal-500/10 dark:bg-blue-500/20 border-teal-500/35 dark:border-blue-500/40 text-[#2563EB] dark:text-blue-300 font-bold"
+                                : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700"
                             )}
                           >
                             <button
@@ -6002,7 +6001,7 @@ JSON structure:
                                 e.stopPropagation();
                                 setQuizTabs(prev => prev.filter(t => t !== s));
                               }}
-                              className="w-3.5 h-3.5 rounded-full flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-100/80 transition-all ml-0.5 cursor-pointer shrink-0 focus:outline-none"
+                              className="w-3.5 h-3.5 rounded-full flex items-center justify-center text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-100/80 dark:hover:bg-rose-950/80 transition-all ml-0.5 cursor-pointer shrink-0 focus:outline-none"
                               title={`Delete ${s}`}
                             >
                               <X className="w-2.5 h-2.5 stroke-[2.5]" />
@@ -6031,7 +6030,7 @@ JSON structure:
                               value={newQuizTabName}
                               onChange={(e) => setNewQuizTabName(e.target.value)}
                               placeholder="New tab..."
-                              className="bg-white border border-teal-500/30 rounded-lg px-2.5 py-1 text-[10px] sm:text-[9px] text-slate-800 focus:outline-none focus:ring-1 focus:ring-teal-500/40 w-28 font-bold"
+                              className="bg-white dark:bg-slate-900 border border-teal-500/30 dark:border-blue-400/40 rounded-lg px-2.5 py-1 text-[10px] sm:text-[9px] text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-teal-500/40 w-28 font-bold"
                               autoFocus
                             />
                             <button 
@@ -6043,7 +6042,7 @@ JSON structure:
                             <button 
                               type="button" 
                               onClick={() => setIsAddingQuizTab(false)} 
-                              className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-500 rounded text-[10px] sm:text-[9px] font-black cursor-pointer"
+                              className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded text-[10px] sm:text-[9px] font-black cursor-pointer"
                             >
                               ✗
                             </button>
@@ -6052,39 +6051,39 @@ JSON structure:
                           <button
                             type="button"
                             onClick={() => setIsAddingQuizTab(true)}
-                            className="px-2.5 py-1 border border-dashed border-teal-500/30 bg-teal-500/5 hover:bg-teal-500/10 text-brand-600 text-[9px] font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer flex items-center gap-0.5 shrink-0"
+                            className="px-2.5 py-1 border border-dashed border-teal-500/30 dark:border-blue-400/40 bg-teal-500/5 dark:bg-blue-950/40 hover:bg-teal-500/10 text-brand-600 dark:text-blue-300 text-[9px] font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer flex items-center gap-0.5 shrink-0"
                           >
                             ➕ Add Tab
                           </button>
                         )}
                       </div>
 
-                      <div className="border-t border-slate-200/50" />
+                      <div className="border-t border-slate-200/50 dark:border-slate-800" />
 
                       {/* Targeted Exam (Optional) */}
                       <div className="space-y-1">
-                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-0.5 block">
-                          Target Exam <span className="text-slate-500 text-[9px] font-semibold">(Optional)</span>
+                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-0.5 block">
+                          Target Exam <span className="text-slate-500 dark:text-slate-400 text-[9px] font-semibold">(Optional)</span>
                         </label>
                         <input
                           type="text"
                           value={quizTargetExam}
                           onChange={(e) => setQuizTargetExam(e.target.value)}
                           placeholder="e.g. OSSC CGL, OPSC OAS (defaults to global target)"
-                          className="w-full bg-white border border-slate-200/60 rounded-xl px-3.5 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-teal-500/40 focus:border-teal-500 transition-all font-semibold"
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-teal-500/40 dark:focus:ring-blue-400/40 focus:border-teal-500 dark:focus:border-blue-400 transition-all font-semibold"
                         />
                       </div>
                     </div>
 
                     {/* Card 2: Quiz Configuration */}
-                    <div className="bg-slate-50/50 border border-slate-200/50 rounded-2xl p-3.5 space-y-4 shadow-2xs">
+                    <div className="bg-slate-50/50 dark:bg-[#060B16]/80 border border-slate-200/50 dark:border-slate-800 rounded-2xl p-3.5 space-y-4 shadow-2xs">
                       
                       {/* Difficulty and MCQ count row */}
                       <div className="grid grid-cols-2 gap-3">
 
                         {/* Difficulty Custom Dropdown */}
                         <div className="space-y-1">
-                          <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-0.5 block">Difficulty</label>
+                          <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-0.5 block">Difficulty</label>
                           <div className="relative">
                             <button
                               type="button"
@@ -6092,8 +6091,8 @@ JSON structure:
                               className={cn(
                                 "w-full flex items-center justify-between gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold tracking-wide transition-all duration-200 cursor-pointer outline-none",
                                 difficultyOpen
-                                  ? "bg-teal-50 border-teal-400/50 text-teal-700 shadow-sm"
-                                  : "bg-white border-slate-200/70 text-slate-700 hover:border-teal-400/40 hover:bg-teal-50/50"
+                                  ? "bg-teal-50 dark:bg-blue-950/60 border-teal-400/50 dark:border-blue-500/50 text-teal-700 dark:text-blue-300 shadow-sm"
+                                  : "bg-white dark:bg-slate-900 border-slate-200/70 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-teal-400/40 dark:hover:border-blue-500/40 hover:bg-teal-50/50 dark:hover:bg-slate-800"
                               )}
                             >
                               <span className="flex items-center gap-1.5">
@@ -6113,7 +6112,7 @@ JSON structure:
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: -5, scale: 0.97 }}
                                     transition={{ duration: 0.14, ease: 'easeOut' }}
-                                    className="absolute left-0 top-[calc(100%+5px)] z-50 w-full bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/60 overflow-hidden"
+                                    className="absolute left-0 top-[calc(100%+5px)] z-50 w-full bg-white dark:bg-[#0B1528] rounded-2xl border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/60 dark:shadow-slate-950/80 overflow-hidden"
                                   >
                                     <div className="p-1.5 space-y-0.5">
                                       {[
@@ -6128,8 +6127,8 @@ JSON structure:
                                           className={cn(
                                             "w-full text-left px-3 py-2 rounded-xl text-xs font-bold tracking-wide transition-all duration-150 cursor-pointer flex items-center gap-2",
                                             quizDifficulty === opt.value
-                                              ? "bg-teal-50 text-teal-700"
-                                              : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                              ? "bg-teal-50 dark:bg-blue-950/60 text-teal-700 dark:text-blue-300"
+                                              : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
                                           )}
                                         >
                                           <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", opt.color)} />
@@ -6146,7 +6145,7 @@ JSON structure:
 
                         {/* MCQ Count Custom Dropdown */}
                         <div className="space-y-1">
-                          <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-0.5 block">MCQ Count</label>
+                          <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-0.5 block">MCQ Count</label>
                           <div className="relative">
                             <button
                               type="button"
@@ -6154,8 +6153,8 @@ JSON structure:
                               className={cn(
                                 "w-full flex items-center justify-between gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold tracking-wide transition-all duration-200 cursor-pointer outline-none",
                                 quizSizeOpen
-                                  ? "bg-teal-50 border-teal-400/50 text-teal-700 shadow-sm"
-                                  : "bg-white border-slate-200/70 text-slate-700 hover:border-teal-400/40 hover:bg-teal-50/50"
+                                  ? "bg-teal-50 dark:bg-blue-950/60 border-teal-400/50 dark:border-blue-500/50 text-teal-700 dark:text-blue-300 shadow-sm"
+                                  : "bg-white dark:bg-slate-900 border-slate-200/70 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-teal-400/40 dark:hover:border-blue-500/40 hover:bg-teal-50/50 dark:hover:bg-slate-800"
                               )}
                             >
                               <span>{quizSize} Questions</span>
@@ -6172,7 +6171,7 @@ JSON structure:
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: -5, scale: 0.97 }}
                                     transition={{ duration: 0.14, ease: 'easeOut' }}
-                                    className="absolute left-0 top-[calc(100%+5px)] z-50 w-full bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/60 overflow-hidden"
+                                    className="absolute left-0 top-[calc(100%+5px)] z-50 w-full bg-white dark:bg-[#0B1528] rounded-2xl border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/60 dark:shadow-slate-950/80 overflow-hidden"
                                   >
                                     <div className="p-1.5 space-y-0.5">
                                       {[3, 5, 10].map(n => (
@@ -6183,11 +6182,11 @@ JSON structure:
                                           className={cn(
                                             "w-full text-left px-3 py-2 rounded-xl text-xs font-bold tracking-wide transition-all duration-150 cursor-pointer flex items-center gap-2",
                                             quizSize === n
-                                              ? "bg-teal-50 text-teal-700"
-                                              : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                              ? "bg-teal-50 dark:bg-blue-950/60 text-teal-700 dark:text-blue-300"
+                                              : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
                                           )}
                                         >
-                                          <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", quizSize === n ? 'bg-teal-500' : 'bg-slate-200')} />
+                                          <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", quizSize === n ? 'bg-teal-500 dark:bg-blue-400' : 'bg-slate-200 dark:bg-slate-700')} />
                                           {n} Questions
                                         </button>
                                       ))}
@@ -6201,18 +6200,18 @@ JSON structure:
 
                       </div>
  
-                      <div className="border-t border-slate-200/50" />
+                      <div className="border-t border-slate-200/50 dark:border-slate-800" />
 
                       {/* Generation Mode Control */}
                       <div className="space-y-2">
-                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-0.5 block">Quiz Engine Mode</label>
-                        <div className="flex bg-slate-100/70 p-1 rounded-xl border border-slate-200/50 w-full relative overflow-hidden">
+                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-0.5 block">Quiz Engine Mode</label>
+                        <div className="flex bg-slate-100/70 dark:bg-slate-900 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800 w-full relative overflow-hidden">
                           <button
                             type="button"
                             onClick={() => setQuizMode('quick')}
                             className={cn(
                               "flex-1 py-1.5 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1.5 cursor-pointer relative",
-                              quizMode === "quick" ? "text-white" : "text-slate-600 hover:text-slate-900"
+                              quizMode === "quick" ? "text-white" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                             )}
                           >
                             {quizMode === 'quick' && (
@@ -6232,7 +6231,7 @@ JSON structure:
                             onClick={() => setQuizMode('best')}
                             className={cn(
                               "flex-1 py-1.5 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1.5 cursor-pointer relative",
-                              quizMode === 'best' ? "text-white" : "text-slate-500 hover:text-slate-800"
+                              quizMode === 'best' ? "text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
                             )}
                           >
                             {quizMode === 'best' && (
@@ -6262,11 +6261,11 @@ JSON structure:
                     </button>
 
                     {/* Card 3: Performance History & Stats Accordion */}
-                    <div className="border border-slate-200/50 rounded-2xl overflow-hidden bg-slate-50/20 shadow-2xs">
+                    <div className="border border-slate-200/50 dark:border-slate-800 rounded-2xl overflow-hidden bg-slate-50/20 dark:bg-[#060B16]/60 shadow-2xs">
                       <button
                         type="button"
                         onClick={() => setShowStatsAccordion(!showStatsAccordion)}
-                        className="w-full flex items-center justify-between px-3.5 py-2.5 text-[9px] font-black uppercase tracking-wider text-slate-500 hover:text-slate-700 bg-slate-50/50 transition-colors cursor-pointer"
+                        className="w-full flex items-center justify-between px-3.5 py-2.5 text-[9px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white bg-slate-50/50 dark:bg-[#060B16]/90 transition-colors cursor-pointer"
                       >
                         <div className="flex items-center gap-1.5">
                           <Trophy className="w-3.5 h-3.5 text-slate-400" />
@@ -6276,7 +6275,7 @@ JSON structure:
                       </button>
 
                       {showStatsAccordion && (
-                        <div className="p-3.5 space-y-4 bg-white border-t border-slate-200/45 animate-fade-down">
+                        <div className="p-3.5 space-y-4 bg-white dark:bg-[#0B1528] border-t border-slate-200/45 dark:border-slate-800 animate-fade-down">
                           
                           {/* Practice Performance HUD */}
                           {renderPracticeAnalyticsHUD()}
@@ -6285,7 +6284,7 @@ JSON structure:
                           {quizHistory.length > 0 && (
                             <div className="space-y-2 text-left">
                               <div className="flex justify-between items-center">
-                                <h5 className="text-[9px] font-black uppercase tracking-widest text-slate-500">Recent Attempts</h5>
+                                <h5 className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Recent Attempts</h5>
                                 <button
                                   type="button"
                                   onClick={clearQuizHistory}
@@ -6296,14 +6295,14 @@ JSON structure:
                               </div>
                               <div className="grid grid-cols-1 gap-2.5 max-h-[160px] overflow-y-auto no-scrollbar">
                                 {quizHistory.map((rec, rIdx) => (
-                                  <div key={rIdx} className="bg-slate-50 border border-slate-200/50 rounded-xl p-2.5 flex justify-between items-center text-xs font-semibold text-slate-700">
+                                  <div key={rIdx} className="bg-slate-50 dark:bg-slate-900/90 border border-slate-200/50 dark:border-slate-800 rounded-xl p-2.5 flex justify-between items-center text-xs font-semibold text-slate-700 dark:text-slate-200">
                                     <div className="space-y-0.5 pr-2 truncate">
-                                      <span className="text-slate-800 font-extrabold truncate block">{rec.subject}</span>
-                                      <span className="text-[9px] text-slate-500">{rec.date} • {rec.difficulty}</span>
+                                      <span className="text-slate-800 dark:text-white font-extrabold truncate block">{rec.subject}</span>
+                                      <span className="text-[9px] text-slate-500 dark:text-slate-400">{rec.date} • {rec.difficulty}</span>
                                     </div>
                                     <span className={cn(
                                       "px-2 py-1 rounded text-[10px] font-black shrink-0",
-                                      (rec.score / rec.total) >= 0.7 ? "bg-emerald-500/10 text-emerald-650" : (rec.score / rec.total) >= 0.4 ? "bg-amber-500/10 text-amber-650" : "bg-red-500/10 text-red-400"
+                                      (rec.score / rec.total) >= 0.7 ? "bg-emerald-500/10 dark:bg-emerald-950/50 text-emerald-650 dark:text-emerald-400" : (rec.score / rec.total) >= 0.4 ? "bg-amber-500/10 dark:bg-amber-950/50 text-amber-650 dark:text-amber-400" : "bg-red-500/10 dark:bg-rose-950/50 text-red-400"
                                     )}>
                                       {rec.score} / {rec.total}
                                     </span>
@@ -6321,8 +6320,8 @@ JSON structure:
                 {/* Quiz loading state */}
                 {quizLoading && (
                   <div className="py-8 flex flex-col items-center justify-center space-y-3">
-                    <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
-                    <p className="text-slate-500 text-xs font-bold animate-pulse">
+                    <div className="w-8 h-8 border-2 border-teal-500 dark:border-blue-400 border-t-transparent rounded-full animate-spin" />
+                    <p className="text-slate-500 dark:text-slate-400 text-xs font-bold animate-pulse">
                       OdishaExamPrep AI Model generating {quizSize} custom questions ({quizMode === 'quick' ? 'Quick Result' : 'Best Result'})...
                     </p>
                   </div>
@@ -6334,18 +6333,18 @@ JSON structure:
                     {activeQuiz.map((q, qIdx) => {
                       const isBookmarked = bookmarkedQuestions.some(bq => bq.question === q.question);
                       return (
-                        <div key={qIdx} className="content-visibility-auto bg-slate-50/70 border border-slate-200/60 rounded-2xl p-4 sm:p-5 space-y-4 text-left relative transition-colors-shadow duration-200 shadow-sm hover:shadow-md animate-fade-in">
-                          <div className="flex justify-between items-center border-b border-slate-200/40 pb-2.5">
+                        <div key={qIdx} className="content-visibility-auto bg-slate-50/70 dark:bg-[#060B16]/80 border border-slate-200/60 dark:border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4 text-left relative transition-colors-shadow duration-200 shadow-sm hover:shadow-md animate-fade-in">
+                          <div className="flex justify-between items-center border-b border-slate-200/40 dark:border-slate-800 pb-2.5">
                             <div className="flex items-center gap-2">
-                              <span className="text-[10px] sm:text-[9px] font-black uppercase tracking-wider text-brand-600 bg-brand-50 px-2.5 py-1 rounded border border-brand-100">
+                              <span className="text-[10px] sm:text-[9px] font-black uppercase tracking-wider text-brand-600 dark:text-blue-300 bg-brand-50 dark:bg-blue-950/60 px-2.5 py-1 rounded border border-brand-100 dark:border-blue-800">
                                 Question {qIdx + 1}
                               </span>
                               {quizSubmitted && (
                                 <span className={cn(
                                   "text-[10px] sm:text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded border",
                                   selectedAnswers[qIdx] === q.correctOption
-                                    ? "bg-emerald-50 text-emerald-650 border-emerald-100"
-                                    : "bg-red-50 text-red-400 border-red-100"
+                                    ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-650 dark:text-emerald-300 border-emerald-100 dark:border-emerald-800"
+                                    : "bg-red-50 dark:bg-rose-950/60 text-red-400 dark:text-rose-300 border-red-100 dark:border-rose-800"
                                 )}>
                                   {selectedAnswers[qIdx] === q.correctOption ? "Correct" : "Incorrect"}
                                 </span>
@@ -6356,21 +6355,21 @@ JSON structure:
                               className={cn(
                                 "w-8 h-8 sm:w-7 sm:h-7 rounded-full flex items-center justify-center border transition-colors-shadow cursor-pointer shrink-0 group",
                                 isBookmarked 
-                                  ? "bg-amber-500/10 border-amber-500/30 text-amber-650 shadow-md shadow-amber-500/5" 
-                                  : "bg-white border-slate-200/60 text-slate-500 hover:border-amber-500/20 hover:bg-amber-500/5 hover:text-amber-650"
+                                  ? "bg-amber-500/10 dark:bg-amber-950/50 border-amber-500/30 dark:border-amber-700 text-amber-650 dark:text-amber-400 shadow-md shadow-amber-500/5" 
+                                  : "bg-white dark:bg-slate-800 border-slate-200/60 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-amber-500/20 hover:bg-amber-500/5 hover:text-amber-650"
                               )}
                               title={isBookmarked ? "Bookmarked!" : "Bookmark question"}
                             >
                               <Star className={cn(
                                 "w-4 h-4 sm:w-3.5 sm:h-3.5 transition-colors-shadow duration-300",
                                 isBookmarked 
-                                  ? "fill-amber-400 text-amber-650 scale-110 drop-shadow-[0_0_4px_rgba(245,158,11,0.4)]" 
-                                  : "fill-none text-slate-500 group-hover:text-amber-300 group-hover:scale-110"
+                                  ? "fill-amber-400 text-amber-650 dark:text-amber-400 scale-110 drop-shadow-[0_0_4px_rgba(245,158,11,0.4)]" 
+                                  : "fill-none text-slate-500 dark:text-slate-400 group-hover:text-amber-300 group-hover:scale-110"
                               )} />
                             </button>
                           </div>
                           
-                          <h5 className="text-[14px] sm:text-sm font-bold text-slate-800 leading-relaxed">
+                          <h5 className="text-[14px] sm:text-sm font-bold text-slate-800 dark:text-white leading-relaxed">
                             <MathTextRenderer text={q.question} />
                           </h5>
 
@@ -6386,24 +6385,24 @@ JSON structure:
                               const isCorrect = q.correctOption === optIdx;
                               const isWrongSelection = isSelected && !isCorrect;
                               
-                              let containerStyle = "bg-white border-slate-200/60 text-slate-700 hover:border-slate-300/85 hover:bg-slate-50";
-                              let badgeStyle = "bg-slate-50 text-slate-500 border-slate-200/80";
+                              let containerStyle = "bg-white dark:bg-slate-900 border-slate-200/60 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-slate-300/85 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/80";
+                              let badgeStyle = "bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-300 border-slate-200/80 dark:border-slate-700";
                               
                               if (isSelected) {
-                                containerStyle = "bg-brand-50 border-brand-500 text-brand-900 ring-1 ring-brand-500/20 font-bold shadow-sm shadow-brand-500/5";
-                                badgeStyle = "bg-brand-500 text-white border-brand-500";
+                                containerStyle = "bg-brand-50 dark:bg-blue-950/60 border-brand-500 dark:border-blue-400 text-brand-900 dark:text-blue-100 ring-1 ring-brand-500/20 dark:ring-blue-400/30 font-bold shadow-sm shadow-brand-500/5";
+                                badgeStyle = "bg-brand-500 dark:bg-blue-500 text-white border-brand-500 dark:border-blue-500";
                               }
                               
                               if (quizSubmitted) {
                                 if (isCorrect) {
-                                  containerStyle = "bg-emerald-50 border-emerald-500/50 text-emerald-800 font-bold ring-1 ring-emerald-500/10";
+                                  containerStyle = "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500/50 dark:border-emerald-600 text-emerald-800 dark:text-emerald-200 font-bold ring-1 ring-emerald-500/10";
                                   badgeStyle = "bg-emerald-500 text-white border-emerald-500";
                                 } else if (isSelected) {
-                                  containerStyle = "bg-red-50 border-red-500/50 text-red-800 ring-1 ring-red-500/10";
+                                  containerStyle = "bg-red-50 dark:bg-rose-950/60 border-red-500/50 dark:border-rose-600 text-red-800 dark:text-rose-200 ring-1 ring-red-500/10";
                                   badgeStyle = "bg-red-500 text-white border-red-500";
                                 } else {
-                                  containerStyle = "bg-white/40 border-slate-200/30 text-slate-400 opacity-60";
-                                  badgeStyle = "bg-slate-50 text-slate-300 border-slate-100";
+                                  containerStyle = "bg-white/40 dark:bg-slate-900/40 border-slate-200/30 dark:border-slate-800 text-slate-400 dark:text-slate-500 opacity-60";
+                                  badgeStyle = "bg-slate-50 dark:bg-slate-800 text-slate-300 dark:text-slate-500 border-slate-100 dark:border-slate-800";
                                 }
                               }
 
@@ -6425,15 +6424,15 @@ JSON structure:
                                     {['A', 'B', 'C', 'D'][optIdx] || String.fromCharCode(65 + optIdx)}
                                   </span>
                                   <span className="flex-1 pr-6 leading-relaxed"><MathTextRenderer text={opt} isOption /></span>
-                                  {quizSubmitted && isCorrect && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-650 shrink-0 absolute right-3" />}
-                                  {quizSubmitted && isWrongSelection && <XCircle className="w-3.5 h-3.5 text-red-500 shrink-0 absolute right-3" />}
+                                  {quizSubmitted && isCorrect && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-650 dark:text-emerald-400 shrink-0 absolute right-3" />}
+                                  {quizSubmitted && isWrongSelection && <XCircle className="w-3.5 h-3.5 text-red-500 dark:text-rose-400 shrink-0 absolute right-3" />}
                                 </button>
                               );
                             })}
                           </div>
                           {quizSubmitted && (
-                            <div className="text-xs sm:text-[11px] text-slate-600 bg-slate-100/50 border border-slate-200/50 rounded-xl p-3.5 sm:p-3 mt-1 font-medium leading-relaxed">
-                              <span className="font-bold text-brand-600 block mb-1 text-xs sm:text-[11px]">Explanation:</span>
+                            <div className="text-xs sm:text-[11px] text-slate-600 dark:text-slate-300 bg-slate-100/50 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800 rounded-xl p-3.5 sm:p-3 mt-1 font-medium leading-relaxed">
+                              <span className="font-bold text-brand-600 dark:text-blue-400 block mb-1 text-xs sm:text-[11px]">Explanation:</span>
                               <MathTextRenderer text={q.explanation} />
                             </div>
                           )}
@@ -6442,7 +6441,7 @@ JSON structure:
                     })}
  
                     {/* Submit / Restart Quiz action */}
-                    <div className="flex flex-col sm:flex-row gap-2.5 pt-4 border-t border-slate-200/40">
+                    <div className="flex flex-col sm:flex-row gap-2.5 pt-4 border-t border-slate-200/40 dark:border-slate-800">
                       {!quizSubmitted ? (
                         <>
                           <button
@@ -6489,7 +6488,7 @@ JSON structure:
                                 }
                               });
                             }}
-                            className="w-full sm:flex-1 py-3.5 sm:py-3 border border-slate-200 bg-white hover:bg-slate-50 text-slate-650 hover:text-slate-800 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-200 cursor-pointer active:translate-y-0.5 flex items-center justify-center gap-1.5 shadow-sm"
+                            className="w-full sm:flex-1 py-3.5 sm:py-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0B1528] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-650 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-200 cursor-pointer active:translate-y-0.5 flex items-center justify-center gap-1.5 shadow-sm"
                           >
                             <X className="w-4 h-4 text-slate-400" />
                             Cancel
@@ -6502,9 +6501,9 @@ JSON structure:
                             setQuizSubmitted(false);
                             setSelectedAnswers({});
                           }}
-                          className="w-full py-3.5 sm:py-3 border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-200 cursor-pointer active:translate-y-0.5 flex items-center justify-center gap-2 shadow-sm"
+                          className="w-full py-3.5 sm:py-3 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-[#0B1528] hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-200 cursor-pointer active:translate-y-0.5 flex items-center justify-center gap-2 shadow-sm"
                         >
-                          <RotateCcw className="w-4 h-4 text-slate-500" />
+                          <RotateCcw className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                           Retry / New Quiz
                         </button>
                       )}
@@ -6528,14 +6527,14 @@ JSON structure:
 
             <div className="flex justify-between items-start gap-4">
               <div className="space-y-1 text-left">
-                <span className="inline-flex px-2.5 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-650 rounded text-[10px] sm:text-[9px] font-black uppercase tracking-wider">
+                <span className="inline-flex px-2.5 py-0.5 bg-amber-500/10 dark:bg-amber-950/50 border border-amber-500/20 dark:border-amber-700 text-amber-650 dark:text-amber-400 rounded text-[10px] sm:text-[9px] font-black uppercase tracking-wider">
                   Syllabus Map
                 </span>
-                <h4 className="font-serif font-extrabold text-slate-800 text-base sm:text-lg flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-amber-650" />
+                <h4 className="font-serif font-extrabold text-slate-800 dark:text-white text-base sm:text-lg flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-amber-650 dark:text-amber-400" />
                   Syllabus Workspace
                 </h4>
-                <p className="text-slate-500 text-[11px] font-semibold leading-relaxed">
+                <p className="text-slate-500 dark:text-slate-400 text-[11px] font-semibold leading-relaxed">
                   Design and manage your own exam syllabus. Toggle progress, request tutoring summaries, or trigger dynamic AI MCQs.
                 </p>
               </div>
@@ -6546,13 +6545,13 @@ JSON structure:
                   setShowAddCollection(!showAddCollection);
                   setShowAddTopic(false);
                 }}
-                className="px-3 py-1.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-[9px] font-black uppercase tracking-wider border border-slate-200/60 hover:bg-slate-100 rounded-lg text-slate-700 hover:text-slate-900 transition-colors cursor-pointer shrink-0 active:scale-95 flex items-center gap-1.5"
+                className="px-3 py-1.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-[9px] font-black uppercase tracking-wider border border-slate-200/60 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer shrink-0 active:scale-95 flex items-center gap-1.5"
               >
                 {showAddCollection ? (
                   <span>Cancel</span>
                 ) : (
                   <>
-                    <Plus className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-slate-500 shrink-0" />
+                    <Plus className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-slate-500 dark:text-slate-400 shrink-0" />
                     <span>Collection</span>
                   </>
                 )}
@@ -6561,16 +6560,16 @@ JSON structure:
 
             {/* Form to Add Collection manually or generate with AI */}
             {showAddCollection && (
-              <div className="bg-slate-50 border border-slate-200/50 p-4 rounded-2xl space-y-4 text-left animate-fade-down">
+              <div className="bg-slate-50 dark:bg-[#060B16] border border-slate-200/50 dark:border-slate-800 p-4 rounded-2xl space-y-4 text-left animate-fade-down">
                 <div className="space-y-2">
-                  <label className="text-[10px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 block px-1">Option A: Generate Syllabus with AI</label>
+                  <label className="text-[10px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block px-1">Option A: Generate Syllabus with AI</label>
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={aiSubjectInput}
                       onChange={(e) => setAiSubjectInput(e.target.value)}
                       placeholder="e.g. Modern Indian History, OSSSC Arithmetic"
-                      className="flex-1 bg-slate-50 border border-slate-200/60 rounded-xl px-3.5 py-2.5 sm:px-3 sm:py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500/40 transition-all font-semibold"
+                      className="flex-1 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-3.5 py-2.5 sm:px-3 sm:py-2 text-xs text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500/40 transition-all font-semibold"
                     />
                     <button
                       type="button"
@@ -6588,21 +6587,21 @@ JSON structure:
                   </div>
                 </div>
 
-                <div className="border-t border-slate-200/50 pt-3 space-y-2">
-                  <label className="text-[10px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 block px-1">Option B: Create Blank Collection</label>
+                <div className="border-t border-slate-200/50 dark:border-slate-800 pt-3 space-y-2">
+                  <label className="text-[10px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block px-1">Option B: Create Blank Collection</label>
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={newCollectionName}
                       onChange={(e) => setNewCollectionName(e.target.value)}
                       placeholder="e.g. My OPSC GS Syllabus"
-                      className="flex-1 bg-slate-50 border border-slate-200/60 rounded-xl px-3.5 py-2.5 sm:px-3 sm:py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500/40 transition-all font-semibold"
+                      className="flex-1 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-3.5 py-2.5 sm:px-3 sm:py-2 text-xs text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500/40 transition-all font-semibold"
                     />
                     <button
                       type="button"
                       disabled={!newCollectionName.trim()}
                       onClick={() => handleCreateCollection(newCollectionName)}
-                      className="px-4 py-2.5 sm:py-2 border border-slate-200/60 hover:bg-slate-100 text-slate-700 hover:text-slate-900 rounded-xl text-[11px] sm:text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed active:translate-y-0.5"
+                      className="px-4 py-2.5 sm:py-2 border border-slate-200/60 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl text-[11px] sm:text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed active:translate-y-0.5"
                     >
                       Create
                     </button>
@@ -6627,8 +6626,8 @@ JSON structure:
                         className={cn(
                           "px-4 py-2 text-[10px] font-black uppercase tracking-wider rounded-xl border transition-all duration-200 cursor-pointer active:scale-95 flex items-center gap-1.5 relative shrink-0 select-none",
                           isActive 
-                            ? "text-amber-650 border-amber-500/40 bg-amber-500/5 font-extrabold" 
-                            : "bg-white border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                            ? "text-amber-650 dark:text-amber-400 border-amber-500/40 bg-amber-500/5 dark:bg-amber-950/40 font-extrabold" 
+                            : "bg-white dark:bg-[#060B16] border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/80"
                         )}
                       >
                         {isActive && (
@@ -6654,7 +6653,7 @@ JSON structure:
                   const isEditing = activeColl.id === editingCollectionId;
 
                   return (
-                    <div className="bg-slate-50/50 border border-slate-200/50 p-2.5 rounded-xl flex items-center justify-between gap-3 text-left animate-fade-in shadow-2xs">
+                    <div className="bg-slate-50/50 dark:bg-[#060B16]/80 border border-slate-200/50 dark:border-slate-800 p-2.5 rounded-xl flex items-center justify-between gap-3 text-left animate-fade-in shadow-2xs">
                       <div className="flex-1 min-w-0">
                         {isEditing ? (
                           <div className="flex items-center gap-1.5 w-full">
@@ -6662,20 +6661,20 @@ JSON structure:
                               type="text"
                               value={editingCollectionName}
                               onChange={(e) => setEditingCollectionName(e.target.value)}
-                              className="flex-1 min-w-0 bg-white border border-slate-200/60 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500/40 transition-all font-semibold"
+                              className="flex-1 min-w-0 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500/40 transition-all font-semibold"
                               autoFocus
                               placeholder="Name..."
                             />
                             <button
                               onClick={() => handleRenameCollection(activeColl.id, editingCollectionName)}
-                              className="p-1.5 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 text-emerald-650 rounded-lg shrink-0 transition-all cursor-pointer active:scale-95"
+                              className="p-1.5 bg-emerald-500/10 dark:bg-emerald-950/60 border border-emerald-500/20 dark:border-emerald-700 hover:bg-emerald-500/20 text-emerald-650 dark:text-emerald-400 rounded-lg shrink-0 transition-all cursor-pointer active:scale-95"
                               title="Save Name"
                             >
                               <Check className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                             </button>
                             <button
                               onClick={() => setEditingCollectionId(null)}
-                              className="p-1.5 bg-slate-50 border border-slate-200/60 hover:bg-slate-100 text-slate-500 rounded-lg shrink-0 transition-all cursor-pointer active:scale-95"
+                              className="p-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 hover:bg-slate-100 text-slate-500 dark:text-slate-300 rounded-lg shrink-0 transition-all cursor-pointer active:scale-95"
                               title="Cancel"
                             >
                               <Square className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
@@ -6684,8 +6683,8 @@ JSON structure:
                         ) : (
                           <div className="flex items-center gap-2 min-w-0">
                             <div className="min-w-0 flex-1">
-                              <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-0.5">Selected Workspace</span>
-                              <h5 className="font-serif font-extrabold text-slate-900 text-xs flex items-center gap-1.5 min-w-0 leading-none">
+                              <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 block mb-0.5">Selected Workspace</span>
+                              <h5 className="font-serif font-extrabold text-slate-900 dark:text-white text-xs flex items-center gap-1.5 min-w-0 leading-none">
                                 <span className="truncate max-w-[130px] xs:max-w-[180px] sm:max-w-[280px] md:max-w-none block">
                                   {activeColl.name}
                                 </span>
@@ -6694,7 +6693,7 @@ JSON structure:
                                     setEditingCollectionId(activeColl.id);
                                     setEditingCollectionName(activeColl.name);
                                   }}
-                                  className="text-slate-400 hover:text-amber-650 transition-colors p-1 rounded hover:bg-slate-100 shrink-0"
+                                  className="text-slate-400 hover:text-amber-650 dark:hover:text-amber-400 transition-colors p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0"
                                   title="Rename Workspace"
                                 >
                                   <Edit3 className="w-3 h-3" />
@@ -6709,22 +6708,22 @@ JSON structure:
                       <div className="flex items-center gap-1 shrink-0">
                         <button
                           onClick={() => handleMoveCollection(activeColl.id, 'up')}
-                          className="p-1.5 bg-white border border-slate-200 text-slate-400 hover:text-slate-700 hover:border-slate-350 rounded-lg transition-all cursor-pointer active:scale-90"
+                          className="p-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white rounded-lg transition-all cursor-pointer active:scale-90"
                           title="Move Left/Up"
                         >
                           <ArrowLeft className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleMoveCollection(activeColl.id, 'down')}
-                          className="p-1.5 bg-white border border-slate-200 text-slate-400 hover:text-slate-700 hover:border-slate-350 rounded-lg transition-all cursor-pointer active:scale-90"
+                          className="p-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white rounded-lg transition-all cursor-pointer active:scale-90"
                           title="Move Right/Down"
                         >
                           <ArrowRight className="w-3.5 h-3.5" />
                         </button>
-                        <div className="w-px h-4 bg-slate-200 mx-0.5 shrink-0" />
+                        <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-0.5 shrink-0" />
                         <button
                           onClick={() => handleDeleteCollection(activeColl.id)}
-                          className="p-1.5 bg-red-50 border border-red-200 hover:bg-red-500 hover:border-red-500 hover:text-white text-red-500 rounded-lg transition-all cursor-pointer active:scale-90"
+                          className="p-1.5 bg-red-50 dark:bg-rose-950/60 border border-red-200 dark:border-rose-800 hover:bg-red-500 hover:border-red-500 hover:text-white text-red-500 dark:text-rose-400 rounded-lg transition-all cursor-pointer active:scale-90"
                           title="Delete Workspace"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -6743,12 +6742,12 @@ JSON structure:
                   const progressPercentage = totalTopics > 0 ? Math.round((completedCount / totalTopics) * 100) : 0;
 
                   return (
-                    <div className="bg-slate-50/50 border border-slate-200/50 p-3 rounded-xl flex items-center justify-between gap-4 shadow-2xs">
+                    <div className="bg-slate-50/50 dark:bg-[#060B16]/80 border border-slate-200/50 dark:border-slate-800 p-3 rounded-xl flex items-center justify-between gap-4 shadow-2xs">
                       <div className="min-w-0">
-                        <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-0.5">Workspace Progress</span>
-                        <span className="text-[10px] font-black text-amber-650 font-mono">{completedCount} of {totalTopics} Completed ({progressPercentage}%)</span>
+                        <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 block mb-0.5">Workspace Progress</span>
+                        <span className="text-[10px] font-black text-amber-650 dark:text-amber-400 font-mono">{completedCount} of {totalTopics} Completed ({progressPercentage}%)</span>
                       </div>
-                      <div className="flex-1 max-w-[120px] xs:max-w-[160px] sm:max-w-none bg-slate-200/80 rounded-full h-1.5 overflow-hidden border border-slate-200/30">
+                      <div className="flex-1 max-w-[120px] xs:max-w-[160px] sm:max-w-none bg-slate-200/80 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden border border-slate-200/30 dark:border-slate-700">
                         <div 
                           className="bg-amber-400 h-full transition-all duration-500 rounded-full" 
                           style={{ width: `${progressPercentage}%` }} 
@@ -6766,13 +6765,13 @@ JSON structure:
                   return (
                     <div className="space-y-3">
                       <div className="flex justify-between items-center px-1">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Study Chapters / Topics</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Study Chapters / Topics</span>
                         <button
                           onClick={() => {
                             setShowAddTopic(!showAddTopic);
                             setEditingTopicId(null);
                           }}
-                          className="text-[9px] font-black uppercase tracking-widest text-amber-650 hover:text-amber-300 border border-amber-500/25 hover:border-amber-500/40 bg-amber-500/5 hover:bg-amber-500/10 px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer active:scale-95"
+                          className="text-[9px] font-black uppercase tracking-widest text-amber-650 dark:text-amber-400 hover:text-amber-300 border border-amber-500/25 dark:border-amber-600/40 hover:border-amber-500/40 bg-amber-500/5 dark:bg-amber-950/40 hover:bg-amber-500/10 px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer active:scale-95"
                         >
                           {showAddTopic ? 'Close Form' : '+ Add Custom Topic'}
                         </button>
@@ -6780,25 +6779,25 @@ JSON structure:
 
                       {/* Add Custom Topic Form */}
                       {showAddTopic && (
-                        <div className="bg-slate-50 border border-slate-200/50 p-4 rounded-2xl space-y-3 text-left animate-fade-down shadow-2xs">
+                        <div className="bg-slate-50 dark:bg-[#060B16] border border-slate-200/50 dark:border-slate-800 p-4 rounded-2xl space-y-3 text-left animate-fade-down shadow-2xs">
                           <div className="space-y-1">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 block px-1">Topic Title</label>
+                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block px-1">Topic Title</label>
                             <input
                               type="text"
                               value={newTopicName}
                               onChange={(e) => setNewTopicName(e.target.value)}
                               placeholder="e.g. Indus Valley Civilization"
-                              className="w-full bg-white border border-slate-200/60 rounded-xl px-3.5 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500/40 transition-all font-semibold"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500/40 transition-all font-semibold"
                             />
                           </div>
                           <div className="space-y-1">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 block px-1">Description / Chapters</label>
+                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block px-1">Description / Chapters</label>
                             <input
                               type="text"
                               value={newTopicDesc}
                               onChange={(e) => setNewTopicDesc(e.target.value)}
                               placeholder="e.g. Harappan sites, trade routes, decline causes"
-                              className="w-full bg-white border border-slate-200/60 rounded-xl px-3.5 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500/40 transition-all font-semibold"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500/40 transition-all font-semibold"
                             />
                           </div>
                           <button
@@ -6814,10 +6813,10 @@ JSON structure:
 
                       {/* Topics Cards */}
                       {activeColl.topics.length === 0 ? (
-                        <div className="py-8 text-center border border-dashed border-slate-200/50 rounded-2xl space-y-2">
-                          <BookOpen className="w-8 h-8 text-slate-600 mx-auto" />
-                          <p className="text-slate-500 text-xs font-bold">This collection is empty.</p>
-                          <p className="text-slate-500 text-[10px] max-w-[200px] mx-auto leading-relaxed">
+                        <div className="py-8 text-center border border-dashed border-slate-200/50 dark:border-slate-800 rounded-2xl space-y-2">
+                          <BookOpen className="w-8 h-8 text-slate-600 dark:text-slate-500 mx-auto" />
+                          <p className="text-slate-500 dark:text-slate-400 text-xs font-bold">This collection is empty.</p>
+                          <p className="text-slate-500 dark:text-slate-400 text-[10px] max-w-[200px] mx-auto leading-relaxed">
                             Click "Add Custom Topic" above to manually write down your chapters, or outline it with AI.
                           </p>
                         </div>
@@ -6827,35 +6826,35 @@ JSON structure:
                             const isEditing = topic.id === editingTopicId;
                             const status = topic.status || 'not_started';
 
-                            let statusColor = "border-slate-200/50 text-slate-500 bg-slate-50";
+                            let statusColor = "border-slate-200/50 dark:border-slate-700 text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800";
                             let statusLabel = "Not Started";
                             if (status === 'in_progress') {
-                              statusColor = "border-amber-500/20 text-amber-650 bg-amber-500/5";
+                              statusColor = "border-amber-500/20 text-amber-650 dark:text-amber-400 bg-amber-500/5 dark:bg-amber-950/40";
                               statusLabel = "In Progress";
                             } else if (status === 'completed') {
-                              statusColor = "border-emerald-500/20 text-emerald-650 bg-emerald-500/5";
+                              statusColor = "border-emerald-500/20 text-emerald-650 dark:text-emerald-400 bg-emerald-500/5 dark:bg-emerald-950/40";
                               statusLabel = "Completed";
                             }
 
                             if (isEditing) {
                               return (
-                                <div key={topic.id} className="p-4 bg-slate-50 border border-amber-500/30 rounded-2xl space-y-3.5 sm:space-y-3 text-left animate-fade-in shadow-2xs">
+                                <div key={topic.id} className="p-4 bg-slate-50 dark:bg-[#060B16] border border-amber-500/30 dark:border-amber-600/50 rounded-2xl space-y-3.5 sm:space-y-3 text-left animate-fade-in shadow-2xs">
                                   <div className="space-y-1">
-                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 block px-1">Rename Topic</label>
+                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block px-1">Rename Topic</label>
                                     <input
                                       type="text"
                                       value={editingTopicName}
                                       onChange={(e) => setEditingTopicName(e.target.value)}
-                                      className="w-full bg-white border border-slate-200/60 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500/40 font-semibold"
+                                      className="w-full bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500/40 font-semibold"
                                     />
                                   </div>
                                   <div className="space-y-1">
-                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 block px-1">Edit Description</label>
+                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block px-1">Edit Description</label>
                                     <input
                                       type="text"
                                       value={editingTopicDesc}
                                       onChange={(e) => setEditingTopicDesc(e.target.value)}
-                                      className="w-full bg-white border border-slate-200/60 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500/40 font-semibold"
+                                      className="w-full bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500/40 font-semibold"
                                     />
                                   </div>
                                   <div className="flex gap-2.5 pt-1">
@@ -6867,7 +6866,7 @@ JSON structure:
                                     </button>
                                     <button
                                       onClick={() => setEditingTopicId(null)}
-                                      className="px-4 py-2 border border-slate-200/60 hover:bg-slate-100 text-slate-700 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer active:scale-95"
+                                      className="px-4 py-2 border border-slate-200/60 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer active:scale-95"
                                     >
                                       Cancel
                                     </button>
@@ -6886,20 +6885,20 @@ JSON structure:
                               <div 
                                 key={topic.id} 
                                 className={cn(
-                                  "bg-slate-50/50 border border-slate-200/50 hover:border-slate-200/80 rounded-2xl flex flex-col text-left transition-all duration-200 relative group overflow-hidden shadow-3xs cursor-pointer",
-                                  isExpanded ? "p-3.5 gap-3 bg-white ring-1 ring-slate-100" : "p-3 gap-0"
+                                  "bg-slate-50/50 dark:bg-[#060B16]/80 border border-slate-200/50 dark:border-slate-800 hover:border-slate-200/80 dark:hover:border-slate-700 rounded-2xl flex flex-col text-left transition-all duration-200 relative group overflow-hidden shadow-3xs cursor-pointer",
+                                  isExpanded ? "p-3.5 gap-3 bg-white dark:bg-[#0B1528] ring-1 ring-slate-100 dark:ring-slate-800" : "p-3 gap-0"
                                 )}
                                 onClick={() => setExpandedTopicId(isExpanded ? null : topic.id)}
                               >
                                 {/* Collapsed Header Row */}
                                 <div className="flex items-start justify-between gap-3 min-w-0">
                                   <div className="space-y-0.5 pr-2 truncate min-w-0 flex-1">
-                                    <h5 className="font-serif font-extrabold text-slate-800 text-sm sm:text-xs leading-snug">
+                                    <h5 className="font-serif font-extrabold text-slate-800 dark:text-white text-sm sm:text-xs leading-snug">
                                       {topic.name}
                                     </h5>
                                     {topic.desc && (
                                       <p className={cn(
-                                        "text-slate-500 text-xs sm:text-[10px] leading-relaxed transition-all",
+                                        "text-slate-500 dark:text-slate-400 text-xs sm:text-[10px] leading-relaxed transition-all",
                                         isExpanded ? "font-medium" : "font-normal truncate block"
                                       )}>
                                         {topic.desc}
@@ -6914,9 +6913,9 @@ JSON structure:
                                         onClick={() => handleToggleSyllabusStatus(activeColl.id, topic.id)}
                                         className={cn(
                                           "px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border transition-all cursor-pointer flex items-center gap-1",
-                                          status === 'not_started' && "bg-slate-50 border-slate-200/50 text-slate-500 hover:bg-slate-100",
-                                          status === 'in_progress' && "bg-amber-500/10 border-amber-500/25 text-amber-650",
-                                          status === 'completed' && "bg-emerald-500/10 border-emerald-500/25 text-emerald-650"
+                                          status === 'not_started' && "bg-slate-50 dark:bg-slate-800 border-slate-200/50 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700",
+                                          status === 'in_progress' && "bg-amber-500/10 dark:bg-amber-950/50 border-amber-500/25 dark:border-amber-700 text-amber-650 dark:text-amber-400",
+                                          status === 'completed' && "bg-emerald-500/10 dark:bg-emerald-950/50 border-emerald-500/25 dark:border-emerald-700 text-emerald-650 dark:text-emerald-400"
                                         )}
                                         title="Quick status toggle"
                                       >
@@ -6930,17 +6929,17 @@ JSON structure:
 
                                 {/* Expanded Action Panel */}
                                 {isExpanded && (
-                                  <div className="space-y-3.5 pt-3 border-t border-slate-100 animate-fade-down" onClick={(e) => e.stopPropagation()}>
+                                  <div className="space-y-3.5 pt-3 border-t border-slate-100 dark:border-slate-800 animate-fade-down" onClick={(e) => e.stopPropagation()}>
                                     
                                     {/* Status & Options Toolbar */}
-                                    <div className="flex items-center justify-between gap-3 bg-slate-50 border border-slate-200/50 rounded-xl p-2">
+                                    <div className="flex items-center justify-between gap-3 bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-xl p-2">
                                       <button
                                         onClick={() => handleToggleSyllabusStatus(activeColl.id, topic.id)}
                                         className={cn(
-                                          "px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border transition-all cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95 bg-white",
-                                          status === 'not_started' && "border-slate-200/60 text-slate-500 hover:bg-slate-50",
-                                          status === 'in_progress' && "border-amber-500/25 text-amber-650 bg-amber-500/5 hover:bg-amber-500/10",
-                                          status === 'completed' && "border-emerald-500/25 text-emerald-650 bg-emerald-500/5 hover:bg-emerald-500/10"
+                                          "px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border transition-all cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95 bg-white dark:bg-slate-800",
+                                          status === 'not_started' && "border-slate-200/60 dark:border-slate-700 text-slate-500 dark:text-slate-300 hover:bg-slate-50",
+                                          status === 'in_progress' && "border-amber-500/25 text-amber-650 dark:text-amber-400 bg-amber-500/5 dark:bg-amber-950/40 hover:bg-amber-500/10",
+                                          status === 'completed' && "border-emerald-500/25 text-emerald-650 dark:text-emerald-400 bg-emerald-500/5 dark:bg-emerald-950/40 hover:bg-emerald-500/10"
                                         )}
                                       >
                                         <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", indicatorColor)} />
@@ -6955,28 +6954,28 @@ JSON structure:
                                             setEditingTopicName(topic.name);
                                             setEditingTopicDesc(topic.desc);
                                           }}
-                                          className="p-1.5 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-white transition-colors cursor-pointer active:scale-90 border border-transparent hover:border-slate-200/40"
+                                          className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors cursor-pointer active:scale-90 border border-transparent hover:border-slate-200/40"
                                           title="Edit topic"
                                         >
                                           <Edit3 className="w-3.5 h-3.5" />
                                         </button>
                                         <button
                                           onClick={() => handleMoveTopic(activeColl.id, topic.id, 'up')}
-                                          className="p-1.5 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-white transition-colors cursor-pointer active:scale-90 border border-transparent hover:border-slate-200/40"
+                                          className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors cursor-pointer active:scale-90 border border-transparent hover:border-slate-200/40"
                                           title="Move Up"
                                         >
                                           <ChevronUp className="w-3.5 h-3.5" />
                                         </button>
                                         <button
                                           onClick={() => handleMoveTopic(activeColl.id, topic.id, 'down')}
-                                          className="p-1.5 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-white transition-colors cursor-pointer active:scale-90 border border-transparent hover:border-slate-200/40"
+                                          className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors cursor-pointer active:scale-90 border border-transparent hover:border-slate-200/40"
                                           title="Move Down"
                                         >
                                           <ChevronDown className="w-3.5 h-3.5" />
                                         </button>
                                         <button
                                           onClick={() => handleDeleteTopic(activeColl.id, topic.id)}
-                                          className="p-1.5 text-slate-500 hover:text-red-400 rounded-lg hover:bg-white transition-colors cursor-pointer active:scale-90 border border-transparent hover:border-slate-200/40"
+                                          className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors cursor-pointer active:scale-90 border border-transparent hover:border-slate-200/40"
                                           title="Delete topic"
                                         >
                                           <Trash2 className="w-3.5 h-3.5" />
@@ -6991,7 +6990,7 @@ JSON structure:
                                           handleSendMessage(`Provide a comprehensive, exam-oriented study summary for: "${topic.name}" (${topic.desc}) under the context of the "${targetExam}" syllabus. List 3 high-yield exam subtopics, 2 historical/factual reference points or formulas to memorize for the exam, and 1 core takeaway/practical tip.`);
                                           setTimeout(() => scrollToElement('chat-pane', { block: 'start' }), 150);
                                         }}
-                                        className="flex-1 py-2.5 bg-slate-50 border border-slate-200/60 hover:bg-[#2563EB]/8 hover:border-[#2563EB]/30 hover:text-[#2563EB] text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 active:scale-95 shadow-2xs cursor-pointer"
+                                        className="flex-1 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700 hover:bg-[#2563EB]/8 dark:hover:bg-blue-950/50 hover:border-[#2563EB]/30 hover:text-[#2563EB] dark:hover:text-blue-300 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 active:scale-95 shadow-2xs cursor-pointer text-slate-700 dark:text-slate-300"
                                         title="Ask personal AI tutor for summary"
                                       >
                                         <HelpCircle className="w-3.5 h-3.5" />
@@ -7024,14 +7023,14 @@ JSON structure:
               </div>
             ) : (
               /* EMPTY ONBOARDING STATE */
-              <div className="py-12 px-4 border border-dashed border-slate-200/60 rounded-[2rem] space-y-6 text-center animate-fade-up">
-                <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto border border-amber-500/20">
-                  <BookOpen className="w-8 h-8 text-amber-650" />
+              <div className="py-12 px-4 border border-dashed border-slate-200/60 dark:border-slate-800 rounded-[2rem] space-y-6 text-center animate-fade-up">
+                <div className="w-16 h-16 bg-amber-500/10 dark:bg-amber-950/50 rounded-full flex items-center justify-center mx-auto border border-amber-500/20 dark:border-amber-700">
+                  <BookOpen className="w-8 h-8 text-amber-650 dark:text-amber-400" />
                 </div>
                 
                 <div className="space-y-1.5 max-w-sm mx-auto">
-                  <h5 className="font-serif font-extrabold text-slate-800 text-base">Your Syllabus Workspace is empty</h5>
-                  <p className="text-slate-500 text-xs font-semibold leading-relaxed">
+                  <h5 className="font-serif font-extrabold text-slate-800 dark:text-white text-base">Your Syllabus Workspace is empty</h5>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs font-semibold leading-relaxed">
                     Personalize your study dashboard. Compile custom subject collections, generate a syllabus with AI, or manually outline your exam targets.
                   </p>
                 </div>
@@ -7046,7 +7045,7 @@ JSON structure:
                   </button>
                   <button
                     onClick={() => setShowAddCollection(true)}
-                    className="flex-1 py-3 border border-slate-200/60 hover:border-slate-800/80 bg-white hover:bg-slate-900 text-slate-700 hover:text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-300 cursor-pointer active:translate-y-0.5 shadow-sm hover:shadow-md hover:shadow-slate-900/5"
+                    className="flex-1 py-3 border border-slate-200/60 dark:border-slate-700 hover:border-slate-800/80 bg-white dark:bg-slate-800 hover:bg-slate-900 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-300 cursor-pointer active:translate-y-0.5 shadow-sm hover:shadow-md"
                   >
                     Create Manually
                   </button>
@@ -7065,21 +7064,21 @@ JSON structure:
                   transition={{ duration: 0.15 }}
                   className="space-y-4 text-left"
                 >
-            <div className="flex flex-col gap-3.5 border-b border-slate-200/50 pb-3">
+            <div className="flex flex-col gap-3.5 border-b border-slate-200/50 dark:border-slate-800 pb-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-left">
                 <div className="space-y-1">
-                  <span className="inline-flex px-2.5 py-0.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-650 rounded text-[10px] sm:text-[9px] font-black uppercase tracking-wider">
+                  <span className="inline-flex px-2.5 py-0.5 bg-indigo-500/10 dark:bg-indigo-950/50 border border-indigo-500/20 dark:border-indigo-800 text-indigo-650 dark:text-indigo-300 rounded text-[10px] sm:text-[9px] font-black uppercase tracking-wider">
                     Shortcut Deck
                   </span>
-                  <h4 className="font-serif font-extrabold text-slate-800 text-base sm:text-lg flex items-center gap-2">
-                    <Award className="w-5 h-5 text-indigo-650 shrink-0" />
+                  <h4 className="font-serif font-extrabold text-slate-800 dark:text-white text-base sm:text-lg flex items-center gap-2">
+                    <Award className="w-5 h-5 text-indigo-650 dark:text-indigo-400 shrink-0" />
                     <span>Formula & Shortcut Cards</span>
                   </h4>
                 </div>
               </div>
 
               {/* Action Toolbar */}
-              <div className="flex flex-wrap items-center gap-1.5 bg-slate-50 p-1 rounded-xl border border-slate-200/50 w-full">
+              <div className="flex flex-wrap items-center gap-1.5 bg-slate-50 dark:bg-[#060B16]/90 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800 w-full">
                 {/* Add Category Action */}
                 <button
                   onClick={() => {
@@ -7091,7 +7090,7 @@ JSON structure:
                     "flex-1 sm:flex-initial px-3.5 py-2 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-[9px] font-black uppercase tracking-wider border transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5",
                     showAddFormulaCategory 
                       ? "bg-indigo-500 border-indigo-400 text-slate-950 font-black" 
-                      : "border-slate-200/50 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+                      : "border-slate-200/50 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
                   )}
                   title="Add category"
                 >
@@ -7120,7 +7119,7 @@ JSON structure:
                     "flex-1 sm:flex-initial px-3.5 py-2 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-[9px] font-black uppercase tracking-wider border transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed",
                     showAddFormula 
                       ? "bg-indigo-500 border-indigo-400 text-slate-950 font-black" 
-                      : "border-slate-200/50 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+                      : "border-slate-200/50 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
                   )}
                   title="Add custom formula card"
                 >
@@ -7148,7 +7147,7 @@ JSON structure:
                     "flex-1 sm:flex-initial px-3.5 py-2 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-[9px] font-black uppercase tracking-wider border transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5",
                     showAiFormulaPrompt 
                       ? "bg-gradient-to-r from-violet-500 to-indigo-500 border-indigo-400 text-white font-black animate-pulse" 
-                      : "border-slate-200/50 text-indigo-650 hover:text-indigo-700 hover:bg-indigo-50"
+                      : "border-slate-200/50 dark:border-slate-700 text-indigo-650 dark:text-indigo-300 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
                   )}
                   title="Generate formula with AI"
                 >
@@ -7171,8 +7170,8 @@ JSON structure:
                   className={cn(
                     "flex-1 sm:flex-initial px-3.5 py-2 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-[9px] font-black uppercase tracking-wider border transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5",
                     flashcardMode 
-                      ? "bg-indigo-500 border-indigo-400 text-slate-950" 
-                      : "border-slate-200/50 text-slate-500 hover:text-slate-800 hover:bg-slate-100"
+                      ? "bg-indigo-500 border-indigo-400 text-slate-950 font-bold" 
+                      : "border-slate-200/50 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
                   )}
                   title="Toggle memory cards style"
                 >
@@ -7184,19 +7183,19 @@ JSON structure:
             {/* Search filter bar */}
             <div className="relative">
               <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-3.5 w-3.5 text-slate-500" />
+                <Search className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />
               </span>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search formulas, articles, grammar rules..."
-                className="w-full bg-white border border-slate-200/60 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all font-semibold"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 dark:focus:border-blue-400 transition-all font-semibold"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-[10px] font-black text-slate-500 hover:text-slate-800 cursor-pointer"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-[10px] font-black text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white cursor-pointer"
                 >
                   Clear
                 </button>
@@ -7205,22 +7204,22 @@ JSON structure:
 
             {/* Form to Add Category manually */}
             {showAddFormulaCategory && (
-              <div className="bg-white border border-slate-200/50 p-4 rounded-2xl space-y-3 text-left animate-fade-down shadow-xl">
+              <div className="bg-white dark:bg-[#0B1528] border border-slate-200/50 dark:border-slate-800 p-4 rounded-2xl space-y-3 text-left animate-fade-down shadow-xl">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 block px-1">Category Name</label>
+                  <label className="text-[10px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block px-1">Category Name</label>
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={newFormulaCategoryName}
                       onChange={(e) => setNewFormulaCategoryName(e.target.value)}
                       placeholder="e.g., Math Techniques, Civics"
-                      className="flex-1 bg-slate-50 border border-slate-200/60 rounded-xl px-3.5 py-2.5 sm:px-3 sm:py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
+                      className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-3.5 py-2.5 sm:px-3 sm:py-2 text-xs text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
                     />
                     <button
                       type="button"
                       disabled={!newFormulaCategoryName.trim()}
                       onClick={() => handleCreateFormulaCategory(newFormulaCategoryName)}
-                      className="px-5 py-2.5 sm:px-4 sm:py-2 border border-slate-200/60 hover:bg-slate-100 text-slate-700 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed active:translate-y-0.5"
+                      className="px-5 py-2.5 sm:px-4 sm:py-2 border border-slate-200/60 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed active:translate-y-0.5"
                     >
                       Create
                     </button>
@@ -7231,17 +7230,17 @@ JSON structure:
 
             {/* AI Generate Formula Form & Preview Card */}
             {showAiFormulaPrompt && (
-              <div className="bg-white border border-slate-200/50 p-4 rounded-2xl space-y-4 text-left animate-fade-down shadow-xl">
+              <div className="bg-white dark:bg-[#0B1528] border border-slate-200/50 dark:border-slate-800 p-4 rounded-2xl space-y-4 text-left animate-fade-down shadow-xl">
                 {!aiGeneratedFormula ? (
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 block px-1">Describe the formula or rule for the AI</label>
+                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block px-1">Describe the formula or rule for the AI</label>
                     <div className="flex gap-2">
                       <input
                         type="text"
                         value={aiFormulaPromptText}
                         onChange={(e) => setAiFormulaPromptText(e.target.value)}
                         placeholder="e.g., Relative speed formula, swara sandhi rule, governor article..."
-                        className="flex-1 bg-slate-50 border border-slate-200/60 rounded-xl px-3 py-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
+                        className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' && aiFormulaPromptText.trim() && !aiGeneratingFormula) {
                             handleGenerateFormulaWithAI();
@@ -7265,14 +7264,14 @@ JSON structure:
                   </div>
                 ) : (
                   <div className="space-y-4 animate-fade-in">
-                    <div className="border-b border-slate-200/50 pb-2">
-                      <span className="text-[8px] font-black uppercase tracking-widest text-indigo-650 block">AI GENERATION PREVIEW</span>
-                      <h5 className="text-white text-xs font-bold font-serif mt-0.5">Please confirm details before adding to Shortcut Deck</h5>
+                    <div className="border-b border-slate-200/50 dark:border-slate-800 pb-2">
+                      <span className="text-[8px] font-black uppercase tracking-widest text-indigo-650 dark:text-indigo-400 block">AI GENERATION PREVIEW</span>
+                      <h5 className="text-slate-800 dark:text-white text-xs font-bold font-serif mt-0.5">Please confirm details before adding to Shortcut Deck</h5>
                     </div>
 
-                    <div className="p-4 bg-slate-50 border border-slate-200/50 rounded-2xl space-y-3">
+                    <div className="p-4 bg-slate-50 dark:bg-slate-900/90 border border-slate-200/50 dark:border-slate-800 rounded-2xl space-y-3">
                       <div className="flex items-center justify-between gap-4">
-                        <span className="text-[9px] font-black uppercase tracking-wider text-indigo-650 font-extrabold">
+                        <span className="text-[9px] font-black uppercase tracking-wider text-indigo-650 dark:text-indigo-300 font-extrabold">
                           {aiGeneratedFormula.title}
                         </span>
                         
@@ -7284,8 +7283,8 @@ JSON structure:
                             <span className={cn(
                               "text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border",
                               categoryExists
-                                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-650"
-                                : "bg-amber-500/10 border-amber-500/20 text-amber-650"
+                                ? "bg-emerald-500/10 dark:bg-emerald-950/60 border-emerald-500/20 dark:border-emerald-700 text-emerald-650 dark:text-emerald-400"
+                                : "bg-amber-500/10 dark:bg-amber-950/60 border-amber-500/20 dark:border-amber-700 text-amber-650 dark:text-amber-400"
                             )}>
                               Category: {aiGeneratedFormula.category} {categoryExists ? '✓' : '(New Category)'}
                             </span>
@@ -7294,17 +7293,17 @@ JSON structure:
                       </div>
 
                       <div className="space-y-1.5">
-                        <div className="font-mono text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200/50 p-2.5 rounded-lg leading-relaxed overflow-x-auto custom-scrollbar">
+                        <div className="font-mono text-xs font-bold text-slate-800 dark:text-white bg-white dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800 p-2.5 rounded-lg leading-relaxed overflow-x-auto custom-scrollbar">
                           <FormulaRenderer formula={aiGeneratedFormula.formula} />
                         </div>
                         {aiGeneratedFormula.shortcut && (
-                          <p className="text-slate-500 text-[10px] font-semibold leading-relaxed">
-                            <span className="font-extrabold text-slate-800">Trick:</span> {aiGeneratedFormula.shortcut}
+                          <p className="text-slate-500 dark:text-slate-400 text-[10px] font-semibold leading-relaxed">
+                            <span className="font-extrabold text-slate-800 dark:text-white">Trick:</span> {aiGeneratedFormula.shortcut}
                           </p>
                         )}
                         {aiGeneratedFormula.example && (
-                          <p className="text-slate-500 text-[10px] font-semibold leading-relaxed">
-                            <span className="font-extrabold text-slate-500">e.g.,</span> {aiGeneratedFormula.example}
+                          <p className="text-slate-500 dark:text-slate-400 text-[10px] font-semibold leading-relaxed">
+                            <span className="font-extrabold text-slate-500 dark:text-slate-400">e.g.,</span> {aiGeneratedFormula.example}
                           </p>
                         )}
                       </div>
@@ -7321,7 +7320,7 @@ JSON structure:
                       <button
                         type="button"
                         onClick={() => setAiGeneratedFormula(null)}
-                        className="px-4 py-2.5 bg-red-500/10 border border-red-500/20 hover:bg-red-500/25 text-red-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors cursor-pointer active:translate-y-0.5 font-extrabold text-center"
+                        className="px-4 py-2.5 bg-red-500/10 dark:bg-rose-950/60 border border-red-500/20 dark:border-rose-800 hover:bg-red-500/25 text-red-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors cursor-pointer active:translate-y-0.5 font-extrabold text-center"
                       >
                         Redo Prompt
                       </button>
@@ -7333,48 +7332,48 @@ JSON structure:
 
             {/* Form to Add Custom Formula card */}
             {showAddFormula && activeFormulaCatId && (
-              <div className="bg-white border border-slate-200/50 p-4 rounded-2xl space-y-3.5 text-left animate-fade-down shadow-xl">
+              <div className="bg-white dark:bg-[#0B1528] border border-slate-200/50 dark:border-slate-800 p-4 rounded-2xl space-y-3.5 text-left animate-fade-down shadow-xl">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 block px-1">Formula Title</label>
+                  <label className="text-[10px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block px-1">Formula Title</label>
                   <input
                     type="text"
                     value={newFormulaTitle}
                     onChange={(e) => setNewFormulaTitle(e.target.value)}
                     placeholder="e.g., Time & Work Shortcut"
-                    className="w-full bg-slate-50 border border-slate-200/60 rounded-xl px-3.5 py-2.5 sm:px-3 sm:py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-3.5 py-2.5 sm:px-3 sm:py-2 text-xs text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 block px-1">Formula / Content</label>
+                  <label className="text-[10px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block px-1">Formula / Content</label>
                   <input
                     type="text"
                     value={newFormulaVal}
                     onChange={(e) => setNewFormulaVal(e.target.value)}
                     placeholder="e.g., Work = Time × Efficiency"
-                    className="w-full bg-slate-50 border border-slate-200/60 rounded-xl px-3.5 py-2.5 sm:px-3 sm:py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-3.5 py-2.5 sm:px-3 sm:py-2 text-xs text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 block px-1">Trick / Shortcut Description (Optional)</label>
+                  <label className="text-[10px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block px-1">Trick / Shortcut Description (Optional)</label>
                   <input
                     type="text"
                     value={newFormulaShortcut}
                     onChange={(e) => setNewFormulaShortcut(e.target.value)}
                     placeholder="e.g., A and B together can finish..."
-                    className="w-full bg-slate-50 border border-slate-200/60 rounded-xl px-3.5 py-2.5 sm:px-3 sm:py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-3.5 py-2.5 sm:px-3 sm:py-2 text-xs text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 block px-1">Example (Optional)</label>
+                  <label className="text-[10px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block px-1">Example (Optional)</label>
                   <input
                     type="text"
                     value={newFormulaExample}
                     onChange={(e) => setNewFormulaExample(e.target.value)}
                     placeholder="e.g., A in 10 days, B in 15 days. Together = 6 days."
-                    className="w-full bg-slate-50 border border-slate-200/60 rounded-xl px-3.5 py-2.5 sm:px-3 sm:py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-3.5 py-2.5 sm:px-3 sm:py-2 text-xs text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
                   />
                 </div>
 
@@ -7405,8 +7404,8 @@ JSON structure:
                         className={cn(
                           "px-4 py-2 text-[10px] font-black uppercase tracking-wider rounded-xl border transition-all duration-200 cursor-pointer active:scale-95 flex items-center gap-1.5 relative shrink-0 select-none",
                           isActive 
-                            ? "text-indigo-650 border-indigo-500/40 bg-indigo-500/5 font-extrabold" 
-                            : "bg-white border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                            ? "text-indigo-650 dark:text-indigo-300 border-indigo-500/40 bg-indigo-500/5 dark:bg-indigo-950/40 font-extrabold" 
+                            : "bg-white dark:bg-[#060B16] border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800"
                         )}
                       >
                         {isActive && (
@@ -7432,7 +7431,7 @@ JSON structure:
                   const isEditing = activeCat.id === editingFormulaCatId;
 
                   return (
-                    <div className="bg-slate-50/50 border border-slate-200/50 p-2.5 rounded-xl flex items-center justify-between gap-3 text-left animate-fade-in shadow-2xs">
+                    <div className="bg-slate-50/50 dark:bg-[#060B16]/80 border border-slate-200/50 dark:border-slate-800 p-2.5 rounded-xl flex items-center justify-between gap-3 text-left animate-fade-in shadow-2xs">
                       <div className="flex-1 min-w-0">
                         {isEditing ? (
                           <div className="flex items-center gap-1.5 w-full">
@@ -7440,20 +7439,20 @@ JSON structure:
                               type="text"
                               value={editingFormulaCatName}
                               onChange={(e) => setEditingFormulaCatName(e.target.value)}
-                              className="flex-1 min-w-0 bg-white border border-slate-200/60 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
+                              className="flex-1 min-w-0 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
                               autoFocus
                               placeholder="Name..."
                             />
                             <button
                               onClick={() => handleRenameFormulaCategory(activeCat.id, editingFormulaCatName)}
-                              className="p-1.5 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 text-emerald-650 rounded-lg shrink-0 transition-all cursor-pointer active:scale-95"
+                              className="p-1.5 bg-emerald-500/10 dark:bg-emerald-950/60 border border-emerald-500/20 dark:border-emerald-700 hover:bg-emerald-500/20 text-emerald-650 dark:text-emerald-400 rounded-lg shrink-0 transition-all cursor-pointer active:scale-95"
                               title="Save Name"
                             >
                               <Check className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => setEditingFormulaCatId(null)}
-                              className="p-1.5 bg-slate-50 border border-slate-200/60 hover:bg-slate-100 text-slate-500 rounded-lg shrink-0 transition-all cursor-pointer active:scale-95"
+                              className="p-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 hover:bg-slate-100 text-slate-500 dark:text-slate-300 rounded-lg shrink-0 transition-all cursor-pointer active:scale-95"
                               title="Cancel"
                             >
                               <Square className="w-3.5 h-3.5" />
@@ -7462,8 +7461,8 @@ JSON structure:
                         ) : (
                           <div className="flex items-center gap-2 min-w-0">
                             <div className="min-w-0 flex-1">
-                              <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-0.5">Category Workspace</span>
-                              <h5 className="font-serif font-extrabold text-slate-800 text-xs flex items-center gap-1.5 min-w-0 leading-none">
+                              <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 block mb-0.5">Category Workspace</span>
+                              <h5 className="font-serif font-extrabold text-slate-800 dark:text-white text-xs flex items-center gap-1.5 min-w-0 leading-none">
                                 <span className="truncate max-w-[130px] xs:max-w-[180px] sm:max-w-[280px] md:max-w-none block">
                                   {activeCat.name}
                                 </span>
@@ -7472,7 +7471,7 @@ JSON structure:
                                     setEditingFormulaCatId(activeCat.id);
                                     setEditingFormulaCatName(activeCat.name);
                                   }}
-                                  className="text-slate-400 hover:text-amber-650 transition-colors p-1 rounded hover:bg-slate-150 shrink-0 cursor-pointer"
+                                  className="text-slate-400 hover:text-amber-650 dark:hover:text-amber-400 transition-colors p-1 rounded hover:bg-slate-150 dark:hover:bg-slate-800 shrink-0 cursor-pointer"
                                   title="Rename Category"
                                 >
                                   <Edit3 className="w-3 h-3" />
@@ -7487,22 +7486,22 @@ JSON structure:
                       <div className="flex items-center gap-1 shrink-0">
                         <button
                           onClick={() => handleMoveFormulaCategory(activeCat.id, 'up')}
-                          className="p-1.5 bg-white border border-slate-200 text-slate-400 hover:text-slate-700 hover:border-slate-350 rounded-lg transition-all cursor-pointer active:scale-90"
+                          className="p-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white rounded-lg transition-all cursor-pointer active:scale-90"
                           title="Move Left/Up"
                         >
                           <ArrowLeft className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleMoveFormulaCategory(activeCat.id, 'down')}
-                          className="p-1.5 bg-white border border-slate-200 text-slate-400 hover:text-slate-700 hover:border-slate-350 rounded-lg transition-all cursor-pointer active:scale-90"
+                          className="p-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white rounded-lg transition-all cursor-pointer active:scale-90"
                           title="Move Right/Down"
                         >
                           <ArrowRight className="w-3.5 h-3.5" />
                         </button>
-                        <div className="w-px h-4 bg-slate-200 mx-0.5 shrink-0" />
+                        <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-0.5 shrink-0" />
                         <button
                           onClick={() => handleDeleteFormulaCategory(activeCat.id)}
-                          className="p-1.5 bg-red-50 border border-red-200 hover:bg-red-500 hover:border-red-500 hover:text-white text-red-500 rounded-lg transition-all cursor-pointer active:scale-90"
+                          className="p-1.5 bg-red-50 dark:bg-rose-950/60 border border-red-200 dark:border-rose-800 hover:bg-red-500 hover:border-red-500 hover:text-white text-red-500 dark:text-rose-400 rounded-lg transition-all cursor-pointer active:scale-90"
                           title="Delete Category"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -7527,7 +7526,7 @@ JSON structure:
 
               if (formulaCategories.length === 0) {
                 return (
-                  <div className="relative py-14 px-6 text-center bg-slate-50 border border-slate-200/60 rounded-[2rem] space-y-6 overflow-hidden shadow-2xl">
+                  <div className="relative py-14 px-6 text-center bg-slate-50 dark:bg-[#060B16] border border-slate-200/60 dark:border-slate-800 rounded-[2rem] space-y-6 overflow-hidden shadow-2xl">
                     {/* Ambient background glow */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none" />
                     
@@ -7546,7 +7545,7 @@ JSON structure:
                       <motion.div 
                         animate={{ y: [4, -4, 4], rotate: [-8, -6, -8] }}
                         transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                        className="absolute w-12 h-16 bg-slate-50 border border-slate-200/50 rounded-xl shadow-lg transform origin-bottom"
+                        className="absolute w-12 h-16 bg-slate-50 dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700 rounded-xl shadow-lg transform origin-bottom"
                       />
                       {/* Middle Card */}
                       <motion.div 
@@ -7560,15 +7559,15 @@ JSON structure:
                         transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
                         className="absolute w-12 h-16 bg-[#0c1020] border border-indigo-500/30 rounded-xl shadow-2xl flex items-center justify-center z-10"
                       >
-                        <Award className="w-5 h-5 text-indigo-650 animate-pulse" />
+                        <Award className="w-5 h-5 text-indigo-650 dark:text-indigo-400 animate-pulse" />
                       </motion.div>
                     </div>
 
                     <div className="space-y-2 max-w-xs mx-auto relative z-10">
-                      <h5 className="font-serif font-black text-lg text-slate-800 tracking-tight font-black">
+                      <h5 className="font-serif font-black text-lg text-slate-800 dark:text-white tracking-tight">
                         Your Shortcut Deck is empty
                       </h5>
-                      <p className="text-slate-500 text-xs font-semibold leading-relaxed">
+                      <p className="text-slate-500 dark:text-slate-400 text-xs font-semibold leading-relaxed">
                         Build your personalized formula compiler. Create categories like "Math", "History", or "Polity" to get started.
                       </p>
                     </div>
@@ -7586,7 +7585,7 @@ JSON structure:
 
               if (!activeFormulaCatId) {
                 return (
-                  <div className="py-8 text-center text-slate-500 text-xs font-bold">
+                  <div className="py-8 text-center text-slate-500 dark:text-slate-400 text-xs font-bold">
                     Select a category tab above to view formulas.
                   </div>
                 );
@@ -7594,10 +7593,10 @@ JSON structure:
 
               if (filtered.length === 0) {
                 return (
-                  <div className="py-12 text-center border border-dashed border-slate-200/50 rounded-2xl space-y-2">
-                    <Award className="w-8 h-8 text-slate-600 mx-auto" />
-                    <p className="text-slate-500 text-xs font-bold">This category is empty.</p>
-                    <p className="text-slate-500 text-[10px] max-w-[200px] mx-auto leading-relaxed">
+                  <div className="py-12 text-center border border-dashed border-slate-200/50 dark:border-slate-800 rounded-2xl space-y-2">
+                    <Award className="w-8 h-8 text-slate-600 dark:text-slate-500 mx-auto" />
+                    <p className="text-slate-500 dark:text-slate-400 text-xs font-bold">This category is empty.</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-[10px] max-w-[200px] mx-auto leading-relaxed">
                       Click "Add Formula" above to start custom compiling your own formulas, shortcuts, and grammar rules.
                     </p>
                   </div>
@@ -7614,42 +7613,42 @@ JSON structure:
                       return (
                         <div 
                           key={card.id} 
-                          className="p-4 bg-slate-50 border border-indigo-500/30 rounded-2xl space-y-3.5 text-left animate-fade-in shadow-2xs"
+                          className="p-4 bg-slate-50 dark:bg-[#060B16] border border-indigo-500/30 rounded-2xl space-y-3.5 text-left animate-fade-in shadow-2xs"
                         >
                           <div className="space-y-1.5">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 block px-1">Rename Title</label>
+                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block px-1">Rename Title</label>
                             <input
                               type="text"
                               value={editingFormulaTitle}
                               onChange={(e) => setEditingFormulaTitle(e.target.value)}
-                              className="w-full bg-white border border-slate-200/60 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 font-semibold"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/40 font-semibold"
                             />
                           </div>
                           <div className="space-y-1.5">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 block px-1">Formula</label>
+                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block px-1">Formula</label>
                             <input
                               type="text"
                               value={editingFormulaVal}
                               onChange={(e) => setEditingFormulaVal(e.target.value)}
-                              className="w-full bg-white border border-slate-200/60 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 font-semibold"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/40 font-semibold"
                             />
                           </div>
                           <div className="space-y-1.5">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 block px-1">Trick / Shortcut</label>
+                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block px-1">Trick / Shortcut</label>
                             <input
                               type="text"
                               value={editingFormulaShortcut}
                               onChange={(e) => setEditingFormulaShortcut(e.target.value)}
-                              className="w-full bg-white border border-slate-200/60 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 font-semibold"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/40 font-semibold"
                             />
                           </div>
                           <div className="space-y-1.5">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 block px-1">Example</label>
+                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block px-1">Example</label>
                             <input
                               type="text"
                               value={editingFormulaExample}
                               onChange={(e) => setEditingFormulaExample(e.target.value)}
-                              className="w-full bg-white border border-slate-200/60 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 font-semibold"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/40 font-semibold"
                             />
                           </div>
                           <div className="flex gap-2 pt-1">
@@ -7664,7 +7663,7 @@ JSON structure:
                                 setEditingFormulaKey(null);
                                 setEditingFormulaIndex(null);
                               }}
-                              className="px-4 py-2 border border-slate-200/60 hover:bg-slate-100 text-slate-400 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer active:scale-95"
+                              className="px-4 py-2 border border-slate-200/60 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 rounded-lg text-[10px] font-black uppercase tracking-widest cursor-pointer active:scale-95"
                             >
                               Cancel
                             </button>
@@ -7682,10 +7681,10 @@ JSON structure:
                           "border rounded-2xl text-left transition-all duration-200 relative overflow-hidden shadow-3xs cursor-pointer",
                           flashcardMode 
                             ? isRevealed 
-                              ? "bg-slate-50 border-indigo-500/25" 
+                              ? "bg-slate-50 dark:bg-[#060B16]/90 border-indigo-500/25" 
                               : "bg-indigo-950/20 border-indigo-500/10 hover:bg-indigo-950/30"
-                            : "bg-slate-50/50 border-slate-200/50 hover:border-slate-200/80",
-                          isExpanded ? "p-3.5 gap-3 bg-white ring-1 ring-slate-100" : "p-3 gap-0"
+                            : "bg-slate-50/50 dark:bg-[#060B16]/80 border-slate-200/50 dark:border-slate-800 hover:border-slate-200/80 dark:hover:border-slate-700",
+                          isExpanded ? "p-3.5 gap-3 bg-white dark:bg-[#0B1528] ring-1 ring-slate-100 dark:ring-slate-800" : "p-3 gap-0"
                         )}
                         onClick={() => {
                           if (flashcardMode && !isRevealed) {
@@ -7697,13 +7696,13 @@ JSON structure:
                       >
                         <div className="flex items-start justify-between gap-3 min-w-0">
                           <div className="space-y-0.5 pr-2 truncate min-w-0 flex-1">
-                            <span className="text-[10.5px] sm:text-[9px] font-black uppercase tracking-wider text-indigo-650">
+                            <span className="text-[10.5px] sm:text-[9px] font-black uppercase tracking-wider text-indigo-650 dark:text-indigo-300">
                               {card.title}
                             </span>
                             
                             {/* Fast preview of formula content */}
                             {!isExpanded && isRevealed && (
-                              <div className="font-mono text-[10.5px] font-semibold text-slate-500 truncate block mt-0.5 max-w-[190px] xs:max-w-[240px] sm:max-w-none">
+                              <div className="font-mono text-[10.5px] font-semibold text-slate-500 dark:text-slate-400 truncate block mt-0.5 max-w-[190px] xs:max-w-[240px] sm:max-w-none">
                                 {card.formula}
                               </div>
                             )}
@@ -7712,7 +7711,7 @@ JSON structure:
                           {/* Collapse chevron */}
                           <div className="flex items-center gap-1.5 shrink-0 pt-0.5" onClick={(e) => e.stopPropagation()}>
                             {flashcardMode && isRevealed && (
-                              <span className="text-[8px] font-black uppercase tracking-wider text-slate-400 bg-white border border-slate-200 px-1.5 py-0.5 rounded-md leading-none">Revealed</span>
+                              <span className="text-[8px] font-black uppercase tracking-wider text-slate-400 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded-md leading-none">Revealed</span>
                             )}
                             <ChevronDown className={cn("w-4 h-4 text-slate-400 transition-transform duration-300", isExpanded && "rotate-180")} />
                           </div>
@@ -7721,35 +7720,35 @@ JSON structure:
                         {/* Card Content display */}
                         <div className="mt-2.5 space-y-2 relative" onClick={(e) => e.stopPropagation()}>
                           {flashcardMode && !isRevealed ? (
-                            <div className="py-4 flex flex-col items-center justify-center text-[10px] font-black uppercase tracking-widest text-indigo-650/80">
+                            <div className="py-4 flex flex-col items-center justify-center text-[10px] font-black uppercase tracking-widest text-indigo-650/80 dark:text-indigo-400">
                               <span>❓ Tap Card to Reveal Formula</span>
                             </div>
                           ) : (
                             isExpanded && (
                               <div className="space-y-3.5 animate-fade-in">
-                                <div className="font-mono text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200/50 p-2.5 rounded-lg leading-relaxed overflow-x-auto custom-scrollbar">
+                                <div className="font-mono text-xs font-bold text-slate-800 dark:text-white bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 p-2.5 rounded-lg leading-relaxed overflow-x-auto custom-scrollbar">
                                   <FormulaRenderer formula={card.formula} />
                                 </div>
                                 {card.shortcut && (
-                                  <p className="text-slate-500 text-xs sm:text-[10px] font-semibold leading-relaxed">
-                                    <span className="font-extrabold text-slate-800">Trick:</span> {card.shortcut}
+                                  <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-[10px] font-semibold leading-relaxed">
+                                    <span className="font-extrabold text-slate-800 dark:text-white">Trick:</span> {card.shortcut}
                                   </p>
                                 )}
                                 {card.example && (
-                                  <p className="text-slate-500 text-xs sm:text-[10px] font-semibold leading-relaxed">
-                                    <span className="font-extrabold text-slate-500">e.g.,</span> {card.example}
+                                  <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-[10px] font-semibold leading-relaxed">
+                                    <span className="font-extrabold text-slate-500 dark:text-slate-400">e.g.,</span> {card.example}
                                   </p>
                                 )}
 
-                                <div className="border-t border-slate-100 my-1" />
+                                <div className="border-t border-slate-100 dark:border-slate-800 my-1" />
 
                                 {/* Action Buttons Toolbar */}
-                                <div className="flex items-center justify-between gap-3 bg-slate-50 border border-slate-200/50 rounded-xl p-2">
+                                <div className="flex items-center justify-between gap-3 bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-xl p-2">
                                   <div className="flex items-center gap-0.5">
                                     {/* Copy button */}
                                     <button
                                       onClick={() => handleCopyShortcut(card)}
-                                      className="p-1.5 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-white transition-colors cursor-pointer border border-transparent hover:border-slate-200/40"
+                                      className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors cursor-pointer border border-transparent hover:border-slate-200/40"
                                       title="Copy shortcut"
                                     >
                                       <Copy className="w-3.5 h-3.5" />
@@ -7765,7 +7764,7 @@ JSON structure:
                                         setEditingFormulaShortcut(card.shortcut);
                                         setEditingFormulaExample(card.example);
                                       }}
-                                      className="p-1.5 text-slate-500 hover:text-amber-650 rounded-lg hover:bg-white transition-colors cursor-pointer border border-transparent hover:border-slate-200/40"
+                                      className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-amber-650 dark:hover:text-amber-400 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors cursor-pointer border border-transparent hover:border-slate-200/40"
                                       title="Edit formula"
                                     >
                                       <Edit3 className="w-3.5 h-3.5" />
@@ -7774,7 +7773,7 @@ JSON structure:
                                     {/* Delete button */}
                                     <button
                                       onClick={() => handleDeleteFormula(activeFormulaCatId, card.id)}
-                                      className="p-1.5 text-slate-500 hover:text-red-550 rounded-lg hover:bg-white transition-colors cursor-pointer border border-transparent hover:border-slate-200/40"
+                                      className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-red-550 dark:hover:text-rose-400 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors cursor-pointer border border-transparent hover:border-slate-200/40"
                                       title="Delete formula"
                                     >
                                       <Trash2 className="w-3.5 h-3.5" />
@@ -7784,7 +7783,7 @@ JSON structure:
                                   {/* Practice button */}
                                   <button
                                     onClick={() => handlePracticeFormula(card.title, `${card.formula} | ${card.shortcut}`)}
-                                    className="py-1.5 px-3 bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-650 hover:text-white text-indigo-650 text-[10px] font-black uppercase tracking-wider rounded-lg transition-colors cursor-pointer active:translate-y-0.5 shadow-2xs border-none"
+                                    className="py-1.5 px-3 bg-indigo-500/10 dark:bg-indigo-950/60 border border-indigo-500/20 dark:border-indigo-800 hover:bg-indigo-650 hover:text-white text-indigo-650 dark:text-indigo-300 text-[10px] font-black uppercase tracking-wider rounded-lg transition-colors cursor-pointer active:translate-y-0.5 shadow-2xs border-none"
                                   >
                                     Practice This
                                   </button>
@@ -7793,7 +7792,7 @@ JSON structure:
                                 {flashcardMode && (
                                   <button
                                     onClick={() => toggleFlashcardReveal(card.title)}
-                                    className="text-[9px] font-black uppercase text-indigo-650 hover:text-indigo-300 block pt-1 cursor-pointer"
+                                    className="text-[9px] font-black uppercase text-indigo-650 dark:text-indigo-400 hover:text-indigo-300 block pt-1 cursor-pointer"
                                   >
                                     🙈 Hide card details
                                   </button>
@@ -7814,7 +7813,7 @@ JSON structure:
           </div>
 
           {/* Bottom Gradient Fade for Scroll Affordance on Mobile */}
-          <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-white via-white/85 to-transparent pointer-events-none z-20 rounded-b-[2rem] lg:hidden" />
+          <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-white via-white/85 to-transparent dark:from-[#0B1528] dark:via-[#0B1528]/85 pointer-events-none z-20 rounded-b-[2rem] lg:hidden" />
 
         </div>
 

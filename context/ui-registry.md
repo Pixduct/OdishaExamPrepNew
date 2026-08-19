@@ -74,6 +74,9 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`ContinuePracticeSliderCard`** | Data Display / Slider | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L8124-L8180) | Horizontal Snap-Scroll Slider Card, Progress Bar, Resume Trigger | App.tsx (Home) | Active |
 | **`RecentActivitySliderCard`** | Data Display / Slider | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L8269-L8310) | Horizontal Snap-Scroll Slider Card, Score Chip, Activity Detail Trigger | App.tsx (Home) | Active |
 | **`InteractiveHeroDemoCard`** | Interactive / CBT Hero | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L2618-L3370) | Live Interactive CBT Mock Question Demo, Option Selector, 3D Vector Shell | App.tsx (Hero) | Active |
+| **`ActiveExamContextBar`** | Form / Context | [`src/components/ActiveExamContextBar.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/ActiveExamContextBar.tsx) | Dual-Theme Deep Sapphire Bar, Pulse Indicator, Switch Modal Trigger | StudyPlanView.tsx, AnalyticsView.tsx | Active |
+| **`ExamContextSelectorModal`** | Overlay / Modal | [`src/components/ExamContextSelectorModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/ExamContextSelectorModal.tsx) | Dual-Theme Exam Picker Modal with Search & Category Filtering | ActiveExamContextBar.tsx, App.tsx | Active |
+| **`AiMentorWorkspace`** | AI / Workspace | [`src/pages/AiMentor.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/AiMentor.tsx) | 4-Tab Suite (Planner/Timer, Quizzer, Syllabus, Shortcuts) with Dark Sapphire Theme | Router (`/ai-mentor`) | Active |
 
 ---
 

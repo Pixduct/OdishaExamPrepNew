@@ -2302,3 +2302,30 @@ Last updated: August 19, 2026
 **Pattern notes:**
 - **Parent Row Viewport Clearance**: The parent hero container (`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10`) must NOT apply `overflow-hidden`, giving full vertical clearance for 3D perspective tilt and neo-brutalist 8px drop-shadows.
 
+---
+
+### 57. `AiMentorWorkspace` (Deep Sapphire & Dual-Theme AI Suite)
+
+File: [`src/pages/AiMentor.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/AiMentor.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Workspace Shell Container** | `min-h-screen bg-[#FBF9F6] dark:bg-[#060B16] text-slate-900 dark:text-white font-sans antialiased relative isolation-isolate` |
+| **Vector Ambient Canvas** | `bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#1e293b_1.2px,transparent_1.2px)] [background-size:20px_20px]` |
+| **Ambient Glow Orbs** | `bg-brand-300/20 dark:bg-brand-600/10` and `bg-indigo-200/15 dark:bg-indigo-900/10` |
+| **Left Chat Navigation Pane** | `bg-white/90 dark:bg-[#0B1528] border-r border-slate-200/80 dark:border-slate-800/90 shadow-sm` |
+| **Chat Message Bubbles (AI)** | `bg-white dark:bg-[#0F1B33] border border-slate-200/80 dark:border-slate-800/80 text-slate-800 dark:text-slate-100 shadow-sm rounded-2xl` |
+| **Chat Message Bubbles (User)** | `bg-gradient-to-br from-brand-600 to-brand-700 text-white rounded-2xl shadow-md shadow-brand-500/20` |
+| **Focus Boards & Analytics HUD**| `bg-white dark:bg-[#0D182E] border border-slate-200/80 dark:border-slate-800/90 rounded-2xl shadow-sm` |
+| **Tab 1: Pomodoro & Roadmap** | Timer: Circular SVG (`stroke-brand-600 dark:stroke-brand-400`), `dark:bg-[#0B1528]`; Roadmap: `dark:bg-[#0D182E] dark:border-slate-800` |
+| **Tab 2: AI MCQ Quizzer Cards** | Card: `dark:bg-[#0D182E] dark:border-slate-800`; Option Pills: `dark:bg-[#080F1E] dark:border-slate-800/80 dark:text-slate-200 hover:dark:bg-[#132240]` |
+| **Tab 3: Syllabus Workspace** | Collection Cards & Toolbars: `dark:bg-[#0D182E] dark:border-slate-800 dark:text-white`; Badges: `dark:bg-brand-950/60 dark:text-brand-300` |
+| **Tab 4: Formula Deck & KaTeX** | Formula Cards & Memory Deck: `dark:bg-[#0D182E] dark:border-slate-800`; Flashcard: `dark:bg-[#080F1E] dark:border-slate-700/80` |
+| **Floating Vector Watermarks** | `Sparkles`, `Cpu`, `Brain`, `Target` at `opacity-[0.08] dark:opacity-[0.04]` |
+
+**Pattern notes:**
+- **Deep Sapphire Dark Palette**: All AI Mentor workspaces, modals, quizzer cards, and toolbars MUST use `#060B16` (page shell), `#0B1528` (sidebars & headers), and `#0D182E` (cards & panels) to maintain 100% OLED dark mode contrast without metallic grey artifacts.
+- **Dual-Theme High Contrast**: Text elements MUST pair pure white (`dark:text-white`), slate-200 (`dark:text-slate-200`), and slate-400 (`dark:text-slate-400`) with subtle dark borders (`dark:border-slate-800`) to guarantee effortless readability across both light and dark themes.
+
+

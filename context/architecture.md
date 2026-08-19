@@ -405,7 +405,7 @@ CREATE TABLE public.push_notifications (
 Repository: `https://github.com/Pixduct/odisha-mcq-engine.git` (`automations/`)
 
 ### 1. Daily 5-MCQ Quiz Set Engine (`automations/mcq_engine.py`)
-- **Execution Schedule:** Off-Peak Green Zone `04:17 UTC` (9:47 AM IST) on GitHub Actions (`daily_mcq.yml`). Announced at **10:00 AM IST**.
+- **Execution Schedule:** Twice-Daily Green Zone at `04:27 UTC` (9:57 AM IST) and `12:37 UTC` (6:07 PM IST) on GitHub Actions (`daily_mcq.yml`).
 - **Poll Indexing:** Poll questions indexed `[1/5]`, `[2/5]`, `[3/5]`, `[4/5]`, `[5/5]`.
 - **Conversion CTA:** Includes explanation CTA bubble driving traffic to `https://www.odishaexamprep.in/`.
 - **Student Promotion Banner:** Sends Daily Completion Banner attached with **7-Day Rotational Student Promotion Photos** (`student 1.png` - `student 7.png`).

@@ -1,6 +1,7 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] Daily MCQ Engine Twice-Daily Green Zone Scheduling (`04:27 UTC` / 9:57 AM IST & `12:37 UTC` / 6:07 PM IST) with Automated Telegram Admin Failure Alerts (`automations/.github/workflows/daily_mcq.yml`)
 - [x] Unrestricted All-Inclusive Exam Boards (All Odisha & National/Central Recruitment Bodies) & Domain Classification Training (`automations/ca_formatter.py`, `automations/ca_renderer.py`)
 - [x] Exam Relevance Filter (No Trivial Local Crimes), Redundancy Elimination Gate & 3 High-Value Bullets Engine (`automations/ca_formatter.py`, `automations/ca_website_publisher.py`)
 - [x] Executive Blog Typography Engine, Responsive Card Tables & High-Readability DOM Processor (`src/index.css`, `src/pages/BlogPost.tsx`)

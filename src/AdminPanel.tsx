@@ -2670,16 +2670,107 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
               </div>
 
               {/* Subtitle / Topics */}
-              <div className="space-y-2">
-                <label className={labelClass}>Topic / Subject Subtitle</label>
-                <input 
-                  type="text" 
-                  value={formData.tagline} 
-                  onChange={e => setFormData({ ...formData, tagline: e.target.value })} 
-                  className={inputClass} 
-                  placeholder="e.g. Fundamental Rights, DPSP, Judiciary & Amendments (500 High-Yield MCQs)" 
-                />
-              </div>
+              {(() => {
+                const CATEGORY_TAGLINE_PRESETS: Record<string, { label: string; value: string }[]> = {
+                  'topic-wise': [
+                    { label: 'Chapter-Wise High-Yield MCQs & Explanations', value: 'Chapter-Wise High-Yield MCQs & Explanations' },
+                    { label: 'Concept Mastery & Topic Practice Drill', value: 'Concept Mastery & Topic Practice Drill' },
+                    { label: 'Complete Chapter Revision & Formula Drills', value: 'Complete Chapter Revision & Formula Drills' },
+                    { label: 'Comprehensive Subject & Topic Test Series', value: 'Comprehensive Subject & Topic Test Series' },
+                  ],
+                  'exam-focused': [
+                    { label: 'Most Expected Questions for Upcoming Exam', value: 'Most Expected Questions for Upcoming Exam' },
+                    { label: 'High-Weightage Core Topics Mastery', value: 'High-Weightage Core Topics Mastery' },
+                    { label: 'Exam Pattern Mock Drills & Speed Booster', value: 'Exam Pattern Mock Drills & Speed Booster' },
+                    { label: 'Target Score Booster & Critical Concepts', value: 'Target Score Booster & Critical Concepts' },
+                  ],
+                  'revision-sets': [
+                    { label: 'Daily Speed Drill & Quick Accuracy Booster', value: 'Daily Speed Drill & Quick Accuracy Booster' },
+                    { label: 'Timed Daily Practice & Rapid Revision', value: 'Timed Daily Practice & Rapid Revision' },
+                    { label: '15-Min Daily Challenge & Instant Rank', value: '15-Min Daily Challenge & Instant Rank' },
+                    { label: 'Daily Warmup Quiz for Exam Readiness', value: 'Daily Warmup Quiz for Exam Readiness' },
+                  ],
+                  'pyq-collections': [
+                    { label: 'Previous Years Solved Questions (PYQ) with Solutions', value: 'Previous Years Solved Questions (PYQ) with Solutions' },
+                    { label: '10-Year Trend Analysis & Official PYQ Breakdown', value: '10-Year Trend Analysis & Official PYQ Breakdown' },
+                    { label: 'Topic-Wise Past Exam MCQs & Detailed Explanations', value: 'Topic-Wise Past Exam MCQs & Detailed Explanations' },
+                    { label: 'Authentic Exam Board Questions & Model Answers', value: 'Authentic Exam Board Questions & Model Answers' },
+                  ],
+                  'general': [
+                    { label: '500+ High-Yield MCQs with Step-by-Step Solutions', value: '500+ High-Yield MCQs with Step-by-Step Solutions' },
+                    { label: 'Complete Syllabus Practice & Speed Drill', value: 'Complete Syllabus Practice & Speed Drill' },
+                    { label: 'Topic Concepts & Standard Exam Drills', value: 'Topic Concepts & Standard Exam Drills' },
+                  ]
+                };
+
+                const currentType = formData.type || 'topic-wise';
+                const categoryPresets = CATEGORY_TAGLINE_PRESETS[currentType] || [];
+                const generalPresets = CATEGORY_TAGLINE_PRESETS['general'] || [];
+                const allPresets = [...categoryPresets, ...generalPresets];
+                const presetValues = allPresets.map(p => p.value);
+                const isPreset = presetValues.includes(formData.tagline);
+                const selectedSelectValue = isPreset ? formData.tagline : (formData.tagline ? '__custom__' : '');
+
+                return (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className={labelClass}>Topic / Subject Subtitle</label>
+                      {formData.tagline && (
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, tagline: '' })}
+                          className="text-[11px] font-bold text-slate-400 hover:text-red-500 transition-colors"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <div className={selectWrapperClass}>
+                        <select 
+                          value={selectedSelectValue}
+                          onChange={e => {
+                            const val = e.target.value;
+                            if (val === '__custom__') {
+                              if (isPreset) {
+                                setFormData({ ...formData, tagline: '' });
+                              }
+                            } else {
+                              setFormData({ ...formData, tagline: val });
+                            }
+                          }}
+                          className={selectClass}
+                        >
+                          <option value="">-- Choose Pre-made CTA Subtitle or Custom --</option>
+                          <optgroup label="✨ Category-Recommended Taglines">
+                            {categoryPresets.map(p => (
+                              <option key={p.value} value={p.value}>{p.label}</option>
+                            ))}
+                          </optgroup>
+                          <optgroup label="🌟 General / Popular CTA Taglines">
+                            {generalPresets.map(p => (
+                              <option key={p.value} value={p.value}>{p.label}</option>
+                            ))}
+                          </optgroup>
+                          <option value="__custom__">✏️ + Enter Custom Subtitle / Topic List...</option>
+                        </select>
+                        <ChevronDown className="w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+
+                      {/* Render text input if Custom is selected or when a custom subtitle is active */}
+                      {(!isPreset || selectedSelectValue === '__custom__') && (
+                        <input 
+                          type="text" 
+                          value={formData.tagline} 
+                          onChange={e => setFormData({ ...formData, tagline: e.target.value })} 
+                          className={inputClass} 
+                          placeholder="e.g. Fundamental Rights, DPSP, Judiciary & Amendments (500 High-Yield MCQs)" 
+                        />
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Category */}
               <div className="space-y-2">

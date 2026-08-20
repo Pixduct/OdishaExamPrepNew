@@ -42,9 +42,9 @@ export const PersonalBestCard: React.FC<PersonalBestCardProps> = ({ userId }) =>
 
   return (
     <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.28)">
-      <div className="p-5 sm:p-7 text-slate-900 dark:text-white rounded-[2.2rem] bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl border-none shadow-xl shadow-slate-900/10 space-y-4 relative group">
+      <div className="p-3.5 sm:p-7 text-slate-900 dark:text-white rounded-2xl sm:rounded-[2.2rem] bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl border-none shadow-xl shadow-slate-900/10 space-y-3.5 sm:space-y-4 relative group">
         {/* Inner Watermark & Grid Background Wrapper */}
-        <div className="absolute inset-0 overflow-hidden rounded-[2.2rem] pointer-events-none z-0">
+        <div className="absolute inset-0 overflow-hidden rounded-2xl sm:rounded-[2.2rem] pointer-events-none z-0">
           <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-10" />
           <Trophy className="absolute -right-8 -bottom-8 w-52 h-52 opacity-10 dark:opacity-15 stroke-[1.2] text-[#2563eb] dark:text-amber-300 transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
         </div>

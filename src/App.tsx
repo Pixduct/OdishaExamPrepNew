@@ -88,6 +88,7 @@ import { stagger } from './lib/animations';
 import { StudyPlanView } from './StudyPlanView';
 import { useActiveExamContext } from './lib/activeExamStore';
 import { ActiveExamContextBar } from './components/ActiveExamContextBar';
+import { useTheme } from './lib/themeStore';
 import { getInstantQuestionsForTopic } from './lib/instantQuestionCompiler';
 import { examService } from './lib/examService';
 import { ThemeToggle } from './components/ThemeToggle';
@@ -430,21 +431,23 @@ const HistoryView = ({
 
         <div className="w-full mx-auto space-y-6 relative z-10">
           <ActiveExamContextBar />
-          <div className="flex flex-col items-center justify-center p-12 sm:p-16 text-center space-y-6 bg-gradient-to-b from-white to-slate-50/40 dark:bg-slate-900 rounded-[2.5rem] border border-slate-200/40 dark:border-slate-800 shadow-xl relative overflow-hidden py-16">
-            <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none" />
-            <div className="relative flex items-center justify-center w-24 h-24 rounded-full bg-brand-50/50 mb-2">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-100 to-brand-50 flex items-center justify-center shadow-inner">
-                <History className="w-8 h-8 text-brand-600 animate-float-sm" />
-              </div>
+          <div className="flex flex-col items-center justify-center p-8 sm:p-16 text-center space-y-6 bg-white dark:bg-[#0B1528] rounded-2xl sm:rounded-[2.5rem] border border-slate-200/80 dark:border-slate-800 shadow-2xl dark:shadow-slate-950/80 relative overflow-hidden py-12 sm:py-16">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/10 dark:bg-blue-500/10 blur-[80px] rounded-full pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none" />
+
+            <div className="relative flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl bg-slate-100 dark:bg-[#060B16] border border-slate-200/80 dark:border-slate-800 shadow-inner mb-2">
+              <History className="w-8 h-8 sm:w-10 sm:h-10 text-brand-600 dark:text-blue-400 animate-float-sm" />
             </div>
-            <div className="space-y-2 relative z-10 max-w-sm">
-              <h2 className="text-2xl font-serif font-extrabold bg-gradient-to-r from-brand-700 to-brand-500 dark:from-brand-300 dark:to-indigo-300 bg-clip-text text-transparent">
+
+            <div className="space-y-3 relative z-10 max-w-sm sm:max-w-md mx-auto">
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                 {t('history.empty.title', 'No History For This Exam')}
               </h2>
-              <p className="text-slate-500 dark:text-slate-400 font-semibold text-xs sm:text-sm leading-relaxed">
+              <p className="text-slate-600 dark:text-slate-300 font-medium text-xs sm:text-sm leading-relaxed">
                 {t('history.empty.description', `No test attempts recorded under ${activeContext.activeExamName}. Switch to "All Exams Combined" or take a test for this target exam.`, { exam: activeContext.activeExamName })}
               </p>
             </div>
+
             <button
               onClick={() => {
                 if (onNavigate) {
@@ -456,7 +459,7 @@ const HistoryView = ({
                   scrollToElement('exams', { block: 'start' });
                 }
               }}
-              className="relative z-10 premium-gradient text-white flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-widest hover:premium-glow hover:scale-[1.02] active:scale-98 transition-all duration-300 shadow-md cursor-pointer border-none"
+              className="relative z-10 px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs sm:text-sm rounded-2xl shadow-xl shadow-blue-600/25 hover:shadow-blue-600/40 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer flex items-center gap-2"
             >
               {t('common.actions.exploreExams', 'Explore Mock Tests')}
             </button>
@@ -485,7 +488,7 @@ const HistoryView = ({
         variants={stagger.containerDelay(0.1, 0.1)}
         initial="hidden"
         animate="show"
-        className="w-full mx-auto space-y-6 sm:space-y-8 pb-32 sm:pb-24 relative z-10"
+        className="w-full mx-auto space-y-4 sm:space-y-8 pb-4 sm:pb-8 relative z-10"
       >
         {/* Executive Bright Study Vector Header Card */}
         <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.30)">
@@ -564,7 +567,7 @@ const HistoryView = ({
           ];
           return (
             <div 
-              className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1"
+              className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5"
             >
               {filters.map(f => {
                 const count = filterCounts[f.id];
@@ -576,7 +579,7 @@ const HistoryView = ({
                     disabled={count === 0}
                     whileTap={count > 0 ? { scale: 0.94 } : undefined}
                     className={cn(
-                      "relative flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black whitespace-nowrap border shrink-0 overflow-hidden transition-all duration-200 shadow-2xs",
+                      "relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-xl sm:rounded-2xl text-[10.5px] sm:text-xs font-black whitespace-nowrap border shrink-0 overflow-hidden transition-all duration-200 shadow-2xs",
                       isActive
                         ? "text-white border-brand-600 shadow-md shadow-brand-500/20"
                         : count === 0
@@ -591,11 +594,11 @@ const HistoryView = ({
                         transition={{ type: 'spring', stiffness: 400, damping: 30, mass: 0.8 }}
                       />
                     )}
-                    <span className="relative z-10 flex items-center gap-2">
-                      {f.icon}
+                    <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
+                      <span className="[&>svg]:w-3 [&>svg]:h-3 sm:[&>svg]:w-3.5 sm:[&>svg]:h-3.5 shrink-0">{f.icon}</span>
                       <span className="uppercase tracking-wider font-mono">{f.label}</span>
                       <span className={cn(
-                        "px-2 py-0.5 rounded-md text-[10px] font-mono font-black min-w-[20px] text-center",
+                        "px-1.5 sm:px-2 py-0.5 rounded sm:rounded-md text-[9px] sm:text-[10px] font-mono font-black min-w-[16px] sm:min-w-[20px] text-center",
                         isActive ? "bg-white/25 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
                       )}>{count}</span>
                     </span>
@@ -659,8 +662,14 @@ const HistoryView = ({
                         ? `Mock Test #${a.title}`
                         : a.title;
 
+                    const cardGlow =
+                      a.type === 'test_incomplete' ? 'rgba(245, 158, 11, 0.28)' :
+                      isAiQuiz ? 'rgba(168, 85, 247, 0.28)' :
+                      isDownloadable ? 'rgba(37, 99, 235, 0.28)' :
+                      'rgba(16, 185, 129, 0.28)';
+
                     return (
-                      <DynamicVectorCard key={a.id || i} glowColor="rgba(37, 99, 235, 0.28)" className="w-full">
+                      <DynamicVectorCard key={a.id || i} glowColor={cardGlow} className="w-full">
                         <motion.div
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -676,7 +685,15 @@ const HistoryView = ({
                           }}
                           className={cn(
                             "relative overflow-hidden bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2.5rem] p-4 sm:p-6 shadow-lg shadow-slate-200/50 dark:shadow-none border border-slate-200/80 dark:border-slate-800 flex flex-col gap-3 sm:gap-4 group transition-all duration-300 text-slate-900 dark:text-white",
-                            isInteractive ? "cursor-pointer hover:border-brand-300 dark:hover:border-slate-700" : ""
+                            isInteractive
+                              ? a.type === 'test_incomplete'
+                                ? "cursor-pointer hover:border-amber-300 dark:hover:border-amber-500/40"
+                                : isAiQuiz
+                                  ? "cursor-pointer hover:border-purple-300 dark:hover:border-purple-500/40"
+                                  : isDownloadable
+                                    ? "cursor-pointer hover:border-blue-300 dark:hover:border-blue-500/40"
+                                    : "cursor-pointer hover:border-emerald-300 dark:hover:border-emerald-500/40"
+                              : ""
                           )}
                         >
                           {/* Radial Grid & Floating Background Watermark Icon */}
@@ -733,7 +750,16 @@ const HistoryView = ({
                               </div>
 
                               <div className="min-w-0 flex-1">
-                                <h4 className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-lg leading-snug tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2 uppercase">
+                                <h4 className={cn(
+                                  "font-extrabold text-slate-900 dark:text-white text-sm sm:text-lg leading-snug tracking-tight transition-colors line-clamp-2 uppercase",
+                                  a.type === 'test_incomplete'
+                                    ? "group-hover:text-amber-600 dark:group-hover:text-amber-400"
+                                    : isAiQuiz
+                                      ? "group-hover:text-purple-600 dark:group-hover:text-purple-400"
+                                      : isDownloadable
+                                        ? "group-hover:text-blue-600 dark:group-hover:text-blue-400"
+                                        : "group-hover:text-emerald-600 dark:group-hover:text-emerald-400"
+                                )}>
                                   {titleText}
                                 </h4>
                                 {/* Desktop date shown under title */}
@@ -2392,59 +2418,32 @@ export const Navbar = ({
 
             {/* Mobile Menu Drawer */}
             <motion.div
-              initial={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0, y: -16 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute top-full left-0 right-0 bg-white dark:bg-[#0B1528] border-b border-slate-200/80 dark:border-slate-800 shadow-2xl dark:shadow-slate-950/80 overflow-y-auto overscroll-contain no-scrollbar md:hidden max-h-[calc(100vh-80px)] rounded-b-[2.25rem] z-[60]"
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              className="absolute top-full left-0 right-0 bg-white dark:bg-[#0B1528] border-b border-slate-200/80 dark:border-slate-800 shadow-2xl dark:shadow-slate-950/80 overflow-y-auto overscroll-contain no-scrollbar md:hidden max-h-[calc(100vh-80px)] rounded-b-2xl z-[60]"
               data-lenis-prevent
             >
               {/* Content Container */}
-              <div className="p-4 flex flex-col gap-1.5">
+              <div className="p-3 flex flex-col gap-1">
                 {/* Mobile Drawer Language & Theme Quick Bar */}
-                <div className="p-2.5 rounded-2xl bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/50 mb-2 flex items-center justify-between gap-2">
+                <div className="py-1.5 px-2.5 rounded-xl bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/50 mb-1 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-200">
-                    <Globe className="w-4 h-4 text-[#2563EB]" />
+                    <Globe className="w-3.5 h-3.5 text-[#2563EB]" />
                     <span>{t('nav.language', 'Language')}</span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <LanguageToggle />
                     <ThemeToggle />
                   </div>
                 </div>
 
-                {/* Mobile Drawer Streak Goal Card */}
-                <div 
-                  className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-850 to-amber-950/50 border border-amber-500/30 text-white shadow-md cursor-pointer mb-2 flex items-center justify-between gap-3"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    setIsStreakModalOpen(true);
-                  }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
-                      <Flame className="w-5 h-5 fill-current animate-pulse text-amber-400" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-extrabold text-white">{t('nav.studyStreak', 'Daily Study Streak')}</span>
-                        <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber-500/20 text-amber-300">
-                          {streakState.currentStreak} {t('nav.days', 'Days')}
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-slate-400 font-medium">
-                        Goal: {streakState.todayQuestionsSolved}/20 Qs Solved Today
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-amber-400 shrink-0" />
-                </div>
-
                 {!user && onSignIn && (
-                  <div className="p-3.5 rounded-2xl border-2 border-slate-900 dark:border-slate-700 bg-gradient-to-br from-slate-50 to-white dark:from-[#060B16] dark:to-[#0B1528] shadow-[4px_4px_0px_#0f172a] dark:shadow-[4px_4px_0px_#1e293b] mb-1">
-                    <p className="text-[10px] font-black text-[#2563EB] dark:text-blue-400 uppercase tracking-widest mb-1">{t('nav.welcomeAspirant', 'Welcome Aspirant')}</p>
-                    <h4 className="text-xs font-serif font-black text-slate-800 dark:text-slate-100 mb-3.5 leading-snug">{t('nav.welcomeSubtitle', 'Master the OPSC, OSSC, and OSSSC syllabus with precision-crafted test series.')}</h4>
-                    <Button variant="primary" className="w-full py-2.5 rounded-xl font-black text-[10px] uppercase tracking-wider border-2 border-slate-900 dark:border-slate-700 shadow-[2px_2px_0px_#0f172a] active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" onClick={() => { onSignIn(); setMobileMenuOpen(false); }}>
+                  <div className="p-3 rounded-xl border border-slate-900/20 dark:border-slate-700 bg-gradient-to-br from-slate-50 to-white dark:from-[#060B16] dark:to-[#0B1528] shadow-xs mb-1">
+                    <p className="text-[9px] font-black text-[#2563EB] dark:text-blue-400 uppercase tracking-widest mb-0.5">{t('nav.welcomeAspirant', 'Welcome Aspirant')}</p>
+                    <h4 className="text-xs font-serif font-black text-slate-800 dark:text-slate-100 mb-2 leading-snug">{t('nav.welcomeSubtitle', 'Master the OPSC, OSSC, and OSSSC syllabus with precision-crafted test series.')}</h4>
+                    <Button variant="primary" className="w-full py-2 rounded-lg font-black text-[10px] uppercase tracking-wider shadow-xs active:scale-[0.98] transition-all" onClick={() => { onSignIn(); setMobileMenuOpen(false); }}>
                       {t('nav.signInToAccount', 'Sign In to Account')}
                     </Button>
                   </div>
@@ -2455,7 +2454,7 @@ export const Navbar = ({
                   variants={drawerContainerVariants}
                   initial="hidden"
                   animate="show"
-                  className="flex flex-col gap-1"
+                  className="flex flex-col gap-0.5"
                 >
                   {!user && (
                     <>
@@ -2464,17 +2463,17 @@ export const Navbar = ({
                           href="#exams" 
                           onClick={(e) => scrollToSection(e, 'exams')} 
                           className={cn(
-                            "flex items-center gap-3 text-sm font-extrabold p-2.5 rounded-xl transition-all border border-transparent group relative active:scale-[0.98] select-none",
+                            "flex items-center gap-2.5 text-xs font-extrabold py-2 px-2.5 rounded-lg transition-all border border-transparent group relative active:scale-[0.98] select-none",
                             activeSection === 'exams'
                               ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-black border-emerald-100 dark:border-emerald-800 shadow-xs"
                               : "text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60 active:bg-slate-100 dark:active:bg-slate-800"
                           )}
                         >
-                          <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-100 dark:border-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 shadow-xs">
-                             <Target className="w-4 h-4" />
+                          <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-100 dark:border-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 shadow-xs">
+                             <Target className="w-3.5 h-3.5" />
                           </div>
                           <span className="tracking-wide">{t('nav.exams', 'Exams')}</span>
-                          <ChevronRight className={cn("w-4 h-4 ml-auto transition-transform duration-250", activeSection === 'exams' ? "text-emerald-500 translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
+                          <ChevronRight className={cn("w-3.5 h-3.5 ml-auto transition-transform duration-250", activeSection === 'exams' ? "text-emerald-500 translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
                         </a>
                       </motion.div>
 
@@ -2483,17 +2482,17 @@ export const Navbar = ({
                           href="#syllabus-paths" 
                           onClick={(e) => scrollToSection(e, 'syllabus-paths')} 
                           className={cn(
-                            "flex items-center gap-3 text-sm font-extrabold p-2.5 rounded-xl transition-all border border-transparent group relative active:scale-[0.98] select-none",
+                            "flex items-center gap-2.5 text-xs font-extrabold py-2 px-2.5 rounded-lg transition-all border border-transparent group relative active:scale-[0.98] select-none",
                             activeSection === 'syllabus-paths'
                               ? "bg-blue-50 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 font-black border-blue-100 dark:border-blue-800 shadow-xs"
                               : "text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60 active:bg-slate-100 dark:active:bg-slate-800"
                           )}
                         >
-                          <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/70 border border-blue-100 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 shadow-xs">
-                             <BookOpen className="w-4 h-4" />
+                          <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/70 border border-blue-100 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 shadow-xs">
+                             <BookOpen className="w-3.5 h-3.5" />
                           </div>
                           <span className="tracking-wide">{t('nav.syllabus', 'Syllabus')}</span>
-                          <ChevronRight className={cn("w-4 h-4 ml-auto transition-transform duration-250", activeSection === 'syllabus-paths' ? "text-blue-500 translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
+                          <ChevronRight className={cn("w-3.5 h-3.5 ml-auto transition-transform duration-250", activeSection === 'syllabus-paths' ? "text-blue-500 translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
                         </a>
                       </motion.div>
 
@@ -2502,17 +2501,17 @@ export const Navbar = ({
                           href="#exam-registry" 
                           onClick={(e) => scrollToSection(e, 'exam-registry')} 
                           className={cn(
-                            "flex items-center gap-3 text-sm font-extrabold p-2.5 rounded-xl transition-all border border-transparent group relative active:scale-[0.98] select-none",
+                            "flex items-center gap-2.5 text-xs font-extrabold py-2 px-2.5 rounded-lg transition-all border border-transparent group relative active:scale-[0.98] select-none",
                             activeSection === 'exam-registry'
                               ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300 font-black border-indigo-100 dark:border-indigo-800 shadow-xs"
                               : "text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60 active:bg-slate-100 dark:active:bg-slate-800"
                           )}
                         >
-                          <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-100 dark:border-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0 shadow-xs">
-                             <Clock3 className="w-4 h-4" />
+                          <div className="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-100 dark:border-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0 shadow-xs">
+                             <Clock3 className="w-3.5 h-3.5" />
                           </div>
                           <span className="tracking-wide">{t('nav.notifications', 'Notifications')}</span>
-                          <ChevronRight className={cn("w-4 h-4 ml-auto transition-transform duration-250", activeSection === 'exam-registry' ? "text-indigo-500 translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
+                          <ChevronRight className={cn("w-3.5 h-3.5 ml-auto transition-transform duration-250", activeSection === 'exam-registry' ? "text-indigo-500 translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
                         </a>
                       </motion.div>
 
@@ -2521,17 +2520,17 @@ export const Navbar = ({
                           href="#achievers-journal" 
                           onClick={(e) => scrollToSection(e, 'achievers-journal')} 
                           className={cn(
-                            "flex items-center gap-3 text-sm font-extrabold p-2.5 rounded-xl transition-all border border-transparent group relative active:scale-[0.98] select-none",
+                            "flex items-center gap-2.5 text-xs font-extrabold py-2 px-2.5 rounded-lg transition-all border border-transparent group relative active:scale-[0.98] select-none",
                             activeSection === 'achievers-journal'
                               ? "bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-black border-amber-600 dark:border-amber-700 shadow-xs"
-                              : "text-slate-700 dark:text-slate-200 hover:bg-amber-50/50 dark:hover:bg-amber-950/40 hover:text-amber-700 dark:hover:text-amber-300 border-transparent hover:border-amber-600/35"
+                              : "text-slate-700 dark:text-slate-200 hover:bg-amber-50/50 dark:hover:bg-amber-950/40 hover:text-amber-700 dark:hover:text-amber-300"
                           )}
                         >
-                          <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/70 border border-amber-100 dark:border-amber-800 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0 shadow-xs">
-                             <Award className="w-4 h-4" />
+                          <div className="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/70 border border-amber-100 dark:border-amber-800 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0 shadow-xs">
+                             <Award className="w-3.5 h-3.5" />
                           </div>
                           <span className="tracking-wide">{t('nav.achievers', 'Achievers')}</span>
-                          <ChevronRight className={cn("w-4 h-4 ml-auto transition-transform duration-250", activeSection === 'achievers-journal' ? "text-amber-500 translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
+                          <ChevronRight className={cn("w-3.5 h-3.5 ml-auto transition-transform duration-250", activeSection === 'achievers-journal' ? "text-amber-500 translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
                         </a>
                       </motion.div>
                     </>
@@ -2542,17 +2541,17 @@ export const Navbar = ({
                       to="/current-affairs"
                       onClick={() => setMobileMenuOpen(false)}
                       className={cn(
-                        "flex items-center gap-3 text-sm font-extrabold p-2.5 rounded-xl transition-all border border-transparent group relative active:scale-[0.98] select-none",
+                        "flex items-center gap-2.5 text-xs font-extrabold py-2 px-2.5 rounded-lg transition-all border border-transparent group relative active:scale-[0.98] select-none",
                         location.pathname.startsWith('/current-affairs')
                           ? "bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-black border-amber-200 dark:border-amber-800 shadow-xs"
                           : "text-slate-700 dark:text-slate-200 hover:bg-amber-50/50 dark:hover:bg-amber-950/40 hover:text-amber-800 dark:hover:text-amber-300"
                       )}
                     >
-                      <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-950/70 border border-amber-200 dark:border-amber-800 flex items-center justify-center text-amber-700 dark:text-amber-300 shrink-0 shadow-xs">
-                         <Globe className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                      <div className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950/70 border border-amber-200 dark:border-amber-800 flex items-center justify-center text-amber-700 dark:text-amber-300 shrink-0 shadow-xs">
+                         <Globe className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                       </div>
                       <span className="tracking-wide">{t('nav.currentAffairs', 'Daily 360° Current Affairs')}</span>
-                      <ChevronRight className={cn("w-4 h-4 ml-auto transition-transform duration-250", location.pathname.startsWith('/current-affairs') ? "text-amber-600 translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
+                      <ChevronRight className={cn("w-3.5 h-3.5 ml-auto transition-transform duration-250", location.pathname.startsWith('/current-affairs') ? "text-amber-600 translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
                     </Link>
                   </motion.div>
 
@@ -2561,17 +2560,17 @@ export const Navbar = ({
                       to="/blog"
                       onClick={() => setMobileMenuOpen(false)}
                       className={cn(
-                        "flex items-center gap-3 text-sm font-extrabold p-2.5 rounded-xl transition-all border border-transparent group relative active:scale-[0.98] select-none",
+                        "flex items-center gap-2.5 text-xs font-extrabold py-2 px-2.5 rounded-lg transition-all border border-transparent group relative active:scale-[0.98] select-none",
                         isBlogActive
                           ? "bg-blue-50 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 font-black border-blue-200 dark:border-blue-800 shadow-xs"
                           : "text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60 active:bg-slate-100 dark:active:bg-slate-800"
                       )}
                     >
-                      <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/70 border border-blue-100 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 shadow-xs">
-                         <FileText className="w-4 h-4" />
+                      <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/70 border border-blue-100 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 shadow-xs">
+                         <FileText className="w-3.5 h-3.5" />
                       </div>
                       <span className="tracking-wide">{t('nav.blog', 'Latest Updates & Blog')}</span>
-                      <ChevronRight className={cn("w-4 h-4 ml-auto transition-transform duration-250", isBlogActive ? "text-blue-500 translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
+                      <ChevronRight className={cn("w-3.5 h-3.5 ml-auto transition-transform duration-250", isBlogActive ? "text-blue-500 translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
                     </Link>
                   </motion.div>
 
@@ -2582,13 +2581,13 @@ export const Navbar = ({
                         setMobileMenuOpen(false);
                         window.dispatchEvent(new CustomEvent('oep-open-tutorial-video'));
                       }}
-                      className="w-full flex items-center gap-3 text-sm font-extrabold p-2.5 rounded-xl transition-all border border-transparent group relative hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-800 dark:text-slate-200 active:bg-rose-100 dark:active:bg-rose-900/50 active:scale-[0.98] select-none cursor-pointer"
+                      className="w-full flex items-center gap-2.5 text-xs font-extrabold py-2 px-2.5 rounded-lg transition-all border border-transparent group relative hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-800 dark:text-slate-200 active:bg-rose-100 dark:active:bg-rose-900/50 active:scale-[0.98] select-none cursor-pointer"
                     >
-                      <div className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950/70 border border-rose-100 dark:border-rose-800 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0 shadow-xs">
-                         <Video className="w-4 h-4" />
+                      <div className="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/70 border border-rose-100 dark:border-rose-800 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0 shadow-xs">
+                         <Video className="w-3.5 h-3.5" />
                       </div>
                       <span className="tracking-wide text-left flex-1 font-bold">{t('nav.watchVideoGuide', 'Watch Video Guide')}</span>
-                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
                     </button>
                   </motion.div>
 
@@ -2599,40 +2598,37 @@ export const Navbar = ({
                         target="_blank" 
                         rel="noopener noreferrer"
                         onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-3 text-sm font-extrabold p-2.5 rounded-xl transition-all border border-transparent group relative hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-200 active:bg-slate-100 dark:active:bg-slate-800 active:scale-[0.98] select-none"
+                        className="flex items-center gap-2.5 text-xs font-extrabold py-2 px-2.5 rounded-lg transition-all border border-transparent group relative hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-200 active:bg-slate-100 dark:active:bg-slate-800 active:scale-[0.98] select-none"
                       >
-                        <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/70 border border-blue-100 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 shadow-xs">
-                           <HelpCircle className="w-4 h-4" />
+                        <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/70 border border-blue-100 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 shadow-xs">
+                           <HelpCircle className="w-3.5 h-3.5" />
                         </div>
                         <span className="tracking-wide">{t('nav.helpSupport', 'Help & Support')}</span>
-                        <ChevronRight className="w-4 h-4 ml-auto text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                        <ChevronRight className="w-3.5 h-3.5 ml-auto text-slate-400 group-hover:translate-x-0.5 transition-transform" />
                       </a>
                     </motion.div>
                   )}
                 </motion.div>
 
                 {user && (
-                  <div className="mt-3 p-4 rounded-[1.75rem] bg-[#FAF8F5] dark:bg-[#060B16] border border-slate-200/60 dark:border-slate-800 shadow-md shadow-slate-200/30 dark:shadow-slate-950/50 flex flex-col gap-3.5">
-                    <div className="flex items-center gap-3.5 px-1.5">
-                      <UserAvatar profile={profile} user={user} className="w-10 h-10 border-2 border-white dark:border-slate-700 shadow-md shrink-0 rounded-2xl" />
+                  <div className="mt-1.5 p-2.5 rounded-xl bg-slate-50 dark:bg-[#060B16] border border-slate-200/70 dark:border-slate-800 shadow-xs flex items-center justify-between gap-2.5">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                      <UserAvatar profile={profile} user={user} className="w-8 h-8 border border-white dark:border-slate-700 shadow-xs shrink-0 rounded-xl" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-black text-slate-800 dark:text-white truncate leading-snug">{profile?.displayName || user?.email?.split('@')[0]}</p>
-                        <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-400 truncate leading-none mt-0.5">{user?.email}</p>
+                        <p className="text-xs font-black text-slate-800 dark:text-white truncate leading-tight">{profile?.displayName || user?.email?.split('@')[0]}</p>
+                        <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-400 truncate leading-none mt-0.5">{user?.email}</p>
                       </div>
                     </div>
                     
-                    <div className="h-px bg-slate-200/60 dark:bg-slate-800" />
-
-                    <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-1.5 shrink-0">
                       {isAdmin && (
                         <Link 
                           to="/admin" 
                           onClick={() => setMobileMenuOpen(false)} 
-                          className="flex items-center gap-3 text-xs font-black text-slate-700 dark:text-slate-200 py-3 px-4 bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all w-full shadow-xs active:scale-[0.98]"
+                          className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 text-[10px] font-bold inline-flex items-center gap-1 shadow-2xs"
+                          title={t('nav.adminPanel', 'Admin Panel')}
                         >
-                          <Settings className="w-4 h-4 text-slate-400" /> 
-                          <span>{t('nav.adminPanel', 'Admin Panel')}</span>
-                          <ChevronRight className="w-3.5 h-3.5 ml-auto text-slate-400" />
+                          <Settings className="w-3.5 h-3.5 text-slate-500" />
                         </Link>
                       )}
                       <button 
@@ -2641,9 +2637,9 @@ export const Navbar = ({
                           await logout();
                           navigate('/');
                         }} 
-                        className="flex items-center gap-3 text-xs font-black text-rose-600 dark:text-rose-400 py-3 px-4 bg-rose-50/50 dark:bg-rose-950/40 hover:bg-rose-50 dark:hover:bg-rose-950/60 border border-rose-100/50 dark:border-rose-800/50 rounded-xl transition-all w-full text-left active:scale-[0.98]"
+                        className="px-2.5 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-600 dark:text-rose-400 border border-rose-200/60 dark:border-rose-800/60 text-[11px] font-black uppercase tracking-wider inline-flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 transition-all"
                       >
-                        <LogOut className="w-4 h-4" /> 
+                        <LogOut className="w-3 h-3" /> 
                         <span>{t('nav.signOut', 'Sign Out')}</span>
                       </button>
                     </div>
@@ -4390,7 +4386,7 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
             if (!isScheduledUpcoming) handleStartTest({ ...test, isPremium, price });
           }}
           className={cn(
-            "px-3 py-2.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl sm:rounded-2xl flex items-center justify-between gap-3 group relative overflow-hidden transition-all duration-300 text-slate-900 dark:text-white",
+            "px-3 py-2.5 sm:p-4 bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-xl sm:rounded-2xl flex items-center justify-between gap-3 group relative overflow-hidden transition-all duration-300 text-slate-900 dark:text-white",
             isScheduledUpcoming
               ? "border-amber-200 dark:border-amber-800 bg-amber-50/20 dark:bg-amber-950/20 cursor-not-allowed opacity-90"
               : isCompleted
@@ -4433,19 +4429,19 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
             <div className={cn(
               "w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border relative",
               isScheduledUpcoming
-                ? "bg-amber-50 border-amber-200 text-amber-700"
+                ? "bg-amber-50 dark:bg-amber-950/60 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300"
                 : isCompleted
-                  ? "bg-emerald-50/60 border-emerald-100/30 text-emerald-600"
+                  ? "bg-emerald-50/60 dark:bg-emerald-950/60 border-emerald-100/30 dark:border-emerald-800 text-emerald-600 dark:text-emerald-300"
                   : isInProgress
-                    ? "bg-amber-50/60 border-amber-100/30 text-amber-600"
+                    ? "bg-amber-50/60 dark:bg-amber-950/60 border-amber-100/30 dark:border-amber-800 text-amber-600 dark:text-amber-300"
                     : isLocked 
-                      ? "bg-amber-50/60 border-amber-100/30 text-amber-600" 
+                      ? "bg-amber-50/60 dark:bg-amber-950/60 border-amber-100/30 dark:border-amber-800 text-amber-600 dark:text-amber-300" 
                       : isPremiumUnlocked 
-                        ? "bg-emerald-50/60 border-emerald-100/30 text-emerald-600" 
-                        : "bg-indigo-50/60 border-indigo-100/30 text-indigo-650"
+                        ? "bg-emerald-50/60 dark:bg-emerald-950/60 border-emerald-100/30 dark:border-emerald-800 text-emerald-600 dark:text-emerald-300" 
+                        : "bg-indigo-50/60 dark:bg-[#060B16] border-indigo-100/30 dark:border-slate-800 text-indigo-650 dark:text-blue-400"
             )}>
               {isScheduledUpcoming ? (
-                <Calendar className="w-4.5 h-4.5 text-amber-700" />
+                <Calendar className="w-4.5 h-4.5 text-amber-700 dark:text-amber-300" />
               ) : isCompleted ? (
                 <CheckCircle2 className="w-4.5 h-4.5 relative z-10" />
               ) : isInProgress ? (
@@ -4464,7 +4460,7 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
                 {isScheduledUpcoming ? (
                   <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[8.5px] font-black rounded border border-amber-200 dark:border-amber-800 uppercase tracking-wider shrink-0">📅 UPCOMING</span>
                 ) : isCompleted ? (
-                  <span className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[8.5px] font-black rounded border border-emerald-100/60 dark:border-emerald-800 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" /> COMPLETED</span>
+                  <span className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[8.5px] font-black rounded border border-emerald-100/60 dark:border-emerald-800 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400" /> COMPLETED</span>
                 ) : isInProgress ? (
                   <span className="px-1.5 py-0.5 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-[8.5px] font-black rounded border border-amber-100 dark:border-amber-800 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><Clock className="w-2.5 h-2.5 animate-pulse" /> {progressPercent}%</span>
                 ) : isPremium && (
@@ -4477,17 +4473,17 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
               </div>
               
               {isScheduledUpcoming ? (
-                <div className="mt-1 text-[10px] font-bold text-amber-800 flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-amber-600 shrink-0" />
-                  <span>Starts in <strong className="font-mono text-amber-900">{countdown.formattedCountdown}</strong></span>
+                <div className="mt-1 text-[10px] font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1">
+                  <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <span>Starts in <strong className="font-mono text-amber-900 dark:text-amber-200">{countdown.formattedCountdown}</strong></span>
                 </div>
               ) : (
                 <div className="flex items-center gap-1.5 mt-1.5 sm:mt-2 text-[9.5px] sm:text-[10px] font-extrabold text-slate-500 dark:text-slate-300 flex-nowrap overflow-hidden">
-                  <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-slate-800/80 px-1.5 py-0.5 rounded-md border border-slate-100/60 dark:border-slate-700/60 shrink-0"><Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {t('exams.details.duration', `${test.durationMinutes}m`, { mins: test.durationMinutes })}</span>
-                  <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-slate-800/80 px-1.5 py-0.5 rounded-md border border-slate-100/60 dark:border-slate-700/60 shrink-0"><Award className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {t('exams.details.totalMarks', `${test.totalMarks}M`, { marks: test.totalMarks })}</span>
-                  <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-slate-800/80 px-1.5 py-0.5 rounded-md border border-slate-100/60 dark:border-slate-700/60 shrink-0"><FileText className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" /> {t('exams.details.questions', `${totalQs}Q`, { count: totalQs })}</span>
+                  <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-[#060B16] px-1.5 py-0.5 rounded-md border border-slate-100/60 dark:border-slate-800 text-slate-600 dark:text-slate-300 shrink-0"><Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400 dark:text-blue-400" /> {t('exams.details.duration', `${test.durationMinutes}m`, { mins: test.durationMinutes })}</span>
+                  <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-[#060B16] px-1.5 py-0.5 rounded-md border border-slate-100/60 dark:border-slate-800 text-slate-600 dark:text-slate-300 shrink-0"><Award className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400 dark:text-amber-400" /> {t('exams.details.totalMarks', `${test.totalMarks}M`, { marks: test.totalMarks })}</span>
+                  <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-[#060B16] px-1.5 py-0.5 rounded-md border border-slate-100/60 dark:border-slate-800 text-slate-600 dark:text-slate-300 shrink-0"><FileText className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400 dark:text-emerald-400" /> {t('exams.details.questions', `${totalQs}Q`, { count: totalQs })}</span>
                   {isCompleted && completedAct && (
-                    <span className="flex items-center gap-0.5 bg-emerald-50/50 text-emerald-700 px-1.5 py-0.5 rounded-md border border-emerald-100/30 shrink-0">
+                    <span className="flex items-center gap-0.5 bg-emerald-50/50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 rounded-md border border-emerald-100/30 dark:border-emerald-800 shrink-0">
                       Score: {completedAct.score}/{completedAct.totalMarks || test.totalMarks}
                     </span>
                   )}
@@ -4499,16 +4495,16 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
           <div className={cn(
             "w-7 h-7 sm:w-8 sm:h-8 rounded-full border flex items-center justify-center shrink-0 shadow-2xs group-active:translate-x-0.5 transition-all duration-300",
             isScheduledUpcoming
-              ? "bg-amber-50 border-amber-200 text-amber-700"
+              ? "bg-amber-50 dark:bg-amber-950/60 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300"
               : isCompleted 
-                ? "bg-emerald-50 border-emerald-100 text-emerald-600 group-active:bg-emerald-500 group-active:text-white"
+                ? "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-100 dark:border-emerald-800 text-emerald-600 dark:text-emerald-300 group-active:bg-emerald-500 group-active:text-white"
                 : isInProgress
-                  ? "bg-amber-50 border-amber-100 text-amber-600 group-active:bg-amber-500 group-active:text-white animate-pulse"
+                  ? "bg-amber-50 dark:bg-amber-950/60 border-amber-100 dark:border-amber-800 text-amber-600 dark:text-amber-300 group-active:bg-amber-500 group-active:text-white animate-pulse"
                   : isLocked
-                    ? "bg-amber-50 border-amber-100 text-amber-600 group-active:bg-amber-500 group-active:text-white"
+                    ? "bg-amber-50 dark:bg-amber-950/60 border-amber-100 dark:border-amber-800 text-amber-600 dark:text-amber-300 group-active:bg-amber-500 group-active:text-white"
                     : isPremiumUnlocked
-                      ? "bg-emerald-50 border-emerald-100 text-emerald-600 group-active:bg-emerald-500 group-active:text-white"
-                      : "bg-slate-50 border-slate-100 text-slate-400 group-active:bg-brand-50 group-active:border-brand-100 group-active:text-brand-600"
+                      ? "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-100 dark:border-emerald-800 text-emerald-600 dark:text-emerald-300 group-active:bg-emerald-500 group-active:text-white"
+                      : "bg-slate-50 dark:bg-[#060B16] border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-300 group-active:bg-blue-600 dark:group-active:bg-blue-600 group-active:text-white"
           )}>
             {isScheduledUpcoming ? (
               <Lock className="w-3.5 h-3.5 text-amber-700" />
@@ -4894,7 +4890,7 @@ const PurchasesView = ({ user, profile, exams, mockTests, testSeries, dynamicQue
         <Award className="absolute bottom-28 right-[6%] w-36 h-36 text-indigo-600 dark:text-blue-400 opacity-[0.08] dark:opacity-[0.04] stroke-[1.2] -rotate-12" />
       </div>
 
-      <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-32 sm:pb-24 mt-2 md:mt-8 relative z-10">
+      <div className="space-y-4 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-4 sm:pb-8 mt-2 md:mt-8 relative z-10">
         {/* Header */}
         {/* Mobile: slim 1-row header; Desktop: centred stacked hero */}
         <div className="mb-6 md:mb-8 relative">
@@ -4971,26 +4967,25 @@ const PurchasesView = ({ user, profile, exams, mockTests, testSeries, dynamicQue
         <motion.div 
           initial={{ opacity: 0, y: 20, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          className="premium-glass-card dark:bg-slate-900/90 dark:border-slate-800 p-8 md:p-16 rounded-2xl md:rounded-[2.5rem] text-center max-w-2xl mx-auto mt-6 md:mt-12 relative overflow-hidden"
+          className="bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 p-8 md:p-16 rounded-2xl md:rounded-[2.5rem] text-center max-w-2xl mx-auto mt-6 md:mt-12 relative overflow-hidden shadow-2xl dark:shadow-slate-950/80"
         >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/10 blur-[80px] rounded-full pointer-events-none" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/10 dark:bg-blue-500/10 blur-[80px] rounded-full pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 blur-[80px] rounded-full pointer-events-none" />
           
           <motion.div 
-            className="w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-slate-100 to-slate-200/50 dark:from-slate-800 dark:to-slate-900 rounded-2xl md:rounded-3xl flex items-center justify-center mx-auto mb-6 md:mb-8 shadow-inner inner-glow animate-float-gentle"
+            className="w-16 h-16 md:w-24 md:h-24 bg-slate-100 dark:bg-[#060B16] border border-slate-200/80 dark:border-slate-800 rounded-2xl md:rounded-3xl flex items-center justify-center mx-auto mb-6 md:mb-8 shadow-inner"
           >
-            <Lock className="w-8 h-8 md:w-10 md:h-10 text-slate-400 dark:text-slate-500" />
+            <Lock className="w-8 h-8 md:w-10 md:h-10 text-slate-400 dark:text-blue-400" />
           </motion.div>
           <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mb-3 md:mb-4 tracking-tight">Your Library is Empty</h2>
-          <p className="text-slate-500 dark:text-slate-400 mb-6 md:mb-10 max-w-md mx-auto text-sm md:text-lg leading-relaxed">
+          <p className="text-slate-600 dark:text-slate-300 mb-6 md:mb-10 max-w-md mx-auto text-sm md:text-lg leading-relaxed font-medium">
             You haven't unlocked any premium content yet. Explore our comprehensive exams and test series to start your journey today.
           </p>
           <button
             onClick={() => onViewExam(null)}
-            className="group relative px-8 py-4 bg-slate-900 text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-[transform,box-shadow] overflow-hidden flex items-center gap-3 mx-auto"
+            className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-sm md:text-base rounded-2xl shadow-xl shadow-blue-600/25 hover:shadow-blue-600/40 hover:-translate-y-0.5 active:scale-95 transition-all overflow-hidden flex items-center gap-3 mx-auto cursor-pointer"
           >
-            <span className="absolute inset-0 bg-gradient-to-r from-brand-600 to-brand-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <span className="relative z-10">Explore Exams</span>
+            <span className="relative z-10">{t('library.exploreExams', 'Explore Exams')}</span>
             <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
           </button>
         </motion.div>
@@ -8185,7 +8180,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           <Compass className="absolute bottom-28 right-[6%] w-36 h-36 text-indigo-600 opacity-[0.08] stroke-[1.2] -rotate-12" />
         </div>
 
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-10 pt-2 sm:pt-4 pb-32 sm:pb-24 relative z-10">
+        <div className="w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 space-y-4 sm:space-y-10 pt-2 sm:pt-4 pb-4 sm:pb-8 relative z-10">
           <YouTubeCarousel videoIds={globalVideoIds} />
         
         {isAdmin && (
@@ -8947,10 +8942,10 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   <div
                     onClick={() => setSelectedBankItem(item)}
                     className={cn(
-                      "p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl flex items-center justify-between gap-4 cursor-pointer group relative overflow-hidden transition-all duration-300",
+                      "p-3 sm:p-4 bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center justify-between gap-3 cursor-pointer group relative overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md",
                       isLocked 
-                        ? "shadow-[0_4px_16px_-4px_rgba(245,158,11,0.06),0_1px_2px_rgba(245,158,11,0.02)] active:border-amber-300"
-                        : "shadow-[0_4px_16px_-4px_rgba(37,99,235,0.06),0_1px_2px_rgba(37,99,235,0.02)] active:border-brand-300"
+                        ? "shadow-[0_4px_16px_-4px_rgba(245,158,11,0.06)] active:border-amber-400"
+                        : "shadow-[0_4px_16px_-4px_rgba(37,99,235,0.06)] active:border-brand-400"
                     )}
                   >
                     <div className={cn(
@@ -8960,49 +8955,49 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         : "bg-gradient-to-r from-brand-500/0 via-brand-500/[0.012] to-brand-500/0"
                     )} />
                     <div className={cn(
-                      "absolute left-0 top-3.5 bottom-3.5 w-1 rounded-r-md opacity-80",
+                      "absolute left-0 top-3 bottom-3 w-1 rounded-r-md",
                       isLocked 
                         ? "bg-gradient-to-b from-amber-400 to-orange-500" 
-                        : "bg-gradient-to-b from-brand-500 to-brand-700"
+                        : "bg-gradient-to-b from-brand-500 to-indigo-600"
                     )} />
 
-                    <div className="flex items-center gap-3.5 min-w-0 flex-1 pl-1">
-                      <div className={cn("w-14 h-14 rounded-xl overflow-hidden shrink-0 shadow-sm relative border border-slate-100 dark:border-slate-800 flex items-center justify-center p-2 text-white select-none", vecTheme.gradient)}>
+                    <div className="flex items-center gap-3 min-w-0 flex-1 pl-1.5">
+                      <div className={cn("w-11 h-11 sm:w-12 sm:h-12 rounded-xl overflow-hidden shrink-0 shadow-xs relative border border-slate-200/50 dark:border-slate-800 flex items-center justify-center p-2 text-white select-none", vecTheme.gradient)}>
                         <VectorCoverTextureOverlay pattern={vecTheme.pattern} className="absolute inset-0 pointer-events-none opacity-25 select-none" />
-                        <VecMainIcon className="w-7 h-7 text-white stroke-[1.8] relative z-10" />
+                        <VecMainIcon className="w-5 h-5 text-white stroke-[2] relative z-10" />
                         {isLocked && (
-                          <div className="absolute inset-0 bg-slate-950/30 flex items-center justify-center z-20">
-                            <Lock className="w-3.5 h-3.5 text-white" />
+                          <div className="absolute inset-0 bg-slate-950/40 flex items-center justify-center z-20">
+                            <Lock className="w-3 h-3 text-amber-300" />
                           </div>
                         )}
                       </div>
                       
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <h4 className="font-extrabold text-[14.5px] text-slate-855 dark:text-white tracking-tight leading-snug line-clamp-2 capitalize">
+                        <div className="flex items-center justify-between gap-2">
+                          <h4 className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 dark:text-white tracking-tight leading-snug truncate capitalize">
                             {item.title.toLowerCase()}
                           </h4>
                           {isLocked ? (
-                            <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 text-[8.5px] font-black rounded border border-amber-100 uppercase tracking-wider shrink-0">
+                            <span className="px-1.5 py-0.5 bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-300 text-[8.5px] font-black rounded border border-amber-200/60 dark:border-amber-800/80 uppercase tracking-wider shrink-0">
                               Premium
                             </span>
                           ) : (
-                            <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 text-[8.5px] font-black rounded border border-emerald-100 uppercase tracking-wider shrink-0">
+                            <span className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-300 text-[8.5px] font-black rounded border border-emerald-200/60 dark:border-emerald-800/80 uppercase tracking-wider shrink-0">
                               Free
                             </span>
                           )}
                         </div>
                         
-                        <div className="flex items-center gap-1.5 mt-1.5 text-[11px] font-bold text-slate-455 dark:text-slate-300 flex-wrap">
-                          <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-100/50 dark:border-slate-700">
+                        <div className="flex items-center gap-1.5 mt-1 text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                          <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-900 px-1.5 py-0.5 rounded border border-slate-200/60 dark:border-slate-800 text-[10px] text-slate-600 dark:text-slate-300 shrink-0">
                             <FileText className="w-3 h-3 text-slate-400" />
                             {(item.questionCount || (Array.isArray(item.questions) ? item.questions.length : 0))} Qs
                           </span>
                           
                           {getBankDisplayTagline(item.tagline, '') && (
-                            <span className="flex items-center gap-0.5 bg-brand-50/50 dark:bg-indigo-950/60 text-brand-650 dark:text-indigo-300 px-1.5 py-0.5 rounded border border-brand-100/20 dark:border-indigo-800 text-[9.5px] font-black uppercase tracking-wider">
-                              <Zap className="w-2.5 h-2.5 fill-brand-650 text-brand-650 shrink-0" />
-                              {getBankDisplayTagline(item.tagline, '')}
+                            <span className="flex items-center gap-1 bg-brand-50/60 dark:bg-blue-950/60 text-brand-700 dark:text-blue-300 px-1.5 py-0.5 rounded border border-brand-200/40 dark:border-blue-800/60 text-[9.5px] font-black uppercase tracking-wider truncate max-w-[140px] xs:max-w-[190px]">
+                              <Zap className="w-2.5 h-2.5 fill-brand-600 text-brand-600 dark:fill-blue-400 dark:text-blue-400 shrink-0" />
+                              <span className="truncate">{getBankDisplayTagline(item.tagline, '').replace(/QUESTION BANK WITH ANSWER KEY/gi, 'Answer Key').replace(/QUESTION BANK/gi, 'Q-Bank')}</span>
                             </span>
                           )}
                         </div>
@@ -9010,12 +9005,12 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     </div>
 
                     <div className={cn(
-                      "w-8 h-8 rounded-full border flex items-center justify-center shrink-0 shadow-2xs group-active:translate-x-0.5 transition-all duration-300",
+                      "w-7 h-7 rounded-full border flex items-center justify-center shrink-0 shadow-2xs group-active:translate-x-0.5 transition-all duration-300",
                       isLocked
-                        ? "bg-amber-50 border-amber-100 text-amber-600 group-active:bg-amber-500 group-active:text-white"
-                        : "bg-slate-50 border-slate-100 text-slate-400 group-active:bg-brand-50 group-active:border-brand-100 group-active:text-brand-600"
+                        ? "bg-amber-50 dark:bg-amber-950/60 border-amber-200/80 dark:border-amber-800 text-amber-600 dark:text-amber-400 group-active:bg-amber-500 group-active:text-white"
+                        : "bg-slate-50 dark:bg-slate-800 border-slate-200/80 dark:border-slate-700 text-slate-400 group-active:bg-brand-50 group-active:border-brand-100 group-active:text-brand-600"
                     )}>
-                      {isLocked ? <Lock className="w-3.5 h-3.5" /> : <ChevronRight className="w-4 h-4" />}
+                      {isLocked ? <Lock className="w-3 h-3" /> : <ChevronRight className="w-3.5 h-3.5" />}
                     </div>
                   </div>
                 ) : (
@@ -9192,7 +9187,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           <Compass className="absolute bottom-28 right-[6%] w-36 h-36 text-indigo-600 opacity-[0.08] stroke-[1.2] -rotate-12" />
         </div>
 
-        <div className="w-full mx-auto space-y-6 sm:space-y-8 pb-32 sm:pb-24 relative z-10">
+        <div className="w-full mx-auto space-y-4 sm:space-y-8 pb-4 sm:pb-8 relative z-10">
 
         {/* Executive Bright Study Vector Header Card */}
         <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 border border-slate-200/80 dark:border-indigo-500/20 shadow-xl shadow-slate-200/40 dark:shadow-indigo-950/20 rounded-[2.2rem] relative overflow-hidden z-10 mb-8 sm:mb-10">
@@ -9286,20 +9281,20 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
           {/* Mobile Premium Segmented Tab Switcher */}
           {isMobile && (
-            <div className="sticky top-16 z-20 -mx-4 px-4 py-2.5 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md mt-1">
-              <div className="flex bg-slate-100 p-1 rounded-xl relative shadow-inner">
+            <div className="sticky top-16 z-20 -mx-4 px-4 py-2.5 bg-slate-50/95 dark:bg-[#060B16]/95 backdrop-blur-md mt-1">
+              <div className="flex bg-slate-100 dark:bg-[#0B1528] p-1 rounded-xl relative shadow-inner border border-slate-200/80 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setMobileExamTab('practice')}
                   className={cn(
                     "flex-grow flex-shrink-0 flex-1 py-2 text-[11px] font-black rounded-lg transition-all flex items-center justify-center gap-1.5 relative cursor-pointer",
-                    mobileExamTab === 'practice' ? "text-indigo-700 font-extrabold" : "text-slate-500"
+                    mobileExamTab === 'practice' ? "text-indigo-700 dark:text-blue-400 font-extrabold" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                   )}
                 >
                   {mobileExamTab === 'practice' && (
                     <motion.div
                       layoutId="mobileActiveSubTabIndicator"
-                      className="absolute inset-0 bg-white rounded-lg shadow-sm z-0"
+                      className="absolute inset-0 bg-white dark:bg-[#060B16] rounded-lg shadow-sm border border-slate-200/50 dark:border-blue-500/30 z-0"
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -9311,13 +9306,13 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   onClick={() => setMobileExamTab('mock')}
                   className={cn(
                     "flex-grow flex-shrink-0 flex-1 py-2 text-[11px] font-black rounded-lg transition-all flex items-center justify-center gap-1.5 relative cursor-pointer",
-                    mobileExamTab === 'mock' ? "text-amber-700 font-extrabold" : "text-slate-500"
+                    mobileExamTab === 'mock' ? "text-amber-700 dark:text-amber-300 font-extrabold" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                   )}
                 >
                   {mobileExamTab === 'mock' && (
                     <motion.div
                       layoutId="mobileActiveSubTabIndicator"
-                      className="absolute inset-0 bg-white rounded-lg shadow-sm z-0"
+                      className="absolute inset-0 bg-white dark:bg-[#060B16] rounded-lg shadow-sm border border-slate-200/50 dark:border-amber-500/30 z-0"
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -9329,13 +9324,13 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   onClick={() => setMobileExamTab('learn')}
                   className={cn(
                     "flex-grow flex-shrink-0 flex-1 py-2 text-[11px] font-black rounded-lg transition-all flex items-center justify-center gap-1.5 relative cursor-pointer",
-                    mobileExamTab === 'learn' ? "text-brand-700 font-extrabold" : "text-slate-500"
+                    mobileExamTab === 'learn' ? "text-brand-700 dark:text-emerald-400 font-extrabold" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                   )}
                 >
                   {mobileExamTab === 'learn' && (
                     <motion.div
                       layoutId="mobileActiveSubTabIndicator"
-                      className="absolute inset-0 bg-white rounded-lg shadow-sm z-0"
+                      className="absolute inset-0 bg-white dark:bg-[#060B16] rounded-lg shadow-sm border border-slate-200/50 dark:border-emerald-500/30 z-0"
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -10506,8 +10501,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                               className={cn(
                                 "px-4 py-2 text-xs sm:text-sm font-bold rounded-xl whitespace-nowrap transition-all duration-200 border cursor-pointer shadow-sm",
                                 isActive
-                                    ? "bg-brand-600 border-brand-600 text-white font-black scale-[1.02] shadow-brand-200"
-                                    : "bg-white hover:bg-slate-50 border-slate-200/80 text-slate-600 hover:text-slate-900"
+                                    ? "bg-blue-600 dark:bg-blue-600 border-blue-600 dark:border-blue-500 text-white font-black scale-[1.02] shadow-md shadow-blue-600/25"
+                                    : "bg-white dark:bg-[#0B1528] hover:bg-slate-50 dark:hover:bg-slate-800 border-slate-200/80 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
                               )}
                             >
                               {subj === 'All' ? t('exams.step2.allSubjects', 'All') : subj}
@@ -10520,7 +10515,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       <div className="space-y-5 sm:space-y-10">
                         {filteredGroupedBySubject.map(([subject, tests]) => (
                           <div key={subject} className="space-y-2.5 sm:space-y-5 cv-card-auto">
-                            <h4 className="text-[13px] sm:text-xl font-black text-brand-700 dark:text-indigo-300 px-3 py-1.5 sm:px-5 sm:py-2.5 bg-brand-50/80 dark:bg-indigo-950/60 rounded-lg sm:rounded-xl inline-flex items-center gap-1.5 border border-brand-100/50 dark:border-indigo-800 shadow-sm">{subject}</h4>
+                            <h4 className="text-[13px] sm:text-xl font-black text-brand-700 dark:text-indigo-300 px-3 py-1.5 sm:px-5 sm:py-2.5 bg-brand-50/80 dark:bg-[#0B1528] rounded-lg sm:rounded-xl inline-flex items-center gap-1.5 border border-brand-100/50 dark:border-slate-800 shadow-sm">{subject}</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6">
                               {(tests as any[]).map(test => (
                                 <ExamDetailMockTestCard
@@ -10841,26 +10836,137 @@ function NotificationSoundListener() {
   return null;
 }
 
+const GlobalToaster = () => {
+  const [theme] = useTheme();
+  const isDark = theme === 'dark';
+
+  return (
+    <Toaster
+      position="top-center"
+      reverseOrder={false}
+      toastOptions={{
+        duration: 3500,
+        style: {
+          fontFamily: 'var(--font-sans)',
+          fontWeight: 700,
+          fontSize: '13px',
+          borderRadius: '16px',
+          padding: '12px 18px',
+          background: isDark ? '#0B1528' : '#ffffff',
+          color: isDark ? '#f8fafc' : '#0f172a',
+          border: isDark ? '1px solid rgba(59, 130, 246, 0.3)' : '1px solid rgba(226, 232, 240, 0.8)',
+          boxShadow: isDark ? '0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.4)' : '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+        },
+      }}
+    />
+  );
+};
+
+const GlobalHorizontalScrollEngine = () => {
+  useEffect(() => {
+    let activeDragEl: HTMLElement | null = null;
+    let startX = 0;
+    let scrollLeft = 0;
+    let hasMoved = false;
+
+    const findHorizontalContainer = (target: HTMLElement | null): HTMLElement | null => {
+      let curr = target;
+      while (curr && curr !== document.body && curr !== document.documentElement) {
+        if (
+          curr.classList.contains('overflow-x-auto') ||
+          curr.classList.contains('no-scrollbar') ||
+          curr.dataset.horizontalScroll
+        ) {
+          if (curr.scrollWidth > curr.clientWidth + 1) {
+            return curr;
+          }
+        }
+        curr = curr.parentElement;
+      }
+      return null;
+    };
+
+    // 1. Universal Wheel Scroll Delegation: Converts vertical delta into horizontal scrolling
+    const onWheel = (e: WheelEvent) => {
+      const container = findHorizontalContainer(e.target as HTMLElement);
+      if (!container) return;
+
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        const maxScroll = container.scrollWidth - container.clientWidth;
+        if (maxScroll > 0) {
+          const atLeft = container.scrollLeft <= 0;
+          const atRight = container.scrollLeft >= maxScroll - 1;
+
+          if ((e.deltaY > 0 && !atRight) || (e.deltaY < 0 && !atLeft)) {
+            e.preventDefault();
+            container.scrollLeft += e.deltaY;
+          }
+        }
+      }
+    };
+
+    // 2. Universal Mouse Drag-to-Scroll: Grab and slide any horizontal track
+    const onMouseDown = (e: MouseEvent) => {
+      if (e.button !== 0) return; // Left-click only
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') return;
+
+      const container = findHorizontalContainer(target);
+      if (container) {
+        activeDragEl = container;
+        hasMoved = false;
+        startX = e.pageX - container.offsetLeft;
+        scrollLeft = container.scrollLeft;
+      }
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (!activeDragEl) return;
+      const x = e.pageX - activeDragEl.offsetLeft;
+      const walk = (x - startX) * 1.35;
+      if (Math.abs(walk) > 4) {
+        hasMoved = true;
+        e.preventDefault();
+        activeDragEl.scrollLeft = scrollLeft - walk;
+      }
+    };
+
+    const onMouseUp = () => {
+      if (activeDragEl && hasMoved) {
+        const preventClick = (clickE: MouseEvent) => {
+          clickE.stopPropagation();
+          window.removeEventListener('click', preventClick, true);
+        };
+        window.addEventListener('click', preventClick, true);
+      }
+      activeDragEl = null;
+      hasMoved = false;
+    };
+
+    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+
+    return () => {
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('mousedown', onMouseDown);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+  }, []);
+
+  return null;
+};
+
 export default function App() {
   return (
     <BrowserRouter>
       {/* Single global Toaster — must be here (root) so StrictMode never renders two instances */}
-      <Toaster
-        position="top-center"
-        reverseOrder={false}
-        toastOptions={{
-          duration: 3500,
-          style: {
-            fontFamily: 'var(--font-sans)',
-            fontWeight: 700,
-            fontSize: '14px',
-            borderRadius: '12px',
-            padding: '12px 16px',
-          },
-        }}
-      />
+      <GlobalToaster />
       <NotificationSoundListener />
       <ScrollToTop />
+      <GlobalHorizontalScrollEngine />
       <AppContent />
     </BrowserRouter>
   );
@@ -11011,8 +11117,8 @@ const ExamDetailPage = () => {
       <main className={cn(
         "relative flex-1 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full pt-24 sm:pt-28 md:pt-32",
         isBottomNavVisible 
-          ? "pb-28 sm:pb-24 lg:pb-32" 
-          : "pb-12 sm:pb-16 lg:pb-20"
+          ? "pb-20 sm:pb-24 lg:pb-28" 
+          : "pb-6 sm:pb-12 lg:pb-16"
       )}>
         <AnimatePresence mode="wait">
           <motion.div
@@ -11610,8 +11716,8 @@ function AppContent() {
           <main className={cn(
             "relative flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pt-4 md:pt-8",
             isBottomNavVisible 
-              ? "pb-28 sm:pb-24 lg:pb-32" 
-              : "pb-12 sm:pb-16 lg:pb-20"
+              ? "pb-20 sm:pb-24 lg:pb-28" 
+              : "pb-6 sm:pb-12 lg:pb-16"
           )}>
             <React.Suspense fallback={<LoadingPortal />}>
               <AiMentor user={user} />
@@ -11765,8 +11871,8 @@ function AppContent() {
                 <main className={cn(
                   "relative flex-1 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full pt-24 sm:pt-28 md:pt-32",
                   isBottomNavVisible 
-                    ? "pb-28 sm:pb-24 lg:pb-32" 
-                    : "pb-12 sm:pb-16 lg:pb-20"
+                    ? "pb-20 sm:pb-24 lg:pb-28" 
+                    : "pb-6 sm:pb-12 lg:pb-16"
                 )}>
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.div

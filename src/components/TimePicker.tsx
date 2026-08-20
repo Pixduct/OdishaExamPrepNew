@@ -76,21 +76,21 @@ export default function TimePicker({ value, onChange, className }: TimePickerPro
       <div
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "w-full bg-slate-50 border border-slate-200/60 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 focus:border-indigo-500/50 transition-all font-semibold flex items-center justify-between cursor-pointer select-none",
-          isOpen && "ring-1 ring-indigo-500/40 border-indigo-500/50"
+          "w-full bg-slate-50 dark:bg-[#060B16] border border-slate-200/60 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500/40 focus:border-blue-500/50 transition-all font-semibold flex items-center justify-between cursor-pointer select-none",
+          isOpen && "ring-1 ring-blue-500/40 border-blue-500/50"
         )}
       >
         <span className="tabular-nums font-mono tracking-wide">{displayValue}</span>
-        <Clock className={cn("w-3.5 h-3.5 text-slate-400 transition-colors duration-200", isOpen && "text-[#2563eb]")} />
+        <Clock className={cn("w-3.5 h-3.5 text-slate-400 dark:text-slate-400 transition-colors duration-200", isOpen && "text-[#2563eb] dark:text-blue-400")} />
       </div>
 
       {/* Dropdown Pickers */}
       {isOpen && (
-        <div className="absolute left-0 mt-1.5 w-60 bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl shadow-xl p-3 z-50 flex flex-col space-y-2.5 animate-in fade-in slide-in-from-top-1 duration-150 select-none">
+        <div className="absolute left-0 mt-1.5 w-60 bg-white/95 dark:bg-[#0B1528] backdrop-blur-md border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xl dark:shadow-slate-950/90 p-3 z-50 flex flex-col space-y-2.5 animate-in fade-in slide-in-from-top-1 duration-150 select-none">
           <div className="grid grid-cols-3 gap-2 text-center">
             {/* Hours selection */}
             <div className="flex flex-col space-y-1">
-              <span className="text-[9px] font-black uppercase tracking-wider text-slate-400">Hour</span>
+              <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-400">Hour</span>
               <div 
                 ref={hourContainerRef}
                 className="h-28 overflow-y-auto no-scrollbar space-y-0.5 pr-0.5"
@@ -106,8 +106,8 @@ export default function TimePicker({ value, onChange, className }: TimePickerPro
                       className={cn(
                         "w-full py-1 text-xs font-semibold rounded-lg transition-colors cursor-pointer text-center",
                         isSelected 
-                          ? "bg-[#2563eb] text-white" 
-                          : "text-slate-600 hover:bg-slate-100"
+                          ? "bg-[#2563eb] text-white font-extrabold" 
+                          : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                       )}
                     >
                       {String(h).padStart(2, '0')}
@@ -119,7 +119,7 @@ export default function TimePicker({ value, onChange, className }: TimePickerPro
 
             {/* Minutes selection */}
             <div className="flex flex-col space-y-1">
-              <span className="text-[9px] font-black uppercase tracking-wider text-slate-400">Min</span>
+              <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-400">Min</span>
               <div 
                 ref={minuteContainerRef}
                 className="h-28 overflow-y-auto no-scrollbar space-y-0.5 pr-0.5"
@@ -135,8 +135,8 @@ export default function TimePicker({ value, onChange, className }: TimePickerPro
                       className={cn(
                         "w-full py-1 text-xs font-semibold rounded-lg transition-colors cursor-pointer text-center",
                         isSelected 
-                          ? "bg-[#2563eb] text-white" 
-                          : "text-slate-600 hover:bg-slate-100"
+                          ? "bg-[#2563eb] text-white font-extrabold" 
+                          : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                       )}
                     >
                       {String(m).padStart(2, '0')}
@@ -148,7 +148,7 @@ export default function TimePicker({ value, onChange, className }: TimePickerPro
 
             {/* Period selection */}
             <div className="flex flex-col space-y-1">
-              <span className="text-[9px] font-black uppercase tracking-wider text-slate-400">Period</span>
+              <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-400">Period</span>
               <div className="h-28 flex flex-col justify-center space-y-1.5 px-0.5">
                 {["AM", "PM"].map((p) => {
                   const isSelected = period === p;
@@ -161,7 +161,7 @@ export default function TimePicker({ value, onChange, className }: TimePickerPro
                         "w-full py-2 text-xs font-black rounded-lg transition-colors cursor-pointer text-center",
                         isSelected 
                           ? "bg-[#2563eb] text-white" 
-                          : "text-slate-600 bg-slate-50 hover:bg-slate-100"
+                          : "text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800"
                       )}
                     >
                       {p}
@@ -176,7 +176,7 @@ export default function TimePicker({ value, onChange, className }: TimePickerPro
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            className="w-full py-1.5 text-[10px] font-black uppercase tracking-wider bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
+            className="w-full py-1.5 text-[10px] font-black uppercase tracking-wider bg-slate-900 dark:bg-blue-600 text-white rounded-xl hover:bg-slate-800 dark:hover:bg-blue-500 transition-colors cursor-pointer"
           >
             Done
           </button>

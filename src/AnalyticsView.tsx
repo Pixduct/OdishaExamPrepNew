@@ -545,7 +545,7 @@ function SkeletonStatCard() {
 
 function AnalyticsSkeleton() {
   return (
-    <div className="w-full mx-auto px-4 sm:px-0 pt-4 sm:pt-6 space-y-6 sm:space-y-8 pb-32 sm:pb-24 relative z-10">
+    <div className="w-full mx-auto px-0 sm:px-0 pt-4 sm:pt-6 space-y-4 sm:space-y-8 pb-4 sm:pb-8 relative z-10">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
         <SkeletonStatCard />
         <SkeletonStatCard />
@@ -1322,25 +1322,35 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
   );
 
   if (!stats) return (
-    <div className="flex flex-col items-center justify-center py-32 text-center px-6 max-w-lg mx-auto relative z-10">
-      <motion.div 
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="w-24 h-24 bg-gradient-to-br from-brand-50 to-indigo-50 rounded-full flex items-center justify-center mb-6 shadow-xl shadow-brand-500/10 border border-white"
-      >
-        <LayoutDashboard className="w-10 h-10 text-brand-600" />
-      </motion.div>
-      <h2 className="text-3xl font-serif font-extrabold text-slate-900 mb-3 tracking-tight">No Data Available</h2>
-      <p className="text-slate-500 mb-8 font-medium text-lg leading-relaxed">Complete your first mock test to generate highly accurate performance metrics.</p>
-      <motion.button 
-        whileHover={{ y: -2, scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        onClick={() => onNavigate?.('home')}
-        className="px-8 py-3.5 bg-gradient-to-r from-brand-600 to-brand-500 text-white rounded-2xl font-bold shadow-[0_8px_20px_rgba(79,70,229,0.3)] hover:shadow-[0_15px_30px_rgba(79,70,229,0.4)] transition-all flex items-center gap-2"
-      >
-        <Rocket className="w-5 h-5" />
-        Take a Test
-      </motion.button>
+    <div className="flex flex-col items-center justify-center py-20 text-center px-6 max-w-lg mx-auto relative z-10 my-12">
+      <div className="w-full bg-white dark:bg-[#0B1528] rounded-2xl sm:rounded-[2.5rem] border border-slate-200/80 dark:border-slate-800 p-8 sm:p-12 shadow-2xl dark:shadow-slate-950/80 relative overflow-hidden flex flex-col items-center justify-center">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/10 dark:bg-blue-500/10 blur-[80px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none" />
+
+        <motion.div 
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="w-20 h-20 sm:w-24 sm:h-24 bg-slate-100 dark:bg-[#060B16] rounded-2xl sm:rounded-3xl flex items-center justify-center mb-6 shadow-inner border border-slate-200/80 dark:border-slate-800"
+        >
+          <LayoutDashboard className="w-8 h-8 sm:w-10 sm:h-10 text-brand-600 dark:text-blue-400" />
+        </motion.div>
+
+        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mb-3 tracking-tight">
+          No Data Available
+        </h2>
+        <p className="text-slate-600 dark:text-slate-300 mb-8 font-medium text-xs sm:text-sm leading-relaxed max-w-md">
+          Complete your first mock test to generate highly accurate performance metrics.
+        </p>
+        <motion.button 
+          whileHover={{ y: -2, scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => onNavigate?.('home')}
+          className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-2xl font-black text-xs sm:text-sm shadow-xl shadow-blue-600/25 transition-all flex items-center gap-2 cursor-pointer"
+        >
+          <Rocket className="w-4 h-4 sm:w-5 sm:h-5" />
+          Take a Test
+        </motion.button>
+      </div>
     </div>
   );
 
@@ -1363,7 +1373,7 @@ ${stats?.examAnalysis ? stats.examAnalysis.map(e => `  * Exam: "${e.examName}" (
         variants={stagger.containerDelay(0.1, 0.1)}
         initial="hidden"
         animate="show"
-        className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 space-y-6 sm:space-y-8 pb-32 sm:pb-24 relative z-10"
+        className="w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 pt-4 sm:pt-6 space-y-4 sm:space-y-8 pb-4 sm:pb-8 relative z-10"
       >
         {/* Sticky Active Context Bar for Target Exam Switching */}
         <ActiveExamContextBar />

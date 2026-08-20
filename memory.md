@@ -1,47 +1,40 @@
-# Memory — Mobile Touch Scrolling Fixes, Admin CTA Subtitle Dropdown & Global Deletion Cache Invalidation
+# Memory — Admin Exam Bundle Toggle State Persistence & End-to-End Payment Engine Hardening
 
-Last updated: 2026-08-20T09:55:40+05:30
+Last updated: 2026-08-20T15:52:00+05:30
 
 ## What was built
 
-### 1. Directional Touch Gesture Tracking & Horizontal Track Scroll Unlock
-- **`src/components/YouTubeCarousel.tsx`**: Re-engineered touch handling to track drag delta distance on touchmove. When vertical swipe intent is detected (`Math.abs(deltaY) >= Math.abs(deltaX)`), touch dragging immediately unbinds and yields to native vertical document scrolling without calling `e.preventDefault()`. `e.preventDefault()` is only called during intentional horizontal carouselling.
-- **Horizontal Scroll Containers & Pill Rows**: Removed restrictive `touch-pan-x` and `overscroll-contain` classes across:
-  - `src/App.tsx`: Continue Practice slider, Recent Activity slider, History filter tabs, Syllabus exam switcher tabs, Sectional Mocks subject tab bar.
-  - `src/pages/AiMentor.tsx`: Attachment tray and quiz suggestion chips.
-  - `src/pages/BlogList.tsx`: Blog category filter bar.
-  - `src/pages/CurrentAffairs.tsx`: Current affairs category filter bar.
+### 1. Admin Exam Bundle Toggle State Persistence (`src/AdminPanel.tsx`)
+- **`handleEditClick`**: Upgraded the form loader for `activeTab === 'exams'` to read `isPremium` directly from `parsedExamMeta.isPremium` (explicit boolean) instead of checking if `item.description` starts with `JSON_METADATA_`. Added positive price fallbacks (`price: 499`, `originalPrice: 999`) when toggling back ON from a zero-price state.
+- **`handleSubmit`**: Explicitly persists `isPremium: Boolean(formData.isPremium)` in `metaObj` within `JSON_METADATA_`. When the bundle is toggled off, `price` and `originalPrice` are cleanly saved as `0`.
+- **Supabase Catalog Clean-up**: Updated existing database rows (`OSSC CHSL`, `OSSSC Nursing Officer`, `OPSC AEE`) in the `public.exams` table to cleanly store `isPremium: false` and `price: 0`.
+- **UI Registry Imprint**: Registered `AdminExamEditModalForm` in `context/ui-registry.md` (Entry 69).
 
-### 2. Category-Matched CTA Subtitle Dropdown & Custom Input (`src/AdminPanel.tsx`)
-- Created `CATEGORY_TAGLINE_PRESETS` in `AdminPanel.tsx` mapped to each practice/question bank category (`topic-wise`, `exam-focused`, `revision-sets`, `pyq-collections`, and generic popular CTAs).
-- Replaced the raw input for **"Topic / Subject Subtitle"** in the Add/Edit Bank modal with a hybrid dropdown selector that dynamically updates its recommendations when the category is switched, allows instant 1-click CTA population, and reveals a custom text input with a `Clear` button for bespoke chapter titles.
-- Imprinted `AdminTopicSubtitleSelector` into `context/ui-registry.md` (Entry 67).
-
-### 3. Global Deletion & Cache Invalidation System (`src/lib/examService.ts`)
-- Fixed the issue where deleted Question Banks, Mock Tests, and Test Series reappeared in the Admin Panel table after deletion.
-- Added comprehensive dual-phase cache invalidation (`cacheService.clear`) across `deleteQuestionBank`, `updateQuestionBank`, `deleteMockTest`, `updateMockTest`, `deleteTestSeries`, `updateTestSeries`, `deleteExam`, `updateExam`, `deleteQuestion`, and `updateQuestion`.
-- Added strict `.filter(item => !item.is_archived)` filtering on `getAllQuestionBanks`, `getAllMockTestsLite`, `getAllTestSeries`, and `getAllExams` so archived/soft-deleted items are never returned to the UI on refresh.
+### 2. End-to-End Payment Engine & Entitlement Hardening (`server.ts`, `src/App.tsx`, `src/components/StickyAICompanion.tsx`)
+- **`server.ts` (`getProductPrice`)**: Added case-insensitive product type normalization and aliases (`exam_bundle`, `exam`, `test_series`, `series`, `mock_test`, `mocktest`, `test`, `mock`, `question_bank`, `questionbank`, `bank`). Added UUID fallback resolution for mock tests linked to test series rows and JSON tagline parsing for question banks. Validates `isPremium` before quoting bundle prices.
+- **`src/App.tsx`**: Updated `hasBundle` in mobile paywall lock and `renderExamDetail` to respect `meta.isPremium`. Hardened user ID resolution (`userId: profile?.uid || user?.id || 'unknown'`) across all checkout triggers to eliminate auth hydration race conditions.
+- **`src/components/StickyAICompanion.tsx`**: Hardened `parseExamPrice` to verify `meta.isPremium` before showing paywalls or prices.
 
 ## Decisions made
 
-- **Touch Action Philosophy**: Inline horizontal rows inside vertically scrolling pages should never use `touch-pan-x` (`touch-action: pan-x;`), because CSS specifications dictate that `pan-x` disables all vertical panning gestures starting on child cards. Relying on default `touch-action: auto` with CSS `overscroll-behavior-x: contain` preserves horizontal swipe while allowing full vertical page scroll freedom.
-- **Dual Cache Invalidation on Mutations**: Any write operation (create, update, single delete, bulk delete) must clear all parent and dependent catalog caches immediately before and after DB operations to guarantee that subsequent `fetchData()` calls retrieve fresh data from Supabase.
-- **Archival/Soft-Delete Isolation**: Items with active user purchases are marked `is_archived: true` to protect paid student access while being filtered out from all active admin lists and active catalog selectors.
+- **Explicit Metadata Boolean State**: All exam attributes (schedule dates, form fill-up dates, bundle pricing, and bundle enable status) are stored in `JSON_METADATA_{...}` inside Supabase `exams.description`. `isPremium` must always be explicitly written and read as a boolean flag, never inferred solely from the presence of `JSON_METADATA_`.
+- **Zero-Price Toggle Guard**: Toggling the bundle OFF saves `price: 0, originalPrice: 0, isPremium: false` to ensure backend pricing APIs and paywalls never trigger on non-bundle exams.
+- **Dual-Layer Entitlement Storage**: Purchases are stored permanently in the Supabase `user_purchases` table and synchronized into Supabase Auth user metadata (`purchasedSeries`), ensuring instant access across devices with zero access loss.
 
 ## Problems solved
 
-- **Mobile Page Scroll Lock on Cards**: Resolved touch event interception by YouTube Carousel and slider cards that previously forced mobile users to scroll from the screen margins.
-- **Deleted Items Reappearing After Alert**: Resolved stale memory cache returning deleted question banks upon `fetchData()`.
+- **Exam Bundle Toggle Switch Turning Back On**: Resolved the issue where turning off the "Full Exam Access Bundle" toggle in the Admin Edit Exam modal turned back on upon reopening the modal.
+- **Legacy Exam Metadata Ambiguity**: Updated existing exam records in Supabase to eliminate legacy metadata without `isPremium`.
 
 ## Current state
 
-- Production build passing cleanly with **0 TypeScript and 0 JSX errors** (`npm run build` exits with code 0).
-- All documentation updated (`context/progress-tracker.md`, `context/ui-registry.md`).
-- Mobile touch scrolling and admin deletions working reliably across all devices and browsers.
+- Production build passing cleanly with **0 TypeScript and 0 bundling errors** (`npm run build` exits with code 0).
+- All documentation and registries updated (`context/progress-tracker.md`, `context/ui-registry.md`).
+- Exam bundle toggle persistence, Razorpay payment flows, and access control engines verified and operational.
 
 ## Next session starts with
 
-- Continue with any new features, content additions, or student dashboard enhancements requested by the developer.
+- Ready for any new feature development, test series creation, or UI enhancements requested by the developer.
 
 ## Open questions
 

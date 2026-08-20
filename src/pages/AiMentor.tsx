@@ -3953,7 +3953,7 @@ JSON structure:
         <Target className="absolute bottom-28 right-[6%] w-36 h-36 text-indigo-600 dark:text-blue-400 opacity-[0.08] dark:opacity-[0.04] stroke-[1.2] -rotate-12" />
       </div>
 
-      <div className="space-y-6 md:space-y-10 relative z-10 pb-16 md:pb-24">
+      <div className="space-y-3 sm:space-y-6 md:space-y-10 relative z-10 pb-4 sm:pb-16 md:pb-24">
         {/* Premium Custom Confirmation Dialog */}
         <AnimatePresence>
           {confirmDialog && (
@@ -4007,8 +4007,9 @@ JSON structure:
             </div>
           )}
         </AnimatePresence>
-        {/* Header and Chip */}
-        <div className="flex flex-col items-center text-center space-y-2 md:space-y-4 mb-2 md:mb-4">
+
+        {/* Desktop Header: Full Spacious Layout */}
+        <div className="hidden sm:flex flex-col items-center text-center space-y-2 md:space-y-4 mb-2 md:mb-4">
           <span className="section-chip text-[10px] md:text-xs">
             <Sparkles className="w-3 md:w-3.5 h-3 md:h-3.5 animate-pulse text-[#2563EB]" />
             Smart Study Suite
@@ -4022,58 +4023,70 @@ JSON structure:
           </p>
         </div>
 
-      {/* Mobile-only View Selector Tab (only visible on mobile lg:hidden) */}
-      <div className="lg:hidden flex bg-slate-100 dark:bg-slate-900/90 p-0.5 rounded-xl border border-slate-200/50 dark:border-slate-800 shadow-inner overflow-hidden max-w-[280px] sm:max-w-xs mx-auto mb-4 relative z-20">
-        <button
-          type="button"
-          onClick={() => setMobileTab('chat')}
-          className={cn(
-            "flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-300 cursor-pointer relative",
-            mobileTab === 'chat' ? "text-[#2563EB] dark:text-blue-400" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
-          )}
-        >
-          {mobileTab === 'chat' && (
-            <motion.div
-              layoutId="mobileViewActiveTabBg"
-              className="absolute inset-0 bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 rounded-lg shadow-md z-0"
-              transition={{ type: "spring", stiffness: 350, damping: 28 }}
-            />
-          )}
-          <span className="relative z-10 flex items-center gap-1">
-            <Sparkles className="w-3 h-3" />
-            <span>AI Chat</span>
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setMobileTab('tools')}
-          className={cn(
-            "flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-300 cursor-pointer relative",
-            mobileTab === 'tools' ? "text-indigo-650 dark:text-indigo-400" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
-          )}
-        >
-          {mobileTab === 'tools' && (
-            <motion.div
-              layoutId="mobileViewActiveTabBg"
-              className="absolute inset-0 bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 rounded-lg shadow-md z-0"
-              transition={{ type: "spring", stiffness: 350, damping: 28 }}
-            />
-          )}
-          <span className="relative z-10 flex items-center gap-1">
-            <Calendar className="w-3 h-3" />
-            <span>Study Tools</span>
-          </span>
-        </button>
-      </div>
+        {/* Mobile Header: Ultra-Compact Single Row with Integrated Switcher */}
+        <div className="flex sm:hidden items-center justify-between px-1 mb-1">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="w-6 h-6 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/20 flex items-center justify-center text-[#2563eb] dark:text-blue-400 shrink-0">
+              <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+            </span>
+            <span className="font-sans font-black text-slate-900 dark:text-white text-xs uppercase tracking-tight truncate">
+              AI Study <span className="text-[#2563eb] dark:text-blue-400">Coach</span>
+            </span>
+          </div>
+
+          {/* Integrated Compact View Switcher */}
+          <div className="flex bg-slate-100 dark:bg-slate-900/90 p-0.5 rounded-lg border border-slate-200/50 dark:border-slate-800 shadow-xs shrink-0 relative overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setMobileTab('chat')}
+              className={cn(
+                "flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[9.5px] font-black uppercase tracking-wider transition-all duration-200 cursor-pointer relative",
+                mobileTab === 'chat' ? "text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
+              )}
+            >
+              {mobileTab === 'chat' && (
+                <motion.div
+                  layoutId="mobileViewActiveTabBg"
+                  className="absolute inset-0 bg-[#2563eb] rounded-md shadow-xs z-0"
+                  transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                />
+              )}
+              <span className="relative z-10 flex items-center gap-1">
+                <Sparkles className="w-2.5 h-2.5" />
+                <span>AI Chat</span>
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileTab('tools')}
+              className={cn(
+                "flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[9.5px] font-black uppercase tracking-wider transition-all duration-200 cursor-pointer relative",
+                mobileTab === 'tools' ? "text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
+              )}
+            >
+              {mobileTab === 'tools' && (
+                <motion.div
+                  layoutId="mobileViewActiveTabBg"
+                  className="absolute inset-0 bg-indigo-600 rounded-md shadow-xs z-0"
+                  transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                />
+              )}
+              <span className="relative z-10 flex items-center gap-1">
+                <Calendar className="w-2.5 h-2.5" />
+                <span>Tools</span>
+              </span>
+            </button>
+          </div>
+        </div>
 
       {/* Main Dual-pane Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8 items-start">
         
         {/* Left Pane: Chat Interface */}
         <div id="chat-pane" className={cn(
           isFullScreen
             ? "fixed inset-0 z-[100] w-screen h-dvh rounded-none border-none shadow-none bg-white dark:bg-[#0B1528] flex flex-col transition-all duration-300"
-            : "lg:col-span-7 bg-white dark:bg-[#0B1528] text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-blue-500/30 rounded-[2rem] overflow-hidden shadow-2xl dark:shadow-slate-950/80 flex-col h-[calc(100dvh-12rem)] min-h-[580px] lg:h-[720px] relative transition-all duration-300",
+            : "lg:col-span-7 bg-white dark:bg-[#0B1528] text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-blue-500/30 rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-2xl dark:shadow-slate-950/80 flex-col h-[calc(100dvh-130px)] sm:h-[calc(100dvh-12rem)] sm:min-h-[580px] lg:h-[720px] relative transition-all duration-300",
           mobileTab === 'chat' ? "flex" : "hidden lg:flex"
         )}>
           <div className="absolute inset-0 flex flex-col">
@@ -4909,7 +4922,7 @@ JSON structure:
 
         {/* Right Pane: Interactive Study Suite */}
         <div className={cn(
-          "lg:col-span-5 bg-white dark:bg-[#0B1528] text-slate-600 dark:text-slate-200 border border-slate-200/60 dark:border-blue-500/30 rounded-[2rem] overflow-hidden shadow-2xl dark:shadow-slate-950/80 flex-col h-[calc(100dvh-12rem)] min-h-[580px] lg:h-[720px] relative",
+          "lg:col-span-5 bg-white dark:bg-[#0B1528] text-slate-600 dark:text-slate-200 border border-slate-200/60 dark:border-blue-500/30 rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-2xl dark:shadow-slate-950/80 flex-col h-[calc(100dvh-130px)] sm:h-[calc(100dvh-12rem)] sm:min-h-[580px] lg:h-[720px] relative",
           mobileTab === 'tools' ? "flex" : "hidden lg:flex"
         )}>
           
@@ -4971,7 +4984,7 @@ JSON structure:
           </div>
 
           {/* Scrollable content pane */}
-          <div className="flex-1 overflow-y-auto overscroll-contain overflow-x-hidden p-4 pb-12 sm:p-6 sm:pb-12 no-scrollbar relative z-10 flex flex-col smooth-scroll-gpu" data-lenis-prevent style={{ contain: 'layout paint' }}>
+          <div className="flex-1 overflow-y-auto overscroll-contain overflow-x-hidden p-3 pb-6 sm:p-6 sm:pb-12 no-scrollbar relative z-10 flex flex-col smooth-scroll-gpu" data-lenis-prevent style={{ contain: 'layout paint' }}>
             <AnimatePresence mode="wait">
               {activeRightTab === 'planner' && (
                 <motion.div
@@ -4988,73 +5001,130 @@ JSON structure:
             )} />
             
             {/* Header Selector */}
-            <div className="flex justify-between items-center border-b border-slate-200/50 dark:border-slate-800 pb-3">
-              <div className="space-y-0.5 text-left">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-200/50 dark:border-slate-800 pb-3">
+              <div className="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto">
                 <span className={cn(
                   "inline-flex px-2 py-0.5 rounded text-[10px] sm:text-[9px] font-black uppercase tracking-wider",
                   coachMode === 'ai' 
                     ? "bg-indigo-500/15 dark:bg-indigo-950/50 border border-indigo-500/20 dark:border-indigo-800 text-indigo-650 dark:text-indigo-300" 
-                    : "bg-rose-500/10 dark:bg-blue-950/50 border border-rose-500/20 dark:border-blue-800 text-[#2563EB] dark:text-blue-400"
+                    : "bg-blue-500/10 dark:bg-blue-950/50 border border-blue-500/20 dark:border-blue-800 text-[#2563EB] dark:text-blue-400"
                 )}>
                   {coachMode === 'ai' ? 'AI Session Planner' : 'Focus Station'}
                 </span>
-                <h4 className="font-serif font-extrabold text-slate-900 dark:text-white text-base flex items-center gap-1.5 mt-0.5">
-                  {coachMode === 'ai' ? <Sparkles className="w-4.5 h-4.5 text-indigo-650 dark:text-indigo-400 animate-pulse" /> : <Timer className="w-4.5 h-4.5 text-[#2563EB] dark:text-blue-400" />}
-                  {coachMode === 'ai' ? 'AI Study Coach' : 'Study Timer (Pomodoro)'}
-                </h4>
+
+                {/* Switcher Toggle for Mobile (rendered inline with top badge on mobile) */}
+                <div className="flex sm:hidden bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200/50 dark:border-slate-800 shrink-0 relative overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (timerActive) {
+                        toast.error("Pause the timer before changing modes");
+                        return;
+                      }
+                      setCoachMode('manual');
+                    }}
+                    className={cn(
+                      "px-2.5 py-1 text-[9.5px] font-black uppercase tracking-wider rounded-md transition-all cursor-pointer relative",
+                      coachMode === 'manual' ? "text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
+                    )}
+                  >
+                    {coachMode === 'manual' && (
+                      <motion.div
+                        layoutId="activeCoachModeBgMobile"
+                        className="absolute inset-0 bg-gradient-to-r from-[#2563eb] to-[#3b82f6] rounded-md z-0 shadow-sm"
+                        transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                      />
+                    )}
+                    <span className="relative z-10">Manual</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (timerActive) {
+                        toast.error("Pause the timer before changing modes");
+                        return;
+                      }
+                      setCoachMode('ai');
+                    }}
+                    className={cn(
+                      "px-2.5 py-1 text-[9.5px] font-black uppercase tracking-wider rounded-md transition-all cursor-pointer flex items-center gap-1 relative",
+                      coachMode === 'ai' ? "text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
+                    )}
+                  >
+                    {coachMode === 'ai' && (
+                      <motion.div
+                        layoutId="activeCoachModeBgMobile"
+                        className="absolute inset-0 bg-indigo-600 rounded-md z-0 shadow-sm"
+                        transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-1">
+                      <Sparkles className="w-2.5 h-2.5" />
+                      <span>AI Coach</span>
+                    </span>
+                  </button>
+                </div>
               </div>
-              
-              {/* Switcher Toggle */}
-              <div className="flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200/50 dark:border-slate-800 shrink-0 relative overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (timerActive) {
-                      toast.error("Pause the timer before changing modes");
-                      return;
-                    }
-                    setCoachMode('manual');
-                  }}
-                  className={cn(
-                    "px-3 py-1.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-[9px] font-black uppercase tracking-wider rounded-md transition-all cursor-pointer relative",
-                    coachMode === 'manual' ? "text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
-                  )}
-                >
-                  {coachMode === 'manual' && (
-                    <motion.div
-                      layoutId="activeCoachModeBg"
-                      className="absolute inset-0 bg-gradient-to-r from-[#2563eb] to-[#3b82f6] rounded-md z-0 shadow-sm"
-                      transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                    />
-                  )}
-                  <span className="relative z-10">Manual</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (timerActive) {
-                      toast.error("Pause the timer before changing modes");
-                      return;
-                    }
-                    setCoachMode('ai');
-                  }}
-                  className={cn(
-                    "px-3 py-1.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-[9px] font-black uppercase tracking-wider rounded-md transition-all cursor-pointer flex items-center gap-1 relative",
-                    coachMode === 'ai' ? "text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
-                  )}
-                >
-                  {coachMode === 'ai' && (
-                    <motion.div
-                      layoutId="activeCoachModeBg"
-                      className="absolute inset-0 bg-indigo-600 rounded-md z-0 shadow-sm"
-                      transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                    />
-                  )}
-                  <span className="relative z-10 flex items-center gap-1">
-                    <Sparkles className="w-2.5 h-2.5" />
-                    <span>AI Coach</span>
-                  </span>
-                </button>
+
+              {/* Title Header: 100% full width on mobile */}
+              <div className="flex items-center justify-between w-full sm:w-auto">
+                <h4 className="font-sans font-black text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-1.5 tracking-tight uppercase">
+                  {coachMode === 'ai' ? <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" /> : <Timer className="w-4 h-4 text-[#2563EB] dark:text-blue-400 shrink-0" />}
+                  <span>{coachMode === 'ai' ? 'AI Study Coach' : 'Study Timer (Pomodoro)'}</span>
+                </h4>
+
+                {/* Switcher Toggle for Desktop */}
+                <div className="hidden sm:flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200/50 dark:border-slate-800 shrink-0 relative overflow-hidden ml-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (timerActive) {
+                        toast.error("Pause the timer before changing modes");
+                        return;
+                      }
+                      setCoachMode('manual');
+                    }}
+                    className={cn(
+                      "px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-md transition-all cursor-pointer relative",
+                      coachMode === 'manual' ? "text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
+                    )}
+                  >
+                    {coachMode === 'manual' && (
+                      <motion.div
+                        layoutId="activeCoachModeBgDesktop"
+                        className="absolute inset-0 bg-gradient-to-r from-[#2563eb] to-[#3b82f6] rounded-md z-0 shadow-sm"
+                        transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                      />
+                    )}
+                    <span className="relative z-10">Manual</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (timerActive) {
+                        toast.error("Pause the timer before changing modes");
+                        return;
+                      }
+                      setCoachMode('ai');
+                    }}
+                    className={cn(
+                      "px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-md transition-all cursor-pointer flex items-center gap-1 relative",
+                      coachMode === 'ai' ? "text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
+                    )}
+                  >
+                    {coachMode === 'ai' && (
+                      <motion.div
+                        layoutId="activeCoachModeBgDesktop"
+                        className="absolute inset-0 bg-indigo-600 rounded-md z-0 shadow-sm"
+                        transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-1">
+                      <Sparkles className="w-2.5 h-2.5" />
+                      <span>AI Coach</span>
+                    </span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -5080,7 +5150,7 @@ JSON structure:
                     className={cn(
                       "relative z-10 inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all duration-300 cursor-pointer active:scale-95",
                       timerMode === 'study'
-                        ? "bg-rose-500/8 dark:bg-blue-950/50 border-rose-500/20 dark:border-blue-500/30 text-[#2563eb] dark:text-blue-300"
+                        ? "bg-blue-500/10 dark:bg-blue-950/50 border-blue-500/20 dark:border-blue-500/30 text-[#2563eb] dark:text-blue-300"
                         : "bg-emerald-500/10 dark:bg-emerald-950/50 border-emerald-500/25 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300"
                     )}
                   >
@@ -5093,7 +5163,7 @@ JSON structure:
                   </button>
 
                   {/* Circular Timer — larger on mobile for better visual impact */}
-                  <div className="relative flex items-center justify-center w-40 h-40 sm:w-28 sm:h-28 shrink-0 bg-white/80 dark:bg-[#060B16] rounded-full border border-slate-200/40 dark:border-slate-800 p-2 shadow-inner z-10">
+                  <div className="relative flex items-center justify-center w-36 h-36 sm:w-28 sm:h-28 shrink-0 bg-white/80 dark:bg-[#060B16] rounded-full border border-slate-200/40 dark:border-slate-800 p-2 shadow-inner z-10">
                     <svg className="w-full h-full transform -rotate-90" viewBox="0 0 112 112">
                       <defs>
                         <linearGradient id="studyTimerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -5161,7 +5231,7 @@ JSON structure:
                       type="button"
                       onClick={toggleTimer}
                       className={cn(
-                        "w-full py-3.5 sm:py-2.5 rounded-xl text-sm sm:text-xs font-black uppercase tracking-widest transition-all duration-300 cursor-pointer active:scale-[0.98] text-center text-white shadow-md premium-btn-transition",
+                        "w-full py-3 sm:py-2.5 rounded-xl text-sm sm:text-xs font-black uppercase tracking-widest transition-all duration-300 cursor-pointer active:scale-[0.98] text-center text-white shadow-md premium-btn-transition",
                         timerActive
                           ? "bg-gradient-to-r from-amber-600 to-amber-500 shadow-amber-600/20"
                           : "bg-gradient-to-r from-[#2563eb] to-[#3b82f6] shadow-[#2563eb]/20"
@@ -5204,8 +5274,8 @@ JSON structure:
                       </div>
                     </div>
 
-                    {/* Preset chips — clean inline solid pills */}
-                    <div className="flex items-center gap-1.5 sm:gap-1">
+                    {/* Preset chips — 4-column responsive grid */}
+                    <div className="grid grid-cols-4 gap-1.5 sm:gap-1">
                       {timerMode === 'study' ? (
                         <>
                           {[25, 45, 60].map((mins) => {
@@ -5224,7 +5294,7 @@ JSON structure:
                                   }
                                 }}
                                 className={cn(
-                                  "flex-1 py-2 sm:py-1.5 rounded-xl text-[11px] sm:text-[10px] font-black uppercase transition-all duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border",
+                                  "py-2 sm:py-1.5 rounded-xl text-[11px] sm:text-[10px] font-black uppercase transition-all duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border text-center",
                                   isSelected
                                     ? "bg-[#2563eb] text-white border-[#2563eb] shadow-sm shadow-[#2563eb]/20"
                                     : "bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-300 border-slate-200/60 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-700 dark:hover:text-white"
@@ -5236,7 +5306,7 @@ JSON structure:
                           })}
                           {/* Custom input chip */}
                           <div className={cn(
-                            "flex-1 py-1.5 rounded-xl border flex items-center justify-center gap-0.5 transition-all duration-200",
+                            "py-1.5 rounded-xl border flex items-center justify-center gap-0.5 transition-all duration-200",
                             ![1500, 2700, 3600].includes(timerMaxSeconds)
                               ? "bg-[#2563eb] border-[#2563eb] shadow-sm shadow-[#2563eb]/20"
                               : "bg-slate-50 dark:bg-slate-800/80 border-slate-200/60 dark:border-slate-700"
@@ -5253,7 +5323,7 @@ JSON structure:
                                 }
                               }}
                               className={cn(
-                                "w-8 text-center bg-transparent font-black text-[11px] sm:text-[10px] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none p-0 disabled:opacity-40",
+                                "w-7 text-center bg-transparent font-black text-[11px] sm:text-[10px] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none p-0 disabled:opacity-40",
                                 ![1500, 2700, 3600].includes(timerMaxSeconds) ? "text-white" : "text-slate-500 dark:text-slate-300"
                               )}
                               min="1"
@@ -5283,7 +5353,7 @@ JSON structure:
                                   }
                                 }}
                                 className={cn(
-                                  "flex-1 py-2 sm:py-1.5 rounded-xl text-[11px] sm:text-[10px] font-black uppercase transition-all duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border",
+                                  "py-2 sm:py-1.5 rounded-xl text-[11px] sm:text-[10px] font-black uppercase transition-all duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border text-center",
                                   isSelected
                                     ? "bg-emerald-600 text-white border-emerald-600 shadow-sm shadow-emerald-600/20"
                                     : "bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-300 border-slate-200/60 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-700 dark:hover:text-white"
@@ -5295,7 +5365,7 @@ JSON structure:
                           })}
                           {/* Custom break input chip */}
                           <div className={cn(
-                            "flex-1 py-1.5 rounded-xl border flex items-center justify-center gap-0.5 transition-all duration-200",
+                            "py-1.5 rounded-xl border flex items-center justify-center gap-0.5 transition-all duration-200",
                             ![300, 600, 900].includes(breakMaxSeconds)
                               ? "bg-emerald-600 border-emerald-600 shadow-sm shadow-emerald-600/20"
                               : "bg-slate-50 dark:bg-slate-800/80 border-slate-200/60 dark:border-slate-700"
@@ -5312,7 +5382,7 @@ JSON structure:
                                 }
                               }}
                               className={cn(
-                                "w-8 text-center bg-transparent font-black text-[11px] sm:text-[10px] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none p-0 disabled:opacity-40",
+                                "w-7 text-center bg-transparent font-black text-[11px] sm:text-[10px] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none p-0 disabled:opacity-40",
                                 ![300, 600, 900].includes(breakMaxSeconds) ? "text-white" : "text-slate-500 dark:text-slate-300"
                               )}
                               min="1"

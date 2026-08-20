@@ -26,7 +26,7 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
   children,
   className = '',
   glowColor = 'rgba(37, 99, 235, 0.25)',
-  roundedClass = 'rounded-3xl sm:rounded-[2.5rem]',
+  roundedClass = 'rounded-2xl sm:rounded-[2.5rem]',
   enableTilt = true,
   onClick,
   style = {}
@@ -156,7 +156,7 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
 
     // Buttery-smooth spring return to flat resting state on exit
     card.style.transition = 'transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s ease';
-    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+    card.style.transform = 'none';
   }, []);
 
   // Cleanup on unmount
@@ -186,15 +186,13 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
       style={{
-        perspective: '1000px',
-        transformStyle: 'preserve-3d',
-        transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
+        transform: 'none',
         transition: 'transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s ease',
         WebkitFontSmoothing: 'antialiased',
         MozOsxFontSmoothing: 'grayscale',
         ...style
       }}
-      className={`relative isolate overflow-hidden ${roundedClass} ${className} group/vector-card will-change-transform`}
+      className={`relative isolate overflow-hidden ${roundedClass} ${className} group/vector-card hover:will-change-transform`}
     >
       {/* ── Layer A: Ambient + cursor warmth (z-0, behind content) ───── */}
       <div

@@ -11,7 +11,7 @@ interface PageLayoutProps {
 
 export default function PageLayout({ children, className, backTo }: PageLayoutProps) {
   return (
-    <div className={cn('min-h-screen bg-[#F8FAFC] font-sans', className)}>
+    <div className={cn('min-h-screen bg-[#F8FAFC] dark:bg-[#060B16] text-slate-900 dark:text-white font-sans transition-colors duration-200', className)}>
       {backTo && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8">
           <Link

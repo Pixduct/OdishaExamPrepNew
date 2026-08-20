@@ -2335,15 +2335,16 @@ Last updated: August 20, 2026
 
 | Property | Class / Token |
 | :--- | :--- |
-| **Background (Container)** | `relative isolate overflow-hidden ${roundedClass} ${className} group/vector-card will-change-transform` |
+| **Background (Container)** | `relative isolate overflow-hidden ${roundedClass} ${className} group/vector-card hover:will-change-transform` |
 | **Background (Ambient Layer)** | `radial-gradient(${ambientRadius}px circle at ${pctX}% ${pctY}%, ${glowColor})` at `z-0` |
 | **Border** | `border-none` or passed via props (borderless vector elevation) |
 | **Border radius** | `rounded-3xl sm:rounded-[2.5rem]` (default `roundedClass` prop) |
 | **Text — primary** | Inherited in Layer C (`relative z-10 w-full h-full`) |
 | **Text — secondary** | Inherited in Layer C (`relative z-10 w-full h-full`) |
 | **Spacing** | Contained in children (`p-6`, `p-8`, etc.) |
+| **Resting State** | Flat 2D transform (`transform: none`) with `hover:will-change-transform` to eliminate idle 3D composite memory overhead across multi-card views |
 | **Hover / Active Tracking** | Instant 0ms latency hardware `requestAnimationFrame` tilt (`rotateX`, `rotateY`, `scale3d(1.015,1.015,1.015)`) with `transition: none` |
-| **Exit State** | Buttery-smooth spring return (`transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s ease`) |
+| **Exit State** | Buttery-smooth spring return (`transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s ease`) returning to `transform: none` |
 | **Shadow** | Preserved from props/classes (e.g., `shadow-xl shadow-slate-950/20`) |
 | **Accent / Glow** | Dynamic theme-aware `glowColor` (`rgba(37, 99, 235, 0.25)` default; dark mode `coreAlpha: 0.40`, light mode `coreAlpha: 0.22`) |
 | **Shine Effect** | Single-pass 1.2s `shine-sweep` (`linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)` at `z-20`) |
@@ -2353,6 +2354,7 @@ Last updated: August 20, 2026
 - **Hardware VSYNC Synchronization**: All mouse coordinates and 3D angle calculations (`rotateX`, `rotateY`, `scale3d`) and ambient spotlight updates MUST be batched via `requestAnimationFrame` to synchronize with monitor refresh rates (60Hz, 120Hz, 144Hz, 240Hz) with zero frame drops.
 - **Untransformed Bounds Caching**: Card bounding dimensions (`rectRef.current`) MUST be cached upon `onMouseEnter` to prevent 3D rotation projection feedback loops from jittering the layout calculations.
 - **Layer Stacking Hierarchy**: Always enforce Layer A Ambient Spotlight at `z-0`, Layer C Child Content at `relative z-10`, and Layer D Shine Sweep at `z-20` so cursor light glows underneath text and UI components without reducing readability.
+- **120 FPS Idle Offloading**: `hover:will-change-transform` and resting `transform: none` ensure idle cards do not allocate persistent GPU 3D rendering buffers during scroll, maintaining fluid 120 FPS scrolling across dense hub pages.
 - **Flex Layout Inside Wrapper**: Because `DynamicVectorCard` wraps children inside a nested `zIndex: 10` content wrapper `div` (Layer C) that does not pass through flex layout styles, callers MUST place flex layout classes (e.g. `flex flex-col sm:flex-row items-center justify-between gap-6`) on a wrapper `div` inside the card rather than on the `DynamicVectorCard` class directly.
 
 ---
@@ -2544,9 +2546,180 @@ Last updated: August 20, 2026
 | **User Profile Footer Card** | Container: `bg-[#FAF8F5] dark:bg-[#060B16] border border-slate-200/60 dark:border-slate-800 shadow-md shadow-slate-200/30 dark:shadow-slate-950/50`; Name: `text-slate-800 dark:text-white`; Email: `text-slate-400 dark:text-slate-400`; Divider: `bg-slate-200/60 dark:bg-slate-800` |
 | **Sign Out Button** | `text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/40 hover:bg-rose-50 dark:hover:bg-rose-950/60 border border-rose-100/50 dark:border-rose-800/50` |
 
+---
+
+### 69. `AdminExamEditModalForm` (Exam & Schedule Monitor Editor Modal)
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L2200-L2320)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Modal Container** | `glass rounded-[2.5rem] w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border-white/60 bg-white dark:bg-slate-900 text-slate-900 dark:text-white` |
+| **Section Card (Schedule Monitor)** | `p-6 bg-slate-50 dark:bg-slate-800/40 rounded-3xl border border-slate-100 dark:border-slate-700/50 space-y-4` |
+| **Bundle Card Container** | `p-6 bg-brand-50/40 dark:bg-brand-950/20 rounded-3xl border border-brand-100/50 dark:border-brand-900/40 space-y-4 mt-6` |
+| **Bundle Icon Badge** | `w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center text-white shadow-md shadow-brand-500/10` |
+| **Toggle Switch Track** | `w-12 h-6.5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer-checked:bg-brand-500 transition-all` |
+| **Toggle Switch Knob** | `after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-sm peer-checked:after:translate-x-[22px]` |
+| **Text — Primary** | `text-base font-black text-slate-900 dark:text-white leading-tight` |
+| **Text — Subtitle** | `text-xs font-bold text-slate-400 dark:text-slate-400 italic mt-0.5` |
+| **Inputs (Price & Dates)** | `w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold text-sm text-slate-900 dark:text-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10` |
+| **Submit Button** | `px-8 py-3 rounded-xl premium-gradient text-white font-black hover:premium-glow shadow-lg shadow-brand-500/20 transition-all active:scale-[0.98] text-sm shrink-0` |
+| **Cancel Button** | `px-6 py-3 rounded-xl border border-slate-200 dark:border-slate-700 font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-sm shrink-0 bg-white dark:bg-slate-800 shadow-sm` |
+
+---
+
+### 70. `LibraryEmptyStateCardAndGlobalToaster` (Library Empty State Card & Global Toaster Dark Mode Overhaul)
+
+Files: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx), [`src/index.css`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/index.css)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Library Card Shell** | `bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 p-8 md:p-16 rounded-2xl md:rounded-[2.5rem] text-center max-w-2xl mx-auto shadow-2xl dark:shadow-slate-950/80` |
+| **Lock Icon Box** | `w-16 h-16 md:w-24 md:h-24 bg-slate-100 dark:bg-[#060B16] border border-slate-200/80 dark:border-slate-800 rounded-2xl md:rounded-3xl flex items-center justify-center mx-auto shadow-inner` |
+| **Lock Icon** | `Lock` (`text-slate-400 dark:text-blue-400`) |
+| **Card Heading** | `text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight` |
+| **Card Subtitle** | `text-slate-600 dark:text-slate-300 max-w-md mx-auto text-sm md:text-lg leading-relaxed font-medium` |
+| **CTA Button** | `bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-sm md:text-base rounded-2xl shadow-xl shadow-blue-600/25` |
+| **Global Toaster Popup** | `Toaster` styled dynamically via `useTheme()`: `background: isDark ? '#0B1528' : '#ffffff'`, `color: isDark ? '#f8fafc' : '#0f172a'`, `border: isDark ? '1px solid rgba(59, 130, 246, 0.3)' : '1px solid rgba(226, 232, 240, 0.8)'` |
+| **CSS Fallback Rule** | `html.dark .premium-glass-card { background: rgba(11, 21, 40, 0.95); border-color: rgba(59, 130, 246, 0.3); }` |
+
+---
+
+### 71. `SegmentedGatewayTabSwitcher` (Segmented Navigation Gateway Tab Bar Dark Mode Optimization)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Sticky Container** | `sticky top-16 z-20 -mx-4 px-4 py-2.5 bg-slate-50/95 dark:bg-[#060B16]/95 backdrop-blur-md mt-1` |
+| **Segmented Track Container** | `flex bg-slate-100 dark:bg-[#0B1528] p-1 rounded-xl relative shadow-inner border border-slate-200/80 dark:border-slate-800` |
+| **Active Sliding Pill (`motion.div`)** | `absolute inset-0 bg-white dark:bg-[#060B16] rounded-lg shadow-sm border border-slate-200/50 dark:border-blue-500/30 z-0` (or `dark:border-amber-500/30` / `dark:border-emerald-500/30`) |
+| **Practice Tests Tab Text & Icon** | Active: `text-indigo-700 dark:text-blue-400 font-extrabold`; Inactive: `text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200` |
+| **Mock Tests Tab Text & Icon** | Active: `text-amber-700 dark:text-amber-300 font-extrabold`; Inactive: `text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200` |
+| **Question Bank Tab Text & Icon** | Active: `text-brand-700 dark:text-emerald-400 font-extrabold`; Inactive: `text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200` |
+
+---
+
+### 72. `TimePickerDarkThemePills` (TimePicker Input Pills Dark Mode Optimization)
+
+File: [`src/components/TimePicker.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/TimePicker.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Input Display Pill Shell** | `w-full bg-slate-50 dark:bg-[#060B16] border border-slate-200/60 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-white` |
+| **Monospaced Time Value** | `tabular-nums font-mono tracking-wide text-slate-800 dark:text-white` |
+| **Clock Icon** | `Clock` (`text-slate-400 dark:text-slate-400`, active: `text-[#2563eb] dark:text-blue-400`) |
+| **Dropdown Selector Popover** | `bg-white/95 dark:bg-[#0B1528] backdrop-blur-md border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xl dark:shadow-slate-950/90` |
+| **Column Titles** | `text-[9px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-400` |
+| **Unselected Option Pills** | `text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800` |
+| **Selected Option Pill** | `bg-[#2563eb] text-white font-extrabold` |
+| **Done Button** | `bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-500 text-white rounded-xl` |
+
+---
+
+### 73. `HistoryEmptyStateCard` (History View Empty State Card Dark Mode Optimization)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Container Shell** | `flex flex-col items-center justify-center p-8 sm:p-16 text-center space-y-6 bg-white dark:bg-[#0B1528] rounded-2xl sm:rounded-[2.5rem] border border-slate-200/80 dark:border-slate-800 shadow-2xl dark:shadow-slate-950/80 relative overflow-hidden py-12 sm:py-16` |
+| **History Icon Box** | `w-20 h-20 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl bg-slate-100 dark:bg-[#060B16] border border-slate-200/80 dark:border-slate-800 shadow-inner flex items-center justify-center` |
+| **History Icon** | `History` (`text-brand-600 dark:text-blue-400 animate-float-sm`) |
+| **Card Heading** | `text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight` |
+| **Card Subtitle** | `text-slate-600 dark:text-slate-300 font-medium text-xs sm:text-sm leading-relaxed` |
+| **CTA Button** | `px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs sm:text-sm rounded-2xl shadow-xl shadow-blue-600/25` |
+
+---
+
+### 74. `AnalyticsEmptyStateCard` (Analytics View Empty State Card Dark Mode Optimization)
+
+File: [`src/AnalyticsView.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AnalyticsView.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Container Shell** | `w-full bg-white dark:bg-[#0B1528] rounded-2xl sm:rounded-[2.5rem] border border-slate-200/80 dark:border-slate-800 p-8 sm:p-12 shadow-2xl dark:shadow-slate-950/80 relative overflow-hidden flex flex-col items-center justify-center` |
+| **Dashboard Icon Box** | `w-20 h-20 sm:w-24 sm:h-24 bg-slate-100 dark:bg-[#060B16] rounded-2xl sm:rounded-3xl flex items-center justify-center border border-slate-200/80 dark:border-slate-800 shadow-inner` |
+| **Dashboard Icon** | `LayoutDashboard` (`text-brand-600 dark:text-blue-400`) |
+| **Card Heading** | `text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight` |
+| **Card Subtitle** | `text-slate-600 dark:text-slate-300 font-medium text-xs sm:text-sm leading-relaxed max-w-md` |
+| **CTA Button** | `px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-2xl font-black text-xs sm:text-sm shadow-xl shadow-blue-600/25` |
+
+---
+
+### 75. `CurrentAffairsMobileReadButtonAndDarkTheme` (Current Affairs Page & Mobile Blue Read Button Optimization)
+
+Files: [`src/pages/CurrentAffairs.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/CurrentAffairs.tsx), [`src/components/PageLayout.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/PageLayout.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Page Root Shell** | `min-h-screen bg-[#F8FAFC] dark:bg-[#060B16] text-slate-900 dark:text-white` |
+| **Category Active Pill** | `bg-slate-900 dark:bg-blue-600 text-white border-slate-900 dark:border-blue-500 shadow-md` |
+| **Category Inactive Pill** | `bg-white dark:bg-[#0B1528] text-slate-600 dark:text-slate-300 border-slate-200/80 dark:border-slate-800` |
+| **Digest Card Shell** | `bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-3xl` |
+| **Read 360° Digest Button (Mobile)** | `bg-gradient-to-r from-blue-600 to-indigo-600 text-white border border-blue-500/30 shadow-md shadow-blue-600/20 font-black` (Permanently blue on mobile `< 640px`) |
+| **Read 360° Digest Button (Desktop)** | `sm:bg-slate-50 dark:sm:bg-[#060B16] sm:text-slate-700 dark:sm:text-slate-200 sm:group-hover:bg-blue-600 sm:group-hover:text-white` |
+
+---
+
+### 76. `RichHTMLProseTextLegibilityDarkTheme` (Rich HTML Article Text Legibility Overrides)
+
+Files: [`src/index.css`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/index.css), [`src/pages/CurrentAffairs.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/CurrentAffairs.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Global CSS Prose Paragraph Override** | `html.dark .prose p, html.dark .prose span, html.dark .prose li { color: #f8fafc !important; }` |
+| **Global CSS Prose Table Override** | `html.dark .prose table { background-color: #0B1528 !important; border-color: #1e293b !important; color: #e2e8f0 !important; }` |
+| **Article Summary Excerpt** | `text-slate-600 dark:text-slate-200 font-medium leading-relaxed` |
+| **Event Date Metadata** | `text-slate-500 dark:text-slate-300 font-semibold` |
+
+---
+
+### 77. `SectionalSubjectFilterPillsDarkTheme` (Sectional Subject Filter Pills Dark Mode Optimization)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Active Subject Pill** | `bg-blue-600 dark:bg-blue-600 border-blue-600 dark:border-blue-500 text-white font-black scale-[1.02] shadow-md shadow-blue-600/25` |
+| **Inactive Subject Pill** | `bg-white dark:bg-[#0B1528] hover:bg-slate-50 dark:hover:bg-slate-800 border-slate-200/80 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white` |
+| **Subject Section Badge** | `bg-brand-50/80 dark:bg-[#0B1528] text-brand-700 dark:text-indigo-300 border border-brand-100/50 dark:border-slate-800` |
+
+---
+
+### 78. `ExamDetailMockTestCardDarkTheme` (Exam Detail Mock Test Card Dark Mode Optimization)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Shell Container** | `px-3 py-2.5 sm:p-4 bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-xl sm:rounded-2xl` |
+| **Left Icon Box Badge** | `w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-indigo-50/60 dark:bg-[#060B16] border border-indigo-100/30 dark:border-slate-800 text-indigo-650 dark:text-blue-400` |
+| **Right Action Chevron Button** | `w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-50 dark:bg-[#060B16] border border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-300 group-active:bg-blue-600` |
+| **Stat Micro-Pills** | `bg-slate-50 dark:bg-[#060B16] border border-slate-100/60 dark:border-slate-800 text-slate-600 dark:text-slate-300` |
+
 **Pattern notes:**
-- **Zero Light Flash in Dark Mode**: Mobile menu drawer dynamically switches from crisp off-white to deep sapphire (`dark:bg-[#0B1528]`) and midnight profile cards (`dark:bg-[#060B16]`).
-- **Luminescent Accent Badges**: Icon containers and active link pills feature dark translucent glows (`dark:bg-amber-950/70`, `dark:bg-blue-950/70`, `dark:bg-rose-950/70`) with high-contrast text.
+- **Zero White Circle Button & Dull Icon Box Artifacts**: Replaced dull light-mode icon boxes and white circle buttons (`bg-slate-50`) with deep midnight tokens (`dark:bg-[#060B16]`, `dark:border-slate-800`, `dark:text-blue-400`), guaranteeing crisp contrast and modern aesthetics in dark mode.
+
+
+
+
+
+
+
+
+
+
 
 
 

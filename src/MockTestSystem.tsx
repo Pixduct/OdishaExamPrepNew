@@ -763,40 +763,40 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
   if (!isStarted) {
     const fmt = (n: number) => Number.isInteger(n) ? String(n) : n.toFixed(2);
     return (
-      <div className="fixed inset-0 w-full h-[100dvh] max-h-[100dvh] bg-[#FBF9F6] dark:bg-slate-950 z-[100] flex flex-col font-sans overflow-hidden" data-lenis-prevent>
+      <div className="fixed inset-0 w-full h-[100dvh] max-h-[100dvh] bg-[#FBF9F6] dark:bg-[#060B16] z-[100] flex flex-col font-sans overflow-hidden" data-lenis-prevent>
         {/* Subtle grid and gradient meshes overlay */}
         <div className="absolute inset-0 pointer-events-none z-[1] opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle, rgba(37,99,235,0.3) 0.5px, transparent 0.5px)', backgroundSize: '24px 24px' }} />
         <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-[#2563eb]/5 to-transparent pointer-events-none z-[1]" />
 
         {/* Sticky Glassmorphic Header with Top Safe Area Inset */}
-        <header className="shrink-0 flex items-center justify-between px-4 sm:px-10 pt-[max(env(safe-area-inset-top),0.75rem)] pb-3 sm:py-5 border-b border-slate-200/60 dark:border-slate-800 bg-white/85 dark:bg-slate-900/90 backdrop-blur-md z-20 relative">
+        <header className="shrink-0 flex items-center justify-between px-3.5 sm:px-10 pt-[max(env(safe-area-inset-top),0.75rem)] pb-3 sm:py-5 border-b border-slate-200/60 dark:border-slate-800 bg-white/85 dark:bg-[#060B16]/90 backdrop-blur-md z-20 relative">
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#2563eb]/5 border border-[#2563eb]/10 flex items-center justify-center shrink-0">
-              <FileText className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-[#2563eb]" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#2563eb]/10 dark:bg-blue-950/60 border border-[#2563eb]/20 dark:border-blue-800/60 flex items-center justify-center shrink-0">
+              <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-[#2563eb] dark:text-blue-400" />
             </div>
             <div>
-              <span className="text-slate-400 dark:text-slate-500 text-[9px] sm:text-[10px] font-black uppercase tracking-widest block leading-none">Assessment System</span>
+              <span className="text-slate-400 dark:text-slate-500 text-[8.5px] sm:text-[10px] font-black uppercase tracking-widest block leading-none">Assessment System</span>
               <span className="text-slate-800 dark:text-white text-xs sm:text-sm font-extrabold tracking-tight mt-0.5 sm:mt-1 block">General Briefing</span>
             </div>
           </div>
           <button 
             onClick={() => onExit(undefined)} 
-            className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200/80 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all duration-200 cursor-pointer shrink-0"
+            className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200/80 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all duration-200 cursor-pointer shrink-0"
           >
-            <X className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </header>
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto no-scrollbar px-3.5 sm:px-10 pt-4 sm:pt-10 pb-20 sm:pb-32 relative z-10">
-          <div className="max-w-6xl mx-auto space-y-4 sm:space-y-8">
+        <div className="flex-1 overflow-y-auto no-scrollbar px-3 sm:px-10 pt-3.5 sm:pt-10 pb-20 sm:pb-32 relative z-10">
+          <div className="max-w-6xl mx-auto space-y-3.5 sm:space-y-8">
             
             {/* Motivation Header */}
-            <div className="text-center space-y-2 sm:space-y-3 max-w-2xl mx-auto">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#2563eb]/5 border border-[#2563eb]/15 rounded-full text-[#2563eb] dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest">
+            <div className="text-center space-y-1.5 sm:space-y-3 max-w-2xl mx-auto">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#2563eb]/10 dark:bg-blue-950/50 border border-[#2563eb]/20 dark:border-blue-800/60 rounded-full text-[#2563eb] dark:text-blue-400 text-[10px] font-black uppercase tracking-widest">
                 <BookOpen className="w-3.5 h-3.5" /> {currentMode === 'practice' ? 'Practice Mode Active' : 'Official Mock Exam'}
               </div>
-              <h1 className="text-xl sm:text-4xl font-serif font-black text-slate-900 dark:text-white tracking-tight leading-tight px-1">
+              <h1 className="text-lg sm:text-4xl font-serif font-black text-slate-900 dark:text-white tracking-tight leading-tight px-1">
                 {test.title}
               </h1>
               <p className="hidden sm:block text-slate-500 dark:text-slate-400 text-sm sm:text-base font-medium leading-relaxed">
@@ -805,10 +805,10 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
             </div>
 
             {/* Mode Selection Panel */}
-            <div className="bg-white dark:bg-slate-900/90 border border-slate-200/60 dark:border-slate-800 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 shadow-sm max-w-4xl mx-auto space-y-3 sm:space-y-4">
+            <div className="bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-2xl sm:rounded-[2rem] p-3.5 sm:p-6 shadow-sm max-w-4xl mx-auto space-y-3 sm:space-y-4">
               <div className="text-center">
-                <span className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest block leading-none">Select Session Style</span>
-                <h3 className="text-slate-800 dark:text-white text-sm sm:text-base font-black tracking-tight mt-1">Choose How You Want to Study</h3>
+                <span className="text-slate-400 dark:text-slate-500 text-[9.5px] sm:text-[10px] font-black uppercase tracking-widest block leading-none">Select Session Style</span>
+                <h3 className="text-slate-800 dark:text-white text-xs sm:text-base font-black tracking-tight mt-1">Choose How You Want to Study</h3>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-4">
@@ -820,10 +820,10 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                     setUntimedPractice(false);
                   }}
                   className={cn(
-                    "p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 text-left transition-all duration-300 flex flex-col gap-2 sm:gap-0 sm:space-y-3 cursor-pointer active:scale-[0.98]",
+                    "p-3 sm:p-5 rounded-xl sm:rounded-2xl border-2 text-left transition-all duration-300 flex flex-col gap-1.5 sm:gap-0 sm:space-y-3 cursor-pointer active:scale-[0.98]",
                     currentMode === 'mock'
-                      ? "border-[#2563eb] bg-[#2563eb]/5 dark:bg-indigo-600/20 shadow-sm"
-                      : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-white hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50/50"
+                      ? "border-[#2563eb] dark:border-blue-500 bg-[#2563eb]/5 dark:bg-blue-950/40 shadow-sm"
+                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 text-slate-900 dark:text-white hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50/50"
                   )}
                 >
                   <div className="flex items-center justify-between w-full">
@@ -831,18 +831,18 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                       "px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-md border whitespace-nowrap",
                       currentMode === 'mock'
                         ? "bg-[#2563eb] border-[#2563eb] text-white font-black"
-                        : "bg-slate-100 border-slate-200 text-slate-500"
+                        : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
                     )}>
                       🏆 Exam Mode
                     </span>
-                    <span className="text-[9px] font-black uppercase text-slate-400">Strict Timed</span>
+                    <span className="text-[9px] font-black uppercase text-slate-400 dark:text-slate-500">Strict Timed</span>
                   </div>
                   <div>
-                    <h4 className="text-sm font-extrabold text-slate-800">Official Exam Simulation</h4>
-                    <p className="hidden sm:block text-[11px] text-slate-500 font-semibold leading-relaxed mt-1">
+                    <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white">Official Exam Simulation</h4>
+                    <p className="hidden sm:block text-[11px] text-slate-500 dark:text-slate-400 font-semibold leading-relaxed mt-1">
                       Strict countdown timer. Negative markings apply. Answers and explanations will be shown only after you submit the test.
                     </p>
-                    <p className="sm:hidden text-[10px] text-slate-500 font-semibold mt-0.5 leading-snug">Timer · Negative marking · Results after submission</p>
+                    <p className="sm:hidden text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5 leading-snug">Timer · Negative marking · Results after submission</p>
                   </div>
                 </button>
 
@@ -851,10 +851,10 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                   type="button"
                   onClick={() => setCurrentMode('practice')}
                   className={cn(
-                    "p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 text-left transition-all duration-300 flex flex-col gap-2 sm:gap-0 sm:space-y-3 cursor-pointer active:scale-[0.98]",
+                    "p-3 sm:p-5 rounded-xl sm:rounded-2xl border-2 text-left transition-all duration-300 flex flex-col gap-1.5 sm:gap-0 sm:space-y-3 cursor-pointer active:scale-[0.98]",
                     currentMode === 'practice'
-                      ? "border-emerald-500 bg-emerald-500/5 shadow-sm"
-                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                      ? "border-emerald-500 dark:border-emerald-500 bg-emerald-500/5 dark:bg-emerald-950/40 shadow-sm"
+                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 text-slate-900 dark:text-white hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50/50"
                   )}
                 >
                   <div className="flex items-center justify-between w-full">
@@ -862,32 +862,31 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                       "px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-md border whitespace-nowrap",
                       currentMode === 'practice'
                         ? "bg-emerald-500 border-emerald-500 text-white font-black"
-                        : "bg-slate-100 border-slate-200 text-slate-500"
+                        : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
                     )}>
                       📖 Practice Mode
                     </span>
-                    <span className="text-[9px] font-black uppercase text-slate-400">Self-Paced</span>
+                    <span className="text-[9px] font-black uppercase text-slate-400 dark:text-slate-500">Self-Paced</span>
                   </div>
                   <div>
-                    <h4 className="text-sm font-extrabold text-slate-800">Interactive Self-Study</h4>
-                    <p className="hidden sm:block text-[11px] text-slate-500 font-semibold leading-relaxed mt-1">
+                    <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white">Interactive Self-Study</h4>
+                    <p className="hidden sm:block text-[11px] text-slate-500 dark:text-slate-400 font-semibold leading-relaxed mt-1">
                       Immediate feedback after each response. Detailed step-by-step solutions are shown instantly. Select timed or untimed practice.
                     </p>
-                    <p className="sm:hidden text-[10px] text-slate-500 font-semibold mt-0.5 leading-snug">Instant feedback · Step-by-step solutions</p>
+                    <p className="sm:hidden text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5 leading-snug">Instant feedback · Step-by-step solutions</p>
                   </div>
                 </button>
               </div>
 
-
               {/* Practice Mode Configurations */}
               {currentMode === 'practice' && (
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-center gap-6 animate-fade-in">
-                  <label className="flex items-center gap-2.5 text-xs text-slate-700 font-bold cursor-pointer select-none">
+                <div className="pt-2.5 sm:pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-6 animate-fade-in">
+                  <label className="flex items-center gap-2 text-[11px] sm:text-xs text-slate-700 dark:text-slate-300 font-bold cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={untimedPractice}
                       onChange={(e) => setUntimedPractice(e.target.checked)}
-                      className="rounded text-[#2563eb] focus:ring-[#2563eb]/40 w-4 h-4 accent-[#2563eb]"
+                      className="rounded text-[#2563eb] focus:ring-[#2563eb]/40 w-3.5 h-3.5 sm:w-4 sm:h-4 accent-[#2563eb]"
                     />
                     <span>Untimed Session (Disable strict countdown timer)</span>
                   </label>
@@ -896,39 +895,39 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
             </div>
 
             {/* Asymmetric Columns (3:2 split) */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 sm:gap-8 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-3.5 sm:gap-8 items-start">
               
               {/* Left Column: Brief details, rubrics, duration (Col Span 3) */}
-              <div className="lg:col-span-3 space-y-4 sm:space-y-6">
+              <div className="lg:col-span-3 space-y-3.5 sm:space-y-6">
                 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
+                <div className="grid grid-cols-3 gap-2 sm:gap-4">
                   {[
                     { label: 'Questions', value: String(totalQs), sub: 'Total count' },
                     { label: 'Duration', value: currentMode === 'practice' && untimedPractice ? 'No Limit' : test.durationMinutes + ' min', sub: 'Countdown limit' },
                     { label: 'Total Marks', value: String(testTotalMarks), sub: 'Maximum raw' },
                   ].map(s => (
-                    <div key={s.label} className="bg-white border border-slate-200/60 rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-sm">
-                      <div className="text-xl sm:text-3xl font-serif font-extrabold text-[#2563eb] tracking-tight">{s.value}</div>
-                      <div className="text-slate-800 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider mt-1">{s.label}</div>
-                      <div className="text-slate-400 text-[9px] sm:text-[10px] font-medium mt-0.5 hidden sm:block">{s.sub}</div>
+                    <div key={s.label} className="bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-xl sm:rounded-2xl p-2.5 sm:p-5 shadow-sm text-center sm:text-left">
+                      <div className="text-lg sm:text-3xl font-serif font-extrabold text-[#2563eb] dark:text-blue-400 tracking-tight">{s.value}</div>
+                      <div className="text-slate-800 dark:text-slate-200 text-[9.5px] sm:text-[11px] font-extrabold uppercase tracking-wider mt-0.5 sm:mt-1">{s.label}</div>
+                      <div className="text-slate-400 dark:text-slate-500 text-[9px] sm:text-[10px] font-medium mt-0.5 hidden sm:block">{s.sub}</div>
                     </div>
                   ))}
                 </div>
 
                 {/* Target Score & Attempts Planner */}
-                <div className="bg-white border border-slate-200/60 rounded-2xl p-4 sm:p-6 space-y-3 sm:space-y-4 shadow-sm">
-                  <h3 className="text-slate-900 font-serif font-black flex items-center gap-2.5 text-base sm:text-lg">
-                    <Target className="w-5 h-5 text-[#2563eb]" /> Target Score & Attempts Planner
+                <div className="bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-2xl p-3.5 sm:p-6 space-y-2.5 sm:space-y-4 shadow-sm">
+                  <h3 className="text-slate-900 dark:text-white font-serif font-black flex items-center gap-2 text-sm sm:text-lg">
+                    <Target className="w-4 h-4 sm:w-5 sm:h-5 text-[#2563eb] dark:text-blue-400" /> Target Score & Attempts Planner
                   </h3>
-                  <p className="text-slate-500 text-xs font-semibold leading-relaxed">
+                  <p className="text-slate-500 dark:text-slate-400 text-xs font-semibold leading-relaxed">
                     Set your goal for this session and analyze your permitted room for error under negative marking conditions.
                   </p>
                   
-                  <div className="space-y-4 pt-1">
+                  <div className="space-y-3 sm:space-y-4 pt-1">
                     <div className="flex justify-between items-center text-xs font-bold">
-                      <span className="text-slate-500">Your Target Score Goal:</span>
-                      <span className="text-[#2563eb] font-black text-sm">{targetScore} / {testTotalMarks} Marks ({Math.round(targetScore / testTotalMarks * 100)}%)</span>
+                      <span className="text-slate-500 dark:text-slate-400">Your Target Score Goal:</span>
+                      <span className="text-[#2563eb] dark:text-blue-400 font-black text-xs sm:text-sm">{targetScore} / {testTotalMarks} Marks ({Math.round(targetScore / testTotalMarks * 100)}%)</span>
                     </div>
                     
                     <input
@@ -938,7 +937,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                       step={1}
                       value={targetScore}
                       onChange={(e) => setTargetScore(parseInt(e.target.value))}
-                      className="w-full accent-[#2563eb] h-1.5 bg-slate-100 rounded-lg cursor-pointer"
+                      className="w-full accent-[#2563eb] h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg cursor-pointer"
                     />
                     
                     {/* Calculation Output Cards */}
@@ -949,19 +948,19 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                         : totalQs - minCorrect;
                       
                       return (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
-                          <div className="bg-[#FBF9F6] border border-slate-200/40 rounded-xl p-3.5 space-y-1">
-                            <span className="text-[9px] text-slate-400 font-black uppercase tracking-wider block">Min. Correct Needed</span>
-                            <div className="text-slate-800 text-base font-black">{minCorrect} Questions</div>
-                            <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3.5 pt-1 sm:pt-2">
+                          <div className="bg-[#FBF9F6] dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-xl p-3 space-y-0.5">
+                            <span className="text-[8.5px] sm:text-[9px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-wider block">Min. Correct Needed</span>
+                            <div className="text-slate-900 dark:text-white text-sm sm:text-base font-black">{minCorrect} Questions</div>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold leading-relaxed">
                               You must answer at least {minCorrect} questions correctly to meet your target.
                             </p>
                           </div>
                           
-                          <div className="bg-[#FBF9F6] border border-slate-200/40 rounded-xl p-3.5 space-y-1">
-                            <span className="text-[9px] text-slate-400 font-black uppercase tracking-wider block">Max Allowed Mistakes</span>
-                            <div className="text-slate-800 text-base font-black">{maxIncorrect >= 0 ? maxIncorrect : 0} Questions</div>
-                            <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
+                          <div className="bg-[#FBF9F6] dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-xl p-3 space-y-0.5">
+                            <span className="text-[8.5px] sm:text-[9px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-wider block">Max Allowed Mistakes</span>
+                            <div className="text-slate-900 dark:text-white text-sm sm:text-base font-black">{maxIncorrect >= 0 ? maxIncorrect : 0} Questions</div>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold leading-relaxed">
                               If you attempt every question, you can afford at most {maxIncorrect >= 0 ? maxIncorrect : 0} mistakes under penalty.
                             </p>
                           </div>
@@ -973,16 +972,16 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
 
                 {/* Automated Topic Distribution Visualizer */}
                 {topicDistribution.length > 0 && (
-                  <div className="bg-white border border-slate-200/60 rounded-2xl p-5 sm:p-6 space-y-4 shadow-sm">
-                    <h3 className="text-slate-900 font-serif font-black flex items-center gap-2.5 text-base sm:text-lg">
-                      <BookOpen className="w-5 h-5 text-[#2563eb]" /> Syllabus Topic Breakdown
+                  <div className="bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 sm:p-6 space-y-3 sm:space-y-4 shadow-sm">
+                    <h3 className="text-slate-900 dark:text-white font-serif font-black flex items-center gap-2 text-sm sm:text-lg">
+                      <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-[#2563eb] dark:text-blue-400" /> Syllabus Topic Breakdown
                     </h3>
-                    <p className="text-slate-500 text-xs font-semibold leading-relaxed">
+                    <p className="text-slate-500 dark:text-slate-400 text-xs font-semibold leading-relaxed">
                       Analysis of this test paper showing the concentration of core syllabus topics.
                     </p>
                     
                     {/* Visual Segmented Bar */}
-                    <div className="w-full h-3.5 bg-slate-100 rounded-full overflow-hidden flex border border-slate-200/40 mt-1">
+                    <div className="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex border border-slate-200/40 dark:border-slate-700 mt-1">
                       {topicDistribution.map((t) => (
                         <div
                           key={t.name}
@@ -994,12 +993,12 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                     </div>
                     
                     {/* Legends Grid */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1">
+                    <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 pt-1">
                       {topicDistribution.map((t) => (
-                        <div key={t.name} className="flex items-center gap-2 text-[10px] sm:text-[11px] font-semibold text-slate-600">
-                          <span className={cn("w-2.5 h-2.5 rounded-full shrink-0", t.color)} />
+                        <div key={t.name} className="flex items-center gap-2 text-[10.5px] sm:text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+                          <span className={cn("w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full shrink-0", t.color)} />
                           <span className="truncate">{t.name}:</span>
-                          <span className="text-slate-800 font-extrabold">{t.count} Qs ({t.percentage}%)</span>
+                          <span className="text-slate-900 dark:text-white font-extrabold shrink-0">{t.count} Qs ({t.percentage}%)</span>
                         </div>
                       ))}
                     </div>
@@ -1007,73 +1006,73 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                 )}
 
                 {/* Marking Rubric Details */}
-                <div className="bg-white border border-slate-200/60 rounded-2xl p-5 sm:p-6 space-y-5 shadow-sm">
-                  <h3 className="text-slate-900 font-serif font-black flex items-center gap-2.5 text-base sm:text-lg">
-                    <Target className="w-5 h-5 text-[#2563eb]" /> Marking Rubric & Scoring
+                <div className="bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-2xl p-3.5 sm:p-6 space-y-3 sm:space-y-5 shadow-sm">
+                  <h3 className="text-slate-900 dark:text-white font-serif font-black flex items-center gap-2 text-sm sm:text-lg">
+                    <Target className="w-4 h-4 sm:w-5 sm:h-5 text-[#2563eb] dark:text-blue-400" /> Marking Rubric & Scoring
                   </h3>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-250 rounded-xl p-3.5">
-                      <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
-                        <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                    <div className="flex flex-col sm:flex-row items-center sm:items-center gap-1.5 sm:gap-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 rounded-xl p-2.5 sm:p-3.5 text-center sm:text-left">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center shrink-0">
+                        <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 dark:text-emerald-400" />
                       </div>
-                      <div>
-                        <div className="text-emerald-700 text-[10px] font-bold uppercase tracking-wider">Correct Answer</div>
-                        <div className="text-slate-900 font-extrabold text-base sm:text-lg mt-0.5">+{fmt(marksPerQ)}</div>
+                      <div className="min-w-0">
+                        <div className="text-emerald-700 dark:text-emerald-300 text-[8.5px] sm:text-[10px] font-bold uppercase tracking-wider truncate">Correct</div>
+                        <div className="text-slate-900 dark:text-white font-extrabold text-sm sm:text-lg mt-0.5">+{fmt(marksPerQ)}</div>
                       </div>
                     </div>
 
                     <div className={cn(
-                      'flex items-center gap-3 rounded-xl p-3.5 border', 
+                      'flex flex-col sm:flex-row items-center sm:items-center gap-1.5 sm:gap-3 rounded-xl p-2.5 sm:p-3.5 border text-center sm:text-left', 
                       negMarkVal > 0 
-                        ? 'bg-rose-50/60 border-rose-100' 
-                        : 'bg-slate-50 border-slate-100'
+                        ? 'bg-rose-50/60 dark:bg-rose-950/40 border-rose-200/80 dark:border-rose-800/60' 
+                        : 'bg-slate-50 dark:bg-slate-900 border-slate-200/60 dark:border-slate-800'
                     )}>
                       <div className={cn(
-                        'w-10 h-10 rounded-lg flex items-center justify-center shrink-0',
-                        negMarkVal > 0 ? 'bg-rose-500/10' : 'bg-slate-200/50'
+                        'w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shrink-0',
+                        negMarkVal > 0 ? 'bg-rose-500/10 dark:bg-rose-500/20' : 'bg-slate-200/50 dark:bg-slate-800'
                       )}>
-                        <TrendingDown className={cn('w-5 h-5', negMarkVal > 0 ? 'text-rose-600' : 'text-slate-400')} />
+                        <TrendingDown className={cn('w-4 h-4 sm:w-5 sm:h-5', negMarkVal > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400')} />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <div className={cn(
-                          'text-[10px] font-bold uppercase tracking-wider', 
-                          negMarkVal > 0 ? 'text-rose-700' : 'text-slate-400'
+                          'text-[8.5px] sm:text-[10px] font-bold uppercase tracking-wider truncate', 
+                          negMarkVal > 0 ? 'text-rose-700 dark:text-rose-300' : 'text-slate-400 dark:text-slate-500'
                         )}>Incorrect</div>
-                        <div className="text-slate-900 font-extrabold text-base sm:text-lg mt-0.5">
+                        <div className="text-slate-900 dark:text-white font-extrabold text-sm sm:text-lg mt-0.5">
                           {negMarkVal > 0 ? '-' + fmt(negMarkVal) : '0'}
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-xl p-3.5">
-                      <div className="w-10 h-10 rounded-lg bg-slate-200/50 flex items-center justify-center shrink-0">
-                        <AlertCircle className="w-5 h-5 text-slate-400" />
+                    <div className="flex flex-col sm:flex-row items-center sm:items-center gap-1.5 sm:gap-3 bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-xl p-2.5 sm:p-3.5 text-center sm:text-left">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-slate-200/50 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                        <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400" />
                       </div>
-                      <div>
-                        <div className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Unanswered</div>
-                        <div className="text-slate-900 font-extrabold text-base sm:text-lg mt-0.5">0</div>
+                      <div className="min-w-0">
+                        <div className="text-slate-400 dark:text-slate-500 text-[8.5px] sm:text-[10px] font-bold uppercase tracking-wider truncate">Unanswered</div>
+                        <div className="text-slate-900 dark:text-white font-extrabold text-sm sm:text-lg mt-0.5">0</div>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Time Allocation details */}
-                <div className="bg-white border border-slate-200/60 rounded-2xl p-4 sm:p-6 space-y-3 sm:space-y-4 shadow-sm">
-                  <h3 className="text-slate-900 font-serif font-black flex items-center gap-2.5 text-base sm:text-lg">
-                    <Zap className="w-5 h-5 text-[#2563eb]" /> Pace & Time Budget
+                <div className="bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-2xl p-3.5 sm:p-6 space-y-3 sm:space-y-4 shadow-sm">
+                  <h3 className="text-slate-900 dark:text-white font-serif font-black flex items-center gap-2 text-sm sm:text-lg">
+                    <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-[#2563eb] dark:text-blue-400" /> Pace & Time Budget
                   </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="bg-[#FBF9F6] rounded-xl p-4 border border-slate-200/50">
-                      <div className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Duration Budget</div>
-                      <div className="text-slate-800 font-serif font-extrabold text-xl sm:text-2xl">
-                        {currentMode === 'practice' && untimedPractice ? 'No Time Limit' : test.durationMinutes + ' minutes'}
+                  <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
+                    <div className="bg-[#FBF9F6] dark:bg-slate-900 rounded-xl p-3 sm:p-4 border border-slate-200/60 dark:border-slate-800">
+                      <div className="text-slate-400 dark:text-slate-500 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-0.5 sm:mb-1">Duration Budget</div>
+                      <div className="text-slate-800 dark:text-white font-serif font-extrabold text-base sm:text-2xl">
+                        {currentMode === 'practice' && untimedPractice ? 'No Time Limit' : test.durationMinutes + ' min'}
                       </div>
                     </div>
-                    <div className="bg-[#FBF9F6] rounded-xl p-4 border border-slate-200/50">
-                      <div className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Target Pace</div>
-                      <div className="text-slate-800 font-serif font-extrabold text-xl sm:text-2xl">
-                        {avgSecsPerQ} <span className="text-xs font-sans font-semibold text-slate-400 uppercase tracking-widest ml-1">seconds / Q</span>
+                    <div className="bg-[#FBF9F6] dark:bg-slate-900 rounded-xl p-3 sm:p-4 border border-slate-200/60 dark:border-slate-800">
+                      <div className="text-slate-400 dark:text-slate-500 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-0.5 sm:mb-1">Target Pace</div>
+                      <div className="text-slate-800 dark:text-white font-serif font-extrabold text-base sm:text-2xl">
+                        {avgSecsPerQ} <span className="text-[10px] sm:text-xs font-sans font-semibold text-slate-400 uppercase tracking-widest ml-0.5">sec / Q</span>
                       </div>
                     </div>
                   </div>
@@ -1082,14 +1081,14 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
               </div>
 
               {/* Right Column: Instructions, start button (Col Span 2) */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="lg:col-span-2 space-y-3.5 sm:space-y-6">
                 
                 {/* CBT Keyboard Navigation Guide */}
-                <div className="hidden sm:block bg-white border border-slate-200/60 rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm">
-                  <h3 className="text-slate-900 font-serif font-black text-base flex items-center gap-2">
+                <div className="hidden sm:block bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm">
+                  <h3 className="text-slate-900 dark:text-white font-serif font-black text-base flex items-center gap-2">
                     <Zap className="w-4.5 h-4.5 text-amber-500" /> CBT Keyboard Shortcuts
                   </h3>
-                  <p className="text-slate-500 text-[11px] font-semibold leading-relaxed">
+                  <p className="text-slate-500 dark:text-slate-400 text-[11px] font-semibold leading-relaxed">
                      OdishaExamPrep CBT engine supports fully functional keyboard shortcuts for quick and efficient test-taking.
                   </p>
                   <div className="grid grid-cols-1 gap-2.5">
@@ -1100,25 +1099,25 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                       { keys: ['M'], desc: 'Flag Question for Review' },
                       { keys: ['C'], desc: 'Clear Current Response' }
                     ].map(sh => (
-                      <div key={sh.desc} className="flex items-center gap-3 bg-slate-50 border border-slate-200/40 p-2.5 rounded-xl text-[11px] font-semibold">
+                      <div key={sh.desc} className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 p-2.5 rounded-xl text-[11px] font-semibold">
                         <div className="flex gap-1 shrink-0">
                           {sh.keys.map(k => (
-                            <kbd key={k} className="px-1.5 py-0.5 bg-white border border-slate-300 shadow-sm rounded text-[9px] font-black text-slate-700 font-mono">{k}</kbd>
+                            <kbd key={k} className="px-1.5 py-0.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded text-[9px] font-black text-slate-700 dark:text-slate-200 font-mono">{k}</kbd>
                           ))}
                         </div>
-                        <span className="text-slate-600 font-medium leading-tight">{sh.desc}</span>
+                        <span className="text-slate-600 dark:text-slate-300 font-medium leading-tight">{sh.desc}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Instructions Panel */}
-                <div className="bg-white border border-slate-200/60 rounded-3xl p-6 space-y-5 shadow-sm relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#2563eb]/3 rounded-full blur-2xl pointer-events-none" />
+                <div className="bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-3.5 sm:space-y-5 shadow-sm relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#2563eb]/5 rounded-full blur-2xl pointer-events-none" />
                   
-                  <h3 className="text-slate-900 font-serif font-black text-lg">Instructions for Candidates</h3>
+                  <h3 className="text-slate-900 dark:text-white font-serif font-black text-sm sm:text-lg">Instructions for Candidates</h3>
                   
-                  <ul className="space-y-4">
+                  <ul className="space-y-2.5 sm:space-y-4">
                     {[
                       'Read each problem statement carefully before selecting options.',
                       'You can bookmark questions for review and return to them anytime.',
@@ -1127,8 +1126,8 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                       negMarkVal > 0 && currentMode === 'mock' ? `Incorrect responses incur a penalty of ${fmt(negMarkVal)} marks.` : 'There are no scoring penalties for incorrect answers in Practice mode.',
                       'The question palette is available for quick vertical navigation.',
                     ].map((ins, i) => (
-                      <li key={i} className="flex items-start gap-3 text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
-                        <span className="w-5.5 h-5.5 rounded-full bg-[#2563eb]/10 flex items-center justify-center shrink-0 text-[#2563eb] text-[11px] font-extrabold font-serif mt-0.5">
+                      <li key={i} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+                        <span className="w-5 h-5 rounded-full bg-[#2563eb]/10 dark:bg-blue-950/80 border border-blue-200/30 dark:border-blue-800/50 flex items-center justify-center shrink-0 text-[#2563eb] dark:text-blue-400 text-[10.5px] font-extrabold font-serif mt-0.5">
                           {i + 1}
                         </span>
                         <span>{ins}</span>
@@ -1145,15 +1144,15 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
         </div>
 
         {/* Sticky Fixed Bottom Start Button Container with Safe Area Inset */}
-        <div className="shrink-0 px-4 sm:p-6 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] bg-white/90 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/60 dark:border-slate-800 z-20 flex justify-center shadow-[0_-8px_30px_rgba(0,0,0,0.03)]">
+        <div className="shrink-0 px-3.5 sm:p-6 pt-2.5 pb-[max(env(safe-area-inset-bottom),0.75rem)] bg-white/95 dark:bg-[#060B16]/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 z-20 flex justify-center shadow-[0_-8px_30px_rgba(0,0,0,0.05)]">
           <button
             onClick={() => {
               requestUniversalFullscreen();
               setIsStarted(true);
             }}
-            className="max-w-3xl w-full py-3 sm:py-4.5 rounded-xl sm:rounded-2xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-black text-sm sm:text-base transition-all duration-300 shadow-lg shadow-[#2563eb]/20 flex items-center justify-center gap-2.5 active:scale-[0.98] cursor-pointer premium-btn-transition border-none"
+            className="max-w-3xl w-full py-3 sm:py-4.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-sm sm:text-base transition-all duration-300 shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2.5 active:scale-[0.98] cursor-pointer premium-btn-transition border-none"
           >
-            <Play className="w-4.5 h-4.5 fill-white" /> Initiate Session
+            <Play className="w-4 h-4 sm:w-4.5 sm:h-4.5 fill-white" /> Initiate Session
           </button>
         </div>
       </div>

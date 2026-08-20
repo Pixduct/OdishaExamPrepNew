@@ -684,7 +684,7 @@ const HistoryView = ({
                             }
                           }}
                           className={cn(
-                            "relative overflow-hidden bg-white dark:bg-slate-900 rounded-[inherit] p-3 sm:p-4.5 shadow-sm dark:shadow-none border border-slate-200/80 dark:border-slate-800 flex flex-col gap-2 sm:gap-3 group transition-all duration-300 text-slate-900 dark:text-white",
+                            "relative overflow-hidden bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl p-3 sm:p-4.5 shadow-sm dark:shadow-none border border-slate-200/80 dark:border-slate-800 flex flex-col gap-2 sm:gap-3 group transition-all duration-300 text-slate-900 dark:text-white",
                             isInteractive
                               ? a.type === 'test_incomplete'
                                 ? "cursor-pointer hover:border-amber-300 dark:hover:border-amber-500/40"

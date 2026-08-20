@@ -201,7 +201,7 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
       />
 
       {/* ── Layer C: Content  (z-10, always on top of light) ───────── */}
-      <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%' }}>
+      <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: 'inherit' }}>
         {children}
       </div>
 

@@ -78,7 +78,7 @@ export const VectorCursorFollower: React.FC = () => {
   return (
     <div
       ref={followerRef}
-      className="fixed top-0 left-0 pointer-events-none z-[9999] will-change-transform transition-transform duration-150 ease-out"
+      className="hidden md:block fixed top-0 left-0 pointer-events-none z-[9999] will-change-transform transition-transform duration-150 ease-out"
       style={{
         transform: 'translate3d(-100px, -100px, 0) translate(-50%, -50%) scale(1)'
       }}

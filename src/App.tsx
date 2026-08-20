@@ -1102,13 +1102,13 @@ const ExamRegistrySection = ({
     else if (key === 'opsc' || (item.exam || '').toLowerCase().includes('opsc')) setSelectedExam('opsc-aio');
   };
   return (
-    <section id="exam-registry" className={cn("bg-transparent border-y border-slate-200/50 dark:border-slate-800 scroll-mt-24", isMobile ? "py-10" : "py-12 md:py-16")}>
-      <div className={cn("max-w-7xl mx-auto space-y-6 md:space-y-12", isMobile ? "px-4" : "px-6")}>
-        <div className="flex flex-col items-center space-y-4 text-center">
-          <span className="section-chip">
+    <section id="exam-registry" className={cn("bg-transparent border-y border-slate-200/50 dark:border-slate-800 scroll-mt-24", isMobile ? "py-6" : "py-12 md:py-16")}>
+      <div className={cn("max-w-7xl mx-auto space-y-4 sm:space-y-8 md:space-y-12", isMobile ? "px-4" : "px-6")}>
+        <div className="flex flex-col items-center space-y-2.5 sm:space-y-4 text-center">
+          <span className="section-chip text-[10px] sm:text-xs">
             {t('home.bulletin.sectionBadge', '⏰ ODISHA RECRUITMENT BULLETIN')}
           </span>
-          <h2 className={cn("font-serif font-extrabold text-slate-955 dark:text-white tracking-tight leading-tight", isMobile ? "text-2xl" : "text-3xl md:text-5xl")}>
+          <h2 className={cn("font-serif font-extrabold text-slate-955 dark:text-white tracking-tight leading-[1.18]", isMobile ? "text-2xl xs:text-3xl" : "text-3xl md:text-5xl")}>
             {t('home.bulletin.title', 'Official Exam Notifications')} <span className="premium-text-gradient font-serif font-extrabold">& Targeted <span className="whitespace-nowrap">Mock Tests</span></span>
           </h2>
           {isMobile ? null : <div className="section-divider" />}
@@ -1124,7 +1124,7 @@ const ExamRegistrySection = ({
 
         <div className={cn(
           "flex flex-col items-center w-full",
-          isMobile ? "gap-4" : "gap-6 md:items-stretch md:gap-0 md:bg-white dark:md:bg-slate-900/90 md:border-2 md:border-slate-900/80 dark:md:border-slate-700/80 md:rounded-[2.5rem] md:overflow-hidden md:shadow-[6px_6px_0px_rgba(37,99,235,0.15)] dark:md:shadow-[8px_8px_0px_rgba(37,99,235,0.4)] md:divide-y-2 md:divide-slate-100 dark:md:divide-slate-800"
+          isMobile ? "gap-2.5" : "gap-6 md:items-stretch md:gap-0 md:bg-white dark:md:bg-slate-900/90 md:border-2 md:border-slate-900/80 dark:md:border-slate-700/80 md:rounded-[2.5rem] md:overflow-hidden md:shadow-[6px_6px_0px_rgba(37,99,235,0.15)] dark:md:shadow-[8px_8px_0px_rgba(37,99,235,0.4)] md:divide-y-2 md:divide-slate-100 dark:md:divide-slate-800"
         )}>
           {announcements.map((item, idx) => {
             const statusMeta = EXAM_REGISTRY_STATUS_MAP[item.status] || {
@@ -1138,30 +1138,30 @@ const ExamRegistrySection = ({
                 className={cn(
                   "w-full flex flex-col items-center text-center md:flex-row md:items-center md:text-left md:justify-between bg-white dark:bg-slate-900 premium-shine-container",
                   isMobile 
-                    ? cn("p-5 border border-slate-250/60 dark:border-slate-800 border-l-4 rounded-2xl shadow-sm gap-5", statusBorderColor)
+                    ? cn("p-4 border border-slate-200/70 dark:border-slate-800 border-l-4 rounded-xl shadow-xs gap-3.5", statusBorderColor)
                     : "p-6 sm:p-8 border-2 border-slate-900/80 dark:border-slate-800 rounded-3xl md:rounded-none md:border-none shadow-[4px_4px_0px_rgba(37,99,235,0.15)] md:shadow-none hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors gap-6"
                 )}
               >
-                <div className={cn("w-full", isMobile ? "space-y-2.5" : "space-y-3")}>
-                  <div className={cn("flex flex-wrap items-center gap-2.5", isMobile ? "justify-start" : "justify-center md:justify-start")}>
-                    <span className={cn("px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-wider border", statusMeta.color)}>
+                <div className={cn("w-full", isMobile ? "space-y-1.5" : "space-y-3")}>
+                  <div className={cn("flex flex-wrap items-center gap-2", isMobile ? "justify-start" : "justify-center md:justify-start")}>
+                    <span className={cn("px-2 py-0.5 rounded text-[9.5px] font-black uppercase tracking-wider border", statusMeta.color)}>
                       {statusMeta.label}
                     </span>
                     <span className="text-xs font-bold text-slate-500 dark:text-slate-300 font-mono">
                       {item.date}
                     </span>
                   </div>
-                  <h3 className={cn("font-serif font-extrabold text-slate-900 dark:text-white", isMobile ? "text-base text-left leading-snug" : "text-lg sm:text-xl text-center md:text-left")}>
+                  <h3 className={cn("font-serif font-extrabold text-slate-900 dark:text-white", isMobile ? "text-[14px] text-left leading-snug" : "text-lg sm:text-xl text-center md:text-left")}>
                     {item.exam}
                   </h3>
                 </div>
                 <button 
                   onClick={() => handlePracticeClick(item)}
                   className={cn(
-                    "inline-flex items-center justify-center gap-2 px-5 py-3 transition-all cursor-pointer w-full md:w-auto font-black uppercase tracking-widest text-xs rounded-xl border-2 transition-all duration-200 shrink-0",
+                    "inline-flex items-center justify-center gap-2 px-5 transition-all cursor-pointer w-full md:w-auto font-black uppercase tracking-widest text-xs rounded-xl border-2 transition-all duration-200 shrink-0",
                     isMobile
-                      ? "bg-[#2563EB] hover:bg-brand-600 text-white border-[#2563EB] shadow-sm active:scale-[0.97]"
-                      : "bg-[#2563EB] dark:bg-[#2563EB] hover:bg-brand-500 dark:hover:bg-brand-500 text-white border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_rgba(15,23,42,1)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
+                      ? "h-11 bg-[#2563EB] hover:bg-brand-600 text-white border-[#2563EB] shadow-xs active:scale-[0.97]"
+                      : "py-3 bg-[#2563EB] dark:bg-[#2563EB] hover:bg-brand-500 dark:hover:bg-brand-500 text-white border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_rgba(15,23,42,1)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
                   )}
                 >
                   {item.actionLabel || 'FREE TEST →'}
@@ -1238,18 +1238,18 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
   const activeTab = tabs[activeTabIdx] || tabs[0];
 
   return (
-    <section id="syllabus-paths" className={cn("scroll-mt-24", isMobile ? "py-10" : "py-12 md:py-16")}>
-      <div className={cn("max-w-7xl mx-auto space-y-6 md:space-y-12", isMobile ? "px-4" : "px-6")}>
-        <div className="flex flex-col items-center space-y-4 text-center">
-          <span className="section-chip">
+    <section id="syllabus-paths" className={cn("scroll-mt-24", isMobile ? "py-6" : "py-12 md:py-16")}>
+      <div className={cn("max-w-7xl mx-auto space-y-4 sm:space-y-8 md:space-y-12", isMobile ? "px-4" : "px-6")}>
+        <div className="flex flex-col items-center space-y-2.5 sm:space-y-4 text-center">
+          <span className="section-chip text-[10px] sm:text-xs">
             {t('exams.syllabus.badge', '🎯 SYLLABUS-MAPPED PREPARATION')}
           </span>
-          <h2 className={cn("font-serif font-extrabold text-slate-955 dark:text-white tracking-tight leading-tight max-w-6xl", isMobile ? "text-2xl" : "text-3xl md:text-4xl")}>
+          <h2 className={cn("font-serif font-extrabold text-slate-955 dark:text-white tracking-tight leading-[1.18] max-w-6xl", isMobile ? "text-2xl xs:text-3xl" : "text-3xl md:text-4xl")}>
             {t('exams.syllabus.title', 'Master Every Topic with Targeted Chapter-Wise Tests')}
           </h2>
           {!isMobile && <div className="section-divider" />}
           {/* Mobile Version (Shorter) */}
-          <p className="block md:hidden text-xs leading-relaxed text-slate-500 font-medium max-w-2xl mx-auto px-1">
+          <p className="block md:hidden text-xs leading-relaxed text-slate-500 dark:text-slate-400 font-medium max-w-xl mx-auto px-1">
             {t('exams.syllabus.subtitle', 'Stop blindly studying. Unlock full-length mock tests and PYQs designed exactly for the OPSC and OSSC curriculum.')}
           </p>
           {/* Desktop Version (Optimized) */}
@@ -1260,9 +1260,9 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
 
         <div 
           className={cn(
-            "flex justify-center max-w-3xl mx-auto relative z-10",
+            "flex justify-start sm:justify-center max-w-3xl mx-auto relative z-10",
             isMobile 
-              ? "gap-1.5 p-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-xl border border-slate-200/30 dark:border-slate-700/50 flex-nowrap overflow-x-auto no-scrollbar w-full"
+              ? "gap-1.5 p-1 bg-slate-100/70 dark:bg-slate-800/60 rounded-xl border border-slate-200/50 dark:border-slate-700/50 flex-nowrap overflow-x-auto no-scrollbar w-full"
               : "gap-2 sm:gap-4 p-1.5 bg-slate-100/60 dark:bg-slate-800/60 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 flex-wrap"
           )}
         >
@@ -1273,9 +1273,9 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
                 key={tab.id || i}
                 onClick={() => setActiveTabIdx(i)}
                 className={cn(
-                  "py-2.5 transition-all cursor-pointer relative focus:outline-none shrink-0",
+                  "py-2 sm:py-2.5 transition-all cursor-pointer relative focus:outline-none shrink-0",
                   isMobile
-                    ? "flex-1 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider"
+                    ? "px-3.5 rounded-lg text-[10px] font-black uppercase tracking-wider whitespace-nowrap"
                     : "flex-grow min-w-[100px] rounded-xl text-xs font-black uppercase tracking-widest",
                   isTabActive
                     ? "text-slate-900 dark:text-white"
@@ -1315,7 +1315,7 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
                   }
                 }
               }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-4 max-w-7xl mx-auto"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3.5 md:gap-4 max-w-7xl mx-auto"
             >
               {(activeTab.topics || []).map((topic: any, i: number) => (
                 <motion.div
@@ -1328,20 +1328,20 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
                   <DynamicVectorCard
                     className={cn(
                       isMobile 
-                        ? "bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 border-l-4 border-l-[#2563EB] rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3 relative active:scale-[0.98] transition-transform duration-200"
+                        ? "bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 border-l-4 border-l-[#2563EB] rounded-xl p-3.5 shadow-xs flex items-center justify-between gap-3 relative active:scale-[0.98] transition-transform duration-200"
                         : "bg-white dark:bg-slate-900 border-2 border-slate-900/80 dark:border-slate-700/80 rounded-2xl p-5 sm:p-6 shadow-[4px_4px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)] flex items-start justify-between gap-4"
                     )}
                   >
-                    <div className="space-y-1">
+                    <div className="space-y-0.5 sm:space-y-1 min-w-0 flex-1 pr-1">
                       <p className={cn(
-                        "font-black uppercase text-[#2563EB] dark:text-brand-400",
+                        "font-black uppercase text-[#2563EB] dark:text-brand-400 truncate",
                         isMobile ? "text-[9px] tracking-wider" : "text-[10px] tracking-wider"
                       )}>
                         {topic.label}
                       </p>
                       <h3 className={cn(
                         "font-serif font-extrabold text-slate-900 dark:text-white leading-tight",
-                        isMobile ? "text-[14px]" : "text-base sm:text-lg"
+                        isMobile ? "text-[13.5px]" : "text-base sm:text-lg"
                       )}>
                         {topic.name}
                       </h3>
@@ -1349,7 +1349,7 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
                     <div className="text-right shrink-0">
                       <span className={cn(
                         "inline-flex bg-brand-50 dark:bg-brand-950/60 text-[#2563EB] dark:text-brand-300 rounded font-mono font-black uppercase border border-brand-100 dark:border-brand-800",
-                        isMobile ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-xs"
+                        isMobile ? "px-2 py-0.5 text-[9.5px]" : "px-2.5 py-1 text-xs"
                       )}>
                         {topic.count} Sets
                       </span>
@@ -3387,28 +3387,29 @@ const LandingPage = () => {
                 className="w-full lg:flex-1 text-center lg:text-left space-y-6 md:space-y-8 lg:space-y-10 lg:max-w-[600px] xl:max-w-[640px] lg:mx-0"
               >
                 <div className="space-y-6">
-                  {/* Premium Badge */}
-                  <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-2xl bg-white dark:bg-slate-900 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 dark:border-slate-800 mb-2 max-w-full overflow-hidden">
-                    <div className="flex -space-x-2 shrink-0">
+                  {/* Premium Trust Badge — Mobile Zero-Truncation */}
+                  <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 rounded-full sm:rounded-2xl bg-white dark:bg-slate-900 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 dark:border-slate-800 mb-2 max-w-full">
+                    <div className="flex -space-x-1.5 sm:-space-x-2 shrink-0">
                       {[1,2,3].map(i => (
-                        <div key={i} className="w-7 h-7 rounded-full border-2 border-white dark:border-slate-800 bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-bold text-brand-600 dark:text-brand-400 shadow-sm">
-                          {i === 1 ? <Target className="w-3.5 h-3.5" /> : i === 2 ? <Award className="w-3.5 h-3.5" /> : <Star className="w-3.5 h-3.5" />}
+                        <div key={i} className="w-5 h-5 sm:w-7 sm:h-7 rounded-full border border-white dark:border-slate-800 bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[9px] font-bold text-brand-600 dark:text-brand-400 shadow-xs">
+                          {i === 1 ? <Target className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" /> : i === 2 ? <Award className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" /> : <Star className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />}
                         </div>
                       ))}
                     </div>
-                    <span className="text-[9px] sm:text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wide truncate">
-                      {t('home.hero.trustedBy', '🎯 Trusted by 10K+ Odisha Aspirants')}
+                    <span className="text-[9.5px] sm:text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                      <span className="sm:hidden">Trusted by 10,000+ Aspirants</span>
+                      <span className="hidden sm:inline">{t('home.hero.trustedBy', '🎯 Trusted by 10K+ Odisha Aspirants')}</span>
                     </span>
                   </div>
 
                   <div className="space-y-3 md:space-y-5">
-                    <h1 className="text-[1.75rem] sm:text-4xl md:text-5xl xl:text-6xl font-serif font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight break-words">
+                    <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-serif font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.18] break-words">
                       {t('home.hero.title1', 'Crack Your Odisha Govt Exams with')}{" "}
                       <span className="premium-text-gradient font-serif font-extrabold">{t('home.hero.title2', 'Realistic Mock Tests')}</span>
                     </h1>
-                    {/* Mobile Version (Shorter) */}
-                    <p className="block md:hidden text-sm leading-relaxed text-slate-500 dark:text-slate-300 max-w-xl mx-auto lg:mx-0 font-normal">
-                      {t('home.hero.subtitle', 'Master OPSC, OSSC, and OSSSC with verified PYQs and a 24/7 AI mentor.')}
+                    {/* Mobile Version (Concise 2-line hook) */}
+                    <p className="block md:hidden text-xs xs:text-sm leading-relaxed text-slate-500 dark:text-slate-300 max-w-md mx-auto lg:mx-0 font-medium">
+                      {t('home.hero.subtitleMobile', 'Verified PYQs, chapter practice, and mock tests for OPSC, OSSC, and OSSSC.')}
                     </p>
                     {/* Desktop Version (Original) */}
                     <p className="hidden md:block text-slate-600 dark:text-slate-300 text-sm sm:text-base md:text-lg max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed">
@@ -3604,19 +3605,20 @@ const LandingPage = () => {
             })()}
           </section>
         ) : (
-          <section className="relative z-10 py-8 sm:py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <DynamicVectorCard className="bg-white dark:bg-slate-900 border-2 border-slate-900/80 dark:border-slate-700/80 p-5 sm:p-8 text-slate-900 dark:text-white shadow-xl relative overflow-hidden">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-6 w-full">
-                <div className="space-y-3 text-center sm:text-left max-w-2xl flex flex-col items-center sm:items-start w-full">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-brand-500/10 dark:bg-brand-500/20 text-brand-600 dark:text-brand-300 border border-brand-500/20 dark:border-brand-500/30">
-                    <Sparkles className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
+          <section className="relative z-10 py-3 sm:py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <DynamicVectorCard className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 sm:p-7 text-slate-900 dark:text-white shadow-xl relative overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 w-full">
+                <div className="space-y-2 sm:space-y-3 text-center sm:text-left max-w-2xl flex flex-col items-center sm:items-start w-full">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider bg-brand-500/10 dark:bg-brand-500/20 text-brand-600 dark:text-brand-300 border border-brand-500/20 dark:border-brand-500/30">
+                    <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-600 dark:text-brand-400" />
                     Personalized Preparation Engine
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
-                    Sign In to Access Your Personal AI Study Plan & Score Tracker
+                  <h3 className="text-base xs:text-lg sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-snug">
+                    <span className="sm:hidden">Sign In for Your AI Study Plan & Score Tracker</span>
+                    <span className="hidden sm:inline">Sign In to Access Your Personal AI Study Plan & Score Tracker</span>
                   </h3>
                   <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
-                    Your readiness score, daily weak-topic drills, streak goals, and personal performance matrix are securely tied to your user account.
+                    Your readiness score, daily weak-topic drills, and streak goals are securely tied to your user account.
                   </p>
                 </div>
 
@@ -3624,7 +3626,7 @@ const LandingPage = () => {
                   <button
                     type="button"
                     onClick={() => setShowAuthModal(true)}
-                    className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-indigo-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-xs sm:text-sm shadow-lg shadow-brand-500/25 transition-all duration-200 active:scale-95 cursor-pointer border-none text-center"
+                    className="w-full sm:w-auto h-11 sm:h-auto px-6 py-2.5 sm:py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-indigo-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-xs sm:text-sm shadow-lg shadow-brand-500/25 transition-all duration-200 active:scale-95 cursor-pointer border-none text-center flex items-center justify-center"
                   >
                     Sign In / Register Free →
                   </button>
@@ -3635,24 +3637,27 @@ const LandingPage = () => {
         )}
 
         {/* 1. Practice Core (Explore Exams) */}
-        <section id="exams" className="py-12 md:py-16 scroll-mt-24 bg-transparent">
-          <div id="exam-gateway-wrapper" data-tour="exam-search" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 sm:space-y-10">
-            <div id="exam-gateway-header" className="flex flex-col items-center space-y-4 text-center">
-              <span className="section-chip">
-                <Zap className="w-3.5 h-3.5" />
-                {t('home.practiceModes.sectionBadge', 'Your Exam Gateway')}
+        <section id="exams" className="py-6 sm:py-10 md:py-16 scroll-mt-24 bg-transparent">
+          <div id="exam-gateway-wrapper" data-tour="exam-search" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-10">
+            <div id="exam-gateway-header" className="flex flex-col items-center space-y-2.5 sm:space-y-4 text-center">
+              <span className="section-chip text-[10px] sm:text-xs">
+                <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                {t('home.practiceModes.sectionBadge', 'Targeted Preparation Engine')}
               </span>
-              <h2 className="text-3xl md:text-5xl font-serif font-extrabold text-slate-955 tracking-tight leading-tight">
-                {t('home.hero.title1', 'Crack')} <span className="premium-text-gradient font-serif font-extrabold">{t('home.hero.title2', 'Odisha Exams')}</span>
+              <h2 className="text-2xl sm:text-3xl md:text-5xl font-serif font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.18]">
+                {t('home.practiceModes.title1', 'Practice Your Way to')}{" "}
+                <span className="premium-text-gradient font-serif font-extrabold">
+                  {t('home.practiceModes.title2', 'Top Rank')}
+                </span>
               </h2>
               {!isMobile && <div className="section-divider" />}
               {/* Mobile Version (Ultra-Short) */}
-              <p className="block md:hidden text-sm sm:text-base leading-relaxed text-slate-500 font-medium max-w-xl mx-auto">
-                {t('home.hero.subtitleMobile', 'Verified PYQs, chapter practice, and mock tests for OPSC, OSSC, and OSSSC.')}
+              <p className="block md:hidden text-xs xs:text-sm leading-relaxed text-slate-500 dark:text-slate-400 font-medium max-w-md mx-auto">
+                {t('home.practiceModes.subtitleMobile', 'Select your exam to access timed CBT mocks, chapter practice sets & verified PYQs.')}
               </p>
               {/* Desktop Version (Original) */}
-              <p className="hidden md:block text-slate-500 text-base sm:text-lg font-medium max-w-xl mx-auto leading-relaxed">
-                {t('home.hero.subtitle', 'Complete mock tests, syllabus-aligned chapter practice, instant rank estimation, and AI mentorship built specifically for OPSC, OSSC, OSSSC & Odisha Police.')}
+              <p className="hidden md:block text-slate-500 dark:text-slate-400 text-base sm:text-lg font-medium max-w-xl mx-auto leading-relaxed">
+                {t('home.practiceModes.subtitle', 'Choose between rapid untimed chapter practice, realistic timed CBT mocks, or our comprehensive reference question banks.')}
               </p>
             </div>
             <DashboardContent 

@@ -29,7 +29,10 @@ export const homeTranslations = {
     practiceModes: {
       sectionBadge: 'Targeted Preparation Engine',
       title: 'Practice Your Way to Top Rank',
+      title1: 'Practice Your Way to',
+      title2: 'Top Rank',
       subtitle: 'Choose between rapid untimed chapter practice, realistic timed CBT mocks, or our comprehensive reference question banks.',
+      subtitleMobile: 'Select your exam to access timed CBT mocks, chapter practice sets & verified PYQs.',
       mode1Title: 'Chapter-Wise Practice',
       mode1Desc: 'Master individual topics with immediate feedback, detailed steps, and unlimited attempts.',
       mode1Btn: 'Start Practice Sets',
@@ -127,7 +130,10 @@ export const homeTranslations = {
     practiceModes: {
       sectionBadge: 'ଲକ୍ଷ୍ୟଭିତ୍ତିକ ପ୍ରସ୍ତୁତି ପ୍ରଣାଳୀ',
       title: 'ଆପଣଙ୍କ ସୁବିଧା ଅନୁସାରେ ଅଭ୍ୟାସ କରନ୍ତୁ',
+      title1: 'ଆପଣଙ୍କ ଲକ୍ଷ୍ୟ ଅନୁସାରେ',
+      title2: 'ଶୀର୍ଷ ର‍୍ୟାଙ୍କ୍ ହାସଲ କରନ୍ତୁ',
       subtitle: 'ଅଧ୍ୟାୟ ଅନୁଯାୟୀ ଦୈନିକ ଅଭ୍ୟାସ, ପ୍ରକୃତ ସମୟଭିତ୍ତିକ CBT ମକ୍ ଟେଷ୍ଟ କିମ୍ବା ବିସ୍ତୃତ ପ୍ରଶ୍ନ ବ୍ୟାଙ୍କ ବାଛନ୍ତୁ।',
+      subtitleMobile: 'CBT ମକ୍ ଟେଷ୍ଟ, ଅଧ୍ୟାୟ ଅଭ୍ୟାସ ଓ ପୂର୍ବ ବର୍ଷର ପ୍ରଶ୍ନ ପାଇଁ ପରୀକ୍ଷା ବାଛନ୍ତୁ।',
       mode1Title: 'ଅଧ୍ୟାୟ-ଭିତ୍ତିକ ଅଭ୍ୟାସ',
       mode1Desc: 'ତୁରନ୍ତ ଉତ୍ତର ସମାଧାନ ଏବଂ ଅସୀମିତ ଚେଷ୍ଟା ସହିତ ପ୍ରତ୍ୟେକ ବିଷୟରେ ଦକ୍ଷତା ହାସଲ କରନ୍ତୁ।',
       mode1Btn: 'ଅଭ୍ୟାସ ସେଟ୍ ଆରମ୍ଭ କରନ୍ତୁ',

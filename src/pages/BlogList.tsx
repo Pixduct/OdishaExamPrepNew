@@ -203,7 +203,7 @@ export default function BlogList() {
                 container.scrollLeft += e.deltaY * 0.85;
               }
             }}
-            className="flex justify-start sm:justify-center overflow-x-auto overscroll-contain touch-pan-x no-scrollbar py-2 gap-2 scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0"
+            className="flex justify-start sm:justify-center overflow-x-auto no-scrollbar py-2 gap-2 scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0"
           >
             {CATEGORIES.map(category => (
               <button

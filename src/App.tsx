@@ -29,6 +29,7 @@ import {
   Menu,
   Star,
   Download,
+  ExternalLink,
   FileText,
   Globe,
   Layers,
@@ -561,8 +562,7 @@ const HistoryView = ({
           ];
           return (
             <div 
-              className="flex items-center gap-2 overflow-x-auto overscroll-contain touch-pan-x no-scrollbar py-1"
-              data-lenis-prevent
+              className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1"
             >
               {filters.map(f => {
                 const count = filterCounts[f.id];
@@ -673,7 +673,7 @@ const HistoryView = ({
                             }
                           }}
                           className={cn(
-                            "relative overflow-hidden bg-white dark:bg-slate-900 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-6 shadow-lg shadow-slate-200/50 dark:shadow-none border border-slate-200/80 dark:border-slate-800 flex flex-col gap-4 group transition-all duration-300 text-slate-900 dark:text-white",
+                            "relative overflow-hidden bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2.5rem] p-4 sm:p-6 shadow-lg shadow-slate-200/50 dark:shadow-none border border-slate-200/80 dark:border-slate-800 flex flex-col gap-3 sm:gap-4 group transition-all duration-300 text-slate-900 dark:text-white",
                             isInteractive ? "cursor-pointer hover:border-brand-300 dark:hover:border-slate-700" : ""
                           )}
                         >
@@ -702,60 +702,62 @@ const HistoryView = ({
                                   onClick={async () => { await handleDeleteActivity(a.id); }}
                                   className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider cursor-pointer border-none shadow-md active:scale-95 transition-all"
                                 >
-                                  Delete
+                                  {t('history.actions.delete', 'Delete')}
                                 </button>
                                 <button
                                   onClick={() => setConfirmDeleteId(null)}
                                   className="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-black uppercase tracking-wider cursor-pointer border-none active:scale-95 transition-all"
                                 >
-                                  Cancel
+                                  {t('history.header.cancel', 'Cancel')}
                                 </button>
                               </div>
                             </div>
                           )}
 
-                          {/* Row 1 — Title & Action Badge */}
-                          <div className="relative z-10 flex items-start justify-between gap-3">
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                          {/* Tier 1 — Status Icon, Title & Actions */}
+                          <div className="relative z-10 flex items-start justify-between gap-2.5">
+                            <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
                               <div className={cn(
-                                "p-3 rounded-2xl shrink-0 shadow-2xs border",
+                                "p-2.5 sm:p-3 rounded-xl sm:rounded-2xl shrink-0 shadow-2xs border mt-0.5 sm:mt-0",
                                 a.type === 'test_incomplete' ? "bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-300 border-amber-200 dark:border-amber-800" :
                                 isAiQuiz ? "bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 border-purple-200 dark:border-purple-800" :
                                 isDownloadable ? "bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-300 border-blue-200 dark:border-blue-800" :
                                 "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
                               )}>
-                                {a.type === 'test_incomplete' ? <Clock className="w-5 h-5" /> :
-                                 isAiQuiz ? <Sparkles className="w-5 h-5" /> :
-                                 isDownloadable ? <Download className="w-5 h-5" /> :
-                                 <CheckCircle2 className="w-5 h-5" />}
+                                {a.type === 'test_incomplete' ? <Clock className="w-4 h-4 sm:w-5 sm:h-5" /> :
+                                 isAiQuiz ? <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" /> :
+                                 isDownloadable ? <Download className="w-4 h-4 sm:w-5 sm:h-5" /> :
+                                 <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />}
                               </div>
 
                               <div className="min-w-0 flex-1">
-                                <h4 className="font-extrabold text-slate-900 dark:text-white text-base sm:text-lg leading-snug tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2 uppercase">
+                                <h4 className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-lg leading-snug tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2 uppercase">
                                   {titleText}
                                 </h4>
-                                <div className="flex items-center gap-2 mt-1">
+                                {/* Desktop date shown under title */}
+                                <div className="hidden sm:flex items-center gap-2 mt-1">
                                   <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
                                   <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{compactDate}</span>
                                 </div>
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-2 shrink-0">
+                            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                              {/* Desktop CTA Action Button */}
                               {(isTestResult || a.type === 'test_incomplete') && (
                                 <div className={cn(
-                                  "px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-2xs border",
+                                  "hidden sm:flex px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider items-center gap-1.5 transition-all shadow-2xs border",
                                   a.type === 'test_incomplete'
                                     ? "bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-300 border-amber-200 dark:border-amber-800 group-hover:bg-amber-600 group-hover:text-white"
                                     : "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 group-hover:bg-emerald-600 dark:group-hover:bg-emerald-500 group-hover:text-white"
                                 )}>
-                                  <span>{a.type === 'test_incomplete' ? 'Resume' : 'View Results'}</span>
+                                  <span>{a.type === 'test_incomplete' ? t('history.actions.resume', 'Resume') : t('history.actions.viewResults', 'View Results')}</span>
                                   {a.type === 'test_incomplete' ? <Play className="w-3.5 h-3.5 fill-current" /> : <ChevronRight className="w-3.5 h-3.5" />}
                                 </div>
                               )}
                               <button
                                 onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(a.id); }}
-                                className="p-2 rounded-xl text-slate-300 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-all cursor-pointer border-none bg-transparent shrink-0"
+                                className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-all cursor-pointer border-none bg-transparent shrink-0"
                                 title="Delete activity"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -763,58 +765,91 @@ const HistoryView = ({
                             </div>
                           </div>
 
-                          {/* Row 2 — Badges & Scores */}
-                          <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                            <div className="flex flex-wrap items-center gap-2">
-                              {a.metadata?.testCategory && (
-                                <span className={cn(
-                                  "px-2.5 py-1 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider border",
-                                  a.type === 'test_incomplete' ? "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800" :
-                                  isAiQuiz ? "bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800" :
-                                  isDownloadable ? "bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800" :
-                                  "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
-                                )}>
-                                  {a.metadata.testCategory}
-                                </span>
-                              )}
-                              {a.metadata?.examName && (
-                                <span className="px-2.5 py-1 bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 rounded-lg text-[10px] font-semibold uppercase tracking-wider border border-slate-200/60 dark:border-slate-700/60 max-w-[180px] sm:max-w-[220px] truncate" title={a.metadata.examName}>
-                                  {a.metadata.examName}
-                                </span>
-                              )}
-                              {a.type === 'test_incomplete' && (
-                                <span className="px-2.5 py-1 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider border border-amber-200 dark:border-amber-800">
-                                  Incomplete
-                                </span>
-                              )}
-                              {a.type === 'question_bank_accessed' && (
-                                <span className="px-2.5 py-1 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider border border-blue-200 dark:border-blue-800 flex items-center gap-1">
-                                  <Download className="w-3 h-3" />
-                                  {isDownloadable ? 'Download Available' : 'PDF Downloaded'}
-                                </span>
-                              )}
+                          {/* Tier 2 — Mobile Date & Category Badges */}
+                          <div className="relative z-10 flex flex-wrap items-center gap-1.5 sm:gap-2">
+                            {/* Mobile-only compact date pill */}
+                            <div className="flex sm:hidden items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-semibold">
+                              <Clock className="w-3 h-3 text-slate-400 shrink-0" />
+                              <span>{compactDate}</span>
                             </div>
 
-                            <div className="shrink-0">
+                            {a.metadata?.testCategory && (
+                              <span className={cn(
+                                "px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-[9px] sm:text-[10px] font-mono font-black uppercase tracking-wider border",
+                                a.type === 'test_incomplete' ? "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800" :
+                                isAiQuiz ? "bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800" :
+                                isDownloadable ? "bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800" :
+                                "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
+                              )}>
+                                {a.metadata.testCategory}
+                              </span>
+                            )}
+                            {a.metadata?.examName && (
+                              <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 rounded-md sm:rounded-lg text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider border border-slate-200/60 dark:border-slate-700/60 max-w-[150px] sm:max-w-[220px] truncate" title={a.metadata.examName}>
+                                {a.metadata.examName}
+                              </span>
+                            )}
+                            {a.type === 'test_incomplete' && (
+                              <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 rounded-md sm:rounded-lg text-[9px] sm:text-[10px] font-mono font-black uppercase tracking-wider border border-amber-200 dark:border-amber-800">
+                                {t('history.status.incomplete', 'Incomplete')}
+                              </span>
+                            )}
+                            {a.type === 'question_bank_accessed' && (
+                              <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 rounded-md sm:rounded-lg text-[9px] sm:text-[10px] font-mono font-black uppercase tracking-wider border border-blue-200 dark:border-blue-800 flex items-center gap-1">
+                                <Download className="w-3 h-3" />
+                                {isDownloadable ? t('history.status.downloadAvailable', 'Download Available') : t('history.status.pdfDownloaded', 'PDF Downloaded')}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Tier 3 — Scores & Mobile Action Button */}
+                          <div className="relative z-10 flex items-center justify-between gap-2 pt-2.5 sm:pt-3 border-t border-slate-100 dark:border-slate-800">
+                            <div>
                               {a.type === 'test_incomplete' && (
-                                <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-950/60 rounded-xl border border-amber-200 dark:border-amber-800">
-                                  <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                                  <span className="text-xs font-mono font-black text-amber-700 dark:text-amber-300">
-                                    {Object.keys(a.metadata?.answers || {}).length} answered
+                                <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 bg-amber-50 dark:bg-amber-950/60 rounded-lg sm:rounded-xl border border-amber-200 dark:border-amber-800">
+                                  <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-600 dark:text-amber-400" />
+                                  <span className="text-[11px] sm:text-xs font-mono font-black text-amber-700 dark:text-amber-300">
+                                    {Object.keys(a.metadata?.answers || {}).length} {t('history.stats.answered', 'answered')}
                                   </span>
                                 </div>
                               )}
                               {((isTestResult || isAiQuiz) && a.score !== undefined && a.score !== null) && (
-                                <div className="flex items-baseline gap-1 px-3.5 py-1 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200/80 dark:border-slate-700">
-                                  <span className="font-mono font-black text-slate-900 dark:text-white text-base sm:text-lg">
+                                <div className="flex items-baseline gap-1 px-2.5 sm:px-3.5 py-1 bg-slate-50 dark:bg-slate-800/80 rounded-lg sm:rounded-xl border border-slate-200/80 dark:border-slate-700">
+                                  <span className="font-mono font-black text-slate-900 dark:text-white text-sm sm:text-lg">
                                     {typeof a.score === 'number' ? Number(a.score.toFixed(2)) : a.score}
                                   </span>
-                                  <span className="text-slate-400 dark:text-slate-400 text-xs font-mono font-bold">/{a.totalMarks}</span>
+                                  <span className="text-slate-400 dark:text-slate-400 text-[10px] sm:text-xs font-mono font-bold">/{a.totalMarks}</span>
                                   {!isAiQuiz && (
-                                    <span className="ml-1.5 text-xs font-mono font-black text-brand-600 dark:text-brand-400">
+                                    <span className="ml-1 text-[10px] sm:text-xs font-mono font-black text-brand-600 dark:text-brand-400">
                                       · {Math.round(a.accuracy || 0)}%
                                     </span>
                                   )}
+                                </div>
+                              )}
+                              {isDownloadable && (
+                                <div className="text-[11px] font-semibold text-slate-400 dark:text-slate-500">
+                                  PDF Document
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Mobile-only Action CTA Button */}
+                            <div className="flex sm:hidden items-center">
+                              {(isTestResult || a.type === 'test_incomplete') && (
+                                <div className={cn(
+                                  "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-all shadow-xs border",
+                                  a.type === 'test_incomplete'
+                                    ? "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800"
+                                    : "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
+                                )}>
+                                  <span>{a.type === 'test_incomplete' ? t('history.actions.resume', 'Resume') : t('history.actions.viewResults', 'View Results')}</span>
+                                  {a.type === 'test_incomplete' ? <Play className="w-3 h-3 fill-current" /> : <ChevronRight className="w-3 h-3" />}
+                                </div>
+                              )}
+                              {isDownloadable && (
+                                <div className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-xs">
+                                  <span>{t('history.actions.openPdf', 'Open PDF')}</span>
+                                  <ExternalLink className="w-3 h-3" />
                                 </div>
                               )}
                             </div>
@@ -1196,11 +1231,10 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
         </div>
 
         <div 
-          data-lenis-prevent
           className={cn(
             "flex justify-center max-w-3xl mx-auto relative z-10",
             isMobile 
-              ? "gap-1.5 p-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-xl border border-slate-200/30 dark:border-slate-700/50 flex-nowrap overflow-x-auto overscroll-contain touch-pan-x no-scrollbar w-full"
+              ? "gap-1.5 p-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-xl border border-slate-200/30 dark:border-slate-700/50 flex-nowrap overflow-x-auto no-scrollbar w-full"
               : "gap-2 sm:gap-4 p-1.5 bg-slate-100/60 dark:bg-slate-800/60 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 flex-wrap"
           )}
         >
@@ -8181,7 +8215,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     container.scrollLeft += e.deltaY * 0.85;
                   }
                 }}
-                className="flex gap-3 sm:gap-4 overflow-x-auto overscroll-contain touch-pan-x no-scrollbar snap-x snap-mandatory py-4 sm:py-5 px-4 sm:px-6"
+                className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory py-4 sm:py-5 px-4 sm:px-6"
                 style={{
                   WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)',
                   maskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)'
@@ -8349,7 +8383,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     container.scrollLeft += e.deltaY * 0.85;
                   }
                 }}
-                className="flex gap-3 sm:gap-4 overflow-x-auto overscroll-contain touch-pan-x no-scrollbar snap-x snap-mandatory py-4 sm:py-5 px-4 sm:px-6"
+                className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory py-4 sm:py-5 px-4 sm:px-6"
                 style={{
                   WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)',
                   maskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)'
@@ -10400,7 +10434,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     <div className="space-y-6 sm:space-y-8">
                       {/* Horizontal Scrollable Subject Tabs */}
                       <div 
-                        className="flex items-center gap-2 overflow-x-auto overscroll-contain touch-pan-x no-scrollbar py-1 px-1 -mx-1 sm:mx-0"
+                        className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-1 -mx-1 sm:mx-0"
                         onWheel={(e) => {
                           const container = e.currentTarget;
                           const isAtRightEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 2;

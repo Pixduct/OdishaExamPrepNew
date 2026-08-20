@@ -1546,7 +1546,7 @@ ${combinedImageContext}`
     }
     res.redirect(301, "/");
   });
-  app.get(["/", "/blog", "/blog/:id", "/privacy-policy", "/terms-of-service", "/refund-policy", "/admin-login"], async (req, res, next) => {
+  app.get(["/", "/blog", "/blog/:id", "/exams/:examId", "/current-affairs", "/privacy-policy", "/terms-of-service", "/refund-policy", "/admin-login"], async (req, res, next) => {
     if (!isProduction) {
       return next();
     }
@@ -1613,6 +1613,73 @@ ${combinedImageContext}`
             schemaJson = `<script type="application/ld+json" id="json-ld-schema">${JSON.stringify(schemaObj)}</script>`;
           }
         }
+      } else if (pathName.startsWith("/exams/")) {
+        const examId = req.params.examId;
+        ogType = "article";
+        if (examId) {
+          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(examId);
+          let query = supabaseAdmin.from("exams").select("*");
+          if (isUuid) {
+            query = query.eq("id", examId);
+          } else {
+            const searchPattern = examId.replace(/-/g, " ").substring(0, 30);
+            query = query.ilike("name", `%${searchPattern}%`);
+          }
+          const { data: examList, error } = await query.limit(1);
+          const exam = examList && examList.length > 0 ? examList[0] : null;
+          if (exam && !error) {
+            let examDescText = exam.description || "";
+            if (examDescText.startsWith("JSON_METADATA_")) {
+              try {
+                const meta = JSON.parse(examDescText.replace("JSON_METADATA_", ""));
+                examDescText = meta.subheading || meta.customSubtitle || `${exam.name} mock tests and syllabus breakdown.`;
+              } catch (e) {
+                examDescText = `${exam.name} comprehensive preparation resources and mock test series.`;
+              }
+            } else {
+              examDescText = examDescText.replace(/<[^>]*>/g, "").substring(0, 160).trim();
+            }
+            title = `${exam.name} Mock Tests, Syllabus & Prep | OdishaExamPrep`;
+            description = examDescText || `Prepare for ${exam.name} with full-length mock tests, sectional practice tests, question banks, and state rank analytics on OdishaExamPrep.`;
+            keywords = `${exam.name.toLowerCase()}, ${exam.name.toLowerCase()} mock test, odisha exam prep, ${exam.category || "exams"}`;
+            if (exam.icon) {
+              imageUrl = exam.icon.startsWith("http") ? exam.icon : `https://nareshsamal99384-cpu.supabase.co/storage/v1/object/public/exams/${exam.icon}`;
+            }
+            const schemaObj = {
+              "@context": "https://schema.org",
+              "@type": "Course",
+              "name": `${exam.name} Test Series & Preparation`,
+              "description": description,
+              "provider": {
+                "@type": "EducationalOrganization",
+                "name": "OdishaExamPrep",
+                "sameAs": "https://odishaexamprep.in"
+              },
+              "image": imageUrl,
+              "url": canonicalUrl
+            };
+            schemaJson = `<script type="application/ld+json" id="json-ld-schema">${JSON.stringify(schemaObj)}</script>`;
+          }
+        }
+      } else if (pathName.startsWith("/current-affairs")) {
+        title = "Daily Odisha & National Current Affairs | OdishaExamPrep";
+        description = "Stay updated with daily Odisha current affairs, national exam news, and high-yield MCQs for OPSC, OSSC, OSSSC, and teaching competitive exams.";
+        keywords = "odisha current affairs, daily current affairs, opsc current affairs, ossc current affairs, daily ca quiz";
+        imageUrl = `${baseUrl}/student%201.png`;
+        ogType = "article";
+        const schemaObj = {
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "Daily Odisha & National Current Affairs",
+          "description": description,
+          "url": canonicalUrl,
+          "publisher": {
+            "@type": "Organization",
+            "name": "OdishaExamPrep",
+            "url": baseUrl
+          }
+        };
+        schemaJson = `<script type="application/ld+json" id="json-ld-schema">${JSON.stringify(schemaObj)}</script>`;
       } else if (pathName === "/privacy-policy") {
         title = "Privacy Policy | OdishaExamPrep";
         description = "Read the Privacy Policy of OdishaExamPrep. Learn how we collect, protect, and use your personal information securely.";

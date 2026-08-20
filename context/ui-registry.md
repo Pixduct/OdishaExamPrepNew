@@ -293,6 +293,7 @@ import { SearchableSelect } from '../components/SearchableSelect';
 | **Category Badges** | `Aptitude` (blue), `Strategy` (amber), `General Studies` (emerald), `Language` (purple), `Current Affairs` (rose) |
 
 **Pattern notes:**
+- **Directional Touch Gesture Guarantee**: `YouTubeCarousel.tsx` uses smart directional gesture detection (`Math.abs(deltaY) >= Math.abs(deltaX)`). When user swipes vertically on mobile, touch dragging unbinds immediately and yields to native vertical document scroll without calling `e.preventDefault()`, ensuring 100% uninterrupted page scrolling when finger starts on any video card.
 - **Full Card Clearance Guarantee**: The carousel track uses `px-6 sm:px-10` padding matching the desktop header (`px-10`) so cards never hit the outer container's `rounded-[2.5rem]` curved border wall, ensuring 100% full-card thumbnail, text, and 3D shadow visibility.
 - **Alpha Mask Edge Fade**: Smooth CSS `maskImage` / `WebkitMaskImage` alpha gradient eliminates hard box clipping and provides a soft, elegant card-dissolve effect at the edges.
 - **Modal Video Player**: Video lightboxes use an integrated top window header bar (`bg-slate-900 border-b border-slate-800`) with the video title on the left and the close button on the top-right corner of the header.

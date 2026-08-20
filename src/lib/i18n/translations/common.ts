@@ -130,6 +130,36 @@ export const commonTranslations = {
       contactUs: 'Contact Us',
       allRightsReserved: 'All rights reserved.',
       builtForOdisha: 'Crafted with ❤️ exclusively for the aspirants of Odisha.'
+    },
+    history: {
+      header: {
+        title: 'Activity History',
+        subtitle: 'Manage, review, and track all your exam practice sessions',
+        clearAll: 'Clear All History',
+        confirmClear: 'Confirm Clear',
+        cancel: 'Cancel',
+      },
+      filters: {
+        all: 'All',
+        completed: 'Completed',
+        incomplete: 'Incomplete',
+        aiQuiz: 'AI Quiz',
+        downloads: 'Downloads',
+      },
+      actions: {
+        resume: 'Resume',
+        viewResults: 'View Results',
+        openPdf: 'Open PDF',
+        delete: 'Delete',
+      },
+      status: {
+        incomplete: 'Incomplete',
+        downloadAvailable: 'Download Available',
+        pdfDownloaded: 'PDF Downloaded',
+      },
+      stats: {
+        answered: 'answered',
+      }
     }
   },
   or: {
@@ -263,6 +293,36 @@ export const commonTranslations = {
       contactUs: 'ଯୋଗାଯୋଗ',
       allRightsReserved: 'ସର୍ବସ୍ୱତ୍ୱ ସଂରକ୍ଷିତ।',
       builtForOdisha: 'ଓଡ଼ିଶାର ସମସ୍ତ ପରୀକ୍ଷାର୍ଥୀଙ୍କ ସଫଳତା ପାଇଁ ସ୍ୱତନ୍ତ୍ର ଭାବରେ ନିର୍ମିତ।'
+    },
+    history: {
+      header: {
+        title: 'କାର୍ଯ୍ୟକଳାପ ଇତିହାସ',
+        subtitle: 'ଆପଣଙ୍କର ସମସ୍ତ ପରୀକ୍ଷା ଅଭ୍ୟାସ ଅଧିବେଶନ ଟ୍ରାକ୍ ଓ ସମୀକ୍ଷା କରନ୍ତୁ',
+        clearAll: 'ସମସ୍ତ ଇତିହାସ ଖାଲି କରନ୍ତୁ',
+        confirmClear: 'ନିଶ୍ଚିତ ଖାଲି କରନ୍ତୁ',
+        cancel: 'ବାତିଲ୍ କରନ୍ତୁ',
+      },
+      filters: {
+        all: 'ସମସ୍ତ',
+        completed: 'ସମ୍ପନ୍ନ',
+        incomplete: 'ଅସମ୍ପୂର୍ଣ୍ଣ',
+        aiQuiz: 'AI କୁଇଜ୍',
+        downloads: 'ଡାଉନଲୋଡ୍',
+      },
+      actions: {
+        resume: 'ପୁନରାରମ୍ଭ କରନ୍ତୁ',
+        viewResults: 'ଫଳାଫଳ ଦେଖନ୍ତୁ',
+        openPdf: 'PDF ଖୋଲନ୍ତୁ',
+        delete: 'ଡିଲିଟ୍',
+      },
+      status: {
+        incomplete: 'ଅସମ୍ପୂର୍ଣ୍ଣ',
+        downloadAvailable: 'ଡାଉନଲୋଡ୍ ଉପଲବ୍ଧ',
+        pdfDownloaded: 'PDF ଡାଉନଲୋଡ୍ ହୋଇଛି',
+      },
+      stats: {
+        answered: 'ଉତ୍ତର ଦିଆଯାଇଛି',
+      }
     }
   }
 };

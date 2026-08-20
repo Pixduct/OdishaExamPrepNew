@@ -167,7 +167,7 @@ export const CurrentAffairsPage: React.FC = () => {
                 container.scrollLeft += e.deltaY * 0.85;
               }
             }}
-            className="flex items-center gap-2 overflow-x-auto overscroll-contain touch-pan-x pb-2 no-scrollbar"
+            className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar"
           >
             {categories.map((cat, idx) => {
               const Icon = cat.icon;

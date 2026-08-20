@@ -125,7 +125,9 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
   const resumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isDragging  = useRef(false);
   const dragStartX  = useRef(0);
+  const dragStartY  = useRef(0);
   const dragStartOffset = useRef(0);
+  const touchDirection = useRef<'horizontal' | 'vertical' | null>(null);
 
   // Render helper
   const applyOffset = useCallback(() => {
@@ -204,26 +206,50 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
   }, [pauseAuto, onMouseMove, onMouseUp]);
 
   // Touch drag
-  const onTouchMove = useCallback((e: TouchEvent) => {
-    if (!isDragging.current) return;
-    const delta = dragStartX.current - e.touches[0].clientX;
-    offsetRef.current = dragStartOffset.current + delta;
-    applyOffset();
-    e.preventDefault(); // prevent page scroll while swiping the carousel
-  }, [applyOffset]);
-
   const onTouchEnd = useCallback(() => {
     if (!isDragging.current) return;
     isDragging.current = false;
+    touchDirection.current = null;
     scheduleResume();
     window.removeEventListener('touchmove', onTouchMove);
     window.removeEventListener('touchend',  onTouchEnd);
-  }, [scheduleResume, onTouchMove]);
+  }, [scheduleResume]);
+
+  const onTouchMove = useCallback((e: TouchEvent) => {
+    if (!isDragging.current || !e.touches || e.touches.length === 0) return;
+    const deltaX = dragStartX.current - e.touches[0].clientX;
+    const deltaY = dragStartY.current - e.touches[0].clientY;
+
+    if (!touchDirection.current) {
+      if (Math.abs(deltaX) < 6 && Math.abs(deltaY) < 6) return;
+      if (Math.abs(deltaY) >= Math.abs(deltaX)) {
+        // Vertical swipe detected - user is scrolling the page!
+        touchDirection.current = 'vertical';
+        isDragging.current = false;
+        scheduleResume();
+        window.removeEventListener('touchmove', onTouchMove);
+        window.removeEventListener('touchend',  onTouchEnd);
+        return;
+      } else {
+        touchDirection.current = 'horizontal';
+      }
+    }
+
+    if (touchDirection.current === 'horizontal') {
+      offsetRef.current = dragStartOffset.current + deltaX;
+      applyOffset();
+      if (e.cancelable) {
+        e.preventDefault(); // prevent vertical page scroll only while intentionally swiping carousel horizontally
+      }
+    }
+  }, [applyOffset, scheduleResume, onTouchEnd]);
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
     isDragging.current = true;
     dragStartX.current = e.touches[0].clientX;
+    dragStartY.current = e.touches[0].clientY;
     dragStartOffset.current = offsetRef.current;
+    touchDirection.current = null;
     pauseAuto();
     window.addEventListener('touchmove', onTouchMove, { passive: false });
     window.addEventListener('touchend',  onTouchEnd);

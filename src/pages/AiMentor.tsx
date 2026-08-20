@@ -4591,14 +4591,13 @@ JSON structure:
                           className="mb-2 px-1 py-1 rounded-2xl bg-white/90 dark:bg-[#0B1528]/95 border border-slate-200/80 dark:border-slate-800 shadow-xs"
                         >
                           <div 
-                            data-lenis-prevent
-                            onWheel={(e) => {
-                              if (e.deltaY !== 0) {
-                                e.currentTarget.scrollLeft += e.deltaY * 0.85;
-                              }
-                            }}
-                            className="flex items-center gap-2.5 overflow-x-auto overscroll-contain touch-pan-x no-scrollbar py-1 px-1 scroll-smooth"
-                          >
+                              onWheel={(e) => {
+                                if (e.deltaY !== 0) {
+                                  e.currentTarget.scrollLeft += e.deltaY * 0.85;
+                                }
+                              }}
+                              className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1 px-1 scroll-smooth"
+                            >
                             {attachments.map(att => (
                               <motion.div
                                 key={att.id}
@@ -5972,13 +5971,12 @@ JSON structure:
 
                       {/* Popular Suggestion Chips - Horizontal Scrollable Row */}
                       <div 
-                        data-lenis-prevent
                         onWheel={(e) => {
                           if (e.deltaY !== 0) {
                             e.currentTarget.scrollLeft += e.deltaY * 0.85;
                           }
                         }}
-                        className="flex items-center gap-1.5 overflow-x-auto overscroll-contain touch-pan-x no-scrollbar py-1 w-full shrink-0"
+                        className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 w-full shrink-0"
                       >
                         {quizTabs.map((s) => (
                           <div

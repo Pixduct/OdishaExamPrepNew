@@ -3616,12 +3616,12 @@ const LandingPage = () => {
               </h2>
               {!isMobile && <div className="section-divider" />}
               {/* Mobile Version (Ultra-Short) */}
-              <p className="block md:hidden text-base leading-relaxed text-slate-500 font-medium max-w-xl mx-auto">
-                {t('home.hero.subtitle', 'Verified PYQs & mock tests for OPSC, OSSC, and OSSSC.')}
+              <p className="block md:hidden text-sm sm:text-base leading-relaxed text-slate-500 font-medium max-w-xl mx-auto">
+                {t('home.hero.subtitleMobile', 'Verified PYQs, chapter practice, and mock tests for OPSC, OSSC, and OSSSC.')}
               </p>
               {/* Desktop Version (Original) */}
               <p className="hidden md:block text-slate-500 text-base sm:text-lg font-medium max-w-xl mx-auto leading-relaxed">
-                {t('home.hero.subtitle', 'Practice with verified PYQs and full-length mock tests for OPSC, OSSC, and OSSSC.')}
+                {t('home.hero.subtitle', 'Complete mock tests, syllabus-aligned chapter practice, instant rank estimation, and AI mentorship built specifically for OPSC, OSSC, OSSSC & Odisha Police.')}
               </p>
             </div>
             <DashboardContent 

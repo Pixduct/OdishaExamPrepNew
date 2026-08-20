@@ -1360,21 +1360,21 @@ const AchieversJournalSection = () => {
   return (
     <section id="achievers-journal" className={cn("bg-transparent border-y border-slate-200/60 dark:border-slate-800 scroll-mt-24", isMobile ? "py-10" : "py-12 md:py-16")}>
       <div className={cn("max-w-7xl mx-auto space-y-6 md:space-y-10", isMobile ? "px-4" : "px-6")}>
-        <div className="flex flex-col items-center space-y-4 text-center">
+        <div className="flex flex-col items-center space-y-3 sm:space-y-4 text-center">
           <span className="section-chip">
             {t('home.achievers.sectionBadge', '🏆 VERIFIED SUCCESS STORIES')}
           </span>
-          <h2 className={cn("font-serif font-extrabold text-slate-955 dark:text-white tracking-tight leading-tight max-w-6xl", isMobile ? "text-2xl" : "text-3xl md:text-4xl")}>
-            {t('home.achievers.title', 'Join Hundreds of Aspirants')} <span className="premium-text-gradient font-serif font-extrabold">{t('home.achievers.subtitle', 'Who Cracked Their Target Exams')}</span>
+          <h2 className={cn("font-serif font-extrabold text-slate-955 dark:text-white tracking-tight leading-tight max-w-4xl", isMobile ? "text-2xl" : "text-3xl md:text-4xl")}>
+            {t('home.achievers.title1', 'Real Aspirants.')} <span className="premium-text-gradient font-serif font-extrabold">{t('home.achievers.title2', 'Real Results.')}</span>
           </h2>
           {!isMobile && <div className="section-divider" />}
-          {/* Mobile Version (Shorter) */}
-          <p className="block md:hidden text-xs leading-relaxed text-slate-500 font-medium max-w-2xl mx-auto px-1">
-            {t('home.achievers.description', 'Explore real preparation strategies and test scores from students who conquered OPSC, OSSC, and OSSSC.')}
+          {/* Mobile Version (Shorter & Concise) */}
+          <p className="block md:hidden text-xs leading-relaxed text-slate-500 font-medium max-w-xl mx-auto px-1">
+            {t('home.achievers.subtitleMobile', 'Strategies and scorecard stories from Odisha exam toppers.')}
           </p>
-          {/* Desktop Version (Optimized) */}
-          <p className="max-w-2xl mx-auto md:text-lg md:leading-relaxed text-slate-600 dark:text-slate-300 hidden md:block">
-            {t('home.achievers.description', 'Explore detailed preparation strategies and actual test scores from real students who conquered OPSC, OSSC, and OSSSC.')}
+          {/* Desktop Version (Full) */}
+          <p className="max-w-2xl mx-auto text-base md:text-lg leading-relaxed text-slate-600 dark:text-slate-300 hidden md:block">
+            {t('home.achievers.subtitle', 'Read how thousands of students across Odisha cracked OPSC, OSSC, and OSSSC with our mock test platform.')}
           </p>
         </div>
 
@@ -1401,7 +1401,6 @@ const AchieversJournalSection = () => {
                       : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800"
                   )}
                 >
-                  {filter === 'all' ? t('common.actions.viewAll', 'All Journeys') : filter.toUpperCase()}
                   {isFilterActive && (
                     <motion.div
                       layoutId="activeAchieverFilterBg"
@@ -1415,7 +1414,7 @@ const AchieversJournalSection = () => {
                   <span className="relative z-10">
                     {filter === 'all' ? (
                       <>
-                        <span className="hidden sm:inline">All Journeys</span>
+                        <span className="hidden sm:inline">{t('common.actions.viewAll', 'All Journeys')}</span>
                         <span className="inline sm:hidden">All</span>
                       </>
                     ) : (

@@ -57,8 +57,10 @@ export const homeTranslations = {
     },
     achievers: {
       sectionBadge: 'State Toppers & Testimonials',
-      title: 'Real Aspirants. Real Results.',
+      title1: 'Real Aspirants.',
+      title2: 'Real Results.',
       subtitle: 'Read how thousands of students across Odisha cracked OPSC, OSSC, and OSSSC with our mock test platform.',
+      subtitleMobile: 'Strategies and scorecard stories from Odisha exam toppers.',
       verifiedAspirant: 'Verified Aspirant',
       examCleared: 'Cleared {exam}'
     },
@@ -153,8 +155,10 @@ export const homeTranslations = {
     },
     achievers: {
       sectionBadge: 'ରାଜ୍ୟ ଟପ୍ପର ଏବଂ କୃତୀ ଛାତ୍ରଛାତ୍ରୀ',
-      title: 'ପରୀକ୍ଷାର୍ଥୀଙ୍କ ପ୍ରକୃତ ସଫଳତା କାହାଣୀ',
+      title1: 'ପ୍ରକୃତ ପରୀକ୍ଷାର୍ଥୀ.',
+      title2: 'ପ୍ରକୃତ ସଫଳତା।',
       subtitle: 'ଜାଣନ୍ତୁ କିପରି ଓଡ଼ିଶାର ହଜାର ହଜାର ଛାତ୍ରଛାତ୍ରୀ ଆମ ମକ୍ ଟେଷ୍ଟ ମାଧ୍ୟମରେ OPSC, OSSC ଏବଂ OSSSC ରେ ଉତ୍ତୀର୍ଣ୍ଣ ହୋଇଛନ୍ତି।',
+      subtitleMobile: 'ଓଡ଼ିଶା ଟପ୍ପରମାନଙ୍କ ପ୍ରସ୍ତୁତି ରଣନୀତି ଏବଂ ସ୍କୋରକାର୍ଡ।',
       verifiedAspirant: 'ପ୍ରମାଣିତ କୃତୀ ଛାତ୍ର',
       examCleared: '{exam} ରେ ସଫଳ'
     },

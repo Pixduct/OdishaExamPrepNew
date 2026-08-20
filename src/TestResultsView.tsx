@@ -655,119 +655,145 @@ export default function TestResultsView({ results, onClose }: { results: any, on
       </div>
 
       {/* SECTION DIVIDER & HEADING */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mb-3 sm:mb-8 mt-3 sm:mt-12 relative z-10">
-        <div className="border-t border-slate-200/80 my-3 sm:my-8"></div>
-        <div>
-          <h2 className="text-base sm:text-2xl font-black text-slate-900 tracking-tight">Detailed Question Analysis</h2>
-          <p className="text-slate-500 text-[11px] sm:text-sm font-semibold mt-0.5 sm:mt-1">Review each question, your answer, and explanations below.</p>
-        </div>
-      </div>
-
-      {/* BOTTOM SECTION: Detailed Question-by-Question Review */}
-      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8 lg:gap-6 relative z-10">
-        
-        {/* Left Col: Quick Navigation (Question Navigator) */}
-        <div className="lg:col-span-1">
-          <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.08)">
-            <div className="px-3.5 py-4 sm:p-8 rounded-2xl sm:rounded-[2rem] border border-slate-200/80 bg-white/90 backdrop-blur-xl shadow-lg lg:sticky lg:top-24 relative overflow-hidden">
-              <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none" />
-              <h3 className="font-extrabold text-slate-900 mb-3 sm:mb-6 text-sm sm:text-xl tracking-tight px-1 relative z-10">Question Navigator</h3>
-                <div className="max-h-[220px] sm:max-h-[300px] lg:max-h-[450px] overflow-y-auto p-1 no-scrollbar relative z-10">
-                 <div className="grid grid-cols-6 sm:grid-cols-6 lg:grid-cols-7 gap-1.5 sm:gap-3 py-1">
-                    {questions.map((q: any, i: number) => {
-                      const uAns = answers ? answers[i] : undefined;
-                      const isCorr = uAns === q.correctAnswerIndex;
-                      const isUnans = uAns === undefined;
-                      const isMarked = markedForReview.includes(i);
-                      return (
-                        <button 
-                          key={i}
-                          onClick={() => setCurrentIdx(i)}
-                          className={cn(
-                            "aspect-square rounded-lg sm:rounded-xl font-bold flex items-center justify-center text-[11px] sm:text-sm transition-all relative overflow-hidden cursor-pointer border-none",
-                            currentIdx === i ? "ring-2 ring-brand-500 scale-105 z-10 shadow-md" : "hover:scale-105 shadow-2xs",
-                            isUnans ? "bg-slate-100 text-slate-400 border border-slate-200" :
-                            isCorr ? "bg-emerald-100 text-emerald-700 border border-emerald-200" : 
-                            "bg-rose-100 text-rose-700 border border-rose-200"
-                          )}
-                        >
-                          {isMarked && <div className="absolute top-0 right-0 w-3.5 h-3.5 bg-amber-400 rotate-45 transform translate-x-2 -translate-y-2"></div>}
-                          {i + 1}
-                        </button>
-                      )
-                    })}
-                 </div>
-               </div>
-               {/* Legend */}
-               <div className="mt-3 sm:mt-6 p-3 sm:p-4 bg-slate-50/90 rounded-xl sm:rounded-2xl border border-slate-200/80 relative z-10">
-                 <div className="grid grid-cols-2 sm:grid-cols-1 gap-x-3 gap-y-1.5 sm:gap-y-3 sm:space-y-0">
-                   <div className="flex items-center gap-1.5 sm:gap-3 text-[10px] sm:text-xs font-bold text-slate-600">
-                     <div className="w-2.5 h-2.5 bg-emerald-100 border border-emerald-200 rounded shrink-0"></div> Correct
-                   </div>
-                   <div className="flex items-center gap-1.5 sm:gap-3 text-[10px] sm:text-xs font-bold text-slate-600">
-                     <div className="w-2.5 h-2.5 bg-rose-100 border border-rose-200 rounded shrink-0"></div> Incorrect
-                   </div>
-                   <div className="flex items-center gap-1.5 sm:gap-3 text-[10px] sm:text-xs font-bold text-slate-600">
-                     <div className="w-2.5 h-2.5 bg-slate-100 border border-slate-200 rounded shrink-0"></div> Unanswered
-                   </div>
-                   <div className="flex items-center gap-1.5 sm:gap-3 text-[10px] sm:text-xs font-bold text-slate-600">
-                     <div className="w-2.5 h-2.5 overflow-hidden rounded border border-slate-200 relative shrink-0"><div className="absolute top-0 right-0 w-3 h-3 bg-amber-400 rotate-45 transform translate-x-1.5 -translate-y-1.5"></div></div> Marked
-                   </div>
-                 </div>
-               </div>
+      {questions.length > 0 ? (
+        <>
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mb-3 sm:mb-8 mt-3 sm:mt-12 relative z-10">
+            <div className="border-t border-slate-200/80 my-3 sm:my-8"></div>
+            <div>
+              <h2 className="text-base sm:text-2xl font-black text-slate-900 tracking-tight">Detailed Question Analysis</h2>
+              <p className="text-slate-500 text-[11px] sm:text-sm font-semibold mt-0.5 sm:mt-1">Review each question, your answer, and explanations below.</p>
             </div>
-          </DynamicVectorCard>
-        </div>
+          </div>
 
-        {/* Right Col: Detailed Question Card */}
-        <div className="lg:col-span-2 space-y-6">
-          <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.08)">
-            <div ref={questionCardRef} className="px-4 py-5 sm:p-8 lg:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white/90 backdrop-blur-xl shadow-lg relative overflow-hidden">
-              <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-20 pointer-events-none" />
-              <div className="relative z-10">
-                {isMobile ? (
-                  <div key={currentIdx}>
-                    {cardContent}
+          {/* BOTTOM SECTION: Detailed Question-by-Question Review */}
+          <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8 lg:gap-6 relative z-10 mb-12">
+            
+            {/* Left Col: Quick Navigation (Question Navigator) */}
+            <div className="lg:col-span-1">
+              <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.08)">
+                <div className="px-3.5 py-4 sm:p-8 rounded-2xl sm:rounded-[2rem] border border-slate-200/80 bg-white/90 backdrop-blur-xl shadow-lg lg:sticky lg:top-24 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none" />
+                  <h3 className="font-extrabold text-slate-900 mb-3 sm:mb-6 text-sm sm:text-xl tracking-tight px-1 relative z-10">Question Navigator</h3>
+                    <div className="max-h-[220px] sm:max-h-[300px] lg:max-h-[450px] overflow-y-auto p-1 no-scrollbar relative z-10">
+                     <div className="grid grid-cols-6 sm:grid-cols-6 lg:grid-cols-7 gap-1.5 sm:gap-3 py-1">
+                        {questions.map((q: any, i: number) => {
+                          const uAns = answers ? answers[i] : undefined;
+                          const isCorr = uAns === q.correctAnswerIndex;
+                          const isUnans = uAns === undefined;
+                          const isMarked = markedForReview.includes(i);
+                          return (
+                            <button 
+                              key={i}
+                              onClick={() => setCurrentIdx(i)}
+                              className={cn(
+                                "aspect-square rounded-lg sm:rounded-xl font-bold flex items-center justify-center text-[11px] sm:text-sm transition-all relative overflow-hidden cursor-pointer border-none",
+                                currentIdx === i ? "ring-2 ring-brand-500 scale-105 z-10 shadow-md" : "hover:scale-105 shadow-2xs",
+                                isUnans ? "bg-slate-100 text-slate-400 border border-slate-200" :
+                                isCorr ? "bg-emerald-100 text-emerald-700 border border-emerald-200" : 
+                                "bg-rose-100 text-rose-700 border border-rose-200"
+                              )}
+                            >
+                              {isMarked && <div className="absolute top-0 right-0 w-3.5 h-3.5 bg-amber-400 rotate-45 transform translate-x-2 -translate-y-2"></div>}
+                              {i + 1}
+                            </button>
+                          )
+                        })}
+                     </div>
+                   </div>
+                   {/* Legend */}
+                   <div className="mt-3 sm:mt-6 p-3 sm:p-4 bg-slate-50/90 rounded-xl sm:rounded-2xl border border-slate-200/80 relative z-10">
+                     <div className="grid grid-cols-2 sm:grid-cols-1 gap-x-3 gap-y-1.5 sm:gap-y-3 sm:space-y-0">
+                       <div className="flex items-center gap-1.5 sm:gap-3 text-[10px] sm:text-xs font-bold text-slate-600">
+                         <div className="w-2.5 h-2.5 bg-emerald-100 border border-emerald-200 rounded shrink-0"></div> Correct
+                       </div>
+                       <div className="flex items-center gap-1.5 sm:gap-3 text-[10px] sm:text-xs font-bold text-slate-600">
+                         <div className="w-2.5 h-2.5 bg-rose-100 border border-rose-200 rounded shrink-0"></div> Incorrect
+                       </div>
+                       <div className="flex items-center gap-1.5 sm:gap-3 text-[10px] sm:text-xs font-bold text-slate-600">
+                         <div className="w-2.5 h-2.5 bg-slate-100 border border-slate-200 rounded shrink-0"></div> Unanswered
+                       </div>
+                       <div className="flex items-center gap-1.5 sm:gap-3 text-[10px] sm:text-xs font-bold text-slate-600">
+                         <div className="w-2.5 h-2.5 overflow-hidden rounded border border-slate-200 relative shrink-0"><div className="absolute top-0 right-0 w-3 h-3 bg-amber-400 rotate-45 transform translate-x-1.5 -translate-y-1.5"></div></div> Marked
+                       </div>
+                     </div>
+                   </div>
+                </div>
+              </DynamicVectorCard>
+            </div>
+
+            {/* Right Col: Detailed Question Card */}
+            <div className="lg:col-span-2 space-y-6">
+              <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.08)">
+                <div ref={questionCardRef} className="px-4 py-5 sm:p-8 lg:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white/90 backdrop-blur-xl shadow-lg relative overflow-hidden">
+                  <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-20 pointer-events-none" />
+                  <div className="relative z-10">
+                    {isMobile ? (
+                      <div key={currentIdx}>
+                        {cardContent}
+                      </div>
+                    ) : (
+                      <motion.div 
+                         key={currentIdx}
+                         {...fadeSlideUpSm}
+                       >
+                         {cardContent}
+                      </motion.div>
+                    )}
                   </div>
-                ) : (
-                  <motion.div 
-                     key={currentIdx}
-                     {...fadeSlideUpSm}
-                   >
-                     {cardContent}
-                  </motion.div>
-                )}
+                </div>
+              </DynamicVectorCard>
+            </div>
+
+          </div>
+
+          {/* Mobile Sticky Bottom Nav */}
+          <div className={cn(
+            "lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 flex gap-3 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] transition-all duration-300 transform",
+            showQuestionNav ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
+          )}>
+            <Button
+              variant="outline"
+              disabled={currentIdx === 0}
+              onClick={() => setCurrentIdx(p => p - 1)}
+              className="flex-1 justify-center gap-2 py-4 text-sm font-black rounded-xl border-2 border-slate-200 disabled:opacity-40 cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4"/> Previous
+            </Button>
+            <div className="flex items-center justify-center px-3 text-xs font-black text-slate-400 bg-slate-50 rounded-xl border border-slate-100 shrink-0 font-mono">
+              {currentIdx + 1} / {questions.length}
+            </div>
+            <Button
+              disabled={currentIdx === questions.length - 1}
+              onClick={() => setCurrentIdx(p => p + 1)}
+              className="flex-1 justify-center gap-2 py-4 text-sm font-black rounded-xl bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-40 cursor-pointer"
+            >
+              Next <ChevronRight className="w-4 h-4"/>
+            </Button>
+          </div>
+        </>
+      ) : (
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mb-12 relative z-10">
+          <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.12)">
+            <div className="p-6 sm:p-10 rounded-2xl sm:rounded-[2.5rem] bg-white/90 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-center space-y-4 shadow-lg">
+              <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-slate-800 text-brand-600 dark:text-brand-400 flex items-center justify-center mx-auto border border-brand-100 dark:border-slate-700 shadow-inner">
+                <Award className="w-6 h-6" />
+              </div>
+              <div className="max-w-md mx-auto space-y-1.5">
+                <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Score Performance Saved</h3>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">Your score of {Number.isInteger(finalScore) ? finalScore : finalScore.toFixed(2)} / {totalMarks} ({accuracy}% Accuracy) has been verified and permanently recorded to your student profile.</p>
+              </div>
+              <div className="pt-2">
+                <button
+                  onClick={onClose}
+                  className="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 cursor-pointer border-none"
+                >
+                  Return to Dashboard
+                </button>
               </div>
             </div>
           </DynamicVectorCard>
         </div>
-
-      </div>
-
-      {/* Mobile Sticky Bottom Nav */}
-      <div className={cn(
-        "lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 flex gap-3 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] transition-all duration-300 transform",
-        showQuestionNav ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
-      )}>
-        <Button
-          variant="outline"
-          disabled={currentIdx === 0}
-          onClick={() => setCurrentIdx(p => p - 1)}
-          className="flex-1 justify-center gap-2 py-4 text-sm font-black rounded-xl border-2 border-slate-200 disabled:opacity-40 cursor-pointer"
-        >
-          <ChevronLeft className="w-4 h-4"/> Previous
-        </Button>
-        <div className="flex items-center justify-center px-3 text-xs font-black text-slate-400 bg-slate-50 rounded-xl border border-slate-100 shrink-0 font-mono">
-          {currentIdx + 1} / {questions.length}
-        </div>
-        <Button
-          disabled={currentIdx === questions.length - 1}
-          onClick={() => setCurrentIdx(p => p + 1)}
-          className="flex-1 justify-center gap-2 py-4 text-sm font-black rounded-xl bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-40 cursor-pointer"
-        >
-          Next <ChevronRight className="w-4 h-4"/>
-        </Button>
-      </div>
+      )}
 
     </div>
   );

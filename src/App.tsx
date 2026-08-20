@@ -5514,15 +5514,60 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     }
   }, [testResults]);
 
-  const handleViewResults = async (results: any) => {
-    if (!results) {
+  const handleViewResults = async (rawResults: any) => {
+    if (!rawResults) {
       setTestResults(null);
       return;
     }
-    let finalResults = { ...results };
-    if ((!finalResults.test?.questions || finalResults.test.questions.length === 0) && finalResults.test?.id && !finalResults.test.id.startsWith('practice-')) {
+    // Normalize metadata and top-level fields
+    let finalResults: any = {
+      ...rawResults,
+      ...(rawResults.metadata || {}),
+      score: rawResults.score ?? rawResults.metadata?.score ?? 0,
+      total: rawResults.totalMarks || rawResults.total || rawResults.metadata?.totalMarks || rawResults.metadata?.total || 20,
+      totalMarks: rawResults.totalMarks || rawResults.total || rawResults.metadata?.totalMarks || rawResults.metadata?.total || 20,
+      accuracy: rawResults.accuracy ?? rawResults.metadata?.accuracy ?? 0,
+      answers: rawResults.answers || rawResults.metadata?.answers || {},
+      timeTaken: rawResults.timeTaken || rawResults.timeSpent || rawResults.metadata?.timeTaken || 300,
+    };
+
+    const targetTestId = finalResults.test?.id || finalResults.testId || finalResults.bankId || (finalResults.resumeSessionId && !finalResults.resumeSessionId.startsWith('session-') ? finalResults.resumeSessionId : undefined);
+    const targetTitle = finalResults.test?.title || finalResults.title || 'Practice Test';
+    const targetExamName = finalResults.test?.examName || finalResults.examName || 'General';
+    const targetCategory = finalResults.test?.testCategory || finalResults.testCategory || 'Mock Test';
+
+    if (!finalResults.test) {
+      finalResults.test = {
+        id: targetTestId || '',
+        title: targetTitle,
+        examName: targetExamName,
+        testCategory: targetCategory,
+        questions: []
+      };
+    }
+
+    // If questions are missing, hydrate them on-demand from the catalog
+    if (!finalResults.test.questions || finalResults.test.questions.length === 0) {
       try {
-        const freshQs = await examService.getQuestionsForMockTest(finalResults.test.id);
+        let freshQs: any[] = [];
+        if (targetTestId) {
+          if (targetTestId.startsWith('practice-') || finalResults.bankId) {
+            freshQs = await examService.getQuestionsForQuestionBank(targetTestId, targetTitle, finalResults.examId || selectedExam);
+          } else {
+            freshQs = await examService.getQuestionsForMockTest(targetTestId);
+          }
+        }
+        // If still no questions, try finding by test title in examService / exams catalog
+        if (!freshQs || freshQs.length === 0) {
+          if (targetTitle) {
+            const allBanks = await examService.getAllQuestionBanks().catch(() => []);
+            const matchingBank = allBanks.find((b: any) => b.title === targetTitle || targetTitle.includes(b.title));
+            if (matchingBank) {
+              freshQs = await examService.getQuestionsForQuestionBank(matchingBank.id, matchingBank.title, matchingBank.examId || selectedExam);
+            }
+          }
+        }
+
         if (freshQs && freshQs.length > 0) {
           finalResults.test.questions = freshQs;
         }
@@ -5530,6 +5575,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         console.error("Failed to fetch questions for results review:", e);
       }
     }
+
     setTestResults(finalResults);
   };
   // Stats for comparisons
@@ -7919,15 +7965,9 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
   }
 
   if (testResults) {
-    if (!testResults.test) {
-      alert("Detailed question-by-question review is only available on the device where you completed the test. (Detailed performance data is kept locally to optimize account space).");
-      setTestResults(null);
-      return null;
-    }
-
     // Find previous result for comparison
     const previousResult = activities
-      .filter(a => a.type === 'mock_test_completed' && a.title === testResults.test.title)
+      .filter(a => a.type === 'mock_test_completed' && a.title === (testResults.test?.title || testResults.title))
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0]; // Most recent from history
 
     if (typeof document === 'undefined') return null;
@@ -8054,10 +8094,18 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         user={user} 
         onViewResults={handleViewResults} 
         onResumeTest={async (test, state) => {
-          let finalTest = { ...test };
-          if (finalTest && finalTest.id && !finalTest.id.startsWith('practice-')) {
+          let finalTest = { ...(test || {}) };
+          const targetTestId = finalTest.id || state?.testId || state?.bankId || (state?.resumeSessionId && !state?.resumeSessionId.startsWith('session-') ? state.resumeSessionId : undefined);
+          const targetTitle = finalTest.title || state?.title;
+          
+          if ((!finalTest.questions || finalTest.questions.length === 0) && targetTestId) {
             try {
-              const freshQs = await examService.getQuestionsForMockTest(finalTest.id);
+              let freshQs: any[] = [];
+              if (targetTestId.startsWith('practice-') || state?.bankId) {
+                freshQs = await examService.getQuestionsForQuestionBank(targetTestId, targetTitle, state?.examId || selectedExam);
+              } else {
+                freshQs = await examService.getQuestionsForMockTest(targetTestId);
+              }
               if (freshQs && freshQs.length > 0) {
                 finalTest.questions = freshQs;
               }

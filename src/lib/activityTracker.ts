@@ -38,25 +38,53 @@ function toCloudSafe(activity: UserActivity): UserActivity {
   if (!activity) return {} as any;
   try {
     const m = activity.metadata || {};
-    // Only keep fields needed for "Continue Practice" card display
+    const testId = m.test?.id || m.testId || m.bankId || (m.resumeSessionId && !m.resumeSessionId.startsWith('session-') ? m.resumeSessionId : undefined);
+    const testTitle = m.test?.title || activity.title;
+
+    // Only keep fields needed for cross-device review & dashboard display
     const lightMeta: any = {
+      testId: testId,
+      examId: m.examId,
       examName: m.examName,
       testCategory: m.testCategory,
       bankType: m.bankType,
       bankId: m.bankId,
       resumeSessionId: m.resumeSessionId,
+      timeTaken: m.timeTaken || activity.timeSpent,
+      totalMarks: activity.totalMarks || m.totalMarks || m.total,
+      total: m.total || activity.totalMarks || m.totalMarks,
+      score: activity.score ?? m.score,
+      accuracy: activity.accuracy ?? m.accuracy,
+      correctCount: activity.correct ?? m.correctCount,
+      incorrectCount: activity.incorrect ?? m.incorrectCount,
     };
 
-    if (activity.type === 'test_incomplete') {
-      // Keep minimal progress info for the "Continue" card
-      lightMeta.currentQuestionIndex = m.currentQuestionIndex;
-      lightMeta.timeLeft = m.timeLeft;
-      // Store test identity ONLY (no questions, no answers)
+    if (activity.type === 'mock_test_completed' || activity.type === 'practice_test_completed') {
+      // Store compact user choices map (e.g. {"0":1, "1":3} is < 150 bytes) and test metadata
+      if (m.answers && typeof m.answers === 'object') {
+        lightMeta.answers = m.answers;
+      }
+      lightMeta.test = {
+        id: testId || '',
+        title: testTitle || '',
+        durationMinutes: m.test?.durationMinutes || 0,
+        _questionCount: m.test?._questionCount || (Array.isArray(m.test?.questions) ? m.test.questions.length : (m.totalQuestions || 0)),
+      };
+    } else if (activity.type === 'test_incomplete') {
+      // Keep minimal progress info for cross-device resume
+      lightMeta.currentQuestionIndex = m.currentQuestionIndex ?? m.progressState?.currentQuestionIndex ?? 0;
+      lightMeta.timeLeft = m.timeLeft ?? m.progressState?.timeLeft;
+      if (m.answers && typeof m.answers === 'object') {
+        lightMeta.answers = m.answers;
+      } else if (m.progressState?.answers && typeof m.progressState.answers === 'object') {
+        lightMeta.answers = m.progressState.answers;
+      }
+      // Store test identity ONLY (no heavy question arrays in cloud sync)
       if (m.test && typeof m.test === 'object') {
         lightMeta.test = {
-          id: m.test.id,
-          title: m.test.title,
-          durationMinutes: m.test.durationMinutes,
+          id: m.test.id || testId || '',
+          title: m.test.title || testTitle || '',
+          durationMinutes: m.test.durationMinutes || 60,
           _questionCount:
             m.test._questionCount ||
             (Array.isArray(m.test.questions) ? m.test.questions.length : 0),
@@ -68,7 +96,7 @@ function toCloudSafe(activity: UserActivity): UserActivity {
         lightMeta.test?._questionCount ||
         0;
     }
-    // Strip: answers, markedForReview, timeSpent, progressState, questions arrays, etc.
+    // Strip: markedForReview, timeSpent map, heavy question arrays, etc.
     return { ...activity, metadata: lightMeta };
   } catch {
     // On any error return a minimal safe object
@@ -114,17 +142,58 @@ export const activityTracker = {
         userMetadata?.activities && Array.isArray(userMetadata.activities)
       ) ? userMetadata.activities : []);
 
-      // Always prefer local (it has full question data for resuming).
-      // Only fall back to cloud if local is completely empty (e.g. new device).
-      if (localActivities.length === 0 && cloudActivities.length > 0) {
-        // Sync cloud → local so we have data on this device
+      if (cloudActivities.length === 0) {
+        return localActivities;
+      }
+
+      if (localActivities.length === 0) {
         try {
           localStorage.setItem(localKey, JSON.stringify(cloudActivities));
         } catch { /* storage full — ignore */ }
         return cloudActivities;
       }
 
-      return localActivities;
+      // Synchronously merge local and cloud activities so any recent changes from other devices appear immediately on refresh
+      const localMap = new Map(localActivities.map(a => [a.id || a.title, a]));
+      const merged: UserActivity[] = [];
+      const processedKeys = new Set<string>();
+
+      // 1. Process cloud items (prefer local version if local has full question arrays, but keep fresh cloud metadata)
+      for (const cloudItem of cloudActivities) {
+        const key = cloudItem.id || cloudItem.title;
+        processedKeys.add(key);
+        const localItem = localMap.get(key);
+        if (localItem && Array.isArray(localItem.metadata?.test?.questions) && localItem.metadata.test.questions.length > 0) {
+          merged.push({
+            ...cloudItem,
+            ...localItem,
+            metadata: {
+              ...cloudItem.metadata,
+              ...localItem.metadata,
+            }
+          });
+        } else {
+          merged.push(localItem ? { ...localItem, ...cloudItem } : cloudItem);
+        }
+      }
+
+      // 2. Add any local items not present in cloud (e.g. offline attempts)
+      for (const localItem of localActivities) {
+        const key = localItem.id || localItem.title;
+        if (!processedKeys.has(key)) {
+          merged.push(localItem);
+        }
+      }
+
+      // Sort chronologically by timestamp (newest first)
+      merged.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+      const finalMerged = merged.slice(0, LOCAL_MAX);
+      try {
+        localStorage.setItem(localKey, JSON.stringify(finalMerged));
+      } catch { /* ignore storage error */ }
+
+      return finalMerged;
     } catch (e) {
       console.error('Failed to load activities', e);
       return [];

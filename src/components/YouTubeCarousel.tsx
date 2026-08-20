@@ -39,6 +39,7 @@ const defaultCatStyle = { bg: 'bg-slate-100', text: 'text-slate-600', border: 'b
 
 export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
   const { t } = useLanguage();
+  const [activeVideo, setActiveVideo] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const [isVisible, setIsVisible] = useState(true);
   const [fetchedTitles, setFetchedTitles] = useState<Record<string, string>>({});

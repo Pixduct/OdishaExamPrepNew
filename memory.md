@@ -1,55 +1,48 @@
-# Memory — Autonomous AI Training, MCQ Twice-Daily Scheduling & Full Odia UI Imprinting
+# Memory — Mobile Touch Scrolling Fixes, Admin CTA Subtitle Dropdown & Global Deletion Cache Invalidation
 
-Last updated: 2026-08-20T06:59:30+05:30
+Last updated: 2026-08-20T09:55:40+05:30
 
 ## What was built
 
-### 1. Autonomous AI Training for Daily Exam Notifications (`automations/exam_update_engine.py` & `breaking_engine.py`)
-- Upgraded system prompts in `automations/exam_update_engine.py` and `automations/breaking_engine.py` to train the AI with the **Autonomous Intellectual Evaluation Mindset** of an expert recruitment officer.
-- High-Yield Targets: Odisha State Boards (OPSC, OSSC, OSSSC, Odisha Police, BSE Odisha, High Court of Orissa) and Central/National Bodies (UPSC CSE, SSC CGL/CHSL/CPO, Banking/IBPS/SBI, Railways/RRB, Defence/CDS/NDA/CAPF, NTA).
-- Low-Yield Noise Rejection (`REJECT`): Routine office staff transfers, internal tenders, vehicle auctions, general internal administrative circulars, obscure school committee notices, or unverified rumors.
-- Autonomous Dynamic Structuring: Generates dynamic natural section headings (e.g. *Official Recruitment Overview*, *Key Dates & Deadlines*, *Vacancies & Eligibility Matrix*, *Selection Process & Exam Pattern*, *Action Plan for Candidates*) with 100% complete sentences and zero `...` truncation.
+### 1. Directional Touch Gesture Tracking & Horizontal Track Scroll Unlock
+- **`src/components/YouTubeCarousel.tsx`**: Re-engineered touch handling to track drag delta distance on touchmove. When vertical swipe intent is detected (`Math.abs(deltaY) >= Math.abs(deltaX)`), touch dragging immediately unbinds and yields to native vertical document scrolling without calling `e.preventDefault()`. `e.preventDefault()` is only called during intentional horizontal carouselling.
+- **Horizontal Scroll Containers & Pill Rows**: Removed restrictive `touch-pan-x` and `overscroll-contain` classes across:
+  - `src/App.tsx`: Continue Practice slider, Recent Activity slider, History filter tabs, Syllabus exam switcher tabs, Sectional Mocks subject tab bar.
+  - `src/pages/AiMentor.tsx`: Attachment tray and quiz suggestion chips.
+  - `src/pages/BlogList.tsx`: Blog category filter bar.
+  - `src/pages/CurrentAffairs.tsx`: Current affairs category filter bar.
 
-### 2. Autonomous AI Training for Engaging Masterclass Blogs (`automations/seo_blog_engine.py`)
-- Upgraded system prompt in `automations/seo_blog_engine.py` with the **Autonomous Intellectual Evaluation Mindset** of a Senior Subject Matter Expert.
-- High-Yield Targets: Central/National conceptual shortcuts, reasoning models, English error spotting, GS concepts, and State Odia language grammar (Samasa, Krudanta/Tadhita, Sandhi), regional Odisha history & geography.
-- Low-Yield Fluff Rejection (`REJECT`): Generic lifestyle cliches (*"study hard"*, *"wake up early"*), fake countdowns (*"30-day exam countdown"*), or superficial summaries lacking worked problem solutions.
-- Autonomous Dynamic Structuring & Worked Examples: Step-by-step worked problem solutions `[Problem Statement] -> [The Common Trap Method] -> [The Shortcut / Rule] -> [Final Answer]`, custom HTML comparison tables, 4-6 FAQs, zero `...` truncation.
+### 2. Category-Matched CTA Subtitle Dropdown & Custom Input (`src/AdminPanel.tsx`)
+- Created `CATEGORY_TAGLINE_PRESETS` in `AdminPanel.tsx` mapped to each practice/question bank category (`topic-wise`, `exam-focused`, `revision-sets`, `pyq-collections`, and generic popular CTAs).
+- Replaced the raw input for **"Topic / Subject Subtitle"** in the Add/Edit Bank modal with a hybrid dropdown selector that dynamically updates its recommendations when the category is switched, allows instant 1-click CTA population, and reveals a custom text input with a `Clear` button for bespoke chapter titles.
+- Imprinted `AdminTopicSubtitleSelector` into `context/ui-registry.md` (Entry 67).
 
-### 3. Daily MCQ Engine Twice-Daily Green Zone Scheduling (`automations/.github/workflows/daily_mcq.yml`)
-- Upgraded `daily_mcq.yml` to run **twice a day**:
-  - Morning Run: `27 04 * * *` (9:57 AM IST)
-  - Evening Run: `37 12 * * *` (6:07 PM IST)
-- Added `if: failure()` step to dispatch automated Telegram Admin Alerts if runner crashes or times out.
-
-### 4. Full UI Registry Imprinting (`context/ui-registry.md`)
-- Imprinted #66 `AutoTranslateWrapper` (`<T>` component & `useAutoTranslate()` hook) in `context/ui-registry.md`.
-- Confirmed entries #57–65 (`AiMentorWorkspace`, `DynamicVectorCard`, `LanguageToggle`, `ActiveExamContextBar`, `ExamContextSelectorModal`, `ExamDetailCategoryCards`, `DefaultDarkModeEngine`, `DefaultOdiaLocalizationEngine`).
-
-### 5. Git Synchronization
-- Submodule `Pixduct/odisha-mcq-engine` and parent repository `Pixduct/OdishaExamPrepNew` committed and pushed to GitHub `main` branch.
+### 3. Global Deletion & Cache Invalidation System (`src/lib/examService.ts`)
+- Fixed the issue where deleted Question Banks, Mock Tests, and Test Series reappeared in the Admin Panel table after deletion.
+- Added comprehensive dual-phase cache invalidation (`cacheService.clear`) across `deleteQuestionBank`, `updateQuestionBank`, `deleteMockTest`, `updateMockTest`, `deleteTestSeries`, `updateTestSeries`, `deleteExam`, `updateExam`, `deleteQuestion`, and `updateQuestion`.
+- Added strict `.filter(item => !item.is_archived)` filtering on `getAllQuestionBanks`, `getAllMockTestsLite`, `getAllTestSeries`, and `getAllExams` so archived/soft-deleted items are never returned to the UI on refresh.
 
 ## Decisions made
 
-- **Autonomous Cognitive Mindset Across All Engines**: All AI automation engines (Current Affairs, Exam Updates, Breaking Notices, and Masterclass Blogs) apply autonomous reasoning without rigid static scripts, evaluating content utility against student exam success.
-- **Zero Ellipsis Policy**: Titles and body content must never contain `...` or ellipsis truncation. Headlines must be complete grammatical sentences under standard character limits.
-- **Off-Peak Green Zone Schedules**: Workflow crons use off-peak minutes (`:27`, `:37`, `:23`, `:47`) to guarantee 0-delay runner execution on GitHub Actions.
+- **Touch Action Philosophy**: Inline horizontal rows inside vertically scrolling pages should never use `touch-pan-x` (`touch-action: pan-x;`), because CSS specifications dictate that `pan-x` disables all vertical panning gestures starting on child cards. Relying on default `touch-action: auto` with CSS `overscroll-behavior-x: contain` preserves horizontal swipe while allowing full vertical page scroll freedom.
+- **Dual Cache Invalidation on Mutations**: Any write operation (create, update, single delete, bulk delete) must clear all parent and dependent catalog caches immediately before and after DB operations to guarantee that subsequent `fetchData()` calls retrieve fresh data from Supabase.
+- **Archival/Soft-Delete Isolation**: Items with active user purchases are marked `is_archived: true` to protect paid student access while being filtered out from all active admin lists and active catalog selectors.
 
 ## Problems solved
 
-- Standardized autonomous AI evaluation across Exam Notifications and Masterclass Blogs.
-- Upgraded Daily MCQ workflow to run 2x/day during peak student practice hours (9:57 AM & 6:07 PM IST).
-- Ensured zero `...` truncation across notice headlines and blog articles.
+- **Mobile Page Scroll Lock on Cards**: Resolved touch event interception by YouTube Carousel and slider cards that previously forced mobile users to scroll from the screen margins.
+- **Deleted Items Reappearing After Alert**: Resolved stale memory cache returning deleted question banks upon `fetchData()`.
 
 ## Current state
 
-- All automation engines (Current Affairs, Exam Notifications, Breaking Alerts, Masterclass Blogs, Daily MCQ Engine) are 100% verified working live, committed, and pushed to GitHub `main` branch.
-- TypeScript compiler and production build pass with 0 errors.
+- Production build passing cleanly with **0 TypeScript and 0 JSX errors** (`npm run build` exits with code 0).
+- All documentation updated (`context/progress-tracker.md`, `context/ui-registry.md`).
+- Mobile touch scrolling and admin deletions working reliably across all devices and browsers.
 
 ## Next session starts with
 
-- Proceed with any CBT exam updates, new question banks, UI feature enhancements, or additional automation requests.
+- Continue with any new features, content additions, or student dashboard enhancements requested by the developer.
 
 ## Open questions
 
-- None.
+- None at this time. All reported issues are fully resolved and verified.

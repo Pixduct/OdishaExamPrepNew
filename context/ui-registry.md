@@ -2505,5 +2505,27 @@ Last updated: August 20, 2026
 - **Zero Boilerplate Localization**: Wrap any inline static text string in `<T>Text</T>` or `t('Text')` to enable instant bilingual rendering without hardcoding keys or breaking structural CSS classes.
 - **Admin/Database Immunity**: Always set `noTranslate={true}` when rendering user-generated content or database records to preserve authentic source text.
 
+---
+
+### 67. `AdminTopicSubtitleSelector` (Category-Aware CTA Dropdown & Custom Topic Input)
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L2672-L2760)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Container** | `space-y-2` |
+| **Select Wrapper** | `relative w-full` |
+| **Dropdown Input** | `w-full px-5 py-3 rounded-2xl border outline-none font-bold bg-slate-50/30 dark:bg-slate-800/30 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15 transition-all text-sm appearance-none` |
+| **Custom Text Input** | `w-full px-5 py-3 rounded-2xl border outline-none font-semibold bg-slate-50/30 dark:bg-slate-800/30 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15 transition-all text-sm placeholder:text-slate-400` |
+| **Header Label** | `text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-300` |
+| **Quick Clear Button** | `text-[11px] font-bold text-slate-400 hover:text-red-500 transition-colors` |
+| **Chevron Icon** | `ChevronDown` (`w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none`) |
+
+**Pattern notes:**
+- **Dynamic Category Mapping**: Automatically synchronizes CTA suggestions with the active category (`topic-wise` -> Chapter-Wise Drills, `exam-focused` -> High-Yield Topics, `revision-sets` -> Daily Speed Quizzes, `pyq-collections` -> Past Years Solved MCQs).
+- **Hybrid Input Flow**: Choosing any pre-made CTA directly populates `formData.tagline`. Selecting `✏️ + Enter Custom Subtitle...` unlocks the text input for bespoke chapter titles.
+
+
 
 

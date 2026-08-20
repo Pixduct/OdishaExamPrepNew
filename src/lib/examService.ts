@@ -275,10 +275,19 @@ export const examService = {
   },
 
   async deleteQuestion(id: string) {
+    cacheService.clear('topic_counts');
+    cacheService.clear('all_question_banks');
+    cacheService.clear('all_mock_tests_lite');
     await callAdminDbProxy('questions', 'delete', undefined, id);
+    cacheService.clear('topic_counts');
+    cacheService.clear('all_question_banks');
+    cacheService.clear('all_mock_tests_lite');
   },
 
   async updateQuestion(id: string, updates: Partial<Question>) {
+    cacheService.clear('topic_counts');
+    cacheService.clear('all_question_banks');
+    cacheService.clear('all_mock_tests_lite');
     const hasDiagramCol = await checkSchemaHasDiagram();
     const payload: any = {
       examId: updates.examId,
@@ -319,11 +328,14 @@ export const examService = {
       .select('*')
       .order('sortOrder', { ascending: true });
     if (error) throw error;
-    cacheService.set('all_test_series', data as TestSeries[]);
-    return data as TestSeries[];
+    const series = ((data || []) as TestSeries[]).filter(s => !s.is_archived);
+    cacheService.set('all_test_series', series);
+    return series;
   },
 
   async deleteTestSeries(id: string) {
+    cacheService.clear('all_test_series');
+    cacheService.clear('all_mock_tests_lite');
     // Check if purchased
     const { data: purchaseCount } = await supabase
       .from('user_purchases')
@@ -373,10 +385,14 @@ export const examService = {
       }
       await callAdminDbProxy('testSeries', 'delete', undefined, id);
     }
+    cacheService.clear('all_test_series');
+    cacheService.clear('all_mock_tests_lite');
   },
 
   async updateTestSeries(id: string, updates: Partial<TestSeries>) {
+    cacheService.clear('all_test_series');
     const data = await callAdminDbProxy('testSeries', 'update', updates, id);
+    cacheService.clear('all_test_series');
     return data?.[0] || data;
   },
 
@@ -448,8 +464,9 @@ export const examService = {
       .order('sortOrder', { ascending: true });
     if (error) throw error;
 
+    const filteredTests = (tests ?? []).filter(t => !t.is_archived);
     // Fast paginated query to get exact question counts for all mock tests
-    const testIds = (tests ?? []).map(t => `mockTest__${t.id}`).filter(Boolean);
+    const testIds = filteredTests.map(t => `mockTest__${t.id}`).filter(Boolean);
     const countMap = await fetchTopicCounts(testIds);
 
     // The `seriesId` column may contain either:
@@ -457,7 +474,7 @@ export const examService = {
     //   - A JSON/JSONB object like {examId, isPremium, category, price, ...}
     //     (used by the admin panel to store exam metadata inline)
     // Parse it to expose virtual `examId` and `isPremium` fields on each test.
-    const result = (tests ?? []).map((t: any) => {
+    const result = filteredTests.map((t: any) => {
       let examId: string | null = t.examId || null;
       let isPremium = t.isPremium ?? false;
       let category: string | null = t.category || null;
@@ -483,6 +500,8 @@ export const examService = {
   },
 
   async deleteMockTest(id: string) {
+    cacheService.clear('all_mock_tests_lite');
+    cacheService.clear('topic_counts');
     // Check if mock test is purchased
     const { data: purchaseCount } = await supabase
       .from('user_purchases')
@@ -498,11 +517,17 @@ export const examService = {
       await callAdminDbProxy('questions', 'delete', undefined, undefined, { topic: { op: 'eq', val: `mockTest__${id}` } });
       await callAdminDbProxy('mockTests', 'delete', undefined, id);
     }
+    cacheService.clear('all_mock_tests_lite');
+    cacheService.clear('topic_counts');
   },
 
   async updateMockTest(id: string, updates: Partial<MockTest>) {
+    cacheService.clear('all_mock_tests_lite');
+    cacheService.clear('topic_counts');
     const { questions, ...updateData } = updates;
     const data = await callAdminDbProxy('mockTests', 'update', updateData, id);
+    cacheService.clear('all_mock_tests_lite');
+    cacheService.clear('topic_counts');
     return data?.[0] || data;
   },
 
@@ -580,8 +605,9 @@ export const examService = {
       .select('*')
       .order('sortOrder', { ascending: true });
     if (error) throw error;
-    cacheService.set('all_exams', data as Exam[]);
-    return data as Exam[];
+    const exams = ((data || []) as Exam[]).filter(ex => !ex.is_archived);
+    cacheService.set('all_exams', exams);
+    return exams;
   },
   async deleteExam(id: string) {
     // 1. Fetch the exam details to get the name
@@ -663,6 +689,11 @@ export const examService = {
         await callAdminDbProxy('mockTests', 'update', { is_archived: true }, undefined, { id: { op: 'in', val: relatedTestIds } });
       }
       
+      cacheService.clear('all_exams');
+      cacheService.clear('all_question_banks');
+      cacheService.clear('all_test_series');
+      cacheService.clear('all_mock_tests_lite');
+      cacheService.clear('topic_counts');
       return; // Stop here, do not delete from database
     }
 
@@ -763,12 +794,22 @@ export const examService = {
 
     // Delete the exam
     cacheService.clear('all_exams');
+    cacheService.clear('all_question_banks');
+    cacheService.clear('all_test_series');
+    cacheService.clear('all_mock_tests_lite');
+    cacheService.clear('topic_counts');
     await callAdminDbProxy('exams', 'delete', undefined, id);
+    cacheService.clear('all_exams');
+    cacheService.clear('all_question_banks');
+    cacheService.clear('all_test_series');
+    cacheService.clear('all_mock_tests_lite');
+    cacheService.clear('topic_counts');
   },
 
   async updateExam(id: string, updates: Partial<Exam>) {
     cacheService.clear('all_exams');
     const data = await callAdminDbProxy('exams', 'update', updates, id);
+    cacheService.clear('all_exams');
     return data?.[0] || data;
   },
 
@@ -790,7 +831,7 @@ export const examService = {
       .order('sortOrder', { ascending: true });
     if (error) throw error;
 
-    const banks = (data || []) as QuestionBank[];
+    const banks = ((data || []) as QuestionBank[]).filter(b => !b.is_archived);
 
     if (banks && banks.length > 0) {
       try {
@@ -816,6 +857,8 @@ export const examService = {
   },
 
   async deleteQuestionBank(id: string) {
+    cacheService.clear('all_question_banks');
+    cacheService.clear('topic_counts');
     // Check if question bank is purchased
     const { data: purchaseCount } = await supabase
       .from('user_purchases')
@@ -846,9 +889,13 @@ export const examService = {
       }
       await callAdminDbProxy('questionBanks', 'delete', undefined, id);
     }
+    cacheService.clear('all_question_banks');
+    cacheService.clear('topic_counts');
   },
 
   async updateQuestionBank(id: string, updates: Partial<QuestionBank>) {
+    cacheService.clear('all_question_banks');
+    cacheService.clear('topic_counts');
     // If the title is being updated, we should also update the topic of all associated questions
     if (updates.title) {
       try {
@@ -869,6 +916,8 @@ export const examService = {
       }
     }
     const data = await callAdminDbProxy('questionBanks', 'update', updates, id);
+    cacheService.clear('all_question_banks');
+    cacheService.clear('topic_counts');
     return data?.[0] || data;
   },
 

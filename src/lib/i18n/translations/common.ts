@@ -135,8 +135,11 @@ export const commonTranslations = {
       header: {
         title: 'Activity History',
         subtitle: 'Manage, review, and track all your exam practice sessions',
+        subtitleMobile: 'Manage and track your exam sessions',
         clearAll: 'Clear All History',
+        clearShort: 'Clear All',
         confirmClear: 'Confirm Clear',
+        confirmShort: 'Confirm',
         cancel: 'Cancel',
       },
       filters: {
@@ -298,8 +301,11 @@ export const commonTranslations = {
       header: {
         title: 'କାର୍ଯ୍ୟକଳାପ ଇତିହାସ',
         subtitle: 'ଆପଣଙ୍କର ସମସ୍ତ ପରୀକ୍ଷା ଅଭ୍ୟାସ ଅଧିବେଶନ ଟ୍ରାକ୍ ଓ ସମୀକ୍ଷା କରନ୍ତୁ',
+        subtitleMobile: 'ପରୀକ୍ଷା ଅଭ୍ୟାସ ଅଧିବେଶନ ଟ୍ରାକ୍ କରନ୍ତୁ',
         clearAll: 'ସମସ୍ତ ଇତିହାସ ଖାଲି କରନ୍ତୁ',
+        clearShort: 'ଇତିହାସ ଖାଲି',
         confirmClear: 'ନିଶ୍ଚିତ ଖାଲି କରନ୍ତୁ',
+        confirmShort: 'ନିଶ୍ଚିତ',
         cancel: 'ବାତିଲ୍ କରନ୍ତୁ',
       },
       filters: {

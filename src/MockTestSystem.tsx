@@ -1160,19 +1160,19 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
   }
 
   return (
-    <div className="fixed inset-0 w-full h-[100dvh] max-h-[100dvh] bg-[#FBF9F6] dark:bg-slate-950 z-[100] flex flex-col font-sans overflow-hidden" data-lenis-prevent>
+    <div className="fixed inset-0 w-full h-[100dvh] max-h-[100dvh] bg-[#FBF9F6] dark:bg-[#060B16] z-[100] flex flex-col font-sans overflow-hidden" data-lenis-prevent>
       {/* Subtle print grid texture overlay */}
       <div className="absolute inset-0 pointer-events-none z-[1] opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle, rgba(37,99,235,0.3) 0.5px, transparent 0.5px)', backgroundSize: '24px 24px' }} />
       
       {/* Header (CBT Candidate + Exam details with Top Safe Area) */}
-      <header className="h-auto min-h-[3.75rem] sm:min-h-[4.5rem] bg-white/85 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800 flex items-center justify-between px-3 sm:px-8 pt-[max(env(safe-area-inset-top),0.5rem)] pb-2 sm:pb-0 shrink-0 sticky top-0 z-40 relative shadow-sm">
+      <header className="h-auto min-h-[3.75rem] sm:min-h-[4.5rem] bg-white/85 dark:bg-[#060B16]/90 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800 flex items-center justify-between px-3 sm:px-8 pt-[max(env(safe-area-inset-top),0.5rem)] pb-2 sm:pb-0 shrink-0 sticky top-0 z-40 relative shadow-sm">
         {/* Scroll Progress Bar */}
         <div ref={progressBarRef} className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#2563eb] origin-left transition-transform duration-75 ease-out scale-x-0 z-50" />
 
         <div className="flex items-center gap-2 sm:gap-4 relative z-10 min-w-0 flex-1 mr-3">
           <button 
             onClick={() => setShowExitConfirm(true)} 
-            className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center bg-slate-50 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-slate-200 dark:border-slate-700 hover:border-rose-100 rounded-xl transition-all duration-200 cursor-pointer text-slate-500 hover:text-[#2563eb] shrink-0"
+            className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center bg-slate-50 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-slate-200 dark:border-slate-700 hover:border-rose-100 rounded-xl transition-all duration-200 cursor-pointer text-slate-500 dark:text-slate-300 hover:text-[#2563eb] dark:hover:text-white shrink-0"
             title="Exit Assessment"
           >
             <X className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -1181,7 +1181,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
           {/* Fullscreen Toggle Button (Desktop/Laptop only) */}
           <button
             onClick={toggleFullscreen}
-            className="hidden lg:flex w-10 h-10 sm:w-11 sm:h-11 items-center justify-center bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition-all duration-200 cursor-pointer text-slate-500 hover:text-[#2563eb] shrink-0"
+            className="hidden lg:flex w-10 h-10 sm:w-11 sm:h-11 items-center justify-center bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl transition-all duration-200 cursor-pointer text-slate-500 dark:text-slate-300 hover:text-[#2563eb] dark:hover:text-white shrink-0"
             title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           >
             {isFullscreen ? (
@@ -1192,8 +1192,8 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
           </button>
 
           <div className="min-w-0 flex-1">
-            <h1 className="font-serif font-extrabold text-slate-900 truncate tracking-tight leading-tight text-sm sm:text-xl">{test.title}</h1>
-            <p className="text-[8px] sm:text-[10px] font-black text-[#2563EB] uppercase tracking-widest leading-none mt-0.5 sm:mt-1">Subject: General Awareness</p>
+            <h1 className="font-serif font-extrabold text-slate-900 dark:text-white truncate tracking-tight leading-tight text-sm sm:text-xl">{test.title}</h1>
+            <p className="text-[8px] sm:text-[10px] font-black text-[#2563EB] dark:text-blue-400 uppercase tracking-widest leading-none mt-0.5 sm:mt-1">Subject: General Awareness</p>
           </div>
         </div>
 
@@ -1202,15 +1202,15 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
           <div className={cn(
             "h-10 sm:h-11 flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 rounded-xl font-mono font-black text-xs sm:text-base border transition-all duration-300 shadow-sm shrink-0",
             currentMode === 'practice' && untimedPractice
-              ? "bg-emerald-50 text-emerald-700 border-emerald-250"
+              ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-250 dark:border-emerald-800"
               : timeLeft < 60
-                ? "bg-rose-50 text-rose-600 border-rose-200"
+                ? "bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-300 border-rose-200 dark:border-rose-800"
                 : timeLeft < 300
-                  ? "bg-amber-50 text-amber-700 border-amber-200"
-                  : "bg-slate-50 text-slate-700 border-slate-200/80"
+                  ? "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800"
+                  : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700"
           )}>
-            <Timer className={cn("w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 text-[#2563EB]", timeLeft < 300 && !(currentMode === 'practice' && untimedPractice) && "animate-pulse")} />
-            <span className="hidden sm:inline text-[11px] font-black uppercase text-slate-400 font-sans tracking-wider leading-none mt-0.5">
+            <Timer className={cn("w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 text-[#2563EB] dark:text-blue-400", timeLeft < 300 && !(currentMode === 'practice' && untimedPractice) && "animate-pulse")} />
+            <span className="hidden sm:inline text-[11px] font-black uppercase text-slate-400 dark:text-slate-400 font-sans tracking-wider leading-none mt-0.5">
               {currentMode === 'practice' && untimedPractice ? t('testEngine.timer.timeElapsed', 'Time Elapsed:') : t('testEngine.timer.timeRemaining', 'Time Left:')}
             </span>
             <span className="tracking-widest">
@@ -1222,7 +1222,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
 
           <button 
             onClick={() => setShowSubmitConfirm(true)}
-            className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white w-10 h-10 sm:w-auto sm:h-11 flex items-center justify-center sm:px-6 rounded-xl font-bold transition-all duration-300 text-xs sm:text-sm uppercase tracking-widest cursor-pointer shadow-md shadow-[#2563eb]/10 hover:shadow-lg hover:shadow-[#2563eb]/20 active:scale-95 gap-1.5 sm:gap-2 shrink-0"
+            className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white w-10 h-10 sm:w-auto sm:h-11 flex items-center justify-center sm:px-6 rounded-xl font-bold transition-all duration-300 text-xs sm:text-sm uppercase tracking-widest cursor-pointer shadow-md shadow-[#2563eb]/10 hover:shadow-lg hover:shadow-[#2563eb]/20 active:scale-95 gap-1.5 sm:gap-2 shrink-0 border-none"
           >
             <Send className="w-4 h-4 sm:w-4 sm:h-4" /> <span className="hidden sm:inline">{t('testEngine.controls.submitTest', 'Submit')}</span>
           </button>
@@ -1233,22 +1233,22 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
       <div className="flex-1 flex overflow-hidden relative z-10">
         
         {/* Left Side: Question Pane */}
-        <div className="flex-1 flex flex-col min-w-0 bg-transparent border-r border-slate-200/60">
+        <div className="flex-1 flex flex-col min-w-0 bg-transparent border-r border-slate-200/60 dark:border-slate-800">
           {/* Question Scoring Info Bar */}
-          <div className="h-9 sm:h-12 bg-slate-50/50 border-b border-slate-200/60 flex items-center justify-between px-3.5 sm:px-8 shrink-0 select-none">
+          <div className="h-9 sm:h-12 bg-slate-50/50 dark:bg-[#060B16]/90 border-b border-slate-200/60 dark:border-slate-800 flex items-center justify-between px-3.5 sm:px-8 shrink-0 select-none">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#2563EB] shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#2563EB] dark:bg-blue-400 shrink-0" />
               <span className="leading-tight truncate">
-                <span className="hidden sm:inline text-xs font-bold text-slate-500">{t('testEngine.palette.mcq', 'Multiple Choice Question (MCQ)')}</span>
-                <span className="sm:hidden text-[10px] text-slate-600 font-extrabold uppercase tracking-widest">{t('testEngine.palette.mcq', 'MCQ')}</span>
+                <span className="hidden sm:inline text-xs font-bold text-slate-500 dark:text-slate-300">{t('testEngine.palette.mcq', 'Multiple Choice Question (MCQ)')}</span>
+                <span className="sm:hidden text-[10px] text-slate-600 dark:text-slate-300 font-extrabold uppercase tracking-widest">{t('testEngine.palette.mcq', 'MCQ')}</span>
               </span>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-100/80">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-100/80 dark:border-emerald-800">
                 {t('testEngine.palette.correct', 'Correct')}: +{marksPerQ.toFixed(2)}
               </span>
               {negMarkVal > 0 && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-rose-700 bg-rose-50 border border-rose-100/80">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 border border-rose-100/80 dark:border-rose-800">
                   {t('testEngine.palette.negative', 'Neg')}: -{negMarkVal.toFixed(2)}
                 </span>
               )}
@@ -1268,7 +1268,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
 
             return (
               <main className={cn(
-                "flex-1 px-3 py-3 sm:p-5 lg:p-6 relative bg-[#FBF9F6] flex flex-col overscroll-contain",
+                "flex-1 px-3 py-3 sm:p-5 lg:p-6 relative bg-[#FBF9F6] dark:bg-[#060B16] flex flex-col overscroll-contain",
                 (mathHeavy || showExplanation) ? "overflow-y-auto no-scrollbar" : "overflow-hidden"
               )} data-lenis-prevent>
                 <div className={cn(
@@ -1292,7 +1292,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                     >
                       {/* ── Question Panel ── */}
                       <div className={cn(
-                        "bg-white rounded-xl sm:rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-md transition-shadow flex flex-col space-y-2.5 sm:space-y-3",
+                        "bg-white dark:bg-[#0B1528] rounded-xl sm:rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow flex flex-col space-y-2.5 sm:space-y-3",
                         mathHeavy
                           ? "px-3 py-4 sm:p-6"
                           : "px-2.5 py-3 sm:p-5 flex-shrink-0 lg:flex-1 lg:h-full lg:max-h-none overflow-hidden"
@@ -1300,22 +1300,22 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                         {/* Question label + Math badge */}
                         <div className="flex items-center justify-between flex-shrink-0 gap-2">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-[#2563EB] bg-[#2563EB]/5 rounded-lg border border-[#2563EB]/15">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] sm:text-xs font-bold text-[#2563EB] dark:text-blue-400 bg-[#2563EB]/5 dark:bg-blue-950/60 rounded-lg border border-[#2563EB]/15 dark:border-blue-800">
                               <FileText className="w-3.5 h-3.5 animate-pulse-soft" />
                               {t('testEngine.palette.question', 'Question')} {currentQuestionIndex + 1} {t('testEngine.palette.of', 'of')} {(test?.questions || []).length}
                             </span>
                             {currentMode === 'practice' && answers[currentQuestionIndex] !== undefined && (
                               <button
                                 onClick={() => setShowExplanation(prev => !prev)}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold text-amber-700 bg-amber-50 hover:bg-amber-100/80 border border-amber-200 rounded-lg transition-all cursor-pointer active:scale-95"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100/80 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800 rounded-lg transition-all cursor-pointer active:scale-95"
                               >
-                                <AlertCircle className="w-3 h-3 text-amber-600 shrink-0" />
+                                <AlertCircle className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
                                 <span>{showExplanation ? t('testEngine.review.hideSolution', 'Hide Explanation') : t('testEngine.review.solutionBreakdown', 'Solution Breakdown')}</span>
                               </button>
                             )}
                           </div>
                           {((/(\$\$[\s\S]*?\$\$|\\\\?\[[\s\S]*?\\\\?\]|\\\\?\([\s\S]*?\\\\?\))/).test(currentQuestion.questionText || '') || countMathBlocks(currentQuestion.questionText) >= 1) && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800 rounded-lg">
                               <span className="text-sm leading-none select-none">∑</span> Math
                             </span>
                           )}
@@ -1325,7 +1325,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                         <div
                           ref={questionTextRef}
                           className={cn(
-                            "text-[15px] sm:text-lg lg:text-xl font-serif font-extrabold text-slate-900 leading-relaxed break-words overflow-wrap-anywhere",
+                            "text-[15px] sm:text-lg lg:text-xl font-serif font-extrabold text-slate-900 dark:text-white leading-relaxed break-words overflow-wrap-anywhere",
                             !mathHeavy && "flex-1 overflow-y-auto pr-2 no-scrollbar"
                           )}
                         >
@@ -1371,11 +1371,11 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                                   "mcq-option group w-full text-left py-3 px-3.5 sm:py-2.5 sm:px-4 rounded-xl border transition-all duration-300 relative cursor-pointer select-none flex items-start gap-3 sm:gap-4 shadow-sm active:scale-[0.98]",
                                   showResult
                                     ? isCorrect 
-                                      ? "border-emerald-500 bg-emerald-50 text-emerald-900 shadow-sm" 
-                                      : isSelected ? "border-rose-500 bg-rose-50 text-rose-900 shadow-sm" : "border-slate-200 bg-white"
+                                      ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 shadow-sm" 
+                                      : isSelected ? "border-rose-500 bg-rose-50 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200 shadow-sm" : "border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B1528] text-slate-800 dark:text-slate-200"
                                     : isSelected 
-                                      ? "border-[#2563EB] bg-gradient-to-r from-[#2563EB]/5 to-white text-slate-900 shadow-md ring-1 ring-[#2563EB]" 
-                                      : "border-slate-200 bg-white hover:border-slate-400 hover:bg-slate-50/50 hover:shadow-md"
+                                      ? "border-[#2563EB] dark:border-blue-500 bg-gradient-to-r from-[#2563EB]/5 to-white dark:to-[#0B1528] text-slate-900 dark:text-white shadow-md ring-1 ring-[#2563EB]" 
+                                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B1528] text-slate-800 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-700 hover:bg-slate-50/50 dark:hover:bg-slate-800/60 hover:shadow-md"
                                 )}
                               >
                                 <div className={cn(
@@ -1383,28 +1383,28 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                                   showResult
                                     ? isCorrect 
                                       ? "bg-emerald-600 text-white" 
-                                      : isSelected ? "bg-rose-600 text-white" : "bg-slate-100 text-slate-400"
+                                      : isSelected ? "bg-rose-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-400"
                                     : isSelected 
-                                      ? "bg-[#2563EB] text-white" 
-                                      : "bg-slate-100 text-slate-500 group-hover:bg-slate-200/70"
+                                      ? "bg-[#2563EB] dark:bg-blue-600 text-white" 
+                                      : "bg-slate-100 dark:bg-[#060B16] text-slate-500 dark:text-slate-300 group-hover:bg-slate-200/70 dark:group-hover:bg-slate-800"
                                 )}>
                                   {String.fromCharCode(65 + idx)}
                                 </div>
                                 
                                 <span className={cn(
-                                  "flex-1 text-slate-800 text-sm sm:text-base transition-all pointer-events-none min-w-0 leading-tight",
-                                  isSelected ? "font-bold text-slate-900" : "font-medium text-slate-600 group-hover:text-slate-900"
+                                  "flex-1 text-slate-800 dark:text-slate-200 text-sm sm:text-base transition-all pointer-events-none min-w-0 leading-tight",
+                                  isSelected ? "font-bold text-slate-900 dark:text-white" : "font-medium text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white"
                                 )}><MathTextRenderer text={option} isOption /></span>
                                 
-                                {showResult && isCorrect && <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 pointer-events-none mt-1 sm:mt-1.5" />}
-                                {showResult && isSelected && !isCorrect && <X className="w-5 h-5 text-rose-600 shrink-0 pointer-events-none mt-1 sm:mt-1.5" />}
+                                {showResult && isCorrect && <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 pointer-events-none mt-1 sm:mt-1.5" />}
+                                {showResult && isSelected && !isCorrect && <X className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0 pointer-events-none mt-1 sm:mt-1.5" />}
                                 
                                 {!showResult && (
                                   <span className={cn(
                                     "text-[10px] font-mono font-black border px-2 py-0.5 rounded-md hidden sm:inline ml-auto select-none transition-all duration-300 pointer-events-none mt-1 sm:mt-1.5",
                                     isSelected 
-                                      ? "border-[#2563EB]/30 bg-[#2563EB]/5 text-[#2563EB]" 
-                                      : "border-slate-200 bg-slate-50 text-slate-400 opacity-0 group-hover:opacity-100"
+                                      ? "border-[#2563EB]/30 bg-[#2563EB]/5 text-[#2563EB] dark:text-blue-400" 
+                                      : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-400 opacity-0 group-hover:opacity-100"
                                   )}>
                                     Press {idx + 1}
                                   </span>
@@ -1416,19 +1416,19 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
 
                         {showExplanation && (
                           <motion.div {...fadeSlideUp}
-                            className="math-explanation rounded-2xl border border-slate-200/60 bg-white p-5 sm:p-6 space-y-3 relative shadow-sm shrink-0 mb-6"
+                            className="math-explanation rounded-2xl border border-slate-200/60 dark:border-slate-800 bg-white dark:bg-[#0B1528] p-5 sm:p-6 space-y-3 relative shadow-sm shrink-0 mb-6"
                           >
                             <div className="absolute top-0 right-0 w-32 h-32 bg-[#2563EB]/3 rounded-full blur-2xl pointer-events-none" />
                             <div className="flex items-center gap-2.5">
-                              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                                <AlertCircle className="w-5 h-5 text-amber-600" />
+                              <div className="w-10 h-10 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center">
+                                <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                               </div>
                               <div>
-                                <h4 className="font-serif font-black text-slate-900 text-base leading-none">Expert Explanation</h4>
-                                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1 block">Solution Breakdown</span>
+                                <h4 className="font-serif font-black text-slate-900 dark:text-white text-base leading-none">Expert Explanation</h4>
+                                <span className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase tracking-wider mt-1 block">Solution Breakdown</span>
                               </div>
                             </div>
-                            <p className="text-slate-700 text-sm sm:text-base leading-relaxed font-serif font-medium border-l-4 border-[#2563EB] pl-4 py-1">
+                            <p className="text-slate-700 dark:text-slate-200 text-sm sm:text-base leading-relaxed font-serif font-medium border-l-4 border-[#2563EB] dark:border-blue-500 pl-4 py-1">
                               <MathTextRenderer text={currentQuestion.explanation} />
                             </p>
                           </motion.div>
@@ -1443,7 +1443,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
 
 
           {/* Bottom Official Exam Navigation Footer with Bottom Safe Area */}
-          <div className="shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 pt-2 sm:py-3 pb-[max(env(safe-area-inset-bottom),0.625rem)] px-3 sm:px-8 shadow-sm">
+          <div className="shrink-0 bg-white/95 dark:bg-[#060B16]/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 pt-2 sm:py-3 pb-[max(env(safe-area-inset-bottom),0.625rem)] px-3 sm:px-8 shadow-sm">
             <div className={cn(
               "w-full mx-auto transition-all duration-300",
               isPaletteCollapsed ? "max-w-[96%] lg:max-w-[94%]" : "max-w-4xl lg:max-w-6xl"
@@ -1458,8 +1458,8 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                     className={cn(
                       "py-2 px-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border flex items-center justify-center gap-1 cursor-pointer",
                       markedForReview.includes(currentQuestionIndex)
-                        ? "bg-amber-50 border-amber-200 text-amber-700 shadow-sm"
-                        : "bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-700"
+                        ? "bg-amber-50 dark:bg-amber-950/60 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 shadow-sm"
+                        : "bg-slate-50 dark:bg-[#0B1528] border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white"
                     )}
                   >
                     <Flag className="w-3 h-3 shrink-0" />
@@ -1468,7 +1468,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                   
                   <button 
                     onClick={handleClearResponse}
-                    className="py-2 px-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-700 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1"
+                    className="py-2 px-2 rounded-lg bg-slate-50 dark:bg-[#0B1528] border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1"
                   >
                     <X className="w-3 h-3 shrink-0" />
                     <span>{t('testEngine.controls.clear', 'Clear')}</span>
@@ -1476,7 +1476,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
 
                   <button 
                     onClick={() => setShowMobilePalette(true)}
-                    className="py-2 px-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-800 transition-all cursor-pointer flex items-center justify-center gap-1 text-[10px] font-bold uppercase tracking-wider"
+                    className="py-2 px-2 rounded-lg bg-slate-50 dark:bg-[#0B1528] border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white transition-all cursor-pointer flex items-center justify-center gap-1 text-[10px] font-bold uppercase tracking-wider"
                   >
                     <LayoutGrid className="w-3 h-3 shrink-0" />
                     <span>{t('testEngine.controls.palette', 'Palette')}</span>
@@ -1488,13 +1488,13 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                   <button 
                     disabled={currentQuestionIndex === 0}
                     onClick={prevQuestion}
-                    className="col-span-2 bg-white border border-slate-200 text-slate-600 py-3 sm:py-3 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-1 active:scale-[0.97]"
+                    className="col-span-2 bg-white dark:bg-[#0B1528] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 py-3 sm:py-3 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-1 active:scale-[0.97]"
                   >
                     <ChevronLeft className="w-4 h-4" /> {t('testEngine.controls.back', 'Back')}
                   </button>
                   <button 
                     onClick={nextQuestion}
-                    className="col-span-3 bg-[#2563eb] hover:bg-[#1d4ed8] text-white py-3 rounded-xl text-[11px] font-extrabold uppercase tracking-wider transition-all shadow-md shadow-[#2563eb]/10 active:scale-95 flex items-center justify-center gap-1 cursor-pointer"
+                    className="col-span-3 bg-[#2563eb] hover:bg-[#1d4ed8] text-white py-3 rounded-xl text-[11px] font-extrabold uppercase tracking-wider transition-all shadow-md shadow-[#2563eb]/10 active:scale-95 flex items-center justify-center gap-1 cursor-pointer border-none"
                   >
                     {currentQuestionIndex === (test?.questions || []).length - 1 ? t('testEngine.controls.saveAndSubmit', 'Save & Submit') : t('testEngine.controls.saveAndNext', 'Save & Next')} <ChevronRight className="w-4 h-4" />
                   </button>
@@ -1510,15 +1510,15 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                     className={cn(
                       "px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer border flex items-center gap-1.5",
                       markedForReview.includes(currentQuestionIndex)
-                        ? "bg-amber-50 border-amber-200 text-amber-700 shadow-sm"
-                        : "bg-white hover:bg-amber-50/50 border-slate-200 hover:border-amber-200 text-slate-600 hover:text-amber-700"
+                        ? "bg-amber-50 dark:bg-amber-950/60 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 shadow-sm"
+                        : "bg-white dark:bg-[#0B1528] hover:bg-amber-50/50 dark:hover:bg-amber-950/40 border-slate-200 dark:border-slate-800 hover:border-amber-200 dark:hover:border-amber-800 text-slate-600 dark:text-slate-300 hover:text-amber-700 dark:hover:text-amber-300"
                     )}
                   >
                     <Flag className="w-3.5 h-3.5" /> {t('testEngine.controls.markForReview', 'Mark for Review')}
                   </button>
                   <button 
                     onClick={handleClearResponse}
-                    className="bg-white border border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-700 px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer"
+                    className="bg-white dark:bg-[#0B1528] border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-500 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer"
                   >
                     {t('testEngine.controls.clearAnswer', 'Clear Answer')}
                   </button>
@@ -1529,13 +1529,13 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                   <button 
                     disabled={currentQuestionIndex === 0}
                     onClick={prevQuestion}
-                    className="bg-white border border-slate-200 hover:border-slate-300 text-slate-600 px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"
+                    className="bg-white dark:bg-[#0B1528] border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-600 dark:text-slate-300 px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"
                   >
                     <ChevronLeft className="w-4 h-4" /> {t('testEngine.controls.back', 'Back')}
                   </button>
                   <button 
                     onClick={nextQuestion}
-                    className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-md shadow-[#2563eb]/10 hover:shadow-lg active:scale-95 flex items-center gap-1 font-extrabold"
+                    className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-md shadow-[#2563eb]/10 hover:shadow-lg active:scale-95 flex items-center gap-1 font-extrabold border-none"
                   >
                     {currentQuestionIndex === (test?.questions || []).length - 1 ? t('testEngine.controls.saveAndSubmit', 'Save & Submit') : t('testEngine.controls.saveAndNext', 'Save & Next')} <ChevronRight className="w-4 h-4" />
                   </button>
@@ -1549,7 +1549,7 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
         {/* Toggle Palette Button (Desktop/Laptop only) */}
         <button
           onClick={() => setIsPaletteCollapsed(!isPaletteCollapsed)}
-          className="hidden lg:flex absolute top-1/2 -translate-y-1/2 z-50 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 w-5.5 h-16 rounded-l-xl items-center justify-center cursor-pointer shadow-md transition-all duration-300 hover:w-6.5 hover:shadow-lg focus:outline-none"
+          className="hidden lg:flex absolute top-1/2 -translate-y-1/2 z-50 bg-white dark:bg-[#0B1528] hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 w-5.5 h-16 rounded-l-xl items-center justify-center cursor-pointer shadow-md transition-all duration-300 hover:w-6.5 hover:shadow-lg focus:outline-none text-slate-500 dark:text-slate-300"
           style={{
             right: isPaletteCollapsed ? '0px' : '320px',
             transition: 'right 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s, border-color 0.2s'
@@ -1557,16 +1557,16 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
           title={isPaletteCollapsed ? "Expand Question Palette" : "Collapse Question Palette"}
         >
           {isPaletteCollapsed ? (
-            <ChevronLeft className="w-4 h-4 text-slate-500 animate-[pulse_2s_infinite]" />
+            <ChevronLeft className="w-4 h-4 text-slate-500 dark:text-slate-300 animate-[pulse_2s_infinite]" />
           ) : (
-            <ChevronRight className="w-4 h-4 text-slate-500" />
+            <ChevronRight className="w-4 h-4 text-slate-500 dark:text-slate-300" />
           )}
         </button>
 
         {/* Right Side: CBT Candidate Profile & Question Palette (Premium Redesign) */}
         <aside 
           className={cn(
-            "bg-white flex flex-col shrink-0 hidden lg:flex border-l border-slate-200/60 transition-all duration-300 ease-in-out overflow-hidden relative",
+            "bg-white dark:bg-[#0B1528] flex flex-col shrink-0 hidden lg:flex border-l border-slate-200/60 dark:border-slate-800 transition-all duration-300 ease-in-out overflow-hidden relative",
             isPaletteCollapsed ? "w-0 border-l-0" : "w-80"
           )}
         >
@@ -1574,24 +1574,24 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
           <div className="w-80 h-full flex flex-col shrink-0">
           
           {/* Candidate Card */}
-          <div className="p-5 border-b border-slate-200/60 flex items-center gap-3.5 bg-slate-50/50">
+          <div className="p-5 border-b border-slate-200/60 dark:border-slate-800 flex items-center gap-3.5 bg-slate-50/50 dark:bg-[#060B16]/80">
             <div className="w-12 h-12 bg-gradient-to-tr from-[#2563eb] to-[#1d4ed8] text-white rounded-2xl font-serif font-black flex items-center justify-center text-lg shadow-sm border border-[#2563eb]/10">
               {user?.user_metadata?.full_name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'N'}
             </div>
             <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Session Active</p>
-              <h4 className="font-serif font-black text-slate-800 truncate max-w-[190px] text-sm mt-1">{user?.user_metadata?.full_name || user?.email?.split('@')[0] || "Naresh Samal"}</h4>
+              <p className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest leading-none">Session Active</p>
+              <h4 className="font-serif font-black text-slate-800 dark:text-white truncate max-w-[190px] text-sm mt-1">{user?.user_metadata?.full_name || user?.email?.split('@')[0] || "Naresh Samal"}</h4>
               <div className="flex items-center gap-1.5 mt-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">Candidate Verified</span>
+                <span className="text-[9px] text-slate-400 dark:text-slate-400 font-extrabold uppercase tracking-wider">Candidate Verified</span>
               </div>
             </div>
           </div>
 
           {/* Palette Grid Header */}
-          <div className="p-4.5 border-b border-slate-100 flex items-center justify-between shrink-0">
-            <h3 className="font-serif font-black text-xs text-slate-900 uppercase tracking-wider">{t('testEngine.palette.questionPalette', 'Question Palette')}</h3>
-            <span className="text-[10px] font-black text-[#2563EB] bg-[#2563EB]/5 border border-[#2563EB]/10 px-2 py-0.5 rounded-md tracking-wider tabular-nums">
+          <div className="p-4.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
+            <h3 className="font-serif font-black text-xs text-slate-900 dark:text-white uppercase tracking-wider">{t('testEngine.palette.questionPalette', 'Question Palette')}</h3>
+            <span className="text-[10px] font-black text-[#2563EB] dark:text-blue-400 bg-[#2563EB]/5 dark:bg-blue-950/60 border border-[#2563EB]/10 dark:border-blue-800 px-2 py-0.5 rounded-md tracking-wider tabular-nums">
               {answeredCount}/{(test?.questions || []).length} {t('testEngine.palette.saved', 'Saved')}
             </span>
           </div>
@@ -1609,25 +1609,25 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
 
                 if (isAnswered && isMarked) {
                   // Answered & Marked for Review (Yellow/Amber bg + Green Check badge)
-                  btnStyle = "bg-amber-50 text-amber-800 border border-amber-300 rounded-xl font-bold hover:bg-amber-100/60";
-                  badgeElement = <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border border-white flex items-center justify-center text-[8px] text-white font-black shadow-sm">✓</span>;
+                  btnStyle = "bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800 rounded-xl font-bold hover:bg-amber-100/60 dark:hover:bg-amber-900/60";
+                  badgeElement = <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border border-white dark:border-slate-900 flex items-center justify-center text-[8px] text-white font-black shadow-sm">✓</span>;
                 } else if (isMarked) {
                   // Marked for Review (Yellow/Amber bg + Amber exclamation badge)
-                  btnStyle = "bg-amber-50 text-amber-800 border border-amber-300 rounded-xl font-bold hover:bg-amber-100/60";
-                  badgeElement = <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-500 rounded-full border border-white flex items-center justify-center text-[8px] text-white font-black shadow-sm">!</span>;
+                  btnStyle = "bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800 rounded-xl font-bold hover:bg-amber-100/60 dark:hover:bg-amber-900/60";
+                  badgeElement = <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-500 rounded-full border border-white dark:border-slate-900 flex items-center justify-center text-[8px] text-white font-black shadow-sm">!</span>;
                 } else if (isAnswered) {
                   // Answered (Green bg)
-                  btnStyle = "bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl font-bold hover:bg-emerald-100/60";
+                  btnStyle = "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-xl font-bold hover:bg-emerald-100/60 dark:hover:bg-emerald-900/60";
                 } else if (isVisited) {
                   // Not Answered but Visited (Rose bg)
-                  btnStyle = "bg-rose-50 text-rose-700 border border-rose-200 rounded-xl font-bold hover:bg-rose-100/60";
+                  btnStyle = "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 rounded-xl font-bold hover:bg-rose-100/60 dark:hover:bg-rose-900/60";
                 } else {
                   // Not Visited (Gray bg)
-                  btnStyle = "bg-slate-50 text-slate-400 border border-slate-200/80 rounded-xl font-bold hover:border-slate-300 hover:bg-slate-100/50";
+                  btnStyle = "bg-slate-50 dark:bg-[#060B16] text-slate-400 dark:text-slate-400 border border-slate-200/80 dark:border-slate-800 rounded-xl font-bold hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100/50 dark:hover:bg-slate-800/50";
                 }
 
                 if (isCurrent) {
-                  btnStyle += " ring-2 ring-offset-2 ring-[#2563EB] scale-105 z-10 shadow-sm";
+                  btnStyle += " ring-2 ring-offset-2 dark:ring-offset-[#0B1528] ring-[#2563EB] dark:ring-blue-500 scale-105 z-10 shadow-sm";
                 }
 
                 return (
@@ -1655,30 +1655,30 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
           </div>
 
           {/* CBT Legend Box */}
-          <div className="p-5 border-t border-slate-200/60 bg-slate-50/50 space-y-3 shrink-0">
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('testEngine.palette.legendOverview', 'Legend Overview')}</h4>
-            <div className="grid grid-cols-2 gap-2.5 text-[10px] font-bold text-slate-600">
+          <div className="p-5 border-t border-slate-200/60 dark:border-slate-800 bg-slate-50/50 dark:bg-[#060B16]/80 space-y-3 shrink-0">
+            <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest">{t('testEngine.palette.legendOverview', 'Legend Overview')}</h4>
+            <div className="grid grid-cols-2 gap-2.5 text-[10px] font-bold text-slate-600 dark:text-slate-300">
               <div className="flex items-center gap-1.5">
-                <span className="w-5 h-5 rounded-lg bg-emerald-50 border border-emerald-200 shrink-0" />
+                <span className="w-5 h-5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 shrink-0" />
                 <span>{t('testEngine.palette.answered', 'Answered')}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-5 h-5 rounded-lg bg-rose-50 border border-rose-200 shrink-0" />
+                <span className="w-5 h-5 rounded-lg bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 shrink-0" />
                 <span>{t('testEngine.palette.notAnswered', 'Not Answered')}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-5 h-5 rounded-lg bg-slate-50 border border-slate-200 shrink-0" />
+                <span className="w-5 h-5 rounded-lg bg-slate-50 dark:bg-[#060B16] border border-slate-200 dark:border-slate-800 shrink-0" />
                 <span>{t('testEngine.palette.notVisited', 'Not Visited')}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-5 h-5 rounded-lg bg-amber-50 border border-amber-300 shrink-0 relative flex items-center justify-center">
-                  <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-amber-500 rounded-full border border-white" />
+                <span className="w-5 h-5 rounded-lg bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 shrink-0 relative flex items-center justify-center">
+                  <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-amber-500 rounded-full border border-white dark:border-slate-900" />
                 </span>
                 <span>{t('testEngine.palette.markedForReview', 'Marked')}</span>
               </div>
               <div className="flex items-center gap-1.5 col-span-2">
-                <span className="w-5 h-5 rounded-lg bg-amber-50 border border-amber-300 shrink-0 relative flex items-center justify-center">
-                  <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border border-white flex items-center justify-center text-[5px] text-white font-black">✓</span>
+                <span className="w-5 h-5 rounded-lg bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 shrink-0 relative flex items-center justify-center">
+                  <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border border-white dark:border-slate-900 flex items-center justify-center text-[5px] text-white font-black">✓</span>
                 </span>
                 <span>{t('testEngine.palette.markedAndAnswered', 'Marked & Answered')}</span>
               </div>
@@ -1703,20 +1703,20 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 300 }}
-              className="bg-white rounded-t-3xl max-h-[80vh] flex flex-col overflow-hidden shadow-2xl"
+              className="bg-white dark:bg-[#0B1528] rounded-t-3xl max-h-[80vh] flex flex-col overflow-hidden shadow-2xl border-t border-slate-200/80 dark:border-slate-800"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="p-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-slate-50/50">
+              <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0 bg-slate-50/50 dark:bg-[#060B16]">
                 <div>
-                  <h3 className="font-serif font-black text-sm text-slate-900 uppercase tracking-wider">{t('testEngine.palette.questionPalette', 'Question Palette')}</h3>
-                  <p className="text-[10px] text-slate-500 font-bold mt-0.5">
+                  <h3 className="font-serif font-black text-sm text-slate-900 dark:text-white uppercase tracking-wider">{t('testEngine.palette.questionPalette', 'Question Palette')}</h3>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold mt-0.5">
                     {answeredCount} of {(test?.questions || []).length} {t('testEngine.palette.saved', 'Questions Saved')}
                   </p>
                 </div>
                 <button 
                   onClick={() => setShowMobilePalette(false)}
-                  className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
+                  className="p-2 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1735,21 +1735,21 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                     let badgeElement = null;
 
                     if (isAnswered && isMarked) {
-                      btnStyle = "bg-amber-50 text-amber-800 border border-amber-300 rounded-xl font-bold";
-                      badgeElement = <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border border-white flex items-center justify-center text-[7px] text-white font-black shadow-sm">✓</span>;
+                      btnStyle = "bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800 rounded-xl font-bold";
+                      badgeElement = <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border border-white dark:border-slate-900 flex items-center justify-center text-[7px] text-white font-black shadow-sm">✓</span>;
                     } else if (isMarked) {
-                      btnStyle = "bg-amber-50 text-amber-800 border border-amber-300 rounded-xl font-bold";
-                      badgeElement = <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border border-white flex items-center justify-center text-[7px] text-white font-black shadow-sm">!</span>;
+                      btnStyle = "bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800 rounded-xl font-bold";
+                      badgeElement = <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border border-white dark:border-slate-900 flex items-center justify-center text-[7px] text-white font-black shadow-sm">!</span>;
                     } else if (isAnswered) {
-                      btnStyle = "bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl font-bold";
+                      btnStyle = "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-xl font-bold";
                     } else if (isVisited) {
-                      btnStyle = "bg-rose-50 text-rose-700 border border-rose-200 rounded-xl font-bold";
+                      btnStyle = "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 rounded-xl font-bold";
                     } else {
-                      btnStyle = "bg-slate-50 text-slate-400 border border-slate-200/80 rounded-xl font-bold";
+                      btnStyle = "bg-slate-50 dark:bg-[#060B16] text-slate-400 dark:text-slate-400 border border-slate-200/80 dark:border-slate-800 rounded-xl font-bold";
                     }
 
                     if (isCurrent) {
-                      btnStyle += " ring-2 ring-offset-1 ring-[#2563EB] scale-105 z-10";
+                      btnStyle += " ring-2 ring-offset-1 dark:ring-offset-[#0B1528] ring-[#2563EB] dark:ring-blue-500 scale-105 z-10";
                     }
 
                     return (
@@ -1778,23 +1778,23 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
               </div>
 
               {/* Legend */}
-              <div className="px-4 pt-3 pb-6 border-t border-slate-100 bg-slate-50/50 shrink-0">
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[10px] font-bold text-slate-600">
+              <div className="px-4 pt-3 pb-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-[#060B16] shrink-0">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[10px] font-bold text-slate-600 dark:text-slate-300">
                   <div className="flex items-center gap-2">
-                    <span className="w-4 h-4 rounded-lg bg-emerald-50 border border-emerald-200 shrink-0" />
+                    <span className="w-4 h-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 shrink-0" />
                     <span>{t('testEngine.palette.answered', 'Answered')}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="w-4 h-4 rounded-lg bg-rose-50 border border-rose-200 shrink-0" />
+                    <span className="w-4 h-4 rounded-lg bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 shrink-0" />
                     <span>{t('testEngine.palette.notAnswered', 'Not Answered')}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="w-4 h-4 rounded-lg bg-slate-50 border border-slate-200 shrink-0" />
+                    <span className="w-4 h-4 rounded-lg bg-slate-50 dark:bg-[#060B16] border border-slate-200 dark:border-slate-800 shrink-0" />
                     <span>{t('testEngine.palette.notVisited', 'Not Visited')}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="w-4 h-4 rounded-lg bg-amber-50 border border-amber-300 shrink-0 relative">
-                      <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-amber-500 rounded-full border border-white" />
+                    <span className="w-4 h-4 rounded-lg bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 shrink-0 relative">
+                      <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-amber-500 rounded-full border border-white dark:border-slate-900" />
                     </span>
                     <span>{t('testEngine.palette.markedForReview', 'Marked')}</span>
                   </div>
@@ -1808,25 +1808,25 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
       {/* Submit Confirmation Modal */}
       <AnimatePresence>
         {showSubmitConfirm && (
-          <div className="fixed inset-0 bg-slate-950/40 z-[100] flex items-center justify-center p-4 sm:p-6 backdrop-blur-sm">
+          <div className="fixed inset-0 bg-slate-950/40 dark:bg-slate-950/80 z-[100] flex items-center justify-center p-4 sm:p-6 backdrop-blur-sm">
             <motion.div {...modalContent}
-              className="relative overflow-hidden rounded-3xl bg-white shadow-2xl max-w-md w-full border border-slate-200/80"
+              className="relative overflow-hidden rounded-3xl bg-white dark:bg-[#0B1528] shadow-2xl max-w-md w-full border border-slate-200/80 dark:border-slate-800"
             >
-              <div className="absolute top-0 right-0 w-48 h-48 bg-[#2563EB]/5 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute top-0 right-0 w-48 h-48 bg-[#2563EB]/5 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
               <div className="p-6 sm:p-8 text-center space-y-6 relative z-10">
-                <div className="w-16 h-16 bg-[#2563EB]/10 rounded-2xl flex items-center justify-center mx-auto border border-[#2563EB]/20">
-                  <Send className="text-[#2563EB] w-8 h-8" />
+                <div className="w-16 h-16 bg-[#2563EB]/10 dark:bg-blue-950/60 rounded-2xl flex items-center justify-center mx-auto border border-[#2563EB]/20 dark:border-blue-800/60">
+                  <Send className="text-[#2563EB] dark:text-blue-400 w-8 h-8" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-xl sm:text-2xl font-serif font-black text-slate-900 tracking-tight">{t('testEngine.submitModal.title', 'Confirm Submission')}</h3>
-                  <p className="text-slate-500 text-sm font-medium">
+                  <h3 className="text-xl sm:text-2xl font-serif font-black text-slate-900 dark:text-white tracking-tight">{t('testEngine.submitModal.title', 'Confirm Submission')}</h3>
+                  <p className="text-slate-500 dark:text-slate-300 text-sm font-medium">
                     {t('testEngine.submitModal.summary', `You have answered ${answeredCount} out of ${(test?.questions || []).length} questions.`, { answered: answeredCount, total: (test?.questions || []).length })}
                   </p>
                 </div>
 
-                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                   <motion.div
-                    className="h-full bg-[#2563EB] rounded-full"
+                    className="h-full bg-[#2563EB] dark:bg-blue-500 rounded-full"
                     initial={{ width: 0 }}
                     animate={{ width: `${(answeredCount / ((test?.questions || []).length || 1)) * 100}%` }}
                     transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -1836,13 +1836,13 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                 <div className="flex flex-col gap-3">
                   <button 
                     onClick={handleSubmit}
-                    className="w-full py-3.5 rounded-xl text-sm font-bold uppercase tracking-wider bg-emerald-600 hover:bg-emerald-700 text-white transition-all cursor-pointer shadow-md shadow-emerald-600/10 hover:shadow-lg hover:shadow-emerald-600/20 active:scale-95 premium-btn-transition"
+                    className="w-full py-3.5 rounded-xl text-sm font-bold uppercase tracking-wider bg-emerald-600 hover:bg-emerald-700 text-white transition-all cursor-pointer shadow-md shadow-emerald-600/10 hover:shadow-lg hover:shadow-emerald-600/20 active:scale-95 premium-btn-transition border-none"
                   >
                     {t('testEngine.submitModal.confirmBtn', 'Submit Test Now')}
                   </button>
                   <button 
                     onClick={() => setShowSubmitConfirm(false)}
-                    className="w-full py-2.5 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-slate-600 transition-colors rounded-xl cursor-pointer"
+                    className="w-full py-2.5 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white transition-colors rounded-xl cursor-pointer"
                   >
                     {t('common.actions.cancel', 'Cancel')}
                   </button>
@@ -1856,23 +1856,23 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
       {/* Exit Confirmation Modal */}
       <AnimatePresence>
         {showExitConfirm && (
-          <div className="fixed inset-0 bg-slate-950/40 z-[100] flex items-center justify-center p-4 sm:p-6 backdrop-blur-sm">
+          <div className="fixed inset-0 bg-slate-950/40 dark:bg-slate-950/80 z-[100] flex items-center justify-center p-4 sm:p-6 backdrop-blur-sm">
             <motion.div {...modalContent}
-              className="relative overflow-hidden rounded-3xl bg-white shadow-2xl max-w-md w-full border border-slate-200/80"
+              className="relative overflow-hidden rounded-3xl bg-white dark:bg-[#0B1528] shadow-2xl max-w-md w-full border border-slate-200/80 dark:border-slate-800"
             >
-              <div className="absolute top-0 right-0 w-48 h-48 bg-[#2563EB]/5 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute top-0 right-0 w-48 h-48 bg-[#2563EB]/5 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
               <div className="p-6 sm:p-8 text-center space-y-6 relative z-10">
-                <div className="w-16 h-16 bg-slate-100 border border-slate-200 rounded-2xl flex items-center justify-center mx-auto">
-                  <LogOut className="text-slate-600 w-8 h-8" />
+                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl flex items-center justify-center mx-auto">
+                  <LogOut className="text-slate-600 dark:text-slate-300 w-8 h-8" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-xl sm:text-2xl font-serif font-black text-slate-900 tracking-tight">{t('testEngine.exitModal.title', 'Pause & Exit Exam?')}</h3>
-                  <p className="text-slate-500 text-sm font-medium">{t('testEngine.exitModal.description', 'Your progress is automatically saved. You can easily resume exactly where you left off from your dashboard later.')}</p>
+                  <h3 className="text-xl sm:text-2xl font-serif font-black text-slate-900 dark:text-white tracking-tight">{t('testEngine.exitModal.title', 'Pause & Exit Exam?')}</h3>
+                  <p className="text-slate-500 dark:text-slate-300 text-sm font-medium">{t('testEngine.exitModal.description', 'Your progress is automatically saved. You can easily resume exactly where you left off from your dashboard later.')}</p>
                 </div>
 
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-slate-50 rounded-xl border border-slate-200/60 shadow-sm">
-                  <BookOpen className="w-4 h-4 text-slate-400" />
-                  <span className="text-xs font-bold text-slate-600">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-slate-50 dark:bg-[#060B16] rounded-xl border border-slate-200/60 dark:border-slate-800 shadow-sm">
+                  <BookOpen className="w-4 h-4 text-slate-400 dark:text-slate-400" />
+                  <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
                     {answeredCount} {t('testEngine.palette.of', 'of')} {(test?.questions || []).length} {t('testEngine.palette.answered', 'answered')}
                   </span>
                 </div>
@@ -1880,13 +1880,13 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                 <div className="flex flex-col gap-3">
                   <button 
                     onClick={handleExit}
-                    className="w-full py-3.5 rounded-xl text-sm font-bold uppercase tracking-wider bg-[#2563EB] hover:bg-[#1d4ed8] text-white transition-all cursor-pointer shadow-md shadow-[#2563EB]/10 hover:shadow-lg hover:shadow-[#2563eb]/20 active:scale-95 premium-btn-transition"
+                    className="w-full py-3.5 rounded-xl text-sm font-bold uppercase tracking-wider bg-[#2563EB] hover:bg-[#1d4ed8] text-white transition-all cursor-pointer shadow-md shadow-[#2563EB]/10 hover:shadow-lg hover:shadow-[#2563eb]/20 active:scale-95 premium-btn-transition border-none"
                   >
                     {t('testEngine.exitModal.confirmBtn', 'Save & Exit Exam')}
                   </button>
                   <button 
                     onClick={() => setShowExitConfirm(false)}
-                    className="w-full py-2.5 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-slate-600 transition-colors rounded-xl cursor-pointer"
+                    className="w-full py-2.5 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white transition-colors rounded-xl cursor-pointer"
                   >
                     {t('testEngine.exitModal.cancelBtn', 'Keep Solving')}
                   </button>

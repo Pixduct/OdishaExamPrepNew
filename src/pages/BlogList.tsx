@@ -253,13 +253,13 @@ export default function BlogList() {
                 transition={{ duration: durations.slow }}
                 className="group relative"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-brand-600/5 to-indigo-600/5 dark:from-blue-600/10 dark:to-indigo-600/10 rounded-2xl sm:rounded-[2.5rem] blur-2xl -z-10 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-indigo-600/5 dark:from-blue-600/10 dark:to-indigo-600/10 rounded-2xl sm:rounded-[2.5rem] blur-2xl -z-10 group-hover:opacity-100 transition-opacity" />
                 <Link 
                   to={`/blog/${featuredBlog.id}`} 
-                  className="flex flex-col lg:flex-row bg-white dark:bg-[#0B1528] rounded-2xl sm:rounded-[2.5rem] border border-slate-200/80 dark:border-slate-800 shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-350"
+                  className="flex flex-col lg:flex-row bg-white dark:bg-[#0B1528] rounded-2xl sm:rounded-[2.5rem] border border-slate-200/80 dark:border-slate-800 shadow-md dark:shadow-slate-950/50 overflow-hidden hover:shadow-xl dark:hover:shadow-slate-950 transition-all duration-350"
                 >
                   {/* Featured Image Banner */}
-                  <div className="w-full lg:w-[50%] h-48 sm:h-72 lg:h-auto bg-gradient-to-br from-slate-900 via-brand-950 to-slate-900 relative overflow-hidden shrink-0">
+                  <div className="w-full lg:w-[50%] h-36 sm:h-64 lg:h-auto bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 relative overflow-hidden shrink-0">
                     {featuredBlog.icon ? (
                       <img 
                         src={getDirectImageUrl(featuredBlog.icon)} 
@@ -274,28 +274,30 @@ export default function BlogList() {
                     ) : null}
                     
                     {/* Vector fallback graphic */}
-                    <div className="absolute inset-0 flex flex-col justify-center items-center p-6 text-white text-center pointer-events-none -z-0">
-                      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:12px_12px]" />
-                      <BookOpen className="w-12 h-12 text-brand-300/40 mb-2" />
-                      <p className="text-xs font-black tracking-widest uppercase text-white/50">{getBlogCategory(featuredBlog)}</p>
+                    <div className="absolute inset-0 flex flex-col justify-center items-center p-4 sm:p-6 text-white text-center pointer-events-none -z-0">
+                      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:10px_10px]" />
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/10 flex items-center justify-center mb-1.5 backdrop-blur-xs border border-white/10">
+                        <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-blue-300" />
+                      </div>
+                      <p className="text-[10px] sm:text-xs font-black tracking-widest uppercase text-white/60">{getBlogCategory(featuredBlog)}</p>
                     </div>
 
                     {/* Category Overlay */}
-                    <div className="absolute top-3 left-3 sm:top-5 sm:left-5 bg-brand-600 dark:bg-blue-600 text-white font-black text-[10px] sm:text-xs uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-md z-10">
+                    <div className="absolute top-3 left-3 sm:top-5 sm:left-5 bg-blue-600 text-white font-black text-[9.5px] sm:text-xs uppercase tracking-widest px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl shadow-md z-10">
                       Featured • {getBlogCategory(featuredBlog)}
                     </div>
                   </div>
 
                   {/* Featured Content details */}
-                  <div className="p-4 sm:p-8 md:p-10 lg:w-[50%] flex flex-col justify-between space-y-4 sm:space-y-6">
-                    <div className="space-y-2.5 sm:space-y-4">
+                  <div className="p-4 sm:p-8 md:p-10 lg:w-[50%] flex flex-col justify-between space-y-3 sm:space-y-6">
+                    <div className="space-y-2 sm:space-y-3.5">
                       {/* Meta information */}
-                      <div className="flex items-center gap-3 text-xs font-bold text-slate-400">
+                      <div className="flex items-center gap-2.5 text-[11px] sm:text-xs font-bold text-slate-400 dark:text-slate-500">
                         <div className="flex items-center gap-1.5">
-                          <Calendar className="w-3.5 h-3.5 text-brand-500 dark:text-blue-400" />
+                          <Calendar className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
                           <span>{featuredBlog.examDate ? new Date(featuredBlog.examDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'Recent'}</span>
                         </div>
-                        <div className="w-1 h-1 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                        <div className="w-1 h-1 bg-slate-300 dark:bg-slate-700 rounded-full" />
                         <div className="flex items-center gap-1.5">
                           <Clock className="w-3.5 h-3.5 text-slate-400" />
                           <span>{calculateReadingTime(featuredBlog.description)} min read</span>
@@ -303,19 +305,20 @@ export default function BlogList() {
                       </div>
 
                       {/* Title */}
-                      <h2 className="text-lg sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-blue-400 transition-colors leading-tight tracking-tight font-serif line-clamp-2">
+                      <h2 className="text-base sm:text-2xl md:text-3xl font-extrabold sm:font-black text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug sm:leading-tight tracking-tight line-clamp-2">
                         {featuredBlog.name}
                       </h2>
 
                       {/* Excerpt */}
-                      <p className="text-xs sm:text-base text-slate-500 dark:text-slate-300 font-medium sm:font-semibold leading-relaxed line-clamp-3">
+                      <p className="text-xs sm:text-base text-slate-600 dark:text-slate-300 font-medium sm:font-semibold leading-relaxed line-clamp-2 sm:line-clamp-3">
                         {getSnippet(featuredBlog.description, 180)}
                       </p>
                     </div>
 
                     {/* Action */}
-                    <div className="flex items-center gap-1.5 text-brand-600 dark:text-blue-400 font-black text-xs sm:text-sm group-hover:gap-2.5 transition-all">
-                      Read Full Strategy <ArrowRight className="w-4 h-4" />
+                    <div className="pt-1 flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-black text-xs sm:text-sm group-hover:gap-2.5 transition-all">
+                      <span>Read Full Strategy</span>
+                      <ArrowRight className="w-4 h-4" />
                     </div>
                   </div>
                 </Link>

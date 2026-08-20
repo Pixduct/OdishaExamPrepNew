@@ -2113,7 +2113,7 @@ export const Navbar = ({
         scrolled ? "h-14 sm:h-16" : "h-16 sm:h-20"
       )}>
         <div
-          className="flex items-center gap-2 sm:gap-3 group cursor-pointer"
+          className="flex items-center gap-2 sm:gap-3 group cursor-pointer shrink-0"
           onClick={() => {
             if (onHomeClick) {
               onHomeClick();
@@ -2126,10 +2126,10 @@ export const Navbar = ({
             }
           }}
         >
-          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl border-2 border-slate-900 dark:border-slate-700 bg-[#2563EB] flex items-center justify-center shadow-[3px_3px_0px_#0f172a] dark:shadow-[3px_3px_0px_rgba(99,102,241,0.3)] group-hover:rotate-3 group-hover:scale-105 transition-all duration-300">
-            <BookOpen className="text-white w-5 h-5 sm:w-6 sm:h-6" />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl border-2 border-slate-900 dark:border-slate-700 bg-[#2563EB] flex items-center justify-center shadow-[2px_2px_0px_#0f172a] dark:shadow-[2px_2px_0px_rgba(99,102,241,0.3)] group-hover:rotate-3 group-hover:scale-105 transition-all duration-300 shrink-0">
+            <BookOpen className="text-white w-4 h-4 sm:w-5.5 sm:h-5.5" />
           </div>
-          <span className="font-serif font-black text-lg sm:text-2xl tracking-tight text-slate-900 dark:text-white group-hover:text-[#2563EB] transition-colors duration-300 uppercase">
+          <span className="font-serif font-black text-[15px] xs:text-base sm:text-xl md:text-2xl tracking-tight text-slate-900 dark:text-white group-hover:text-[#2563EB] transition-colors duration-300">
             Odisha<span className="text-[#2563EB] font-serif font-black">Exam</span>Prep
           </span>
         </div>
@@ -8217,12 +8217,12 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
         {/* ── Continue Practice (horizontal snap-scroll slider) ── */}
         {!isGuest && incompleteTests.length > 0 && (
-          <div className="space-y-3 sm:space-y-4">
-            {/* Section header — bolder on mobile */}
+          <div className="space-y-2 sm:space-y-4">
+            {/* Section header */}
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-[18px] sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">{t('common.activity.continuePractice', 'Continue Practice')}</h2>
-                <p className="text-[11px] text-slate-400 font-medium mt-0.5 sm:hidden">{t('common.activity.testHistoryGlance', 'Pick up where you left off')}</p>
+                <h2 className="text-base sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">{t('common.activity.continuePractice', 'Continue Practice')}</h2>
+                <p className="text-[10.5px] text-slate-400 font-medium mt-0.5 sm:hidden">{t('common.activity.testHistoryGlance', 'Pick up where you left off')}</p>
               </div>
               <button
                 onClick={() => onNavigate?.('history')}
@@ -8263,7 +8263,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     container.scrollLeft += e.deltaY * 0.85;
                   }
                 }}
-                className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory py-4 sm:py-5 px-4 sm:px-6"
+                className="flex gap-2.5 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory py-2.5 sm:py-4 px-4 sm:px-6"
                 style={{
                   WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)',
                   maskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)'
@@ -8312,7 +8312,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   );
 
                   return (
-                    <DynamicVectorCard key={i} glowColor="rgba(37, 99, 235, 0.28)" roundedClass="rounded-2xl" className="snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px]">
+                    <DynamicVectorCard key={i} glowColor="rgba(37, 99, 235, 0.28)" roundedClass="rounded-2xl" className="snap-start shrink-0 w-[66vw] xs:w-[250px] sm:w-[280px] lg:w-[320px]">
                       <motion.div
                         initial={{ opacity: 0, y: 15, scale: 0.96 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -8331,36 +8331,36 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           }
                           handleStartTest(testToResume, a);
                         }}
-                        className={`w-full h-full rounded-2xl border border-slate-100/90 sm:border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 hover:border-brand-300/60 dark:hover:border-brand-600/50 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container relative overflow-hidden ${
+                        className={`w-full h-full rounded-2xl border border-slate-100/90 sm:border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 hover:border-brand-300/60 dark:hover:border-brand-600/50 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 group p-3 sm:p-4.5 flex flex-col gap-2 premium-shine-container relative overflow-hidden ${
                           canResume ? 'cursor-pointer active:scale-[0.98]' : 'opacity-60 cursor-not-allowed'
                         }`}
                       >
                         {/* Inner Vector Grid Overlay */}
                         <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
                         {/* Top row: icon + text */}
-                        <div className="flex items-center gap-3 relative z-10">
+                        <div className="flex items-center gap-2.5 sm:gap-3 relative z-10">
                           {/* Play icon with brand gradient */}
-                          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shrink-0 shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform duration-300">
-                            <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white fill-white ml-0.5" />
+                          <div className="w-7.5 h-7.5 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shrink-0 shadow-xs shadow-brand-500/20 group-hover:scale-105 transition-transform duration-300">
+                            <Play className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white fill-white ml-0.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 dark:text-white line-clamp-2 sm:line-clamp-1 leading-snug group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors duration-300">{a.title || t('common.activity.continuePractice', 'Practice Session')}</h4>
-                            <p className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">{t('common.activity.lastPracticed', 'Last practiced {time}', { time: timeAgo })}</p>
+                            <h4 className="font-extrabold text-[12.5px] sm:text-sm text-slate-900 dark:text-white line-clamp-1 leading-snug group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors duration-300">{a.title || t('common.activity.continuePractice', 'Practice Session')}</h4>
+                            <p className="text-[9.5px] sm:text-[10.5px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">{t('common.activity.lastPracticed', 'Last practiced {time}', { time: timeAgo })}</p>
                             {a.metadata?.testCategory && (
-                              <span className="inline-block mt-1 text-[8.5px] sm:text-[9px] font-black uppercase tracking-widest text-brand-600 dark:text-brand-400 bg-brand-50/70 dark:bg-brand-950/50 border border-brand-100/40 dark:border-brand-800/50 px-1.5 py-0.5 rounded">{a.metadata.testCategory}</span>
+                              <span className="inline-block mt-0.5 text-[8px] sm:text-[8.5px] font-black uppercase tracking-widest text-brand-600 dark:text-brand-400 bg-brand-50/70 dark:bg-brand-950/50 border border-brand-100/40 dark:border-brand-800/50 px-1.5 py-0.5 rounded">{a.metadata.testCategory}</span>
                             )}
                             {!canResume && (
-                              <span className="block text-[8.5px] sm:text-[9px] font-bold text-slate-400 mt-0.5">{t('common.activity.openAppToResume', 'Open app to resume')}</span>
+                              <span className="block text-[8px] sm:text-[8.5px] font-bold text-slate-400 mt-0.5">{t('common.activity.openAppToResume', 'Open app to resume')}</span>
                             )}
                           </div>
                         </div>
-                        {/* Progress bar — taller + labelled on mobile for clarity */}
-                        <div className="flex flex-col gap-1 relative z-10">
+                        {/* Progress bar */}
+                        <div className="flex flex-col gap-0.5 relative z-10 pt-0.5">
                           <div className="flex items-center justify-between mb-0.5">
-                            <span className="text-[8.5px] sm:text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{t('common.activity.progress', 'Progress')}</span>
-                            <span className="text-[10px] sm:text-[11px] font-black text-brand-600">{isOdia ? toOdiaDigits(progressPct) : progressPct}%</span>
+                            <span className="text-[8px] sm:text-[8.5px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{t('common.activity.progress', 'Progress')}</span>
+                            <span className="text-[9.5px] sm:text-[10.5px] font-black text-brand-600">{isOdia ? toOdiaDigits(progressPct) : progressPct}%</span>
                           </div>
-                          <div className="w-full h-1.5 sm:h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                          <div className="w-full h-1 sm:h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                             <div
                               className="h-full bg-gradient-to-r from-brand-600 to-brand-400 rounded-full transition-all duration-700"
                               style={{ width: `${Math.max(progressPct, progressPct === 0 ? 0 : 4)}%` }}
@@ -8374,9 +8374,9 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               </div>
             </div>
             {incompleteTests.length > 1 && (
-              <div className="flex items-center justify-center gap-1.5 mt-1 sm:hidden pointer-events-none px-4">
+              <div className="flex items-center justify-center gap-1.5 mt-0.5 sm:hidden pointer-events-none px-4">
                 <div className="h-[1px] flex-1 bg-slate-200/60" />
-                <span className="text-[8.5px] font-black uppercase tracking-widest text-slate-400">{t('common.activity.swipeToExplore', 'Swipe to explore')}</span>
+                <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">{t('common.activity.swipeToExplore', 'Swipe to explore')}</span>
                 <div className="h-[1px] flex-1 bg-slate-200/60" />
               </div>
             )}
@@ -8385,12 +8385,12 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
         {/* ── Recent Activity (completed tests & other) ── */}
         {!isGuest && activities.filter((a: any) => a.type !== 'test_incomplete').length > 0 && (
-          <div className="space-y-3 sm:space-y-5">
-            {/* Section header — bolder on mobile */}
+          <div className="space-y-2 sm:space-y-4">
+            {/* Section header */}
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-[18px] sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">{t('common.activity.recentActivity', 'Recent Activity')}</h2>
-                <p className="text-[11px] text-slate-400 font-medium mt-0.5 sm:hidden">{t('common.activity.testHistoryGlance', 'Your test history at a glance')}</p>
+                <h2 className="text-base sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">{t('common.activity.recentActivity', 'Recent Activity')}</h2>
+                <p className="text-[10.5px] text-slate-400 font-medium mt-0.5 sm:hidden">{t('common.activity.testHistoryGlance', 'Your test history at a glance')}</p>
               </div>
               <button
                 onClick={() => onNavigate?.('history')}
@@ -8431,7 +8431,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     container.scrollLeft += e.deltaY * 0.85;
                   }
                 }}
-                className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory py-4 sm:py-5 px-4 sm:px-6"
+                className="flex gap-2.5 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory py-2.5 sm:py-4 px-4 sm:px-6"
                 style={{
                   WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)',
                   maskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)'
@@ -8456,7 +8456,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400'
                     : 'bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400';
                   return (
-                    <DynamicVectorCard key={i} glowColor="rgba(37, 99, 235, 0.28)" roundedClass="rounded-2xl" className="snap-start shrink-0 w-[76vw] sm:w-[300px] lg:w-[340px]">
+                    <DynamicVectorCard key={i} glowColor="rgba(37, 99, 235, 0.28)" roundedClass="rounded-2xl" className="snap-start shrink-0 w-[66vw] xs:w-[250px] sm:w-[280px] lg:w-[320px]">
                       <motion.div
                         initial={{ opacity: 0, y: 15, scale: 0.96 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -8466,30 +8466,30 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           if (isTestResult) handleViewResults(a.metadata);
                           else if (a.type === 'question_bank_accessed' && a.metadata?.pdfUrl) window.open(a.metadata.pdfUrl, '_blank');
                         }}
-                        className="w-full h-full rounded-2xl border border-slate-100/90 sm:border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 hover:border-brand-300/60 dark:hover:border-brand-600/50 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 cursor-pointer group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container relative overflow-hidden active:scale-[0.98]"
+                        className="w-full h-full rounded-2xl border border-slate-100/90 sm:border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 hover:border-brand-300/60 dark:hover:border-brand-600/50 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 cursor-pointer group p-3 sm:p-4.5 flex flex-col gap-2 premium-shine-container relative overflow-hidden active:scale-[0.98]"
                       >
                         {/* Inner Vector Grid Overlay */}
                         <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
                       {/* Top row: icon + title + arrow */}
-                      <div className="flex items-start gap-3 relative z-10">
+                      <div className="flex items-start gap-2.5 sm:gap-3 relative z-10">
                         {/* Completed icon — branded circle */}
-                        <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 border border-brand-100 dark:border-brand-800/50 group-hover:scale-105 transition-transform relative z-10">
-                          <CheckCircle2 className="w-4.5 h-4.5 sm:w-5 h-5" />
+                        <div className="w-7.5 h-7.5 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0 bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 border border-brand-100 dark:border-brand-800/50 group-hover:scale-105 transition-transform relative z-10">
+                          <CheckCircle2 className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-extrabold text-[13.5px] sm:text-sm text-slate-900 dark:text-white line-clamp-2 sm:line-clamp-1 leading-snug group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">{a.title}</h4>
-                          <p className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">{new Date(a.timestamp).toLocaleDateString()}</p>
+                          <h4 className="font-extrabold text-[12.5px] sm:text-sm text-slate-900 dark:text-white line-clamp-1 leading-snug group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">{a.title}</h4>
+                          <p className="text-[9.5px] sm:text-[10.5px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">{new Date(a.timestamp).toLocaleDateString()}</p>
                         </div>
                         <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300 shrink-0 mt-0.5 group-hover:text-brand-500 group-hover:translate-x-0.5 transition-all relative z-10" />
                       </div>
 
                       {/* Bottom row: score chip + category label */}
-                      <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700 relative z-10">
-                        <span className="text-[8.5px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 truncate">
+                      <div className="flex items-center justify-between pt-1.5 border-t border-slate-100 dark:border-slate-700/60 relative z-10">
+                        <span className="text-[8px] sm:text-[8.5px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 truncate">
                           {a.metadata?.testCategory || t('common.activity.recentActivity', 'Activity')}
                         </span>
                         {scoreLabel && (
-                          <span className={`text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-lg shrink-0 ml-2 ${scoreColour}`}>
+                          <span className={`text-[9.5px] sm:text-[10.5px] font-black px-2 py-0.5 rounded-md shrink-0 ml-2 ${scoreColour}`}>
                             {scoreLabel}
                           </span>
                         )}
@@ -8501,9 +8501,9 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               </div>
             </div>
             {activities.filter((a: any) => a.type !== 'test_incomplete').length > 1 && (
-              <div className="flex items-center justify-center gap-1.5 mt-1 sm:hidden pointer-events-none px-4">
+              <div className="flex items-center justify-center gap-1.5 mt-0.5 sm:hidden pointer-events-none px-4">
                 <div className="h-[1px] flex-1 bg-slate-200/60" />
-                <span className="text-[8.5px] font-black uppercase tracking-widest text-slate-400">{t('common.activity.swipeToExplore', 'Swipe to explore')}</span>
+                <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">{t('common.activity.swipeToExplore', 'Swipe to explore')}</span>
                 <div className="h-[1px] flex-1 bg-slate-200/60" />
               </div>
             )}
@@ -8785,53 +8785,45 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
     return (
       <div className="space-y-8 md:space-y-10">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => setSelectedBankType(null)} className="p-3 rounded-2xl hover:bg-brand-50 dark:hover:bg-slate-800 shrink-0">
-              <ChevronRight className="w-6 h-6 rotate-180 text-brand-600 dark:text-indigo-400" />
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Button variant="ghost" onClick={() => setSelectedBankType(null)} className="p-2 sm:p-3 rounded-xl sm:rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0">
+              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 rotate-180 text-brand-600 dark:text-indigo-400" />
             </Button>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-955 dark:text-white tracking-tight">{bankTitle}</h1>
-              <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium">{t('exams.step3.browsePdfLibrary', 'Browse available question banks')}</p>
+              <h1 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">{bankTitle}</h1>
+              <p className="text-xs sm:text-base text-slate-500 dark:text-slate-400 font-medium">{t('exams.step3.browsePdfLibrary', 'Browse available question banks')}</p>
             </div>
           </div>
           
-          <div className={cn(
-            "w-full lg:w-auto",
-            isMobile
-              ? "flex flex-row items-center gap-2.5"
-              : "flex flex-col sm:flex-row items-center gap-3"
-          )}>
+          <div className="w-full lg:w-auto flex flex-row items-center gap-2 sm:gap-3">
              <div className="relative flex-1 sm:w-64">
-               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
+               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 dark:text-slate-500" />
                <input 
                  type="text" 
                  placeholder={t('exams.step3.searchBanks', 'Search banks...')} 
                  value={bankSearchQuery}
                  onChange={e => setBankSearchQuery(e.target.value)}
-                 className="w-full pl-10 pr-4 py-3 sm:py-2.5 bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 rounded-xl focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 dark:focus:border-brand-400 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-medium outline-none transition-all shadow-sm"
+                 className="w-full pl-8.5 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-xs sm:text-sm font-medium outline-none transition-all shadow-xs"
                />
              </div>
               {/* Premium Custom Sort Dropdown */}
-              <div className={cn("relative", isMobile ? "w-[145px] shrink-0" : "w-full sm:w-auto")}>
+              <div className="relative shrink-0">
                 <button
                   onClick={() => setBankSortOpen(o => !o)}
                   className={cn(
-                    "w-full flex items-center justify-between gap-2 pl-3.5 pr-3 py-2.5 rounded-xl border text-xs font-bold tracking-wide transition-all duration-200 cursor-pointer outline-none",
+                    "flex items-center justify-between gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl border text-xs font-bold tracking-wide transition-all duration-200 cursor-pointer outline-none whitespace-nowrap",
                     bankSortOpen
-                      ? "bg-[#2563EB]/5 dark:bg-brand-950/60 border-[#2563EB]/40 dark:border-brand-800 text-[#2563EB] dark:text-brand-400 shadow-md shadow-[#2563EB]/10"
-                      : "bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:border-[#2563EB]/30 dark:hover:border-brand-500/40 hover:bg-[#2563EB]/5 dark:hover:bg-brand-950/40 hover:text-[#2563EB] dark:hover:text-brand-400 shadow-sm"
+                      ? "bg-blue-50 dark:bg-blue-950/60 border-blue-400 dark:border-blue-800 text-blue-600 dark:text-blue-400 shadow-xs"
+                      : "bg-white dark:bg-[#0B1528] border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-400/40 hover:bg-slate-50 dark:hover:bg-slate-800/60 shadow-xs"
                   )}
                 >
-                  <span className="flex items-center gap-1.5">
-                    <Filter className="w-3 h-3 opacity-60" />
-                    {isMobile
-                      ? (bankSortBy === "Name" ? t('exams.step3.sortName', 'Sort: Name') : bankSortBy === "Most Questions" ? t('exams.step3.sortMost', 'Sort: Most Qs') : t('exams.step3.sortLeast', 'Sort: Least Qs'))
-                      : `Sort: ${bankSortBy === "Name" ? t('exams.step3.sortName', 'Name') : bankSortBy === "Most Questions" ? t('exams.step3.sortMost', 'Most Questions') : t('exams.step3.sortLeast', 'Least Questions')}`
-                    }
+                  <Filter className="w-3 h-3 text-slate-400 dark:text-slate-500 shrink-0" />
+                  <span>
+                    {bankSortBy === "Name" ? 'Name' : bankSortBy === "Most Questions" ? 'Most Qs' : 'Least Qs'}
                   </span>
                   <motion.div animate={{ rotate: bankSortOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                    <ChevronDown className="w-3.5 h-3.5" />
+                    <ChevronDown className="w-3.5 h-3.5 opacity-60" />
                   </motion.div>
                 </button>
 
@@ -8845,7 +8837,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -6, scale: 0.97 }}
                         transition={{ duration: 0.15, ease: "easeOut" }}
-                        className="absolute right-0 top-[calc(100%+6px)] z-50 min-w-[160px] bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/70 dark:shadow-black/70 overflow-hidden"
+                        className="absolute right-0 top-[calc(100%+6px)] z-50 min-w-[160px] bg-white dark:bg-[#0B1528] rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xl shadow-slate-200/70 dark:shadow-black/70 overflow-hidden"
                       >
                         <div className="p-1.5">
                           {[
@@ -8857,9 +8849,9 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                               key={opt.value}
                               onClick={() => { setBankSortBy(opt.value); setBankSortOpen(false); }}
                               className={cn(
-                                "w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-150 cursor-pointer flex items-center gap-2.5",
+                                "w-full text-left px-3 py-2 rounded-xl text-xs font-bold tracking-wide transition-all duration-150 cursor-pointer flex items-center gap-2",
                                 bankSortBy === opt.value
-                                  ? "bg-gradient-to-r from-[#2563EB]/10 to-[#2563EB]/5 dark:from-brand-950/60 dark:to-brand-900/40 text-[#2563EB] dark:text-brand-400"
+                                  ? "bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-extrabold"
                                   : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
                               )}
                             >
@@ -9973,14 +9965,17 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
       {/* Section 1: Practice Tests */}
       {(!isMobile || mobileExamTab === 'practice') && (
-        <section id="practice-mode-section" className="space-y-6 scroll-mt-24">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/60 rounded-xl flex items-center justify-center border border-indigo-100 dark:border-indigo-800">
-              <Dumbbell className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+        <section id="practice-mode-section" className="space-y-4 sm:space-y-6 scroll-mt-24">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 bg-indigo-50 dark:bg-indigo-950/60 rounded-xl sm:rounded-2xl flex items-center justify-center border border-indigo-100 dark:border-indigo-800 shrink-0 mt-0.5">
+              <Dumbbell className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-indigo-600 dark:text-indigo-400" />
             </div>
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">{t('exams.step1.title', 'Step 1: Practice Tests')}</h2>
-              <p className="text-slate-500 dark:text-slate-400 font-medium text-xs sm:text-sm mt-0.5">{t('exams.step1.subtitle', 'Master topics with instant answers, explanations & interactive drills.')}</p>
+            <div className="space-y-1 min-w-0 flex-1">
+              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest">
+                <Zap className="w-2.5 h-2.5 fill-indigo-600 dark:fill-indigo-400" /> Step 1 · Topic Practice
+              </div>
+              <h2 className="text-lg sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">{t('exams.step1.title', 'Practice Tests & Chapter Drills')}</h2>
+              <p className="text-slate-500 dark:text-slate-400 font-medium text-xs sm:text-sm leading-relaxed">{t('exams.step1.subtitle', 'Master topics with instant answers, explanations & interactive drills.')}</p>
             </div>
           </div>
 
@@ -10215,27 +10210,27 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         </section>
       )}
 
-      {/* Section 3: Mock Tests */}
+      {/* Section 2: Mock Tests */}
       {(!isMobile || mobileExamTab === 'mock') && (
-        <section id="test-series" className="space-y-10 scroll-mt-24">
-        <div className="space-y-3">
-          <div className="hidden sm:flex items-center gap-2 text-brand-600 dark:text-indigo-300 font-black text-[10px] uppercase tracking-[0.2em] bg-brand-50 dark:bg-indigo-950/60 w-fit px-3 py-1 rounded-full border border-brand-100 dark:border-indigo-800">
-            <Award className="w-3 h-3" />
-            {t('exams.step2.testSeriesBadge', 'Test Series')}
-          </div>
-          <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4 sm:gap-6">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-955 dark:text-white tracking-tight">{t('exams.step2.title', 'Step 2: Mock Tests')}</h2>
-              <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-lg font-medium mt-1 sm:mt-2 leading-relaxed">{t('exams.step2.subtitle', 'Simulate the real exam environment with our expert-curated test series.')}</p>
+        <section id="test-series" className="space-y-4 sm:space-y-10 scroll-mt-24">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 bg-brand-50 dark:bg-blue-950/60 rounded-xl sm:rounded-2xl flex items-center justify-center border border-brand-100 dark:border-blue-800 shrink-0 mt-0.5">
+              <Award className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-brand-600 dark:text-blue-400" />
             </div>
-            <div className="flex items-center gap-2.5 sm:gap-3 bg-white dark:bg-slate-900 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full border border-slate-200/50 dark:border-slate-800 shadow-sm w-fit text-xs sm:text-sm">
-              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-500 dark:text-brand-400" />
-              <span className="font-bold text-slate-700 dark:text-slate-300">
-                {t('exams.step2.updatedPattern', `Updated for ${new Date().getFullYear()} Exam Pattern`, { year: new Date().getFullYear() })}
-              </span>
+            <div className="space-y-1 min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-brand-50 dark:bg-blue-950/60 text-brand-700 dark:text-blue-300 border border-brand-100 dark:border-blue-800 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest">
+                  <Award className="w-2.5 h-2.5" /> Step 2 · Mock Test Series
+                </div>
+                <div className="inline-flex items-center gap-1 bg-white dark:bg-slate-900 px-2 py-0.5 rounded-full border border-slate-200/80 dark:border-slate-800 text-[9.5px] sm:text-xs font-bold text-slate-700 dark:text-slate-300">
+                  <Sparkles className="w-3 h-3 text-brand-500 dark:text-brand-400" />
+                  <span>{t('exams.step2.updatedPattern', `Updated for ${new Date().getFullYear()} Exam Pattern`, { year: new Date().getFullYear() })}</span>
+                </div>
+              </div>
+              <h2 className="text-lg sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">{t('exams.step2.title', 'Official Mock Test Series')}</h2>
+              <p className="text-slate-500 dark:text-slate-400 font-medium text-xs sm:text-sm leading-relaxed">{t('exams.step2.subtitle', 'Simulate the real exam environment with our expert-curated test series.')}</p>
             </div>
           </div>
-        </div>
 
         {(() => {
           if (!selectedMockCategory) return (
@@ -10558,14 +10553,17 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
       {/* Section 3: Reference Library & Downloadable Question Banks */}
       {(!isMobile || mobileExamTab === 'learn') && (
-        <section id="question-bank-section" className="space-y-6 scroll-mt-24 pt-6 border-t border-slate-200/60 dark:border-slate-800">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center border border-slate-200/50 dark:border-slate-800">
-              <BookMarked className="w-5 h-5 text-slate-700 dark:text-slate-300" />
+        <section id="question-bank-section" className="space-y-4 sm:space-y-6 scroll-mt-24 pt-6 border-t border-slate-200/60 dark:border-slate-800">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 bg-slate-100 dark:bg-slate-900 rounded-xl sm:rounded-2xl flex items-center justify-center border border-slate-200/80 dark:border-slate-800 shrink-0 mt-0.5">
+              <BookMarked className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-slate-700 dark:text-slate-300" />
             </div>
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">{t('exams.step3.title', 'Step 3: Reference Library & Question Banks')}</h2>
-              <p className="text-slate-500 dark:text-slate-400 font-medium text-xs sm:text-sm mt-0.5">{t('exams.step3.subtitle', 'Downloadable PDF question modules, revision sets, and past paper collections.')}</p>
+            <div className="space-y-1 min-w-0 flex-1">
+              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest">
+                <BookOpen className="w-2.5 h-2.5" /> Step 3 · PDF Reference Library
+              </div>
+              <h2 className="text-lg sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">{t('exams.step3.title', 'Question Banks & Revision PDFs')}</h2>
+              <p className="text-slate-500 dark:text-slate-400 font-medium text-xs sm:text-sm leading-relaxed">{t('exams.step3.subtitle', 'Downloadable PDF question modules, revision sets, and past paper collections.')}</p>
             </div>
           </div>
           

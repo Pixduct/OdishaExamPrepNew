@@ -76,8 +76,11 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`InteractiveHeroDemoCard`** | Interactive / CBT Hero | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L2618-L3370) | Live Interactive CBT Mock Question Demo, Option Selector, 3D Vector Shell | App.tsx (Hero) | Active |
 | **`ActiveExamContextBar`** | Form / Context | [`src/components/ActiveExamContextBar.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/ActiveExamContextBar.tsx) | Dual-Theme Deep Sapphire Bar, Pulse Indicator, Switch Modal Trigger | StudyPlanView.tsx, AnalyticsView.tsx | Active |
 | **`AiMentorWorkspace`** | AI / Workspace | [`src/pages/AiMentor.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/AiMentor.tsx) | 4-Tab Suite (Planner/Timer, Quizzer, Syllabus, Shortcuts) with Dark Sapphire Theme | Router (`/ai-mentor`) | Active |
-| **`LanguageToggle`** | Navigation / Control | [`src/components/LanguageToggle.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/LanguageToggle.tsx) | `default` (Floating pill), `compact` (Header pill embedded) | App.tsx (Signed-in & Signed-out Navbar, Mobile Drawer) | Active |
 | **`AdminExamEditModalForm`** | Admin / Form Modal | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L2200-L2315) | Exam & Bundle editor modal with verified `isPremium` toggle persistence & schedule monitoring | AdminPanel.tsx | Active |
+| **`GlobalHorizontalScrollEngine`** | Performance / Scroll | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) & [`src/index.css`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/index.css) | Universal Wheel Scroll Delegation, Mouse Drag Physics, CSS Touch Momentum | App.tsx (Root) | Active |
+| **`TopicWiseQuestionBankMobileCard`** | Data Display / Mobile | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) | Structured Header Row, Compact Single-Row Metadata, Dark Mode Sapphire Shell | App.tsx (Exam Detail) | Active |
+| **`AssessmentGeneralBriefingModal`** | Overlay / Assessment | [`src/MockTestSystem.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/MockTestSystem.tsx) | Practice/Exam Mode Selector, 3-Col Marking Rubric, Target Score Planner, Dark Glass Header/Bottom Bar | MockTestSystem.tsx | Active |
+| **`ExamDetailStepSectionHeader`** | Navigation / Header | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) | Step Micro-Badges (`[ ⚡ STEP 1 ]`, `[ 🏆 STEP 2 ]`, `[ 📚 STEP 3 ]`), Aligned Icon Boxes, Responsive Typography | App.tsx (Exam Detail) | Active |
 
 ---
 
@@ -2708,8 +2711,99 @@ Last updated: August 20, 2026
 | **Right Action Chevron Button** | `w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-50 dark:bg-[#060B16] border border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-300 group-active:bg-blue-600` |
 | **Stat Micro-Pills** | `bg-slate-50 dark:bg-[#060B16] border border-slate-100/60 dark:border-slate-800 text-slate-600 dark:text-slate-300` |
 
+---
+
+### 79. `GlobalHorizontalScrollEngine` (Universal System-Wide Horizontal Scroll & Mouse Drag Engine)
+
+Files: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx), [`src/index.css`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/index.css)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Scroll Detection** | `.overflow-x-auto`, `.no-scrollbar`, `[data-horizontal-scroll]` where `scrollWidth > clientWidth` |
+| **Wheel Delegation** | Converts vertical `e.deltaY` to horizontal `scrollLeft += e.deltaY` with edge boundary release |
+| **Mouse Drag Physics** | Left-click mousedown tracking, `walk = (x - startX) * 1.35`, click-vs-drag threshold `> 4px` |
+| **CSS Touch Momentum** | `overscroll-behavior-x: contain; touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch;` |
+
 **Pattern notes:**
-- **Zero White Circle Button & Dull Icon Box Artifacts**: Replaced dull light-mode icon boxes and white circle buttons (`bg-slate-50`) with deep midnight tokens (`dark:bg-[#060B16]`, `dark:border-slate-800`, `dark:text-blue-400`), guaranteeing crisp contrast and modern aesthetics in dark mode.
+- **System-Wide Universal Application**: Deployed at root `App()` to immediately empower all category pill bars, tab lists, time presets, and question bank sliders across the entire website without per-component boilerplate.
+
+---
+
+### 80. `TopicWiseQuestionBankMobileCard` (Topic Wise Question Bank Mobile Item Card)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Shell Container** | `p-3 sm:p-4 bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-2xl` |
+| **Header Row Layout** | `flex items-center justify-between gap-2` (title on left `text-[13.5px] sm:text-sm font-extrabold truncate capitalize`, `FREE`/`PREMIUM` badge on right `px-1.5 py-0.5 text-[8.5px] font-black uppercase rounded`) |
+| **Vector Icon Box** | `w-11 h-11 sm:w-12 sm:h-12 rounded-xl` with `w-5 h-5` vector icon |
+| **Single-Row Metadata** | `📄 100 Qs` (`bg-slate-50 dark:bg-slate-900 text-[10px] text-slate-600 dark:text-slate-300`) + `⚡ Answer Key` (`bg-brand-50/60 dark:bg-blue-950/60 text-brand-700 dark:text-blue-300 text-[9.5px] font-black uppercase truncate max-w-[140px] xs:max-w-[190px]`) |
+| **Action Chevron Button** | `w-7 h-7 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-400` |
+
+**Pattern notes:**
+- **Zero Orphan Badges**: Decoupling `item.title` and `FREE`/`PREMIUM` badges into a structured `justify-between` header row permanently prevents multi-line wrapping glitches on narrow screens.
+
+---
+
+### 81. `AssessmentGeneralBriefingModal` (Assessment General Briefing Modal Mobile & Dark Mode Overhaul)
+
+File: [`src/MockTestSystem.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/MockTestSystem.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Modal Backdrop** | `fixed inset-0 w-full h-[100dvh] bg-[#FBF9F6] dark:bg-[#060B16] z-[100]` |
+| **Sticky Glass Header** | `bg-white/85 dark:bg-[#060B16]/90 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800` |
+| **Active Mode Cards** | Exam (`border-[#2563eb] dark:border-blue-500 bg-[#2563eb]/5 dark:bg-blue-950/40`), Practice (`border-emerald-500 dark:border-emerald-500 bg-emerald-500/5 dark:bg-emerald-950/40`), Inactive (`border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60`) |
+| **Card Shells** | `bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-2xl` |
+| **Sub-Boxes & Outputs** | `bg-[#FBF9F6] dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-xl` |
+| **Marking Rubric Grid** | 3-column micro-grid: Correct (`bg-emerald-50 dark:bg-emerald-950/40`), Incorrect (`bg-rose-50/60 dark:bg-rose-950/40`), Unanswered (`bg-slate-50 dark:bg-slate-900`) |
+| **Sticky Bottom Bar** | `bg-white/95 dark:bg-[#060B16]/95 border-t border-slate-200/80 dark:border-slate-800`, button `bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black` |
+
+**Pattern notes:**
+- **Zero Flashbang White Boxes**: Full deep sapphire tokenization ensures seamless dark mode immersion without blinding white card containers or unstyled text.
+
+---
+
+### 82. `ExamDetailStepSectionHeader` (Exam Detail Step 1, 2, 3 Section Header Micro-Architecture)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Header Container** | `flex items-start gap-3` |
+| **Icon Container** | `w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center border shrink-0 mt-0.5` |
+| **Step Micro-Badge** | `inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest` |
+| **Section Title** | `text-lg sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight` |
+| **Section Subtitle** | `text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed` |
+
+---
+
+### 83. `InteractiveMockTestSystemDarkTheme` (Interactive Mock Test System Dark Mode Overhaul)
+
+File: [`src/MockTestSystem.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/MockTestSystem.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Root Viewport Background** | `bg-[#FBF9F6] dark:bg-[#060B16]` |
+| **Top Glass Header & Timer** | `bg-white/85 dark:bg-[#060B16]/90 border-slate-200/60 dark:border-slate-800 text-slate-900 dark:text-white` |
+| **Question Scoring Info Bar** | `bg-slate-50/50 dark:bg-[#060B16]/90 border-slate-200/60 dark:border-slate-800` |
+| **Question Panel Shell** | `bg-white dark:bg-[#0B1528] border-slate-200/60 dark:border-slate-800 text-slate-900 dark:text-white` |
+| **MCQ Options (A, B, C, D)** | Unselected: `bg-white dark:bg-[#0B1528] border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-50/50 dark:hover:bg-slate-800/60`, Option Badge: `bg-slate-100 dark:bg-[#060B16] text-slate-500 dark:text-slate-300` |
+| **Expert Solution Box** | `bg-white dark:bg-[#0B1528] border-slate-200/60 dark:border-slate-800 text-slate-700 dark:text-slate-200` |
+| **Bottom Controls Footer** | `bg-white/95 dark:bg-[#060B16]/95 border-t border-slate-200/80 dark:border-slate-800`, Buttons: `bg-slate-50 dark:bg-[#0B1528] border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-300` |
+| **Question Palette Sidebar & Sheet** | Container: `bg-white dark:bg-[#0B1528] border-slate-200/60 dark:border-slate-800`, Unvisited Grid Buttons: `bg-slate-50 dark:bg-[#060B16] border-slate-200/80 dark:border-slate-800 text-slate-400 dark:text-slate-400` |
+| **Confirmation Modals** | Modal Frame: `bg-white dark:bg-[#0B1528] border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-white` |
+
+**Pattern notes:**
+- **Zero White Card Artifacts in Exam Interface**: Complete dark mode overhaul across test header, question card, option cards, solution breakdown, navigation footer, question palette drawer, mobile bottom sheet, and exit/submit confirmation modals.
+
+
 
 
 

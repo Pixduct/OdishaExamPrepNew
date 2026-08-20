@@ -133,21 +133,21 @@ export const CurrentAffairsReaderModal: React.FC<Props> = ({ article, onClose })
             </div>
           )}
 
-          {/* 5. Student Community & Channel Promotion Hub Banner (Positioned after analysis) */}
-          <div className={`rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white border shadow-lg relative overflow-hidden ${
+          {/* 5. Student Community & Channel Promotion Hub Banner */}
+          <div className={`rounded-2xl p-3.5 sm:p-5 text-white border shadow-md relative overflow-hidden ${
             cat.includes('odisha')
-              ? 'bg-gradient-to-r from-amber-700 via-amber-800 to-orange-950 border-amber-500/40'
+              ? 'bg-gradient-to-r from-amber-700 via-amber-850 to-orange-950 border-amber-500/40'
               : cat.includes('world') || cat.includes('international')
-              ? 'bg-gradient-to-r from-indigo-800 via-purple-900 to-slate-950 border-purple-500/40'
-              : 'bg-gradient-to-r from-teal-800 via-emerald-900 to-slate-950 border-teal-500/40'
+              ? 'bg-gradient-to-r from-indigo-850 via-purple-900 to-slate-950 border-purple-500/40'
+              : 'bg-gradient-to-r from-teal-850 via-emerald-900 to-slate-950 border-teal-500/40'
           }`}>
             <div className={`absolute -right-8 -bottom-8 w-48 h-48 rounded-full blur-2xl pointer-events-none ${
               cat.includes('odisha') ? 'bg-amber-500/20' : cat.includes('world') ? 'bg-purple-500/20' : 'bg-teal-500/20'
             }`} />
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 relative z-10">
-              <div className="space-y-1 max-w-lg">
-                <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-black uppercase tracking-wider border ${
+              <div className="space-y-1.5 max-w-lg">
+                <div className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-black uppercase tracking-wider border ${
                   cat.includes('odisha')
                     ? 'bg-amber-400/20 text-amber-200 border-amber-400/40'
                     : cat.includes('world') || cat.includes('international')
@@ -155,12 +155,12 @@ export const CurrentAffairsReaderModal: React.FC<Props> = ({ article, onClose })
                     : 'bg-teal-400/20 text-teal-200 border-teal-400/40'
                 }`}>
                   <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                  {cat.includes('odisha') ? 'Odisha State Exam Community' : cat.includes('world') || cat.includes('international') ? 'International Relations Community' : 'National Exam Community'}
+                  <span>{cat.includes('odisha') ? 'Odisha State Exam Community' : cat.includes('world') || cat.includes('international') ? 'International Relations Community' : 'National Exam Community'}</span>
                 </div>
-                <h3 className="text-sm sm:text-lg font-sans sm:font-serif font-black text-white leading-tight">
-                  Daily Current Affairs PDFs & Video Class Alerts
+                <h3 className="text-sm sm:text-lg font-black text-white leading-tight tracking-tight">
+                  Daily Current Affairs PDFs &amp; Video Class Alerts
                 </h3>
-                <p className="text-[11px] sm:text-xs text-white/80 font-medium leading-relaxed">
+                <p className="text-[11px] sm:text-xs text-white/85 font-medium leading-relaxed">
                   {cat.includes('odisha')
                     ? 'Join 25,000+ OPSC, OSSC CGL & OSSSC aspirants getting instant PDF notes, daily quizzes & free YouTube classes.'
                     : cat.includes('world') || cat.includes('international')
@@ -169,33 +169,34 @@ export const CurrentAffairsReaderModal: React.FC<Props> = ({ article, onClose })
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 shrink-0 pt-1 sm:pt-0">
+              <div className="grid grid-cols-3 sm:flex items-center gap-2 sm:gap-2.5 shrink-0 pt-1 sm:pt-0">
                 <a
                   href="https://t.me/OdishaExamPrep365"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 sm:flex-initial px-3 sm:px-3.5 py-2 sm:py-2.5 bg-sky-500 hover:bg-sky-400 text-white font-extrabold text-[11px] sm:text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 group cursor-pointer"
+                  className="px-2.5 sm:px-3.5 py-2 sm:py-2.5 bg-sky-500 hover:bg-sky-400 active:scale-95 text-white font-extrabold text-[11px] sm:text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 group cursor-pointer"
                 >
-                  <Send className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                  Telegram
+                  <Send className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform shrink-0" />
+                  <span>Telegram</span>
                 </a>
 
                 <a
                   href="https://www.youtube.com/@OdishaExamPrep365"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 sm:flex-initial px-3 sm:px-3.5 py-2 sm:py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-[11px] sm:text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 group cursor-pointer"
+                  className="px-2.5 sm:px-3.5 py-2 sm:py-2.5 bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-extrabold text-[11px] sm:text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 group cursor-pointer"
                 >
-                  <Play className="w-3.5 h-3.5 fill-white group-hover:scale-110 transition-transform" />
-                  YouTube
+                  <Play className="w-3.5 h-3.5 fill-white group-hover:scale-110 transition-transform shrink-0" />
+                  <span>YouTube</span>
                 </a>
 
                 <button
                   onClick={() => window.print()}
-                  className="px-2.5 sm:px-3 py-2 sm:py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold text-[11px] sm:text-xs rounded-xl border border-white/20 transition-all flex items-center justify-center gap-1 backdrop-blur-xs cursor-pointer"
+                  className="px-2.5 sm:px-3.5 py-2 sm:py-2.5 bg-white/15 hover:bg-white/25 active:scale-95 text-white font-extrabold text-[11px] sm:text-xs rounded-xl border border-white/20 transition-all flex items-center justify-center gap-1.5 backdrop-blur-xs cursor-pointer shadow-xs"
                   title="Print or Save PDF Note"
                 >
-                  <Printer className="w-3.5 h-3.5" /> PDF
+                  <Printer className="w-3.5 h-3.5 shrink-0" />
+                  <span>PDF</span>
                 </button>
               </div>
             </div>

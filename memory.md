@@ -1,41 +1,60 @@
-# Memory — Admin Exam Bundle Toggle State Persistence & End-to-End Payment Engine Hardening
+# Memory — Mobile View Optimization & Dark Mode Micro-Architecture Overhaul
 
-Last updated: 2026-08-20T15:52:00+05:30
+Last updated: 2026-08-20T18:31:30+05:30
 
 ## What was built
 
-### 1. Admin Exam Bundle Toggle State Persistence (`src/AdminPanel.tsx`)
-- **`handleEditClick`**: Upgraded the form loader for `activeTab === 'exams'` to read `isPremium` directly from `parsedExamMeta.isPremium` (explicit boolean) instead of checking if `item.description` starts with `JSON_METADATA_`. Added positive price fallbacks (`price: 499`, `originalPrice: 999`) when toggling back ON from a zero-price state.
-- **`handleSubmit`**: Explicitly persists `isPremium: Boolean(formData.isPremium)` in `metaObj` within `JSON_METADATA_`. When the bundle is toggled off, `price` and `originalPrice` are cleanly saved as `0`.
-- **Supabase Catalog Clean-up**: Updated existing database rows (`OSSC CHSL`, `OSSSC Nursing Officer`, `OPSC AEE`) in the `public.exams` table to cleanly store `isPremium: false` and `price: 0`.
-- **UI Registry Imprint**: Registered `AdminExamEditModalForm` in `context/ui-registry.md` (Entry 69).
+### 1. Universal System-Wide Horizontal Scroll & Mouse Drag Engine (`src/App.tsx`, `src/index.css`)
+- **Root Delegation Component (`GlobalHorizontalScrollEngine`)**: Mounted at the application root in `src/App.tsx`. Automatically detects any horizontal scroll container (`.overflow-x-auto`, `.no-scrollbar`, `[data-horizontal-scroll]`) when `scrollWidth > clientWidth`.
+- **Wheel-to-Horizontal Converter**: Intercepts vertical mouse wheel events and smoothly scrolls horizontal tracks (`scrollLeft += e.deltaY`), releasing to default page scrolling when edge boundaries are reached.
+- **Mouse Drag-to-Scroll Physics**: Enables smooth left-click desktop dragging with an accelerated `1.35x` walk multiplier and a `> 4px` threshold disambiguation to prevent accidental click suppression.
+- **Hardware-Accelerated Touch CSS**: Enforced `-webkit-overflow-scrolling: touch`, `touch-action: pan-x pan-y`, and `overscroll-behavior-x: contain` in `src/index.css`.
 
-### 2. End-to-End Payment Engine & Entitlement Hardening (`server.ts`, `src/App.tsx`, `src/components/StickyAICompanion.tsx`)
-- **`server.ts` (`getProductPrice`)**: Added case-insensitive product type normalization and aliases (`exam_bundle`, `exam`, `test_series`, `series`, `mock_test`, `mocktest`, `test`, `mock`, `question_bank`, `questionbank`, `bank`). Added UUID fallback resolution for mock tests linked to test series rows and JSON tagline parsing for question banks. Validates `isPremium` before quoting bundle prices.
-- **`src/App.tsx`**: Updated `hasBundle` in mobile paywall lock and `renderExamDetail` to respect `meta.isPremium`. Hardened user ID resolution (`userId: profile?.uid || user?.id || 'unknown'`) across all checkout triggers to eliminate auth hydration race conditions.
-- **`src/components/StickyAICompanion.tsx`**: Hardened `parseExamPrice` to verify `meta.isPremium` before showing paywalls or prices.
+### 2. Topic-Wise Question Bank Mobile Card Micro-Architecture (`src/App.tsx`)
+- **Structured Header Row**: Decoupled the item title and `FREE`/`PREMIUM` badge into a `flex items-center justify-between` row, permanently eliminating orphan badge wrapping.
+- **Vector Logo Optimization**: Scaled vector logo containers to `w-11 h-11` with `w-5 h-5` icons to reclaim horizontal text width on phones.
+- **Single-Row Metadata**: Replaced bulky purple banners with compact single-row chips (`📄 100 Qs` + `⚡ Answer Key`).
+- **Dark Mode Tokenization**: Applied deep sapphire card tokens (`dark:bg-[#0B1528]`, `dark:border-slate-800`, `dark:text-white`) with safe bottom clearance (`pb-24 sm:pb-12`).
+
+### 3. Assessment General Briefing Modal Mobile & Dark Mode Overhaul (`src/MockTestSystem.tsx`)
+- **Theme-Adaptive Backgrounds & Shells**: Replaced hardcoded `bg-white` and `bg-[#FBF9F6]` styling with deep sapphire tokens (`bg-white dark:bg-[#0B1528]`, `dark:border-slate-800`, `dark:text-white`, `dark:text-slate-300`).
+- **Study Mode Cards**: Redesigned **Exam Mode** (`border-blue-600 dark:border-blue-500 bg-blue-950/40`) and **Practice Mode** (`border-emerald-500 bg-emerald-950/40`) with active contrast borders and legible typography.
+- **Compact 3-Column Mobile Marking Rubric**: Compacted `+1 Correct`, `-0.25 Incorrect`, and `0 Unanswered` into a responsive 3-column micro-grid, saving ~150px of vertical space.
+- **Target Score Planner & Syllabus Breakdown**: Styled calculation output boxes and range sliders for dark mode; formatted topic breakdown legends with multi-column responsive styling.
+- **Sticky Midnight Bottom Bar**: Upgraded the bottom container (`dark:bg-[#060B16]/95 dark:border-slate-800`) with safe area insets and an action blue `▶ Initiate Session` CTA button.
+
+### 4. Exam Detail Step 1, 2, 3 Section Header Redesign (`src/App.tsx`)
+- **Decoupled Step Micro-Badges**: Replaced clunky inline `"Step X:"` text with colorful micro-badges:
+  - **Step 1**: `[ ⚡ STEP 1 · TOPIC PRACTICE ]`
+  - **Step 2**: `[ 🏆 STEP 2 · MOCK TEST SERIES ]` + `[ ✨ Updated for 2026 Exam Pattern ]`
+  - **Step 3**: `[ 📚 STEP 3 · PDF REFERENCE LIBRARY ]`
+- **Responsive Typography & Icon Alignment**: Tuned mobile title font scaling to `text-lg sm:text-3xl font-black leading-tight` and aligned icon boxes with top baseline alignment.
+
+### 5. Registries & Progress Synchronization
+- Logged all new components, patterns, and entries in `context/progress-tracker.md` and `context/ui-registry.md` (Entries 79–82).
 
 ## Decisions made
 
-- **Explicit Metadata Boolean State**: All exam attributes (schedule dates, form fill-up dates, bundle pricing, and bundle enable status) are stored in `JSON_METADATA_{...}` inside Supabase `exams.description`. `isPremium` must always be explicitly written and read as a boolean flag, never inferred solely from the presence of `JSON_METADATA_`.
-- **Zero-Price Toggle Guard**: Toggling the bundle OFF saves `price: 0, originalPrice: 0, isPremium: false` to ensure backend pricing APIs and paywalls never trigger on non-bundle exams.
-- **Dual-Layer Entitlement Storage**: Purchases are stored permanently in the Supabase `user_purchases` table and synchronized into Supabase Auth user metadata (`purchasedSeries`), ensuring instant access across devices with zero access loss.
+- **Universal Root Event Delegation**: Instead of wiring custom wheel and drag handlers into every individual tab bar or pill slider, `GlobalHorizontalScrollEngine` handles horizontal scrolling dynamically for all existing and future tracks.
+- **Mobile Micro-Badge Pattern**: Decoupling numerical sequence labels (`Step 1`, `Step 2`, `Step 3`) into upper micro-badges prevents awkwardly broken titles on narrow screens.
+- **Deep Sapphire Dark Mode Standard**: All cards use `dark:bg-[#0B1528]`, backdrop canvas uses `dark:bg-[#060B16]`, and borders use `dark:border-slate-800`.
 
 ## Problems solved
 
-- **Exam Bundle Toggle Switch Turning Back On**: Resolved the issue where turning off the "Full Exam Access Bundle" toggle in the Admin Edit Exam modal turned back on upon reopening the modal.
-- **Legacy Exam Metadata Ambiguity**: Updated existing exam records in Supabase to eliminate legacy metadata without `isPremium`.
+- **Wheel Scroll Lockouts on Pill Sliders**: Fixed issue where mouse wheel scrolling over category filter pills locked up and scrolled the parent page instead of navigating horizontal items.
+- **Clumsy Text Wrapping on Phone Viewports**: Resolved awkward 2-3 line wrapping of titles, badges, and section headers across the Exam Detail page.
+- **Flashbang White Cards in Dark Mode**: Completely eliminated hardcoded white boxes and low-contrast grey text in the Assessment General Briefing dialog.
 
 ## Current state
 
 - Production build passing cleanly with **0 TypeScript and 0 bundling errors** (`npm run build` exits with code 0).
-- All documentation and registries updated (`context/progress-tracker.md`, `context/ui-registry.md`).
-- Exam bundle toggle persistence, Razorpay payment flows, and access control engines verified and operational.
+- All UI registries and progress trackers fully synchronized.
+- Both mobile and dark mode experiences across Exam Details, Mock Test briefing modals, and pill sliders are verified and production-ready.
 
 ## Next session starts with
 
-- Ready for any new feature development, test series creation, or UI enhancements requested by the developer.
+- Ready for any new feature requests, additional page mobile audits, or assessment flow enhancements.
 
 ## Open questions
 
-- None at this time. All reported issues are fully resolved and verified.
+- None at this time. All reported issues are resolved and verified.

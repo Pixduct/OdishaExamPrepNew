@@ -32,7 +32,9 @@ import { recordQuestionSolved, completeDailyGoalDirectly } from './lib/streakMan
 import { destroyLenis, initLenis } from './lib/lenisScroll';
 
 export const requestUniversalFullscreen = () => {
-  if (typeof document === 'undefined') return;
+  if (typeof document === 'undefined' || typeof window === 'undefined') return;
+  // On mobile screens (< 1024px), do NOT call OS fullscreen API to avoid intrusive Android Chrome notification overlay
+  if (window.innerWidth < 1024) return;
   const doc = document as any;
   const fsElement = doc.fullscreenElement || 
                     doc.webkitFullscreenElement || 
@@ -761,40 +763,40 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
   if (!isStarted) {
     const fmt = (n: number) => Number.isInteger(n) ? String(n) : n.toFixed(2);
     return (
-      <div className="fixed inset-0 bg-[#FBF9F6] dark:bg-slate-950 z-[100] flex flex-col font-sans overflow-hidden" data-lenis-prevent>
+      <div className="fixed inset-0 w-full h-[100dvh] max-h-[100dvh] bg-[#FBF9F6] dark:bg-slate-950 z-[100] flex flex-col font-sans overflow-hidden" data-lenis-prevent>
         {/* Subtle grid and gradient meshes overlay */}
         <div className="absolute inset-0 pointer-events-none z-[1] opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle, rgba(37,99,235,0.3) 0.5px, transparent 0.5px)', backgroundSize: '24px 24px' }} />
         <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-[#2563eb]/5 to-transparent pointer-events-none z-[1]" />
 
-        {/* Sticky Glassmorphic Header */}
-        <header className="shrink-0 flex items-center justify-between px-6 py-4 sm:px-10 sm:py-5 border-b border-slate-200/60 dark:border-slate-800 bg-white/75 dark:bg-slate-900/80 backdrop-blur-md z-20 relative">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#2563eb]/5 border border-[#2563eb]/10 flex items-center justify-center">
-              <FileText className="w-5 h-5 text-[#2563eb]" />
+        {/* Sticky Glassmorphic Header with Top Safe Area Inset */}
+        <header className="shrink-0 flex items-center justify-between px-4 sm:px-10 pt-[max(env(safe-area-inset-top),0.75rem)] pb-3 sm:py-5 border-b border-slate-200/60 dark:border-slate-800 bg-white/85 dark:bg-slate-900/90 backdrop-blur-md z-20 relative">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#2563eb]/5 border border-[#2563eb]/10 flex items-center justify-center shrink-0">
+              <FileText className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-[#2563eb]" />
             </div>
             <div>
-              <span className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest block leading-none">Assessment System</span>
-              <span className="text-slate-800 dark:text-white text-sm font-extrabold tracking-tight mt-1 block">General Briefing</span>
+              <span className="text-slate-400 dark:text-slate-500 text-[9px] sm:text-[10px] font-black uppercase tracking-widest block leading-none">Assessment System</span>
+              <span className="text-slate-800 dark:text-white text-xs sm:text-sm font-extrabold tracking-tight mt-0.5 sm:mt-1 block">General Briefing</span>
             </div>
           </div>
           <button 
             onClick={() => onExit(undefined)} 
-            className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200/80 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all duration-200 cursor-pointer"
+            className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200/80 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all duration-200 cursor-pointer shrink-0"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
           </button>
         </header>
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto no-scrollbar px-4 sm:px-10 py-5 sm:py-12 pb-24 sm:pb-32 relative z-10">
-          <div className="max-w-6xl mx-auto space-y-5 sm:space-y-8">
+        <div className="flex-1 overflow-y-auto no-scrollbar px-3.5 sm:px-10 pt-4 sm:pt-10 pb-20 sm:pb-32 relative z-10">
+          <div className="max-w-6xl mx-auto space-y-4 sm:space-y-8">
             
             {/* Motivation Header */}
             <div className="text-center space-y-2 sm:space-y-3 max-w-2xl mx-auto">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#2563eb]/5 border border-[#2563eb]/15 rounded-full text-[#2563eb] dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#2563eb]/5 border border-[#2563eb]/15 rounded-full text-[#2563eb] dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest">
                 <BookOpen className="w-3.5 h-3.5" /> {currentMode === 'practice' ? 'Practice Mode Active' : 'Official Mock Exam'}
               </div>
-              <h1 className="text-2xl sm:text-4xl font-serif font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+              <h1 className="text-xl sm:text-4xl font-serif font-black text-slate-900 dark:text-white tracking-tight leading-tight px-1">
                 {test.title}
               </h1>
               <p className="hidden sm:block text-slate-500 dark:text-slate-400 text-sm sm:text-base font-medium leading-relaxed">
@@ -1142,37 +1144,39 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
           </div>
         </div>
 
-        {/* Sticky Fixed Bottom Start Button Container */}
-        <div className="shrink-0 px-4 py-3 sm:p-6 bg-white/80 backdrop-blur-md border-t border-slate-200/60 z-20 flex justify-center shadow-[0_-8px_30px_rgba(0,0,0,0.02)]">
+        {/* Sticky Fixed Bottom Start Button Container with Safe Area Inset */}
+        <div className="shrink-0 px-4 sm:p-6 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] bg-white/90 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/60 dark:border-slate-800 z-20 flex justify-center shadow-[0_-8px_30px_rgba(0,0,0,0.03)]">
           <button
             onClick={() => {
               requestUniversalFullscreen();
               setIsStarted(true);
             }}
-            className="max-w-3xl w-full py-3.5 sm:py-4.5 rounded-xl sm:rounded-2xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-black text-sm sm:text-base transition-all duration-300 shadow-lg shadow-[#2563eb]/20 flex items-center justify-center gap-2.5 active:scale-[0.98] cursor-pointer premium-btn-transition"
+            className="max-w-3xl w-full py-3 sm:py-4.5 rounded-xl sm:rounded-2xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-black text-sm sm:text-base transition-all duration-300 shadow-lg shadow-[#2563eb]/20 flex items-center justify-center gap-2.5 active:scale-[0.98] cursor-pointer premium-btn-transition border-none"
           >
             <Play className="w-4.5 h-4.5 fill-white" /> Initiate Session
           </button>
         </div>
       </div>
     );
-  }  return (
-    <div className="fixed inset-0 bg-[#FBF9F6] z-[100] flex flex-col font-sans overflow-hidden" data-lenis-prevent>
+  }
+
+  return (
+    <div className="fixed inset-0 w-full h-[100dvh] max-h-[100dvh] bg-[#FBF9F6] dark:bg-slate-950 z-[100] flex flex-col font-sans overflow-hidden" data-lenis-prevent>
       {/* Subtle print grid texture overlay */}
       <div className="absolute inset-0 pointer-events-none z-[1] opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle, rgba(37,99,235,0.3) 0.5px, transparent 0.5px)', backgroundSize: '24px 24px' }} />
       
-      {/* Header (CBT Candidate + Exam details) */}
-      <header className="h-16 sm:h-20 bg-white/85 backdrop-blur-md border-b border-slate-200/60 flex items-center justify-between px-3 sm:px-8 shrink-0 sticky top-0 z-40 relative shadow-sm">
+      {/* Header (CBT Candidate + Exam details with Top Safe Area) */}
+      <header className="h-auto min-h-[3.75rem] sm:min-h-[4.5rem] bg-white/85 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800 flex items-center justify-between px-3 sm:px-8 pt-[max(env(safe-area-inset-top),0.5rem)] pb-2 sm:pb-0 shrink-0 sticky top-0 z-40 relative shadow-sm">
         {/* Scroll Progress Bar */}
         <div ref={progressBarRef} className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#2563eb] origin-left transition-transform duration-75 ease-out scale-x-0 z-50" />
 
         <div className="flex items-center gap-2 sm:gap-4 relative z-10 min-w-0 flex-1 mr-3">
           <button 
             onClick={() => setShowExitConfirm(true)} 
-            className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-100 rounded-xl transition-all duration-200 cursor-pointer text-slate-500 hover:text-[#2563eb] shrink-0"
+            className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center bg-slate-50 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-slate-200 dark:border-slate-700 hover:border-rose-100 rounded-xl transition-all duration-200 cursor-pointer text-slate-500 hover:text-[#2563eb] shrink-0"
             title="Exit Assessment"
           >
-            <X className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
 
           {/* Fullscreen Toggle Button (Desktop/Laptop only) */}
@@ -1439,8 +1443,8 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
           })()}
 
 
-          {/* Bottom Official Exam Navigation Footer */}
-          <div className="shrink-0 bg-white border-t border-slate-200/80 py-2 px-3 sm:py-3 sm:px-8 shadow-sm">
+          {/* Bottom Official Exam Navigation Footer with Bottom Safe Area */}
+          <div className="shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 pt-2 sm:py-3 pb-[max(env(safe-area-inset-bottom),0.625rem)] px-3 sm:px-8 shadow-sm">
             <div className={cn(
               "w-full mx-auto transition-all duration-300",
               isPaletteCollapsed ? "max-w-[96%] lg:max-w-[94%]" : "max-w-4xl lg:max-w-6xl"

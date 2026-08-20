@@ -2368,7 +2368,7 @@ export const Navbar = ({
             </button>
           )}
           <button 
-            className="p-2 sm:p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl transition-all"
+            className="p-2 sm:p-2.5 text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -2386,7 +2386,7 @@ export const Navbar = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-slate-950/50 backdrop-blur-[3px] z-[55] md:hidden"
+              className="fixed inset-0 bg-slate-950/60 backdrop-blur-[3px] z-[55] md:hidden"
               onClick={() => setMobileMenuOpen(false)}
             />
 
@@ -2396,7 +2396,7 @@ export const Navbar = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute top-full left-0 right-0 bg-white border-b border-slate-200/80 shadow-2xl overflow-y-auto overscroll-contain no-scrollbar md:hidden max-h-[calc(100vh-80px)] rounded-b-[2.25rem] z-[60]"
+              className="absolute top-full left-0 right-0 bg-white dark:bg-[#0B1528] border-b border-slate-200/80 dark:border-slate-800 shadow-2xl dark:shadow-slate-950/80 overflow-y-auto overscroll-contain no-scrollbar md:hidden max-h-[calc(100vh-80px)] rounded-b-[2.25rem] z-[60]"
               data-lenis-prevent
             >
               {/* Content Container */}
@@ -2441,10 +2441,10 @@ export const Navbar = ({
                 </div>
 
                 {!user && onSignIn && (
-                  <div className="p-3.5 rounded-2xl border-2 border-slate-900 bg-gradient-to-br from-slate-50 to-white shadow-[4px_4px_0px_#0f172a] mb-1">
-                    <p className="text-[10px] font-black text-[#2563EB] uppercase tracking-widest mb-1">{t('nav.welcomeAspirant', 'Welcome Aspirant')}</p>
-                    <h4 className="text-xs font-serif font-black text-slate-800 mb-3.5 leading-snug">{t('nav.welcomeSubtitle', 'Master the OPSC, OSSC, and OSSSC syllabus with precision-crafted test series.')}</h4>
-                    <Button variant="primary" className="w-full py-2.5 rounded-xl font-black text-[10px] uppercase tracking-wider border-2 border-slate-900 shadow-[2px_2px_0px_#0f172a] active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" onClick={() => { onSignIn(); setMobileMenuOpen(false); }}>
+                  <div className="p-3.5 rounded-2xl border-2 border-slate-900 dark:border-slate-700 bg-gradient-to-br from-slate-50 to-white dark:from-[#060B16] dark:to-[#0B1528] shadow-[4px_4px_0px_#0f172a] dark:shadow-[4px_4px_0px_#1e293b] mb-1">
+                    <p className="text-[10px] font-black text-[#2563EB] dark:text-blue-400 uppercase tracking-widest mb-1">{t('nav.welcomeAspirant', 'Welcome Aspirant')}</p>
+                    <h4 className="text-xs font-serif font-black text-slate-800 dark:text-slate-100 mb-3.5 leading-snug">{t('nav.welcomeSubtitle', 'Master the OPSC, OSSC, and OSSSC syllabus with precision-crafted test series.')}</h4>
+                    <Button variant="primary" className="w-full py-2.5 rounded-xl font-black text-[10px] uppercase tracking-wider border-2 border-slate-900 dark:border-slate-700 shadow-[2px_2px_0px_#0f172a] active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" onClick={() => { onSignIn(); setMobileMenuOpen(false); }}>
                       {t('nav.signInToAccount', 'Sign In to Account')}
                     </Button>
                   </div>
@@ -2466,11 +2466,11 @@ export const Navbar = ({
                           className={cn(
                             "flex items-center gap-3 text-sm font-extrabold p-2.5 rounded-xl transition-all border border-transparent group relative active:scale-[0.98] select-none",
                             activeSection === 'exams'
-                              ? "bg-emerald-50 text-emerald-800 font-black border-emerald-100 shadow-xs"
-                              : "text-slate-700 hover:bg-slate-50 active:bg-slate-100"
+                              ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-black border-emerald-100 dark:border-emerald-800 shadow-xs"
+                              : "text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60 active:bg-slate-100 dark:active:bg-slate-800"
                           )}
                         >
-                          <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0 shadow-xs">
+                          <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-100 dark:border-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 shadow-xs">
                              <Target className="w-4 h-4" />
                           </div>
                           <span className="tracking-wide">{t('nav.exams', 'Exams')}</span>
@@ -2485,11 +2485,11 @@ export const Navbar = ({
                           className={cn(
                             "flex items-center gap-3 text-sm font-extrabold p-2.5 rounded-xl transition-all border border-transparent group relative active:scale-[0.98] select-none",
                             activeSection === 'syllabus-paths'
-                              ? "bg-blue-50 text-blue-800 font-black border-blue-100 shadow-xs"
-                              : "text-slate-700 hover:bg-slate-50 active:bg-slate-100"
+                              ? "bg-blue-50 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 font-black border-blue-100 dark:border-blue-800 shadow-xs"
+                              : "text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60 active:bg-slate-100 dark:active:bg-slate-800"
                           )}
                         >
-                          <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0 shadow-xs">
+                          <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/70 border border-blue-100 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 shadow-xs">
                              <BookOpen className="w-4 h-4" />
                           </div>
                           <span className="tracking-wide">{t('nav.syllabus', 'Syllabus')}</span>
@@ -2504,15 +2504,15 @@ export const Navbar = ({
                           className={cn(
                             "flex items-center gap-3 text-sm font-extrabold p-2.5 rounded-xl transition-all border border-transparent group relative active:scale-[0.98] select-none",
                             activeSection === 'exam-registry'
-                              ? "bg-[#fce7eb] text-[#2563EB] font-black border-[#fbe1e6] shadow-xs"
-                              : "text-slate-700 hover:bg-slate-50 active:bg-slate-100"
+                              ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300 font-black border-indigo-100 dark:border-indigo-800 shadow-xs"
+                              : "text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60 active:bg-slate-100 dark:active:bg-slate-800"
                           )}
                         >
-                          <div className="w-8 h-8 rounded-xl bg-[#fce7eb] border border-[#fbe1e6] flex items-center justify-center text-[#2563EB] shrink-0 shadow-xs">
+                          <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-100 dark:border-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0 shadow-xs">
                              <Clock3 className="w-4 h-4" />
                           </div>
                           <span className="tracking-wide">{t('nav.notifications', 'Notifications')}</span>
-                          <ChevronRight className={cn("w-4 h-4 ml-auto transition-transform duration-250", activeSection === 'exam-registry' ? "text-[#2563EB] translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
+                          <ChevronRight className={cn("w-4 h-4 ml-auto transition-transform duration-250", activeSection === 'exam-registry' ? "text-indigo-500 translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
                         </a>
                       </motion.div>
 
@@ -2523,11 +2523,11 @@ export const Navbar = ({
                           className={cn(
                             "flex items-center gap-3 text-sm font-extrabold p-2.5 rounded-xl transition-all border border-transparent group relative active:scale-[0.98] select-none",
                             activeSection === 'achievers-journal'
-                              ? "bg-amber-50 text-amber-800 font-black border-amber-600 shadow-xs"
-                              : "text-slate-700 hover:bg-amber-50/50 hover:text-amber-700 border-transparent hover:border-amber-600/35"
+                              ? "bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-black border-amber-600 dark:border-amber-700 shadow-xs"
+                              : "text-slate-700 dark:text-slate-200 hover:bg-amber-50/50 dark:hover:bg-amber-950/40 hover:text-amber-700 dark:hover:text-amber-300 border-transparent hover:border-amber-600/35"
                           )}
                         >
-                          <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 shrink-0 shadow-xs">
+                          <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/70 border border-amber-100 dark:border-amber-800 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0 shadow-xs">
                              <Award className="w-4 h-4" />
                           </div>
                           <span className="tracking-wide">{t('nav.achievers', 'Achievers')}</span>
@@ -2544,12 +2544,12 @@ export const Navbar = ({
                       className={cn(
                         "flex items-center gap-3 text-sm font-extrabold p-2.5 rounded-xl transition-all border border-transparent group relative active:scale-[0.98] select-none",
                         location.pathname.startsWith('/current-affairs')
-                          ? "bg-amber-50 text-amber-800 font-black border-amber-200 shadow-xs"
-                          : "text-slate-700 hover:bg-amber-50/50 hover:text-amber-800"
+                          ? "bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-black border-amber-200 dark:border-amber-800 shadow-xs"
+                          : "text-slate-700 dark:text-slate-200 hover:bg-amber-50/50 dark:hover:bg-amber-950/40 hover:text-amber-800 dark:hover:text-amber-300"
                       )}
                     >
-                      <div className="w-8 h-8 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-700 shrink-0 shadow-xs">
-                         <Globe className="w-4 h-4 text-amber-600" />
+                      <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-950/70 border border-amber-200 dark:border-amber-800 flex items-center justify-center text-amber-700 dark:text-amber-300 shrink-0 shadow-xs">
+                         <Globe className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                       </div>
                       <span className="tracking-wide">{t('nav.currentAffairs', 'Daily 360° Current Affairs')}</span>
                       <ChevronRight className={cn("w-4 h-4 ml-auto transition-transform duration-250", location.pathname.startsWith('/current-affairs') ? "text-amber-600 translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
@@ -2563,15 +2563,15 @@ export const Navbar = ({
                       className={cn(
                         "flex items-center gap-3 text-sm font-extrabold p-2.5 rounded-xl transition-all border border-transparent group relative active:scale-[0.98] select-none",
                         isBlogActive
-                          ? "bg-[#fce7eb] text-[#2563EB] font-black border-[#fbe1e6] shadow-xs"
-                          : "text-slate-700 hover:bg-slate-50 active:bg-slate-100"
+                          ? "bg-blue-50 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 font-black border-blue-200 dark:border-blue-800 shadow-xs"
+                          : "text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60 active:bg-slate-100 dark:active:bg-slate-800"
                       )}
                     >
-                      <div className="w-8 h-8 rounded-xl bg-[#fce7eb] border border-[#fbe1e6] flex items-center justify-center text-[#2563EB] shrink-0 shadow-xs">
+                      <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/70 border border-blue-100 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 shadow-xs">
                          <FileText className="w-4 h-4" />
                       </div>
                       <span className="tracking-wide">{t('nav.blog', 'Latest Updates & Blog')}</span>
-                      <ChevronRight className={cn("w-4 h-4 ml-auto transition-transform duration-250", isBlogActive ? "text-[#2563EB] translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
+                      <ChevronRight className={cn("w-4 h-4 ml-auto transition-transform duration-250", isBlogActive ? "text-blue-500 translate-x-0.5" : "text-slate-400 group-hover:translate-x-0.5")} />
                     </Link>
                   </motion.div>
 
@@ -2582,9 +2582,9 @@ export const Navbar = ({
                         setMobileMenuOpen(false);
                         window.dispatchEvent(new CustomEvent('oep-open-tutorial-video'));
                       }}
-                      className="w-full flex items-center gap-3 text-sm font-extrabold p-2.5 rounded-xl transition-all border border-transparent group relative hover:bg-rose-50 text-slate-800 active:bg-rose-100 active:scale-[0.98] select-none cursor-pointer"
+                      className="w-full flex items-center gap-3 text-sm font-extrabold p-2.5 rounded-xl transition-all border border-transparent group relative hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-800 dark:text-slate-200 active:bg-rose-100 dark:active:bg-rose-900/50 active:scale-[0.98] select-none cursor-pointer"
                     >
-                      <div className="w-8 h-8 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 shrink-0 shadow-xs">
+                      <div className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950/70 border border-rose-100 dark:border-rose-800 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0 shadow-xs">
                          <Video className="w-4 h-4" />
                       </div>
                       <span className="tracking-wide text-left flex-1 font-bold">{t('nav.watchVideoGuide', 'Watch Video Guide')}</span>
@@ -2599,9 +2599,9 @@ export const Navbar = ({
                         target="_blank" 
                         rel="noopener noreferrer"
                         onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-3 text-sm font-extrabold p-2.5 rounded-xl transition-all border border-transparent group relative hover:bg-slate-50 active:bg-slate-100 active:scale-[0.98] select-none"
+                        className="flex items-center gap-3 text-sm font-extrabold p-2.5 rounded-xl transition-all border border-transparent group relative hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-200 active:bg-slate-100 dark:active:bg-slate-800 active:scale-[0.98] select-none"
                       >
-                        <div className="w-8 h-8 rounded-xl bg-[#fce7eb]/50 border border-[#fce7eb]/80 flex items-center justify-center text-[#2563EB] shrink-0 shadow-xs">
+                        <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/70 border border-blue-100 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 shadow-xs">
                            <HelpCircle className="w-4 h-4" />
                         </div>
                         <span className="tracking-wide">{t('nav.helpSupport', 'Help & Support')}</span>
@@ -2612,23 +2612,23 @@ export const Navbar = ({
                 </motion.div>
 
                 {user && (
-                  <div className="mt-3 p-4 rounded-[1.75rem] bg-[#FAF8F5] border border-slate-200/60 shadow-md shadow-slate-200/30 flex flex-col gap-3.5">
+                  <div className="mt-3 p-4 rounded-[1.75rem] bg-[#FAF8F5] dark:bg-[#060B16] border border-slate-200/60 dark:border-slate-800 shadow-md shadow-slate-200/30 dark:shadow-slate-950/50 flex flex-col gap-3.5">
                     <div className="flex items-center gap-3.5 px-1.5">
-                      <UserAvatar profile={profile} user={user} className="w-10 h-10 border-2 border-white shadow-md shrink-0 rounded-2xl" />
+                      <UserAvatar profile={profile} user={user} className="w-10 h-10 border-2 border-white dark:border-slate-700 shadow-md shrink-0 rounded-2xl" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-black text-slate-800 truncate leading-snug">{profile?.displayName || user?.email?.split('@')[0]}</p>
-                        <p className="text-[11px] font-semibold text-slate-400 truncate leading-none mt-0.5">{user?.email}</p>
+                        <p className="text-sm font-black text-slate-800 dark:text-white truncate leading-snug">{profile?.displayName || user?.email?.split('@')[0]}</p>
+                        <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-400 truncate leading-none mt-0.5">{user?.email}</p>
                       </div>
                     </div>
                     
-                    <div className="h-px bg-slate-200/60" />
+                    <div className="h-px bg-slate-200/60 dark:bg-slate-800" />
 
                     <div className="flex flex-col gap-2">
                       {isAdmin && (
                         <Link 
                           to="/admin" 
                           onClick={() => setMobileMenuOpen(false)} 
-                          className="flex items-center gap-3 text-xs font-black text-slate-700 py-3 px-4 bg-white border border-slate-200/80 hover:bg-slate-50 rounded-xl transition-all w-full shadow-xs active:scale-[0.98]"
+                          className="flex items-center gap-3 text-xs font-black text-slate-700 dark:text-slate-200 py-3 px-4 bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all w-full shadow-xs active:scale-[0.98]"
                         >
                           <Settings className="w-4 h-4 text-slate-400" /> 
                           <span>{t('nav.adminPanel', 'Admin Panel')}</span>
@@ -2641,7 +2641,7 @@ export const Navbar = ({
                           await logout();
                           navigate('/');
                         }} 
-                        className="flex items-center gap-3 text-xs font-black text-rose-600 py-3 px-4 bg-rose-50/50 hover:bg-rose-50 border border-rose-100/50 rounded-xl transition-all w-full text-left active:scale-[0.98]"
+                        className="flex items-center gap-3 text-xs font-black text-rose-600 dark:text-rose-400 py-3 px-4 bg-rose-50/50 dark:bg-rose-950/40 hover:bg-rose-50 dark:hover:bg-rose-950/60 border border-rose-100/50 dark:border-rose-800/50 rounded-xl transition-all w-full text-left active:scale-[0.98]"
                       >
                         <LogOut className="w-4 h-4" /> 
                         <span>{t('nav.signOut', 'Sign Out')}</span>

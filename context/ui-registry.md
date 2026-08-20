@@ -2524,7 +2524,29 @@ Last updated: August 20, 2026
 
 **Pattern notes:**
 - **Dynamic Category Mapping**: Automatically synchronizes CTA suggestions with the active category (`topic-wise` -> Chapter-Wise Drills, `exam-focused` -> High-Yield Topics, `revision-sets` -> Daily Speed Quizzes, `pyq-collections` -> Past Years Solved MCQs).
-- **Hybrid Input Flow**: Choosing any pre-made CTA directly populates `formData.tagline`. Selecting `✏️ + Enter Custom Subtitle...` unlocks the text input for bespoke chapter titles.
+---
+
+### 68. `MobileMenuDrawerDarkTheme` (Mobile Drawer & Navigation Item Dark Mode Optimization)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Drawer Shell** | `absolute top-full left-0 right-0 bg-white dark:bg-[#0B1528] border-b border-slate-200/80 dark:border-slate-800 shadow-2xl dark:shadow-slate-950/80 rounded-b-[2.25rem] z-[60]` |
+| **Backdrop Overlay** | `fixed inset-0 bg-slate-950/60 backdrop-blur-[3px] z-[55] md:hidden` |
+| **Quick Action Utility Bar** | `p-2.5 rounded-2xl bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/50` |
+| **Navigation Item (Inactive)** | `text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60 active:bg-slate-100 dark:active:bg-slate-800` |
+| **Current Affairs Item (Active / Inactive)** | Active: `bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800`; Inactive: `hover:bg-amber-50/50 dark:hover:bg-amber-950/40 text-amber-800 dark:text-amber-300`; Icon: `bg-amber-100 dark:bg-amber-950/70 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300` |
+| **Blog & Syllabus Items (Active / Inactive)** | Active: `bg-blue-50 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800`; Icon: `bg-blue-50 dark:bg-blue-950/70 border-blue-100 dark:border-blue-800 text-blue-600 dark:text-blue-400` |
+| **Watch Video Guide Button** | `hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-800 dark:text-slate-200 active:bg-rose-100 dark:active:bg-rose-900/50`; Icon: `bg-rose-50 dark:bg-rose-950/70 border-rose-100 dark:border-rose-800 text-rose-600 dark:text-rose-400` |
+| **User Profile Footer Card** | Container: `bg-[#FAF8F5] dark:bg-[#060B16] border border-slate-200/60 dark:border-slate-800 shadow-md shadow-slate-200/30 dark:shadow-slate-950/50`; Name: `text-slate-800 dark:text-white`; Email: `text-slate-400 dark:text-slate-400`; Divider: `bg-slate-200/60 dark:bg-slate-800` |
+| **Sign Out Button** | `text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/40 hover:bg-rose-50 dark:hover:bg-rose-950/60 border border-rose-100/50 dark:border-rose-800/50` |
+
+**Pattern notes:**
+- **Zero Light Flash in Dark Mode**: Mobile menu drawer dynamically switches from crisp off-white to deep sapphire (`dark:bg-[#0B1528]`) and midnight profile cards (`dark:bg-[#060B16]`).
+- **Luminescent Accent Badges**: Icon containers and active link pills feature dark translucent glows (`dark:bg-amber-950/70`, `dark:bg-blue-950/70`, `dark:bg-rose-950/70`) with high-contrast text.
+
 
 
 

@@ -1749,15 +1749,15 @@ export const Footer = () => {
         </div>
 
         {/* Core footer layout */}
-        <div className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4", isMobile ? "gap-8" : "gap-12 sm:gap-16")}>
+        <div className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4", isMobile ? "gap-6" : "gap-12 sm:gap-16")}>
           
           {/* Logo & Tagline column */}
-          <div className={cn("col-span-1 md:col-span-2", isMobile ? "space-y-4" : "space-y-6")}>
+          <div className={cn("col-span-1 md:col-span-2", isMobile ? "space-y-3.5" : "space-y-6")}>
             <div className="flex items-center gap-3">
-              <div role="img" aria-label="OdishaExamPrep Platform Logo" className={cn("bg-[#2563EB] rounded-2xl flex items-center justify-center shadow-lg shadow-[#2563eb]/20 border-2 border-brand-400/40", isMobile ? "w-10 h-10 shrink-0" : "w-12 h-12")}>
-                <BookOpen className={cn("text-white", isMobile ? "w-5 h-5" : "w-6 h-6")} />
+              <div role="img" aria-label="OdishaExamPrep Platform Logo" className={cn("bg-[#2563EB] rounded-2xl flex items-center justify-center shadow-lg shadow-[#2563eb]/20 border-2 border-brand-400/40", isMobile ? "w-9 h-9 shrink-0" : "w-12 h-12")}>
+                <BookOpen className={cn("text-white", isMobile ? "w-4.5 h-4.5" : "w-6 h-6")} />
               </div>
-              <span className={cn("font-serif font-black tracking-tight text-white", isMobile ? "text-2xl" : "text-3xl")}>
+              <span className={cn("font-serif font-black tracking-tight text-white", isMobile ? "text-xl xs:text-2xl" : "text-3xl")}>
                 Odisha<span className="text-brand-400 font-serif font-black">Exam</span>Prep
               </span>
             </div>
@@ -1771,7 +1771,7 @@ export const Footer = () => {
             </p>
             
             {/* Newsletter update form */}
-            <div className={cn("space-y-2.5", isMobile ? "pt-2" : "space-y-3 pt-4")}>
+            <div className={cn("space-y-2", isMobile ? "pt-1" : "space-y-3 pt-4")}>
               <h2 className="text-xs font-black uppercase tracking-wider text-white">{t('footer.neverMiss', 'Never Miss an Odisha Exam Update')}</h2>
               <form onSubmit={handleSubscribe} className={cn("flex max-w-md", isMobile ? "gap-1.5" : "gap-2")}>
                 <input 
@@ -1780,11 +1780,11 @@ export const Footer = () => {
                   placeholder={isMobile ? "Email address…" : "Enter email to get notified..."}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 min-w-0 bg-slate-900 border-2 border-slate-700 focus:border-[#2563EB] rounded-xl px-4 py-3 text-xs sm:text-sm text-white focus:outline-none transition-all font-bold placeholder:text-slate-400"
+                  className="flex-1 min-w-0 bg-slate-900 border-2 border-slate-700 focus:border-[#2563EB] rounded-xl px-3.5 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-white focus:outline-none transition-all font-bold placeholder:text-slate-400"
                 />
                 <button 
                   type="submit"
-                  className="shrink-0 px-5 py-3 bg-[#2563EB] hover:bg-brand-600 border border-brand-400/40 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-1.5 cursor-pointer shadow-lg shadow-brand-500/20"
+                  className="shrink-0 px-4 sm:px-5 py-2.5 sm:py-3 h-10 sm:h-auto bg-[#2563EB] hover:bg-brand-600 border border-brand-400/40 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-1.5 cursor-pointer shadow-lg shadow-brand-500/20"
                 >
                   {subscribed ? "Done!" : (
                     <>
@@ -1805,15 +1805,15 @@ export const Footer = () => {
             </div>
           </div>
           
-          {/* Platform + Contact — side-by-side on mobile */}
-          <div className={cn(isMobile ? "col-span-1 grid grid-cols-2 gap-6" : "contents")}>
+          {/* Platform + Contact — proportional on mobile */}
+          <div className={cn(isMobile ? "col-span-1 grid grid-cols-[1fr_1.18fr] gap-3 xs:gap-5 pt-2" : "contents")}>
 
           {/* Platform navigation */}
           <div className={cn(isMobile ? "" : "space-y-6")}>
-            <h4 className={cn("text-white font-black tracking-widest uppercase text-xs sm:text-sm relative after:content-[''] after:absolute after:-bottom-2.5 after:left-0 after:w-8 after:h-[2.5px] after:bg-[#2563eb]", isMobile ? "mb-4" : "mb-6")}>
+            <h4 className={cn("text-white font-black tracking-widest uppercase relative after:content-[''] after:absolute after:-bottom-2 after:left-0 after:w-6 after:h-[2px] after:bg-[#2563eb]", isMobile ? "text-[11px] mb-3" : "text-xs sm:text-sm mb-6")}>
               {t('footer.quickLinks', 'Platform')}
             </h4>
-            <ul className={cn("font-bold text-slate-300", isMobile ? "space-y-3" : "space-y-4")}>
+            <ul className={cn("font-bold text-slate-300", isMobile ? "space-y-2.5" : "space-y-4")}>
               {[
                 { to: "/current-affairs", label: t('nav.currentAffairs', 'Daily Current Affairs'), icon: Globe },
                 { to: "/blog", label: t('nav.blog', 'Official Blog'), icon: BookOpen },
@@ -1824,10 +1824,10 @@ export const Footer = () => {
                 <li key={idx}>
                   <Link 
                     to={link.to} 
-                    className="hover:text-brand-300 transition-all duration-300 flex items-center gap-2 group hover:translate-x-1.5"
+                    className="hover:text-brand-300 transition-all duration-300 flex items-center gap-1.5 xs:gap-2 group hover:translate-x-1"
                   >
-                    <link.icon className={cn("text-brand-400 group-hover:text-brand-300 transition-colors shrink-0", isMobile ? "w-3.5 h-3.5" : "w-4 h-4")} />
-                    <span className={cn(isMobile ? "text-xs" : "text-sm")}>{link.label}</span>
+                    <link.icon className={cn("text-brand-400 group-hover:text-brand-300 transition-colors shrink-0", isMobile ? "w-3 h-3" : "w-4 h-4")} />
+                    <span className={cn(isMobile ? "text-[11px] xs:text-xs" : "text-sm")}>{link.label}</span>
                   </Link>
                 </li>
               ))}
@@ -1836,58 +1836,56 @@ export const Footer = () => {
 
           {/* Contact details */}
           <div className={cn(isMobile ? "" : "space-y-6")}>
-            <h4 className={cn("text-white font-black tracking-widest uppercase text-xs sm:text-sm relative after:content-[''] after:absolute after:-bottom-2.5 after:left-0 after:w-8 after:h-[2.5px] after:bg-[#2563eb]", isMobile ? "mb-4" : "mb-6")}>
+            <h4 className={cn("text-white font-black tracking-widest uppercase relative after:content-[''] after:absolute after:-bottom-2 after:left-0 after:w-6 after:h-[2px] after:bg-[#2563eb]", isMobile ? "text-[11px] mb-3" : "text-xs sm:text-sm mb-6")}>
               {t('footer.contactUs', 'Contact')}
             </h4>
-            <ul className={cn("font-bold text-slate-300", isMobile ? "space-y-3" : "space-y-3.5")}>
+            <ul className={cn("font-bold text-slate-300", isMobile ? "space-y-2.5" : "space-y-3.5")}>
               <li>
                 <a 
                   href="https://mail.google.com/mail/?view=cm&fs=1&to=odishaexamprep365@gmail.com" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="flex items-center gap-2.5 group"
+                  className="flex items-center gap-2 group min-w-0"
                 >
-                  <div className={cn("rounded-xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center shrink-0 group-hover:border-[#2563eb] group-hover:bg-[#2563eb]/20 transition-all duration-300", isMobile ? "w-8 h-8" : "w-10 h-10")}>
+                  <div className={cn("rounded-xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center shrink-0 group-hover:border-[#2563eb] group-hover:bg-[#2563eb]/20 transition-all duration-300", isMobile ? "w-7 h-7" : "w-10 h-10")}>
                     <Mail className={cn("text-brand-400 group-hover:text-brand-300 transition-colors", isMobile ? "w-3.5 h-3.5" : "w-4 h-4")} />
                   </div>
-                  <span className={cn("break-all text-slate-200 group-hover:text-white transition-colors duration-300 font-bold", isMobile ? "text-[10px] leading-snug" : "text-sm lg:whitespace-nowrap")}>
-                    odishaexamprep365
-                    {isMobile ? <br /> : ""}
-                    @gmail.com
+                  <span className={cn("text-slate-200 group-hover:text-white transition-colors duration-300 font-bold truncate", isMobile ? "text-[10px] xs:text-[11px] leading-tight" : "text-sm lg:whitespace-nowrap")}>
+                    odishaexamprep365@gmail.com
                   </span>
                 </a>
               </li>
               <li>
                 <a 
                   href="tel:+917377431715" 
-                  className="flex items-center gap-2.5 group"
+                  className="flex items-center gap-2 group min-w-0"
                 >
-                  <div className={cn("rounded-xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center shrink-0 group-hover:border-[#25D366] group-hover:bg-[#25D366]/20 transition-all duration-300", isMobile ? "w-8 h-8" : "w-10 h-10")}>
+                  <div className={cn("rounded-xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center shrink-0 group-hover:border-[#25D366] group-hover:bg-[#25D366]/20 transition-all duration-300", isMobile ? "w-7 h-7" : "w-10 h-10")}>
                     <Phone className={cn("text-[#25D366] group-hover:text-[#25D366] transition-colors", isMobile ? "w-3.5 h-3.5" : "w-4 h-4")} />
                   </div>
-                  <span className={cn("text-slate-200 group-hover:text-white transition-colors duration-300 font-bold", isMobile ? "text-xs" : "text-sm")}>
+                  <span className={cn("text-slate-200 group-hover:text-white transition-colors duration-300 font-bold font-mono", isMobile ? "text-[10.5px] xs:text-xs" : "text-sm")}>
                     +91 7377431715
                   </span>
                 </a>
               </li>
               
               {/* Social links */}
-              <li className={cn("flex", isMobile ? "gap-2 pt-1" : "gap-3 pt-3")}>
+              <li className={cn("flex", isMobile ? "gap-2 pt-0.5" : "gap-3 pt-3")}>
                 <a 
                   href="https://www.youtube.com/@OdishaExamPrep365" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className={cn("rounded-xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center hover:bg-[#FF0000] hover:border-[#FF0000] hover:-translate-y-1 transition-all duration-300 text-slate-300 hover:text-white shadow-lg hover:shadow-red-600/20 group", isMobile ? "w-9 h-9" : "w-11 h-11")}
+                  className={cn("rounded-xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center hover:bg-[#FF0000] hover:border-[#FF0000] hover:-translate-y-1 transition-all duration-300 text-slate-300 hover:text-white shadow-lg hover:shadow-red-600/20 group", isMobile ? "w-8 h-8" : "w-11 h-11")}
                 >
-                  <Youtube className={cn("text-slate-300 group-hover:text-white transition-colors", isMobile ? "w-4 h-4" : "w-5 h-5")} />
+                  <Youtube className={cn("text-slate-300 group-hover:text-white transition-colors", isMobile ? "w-3.5 h-3.5" : "w-5 h-5")} />
                 </a>
                 <a 
                   href="https://t.me/OdishaExamPrep_Official" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className={cn("rounded-xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center hover:bg-[#0088cc] hover:border-[#0088cc] hover:-translate-y-1 transition-all duration-300 text-slate-300 hover:text-white shadow-lg hover:shadow-blue-600/20 group", isMobile ? "w-9 h-9" : "w-11 h-11")}
+                  className={cn("rounded-xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center hover:bg-[#0088cc] hover:border-[#0088cc] hover:-translate-y-1 transition-all duration-300 text-slate-300 hover:text-white shadow-lg hover:shadow-blue-600/20 group", isMobile ? "w-8 h-8" : "w-11 h-11")}
                 >
-                  <Send className={cn("text-slate-300 group-hover:text-white transition-colors", isMobile ? "w-3.5 h-3.5" : "w-4 h-4")} />
+                  <Send className={cn("text-slate-300 group-hover:text-white transition-colors", isMobile ? "w-3 h-3" : "w-4 h-4")} />
                 </a>
               </li>
             </ul>
@@ -1897,9 +1895,9 @@ export const Footer = () => {
         </div>
       </div>
       
-      {/* Bottom bar */}
-      <div className={cn("max-w-7xl mx-auto", isMobile ? "px-4 mt-10" : "px-6 mt-16 md:mt-24")}>
-        <div className="pt-8 border-t border-slate-800/80 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+      {/* Bottom bar with WhatsApp clearance */}
+      <div className={cn("max-w-7xl mx-auto pb-14 sm:pb-4", isMobile ? "px-4 mt-8" : "px-6 mt-16 md:mt-24")}>
+        <div className="pt-6 sm:pt-8 border-t border-slate-800/80 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
           <p className="text-xs font-mono font-bold tracking-widest text-slate-400 uppercase">
             © 2026 OdishaExamPrep. All rights reserved.
           </p>
@@ -1913,7 +1911,7 @@ export const Footer = () => {
         </div>
 
         {/* Big Executive Brand Watermark Headline */}
-        <div className="pt-10 sm:pt-16 pb-4 flex justify-center overflow-hidden pointer-events-none select-none">
+        <div className="pt-8 sm:pt-16 pb-4 flex justify-center overflow-hidden pointer-events-none select-none">
           <h1 className="font-serif font-black tracking-tighter text-center text-4xl sm:text-6xl md:text-8xl lg:text-[7.5rem] xl:text-[9.5rem] 2xl:text-[11rem] leading-none bg-gradient-to-b from-slate-700/40 via-slate-800/25 to-transparent bg-clip-text text-transparent transition-all duration-500 whitespace-nowrap">
             Odisha<span className="text-brand-500/35 font-serif font-black">Exam</span>Prep
           </h1>

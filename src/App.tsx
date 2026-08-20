@@ -643,7 +643,7 @@ const HistoryView = ({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8, transition: { duration: 0.14 } }}
                   transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                  className="grid grid-cols-1 gap-4"
+                  className="grid grid-cols-1 gap-2.5 sm:gap-3.5"
                 >
                   {filteredActivities.map((a, i) => {
                     const isTestResult = !!a.metadata && a.type !== 'question_bank_accessed';
@@ -669,7 +669,7 @@ const HistoryView = ({
                       'rgba(16, 185, 129, 0.28)';
 
                     return (
-                      <DynamicVectorCard key={a.id || i} glowColor={cardGlow} className="w-full">
+                      <DynamicVectorCard key={a.id || i} glowColor={cardGlow} roundedClass="rounded-xl sm:rounded-2xl" className="w-full">
                         <motion.div
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -678,13 +678,13 @@ const HistoryView = ({
                             if (isDownloadable) {
                               window.open(a.metadata.pdfUrl, '_blank');
                             } else if (a.type === 'test_incomplete' && onResumeTest) {
-                              onResumeTest(a.metadata.test, a.metadata);
+                              onResumeTest(a.metadata?.test || { title: a.title }, a.metadata || a);
                             } else if (isTestResult && onViewResults) {
                               onViewResults(a.metadata);
                             }
                           }}
                           className={cn(
-                            "relative overflow-hidden bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2.5rem] p-4 sm:p-6 shadow-lg shadow-slate-200/50 dark:shadow-none border border-slate-200/80 dark:border-slate-800 flex flex-col gap-3 sm:gap-4 group transition-all duration-300 text-slate-900 dark:text-white",
+                            "relative overflow-hidden bg-white dark:bg-slate-900 rounded-[inherit] p-3 sm:p-4.5 shadow-sm dark:shadow-none border border-slate-200/80 dark:border-slate-800 flex flex-col gap-2 sm:gap-3 group transition-all duration-300 text-slate-900 dark:text-white",
                             isInteractive
                               ? a.type === 'test_incomplete'
                                 ? "cursor-pointer hover:border-amber-300 dark:hover:border-amber-500/40"
@@ -700,32 +700,32 @@ const HistoryView = ({
                           <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
                           
                           {a.type === 'test_incomplete' ? (
-                            <Clock className="absolute -right-6 -bottom-6 w-44 h-44 opacity-10 stroke-[1.2] text-amber-500 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                            <Clock className="absolute -right-3 -bottom-3 w-28 h-28 sm:w-36 sm:h-36 opacity-10 stroke-[1.2] text-amber-500 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
                           ) : isAiQuiz ? (
-                            <Sparkles className="absolute -right-6 -bottom-6 w-44 h-44 opacity-10 stroke-[1.2] text-purple-500 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                            <Sparkles className="absolute -right-3 -bottom-3 w-28 h-28 sm:w-36 sm:h-36 opacity-10 stroke-[1.2] text-purple-500 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
                           ) : isDownloadable ? (
-                            <Download className="absolute -right-6 -bottom-6 w-44 h-44 opacity-10 stroke-[1.2] text-blue-500 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                            <Download className="absolute -right-3 -bottom-3 w-28 h-28 sm:w-36 sm:h-36 opacity-10 stroke-[1.2] text-blue-500 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
                           ) : (
-                            <CheckCircle2 className="absolute -right-6 -bottom-6 w-44 h-44 opacity-10 stroke-[1.2] text-emerald-500 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
+                            <CheckCircle2 className="absolute -right-3 -bottom-3 w-28 h-28 sm:w-36 sm:h-36 opacity-10 stroke-[1.2] text-emerald-500 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />
                           )}
 
                           {/* Confirm delete overlay */}
                           {confirmDeleteId === a.id && (
                             <div
-                              className="absolute inset-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md flex flex-col items-center justify-center gap-3 px-6 z-30 rounded-[inherit]"
+                              className="absolute inset-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md flex flex-col items-center justify-center gap-2.5 px-4 z-30 rounded-[inherit]"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <span className="text-sm font-bold text-slate-800 dark:text-white text-center">Delete this activity from history?</span>
-                              <div className="flex gap-3">
+                              <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-white text-center">Delete this activity from history?</span>
+                              <div className="flex gap-2.5">
                                 <button
                                   onClick={async () => { await handleDeleteActivity(a.id); }}
-                                  className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider cursor-pointer border-none shadow-md active:scale-95 transition-all"
+                                  className="px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-black uppercase tracking-wider cursor-pointer border-none shadow-md active:scale-95 transition-all"
                                 >
                                   {t('history.actions.delete', 'Delete')}
                                 </button>
                                 <button
                                   onClick={() => setConfirmDeleteId(null)}
-                                  className="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-black uppercase tracking-wider cursor-pointer border-none active:scale-95 transition-all"
+                                  className="px-3.5 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-black uppercase tracking-wider cursor-pointer border-none active:scale-95 transition-all"
                                 >
                                   {t('history.header.cancel', 'Cancel')}
                                 </button>
@@ -734,24 +734,24 @@ const HistoryView = ({
                           )}
 
                           {/* Tier 1 — Status Icon, Title & Actions */}
-                          <div className="relative z-10 flex items-start justify-between gap-2.5">
-                            <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
+                          <div className="relative z-10 flex items-center justify-between gap-2.5">
+                            <div className="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
                               <div className={cn(
-                                "p-2.5 sm:p-3 rounded-xl sm:rounded-2xl shrink-0 shadow-2xs border mt-0.5 sm:mt-0",
+                                "w-7.5 h-7.5 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl shrink-0 shadow-2xs border flex items-center justify-center",
                                 a.type === 'test_incomplete' ? "bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-300 border-amber-200 dark:border-amber-800" :
                                 isAiQuiz ? "bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 border-purple-200 dark:border-purple-800" :
                                 isDownloadable ? "bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-300 border-blue-200 dark:border-blue-800" :
                                 "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
                               )}>
-                                {a.type === 'test_incomplete' ? <Clock className="w-4 h-4 sm:w-5 sm:h-5" /> :
-                                 isAiQuiz ? <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" /> :
-                                 isDownloadable ? <Download className="w-4 h-4 sm:w-5 sm:h-5" /> :
-                                 <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />}
+                                {a.type === 'test_incomplete' ? <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> :
+                                 isAiQuiz ? <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> :
+                                 isDownloadable ? <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> :
+                                 <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
                               </div>
 
                               <div className="min-w-0 flex-1">
                                 <h4 className={cn(
-                                  "font-extrabold text-slate-900 dark:text-white text-sm sm:text-lg leading-snug tracking-tight transition-colors line-clamp-2 uppercase",
+                                  "font-bold text-slate-900 dark:text-white text-[13px] sm:text-base leading-snug tracking-tight transition-colors line-clamp-1",
                                   a.type === 'test_incomplete'
                                     ? "group-hover:text-amber-600 dark:group-hover:text-amber-400"
                                     : isAiQuiz
@@ -763,9 +763,9 @@ const HistoryView = ({
                                   {titleText}
                                 </h4>
                                 {/* Desktop date shown under title */}
-                                <div className="hidden sm:flex items-center gap-2 mt-1">
-                                  <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
-                                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{compactDate}</span>
+                                <div className="hidden sm:flex items-center gap-1.5 mt-0.5">
+                                  <Clock className="w-3 h-3 text-slate-400 dark:text-slate-500 shrink-0" />
+                                  <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">{compactDate}</span>
                                 </div>
                               </div>
                             </div>
@@ -774,36 +774,36 @@ const HistoryView = ({
                               {/* Desktop CTA Action Button */}
                               {(isTestResult || a.type === 'test_incomplete') && (
                                 <div className={cn(
-                                  "hidden sm:flex px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider items-center gap-1.5 transition-all shadow-2xs border",
+                                  "hidden sm:flex px-2.5 py-1 rounded-lg text-[11px] font-black uppercase tracking-wider items-center gap-1.5 transition-all shadow-2xs border",
                                   a.type === 'test_incomplete'
                                     ? "bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-300 border-amber-200 dark:border-amber-800 group-hover:bg-amber-600 group-hover:text-white"
                                     : "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 group-hover:bg-emerald-600 dark:group-hover:bg-emerald-500 group-hover:text-white"
                                 )}>
                                   <span>{a.type === 'test_incomplete' ? t('history.actions.resume', 'Resume') : t('history.actions.viewResults', 'View Results')}</span>
-                                  {a.type === 'test_incomplete' ? <Play className="w-3.5 h-3.5 fill-current" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                                  {a.type === 'test_incomplete' ? <Play className="w-3 h-3 fill-current" /> : <ChevronRight className="w-3 h-3" />}
                                 </div>
                               )}
                               <button
                                 onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(a.id); }}
-                                className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-all cursor-pointer border-none bg-transparent shrink-0"
+                                className="p-1 sm:p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-all cursor-pointer border-none bg-transparent shrink-0"
                                 title="Delete activity"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                               </button>
                             </div>
                           </div>
 
                           {/* Tier 2 — Mobile Date & Category Badges */}
-                          <div className="relative z-10 flex flex-wrap items-center gap-1.5 sm:gap-2">
+                          <div className="relative z-10 flex flex-wrap items-center gap-1.5">
                             {/* Mobile-only compact date pill */}
-                            <div className="flex sm:hidden items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-semibold">
-                              <Clock className="w-3 h-3 text-slate-400 shrink-0" />
+                            <div className="flex sm:hidden items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[9.5px] font-semibold">
+                              <Clock className="w-2.5 h-2.5 text-slate-400 shrink-0" />
                               <span>{compactDate}</span>
                             </div>
 
                             {a.metadata?.testCategory && (
                               <span className={cn(
-                                "px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-[9px] sm:text-[10px] font-mono font-black uppercase tracking-wider border",
+                                "px-1.5 sm:px-2 py-0.5 rounded-md text-[9px] sm:text-[9.5px] font-mono font-black uppercase tracking-wider border",
                                 a.type === 'test_incomplete' ? "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800" :
                                 isAiQuiz ? "bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800" :
                                 isDownloadable ? "bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800" :
@@ -813,49 +813,49 @@ const HistoryView = ({
                               </span>
                             )}
                             {a.metadata?.examName && (
-                              <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 rounded-md sm:rounded-lg text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider border border-slate-200/60 dark:border-slate-700/60 max-w-[150px] sm:max-w-[220px] truncate" title={a.metadata.examName}>
+                              <span className="px-1.5 sm:px-2 py-0.5 bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 rounded-md text-[9px] sm:text-[9.5px] font-semibold uppercase tracking-wider border border-slate-200/60 dark:border-slate-700/60 max-w-[120px] sm:max-w-[180px] truncate" title={a.metadata.examName}>
                                 {a.metadata.examName}
                               </span>
                             )}
                             {a.type === 'test_incomplete' && (
-                              <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 rounded-md sm:rounded-lg text-[9px] sm:text-[10px] font-mono font-black uppercase tracking-wider border border-amber-200 dark:border-amber-800">
+                              <span className="px-1.5 sm:px-2 py-0.5 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 rounded-md text-[9px] sm:text-[9.5px] font-mono font-black uppercase tracking-wider border border-amber-200 dark:border-amber-800">
                                 {t('history.status.incomplete', 'Incomplete')}
                               </span>
                             )}
                             {a.type === 'question_bank_accessed' && (
-                              <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 rounded-md sm:rounded-lg text-[9px] sm:text-[10px] font-mono font-black uppercase tracking-wider border border-blue-200 dark:border-blue-800 flex items-center gap-1">
-                                <Download className="w-3 h-3" />
+                              <span className="px-1.5 sm:px-2 py-0.5 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 rounded-md text-[9px] sm:text-[9.5px] font-mono font-black uppercase tracking-wider border border-blue-200 dark:border-blue-800 flex items-center gap-1">
+                                <Download className="w-2.5 h-2.5" />
                                 {isDownloadable ? t('history.status.downloadAvailable', 'Download Available') : t('history.status.pdfDownloaded', 'PDF Downloaded')}
                               </span>
                             )}
                           </div>
 
                           {/* Tier 3 — Scores & Mobile Action Button */}
-                          <div className="relative z-10 flex items-center justify-between gap-2 pt-2.5 sm:pt-3 border-t border-slate-100 dark:border-slate-800">
+                          <div className="relative z-10 flex items-center justify-between gap-2 pt-2 sm:pt-2.5 border-t border-slate-100 dark:border-slate-800">
                             <div>
                               {a.type === 'test_incomplete' && (
-                                <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 bg-amber-50 dark:bg-amber-950/60 rounded-lg sm:rounded-xl border border-amber-200 dark:border-amber-800">
-                                  <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-600 dark:text-amber-400" />
-                                  <span className="text-[11px] sm:text-xs font-mono font-black text-amber-700 dark:text-amber-300">
+                                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-amber-50 dark:bg-amber-950/60 rounded-md sm:rounded-lg border border-amber-200 dark:border-amber-800">
+                                  <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-600 dark:text-amber-400" />
+                                  <span className="text-[10px] sm:text-[11px] font-mono font-black text-amber-700 dark:text-amber-300">
                                     {Object.keys(a.metadata?.answers || {}).length} {t('history.stats.answered', 'answered')}
                                   </span>
                                 </div>
                               )}
                               {((isTestResult || isAiQuiz) && a.score !== undefined && a.score !== null) && (
-                                <div className="flex items-baseline gap-1 px-2.5 sm:px-3.5 py-1 bg-slate-50 dark:bg-slate-800/80 rounded-lg sm:rounded-xl border border-slate-200/80 dark:border-slate-700">
-                                  <span className="font-mono font-black text-slate-900 dark:text-white text-sm sm:text-lg">
+                                <div className="flex items-baseline gap-1 px-2 py-0.5 bg-slate-50 dark:bg-slate-800/80 rounded-md sm:rounded-lg border border-slate-200/80 dark:border-slate-700">
+                                  <span className="font-mono font-black text-slate-900 dark:text-white text-xs sm:text-base">
                                     {typeof a.score === 'number' ? Number(a.score.toFixed(2)) : a.score}
                                   </span>
-                                  <span className="text-slate-400 dark:text-slate-400 text-[10px] sm:text-xs font-mono font-bold">/{a.totalMarks}</span>
+                                  <span className="text-slate-400 dark:text-slate-400 text-[9px] sm:text-[11px] font-mono font-bold">/{a.totalMarks}</span>
                                   {!isAiQuiz && (
-                                    <span className="ml-1 text-[10px] sm:text-xs font-mono font-black text-brand-600 dark:text-brand-400">
+                                    <span className="ml-1 text-[9px] sm:text-[10px] font-mono font-black text-brand-600 dark:text-brand-400">
                                       · {Math.round(a.accuracy || 0)}%
                                     </span>
                                   )}
                                 </div>
                               )}
                               {isDownloadable && (
-                                <div className="text-[11px] font-semibold text-slate-400 dark:text-slate-500">
+                                <div className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">
                                   PDF Document
                                 </div>
                               )}
@@ -865,19 +865,19 @@ const HistoryView = ({
                             <div className="flex sm:hidden items-center">
                               {(isTestResult || a.type === 'test_incomplete') && (
                                 <div className={cn(
-                                  "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-all shadow-xs border",
+                                  "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-all shadow-2xs border",
                                   a.type === 'test_incomplete'
                                     ? "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800"
                                     : "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
                                 )}>
                                   <span>{a.type === 'test_incomplete' ? t('history.actions.resume', 'Resume') : t('history.actions.viewResults', 'View Results')}</span>
-                                  {a.type === 'test_incomplete' ? <Play className="w-3 h-3 fill-current" /> : <ChevronRight className="w-3 h-3" />}
+                                  {a.type === 'test_incomplete' ? <Play className="w-2.5 h-2.5 fill-current" /> : <ChevronRight className="w-2.5 h-2.5" />}
                                 </div>
                               )}
                               {isDownloadable && (
-                                <div className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-xs">
+                                <div className="px-2 py-0.5 rounded-md text-[9.5px] font-black uppercase tracking-wider flex items-center gap-1 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-2xs">
                                   <span>{t('history.actions.openPdf', 'Open PDF')}</span>
-                                  <ExternalLink className="w-3 h-3" />
+                                  <ExternalLink className="w-2.5 h-2.5" />
                                 </div>
                               )}
                             </div>
@@ -7506,7 +7506,50 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     try {
       let finalTest = { ...targetTest };
 
-      // Immediately set active test & state synchronously within user gesture callstack
+      // Ensure questions are populated before starting/resuming test
+      if (!finalTest.questions || finalTest.questions.length === 0) {
+        if (targetTestId && !targetTestId.startsWith('practice-')) {
+          try {
+            const fetchedQs = await examService.getQuestionsForMockTest(targetTestId);
+            if (fetchedQs && fetchedQs.length > 0) {
+              finalTest.questions = fetchedQs;
+              finalTest.questionCount = fetchedQs.length;
+              finalTest.totalQuestions = fetchedQs.length;
+              finalTest.totalMarks = finalTest.totalMarks || fetchedQs.length;
+            }
+          } catch (e) {
+            console.error("Failed to load questions for mock test:", e);
+          }
+        }
+
+        // If still no questions (or if it's a practice session):
+        if (!finalTest.questions || finalTest.questions.length === 0) {
+          const rawTitle = finalTest.title || test?.title || actMeta?.title || '';
+          const cleanTopic = rawTitle.replace(/(\s*-\s*Practice Session)+$/gi, '').trim() || 'General';
+          const targetCount = finalTest.totalQuestions || finalTest.practiceQuestionCount || finalTest._questionCount || actMeta?.totalQuestions || 20;
+
+          // Check if matching topic bank exists in dynamicQuestionBanks
+          const flatBanks = Object.values(dynamicQuestionBanks || {}).flat() as any[];
+          const topicBank = flatBanks.find(b => b.id === finalTest.bankId || (b.title && b.title.toLowerCase().includes(cleanTopic.toLowerCase())) || (b.name && b.name.toLowerCase().includes(cleanTopic.toLowerCase())));
+
+          if (topicBank && Array.isArray(topicBank.questions) && topicBank.questions.length > 0) {
+            finalTest.questions = topicBank.questions.slice(0, targetCount);
+          } else {
+            const instantQs = getInstantQuestionsForTopic(cleanTopic, targetCount);
+            finalTest.questions = instantQs.map(q => ({
+              id: q.id,
+              questionText: q.questionText,
+              options: q.options,
+              correctAnswerIndex: q.correctAnswerIndex,
+              explanation: q.explanation || 'No explanation provided.'
+            }));
+          }
+          finalTest.totalQuestions = finalTest.questions.length;
+          finalTest.totalMarks = finalTest.totalMarks || finalTest.questions.length;
+        }
+      }
+
+      // Immediately set active test & state synchronously
       if (actMeta && (actMeta.isStarted || actMeta.answers || actMeta.answersById || actMeta.currentQuestionIndex !== undefined)) {
         setActiveTestState({
           ...actMeta,
@@ -7523,17 +7566,6 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           ...finalTest,
           durationMinutes: finalTest.durationMinutes || 60,
         });
-      }
-
-      // Dynamically fetch latest questions in background if missing or resuming real test
-      if (!finalTest.questions || finalTest.questions.length === 0 || (targetTestId && !targetTestId.startsWith('practice-'))) {
-        if (targetTestId && !targetTestId.startsWith('practice-')) {
-          examService.getQuestionsForMockTest(targetTestId).then((fetchedQs) => {
-            if (fetchedQs && fetchedQs.length > 0) {
-              setActiveTest(prev => prev ? { ...prev, questions: fetchedQs, questionCount: fetchedQs.length } : prev);
-            }
-          }).catch(console.error);
-        }
       }
     } catch (error) {
       console.error(error);
@@ -8091,28 +8123,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       <HistoryView 
         user={user} 
         onViewResults={handleViewResults} 
-        onResumeTest={async (test, state) => {
-          let finalTest = { ...(test || {}) };
-          const targetTestId = finalTest.id || state?.testId || state?.bankId || (state?.resumeSessionId && !state?.resumeSessionId.startsWith('session-') ? state.resumeSessionId : undefined);
-          const targetTitle = finalTest.title || state?.title;
-          
-          if ((!finalTest.questions || finalTest.questions.length === 0) && targetTestId) {
-            try {
-              let freshQs: any[] = [];
-              if (targetTestId.startsWith('practice-') || state?.bankId) {
-                freshQs = await examService.getQuestionsForQuestionBank(targetTestId, targetTitle, state?.examId || selectedExam);
-              } else {
-                freshQs = await examService.getQuestionsForMockTest(targetTestId);
-              }
-              if (freshQs && freshQs.length > 0) {
-                finalTest.questions = freshQs;
-              }
-            } catch (e) {
-              console.error("Failed to fetch fresh questions on resume:", e);
-            }
-          }
-          setActiveTest(finalTest);
-          setActiveTestState(state);
+        onResumeTest={(test, state) => {
+          handleStartTest(test, state);
         }} 
         onActivityDeleted={onActivityLogged} 
         onNavigate={onNavigate} 

@@ -760,6 +760,24 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentQuestionIndex, showSubmitConfirm, showExitConfirm, currentQuestion, handleAnswer, nextQuestion, prevQuestion, toggleMarkForReview]);
 
+  if (!test?.questions || test.questions.length === 0) {
+    return (
+      <div className="fixed inset-0 w-full h-[100dvh] bg-[#FBF9F6] dark:bg-[#060B16] z-[100] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-12 h-12 rounded-2xl bg-blue-600/10 dark:bg-blue-950/60 border border-blue-500/20 flex items-center justify-center mb-4">
+          <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400 animate-pulse" />
+        </div>
+        <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1.5">Loading Questions...</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium max-w-sm mb-6">Retrieving test session questions and answer sheets.</p>
+        <button
+          onClick={() => onExit(undefined)}
+          className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
+        >
+          Return to Dashboard
+        </button>
+      </div>
+    );
+  }
+
   if (!isStarted) {
     const fmt = (n: number) => Number.isInteger(n) ? String(n) : n.toFixed(2);
     return (

@@ -2800,8 +2800,28 @@ Last updated: August 20, 2026
 | **Question Palette Sidebar & Sheet** | Container: `bg-white dark:bg-[#0B1528] border-slate-200/60 dark:border-slate-800`, Unvisited Grid Buttons: `bg-slate-50 dark:bg-[#060B16] border-slate-200/80 dark:border-slate-800 text-slate-400 dark:text-slate-400` |
 | **Confirmation Modals** | Modal Frame: `bg-white dark:bg-[#0B1528] border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-white` |
 
+---
+
+### 84. `TestResultsViewDarkTheme` (Performance Report / Test Results View Dark Mode Overhaul)
+
+File: [`src/TestResultsView.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/TestResultsView.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Root Viewport Background** | `bg-[#F8FAFC] dark:bg-[#060B16]` |
+| **Top Glass Header & Back Button** | Header: `bg-white/80 dark:bg-[#060B16]/90 border-b border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-white`, Button: `bg-slate-50 dark:bg-[#0B1528] border-2 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200` |
+| **Total Score Hero Card** | Container: `dark:bg-gradient-to-br dark:from-[#0B1528] dark:via-[#060B16] dark:to-[#0B1528] dark:border-blue-900/40 shadow-xl`, Score: `text-[#2563eb] dark:text-blue-400` |
+| **Performance Calculation Box** | `bg-slate-50/80 dark:bg-[#060B16]/80 border-slate-200/80 dark:border-slate-800 text-slate-500 dark:text-slate-400` |
+| **Stat Metric Grid Cards** | Cards: `bg-white/90 dark:bg-[#0B1528] border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-white`, Metric Icons: Correct `dark:bg-emerald-950/60`, Incorrect `dark:bg-rose-950/60`, Marked `dark:bg-amber-950/60`, Unanswered `dark:bg-slate-800` |
+| **Question Navigator Box** | Container: `bg-white/90 dark:bg-[#0B1528] border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-white`, Unvisited Grid Buttons: `bg-slate-100 dark:bg-[#060B16] border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-400` |
+| **Detailed Question Review Card** | Shell: `bg-white dark:bg-[#0B1528] border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-white`, Question Header Pill: `bg-slate-100 dark:bg-[#060B16] border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300` |
+| **MCQ Review Options & Explanation** | Correct Option: `dark:bg-emerald-950/60 dark:border-emerald-600 dark:text-emerald-200`, Incorrect Option: `dark:bg-rose-950/60 dark:border-rose-600 dark:text-rose-200`, Unselected: `dark:bg-[#060B16] dark:border-slate-800 dark:text-slate-300`, Explanation: `dark:bg-[#060B16] dark:border-slate-800 dark:text-slate-200` |
+| **Sticky Bottom Navigation Footer** | Mobile Bar: `bg-white/95 dark:bg-[#060B16]/95 border-t border-slate-200 dark:border-slate-800`, Previous: `dark:bg-[#0B1528] dark:border-slate-800 dark:text-slate-200`, Next: `bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-black` |
+
 **Pattern notes:**
-- **Zero White Card Artifacts in Exam Interface**: Complete dark mode overhaul across test header, question card, option cards, solution breakdown, navigation footer, question palette drawer, mobile bottom sheet, and exit/submit confirmation modals.
+- **Zero Metallic Grey Artifacts**: Completely eliminated metallic grey gradients in dark mode across performance report hero banner, metric summary cards, calculation breakdowns, question navigator, MCQ option cards, solution explanations, and sticky bottom navigation. Standardized on deep sapphire midnight tokens (`#060B16` and `#0B1528`).
+
 
 
 

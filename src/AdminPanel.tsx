@@ -1344,6 +1344,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         } catch(e) {}
       }
 
+      const isExamPremium = parsedExamMeta.isPremium !== undefined
+        ? Boolean(parsedExamMeta.isPremium)
+        : Boolean(parsedExamMeta.price && Number(parsedExamMeta.price) > 0);
+
       newData = {
         ...newData,
         name: item.name || '',
@@ -1354,10 +1358,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         metaDescription: item.metaDescription || '',
         keywords: item.keywords || '',
         targetExamId: item.targetExamId || '',
-        isPremium: (item.description || '').startsWith('JSON_METADATA_'),
-        price: parsedExamMeta.price || 499,
-        originalPrice: parsedExamMeta.originalPrice || 999,
-        description: parsedExamMeta.description || item.description || '',
+        isPremium: isExamPremium,
+        price: parsedExamMeta.price !== undefined ? parsedExamMeta.price : 499,
+        originalPrice: parsedExamMeta.originalPrice !== undefined ? parsedExamMeta.originalPrice : 999,
+        description: parsedExamMeta.description !== undefined ? parsedExamMeta.description : (item.description || ''),
         examDateStatus: parsedExamMeta.examDateStatus || (parsedExamMeta.examDate || item.examDate ? 'published' : 'tba'),
         formFillupStatus: parsedExamMeta.formFillupStatus || 'tba',
         formFillupEndDate: parsedExamMeta.formFillupEndDate || ''
@@ -1577,14 +1581,16 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         });
         await Promise.all(promises);
       } else if (activeTab === 'exams' || activeTab === 'blogs') {
+        const isExamPremium = Boolean(formData.isPremium);
         const metaObj = {
-          price: Number(formData.price),
-          originalPrice: Number(formData.originalPrice),
+          price: isExamPremium ? (Number(formData.price) || 499) : 0,
+          originalPrice: isExamPremium ? (Number(formData.originalPrice) || ((Number(formData.price) || 499) * 2)) : 0,
           description: formData.description,
           examDate: formData.examDate || '',
           examDateStatus: formData.examDateStatus || 'tba',
           formFillupStatus: formData.formFillupStatus || 'tba',
-          formFillupEndDate: formData.formFillupEndDate || ''
+          formFillupEndDate: formData.formFillupEndDate || '',
+          isPremium: isExamPremium
         };
         const payload: any = {
           name: formData.name,

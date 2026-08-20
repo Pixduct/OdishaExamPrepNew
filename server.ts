@@ -505,7 +505,9 @@ async function startServer() {
       return 999; // Fallback global Full Access price
     }
 
-    if (productType === 'exam_bundle' || productType === 'exam' || productId.startsWith('exam_bundle_')) {
+    const normType = (productType || '').toLowerCase();
+
+    if (normType === 'exam_bundle' || normType === 'exam' || productId.startsWith('exam_bundle_')) {
       const examId = productId.replace('exam_bundle_', '');
       const { data: exam, error } = await supabaseAdmin
         .from('exams')
@@ -520,15 +522,19 @@ async function startServer() {
       if ((exam.description || '').startsWith('JSON_METADATA_')) {
         try {
           const meta = JSON.parse(exam.description.replace('JSON_METADATA_', ''));
+          const isPremium = meta.isPremium !== undefined ? Boolean(meta.isPremium) : (Number(meta.price) > 0);
+          if (!isPremium) {
+            throw new Error('Exam bundle is not enabled for this exam');
+          }
           return Number(meta.price) || 499;
-        } catch (e) {
-          throw new Error('Failed to parse exam metadata');
+        } catch (e: any) {
+          throw new Error(e.message || 'Failed to parse exam metadata');
         }
       }
       throw new Error('Exam is not premium');
     }
 
-    if (productType === 'test_series' || productType === 'series') {
+    if (normType === 'test_series' || normType === 'series') {
       const { data: series, error } = await supabaseAdmin
         .from('testSeries')
         .select('price')
@@ -541,7 +547,7 @@ async function startServer() {
       return Number(series.price) || 499;
     }
 
-    if (productType === 'mock_test' || productType === 'mockTest') {
+    if (normType === 'mock_test' || normType === 'mocktest' || normType === 'test' || normType === 'mock') {
       const { data: test, error } = await supabaseAdmin
         .from('mockTests')
         .select('seriesId')
@@ -553,17 +559,28 @@ async function startServer() {
       }
 
       try {
-        if (test.seriesId && test.seriesId.startsWith('{')) {
-          const parsed = JSON.parse(test.seriesId);
-          if (parsed.isPremium) {
-            return Number(parsed.price) || 499;
+        if (test.seriesId) {
+          if (typeof test.seriesId === 'string' && test.seriesId.startsWith('{')) {
+            const parsed = JSON.parse(test.seriesId);
+            if (parsed.isPremium) {
+              return Number(parsed.price) || 499;
+            }
+          } else {
+            const { data: series } = await supabaseAdmin
+              .from('testSeries')
+              .select('price')
+              .eq('id', test.seriesId)
+              .single();
+            if (series) {
+              return Number(series.price) || 499;
+            }
           }
         }
       } catch (e) {}
       throw new Error('Mock Test is not premium');
     }
 
-    if (productType === 'question_bank' || productType === 'questionBank') {
+    if (normType === 'question_bank' || normType === 'questionbank' || normType === 'bank') {
       const { data: bank, error } = await supabaseAdmin
         .from('questionBanks')
         .select('tagline, isPremium')
@@ -579,7 +596,7 @@ async function startServer() {
       }
 
       try {
-        if (bank.tagline && bank.tagline.includes('{"text"')) {
+        if (bank.tagline && (bank.tagline.startsWith('{') || bank.tagline.includes('{"text"') || bank.tagline.includes('"price"'))) {
           const parsed = JSON.parse(bank.tagline);
           return Number(parsed.price) || 499;
         }

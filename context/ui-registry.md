@@ -77,6 +77,7 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`ActiveExamContextBar`** | Form / Context | [`src/components/ActiveExamContextBar.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/ActiveExamContextBar.tsx) | Dual-Theme Deep Sapphire Bar, Pulse Indicator, Switch Modal Trigger | StudyPlanView.tsx, AnalyticsView.tsx | Active |
 | **`AiMentorWorkspace`** | AI / Workspace | [`src/pages/AiMentor.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/AiMentor.tsx) | 4-Tab Suite (Planner/Timer, Quizzer, Syllabus, Shortcuts) with Dark Sapphire Theme | Router (`/ai-mentor`) | Active |
 | **`LanguageToggle`** | Navigation / Control | [`src/components/LanguageToggle.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/LanguageToggle.tsx) | `default` (Floating pill), `compact` (Header pill embedded) | App.tsx (Signed-in & Signed-out Navbar, Mobile Drawer) | Active |
+| **`AdminExamEditModalForm`** | Admin / Form Modal | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L2200-L2315) | Exam & Bundle editor modal with verified `isPremium` toggle persistence & schedule monitoring | AdminPanel.tsx | Active |
 
 ---
 

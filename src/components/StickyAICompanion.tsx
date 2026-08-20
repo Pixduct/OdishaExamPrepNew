@@ -132,6 +132,8 @@ const parseExamPrice = (d: string): number | undefined => {
   if (typeof d === 'string' && d.startsWith('JSON_METADATA_')) {
     try {
       const meta = JSON.parse(d.replace('JSON_METADATA_', ''));
+      const isPremium = meta.isPremium !== undefined ? Boolean(meta.isPremium) : (Number(meta.price) > 0);
+      if (!isPremium) return undefined;
       return typeof meta.price === 'number' ? meta.price : undefined;
     } catch (e) {
       return undefined;

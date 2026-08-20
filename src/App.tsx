@@ -5443,7 +5443,10 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     if (currentExam) {
       const examDesc = currentExam.description || '';
       if (typeof examDesc === 'string' && examDesc.startsWith('JSON_METADATA_')) {
-        hasBundle = true;
+        try {
+          const meta = JSON.parse(examDesc.replace('JSON_METADATA_', ''));
+          hasBundle = meta.isPremium !== undefined ? Boolean(meta.isPremium) : (Number(meta.price) > 0);
+        } catch(e) {}
       }
     }
     const isModalActive = isMobile && hasBundle && !hasAccessTo(`exam_bundle_${selectedExam}`) && !isBannerDismissed;
@@ -6426,7 +6429,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                 body: JSON.stringify({
                                   productId: paywallItemId || 'full_access',
                                   productType: paywallProductType,
-                                  userId: profile?.uid || 'unknown',
+                                  userId: profile?.uid || user?.id || 'unknown',
                                   currency: 'INR'
                                 })
                               });
@@ -6476,7 +6479,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                         razorpay_order_id: response.razorpay_order_id,
                                         razorpay_payment_id: response.razorpay_payment_id,
                                         razorpay_signature: response.razorpay_signature,
-                                        userId: profile?.uid,
+                                        userId: profile?.uid || user?.id,
                                         productId: paywallItemId || 'full_access',
                                         productType: paywallProductType,
                                         pricePaid: paywallPrice,
@@ -7779,7 +7782,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         body: JSON.stringify({
           productId: test.id,
           productType: 'mock_test',
-          userId: profile?.uid || 'unknown',
+          userId: profile?.uid || user?.id || 'unknown',
           currency: 'INR'
         })
       });
@@ -7825,7 +7828,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
-                userId: profile?.uid,
+                userId: profile?.uid || user?.id,
                 productId: test.id,
                 productType: 'mock_test',
                 pricePaid: price,
@@ -9169,7 +9172,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         bundlePrice = meta.price;
         bundleOriginalPrice = meta.originalPrice;
         examDescription = meta.description;
-        hasBundle = true;
+        hasBundle = meta.isPremium !== undefined ? Boolean(meta.isPremium) : (Number(meta.price) > 0);
       } catch(e) {}
     }
 

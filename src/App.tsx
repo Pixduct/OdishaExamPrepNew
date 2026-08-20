@@ -3351,11 +3351,11 @@ const LandingPage = () => {
       {/* Site-Wide Vector Canvas Grid Overlay */}
       <div className="fixed inset-0 pointer-events-none z-[0] opacity-40 dark:opacity-[0.05] bg-[radial-gradient(#94a3b8_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:24px_24px]" />
       
-      {/* Floating Ambient Academic Watermarks — scroll-pause exempt, always in motion */}
-      <div className="fixed top-20 right-10 pointer-events-none z-[0] opacity-[0.03] dark:opacity-[0.04] text-slate-900 dark:text-white animate-watermark-spin">
+      {/* Floating Ambient Academic Watermarks — hidden on mobile to prevent icon collision */}
+      <div className="hidden md:block fixed top-20 right-10 pointer-events-none z-[0] opacity-[0.03] dark:opacity-[0.04] text-slate-900 dark:text-white animate-watermark-spin">
         <GraduationCap className="w-96 h-96" />
       </div>
-      <div className="fixed bottom-20 left-10 pointer-events-none z-[0] opacity-[0.03] dark:opacity-[0.04] text-slate-900 dark:text-white animate-watermark-drift">
+      <div className="hidden md:block fixed bottom-20 left-10 pointer-events-none z-[0] opacity-[0.03] dark:opacity-[0.04] text-slate-900 dark:text-white animate-watermark-drift">
         <Compass className="w-80 h-80" />
       </div>
 
@@ -3446,8 +3446,8 @@ const LandingPage = () => {
                   
                   {/* Horizontal scrolling row on mobile, wrapping grid on desktop */}
                   <div className="relative w-full overflow-hidden">
-                    <div className="absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-[#FAF8F5] to-transparent z-10 pointer-events-none sm:hidden" />
-                    <div className="absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-[#FAF8F5] to-transparent z-10 pointer-events-none sm:hidden" />
+                    <div className="absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-[#FAF8F5] dark:from-[#060B16] to-transparent z-10 pointer-events-none sm:hidden" />
+                    <div className="absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-[#FAF8F5] dark:from-[#060B16] to-transparent z-10 pointer-events-none sm:hidden" />
                     
                     <div className="flex sm:flex-wrap overflow-x-auto sm:overflow-x-visible no-scrollbar justify-start sm:justify-center lg:justify-start gap-2.5 sm:gap-3 px-4 sm:px-0 -mx-4 sm:mx-0 snap-x snap-mandatory">
                       {focusedPrepTags.map((tag, idx) => {
@@ -11718,13 +11718,13 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0b0f19] font-sans text-slate-900 dark:text-slate-100">
+    <div className="w-full max-w-full overflow-x-hidden min-h-screen min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0b0f19] font-sans text-slate-900 dark:text-slate-100">
       {isAIOctive && (
-        <div className="flex flex-col min-h-screen min-h-[100dvh]">
+        <div className="w-full max-w-full overflow-x-hidden flex flex-col min-h-screen min-h-[100dvh]">
           <Navbar user={user} isAdmin={isAdmin} onHomeClick={handleHomeClick} />
 
           <main className={cn(
-            "relative flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pt-4 md:pt-8",
+            "relative flex-1 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full overflow-x-hidden pt-20 sm:pt-24 md:pt-28",
             isBottomNavVisible 
               ? "pb-20 sm:pb-24 lg:pb-28" 
               : "pb-6 sm:pb-12 lg:pb-16"

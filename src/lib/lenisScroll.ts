@@ -4,6 +4,14 @@ let lenisInstance: Lenis | null = null;
 let isScrollingTimer: ReturnType<typeof setTimeout> | null = null;
 let rafId: number | null = null;
 
+let lastWheelDeltaY = 0;
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('wheel', (e) => {
+    lastWheelDeltaY = e.deltaY;
+  }, { capture: true, passive: true });
+}
+
 export function initLenis(): Lenis | null {
   if (typeof window === 'undefined') return null;
   if (lenisInstance) return lenisInstance;
@@ -12,15 +20,9 @@ export function initLenis(): Lenis | null {
   lenisInstance = new Lenis({
     lerp: 0.18,
     smoothWheel: true,
-    wheelMultiplier: 0.60,
+    wheelMultiplier: 1.0,
     touchMultiplier: 0,
-    prevent: (node: HTMLElement) => {
-      if (!node || !(node instanceof HTMLElement)) return false;
-      return (
-        node.hasAttribute('data-lenis-prevent') ||
-        Boolean(node.closest('[data-lenis-prevent]'))
-      );
-    },
+    allowNestedScroll: true,
   });
 
   // High performance RAF loop
@@ -32,6 +34,9 @@ export function initLenis(): Lenis | null {
 
   // Active Scroll Guard: Toggle 'is-scrolling' class to lock hover recalculations and repaints during scroll
   lenisInstance.on('scroll', () => {
+    if (typeof window !== 'undefined' && window.scrollX !== 0) {
+      window.scrollTo(0, window.scrollY);
+    }
     if (typeof document !== 'undefined' && !document.body.classList.contains('is-scrolling')) {
       document.body.classList.add('is-scrolling');
     }
@@ -43,6 +48,14 @@ export function initLenis(): Lenis | null {
       }
     }, 150);
   });
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener('scroll', () => {
+      if (window.scrollX !== 0) {
+        window.scrollTo(0, window.scrollY);
+      }
+    }, { passive: true });
+  }
 
   return lenisInstance;
 }

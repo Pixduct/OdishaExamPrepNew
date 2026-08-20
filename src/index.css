@@ -31,10 +31,28 @@
    GLOBAL BASE
    ============================================================ */
 html {
+  overflow-x: clip !important;
+  max-width: 100vw !important;
+  width: 100% !important;
+}
+
+body {
   scroll-behavior: auto; /* Lenis handles smooth physics scrolling */
   overscroll-behavior-y: auto; /* Allow native pull-to-refresh on mobile devices */
-  overflow-x: hidden;
-  max-width: 100%;
+  overflow-x: clip !important;
+  max-width: 100vw !important;
+  width: 100% !important;
+  position: relative;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 /* ---------- Lenis Smooth Scroll Core Rules ---------- */
@@ -47,7 +65,8 @@ html.lenis, html.lenis body {
 }
 
 .lenis.lenis-smooth [data-lenis-prevent] {
-  overscroll-behavior: contain;
+  overscroll-behavior-y: auto !important;
+  overscroll-behavior-x: contain;
 }
 
 .lenis.lenis-stopped {
@@ -93,7 +112,8 @@ body.is-scrolling .backdrop-blur {
   touch-action: pan-x pan-y;
   -webkit-overflow-scrolling: touch;
 }
-.overflow-y-auto,
+.overscroll-contain,
+.overscroll-contain-y,
 [data-lenis-prevent] {
   overscroll-behavior-y: contain;
 }

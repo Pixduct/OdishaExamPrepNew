@@ -3820,15 +3820,15 @@ JSON structure:
     const InsightIcon = currentInsight.icon;
 
     return (
-      <div className="bg-gradient-to-b from-indigo-50/30 to-white/70 dark:from-[#0B1528] dark:to-[#060B16] border border-indigo-100/30 dark:border-slate-800 rounded-xl p-3 mt-2 text-left space-y-2 relative overflow-hidden shadow-xs hover:shadow-sm transition-all duration-300 animate-scale-in">
+      <div className="bg-gradient-to-b from-indigo-50/30 to-white/70 dark:from-[#0B1528] dark:to-[#060B16] border border-indigo-100/30 dark:border-slate-800 rounded-xl p-3 mt-2 text-left space-y-2 relative overflow-hidden shadow-xs hover:shadow-sm transition-all duration-300 w-full max-w-full min-w-0">
         <div className="absolute top-0 right-0 w-12 h-12 bg-indigo-500/5 dark:bg-indigo-500/15 rounded-full blur-xl pointer-events-none" />
         
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 w-full min-w-0">
           <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 dark:text-slate-400">
-            <span className="flex items-center gap-1 uppercase tracking-wider text-[10px]">
-              <Sparkles className="w-3 h-3 text-indigo-650 dark:text-indigo-400 animate-pulse" /> {titleText}
+            <span className="flex items-center gap-1 uppercase tracking-wider text-[10px] truncate">
+              <Sparkles className="w-3 h-3 text-indigo-650 dark:text-indigo-400 animate-pulse shrink-0" /> {titleText}
             </span>
-            <span className="font-mono text-indigo-650 dark:text-indigo-300 text-[10px] bg-indigo-500/10 dark:bg-indigo-950/50 border border-indigo-500/20 dark:border-indigo-800 px-1.5 py-0.5 rounded font-bold">
+            <span className="font-mono text-indigo-650 dark:text-indigo-300 text-[10px] bg-indigo-500/10 dark:bg-indigo-950/50 border border-indigo-500/20 dark:border-indigo-800 px-1.5 py-0.5 rounded font-bold shrink-0">
               {currentMins} / {targetMins} min
             </span>
           </div>
@@ -3849,7 +3849,7 @@ JSON structure:
 
         <div className="border-t border-slate-100 dark:border-slate-800 w-full my-0.5" />
 
-        <div className="space-y-2 text-left relative">
+        <div className="space-y-2 text-left relative w-full min-w-0">
           <div className="flex justify-between items-center shrink-0">
             <span className="inline-flex px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-indigo-500/10 dark:bg-indigo-950/60 border border-indigo-500/15 dark:border-indigo-800 text-indigo-650 dark:text-indigo-300">
               {currentInsight.category}
@@ -3866,11 +3866,11 @@ JSON structure:
             </button>
           </div>
           
-          <div className="flex gap-2.5 bg-indigo-500/5 dark:bg-[#0B1528]/80 border border-indigo-500/10 dark:border-slate-800 p-2.5 rounded-xl items-center">
+          <div className="flex gap-2.5 bg-indigo-500/5 dark:bg-[#0B1528]/80 border border-indigo-500/10 dark:border-slate-800 p-2.5 rounded-xl items-center w-full min-w-0">
             <div className="p-1.5 bg-white dark:bg-slate-800 border border-indigo-500/10 dark:border-slate-700 rounded-lg text-indigo-650 dark:text-indigo-300 shrink-0">
               <InsightIcon className="w-4 h-4" />
             </div>
-            <p className="text-[11px] sm:text-[10px] text-slate-700 dark:text-slate-200 leading-normal font-semibold flex-1">
+            <p className="text-[11px] sm:text-[10px] text-slate-700 dark:text-slate-200 leading-normal font-semibold flex-1 min-w-0">
               {currentInsight.tip}
             </p>
           </div>
@@ -4008,8 +4008,8 @@ JSON structure:
           )}
         </AnimatePresence>
 
-        {/* Desktop Header: Full Spacious Layout */}
-        <div className="hidden sm:flex flex-col items-center text-center space-y-2 md:space-y-4 mb-2 md:mb-4">
+        {/* Desktop Header: Full Spacious Layout (visible on dual-pane lg+ screens) */}
+        <div className="hidden lg:flex flex-col items-center text-center space-y-2 md:space-y-4 mb-2 md:mb-4">
           <span className="section-chip text-[10px] md:text-xs">
             <Sparkles className="w-3 md:w-3.5 h-3 md:h-3.5 animate-pulse text-[#2563EB]" />
             Smart Study Suite
@@ -4023,8 +4023,8 @@ JSON structure:
           </p>
         </div>
 
-        {/* Mobile Header: Ultra-Compact Single Row with Integrated Switcher */}
-        <div className="flex sm:hidden items-center justify-between px-1 mb-1">
+        {/* Mobile Header: Ultra-Compact Single Row with Integrated Switcher (visible on single-column < lg screens) */}
+        <div className="flex lg:hidden items-center justify-between px-1 mb-2 pt-1">
           <div className="flex items-center gap-1.5 min-w-0">
             <span className="w-6 h-6 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/20 flex items-center justify-center text-[#2563eb] dark:text-blue-400 shrink-0">
               <Sparkles className="w-3.5 h-3.5 animate-pulse" />
@@ -4080,13 +4080,13 @@ JSON structure:
         </div>
 
       {/* Main Dual-pane Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8 items-start w-full max-w-full overflow-x-hidden">
         
         {/* Left Pane: Chat Interface */}
         <div id="chat-pane" className={cn(
           isFullScreen
             ? "fixed inset-0 z-[100] w-screen h-dvh rounded-none border-none shadow-none bg-white dark:bg-[#0B1528] flex flex-col transition-all duration-300"
-            : "lg:col-span-7 bg-white dark:bg-[#0B1528] text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-blue-500/30 rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-2xl dark:shadow-slate-950/80 flex-col h-[calc(100dvh-130px)] sm:h-[calc(100dvh-12rem)] sm:min-h-[580px] lg:h-[720px] relative transition-all duration-300",
+            : "lg:col-span-7 bg-white dark:bg-[#0B1528] text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-blue-500/30 rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-2xl dark:shadow-slate-950/80 flex-col h-[calc(100dvh-170px)] sm:h-[calc(100dvh-13rem)] sm:min-h-[560px] lg:h-[720px] relative transition-all duration-300",
           mobileTab === 'chat' ? "flex" : "hidden lg:flex"
         )}>
           <div className="absolute inset-0 flex flex-col">
@@ -4236,27 +4236,30 @@ JSON structure:
             </AnimatePresence>
             
             {/* Header Control Panel */}
-            <div className="p-3 border-b border-slate-200/60 dark:border-slate-800 bg-slate-50 dark:bg-[#060B16]/90 flex items-center justify-between gap-3 z-10">
-              <div className="flex items-center gap-2 shrink-0">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                <span className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-white">OdishaExamPrep AI</span>
+            <div className="px-2.5 py-2 sm:p-3 border-b border-slate-200/60 dark:border-slate-800 bg-slate-50 dark:bg-[#060B16]/90 flex items-center justify-between gap-1.5 sm:gap-2 z-10 w-full min-w-0">
+              <div className="flex items-center gap-1.5 shrink min-w-0">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shrink-0" />
+                <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-800 dark:text-white truncate">
+                  <span className="sm:hidden">AI Tutor</span>
+                  <span className="hidden sm:inline">OdishaExamPrep AI</span>
+                </span>
               </div>
 
-              <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
                 {/* Target Exam Custom Popover Selector */}
                 <div className="relative" ref={examDropdownRef}>
                   <button
                     type="button"
                     onClick={() => setIsExamDropdownOpen(!isExamDropdownOpen)}
-                    className="bg-white dark:bg-[#0B1528] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700 text-brand-600 dark:text-blue-300 rounded-lg text-[9px] font-black uppercase tracking-wider py-1.5 pl-2.5 pr-6 focus:outline-none transition-all cursor-pointer flex items-center gap-1 relative shrink-0 shadow-xs active:scale-95"
+                    className="bg-white dark:bg-[#0B1528] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700 text-brand-600 dark:text-blue-300 rounded-lg text-[9px] font-black uppercase tracking-wider py-1 pl-2 pr-5 focus:outline-none transition-all cursor-pointer flex items-center gap-1 relative shrink-0 shadow-xs active:scale-95"
                   >
                     <div className="flex items-center gap-1">
-                      <Target className="w-3.5 h-3.5 text-brand-600 dark:text-blue-400" />
-                      <span className="truncate max-w-[80px]">
+                      <Target className="w-3 h-3 text-brand-600 dark:text-blue-400 shrink-0" />
+                      <span className="truncate max-w-[50px] xs:max-w-[75px] sm:max-w-[100px]">
                         {targetExam || 'Select Exam'}
                       </span>
                     </div>
-                    <ChevronDown className={cn("w-3 h-3 text-brand-600 dark:text-blue-400 transition-transform duration-300 absolute right-2 top-1/2 -translate-y-1/2", isExamDropdownOpen && "rotate-180")} />
+                    <ChevronDown className={cn("w-2.5 h-2.5 text-brand-600 dark:text-blue-400 transition-transform duration-300 absolute right-1.5 top-1/2 -translate-y-1/2", isExamDropdownOpen && "rotate-180")} />
                   </button>
 
                   <AnimatePresence>
@@ -4343,11 +4346,11 @@ JSON structure:
                 <button
                   type="button"
                   onClick={handleCreateNewChat}
-                  className="flex items-center gap-1 px-2.5 py-1.5 bg-brand-50 dark:bg-blue-950/50 hover:bg-brand-100 dark:hover:bg-blue-900/60 text-brand-700 dark:text-blue-300 border border-brand-200/80 dark:border-blue-800/60 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
+                  className="p-1.5 sm:px-2.5 sm:py-1.5 bg-brand-50 dark:bg-blue-950/50 hover:bg-brand-100 dark:hover:bg-blue-900/60 text-brand-700 dark:text-blue-300 border border-brand-200/80 dark:border-blue-800/60 rounded-lg sm:rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 shrink-0 flex items-center gap-1"
                   title="Start New Chat Session"
                 >
                   <Plus className="w-3.5 h-3.5 text-brand-600 dark:text-blue-400" />
-                  <span className="text-[10px] font-black uppercase tracking-wider hidden xs:inline">New Chat</span>
+                  <span className="text-[10px] font-black uppercase tracking-wider hidden md:inline">New Chat</span>
                 </button>
 
                 {/* History Drawer Toggle Button */}
@@ -4355,7 +4358,7 @@ JSON structure:
                   type="button"
                   onClick={() => setIsHistoryDrawerOpen(!isHistoryDrawerOpen)}
                   className={cn(
-                    "flex items-center gap-1 px-2.5 py-1.5 border rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 shrink-0 relative",
+                    "p-1.5 sm:px-2.5 sm:py-1.5 border rounded-lg sm:rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 shrink-0 relative flex items-center gap-1",
                     isHistoryDrawerOpen
                       ? "bg-slate-800 dark:bg-blue-600 text-white border-slate-800 dark:border-blue-600"
                       : "bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-slate-700"
@@ -4363,9 +4366,9 @@ JSON structure:
                   title="View Chat History"
                 >
                   <History className="w-3.5 h-3.5" />
-                  <span className="text-[10px] font-black uppercase tracking-wider hidden xs:inline">History</span>
+                  <span className="text-[10px] font-black uppercase tracking-wider hidden md:inline">History</span>
                   {sessions.length > 1 && (
-                    <span className="w-4 h-4 bg-brand-600 dark:bg-blue-500 text-white text-[9px] font-black rounded-full flex items-center justify-center -ml-0.5">
+                    <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 bg-brand-600 dark:bg-blue-500 text-white text-[8px] sm:text-[9px] font-black rounded-full flex items-center justify-center -ml-0.5">
                       {sessions.length}
                     </span>
                   )}
@@ -4377,18 +4380,18 @@ JSON structure:
                     setMessages([DEFAULT_WELCOME_MESSAGE]);
                     setLoading(false);
                   }}
-                  className="flex items-center gap-1 px-2 py-1.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-rose-500/10 dark:hover:bg-rose-950/40 text-slate-650 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200/60 dark:border-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
+                  className="p-1.5 sm:px-2 sm:py-1.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-rose-500/10 dark:hover:bg-rose-950/40 text-slate-650 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200/60 dark:border-slate-700 rounded-lg sm:rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 shrink-0 flex items-center justify-center"
                   title="Clear Active Chat Messages"
                 >
                   <Trash2 className="w-3.5 h-3.5 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400" />
                 </button>
 
-                {/* Fullscreen Workspace Toggle Button */}
+                {/* Fullscreen Workspace Toggle Button (Desktop Only) */}
                 <button
                   type="button"
                   onClick={toggleFullScreen}
                   className={cn(
-                    "flex items-center gap-1.5 px-2.5 py-1.5 border rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 shrink-0",
+                    "hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 border rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 shrink-0",
                     isFullScreen
                       ? "bg-[#2563EB] hover:bg-[#1d4ed8] text-white border-[#2563EB] shadow-md shadow-[#2563EB]/20 font-black"
                       : "bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-slate-700"
@@ -4409,8 +4412,7 @@ JSON structure:
 
             <div 
               ref={chatConsoleRef} 
-              className="flex-1 overflow-y-auto overscroll-contain p-3 sm:p-5 lg:p-6 space-y-4 md:space-y-5 no-scrollbar smooth-scroll-gpu"
-              data-lenis-prevent
+              className="flex-1 overflow-y-auto overscroll-y-auto [touch-action:pan-y] p-3 sm:p-5 lg:p-6 space-y-4 md:space-y-5 no-scrollbar"
               style={{ scrollBehavior: loading ? 'auto' : 'smooth' }}
             >
               {messages.map((m, idx) => (
@@ -4922,7 +4924,7 @@ JSON structure:
 
         {/* Right Pane: Interactive Study Suite */}
         <div className={cn(
-          "lg:col-span-5 bg-white dark:bg-[#0B1528] text-slate-600 dark:text-slate-200 border border-slate-200/60 dark:border-blue-500/30 rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-2xl dark:shadow-slate-950/80 flex-col h-[calc(100dvh-130px)] sm:h-[calc(100dvh-12rem)] sm:min-h-[580px] lg:h-[720px] relative",
+          "lg:col-span-5 bg-white dark:bg-[#0B1528] text-slate-600 dark:text-slate-200 border border-slate-200/60 dark:border-blue-500/30 rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-2xl dark:shadow-slate-950/80 flex-col h-[calc(100dvh-170px)] sm:h-[calc(100dvh-13rem)] sm:min-h-[560px] lg:h-[720px] relative",
           mobileTab === 'tools' ? "flex" : "hidden lg:flex"
         )}>
           
@@ -4984,7 +4986,10 @@ JSON structure:
           </div>
 
           {/* Scrollable content pane */}
-          <div className="flex-1 overflow-y-auto overscroll-contain overflow-x-hidden p-3 pb-6 sm:p-6 sm:pb-12 no-scrollbar relative z-10 flex flex-col smooth-scroll-gpu" data-lenis-prevent style={{ contain: 'layout paint' }}>
+          <div 
+            style={{ overflowX: 'clip', overflowY: 'auto' }}
+            className="flex-1 overscroll-y-auto [touch-action:pan-y] p-3 pb-4 sm:p-5 sm:pb-6 no-scrollbar relative z-10 flex flex-col w-full max-w-full min-w-0"
+          >
             <AnimatePresence mode="wait">
               {activeRightTab === 'planner' && (
                 <motion.div
@@ -4993,138 +4998,78 @@ JSON structure:
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.15 }}
-                  className="space-y-2.5 sm:space-y-3 text-left flex-1 flex flex-col min-h-full"
+                  style={{ overflowX: 'clip' }}
+                  className="space-y-3 sm:space-y-4 text-left w-full max-w-full min-w-0"
                 >
-            <div className={cn(
-              "absolute -top-10 -right-10 w-24 h-24 rounded-full blur-xl pointer-events-none transition-all duration-500",
-              coachMode === 'ai' ? "bg-indigo-500/15" : "bg-rose-500/10"
-            )} />
             
-            {/* Header Selector */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-200/50 dark:border-slate-800 pb-3">
-              <div className="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto">
-                <span className={cn(
-                  "inline-flex px-2 py-0.5 rounded text-[10px] sm:text-[9px] font-black uppercase tracking-wider",
-                  coachMode === 'ai' 
-                    ? "bg-indigo-500/15 dark:bg-indigo-950/50 border border-indigo-500/20 dark:border-indigo-800 text-indigo-650 dark:text-indigo-300" 
-                    : "bg-blue-500/10 dark:bg-blue-950/50 border border-blue-500/20 dark:border-blue-800 text-[#2563EB] dark:text-blue-400"
+            {/* Header Selector: Unified Single-Row on Mobile & Desktop */}
+            <div className="flex items-center justify-between gap-2 border-b border-slate-200/50 dark:border-slate-800 pb-2.5">
+              {/* Left: Clean Branded Title */}
+              <div className="flex items-center gap-2 min-w-0">
+                <div className={cn(
+                  "p-1 rounded-lg border shrink-0 transition-colors",
+                  coachMode === 'ai'
+                    ? "bg-indigo-500/10 dark:bg-indigo-950/60 border-indigo-500/20 text-indigo-650 dark:text-indigo-400"
+                    : "bg-blue-500/10 dark:bg-blue-950/60 border-blue-500/20 text-[#2563EB] dark:text-blue-400"
                 )}>
-                  {coachMode === 'ai' ? 'AI Session Planner' : 'Focus Station'}
-                </span>
-
-                {/* Switcher Toggle for Mobile (rendered inline with top badge on mobile) */}
-                <div className="flex sm:hidden bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200/50 dark:border-slate-800 shrink-0 relative overflow-hidden">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (timerActive) {
-                        toast.error("Pause the timer before changing modes");
-                        return;
-                      }
-                      setCoachMode('manual');
-                    }}
-                    className={cn(
-                      "px-2.5 py-1 text-[9.5px] font-black uppercase tracking-wider rounded-md transition-all cursor-pointer relative",
-                      coachMode === 'manual' ? "text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
-                    )}
-                  >
-                    {coachMode === 'manual' && (
-                      <motion.div
-                        layoutId="activeCoachModeBgMobile"
-                        className="absolute inset-0 bg-gradient-to-r from-[#2563eb] to-[#3b82f6] rounded-md z-0 shadow-sm"
-                        transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                      />
-                    )}
-                    <span className="relative z-10">Manual</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (timerActive) {
-                        toast.error("Pause the timer before changing modes");
-                        return;
-                      }
-                      setCoachMode('ai');
-                    }}
-                    className={cn(
-                      "px-2.5 py-1 text-[9.5px] font-black uppercase tracking-wider rounded-md transition-all cursor-pointer flex items-center gap-1 relative",
-                      coachMode === 'ai' ? "text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
-                    )}
-                  >
-                    {coachMode === 'ai' && (
-                      <motion.div
-                        layoutId="activeCoachModeBgMobile"
-                        className="absolute inset-0 bg-indigo-600 rounded-md z-0 shadow-sm"
-                        transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                      />
-                    )}
-                    <span className="relative z-10 flex items-center gap-1">
-                      <Sparkles className="w-2.5 h-2.5" />
-                      <span>AI Coach</span>
-                    </span>
-                  </button>
+                  {coachMode === 'ai' ? <Sparkles className="w-3.5 h-3.5" /> : <Timer className="w-3.5 h-3.5" />}
                 </div>
+                <h4 className="font-sans font-black text-slate-900 dark:text-white text-xs sm:text-sm tracking-tight uppercase truncate">
+                  {coachMode === 'ai' ? 'AI Study Coach' : 'Focus Station'}
+                </h4>
               </div>
 
-              {/* Title Header: 100% full width on mobile */}
-              <div className="flex items-center justify-between w-full sm:w-auto">
-                <h4 className="font-sans font-black text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-1.5 tracking-tight uppercase">
-                  {coachMode === 'ai' ? <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" /> : <Timer className="w-4 h-4 text-[#2563EB] dark:text-blue-400 shrink-0" />}
-                  <span>{coachMode === 'ai' ? 'AI Study Coach' : 'Study Timer (Pomodoro)'}</span>
-                </h4>
-
-                {/* Switcher Toggle for Desktop */}
-                <div className="hidden sm:flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200/50 dark:border-slate-800 shrink-0 relative overflow-hidden ml-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (timerActive) {
-                        toast.error("Pause the timer before changing modes");
-                        return;
-                      }
-                      setCoachMode('manual');
-                    }}
-                    className={cn(
-                      "px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-md transition-all cursor-pointer relative",
-                      coachMode === 'manual' ? "text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
-                    )}
-                  >
-                    {coachMode === 'manual' && (
-                      <motion.div
-                        layoutId="activeCoachModeBgDesktop"
-                        className="absolute inset-0 bg-gradient-to-r from-[#2563eb] to-[#3b82f6] rounded-md z-0 shadow-sm"
-                        transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                      />
-                    )}
-                    <span className="relative z-10">Manual</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (timerActive) {
-                        toast.error("Pause the timer before changing modes");
-                        return;
-                      }
-                      setCoachMode('ai');
-                    }}
-                    className={cn(
-                      "px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-md transition-all cursor-pointer flex items-center gap-1 relative",
-                      coachMode === 'ai' ? "text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
-                    )}
-                  >
-                    {coachMode === 'ai' && (
-                      <motion.div
-                        layoutId="activeCoachModeBgDesktop"
-                        className="absolute inset-0 bg-indigo-600 rounded-md z-0 shadow-sm"
-                        transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                      />
-                    )}
-                    <span className="relative z-10 flex items-center gap-1">
-                      <Sparkles className="w-2.5 h-2.5" />
-                      <span>AI Coach</span>
-                    </span>
-                  </button>
-                </div>
+              {/* Right: Unified Segmented Mode Switcher */}
+              <div className="flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200/50 dark:border-slate-800 shrink-0 relative overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (timerActive) {
+                      toast.error("Pause the timer before changing modes");
+                      return;
+                    }
+                    setCoachMode('manual');
+                  }}
+                  className={cn(
+                    "px-2.5 py-1 text-[9.5px] sm:text-[9px] font-black uppercase tracking-wider rounded-md transition-all cursor-pointer relative",
+                    coachMode === 'manual' ? "text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
+                  )}
+                >
+                  {coachMode === 'manual' && (
+                    <motion.div
+                      layoutId="activeCoachModeBg"
+                      className="absolute inset-0 bg-gradient-to-r from-[#2563eb] to-[#3b82f6] rounded-md z-0 shadow-sm"
+                      transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                    />
+                  )}
+                  <span className="relative z-10">Manual</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (timerActive) {
+                      toast.error("Pause the timer before changing modes");
+                      return;
+                    }
+                    setCoachMode('ai');
+                  }}
+                  className={cn(
+                    "px-2.5 py-1 text-[9.5px] sm:text-[9px] font-black uppercase tracking-wider rounded-md transition-all cursor-pointer flex items-center gap-1 relative",
+                    coachMode === 'ai' ? "text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
+                  )}
+                >
+                  {coachMode === 'ai' && (
+                    <motion.div
+                      layoutId="activeCoachModeBg"
+                      className="absolute inset-0 bg-indigo-600 rounded-md z-0 shadow-sm"
+                      transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-1">
+                    <Sparkles className="w-2.5 h-2.5" />
+                    <span>AI Coach</span>
+                  </span>
+                </button>
               </div>
             </div>
 
@@ -5436,10 +5381,10 @@ JSON structure:
               </div>
             ) : (
               /* AI STUDY COACH & PLANNED TIMER MODE */
-              <div className="space-y-4 flex-1 flex flex-col">
+              <div className="space-y-4 w-full">
                 {activeBlockIndex === -1 ? (
                   /* AI PLAN GENERATOR FORM */
-                  <div className="space-y-3.5 text-left animate-fade-up flex-1 flex flex-col">
+                  <div className="space-y-3.5 text-left animate-fade-up w-full">
                     
                     {/* Card 1: Session Duration */}
                     <div className="bg-slate-50/50 dark:bg-[#060B16]/80 border border-slate-200/50 dark:border-slate-800 rounded-2xl p-3.5 space-y-3 shadow-2xs">
@@ -5475,32 +5420,66 @@ JSON structure:
                           <Target className="w-3.5 h-3.5" />
                           <span>Primary Session Goal</span>
                         </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {["Deep Study", "Revision", "Mock Test", "Practice Questions", "Mixed Session"].map(g => {
-                            const isSelected = plannerGoal === g;
-                            return (
-                              <button
-                                type="button"
-                                key={g}
-                                onClick={() => setPlannerGoal(g)}
-                                className={cn(
-                                  "px-2.5 py-1.5 text-[10px] sm:text-[9px] font-black uppercase tracking-wider rounded-lg transition-all duration-200 cursor-pointer border relative select-none",
-                                  isSelected
-                                    ? "bg-indigo-600 border-indigo-600 text-white shadow-sm font-extrabold"
-                                    : "bg-white dark:bg-slate-800/80 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-700 dark:hover:text-white font-semibold"
-                                )}
-                              >
-                                {isSelected && (
-                                  <motion.div
-                                    layoutId="activePlannerGoalBg"
-                                    className="absolute inset-0 bg-indigo-600 rounded-lg -z-10 shadow-sm"
-                                    transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                                  />
-                                )}
-                                <span className="relative z-10">{g}</span>
-                              </button>
-                            );
-                          })}
+                        
+                        {/* 2-Tier Structured Symmetric Grid */}
+                        <div className="space-y-1.5 w-full">
+                          {/* Row 1: 3-Column Equal Grid for Short Labels */}
+                          <div className="grid grid-cols-3 gap-1.5 w-full">
+                            {["Deep Study", "Revision", "Mock Test"].map(g => {
+                              const isSelected = plannerGoal === g;
+                              return (
+                                <button
+                                  type="button"
+                                  key={g}
+                                  onClick={() => setPlannerGoal(g)}
+                                  className={cn(
+                                    "py-2 px-1 text-[10px] sm:text-[9px] font-black uppercase tracking-wider rounded-lg transition-all duration-200 cursor-pointer border relative select-none text-center truncate",
+                                    isSelected
+                                      ? "bg-indigo-600 border-indigo-600 text-white shadow-sm font-extrabold"
+                                      : "bg-white dark:bg-slate-800/80 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-700 dark:hover:text-white font-semibold"
+                                  )}
+                                >
+                                  {isSelected && (
+                                    <motion.div
+                                      layoutId="activePlannerGoalBg"
+                                      className="absolute inset-0 bg-indigo-600 rounded-lg -z-10 shadow-sm"
+                                      transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                                    />
+                                  )}
+                                  <span className="relative z-10 truncate">{g}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {/* Row 2: 2-Column Equal Grid for Multi-Word Labels */}
+                          <div className="grid grid-cols-2 gap-1.5 w-full">
+                            {["Practice Questions", "Mixed Session"].map(g => {
+                              const isSelected = plannerGoal === g;
+                              return (
+                                <button
+                                  type="button"
+                                  key={g}
+                                  onClick={() => setPlannerGoal(g)}
+                                  className={cn(
+                                    "py-2 px-2 text-[10px] sm:text-[9px] font-black uppercase tracking-wider rounded-lg transition-all duration-200 cursor-pointer border relative select-none text-center truncate",
+                                    isSelected
+                                      ? "bg-indigo-600 border-indigo-600 text-white shadow-sm font-extrabold"
+                                      : "bg-white dark:bg-slate-800/80 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-700 dark:hover:text-white font-semibold"
+                                  )}
+                                >
+                                  {isSelected && (
+                                    <motion.div
+                                      layoutId="activePlannerGoalBg"
+                                      className="absolute inset-0 bg-indigo-600 rounded-lg -z-10 shadow-sm"
+                                      transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                                    />
+                                  )}
+                                  <span className="relative z-10 truncate">{g}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
                       </div>
 
@@ -5558,35 +5537,35 @@ JSON structure:
                       </button>
 
                       {showAdvanced && (
-                        <div className="p-3.5 pt-1.5 grid grid-cols-3 gap-2.5 bg-white dark:bg-[#0B1528] border-t border-slate-200/40 dark:border-slate-800 animate-fade-down">
-                          <div className="space-y-1">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-0.5 block">Chapters</label>
+                        <div className="p-3.5 pt-1.5 grid grid-cols-3 gap-2 bg-white dark:bg-[#0B1528] border-t border-slate-200/40 dark:border-slate-800 animate-fade-down w-full max-w-full min-w-0">
+                          <div className="space-y-1 min-w-0 overflow-hidden">
+                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-0.5 block truncate">Chapters</label>
                             <input
                               type="text"
                               value={plannerChapters}
                               onChange={(e) => setPlannerChapters(e.target.value)}
                               placeholder="e.g. Ch 4"
-                              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-2.5 py-2 text-[10px] text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
+                              className="w-full min-w-0 bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-2 py-2 text-[10px] text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
                             />
                           </div>
-                          <div className="space-y-1">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-0.5 block">MCQ Count</label>
+                          <div className="space-y-1 min-w-0 overflow-hidden">
+                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-0.5 block truncate">MCQ Count</label>
                             <input
                               type="text"
                               value={plannerQuestions}
                               onChange={(e) => setPlannerQuestions(e.target.value)}
                               placeholder="e.g. 30 Qs"
-                              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-2.5 py-2 text-[10px] text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
+                              className="w-full min-w-0 bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-2 py-2 text-[10px] text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
                             />
                           </div>
-                          <div className="space-y-1">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-0.5 block">Target Hours</label>
+                          <div className="space-y-1 min-w-0 overflow-hidden">
+                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-0.5 block truncate">Target Hours</label>
                             <input
                               type="text"
                               value={plannerHours}
                               onChange={(e) => setPlannerHours(e.target.value)}
                               placeholder="e.g. 5 hrs"
-                              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-2.5 py-2 text-[10px] text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
+                              className="w-full min-w-0 bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-700 rounded-xl px-2 py-2 text-[10px] text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/40 transition-all font-semibold"
                             />
                           </div>
                         </div>
@@ -5884,7 +5863,7 @@ JSON structure:
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.15 }}
-                  className="space-y-5 text-left"
+                  className="space-y-5 text-left w-full max-w-full min-w-0 overflow-x-hidden [overflow-x:clip]"
                 >
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3.5">
@@ -6592,40 +6571,43 @@ JSON structure:
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.15 }}
-                  className="space-y-4 text-left"
+                  className="space-y-4 text-left w-full max-w-full min-w-0 overflow-x-hidden [overflow-x:clip]"
                 >
 
-            <div className="flex justify-between items-start gap-4">
-              <div className="space-y-1 text-left">
-                <span className="inline-flex px-2.5 py-0.5 bg-amber-500/10 dark:bg-amber-950/50 border border-amber-500/20 dark:border-amber-700 text-amber-650 dark:text-amber-400 rounded text-[10px] sm:text-[9px] font-black uppercase tracking-wider">
-                  Syllabus Map
-                </span>
-                <h4 className="font-serif font-extrabold text-slate-800 dark:text-white text-base sm:text-lg flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-amber-650 dark:text-amber-400" />
-                  Syllabus Workspace
-                </h4>
-                <p className="text-slate-500 dark:text-slate-400 text-[11px] font-semibold leading-relaxed">
-                  Design and manage your own exam syllabus. Toggle progress, request tutoring summaries, or trigger dynamic AI MCQs.
-                </p>
+            {/* Header: Unified Single-Row on Mobile & Desktop */}
+            <div className="space-y-2 border-b border-slate-200/50 dark:border-slate-800 pb-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="p-1 rounded-lg bg-amber-500/10 dark:bg-amber-950/60 border border-amber-500/20 text-amber-650 dark:text-amber-400 shrink-0">
+                    <BookOpen className="w-3.5 h-3.5" />
+                  </div>
+                  <h4 className="font-sans font-black text-slate-900 dark:text-white text-xs sm:text-sm tracking-tight uppercase truncate">
+                    Syllabus Workspace
+                  </h4>
+                </div>
+
+                {/* Add Collection Action */}
+                <button
+                  onClick={() => {
+                    setShowAddCollection(!showAddCollection);
+                    setShowAddTopic(false);
+                  }}
+                  className="px-2.5 py-1 text-[9.5px] sm:text-[9px] font-black uppercase tracking-wider border border-slate-200/60 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer shrink-0 active:scale-95 flex items-center gap-1"
+                >
+                  {showAddCollection ? (
+                    <span>Cancel</span>
+                  ) : (
+                    <>
+                      <Plus className="w-3 h-3 text-slate-500 dark:text-slate-400 shrink-0" />
+                      <span>Collection</span>
+                    </>
+                  )}
+                </button>
               </div>
 
-              {/* Add Collection Action */}
-              <button
-                onClick={() => {
-                  setShowAddCollection(!showAddCollection);
-                  setShowAddTopic(false);
-                }}
-                className="px-3 py-1.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-[9px] font-black uppercase tracking-wider border border-slate-200/60 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer shrink-0 active:scale-95 flex items-center gap-1.5"
-              >
-                {showAddCollection ? (
-                  <span>Cancel</span>
-                ) : (
-                  <>
-                    <Plus className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-slate-500 dark:text-slate-400 shrink-0" />
-                    <span>Collection</span>
-                  </>
-                )}
-              </button>
+              <p className="text-slate-500 dark:text-slate-400 text-[11px] font-medium leading-relaxed">
+                Design and manage your own exam syllabus. Toggle progress, request tutoring summaries, or trigger dynamic AI MCQs.
+              </p>
             </div>
 
             {/* Form to Add Collection manually or generate with AI */}
@@ -7132,24 +7114,23 @@ JSON structure:
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.15 }}
-                  className="space-y-4 text-left"
+                  className="space-y-4 text-left w-full max-w-full min-w-0 overflow-x-hidden [overflow-x:clip]"
                 >
-            <div className="flex flex-col gap-3.5 border-b border-slate-200/50 dark:border-slate-800 pb-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-left">
-                <div className="space-y-1">
-                  <span className="inline-flex px-2.5 py-0.5 bg-indigo-500/10 dark:bg-indigo-950/50 border border-indigo-500/20 dark:border-indigo-800 text-indigo-650 dark:text-indigo-300 rounded text-[10px] sm:text-[9px] font-black uppercase tracking-wider">
-                    Shortcut Deck
-                  </span>
-                  <h4 className="font-serif font-extrabold text-slate-800 dark:text-white text-base sm:text-lg flex items-center gap-2">
-                    <Award className="w-5 h-5 text-indigo-650 dark:text-indigo-400 shrink-0" />
-                    <span>Formula & Shortcut Cards</span>
-                  </h4>
+            {/* Header: Unified Title + Responsive 2x2 Toolbar */}
+            <div className="flex flex-col gap-2.5 border-b border-slate-200/50 dark:border-slate-800 pb-3">
+              {/* Unified Title Bar */}
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="p-1 rounded-lg bg-indigo-500/10 dark:bg-indigo-950/60 border border-indigo-500/20 text-indigo-650 dark:text-indigo-400 shrink-0">
+                  <Award className="w-3.5 h-3.5" />
                 </div>
+                <h4 className="font-sans font-black text-slate-900 dark:text-white text-xs sm:text-sm tracking-tight uppercase truncate">
+                  Formula & Shortcut Cards
+                </h4>
               </div>
 
-              {/* Action Toolbar */}
-              <div className="flex flex-wrap items-center gap-1.5 bg-slate-50 dark:bg-[#060B16]/90 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800 w-full">
-                {/* Add Category Action */}
+              {/* Action Toolbar: Structured 2x2 Grid on Mobile, Fluid Row on Desktop */}
+              <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1.5 bg-slate-50 dark:bg-[#060B16]/90 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800 w-full">
+                {/* 1. Category */}
                 <button
                   onClick={() => {
                     setShowAddFormulaCategory(!showAddFormulaCategory);
@@ -7157,7 +7138,7 @@ JSON structure:
                     setShowAiFormulaPrompt(false);
                   }}
                   className={cn(
-                    "flex-1 sm:flex-initial px-3.5 py-2 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-[9px] font-black uppercase tracking-wider border transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5",
+                    "py-2 px-2 sm:py-1.5 sm:px-3 rounded-lg text-[10px] sm:text-[9px] font-black uppercase tracking-wider border transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5 truncate",
                     showAddFormulaCategory 
                       ? "bg-indigo-500 border-indigo-400 text-slate-950 font-black" 
                       : "border-slate-200/50 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -7166,18 +7147,18 @@ JSON structure:
                 >
                   {showAddFormulaCategory ? (
                     <>
-                      <X className="w-3.5 h-3.5" />
+                      <X className="w-3 h-3 shrink-0" />
                       <span>Cancel</span>
                     </>
                   ) : (
                     <>
-                      <Plus className="w-3.5 h-3.5" />
+                      <Plus className="w-3 h-3 shrink-0" />
                       <span>Category</span>
                     </>
                   )}
                 </button>
 
-                {/* Add Custom Formula Action */}
+                {/* 2. Formula */}
                 <button
                   disabled={formulaCategories.length === 0}
                   onClick={() => {
@@ -7186,7 +7167,7 @@ JSON structure:
                     setShowAiFormulaPrompt(false);
                   }}
                   className={cn(
-                    "flex-1 sm:flex-initial px-3.5 py-2 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-[9px] font-black uppercase tracking-wider border transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed",
+                    "py-2 px-2 sm:py-1.5 sm:px-3 rounded-lg text-[10px] sm:text-[9px] font-black uppercase tracking-wider border transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed truncate",
                     showAddFormula 
                       ? "bg-indigo-500 border-indigo-400 text-slate-950 font-black" 
                       : "border-slate-200/50 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -7195,18 +7176,18 @@ JSON structure:
                 >
                   {showAddFormula ? (
                     <>
-                      <X className="w-3.5 h-3.5" />
+                      <X className="w-3 h-3 shrink-0" />
                       <span>Cancel</span>
                     </>
                   ) : (
                     <>
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Add Formula</span>
+                      <Plus className="w-3 h-3 shrink-0" />
+                      <span>Formula</span>
                     </>
                   )}
                 </button>
 
-                {/* AI Generate Formula Action */}
+                {/* 3. AI Generate */}
                 <button
                   onClick={() => {
                     setShowAiFormulaPrompt(!showAiFormulaPrompt);
@@ -7214,18 +7195,18 @@ JSON structure:
                     setShowAddFormulaCategory(false);
                   }}
                   className={cn(
-                    "flex-1 sm:flex-initial px-3.5 py-2 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-[9px] font-black uppercase tracking-wider border transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5",
+                    "py-2 px-2 sm:py-1.5 sm:px-3 rounded-lg text-[10px] sm:text-[9px] font-black uppercase tracking-wider border transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5 truncate",
                     showAiFormulaPrompt 
                       ? "bg-gradient-to-r from-violet-500 to-indigo-500 border-indigo-400 text-white font-black animate-pulse" 
                       : "border-slate-200/50 dark:border-slate-700 text-indigo-650 dark:text-indigo-300 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
                   )}
                   title="Generate formula with AI"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
+                  <Sparkles className="w-3 h-3 shrink-0" />
                   <span>{showAiFormulaPrompt ? 'Cancel' : 'AI Generate'}</span>
                 </button>
 
-                {/* Flashcard Memory Toggle */}
+                {/* 4. Memory Mode */}
                 <button
                   onClick={() => {
                     setFlashcardMode(!flashcardMode);
@@ -7238,7 +7219,7 @@ JSON structure:
                     );
                   }}
                   className={cn(
-                    "flex-1 sm:flex-initial px-3.5 py-2 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-[9px] font-black uppercase tracking-wider border transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5",
+                    "py-2 px-2 sm:py-1.5 sm:px-3 rounded-lg text-[10px] sm:text-[9px] font-black uppercase tracking-wider border transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5 truncate",
                     flashcardMode 
                       ? "bg-indigo-500 border-indigo-400 text-slate-950 font-bold" 
                       : "border-slate-200/50 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"

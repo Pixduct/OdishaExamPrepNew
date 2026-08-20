@@ -49,11 +49,12 @@
       }
     </style>
     <script>
-      // Anti-flicker initial theme setup: Default to Dark Mode unless explicitly saved as 'light'
+      // Anti-flicker initial theme & language setup
       (function() {
         try {
-          var saved = localStorage.getItem('oep-theme-preference');
-          if (saved === 'light') {
+          // Theme setup: Default to Dark Mode unless explicitly saved as 'light'
+          var savedTheme = localStorage.getItem('oep-theme-preference');
+          if (savedTheme === 'light') {
             document.documentElement.classList.remove('dark');
             document.documentElement.setAttribute('data-theme', 'light');
             document.documentElement.style.backgroundColor = '#FAF8F5';
@@ -65,6 +66,16 @@
             document.documentElement.style.backgroundColor = '#0b0f19';
             var metaThemeDark = document.querySelector('meta[name="theme-color"]');
             if (metaThemeDark) metaThemeDark.setAttribute('content', '#0b0f19');
+          }
+
+          // Language setup: Default to Odia ('or') unless explicitly saved as 'en'
+          var savedLang = localStorage.getItem('oep-language-preference');
+          if (savedLang === 'en') {
+            document.documentElement.lang = 'en';
+            document.documentElement.setAttribute('data-language', 'en');
+          } else {
+            document.documentElement.lang = 'or';
+            document.documentElement.setAttribute('data-language', 'or');
           }
         } catch (e) {}
       })();

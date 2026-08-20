@@ -1,61 +1,58 @@
-# Memory — OdishaExamPrep AI Mentor & Targeted Exam Dark Mode Overhaul
+# Memory — Site-Wide Odia (`ଓଡ଼ିଆ`) Localization & Default Language Architecture
 
-Last updated: 2026-08-20T00:35:00+05:30
+Last updated: 2026-08-20T06:57:30+05:30
 
 ## What was built
 
-### 1. Targeted Exam Context Bar & Context Selector Modal Dual-Theme Overhaul
-- **`ActiveExamContextBar.tsx`**: Replaced metallic grey styling with dual-theme deep sapphire (`bg-white/95 dark:bg-[#0B1528]`, `border-slate-200/80 dark:border-blue-500/30`), blue glowing indicator dot (`animate-ping`), high-contrast typography, and styled quick-switch CTA button.
-- **`ExamContextSelectorModal.tsx`**: Overhauled modal backdrop (`dark:bg-slate-950/80 backdrop-blur-md`), dialog card (`dark:bg-[#0B1528] dark:border-blue-500/30`), category switcher tabs, exam selection cards, and search input for both light and dark themes.
-- **`StudyPlanView.tsx`**: Harmonized the study plan header exam selector to match the deep sapphire design token architecture.
+### 1. Universal Phrase Engine & Odia Localization Layer
+- **`src/lib/i18n/phraseDictionary.ts`**: Static dictionary containing 250+ system phrases with parameter interpolation and native Odia numeral conversions (`toOdiaDigits`).
+- **`src/lib/LanguageContext.tsx`**: Context provider with fuzzy matching, dynamic event listeners (`oep-language-changed`), and local storage persistence (`oep-language-preference`).
+- **`src/components/AutoTranslate.tsx`**: `<T>` component and `useAutoTranslate()` hook for effortless UI text internationalization.
 
-### 2. Comprehensive AI Mentor Dark Mode Overhaul (`src/pages/AiMentor.tsx`)
-- **`MarkdownMathRenderer`**: Upgraded KaTeX formulas, inline math, markdown headers, unordered lists, and syntax blocks with `dark:text-white`, `dark:bg-slate-800`, `dark:border-slate-700`, and `dark:text-blue-300`.
-- **Mobile Tab Bar & Container Shell**: Added responsive sliding tab bar with dark theme indicators (`dark:bg-slate-900`, `dark:border-slate-800`).
-- **Left Chat Pane & Navigation**:
-  - History drawer & session items styled with `dark:bg-[#0B1528]`, `dark:bg-[#060B16]`, and `dark:border-slate-800`.
-  - Header bar, exam context dropdown, and control panel updated for high contrast.
-  - Message bubbles: AI assistant bubble styled with `dark:bg-slate-800/80 dark:border-slate-700/60 dark:text-slate-100`; User bubble with brand gradient.
-  - Prompt console & attachment tray updated with deep midnight inputs (`dark:bg-[#060B16]/95`, `dark:bg-[#0B1528]`, `dark:border-slate-700`).
-  - Fullscreen lightbox modal styled with dark blurred backdrop and crisp image framing.
-- **Focus Boards & Practice Analytics HUD**:
-  - `renderDailyFocusBoard`, `renderAiFocusProgressBoard`, and `renderPracticeAnalyticsHUD` styled with deep sapphire cards (`dark:bg-[#060B16]/80`, `dark:border-slate-800`) and high-contrast metric chips.
-- **Tab 1: Planner & Pomodoro Timer**:
-  - Manual stopwatch timer card and Circular SVG countdown timer upgraded with high-contrast digits (`dark:text-white`), dark preset pills (`dark:bg-slate-800/80`), and sapphire background gradients (`dark:from-[#060B16]/90 dark:to-[#0B1528]`).
-  - AI Plan Generator Form & Active Dashboard styled with high-contrast timeline roadmap items and goal/energy chips.
-- **Tab 2: Dynamic AI MCQ Quizzer & Bookmarks**:
-  - Custom subject input, suggestion chips, difficulty and MCQ count dropdowns, and stats accordion overhauled with `dark:bg-[#060B16]`, `dark:bg-[#0B1528]`, and `dark:border-slate-800`.
-  - Question cards, option buttons (A, B, C, D badges with active, correct, and incorrect states), star bookmarks, and solution explanation cards styled with dark mode tokens.
-- **Tab 3: Syllabus Workspace**:
-  - Subject collection switcher, AI syllabus generator form, chapter topic cards, status toggles (Pending / Doing / Done), and expanded tutor/quiz action buttons upgraded with dark midnight styling.
-- **Tab 4: Formulas & Shortcut Deck**:
-  - Action toolbar, search filter bar, AI formula preview cards, custom formula creator, memory flashcard flip mode, and formula KaTeX containers styled with `dark:bg-[#0B1528]`, `dark:bg-slate-900`, and `dark:text-white`.
+### 2. Default Website Landing Language Set to Odia
+- **`src/lib/LanguageContext.tsx`**: Updated `getStoredLanguage()` to default to `'or'` for any visitor without a pre-saved preference.
+- **`index.html`**: Updated root tags to `<html lang="or" data-language="or">`. When new users arrive via Google Search or direct link, all system-generated UI elements render in Odia first by default.
 
-### 3. Documentation & Verification
-- **`context/ui-registry.md`**: Registered `ActiveExamContextBar` (#60) and `ExamContextSelectorModal` (#61).
-- **`context/progress-tracker.md`**: Documented completed milestones.
-- **Verification**: `npx tsc --noEmit` and `npm run build` passed with 0 errors.
+### 3. Header Language Switcher Target Labeling
+- **`src/components/LanguageToggle.tsx`**: Updated toggle logic so the button displays the language the user will **switch to**:
+  - When viewing in **English** ➔ displays **`🌐 ଓଡ଼ିଆ`** (with tooltip *"Switch to Odia / ଓଡ଼ିଆ ଭାଷା କରନ୍ତୁ"*).
+  - When viewing in **Odia** ➔ displays **`🌐 English`** (with tooltip *"Switch to English / ଇଂରାଜୀ ଭାଷା କରନ୍ତୁ"*).
+  - Applied across desktop headers, signed-in utility pills, and mobile navigation drawers.
+
+### 4. Comprehensive Study Plan & Leaderboard Localization
+- **`ActiveExamContextBar.tsx`**: Context indicator translated (*"Target Exam Context"* ➔ `ଲକ୍ଷ୍ୟ ପରୀକ୍ଷା ପ୍ରସଙ୍ଗ`, *"All Exams Combined"* ➔ `ସମସ୍ତ ପରୀକ୍ଷା ସମ୍ମିଳିତ`).
+- **`ExamContextSelectorModal.tsx`**: Full modal localized including search placeholders, category accordions, and active targets.
+- **`AIStudyPlanCard.tsx`**: Study plan header, badges (*"Real Data Personalized"* ➔ `ବାସ୍ତବ ତଥ୍ୟ ଆଧାରିତ`), countdown timers, daily task progress, priority tags, dynamic task instructions, and action buttons.
+- **`OdishaLeaderboardCard.tsx`**: Leaderboard headers, student rank (`ରେଙ୍କ୍ #୧୨,୯୨୫`), all 5 leagues (Bronze, Silver, Gold, Diamond, Master), XP requirements, filter tabs (*"Daily"*, *"Weekly"*, *"All-Time"*), sprint leader titles, and nearby rivals.
+- **`SmartRecommendationCard.tsx`**: Weak topic focus area, weightage mark badges, accuracy percentiles, and 15-minute drill action triggers.
+- **`TopicConfidenceMatrix.tsx`**: Status tags (*"Needs Practice"*, *"Strong Area"*, *"In Progress"*), question counters, and session metrics.
+- **`PersonalBestCard.tsx`**: Milestone tiles (Best Score, Best Accuracy, Fastest Speed, Best Streak) and subject-wise score drawers.
+
+### 5. Documentation & Registries
+- **`context/ui-registry.md`**: Registered `LanguageToggle` (#64) and `DefaultOdiaLocalizationEngine` (#65).
+- **`context/progress-tracker.md`**: Logged all completed localization and language default milestones.
 
 ## Decisions made
 
-- **Deep Sapphire Theme Token System**: Standardized on deep sapphire midnight (`dark:bg-[#0B1528]`, `dark:bg-[#060B16]`) with subtle blue luminescent perimeter strokes (`dark:border-blue-500/30`), completely eliminating dull metallic grey artifacts across cards and modals.
-- **Dual-Theme High-Contrast Invariant**: Ensured all text elements maintain high contrast in both themes (`text-slate-800 dark:text-white`, `text-slate-500 dark:text-slate-400`), preventing light-on-light or dark-on-dark unreadable states.
-- **Synchronized Global State**: Selected targeted exams persist across `localStorage`, `AuthContext`, Study Plan Hub, Analytics, and AI Mentor.
+- **Target Labeling Pattern for Language Switcher**: The button displays the destination language rather than current language, eliminating user confusion.
+- **Organic Traffic Odia First**: First-time visitors and Google search arrivals land on Odia by default, establishing authentic regional identity while preserving 1-click toggle to English.
+- **Admin/Database Dynamic Content Immunity**: Questions, answers, explanations, and admin PDF titles remain untouched in their uploaded format, preventing translation distortion.
 
 ## Problems solved
 
-- Resolved visual issue where Targeted Exam card and AI Mentor tabs/cards rendered light-mode styles in dark mode.
-- Replaced unwanted metallic grey color with premium deep sapphire styling in dark mode.
-- Fixed typo in Pomodoro status chip in `AiMentor.tsx`.
+- Resolved English fallback persisting across Study Plan cards and Leaderboard during language switches.
+- Eliminated confusion in header globe toggle by showing target switch language.
+- Configured default language boot sequence to eliminate language flash on initial load.
 
 ## Current state
 
-- All tabs and modals (including Home, Study Plan, Analytics, History, Library, AI Mentor, and Targeted Exam Selector) have complete, 100% verified light and dark mode styling.
-- Zero TypeScript compiler errors; production Vite build passes cleanly.
+- The whole website boots in Odia by default for first-time visitors and immediately updates all system-generated strings upon toggling.
+- All Study Plan cards, Leaderboard, Recommendation Engine, Exam Context switcher, and Navigation docks are 100% localized.
+- Production build passes cleanly with 0 TypeScript / Vite compilation errors (`npm run build` exited with code 0).
 
 ## Next session starts with
 
-- Proceed with any next feature, exam drill, or UI optimization requested by the user.
+- Proceed with any new features, CBT exam updates, question bank additions, or analytics enhancements as requested by the user.
 
 ## Open questions
 

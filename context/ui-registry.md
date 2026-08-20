@@ -2431,7 +2431,77 @@ Last updated: August 20, 2026
 | **Action CTA Button** | `w-full h-[48px] sm:h-[54px] rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 font-black text-sm sm:text-base text-white transition-all relative z-10 pointer-events-none overflow-hidden cursor-pointer shadow-lg` + gradient glow |
 | **Hero Resume Banner** | `bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-850 dark:from-[#0B1528] dark:via-[#081020] dark:to-[#060B16] text-white border border-blue-500/25 dark:border-blue-500/30 rounded-2xl sm:rounded-[2.2rem] p-4 sm:p-8 md:p-10 shadow-xl shadow-blue-900/10 dark:shadow-slate-950/40` |
 
+---
+
+### 63. `DefaultDarkModeEngine` (Default Dark Mode Boot & Pre-Hydration Anti-Flicker Engine)
+
+Files: [`src/lib/themeStore.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/themeStore.ts), [`index.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/index.html)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Default Fallback** | `'dark'` (when `localStorage.getItem('oep-theme-preference')` is `null` or uninitialized) |
+| **Pre-Hydration Anti-Flicker Script** | Inline IIFE script in `<head>` applying `dark` class, `data-theme="dark"`, and `#0b0f19` `backgroundColor` before DOM render |
+| **HTML Root Class** | `<html class="dark" data-theme="dark">` |
+| **Document Base Background** | `bg-[#0b0f19]` (Dark Mode default) / `#FAF8F5` (Light Mode) |
+| **Theme Toggle Button** | [`src/components/ThemeToggle.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/ThemeToggle.tsx) — toggles `'light'` or `'dark'`, updating `localStorage` (`oep-theme-preference`) & firing `oep-theme-changed` window event |
+
+### 64. `LanguageToggle` (Header, Utility & Mobile Drawer Language Switch Component)
+
+File: [`src/components/LanguageToggle.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/LanguageToggle.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Container (Compact)** | `flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all text-xs font-black cursor-pointer shadow-xs border select-none group shrink-0` |
+| **Active Target English** | `bg-white dark:bg-slate-900 border-transparent hover:border-slate-200 dark:hover:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-[#2563EB] dark:hover:text-white` |
+| **Active Target Odia** | `bg-brand-50/90 dark:bg-brand-950/60 border-brand-300/80 dark:border-brand-700/60 text-[#2563EB] dark:text-brand-300 hover:bg-brand-100/80` |
+| **Container (Default Pill)** | `relative inline-flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300 cursor-pointer select-none shadow-2xs` |
+| **Icon** | `Globe` icon (`w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-45`) |
+| **Target Switch Label** | When English mode: displays `🌐 ଓଡ଼ିଆ`; when Odia mode: displays `🌐 English` |
+
 **Pattern notes:**
-- **Zero Dark-Only Hardcoded Artifacts**: Cards in Step 1 (Practice Tests), Step 2 (Mock Tests), and Step 3 (Reference Library) automatically adapt to light mode with luminous tinted surfaces and dark mode with deep sapphire midnight (`dark:from-[#0B1528] dark:to-[#060B16]`).
-- **High-Contrast Text Hierarchy**: Titles and subtitles switch seamlessly between dark slate in light mode (`text-slate-900`, `text-slate-600`) and pure white / slate-400 in dark mode.
+- **Target Labeling**: The button clearly shows the language the user will switch into upon clicking (`'ଓଡ଼ିଆ'` when currently viewing English; `'English'` when viewing Odia).
+- **Zero Layout Shift**: Fixed font size (`text-[11px] font-extrabold tracking-wide`) and compact padding prevent navbar jumping.
+
+---
+
+### 65. `DefaultOdiaLocalizationEngine` (Default Odia Boot & Universal Translation Layer)
+
+Files: [`src/lib/LanguageContext.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/LanguageContext.tsx), [`index.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/index.html), [`src/lib/i18n/phraseDictionary.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/i18n/phraseDictionary.ts)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Default Fallback** | `'or'` (Odia default for all new/organic visitors without stored preference) |
+| **HTML Root Tag** | `<html lang="or" data-language="or">` |
+| **Storage Key** | `localStorage.getItem('oep-language-preference')` |
+| **Event Broadcast** | `window.dispatchEvent(new CustomEvent('oep-language-changed', { detail: lang }))` |
+| **Numeral Conversion** | `toOdiaDigits(num)` converts ASCII digits (`0-9`) to native Odia glyphs (`୦-୯`) |
+| **Content Guard** | Dynamic questions, options, PDF titles, and explanations remain in original input language |
+
+**Pattern notes:**
+- **Organic Landing in Odia**: New visitors arriving via search engines receive Odia UI by default.
+- **User Selection Persistence**: Explicit language choices are preserved across sessions and tabs.
+
+---
+
+### 66. `AutoTranslateWrapper` (Universal Static Phrase Translation & Odia Numeral Component)
+
+File: [`src/components/AutoTranslate.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/AutoTranslate.tsx)
+Last updated: August 20, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Component Tag** | `<T>` (defaults to rendering `<span>`, configurable via `as` prop e.g. `as="p"`, `as="h3"`) |
+| **Hook API** | `useAutoTranslate()` returning `{ t, autoTranslate, isOdia, language, setLanguage, toggleLanguage, toOdiaDigits }` |
+| **Dictionary Source** | `phraseDictionary.ts` (`translatePhrase`) + modular key lookups (`common`, `home`, `exams`, `testEngine`, `aiMentor`, `analytics`, `currentAffairs`) |
+| **Numeral Conversion** | Automatically converts numbers in parameters using `toOdiaDigits` (`0-9` -> `୦-୯`) when `language === 'or'` |
+| **Content Guard** | `noTranslate={true}` prop bypasses translation to keep dynamic admin/database text (mock questions, options, PDF titles) intact |
+
+**Pattern notes:**
+- **Zero Boilerplate Localization**: Wrap any inline static text string in `<T>Text</T>` or `t('Text')` to enable instant bilingual rendering without hardcoding keys or breaking structural CSS classes.
+- **Admin/Database Immunity**: Always set `noTranslate={true}` when rendering user-generated content or database records to preserve authentic source text.
+
+
 

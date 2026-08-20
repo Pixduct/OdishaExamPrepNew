@@ -79,8 +79,11 @@ export const homeTranslations = {
     videos: {
       sectionBadge: 'Topper Masterclasses & Strategy',
       title: 'Free Video Strategy & Solution Guides',
+      titleMobile: 'Free Strategy Videos',
       subtitle: 'Watch video breakdowns by toppers and educators explaining high-weightage topics and time management.',
+      subtitleMobile: 'Watch free masterclasses and exam tips.',
       subscribeBtn: 'Subscribe on YouTube',
+      subscribeBtnMobile: 'Subscribe',
       watchNow: 'Watch Now',
       freeLecture: 'Free Lecture',
       categories: {
@@ -172,8 +175,11 @@ export const homeTranslations = {
     videos: {
       sectionBadge: 'ଟପ୍ପର ମାଷ୍ଟରକ୍ଲାସ୍ ଓ ରଣନୀତି',
       title: 'ମାଗଣା ପରୀକ୍ଷା ରଣନୀତି ଭିଡିଓ',
+      titleMobile: 'ମାଗଣା ରଣନୀତି ଭିଡିଓ',
       subtitle: 'ଆମ ଚ୍ୟାନେଲରୁ ମାଗଣା ମାଷ୍ଟରକ୍ଲାସ୍ ଏବଂ ପରୀକ୍ଷା ପ୍ରସ୍ତୁତି ଟିପ୍ସ ଦେଖନ୍ତୁ।',
+      subtitleMobile: 'ମାଗଣା ମାଷ୍ଟରକ୍ଲାସ୍ ଏବଂ ପରୀକ୍ଷା ଟିପ୍ସ ଦେଖନ୍ତୁ।',
       subscribeBtn: 'ୟୁଟ୍ୟୁବ୍ ରେ ସବସ୍କ୍ରାଇବ୍ କରନ୍ତୁ',
+      subscribeBtnMobile: 'ସବସ୍କ୍ରାଇବ୍',
       watchNow: 'ଦେଖନ୍ତୁ',
       freeLecture: 'ମାଗଣା କ୍ଲାସ୍',
       categories: {

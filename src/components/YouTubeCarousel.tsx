@@ -39,8 +39,7 @@ const defaultCatStyle = { bg: 'bg-slate-100', text: 'text-slate-600', border: 'b
 
 export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
   const { t } = useLanguage();
-  const [activeVideo, setActiveVideo] = useState<string | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const [isVisible, setIsVisible] = useState(true);
   const [fetchedTitles, setFetchedTitles] = useState<Record<string, string>>({});
   const containerRef = useRef<HTMLDivElement>(null);
@@ -248,67 +247,64 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
       roundedClass="rounded-[2rem] sm:rounded-[2.5rem]"
       className="w-full select-none"
     >
-    <div ref={containerRef} className="w-full relative py-3 sm:py-12 overflow-hidden bg-[#F2EFE9] dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-[2rem] sm:rounded-[2.5rem] shadow-[6px_6px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_rgba(0,0,0,1)] select-none">
+    <div ref={containerRef} className="w-full relative py-3.5 sm:py-10 overflow-hidden bg-[#F2EFE9] dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-2xl sm:rounded-[2.5rem] shadow-[4px_4px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_rgba(0,0,0,1)] select-none">
       {/* Editorial Decorative Grid overlay — desktop only */}
-      {!isMobile && <div className="absolute inset-0 grid-bg opacity-[0.02] pointer-events-none" />}
+      <div className="hidden sm:block absolute inset-0 grid-bg opacity-[0.02] pointer-events-none" />
 
-      {/* ── MOBILE HEADER ─────────────────────────────────────────────── */}
-      {isMobile ? (
-        <div className="px-4 mb-3 relative z-10">
-          {/* Single row: icon + title/subtitle + subscribe button */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-[#2563EB] text-white rounded-xl flex items-center justify-center border-2 border-slate-900 shrink-0 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+      {/* ── MOBILE HEADER (CSS Responsive) ─────────────────────────────── */}
+      <div className="block sm:hidden px-3.5 mb-2.5 relative z-10">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-7 h-7 bg-[#2563EB] text-white rounded-lg flex items-center justify-center border border-slate-900 dark:border-slate-700 shrink-0 shadow-xs">
               <Youtube className="w-4 h-4 text-white" />
             </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="text-[13px] font-serif font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
-                {t('home.videos.title', 'Free Strategy Videos')}
-              </h3>
-              <p className="text-slate-500 dark:text-slate-400 font-medium text-[10px] leading-snug">
-                {t('home.videos.subtitle', 'Watch free masterclasses and proven exam tips from our channel.')}
-              </p>
-            </div>
-            {/* Subscribe pill — inline, right side */}
-            <a
-              href="https://www.youtube.com/@OdishaExamPrep365?sub_confirmation=1"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#FF0000] border-2 border-slate-900 text-white font-black uppercase text-[9px] tracking-widest rounded-lg shadow-[2px_2px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all duration-150 select-none cursor-pointer shrink-0"
-            >
-              <Youtube className="w-3 h-3 text-white shrink-0" />
-              <span>{t('home.videos.subscribeBtn', 'Subscribe')}</span>
-            </a>
-          </div>
-        </div>
-      ) : (
-        /* ── DESKTOP HEADER ───────────────────────────────────────────── */
-        <div className="flex flex-row sm:items-center justify-between gap-4 px-10 mb-8 relative z-10">
-          <div className="flex items-center gap-4 min-w-0">
-            <div className="w-12 h-12 bg-[#2563EB] text-white rounded-xl flex items-center justify-center border-2 border-slate-900 shrink-0 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-              <Youtube className="w-6 h-6 text-white" />
-            </div>
-            <div className="min-w-0">
-              <h3 className="text-2xl font-serif font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
-                {t('home.videos.title', 'Free Strategy Videos')}
-              </h3>
-              <p className="text-slate-600 dark:text-slate-400 font-medium text-sm mt-0.5">
-                {t('home.videos.subtitle', 'Watch free masterclasses and proven exam tips from our channel.')}
-              </p>
-            </div>
+            <h3 className="text-sm font-serif font-extrabold text-slate-900 dark:text-white tracking-tight truncate">
+              {t('home.videos.titleMobile', 'Free Strategy Videos')}
+            </h3>
           </div>
 
           <a
             href="https://www.youtube.com/@OdishaExamPrep365?sub_confirmation=1"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#FF0000] border-2 border-slate-900 text-white font-black uppercase text-xs tracking-widest rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] md:hover:shadow-none md:hover:translate-x-0.5 md:hover:translate-y-0.5 transition-all select-none cursor-pointer duration-200 shrink-0"
+            className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#FF0000] border border-slate-900 dark:border-slate-700 text-white font-black uppercase text-[9px] tracking-wider rounded-lg shadow-xs active:scale-95 transition-all select-none cursor-pointer shrink-0"
           >
-            <Youtube className="w-4 h-4 text-white" />
-            <span>{t('home.videos.subscribeBtn', 'Subscribe on YouTube')}</span>
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-white animate-ping shrink-0" />
+            <Youtube className="w-3 h-3 text-white shrink-0" />
+            <span>{t('home.videos.subscribeBtnMobile', 'Subscribe')}</span>
           </a>
         </div>
-      )}
+        <p className="text-slate-500 dark:text-slate-400 font-medium text-[11px] leading-snug mt-1 pl-9 truncate">
+          {t('home.videos.subtitleMobile', 'Watch free masterclasses and exam tips.')}
+        </p>
+      </div>
+
+      {/* ── DESKTOP HEADER (CSS Responsive) ───────────────────────────── */}
+      <div className="hidden sm:flex flex-row sm:items-center justify-between gap-4 px-8 sm:px-10 mb-6 sm:mb-8 relative z-10">
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="w-12 h-12 bg-[#2563EB] text-white rounded-xl flex items-center justify-center border-2 border-slate-900 shrink-0 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+            <Youtube className="w-6 h-6 text-white" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-2xl font-serif font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+              {t('home.videos.title', 'Free Video Strategy & Solution Guides')}
+            </h3>
+            <p className="text-slate-600 dark:text-slate-400 font-medium text-sm mt-0.5">
+              {t('home.videos.subtitle', 'Watch video breakdowns by toppers and educators explaining high-weightage topics and time management.')}
+            </p>
+          </div>
+        </div>
+
+        <a
+          href="https://www.youtube.com/@OdishaExamPrep365?sub_confirmation=1"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#FF0000] border-2 border-slate-900 text-white font-black uppercase text-xs tracking-widest rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] md:hover:shadow-none md:hover:translate-x-0.5 md:hover:translate-y-0.5 transition-all select-none cursor-pointer duration-200 shrink-0"
+        >
+          <Youtube className="w-4 h-4 text-white" />
+          <span>{t('home.videos.subscribeBtn', 'Subscribe on YouTube')}</span>
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-white animate-ping shrink-0" />
+        </a>
+      </div>
 
       {/* ── DRAGGABLE CAROUSEL TRACK ──────────────────────────────────── */}
       <div
@@ -402,7 +398,7 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
                     {/* Title */}
                     <h3 className={cn(
                       "text-slate-900 dark:text-white font-serif font-extrabold line-clamp-2 leading-snug md:group-hover/video:text-[#2563EB] dark:md:group-hover/video:text-brand-400 transition-colors",
-                      isMobile ? "text-[12.5px]" : "text-base"
+                      isMobile ? "text-[12px] min-h-[2.4rem]" : "text-base min-h-[2.75rem]"
                     )}>
                       {video.title}
                     </h3>
@@ -435,13 +431,11 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
       </div>
 
       {/* ── Swipe hint for mobile — shown briefly ─────────────────────── */}
-      {isMobile && (
-        <div className="flex items-center justify-center gap-1.5 mt-3 px-5 pointer-events-none">
-          <div className="h-px flex-1 bg-slate-300/60" />
-          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">{t('common.activity.swipeToExplore', 'Swipe to explore')}</span>
-          <div className="h-px flex-1 bg-slate-300/60" />
-        </div>
-      )}
+      <div className="flex sm:hidden items-center justify-center gap-1.5 mt-2.5 px-5 pointer-events-none">
+        <div className="h-px flex-1 bg-slate-300/60 dark:bg-slate-700/60" />
+        <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">{t('common.activity.swipeToExplore', 'Swipe to explore')}</span>
+        <div className="h-px flex-1 bg-slate-300/60 dark:bg-slate-700/60" />
+      </div>
 
       {/* ── VIDEO MODAL ──────────────────────────────────────────────── */}
       <AnimatePresence>

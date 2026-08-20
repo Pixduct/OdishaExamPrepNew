@@ -2351,6 +2351,7 @@ Last updated: August 20, 2026
 - **Hardware VSYNC Synchronization**: All mouse coordinates and 3D angle calculations (`rotateX`, `rotateY`, `scale3d`) and ambient spotlight updates MUST be batched via `requestAnimationFrame` to synchronize with monitor refresh rates (60Hz, 120Hz, 144Hz, 240Hz) with zero frame drops.
 - **Untransformed Bounds Caching**: Card bounding dimensions (`rectRef.current`) MUST be cached upon `onMouseEnter` to prevent 3D rotation projection feedback loops from jittering the layout calculations.
 - **Layer Stacking Hierarchy**: Always enforce Layer A Ambient Spotlight at `z-0`, Layer C Child Content at `relative z-10`, and Layer D Shine Sweep at `z-20` so cursor light glows underneath text and UI components without reducing readability.
+- **Flex Layout Inside Wrapper**: Because `DynamicVectorCard` wraps children inside a nested `zIndex: 10` content wrapper `div` (Layer C) that does not pass through flex layout styles, callers MUST place flex layout classes (e.g. `flex flex-col sm:flex-row items-center justify-between gap-6`) on a wrapper `div` inside the card rather than on the `DynamicVectorCard` class directly.
 
 ---
 

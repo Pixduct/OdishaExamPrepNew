@@ -3574,28 +3574,30 @@ const LandingPage = () => {
           </section>
         ) : (
           <section className="relative z-10 py-8 sm:py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <DynamicVectorCard className="bg-white dark:bg-slate-900 border-2 border-slate-900/80 dark:border-slate-700/80 p-6 sm:p-8 text-slate-900 dark:text-white shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
-              <div className="space-y-2 text-center sm:text-left max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-brand-500/10 dark:bg-brand-500/20 text-brand-600 dark:text-brand-300 border border-brand-500/20 dark:border-brand-500/30">
-                  <Sparkles className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
-                  Personalized Preparation Engine
+            <DynamicVectorCard className="bg-white dark:bg-slate-900 border-2 border-slate-900/80 dark:border-slate-700/80 p-5 sm:p-8 text-slate-900 dark:text-white shadow-xl relative overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-6 w-full">
+                <div className="space-y-3 text-center sm:text-left max-w-2xl flex flex-col items-center sm:items-start w-full">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-brand-500/10 dark:bg-brand-500/20 text-brand-600 dark:text-brand-300 border border-brand-500/20 dark:border-brand-500/30">
+                    <Sparkles className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
+                    Personalized Preparation Engine
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
+                    Sign In to Access Your Personal AI Study Plan & Score Tracker
+                  </h3>
+                  <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Your readiness score, daily weak-topic drills, streak goals, and personal performance matrix are securely tied to your user account.
+                  </p>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-                  Sign In to Access Your Personal AI Study Plan & Score Tracker
-                </h3>
-                <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
-                  Your readiness score, daily weak-topic drills, streak goals, and personal performance matrix are securely tied to your user account.
-                </p>
-              </div>
 
-              <div className="shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setShowAuthModal(true)}
-                  className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-indigo-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-xs sm:text-sm shadow-lg shadow-brand-500/25 transition-all duration-200 active:scale-95 cursor-pointer border-none"
-                >
-                  Sign In / Register Free →
-                </button>
+                <div className="w-full sm:w-auto shrink-0 flex justify-center sm:justify-start">
+                  <button
+                    type="button"
+                    onClick={() => setShowAuthModal(true)}
+                    className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-indigo-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-xs sm:text-sm shadow-lg shadow-brand-500/25 transition-all duration-200 active:scale-95 cursor-pointer border-none text-center"
+                  >
+                    Sign In / Register Free →
+                  </button>
+                </div>
               </div>
             </DynamicVectorCard>
           </section>

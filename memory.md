@@ -1,52 +1,61 @@
-# Memory — Admin Question Bank & Practice Mode Full Decoupling, Safe Deletion & Mode Isolation
+# Memory — Current Affairs Paper Setter's Lens, 5-Layer Deterministic Safety Architecture & Admin Audit
 
 Last updated: August 21, 2026
 
 ## What was built
 
-### 1. Top-Level Decoupled Navigation & Tab Views (`src/AdminPanel.tsx`)
-- Added **`Practice Sets`** (🎯) alongside **`Question Banks`** (📦) as independent top-level navigation tabs.
-- Filtered item lists and exam drilldown counters so `Question Banks` tab strictly displays items with `(target_mode || 'both') !== 'practice'` and `Practice Sets` tab strictly displays items with `(target_mode || 'both') !== 'bank'`.
-- Independent search bars, exam dropdown filters, and category hierarchy pill selectors for both tabs.
+### 1. The Paper Setter's Lens & 7 Core Syllabus Domains (`ca_formatter.py`, `ca_website_publisher.py`)
+- **Exam Question Probability Test**: Trained the AI system prompts to act as a Senior Paper Setter (UPSC, OPSC, OSSC, SSC CGL, Banking), evaluating every raw news item and only approving stories with an exam relevance score of **8/10 or higher**.
+- **7 Core Syllabus Domains**: All published news is mapped strictly to:
+  1. *Governance, Law & Polity* (Bills, Acts, Amendments, SC/HC Verdicts, CAG, ECI)
+  2. *Economy, Banking & Infrastructure* (RBI, GST, Budgets, Foreign Trade, Ports/Expressways)
+  3. *Science, Space & Technology* (ISRO, DRDO, Nuclear Energy, AI Missions)
+  4. *Environment, Ecology & Geography* (Ramsar Sites, Tiger Reserves, IUCN Status, Climate)
+  5. *International Relations & Defense* (Bilateral Exercises, Multilateral Summits: G20/BRICS/SCO)
+  6. *Odisha State Governance & Regional GK* (Odisha Cabinet Approvals, State Schemes, Heritage)
+  7. *National Honours, Records & Top Appointments* (Padma/Khel Ratna Awards, CJI/ECI Chiefs)
 
-### 2. Tailored Creation & Edit Modal Forms (`src/AdminPanel.tsx`)
-- **Question Banks Form (`activeTab === 'banks'`):**
-  - Displays amber guidance banner (*"📦 Question Bank (Step 3) — Interactive web reader & PDF downloads for students"*).
-  - Shows custom PDF download links, cover image URLs, and Question Bank category presets (`Topic-Wise Question Bank`, `Exam-Focused Bank`, `Revision Sets`, `PYQ Collections`).
-  - Defaults strictly to `target_mode: 'bank'`.
-- **Practice Sets Form (`activeTab === 'practice'`):**
-  - Displays blue guidance banner (*"🎯 Practice Set (Step 1) — Interactive CBT drills with instant timer and answer explanations"*).
-  - Renders clean, distraction-free CBT test creation form (hides PDF links and cover image inputs).
-  - Displays Practice category presets (`Chapter-Wise Practice`, `High-Yield Topic Banks`, `Daily Speed Quizzes`, `Topic-Wise PYQs`).
-  - Defaults strictly to `target_mode: 'practice'`.
+### 2. Geographic Directional Fragment Rejection & Routine Accident Noise Filters (`ca_formatter.py`)
+- **Ban on Directional Fragments**: Strictly prohibited lazy directional adjectives like *"in North"*, *"in South"*, *"in East"*, *"in West"*, *"in Central"* without naming the specific River, Sea, District/Province, and State/Country.
+- **Accident & Noise Filters**: Added regex filters (`boat capsizes`, `capsizing`, `ferry sinks`, `drowned`, `bus crash`, `campus protest`) to drop low-yield routine tragedies automatically.
 
-### 3. Non-Destructive Safe Deletion Engine (`src/AdminPanel.tsx`, `src/lib/examService.ts`)
-- **Admin Panel Safe Downgrade**: Deleting an item with legacy `target_mode === 'both'` from the `Practice Sets` tab now safely updates `target_mode = 'bank'`, preserving the Question Bank and its PDFs completely. Deleting from `Question Banks` tab updates `target_mode = 'practice'`.
-- **Backend Co-existence Guard (`src/lib/examService.ts#deleteQuestionBank`)**: Before deleting questions associated with a deleted bank/practice set from the `questions` table, it checks if any other Question Bank or Practice Set shares that topic (`title` and `examId`). If a co-existing bank exists, question deletion is skipped, ensuring zero data loss.
-
-### 4. Memory & Documentation Sync
-- Imprinted **`AdminDecoupledContentModal`** (Item 90) in `context/ui-registry.md`.
-- Updated `context/progress-tracker.md`.
+### 3. 5-Layer Deterministic Python Safety Net (Intercepting "Dumb" AI Drift)
+- **Layer 1: Pre-AI Scraper Sanitization** — Drops unverified dates and crime/accidents before the LLM sees the text.
+- **Layer 2: AI Generation** — Paper Setter prompt with 5W1H entity constraints.
+- **Layer 3: Deterministic Python Quality Gates (`validate_slide_quality`)** — Hard Python code tests numeric fact claims, date validity against raw news, directional fragments, ghost actors, and bullet counts. Drops any non-compliant slide immediately.
+- **Layer 4: Minimum Viable Quality Quorum (`MIN_SLIDES_TO_POST = 5`)** — Cancels the public broadcast entirely if fewer than 5 clean slides survive the Python bouncer, notifying Admin Telegram DM.
+- **Layer 5: Slide-by-Slide Telegram Admin Audit** — Delivers an item-by-item verification proof for every published slide directly to Admin DM (`1317595163`).
 
 ---
 
 ## Decisions made
-- **Decoupled User Experience on Unified Schema**: Maintained database schema consistency (`public.questionBanks` with `target_mode: 'bank' | 'practice' | 'both'`) while providing a 100% decoupled, isolated admin experience for Question Banks and Practice Sets.
-- **Safe Downgrade over Hard Delete**: Transitioning legacy combined items into single-mode items on delete rather than wiping the database row.
-- **Topic Co-Existence Preservation**: Ensured `questions` table rows are guarded if multiple entities reference the same topic title.
+- **Deterministic Code over Probabilistic AI**: Never rely on prompt constraints alone; use strict Python regex and fact-check bouncers as the ultimate gatekeeper.
+- **Fail-Safe Quorum**: Aborting public broadcasts rather than publishing low-quality or hallucinated news if the AI has an off day.
+- **Syllabus Relevance over Sensationalism**: Prioritize policy milestones and constitutional developments over emotional accident stories.
 
 ---
 
 ## Problems solved
-- **Data Loss on Practice Test Deletion**: Eliminated the critical issue where deleting a practice test inadvertently deleted the Question Bank, removed attached PDF links, and purged questions from the database.
-- **Sticky Form Modal Bleed**: Fixed sticky session memory bleed where opening `+ Add New Question Bank` was pre-selecting Practice Mode from prior sessions.
-- **Subject Tag Clarity**: Clarified that the `Select Subject` dropdown assigns category tagging for student frontend filtering and does not create destructive hard foreign-key locks.
+- **Vague Directional Headlines**: Eliminated cards like *"Dozens Dead after Boat Capsizes in North"* by banning directional fragments and filtering routine boat accidents.
+- **AI Boundary Drift**: Hardened post-AI Python validators so invalid dates, fake numbers, or missing states get dropped automatically.
+- **Outdated / Archive News**: Enforced strict 24-hour timestamp verification in the scraper.
 
 ---
 
 ## Current state
-- Fully tested and verified with `npm run build` passing cleanly with 0 errors (exit code `0`).
-- Both Question Banks and Practice Sets operate with complete independence for adding, editing, and deleting.
+- Frontend builds with **0 errors** (`npm run build` exit code `0`).
+- Automations submodule (`Pixduct/odisha-mcq-engine`) and parent repository (`Pixduct/OdishaExamPrepNew`) are fully synced and pushed to GitHub `main`.
+- `context/progress-tracker.md` is 100% updated.
+
+---
+
+## Next session starts with
+- Ready for any new feature requests, study tools, UI enhancements, or automation workflows.
+
+---
+
+## Open questions
+- None. All tasks and quality safeguards are verified and active.
 
 ---
 

@@ -487,6 +487,64 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const [bankAnswerKeyFileName, setBankAnswerKeyFileName] = useState('');
   const [showBankPreviewModal, setShowBankPreviewModal] = useState(false);
 
+  // Helper to calculate next category-scoped sequential sort order (starting from 1, filling missing gaps)
+  const getNextAvailableOrder = (
+    tab: string,
+    examId?: string,
+    category?: string,
+    targetMode?: string,
+    topic?: string
+  ): number => {
+    if (tab === 'banks' || tab === 'practice') {
+      const isPractice = (targetMode || tab) === 'practice';
+      const targetCategory = (!category || category === 'all') ? 'topic-wise' : category;
+      const scopedBanks = banks.filter((b: any) => {
+        const matchExam = !examId || b.examId === examId;
+        const matchMode = isPractice ? (b.target_mode || 'both') !== 'bank' : (b.target_mode || 'both') !== 'practice';
+        const matchCategory = (b.type || 'topic-wise') === targetCategory;
+        return matchExam && matchMode && matchCategory;
+      });
+      const existingOrders = scopedBanks
+        .map((b: any) => Number(b.sortOrder))
+        .filter((n: number) => !isNaN(n) && n > 0);
+      let next = 1;
+      while (existingOrders.includes(next)) {
+        next++;
+      }
+      return next;
+    } else if (tab === 'tests') {
+      const targetCategory = (!category || category === 'all') ? 'full-length' : category;
+      const scopedTests = mockTests.filter((t: any) => {
+        const matchExam = !examId || t.examId === examId;
+        const matchCategory = (t.category || t.mockCategory || 'full-length') === targetCategory;
+        return matchExam && matchCategory;
+      });
+      const existingOrders = scopedTests
+        .map((t: any) => Number(t.sortOrder))
+        .filter((n: number) => !isNaN(n) && n > 0);
+      let next = 1;
+      while (existingOrders.includes(next)) {
+        next++;
+      }
+      return next;
+    } else if (tab === 'questions') {
+      const scopedQuestions = questions.filter((q: any) => {
+        const matchExam = !examId || q.examId === examId;
+        const matchTopic = !topic || q.topic === topic;
+        return matchExam && matchTopic;
+      });
+      const existingOrders = scopedQuestions
+        .map((q: any) => Number(q.sortOrder))
+        .filter((n: number) => !isNaN(n) && n > 0);
+      let next = 1;
+      while (existingOrders.includes(next)) {
+        next++;
+      }
+      return next;
+    }
+    return 1;
+  };
+
   // --- Sticky Creation Memory Helpers per Tab ---
   const getStickyFormData = (tab: string) => {
     let sticky: any = {};
@@ -500,15 +558,16 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       if (!sticky.examId && selectedExamIdForBanks) sticky.examId = selectedExamIdForBanks;
       if (!sticky.type && bankFilter && bankFilter !== 'all') sticky.type = bankFilter;
       sticky.target_mode = tab === 'practice' ? 'practice' : 'bank';
+      sticky.sortOrder = getNextAvailableOrder(tab, sticky.examId, sticky.type || 'topic-wise', sticky.target_mode);
     } else if (tab === 'tests') {
       if (!sticky.examId && selectedExamIdForTests) sticky.examId = selectedExamIdForTests;
       if (!sticky.mockCategory && selectedCategoryForTests) sticky.mockCategory = selectedCategoryForTests;
-      const maxOrder = mockTests.reduce((max, t) => (t.sortOrder && t.sortOrder > max ? t.sortOrder : max), 0);
-      sticky.sortOrder = maxOrder + 1;
+      sticky.sortOrder = getNextAvailableOrder('tests', sticky.examId, sticky.mockCategory || 'full-length');
     } else if (tab === 'questions') {
       if (!sticky.targetExamId && filterExamId && filterExamId !== 'all') sticky.targetExamId = filterExamId;
       if (!sticky.topic && selectedTargetIdForQuestions && selectedTypeForQuestions === 'bank') sticky.topic = selectedTargetIdForQuestions;
       if (!sticky.topic && selectedTargetIdForQuestions && selectedTypeForQuestions === 'mock') sticky.topic = `mockTest__${selectedTargetIdForQuestions}`;
+      sticky.sortOrder = getNextAvailableOrder('questions', sticky.targetExamId, undefined, undefined, sticky.topic);
     } else if (tab === 'series') {
       if (!sticky.examId && selectedExamIdForSeries) sticky.examId = selectedExamIdForSeries;
     } else if (tab === 'exams') {
@@ -1516,9 +1575,11 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           parsedDiagram = diagramValidator(parsedDiagram);
         }
 
+        const targetOrder = formData.sortOrder ? Number(formData.sortOrder) : getNextAvailableOrder('questions', formData.examId, undefined, undefined, formData.topic);
         const payload: any = {
           examId: formData.examId,
           topic: formData.topic,
+          sortOrder: targetOrder,
           difficulty: formData.difficulty as 'easy' | 'medium' | 'hard',
           questionText: cleanedQuestionText,
           options: formData.options,
@@ -1558,76 +1619,43 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         const targetExamId = formData.examId;
         const targetCategory = formData.mockCategory;
         const targetSubject = targetCategory === 'sectional' ? formData.mockSubject : null;
-
-        const scopedTests = mockTests.filter(t => {
-          const s = getMockTestScope(t);
-          return s.examId === targetExamId && s.category === targetCategory && s.subject === targetSubject;
+        
+        // Scope mock tests list to the same category/exam for dense sequence ordering
+        const scopedTests = mockTests.filter((t: any) => {
+          let cat = 'full-length';
+          let subj = null;
+          try {
+            if (t.seriesId) {
+              const cfg = JSON.parse(t.seriesId);
+              cat = cfg.category || 'full-length';
+              subj = cfg.subject || null;
+            }
+          } catch(e) {}
+          return t.examId === targetExamId && cat === targetCategory && (targetCategory !== 'sectional' || subj === targetSubject);
         });
 
-        const maxOrder = scopedTests.reduce((max, t) => (t.sortOrder && t.sortOrder > max ? t.sortOrder : max), 0);
-        const targetOrder = Number(formData.sortOrder) || (maxOrder + 1);
+        const targetOrder = Number(formData.sortOrder) || getNextAvailableOrder('tests', formData.examId, targetCategory);
 
         const payload = {
+          examId: formData.examId,
           seriesId: mockConfig,
           title: formData.title,
           durationMinutes: Number(formData.durationMinutes),
           totalMarks: Number(formData.totalMarks),
           negativeMarking: Number(formData.negativeMarking) || 0,
           sortOrder: targetOrder,
-          scheduled_at: formData.scheduled_at ? new Date(formData.scheduled_at).toISOString() : null
+          questionIds: []
         };
-
-        const virtualMockTest = {
-          ...payload,
-          examId: formData.examId,
-          isPremium: formData.isPremium
-        };
-
-        if (!validateChangeBeforePublish('test', virtualMockTest, !!editingId)) return;
-
-        // Conflict resolution within the same scope
-        let otherTests = scopedTests
-          .filter(t => t.id !== editingId)
-          .sort((a, b) => (a.sortOrder || 9999) - (b.sortOrder || 9999));
-
-        const finalOrderList: { id?: string, sortOrder: number, isSelf?: boolean }[] = [];
-        let inserted = false;
+        if (!validateChangeBeforePublish('test', payload, !!editingId)) return;
         
-        for (const test of otherTests) {
-          const currentOrder = test.sortOrder || 9999;
-          if (!inserted && currentOrder >= targetOrder) {
-            finalOrderList.push({ id: editingId || undefined, sortOrder: targetOrder, isSelf: true });
-            inserted = true;
-          }
-          finalOrderList.push({ id: test.id, sortOrder: currentOrder });
-        }
-        if (!inserted) {
-          finalOrderList.push({ id: editingId || undefined, sortOrder: targetOrder, isSelf: true });
-        }
-
-        let savedTestId = editingId;
         if (editingId) {
           await examService.updateMockTest(editingId, payload);
         } else {
-          const created = await examService.createMockTest(payload);
-          savedTestId = created.id;
+          await examService.createMockTest(payload);
         }
-
-        const promises = finalOrderList.map((item, index) => {
-          const targetIndexOrder = index + 1;
-          const actualId = item.isSelf ? savedTestId : item.id;
-          const currentOrder = item.isSelf ? targetOrder : (mockTests.find(t => t.id === item.id)?.sortOrder || 9999);
-          if (actualId && currentOrder !== targetIndexOrder) {
-            return examService.updateMockTest(actualId, { sortOrder: targetIndexOrder });
-          }
-          return Promise.resolve();
-        });
-        await Promise.all(promises);
       } else if (activeTab === 'exams' || activeTab === 'blogs') {
-        const isExamPremium = Boolean(formData.isPremium);
+        const isExamPremium = formData.isPremium === true;
         const metaObj = {
-          price: isExamPremium ? (Number(formData.price) || 499) : 0,
-          originalPrice: isExamPremium ? (Number(formData.originalPrice) || ((Number(formData.price) || 499) * 2)) : 0,
           description: formData.description,
           examDate: formData.examDate || '',
           examDateStatus: formData.examDateStatus || 'tba',
@@ -1678,12 +1706,15 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         };
 
         const assignedTargetMode = formData.target_mode || (activeTab === 'practice' ? 'practice' : 'bank');
+        const assignedCategory = formData.type || 'topic-wise';
+        const targetOrder = formData.sortOrder ? Number(formData.sortOrder) : getNextAvailableOrder(activeTab, formData.examId, assignedCategory, assignedTargetMode);
 
         const payload = {
           examId: formData.examId,
-          type: formData.type,
+          type: assignedCategory,
           target_mode: assignedTargetMode,
           title: formData.title,
+          sortOrder: targetOrder,
           questionCount: finalQuestionCount,
           tagline: (formData.isPremium || formData.mockSubject || formData.tagline) ? JSON.stringify(metaTaglineObj) : '',
           image: formData.image,
@@ -2702,7 +2733,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                 <SearchableDropdown
                   required
                   value={formData.examId}
-                  onChange={v => setFormData({ ...formData, examId: v })}
+                  onChange={v => {
+                    const nextOrder = !editingId ? getNextAvailableOrder(activeTab, v, formData.type || 'topic-wise', tMode) : formData.sortOrder;
+                    setFormData({ ...formData, examId: v, sortOrder: nextOrder });
+                  }}
                   options={actualExams.map(ex => ({ value: ex.id as string, label: ex.name }))}
                   placeholder="-- Choose Exam --"
                   disabled={!!selectedExamIdForBanks}
@@ -2831,7 +2865,16 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                   {tMode === 'bank' ? 'Question Bank Category *' : tMode === 'practice' ? 'Practice Set Category *' : 'Bank Category *'}
                 </label>
                 <div className={selectWrapperClass}>
-                  <select required value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value })} className={selectClass}>
+                  <select 
+                    required 
+                    value={formData.type} 
+                    onChange={e => {
+                      const newType = e.target.value;
+                      const nextOrder = !editingId ? getNextAvailableOrder(activeTab, formData.examId, newType, tMode) : formData.sortOrder;
+                      setFormData({ ...formData, type: newType, sortOrder: nextOrder });
+                    }} 
+                    className={selectClass}
+                  >
                     {activeCategoryOptions.map(opt => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
@@ -3093,17 +3136,37 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                 </div>
               )}
 
-              {/* Questions Count Manual Override */}
-              <div className="space-y-2">
-                <label className={labelClass}>
-                  Questions Count {liveMergedQuestions.length > 0 ? <span className="text-emerald-600 font-semibold normal-case tracking-normal">(auto-calculated from JSON: {liveMergedQuestions.length})</span> : ''}
-                </label>
-                <input 
-                  type="number" 
-                  value={liveMergedQuestions.length > 0 ? liveMergedQuestions.length : formData.questionCount} 
-                  onChange={e => setFormData({ ...formData, questionCount: e.target.value })} 
-                  className={inputClass} 
-                />
+              {/* Order Sequence & Questions Count Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:col-span-2">
+                <div className="space-y-2">
+                  <label className={labelClass}>
+                    Order Sequence (Category-Scoped) *
+                  </label>
+                  <input 
+                    required
+                    type="number" 
+                    min="1"
+                    value={formData.sortOrder ?? ''} 
+                    onChange={e => setFormData({ ...formData, sortOrder: e.target.value })} 
+                    className={inputClass} 
+                    placeholder="e.g. 1, 2, 3..." 
+                  />
+                  <p className="text-[10px] text-slate-400 font-semibold mt-0.5">
+                    Starts from 1 for each category. Auto-fills next sequence number or missing deleted gap.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className={labelClass}>
+                    Questions Count {liveMergedQuestions.length > 0 ? <span className="text-emerald-600 font-semibold normal-case tracking-normal">(auto-calculated from JSON: {liveMergedQuestions.length})</span> : ''}
+                  </label>
+                  <input 
+                    type="number" 
+                    value={liveMergedQuestions.length > 0 ? liveMergedQuestions.length : formData.questionCount} 
+                    onChange={e => setFormData({ ...formData, questionCount: e.target.value })} 
+                    className={inputClass} 
+                  />
+                </div>
               </div>
 
               {/* Image URL — hidden for practice-only */}

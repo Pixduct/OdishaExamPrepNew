@@ -1,6 +1,7 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] Green API WhatsApp Broadcast Integration (`120363412784897729@g.us`): Fully integrated WhatsApp automation across `ca_publisher.py`, `exam_update_engine.py`, and `shared/telegram.py`. Configured default fallback to WhatsApp Announcement Group `120363412784897729@g.us` (`idInstance: 710722716124`). Every scheduled cron run will now automatically render 1080x1080 slide carousels, exam notifications, and daily quizzes directly to WhatsApp alongside Telegram and YouTube. Verified and synced across GitHub repositories.
 - [x] Enterprise Workflow Observability & Bulletproof Telegram Admin Reporting: Resolved silence and missing notification issues across all 7 GitHub Actions automated engines (`Daily CA Engine`, `CA Website Publisher`, `Recruitment Notice Scraper`, `Exam Update Engine`, `Daily MCQ Engine`, `Strategic Engagement Engine`, `Strategic Evergreen Blog Engine`).
   1. Updated `ca_website_publisher.py` to send complete execution reports even when existing articles are already up-to-date in Supabase DB.
   2. Integrated breaking notice execution summaries in `scraper.py`.

@@ -679,6 +679,14 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     } else if (targetTab === 'banks') {
       initial.target_mode = 'bank';
     }
+    // Always dynamically re-calculate the fresh next available order from latest state
+    initial.sortOrder = getNextAvailableOrder(
+      targetTab,
+      initial.examId,
+      initial.type || 'topic-wise',
+      initial.target_mode,
+      initial.topic
+    );
     setFormData(initial);
     setDiagramText('');
     setBankQuestionsJson('');
@@ -1219,6 +1227,13 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       list = filtered;
     }
     
+    // Strict ID deduplication across any active tab
+    const uniqueMap = new Map();
+    list.forEach(item => {
+      if (item && item.id) uniqueMap.set(item.id, item);
+    });
+    list = Array.from(uniqueMap.values());
+
     // Sort local items by sortOrder if available
     let sorted = [...list];
     if (activeTab === 'tests') {
@@ -1620,8 +1635,13 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         if (parsedDiagram !== null && parsedDiagram !== undefined) {
           payload.diagram = parsedDiagram;
         }
-        if (editingId) await examService.updateQuestion(editingId, payload);
-        else await examService.addQuestion(payload);
+        if (editingId) {
+          await examService.updateQuestion(editingId, payload);
+          setQuestions(prev => prev.map(q => q.id === editingId ? { ...q, ...payload, id: editingId } : q));
+        } else {
+          const res = await examService.addQuestion(payload);
+          if (res) setQuestions(prev => [...prev.filter(q => q.id !== res.id), res]);
+        }
       } else if (activeTab === 'series') {
         if (!formData.examId) { alert("Please select an exam."); return; }
         const payload = {
@@ -1633,8 +1653,13 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           testIds: []
         };
         if (!validateChangeBeforePublish('series', payload, !!editingId)) return;
-        if (editingId) await examService.updateTestSeries(editingId, payload);
-        else await examService.createTestSeries(payload);
+        if (editingId) {
+          await examService.updateTestSeries(editingId, payload);
+          setSeries(prev => prev.map(s => s.id === editingId ? { ...s, ...payload, id: editingId } : s));
+        } else {
+          const res = await examService.createTestSeries(payload);
+          if (res) setSeries(prev => [...prev.filter(s => s.id !== res.id), res]);
+        }
       } else if (activeTab === 'tests') {
         if (!formData.examId) { alert("Please select an exam."); return; }
         const mockConfig = JSON.stringify({
@@ -1681,8 +1706,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         
         if (editingId) {
           await examService.updateMockTest(editingId, payload);
+          setMockTests(prev => prev.map(t => t.id === editingId ? { ...t, ...payload, id: editingId } : t));
         } else {
-          await examService.createMockTest(payload);
+          const res = await examService.createMockTest(payload);
+          if (res) setMockTests(prev => [...prev.filter(t => t.id !== res.id), res]);
         }
       } else if (activeTab === 'exams' || activeTab === 'blogs') {
         const isExamPremium = formData.isPremium === true;
@@ -1711,7 +1738,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           setExams(prev => prev.map(e => e.id === editingId ? { ...e, ...payload, id: editingId } : e));
         } else {
           const res = await examService.addExam(payload);
-          if (res) setExams(prev => [...prev, res]);
+          if (res) setExams(prev => [...prev.filter(e => e.id !== res.id), res]);
         }
         try { sessionStorage.removeItem('oep_admin_catalog_cache'); } catch(e) {}
       } else if (activeTab === 'banks' || activeTab === 'practice') {
@@ -1758,8 +1785,12 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         
         if (editingId) {
           await examService.updateQuestionBank(editingId, payload);
+          setBanks(prev => prev.map(b => b.id === editingId ? { ...b, ...payload, id: editingId } : b));
         } else {
-          await examService.createQuestionBank(payload);
+          const res = await examService.createQuestionBank(payload);
+          if (res) {
+            setBanks(prev => [...prev.filter(b => b.id !== res.id), { ...payload, ...res }]);
+          }
         }
 
         // If questions JSON was provided, bulk-upload them into questions table with topic = bank.title

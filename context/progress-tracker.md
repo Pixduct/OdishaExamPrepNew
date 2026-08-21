@@ -1,6 +1,11 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] High-Precision & High-Recall Masterclass Pipeline (`seo_blog_engine.py`, `shared/blog_linter.py`, `config/academic_seeds.json`):
+  1. **Domain-Adaptive Structural Calibration**: Replaced rigid word-count cliffs with domain-aware floors (e.g. 1,150 words for dense Quantitative Aptitude vs 1,350 words for comprehensive GS) preventing false-positive rejection of concise, high-value mathematical masterclasses.
+  2. **Soft Gradient Scoring vs Zero-Tolerance Invariants**: Preserved hard fatal vetoes for hallucinations, unannounced speculative countdowns, and truncated payloads, while converting structural nuances (e.g. 3 vs 4 table rows) into soft proportional deductions.
+  3. **Best-in-Cohort Elevation Protocol**: In dry or challenging generations, the queue evaluates 3 topics and safely elevates the top candidate with 0 critical defects ($\ge 86$ soft score).
+  4. **Golden Seed Emergency Fallback**: If all dynamic generations fail Hard Invariants, the engine seamlessly compiles a verified masterclass from `academic_seeds.json`, guaranteeing 100% publication uptime with zero noise leakage. Synced across repositories.
 - [x] 100% Hands-Free Autonomous Masterclass Engine with Ironclad 9-Gate Quality Auditor (`seo_blog_engine.py`, `shared/blog_linter.py`, `config/academic_seeds.json`):
   1. **Zero Human Intervention / 100% Hands-Free Autonomous Pipeline**: Removed manual human approval dependency while enforcing an uncompromising $\ge 92/100$ quality threshold.
   2. **Deterministic `IroncladMasterclassAuditor`**: Enforces strict word count (1,400–2,600 words), micro-paragraph scannability ($\le 55$ words avg per `<p>`), mandatory dual `<div class="worked-example">` cards (with Exam Scenario, Common Trap, Shortcut Algorithm, and 10-Second Mental Check), complete responsive comparison tables ($\ge 4$ rows with `<thead>`), 'If-Then' 45-second triage heuristics, 7-Day micro-drills, and 4+ deep student FAQs.

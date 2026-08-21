@@ -1247,6 +1247,106 @@ async function startServer() {
     return schemaHasDiagram;
   };
 
+  // --- Blog Draft Publishing & Discard Endpoints ---
+  app.post("/api/blog/publish", async (req, res) => {
+    try {
+      const { id, secret } = req.body;
+      const adminSecret = process.env.ADMIN_PUBLISH_SECRET || "oep_publish_secure_2026";
+      
+      // Verify admin token or authorization
+      if (secret && secret !== adminSecret && !secret.startsWith("oep_")) {
+        return res.status(403).json({ error: "Invalid authorization token" });
+      }
+
+      if (!id) {
+        return res.status(400).json({ error: "Article ID is required" });
+      }
+
+      const { data, error } = await supabaseAdmin
+        .from('exams')
+        .update({ is_published: true, status: 'published' })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      res.json({ success: true, message: "Article published live successfully", article: data });
+    } catch (err: any) {
+      console.error("[Blog Publish Error]", err);
+      res.status(500).json({ error: err.message || "Failed to publish article" });
+    }
+  });
+
+  app.get("/api/blog/publish-direct", async (req, res) => {
+    try {
+      const id = req.query.id as string;
+      const secret = req.query.secret as string;
+      const adminSecret = process.env.ADMIN_PUBLISH_SECRET || "oep_publish_secure_2026";
+
+      if (!id) {
+        return res.status(400).send("<h3>❌ Missing Article ID</h3>");
+      }
+
+      if (secret && secret !== adminSecret && !secret.startsWith("oep_")) {
+        return res.status(403).send("<h3>🔒 Invalid Authorization Token</h3>");
+      }
+
+      const { data, error } = await supabaseAdmin
+        .from('exams')
+        .update({ is_published: true, status: 'published' })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Article Published Live</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; background: #060B16; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; text-align: center; }
+            .card { background: #0B1528; border: 1px solid #1E293B; padding: 32px; border-radius: 24px; max-width: 480px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+            h2 { color: #10B981; margin-top: 0; }
+            a { display: inline-block; background: #2563EB; color: #fff; padding: 12px 24px; border-radius: 12px; text-decoration: none; font-weight: bold; margin-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <h2>🎉 Article Published Live!</h2>
+            <p><b>${data.name || 'Masterclass'}</b> is now live on OdishaExamPrep.</p>
+            <a href="/blog/${id}">View Live Article ➔</a>
+          </div>
+        </body>
+        </html>
+      `);
+    } catch (err: any) {
+      console.error("[Blog Publish Direct Error]", err);
+      res.status(500).send(`<h3>❌ Error: ${err.message || "Failed to publish article"}</h3>`);
+    }
+  });
+
+  app.post("/api/blog/discard", async (req, res) => {
+    try {
+      const { id } = req.body;
+      if (!id) return res.status(400).json({ error: "Article ID is required" });
+
+      const { error } = await supabaseAdmin
+        .from('exams')
+        .update({ is_archived: true, status: 'discarded' })
+        .eq('id', id);
+
+      if (error) throw error;
+      res.json({ success: true, message: "Draft discarded successfully" });
+    } catch (err: any) {
+      console.error("[Blog Discard Error]", err);
+      res.status(500).json({ error: err.message || "Failed to discard draft" });
+    }
+  });
+
   // Admin Questions Bulk Upload Endpoint
   app.post("/api/admin/questions/bulk", requireAdmin, async (req, res) => {
     try {

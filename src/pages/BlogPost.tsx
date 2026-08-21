@@ -50,8 +50,62 @@ export default function BlogPost() {
   const [processedDescription, setProcessedDescription] = useState('');
   const [toc, setToc] = useState<TocItem[]>([]);
   const [activeId, setActiveId] = useState<string>('');
+  const [publishing, setPublishing] = useState(false);
+  const [publishSuccess, setPublishSuccess] = useState(false);
+  const [discarded, setDiscarded] = useState(false);
   const isManualScrolling = React.useRef(false);
   const manualScrollTimeout = React.useRef<number | null>(null);
+
+  const isPreviewMode = typeof window !== 'undefined' && (
+    window.location.pathname.startsWith('/blog/preview') || 
+    new URLSearchParams(window.location.search).get('preview') === 'true' || 
+    (blog as any)?.is_published === false ||
+    (blog as any)?.status === 'draft'
+  );
+
+  const handlePublishDraft = async () => {
+    if (!blog?.id || publishing) return;
+    setPublishing(true);
+    try {
+      const res = await fetch('/api/blog/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: blog.id, secret: 'oep_publish_secure_2026' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPublishSuccess(true);
+        if (blog) {
+          (blog as any).is_published = true;
+          (blog as any).status = 'published';
+        }
+      } else {
+        alert(data.error || 'Failed to publish draft');
+      }
+    } catch (e: any) {
+      alert(`Publishing error: ${e.message}`);
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const handleDiscardDraft = async () => {
+    if (!blog?.id) return;
+    if (!window.confirm("Are you sure you want to discard this draft? It will be archived.")) return;
+    try {
+      const res = await fetch('/api/blog/discard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: blog.id })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setDiscarded(true);
+      }
+    } catch (e: any) {
+      alert(`Discard error: ${e.message}`);
+    }
+  };
 
   useEffect(() => {
     let ticking = false;
@@ -334,6 +388,40 @@ export default function BlogPost() {
 
   return (
     <PageLayout>
+      {isPreviewMode && (
+        <div className="sticky top-0 z-[110] bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 text-white px-4 py-2.5 sm:py-3 shadow-xl backdrop-blur-md border-b border-amber-400/30 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-xs sm:text-sm font-bold">
+            <span className="bg-white/20 px-2 py-0.5 rounded-lg text-[10px] tracking-wider uppercase font-black">Admin Preview</span>
+            <span>🔒 Draft Mode · Unpublished</span>
+            {publishSuccess && <span className="bg-emerald-500 text-white px-2 py-0.5 rounded-md text-xs font-black animate-pulse">Published Live!</span>}
+            {discarded && <span className="bg-rose-500 text-white px-2 py-0.5 rounded-md text-xs font-black">Draft Discarded</span>}
+          </div>
+          <div className="flex items-center gap-2">
+            {!publishSuccess && !discarded && (
+              <>
+                <button 
+                  onClick={handlePublishDraft}
+                  disabled={publishing}
+                  className="px-3 sm:px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs sm:text-sm font-extrabold shadow transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 disabled:opacity-50"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> {publishing ? "Publishing..." : "Approve & Publish Live"}
+                </button>
+                <button 
+                  onClick={handleDiscardDraft}
+                  className="px-2.5 sm:px-3 py-1.5 bg-black/40 hover:bg-black/60 text-white/90 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                >
+                  Discard
+                </button>
+              </>
+            )}
+            {publishSuccess && (
+              <a href={`/blog/${blog.id}`} className="px-3 py-1.5 bg-white text-emerald-800 rounded-xl text-xs font-black shadow">
+                View Live Page ➔
+              </a>
+            )}
+          </div>
+        </div>
+      )}
       <div className="fixed top-0 left-0 h-1 bg-brand-600 dark:bg-blue-500 z-[100] transition-all duration-75" style={{ width: `${scrollProgress}%` }} />
       <div className="w-full h-48 sm:h-80 md:h-[380px] bg-slate-950 relative overflow-hidden flex items-end">
         {blog.icon ? <img src={getDirectImageUrl(blog.icon)} alt={blog.name} className="absolute inset-0 w-full h-full object-cover opacity-35" /> : <div className="absolute inset-0 bg-gradient-to-br from-slate-900 to-indigo-950 opacity-90" />}

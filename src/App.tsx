@@ -11856,6 +11856,7 @@ function AppContent() {
         <Route path={ROUTE_PATHS.REFUND_POLICY} element={<RefundPolicy />} />
         <Route path={ROUTE_PATHS.BLOG} element={<BlogList />} />
         <Route path={ROUTE_PATHS.BLOG_DETAIL} element={<BlogPost />} />
+        <Route path="/blog/preview/:id" element={<BlogPost />} />
         <Route path={ROUTE_PATHS.CURRENT_AFFAIRS} element={<CurrentAffairsPage />} />
         <Route 
           path={ROUTE_PATHS.ADMIN} 

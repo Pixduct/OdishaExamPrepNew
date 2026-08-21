@@ -2948,19 +2948,28 @@ Last updated: August 21, 2026
 - **Mode Isolation**: Automatically adapts inputs based on `activeTab` or `target_mode` — Question Banks display PDF download links and cover image inputs with amber guidance; Practice Sets render clean, distraction-free CBT test creation forms with blue guidance.
 - **Non-Destructive Target Decoupling**: Prevents accidental question or bank deletion across shared topics.
 
+---
 
+### 91. `CurrentAffairsStudentCommunityBanner` (Student Community & Channel Promotion Hub Banner Dual-Theme Gradient)
 
+Files: [`src/components/CurrentAffairsReaderModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/CurrentAffairsReaderModal.tsx#L136-L203), [`src/components/StreakDetailModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/StreakDetailModal.tsx#L87)
+Last updated: August 21, 2026
 
+| Property | Class / Token |
+| :--- | :--- |
+| **Odisha State Banner Shell** | `bg-gradient-to-r from-amber-900 via-amber-950 to-orange-950 border-amber-500/40 text-white rounded-2xl p-3.5 sm:p-5 relative overflow-hidden shadow-md` |
+| **World / International Banner Shell** | `bg-gradient-to-r from-indigo-950 via-purple-900 to-slate-950 border-purple-500/40 text-white rounded-2xl p-3.5 sm:p-5 relative overflow-hidden shadow-md` |
+| **National Exam Banner Shell** | `bg-gradient-to-r from-teal-950 via-emerald-900 to-slate-950 border-teal-500/40 text-white rounded-2xl p-3.5 sm:p-5 relative overflow-hidden shadow-md` |
+| **Community Badge (International)** | `bg-purple-400/20 text-purple-200 border-purple-400/40 text-[10px] sm:text-[11px] font-black uppercase tracking-wider rounded-lg px-2.5 py-0.5 border inline-flex items-center gap-1.5` |
+| **Banner Title** | `text-sm sm:text-lg font-black text-white leading-tight tracking-tight` |
+| **Banner Description** | `text-[11px] sm:text-xs text-white/85 font-medium leading-relaxed max-w-lg` |
+| **Telegram CTA Button** | `bg-sky-500 hover:bg-sky-400 text-white font-extrabold text-[11px] sm:text-xs rounded-xl px-2.5 sm:px-3.5 py-2 sm:py-2.5 flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition-all` |
+| **YouTube CTA Button** | `bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-[11px] sm:text-xs rounded-xl px-2.5 sm:px-3.5 py-2 sm:py-2.5 flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition-all` |
+| **PDF Print Button** | `bg-white/15 hover:bg-white/25 text-white border border-white/20 font-extrabold text-[11px] sm:text-xs rounded-xl px-2.5 sm:px-3.5 py-2 sm:py-2.5 flex items-center justify-center gap-1.5 backdrop-blur-xs cursor-pointer shadow-xs active:scale-95 transition-all` |
 
-
-
-
-
-
-
-
-
-
+**Pattern notes:**
+- **Valid Color Steps**: Standardized on valid Tailwind CSS 900/950 color steps (`from-indigo-950`, `from-amber-900`, `from-teal-950`, `from-slate-900`) instead of non-standard `-850` step classes.
+- **Dual-Theme Legibility**: Banner starting stop (`from-`) is guaranteed to render dark indigo/teal/amber hues across all CSS browsers, permanently eliminating light mode white-start background fallback bugs behind white text.
 
 
 

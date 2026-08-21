@@ -84,7 +84,7 @@ export const StreakDetailModal: React.FC<StreakDetailModalProps> = ({
           </div>
 
           {/* Main Streak Counter Hero Box */}
-          <div className="p-3.5 sm:p-5 rounded-2xl bg-gradient-to-br from-slate-850 via-slate-900 to-amber-950/40 border border-amber-500/25 relative overflow-hidden flex items-center justify-between gap-3">
+          <div className="p-3.5 sm:p-5 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/40 border border-amber-500/25 relative overflow-hidden flex items-center justify-between gap-3">
             <div className="space-y-0.5 sm:space-y-1 relative z-10">
               <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2 sm:px-2.5 py-0.5 rounded-full border border-amber-500/20">
                 Active Streak
@@ -223,7 +223,7 @@ export const StreakDetailModal: React.FC<StreakDetailModalProps> = ({
                       className={`p-2.5 rounded-xl border flex items-center gap-2.5 text-left transition-all ${
                         m.unlocked
                           ? 'bg-amber-500/10 border-amber-500/30 text-amber-200'
-                          : 'bg-slate-850/60 border-slate-800 text-slate-500 opacity-60'
+                          : 'bg-slate-900/60 border-slate-800 text-slate-500 opacity-60'
                       }`}
                     >
                       <span className="text-xl shrink-0">{m.icon}</span>

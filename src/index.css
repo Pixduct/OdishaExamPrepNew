@@ -1119,16 +1119,157 @@ html.dark .prose strong, html[data-theme="dark"] .prose strong {
   color: #f8fafc !important;
 }
 
-html.dark .prose table, html[data-theme="dark"] .prose table {
-  background-color: #0B1528 !important;
+/* Universal Dark Mode Data Table Overrides */
+html.dark table, html[data-theme="dark"] table {
+  background-color: #060B16 !important;
   border-color: #1e293b !important;
   color: #e2e8f0 !important;
 }
 
-html.dark .prose td, html[data-theme="dark"] .prose td,
-html.dark .prose th, html[data-theme="dark"] .prose th {
+html.dark thead, html[data-theme="dark"] thead,
+html.dark tr.bg-slate-100, html[data-theme="dark"] tr.bg-slate-100,
+html.dark tr.bg-slate-50, html[data-theme="dark"] tr.bg-slate-50,
+html.dark th, html[data-theme="dark"] th {
+  background-color: #0B1528 !important;
+  background: #0B1528 !important;
+  border-color: #1e293b !important;
+  color: #94a3b8 !important;
+}
+
+html.dark tbody tr, html[data-theme="dark"] tbody tr {
+  background-color: #060B16 !important;
+  background: #060B16 !important;
+  color: #f8fafc !important;
+}
+
+html.dark tbody tr:nth-child(even), html[data-theme="dark"] tbody tr:nth-child(even) {
+  background-color: #0B1528 !important;
+  background: #0B1528 !important;
+}
+
+html.dark td, html[data-theme="dark"] td {
   border-color: #1e293b !important;
   color: #f8fafc !important;
+}
+
+/* Universal Dark Mode Injected Static GK / Callout Box Overrides */
+html.dark div[style*="background"], html[data-theme="dark"] div[style*="background"],
+html.dark div[style*="linear-gradient"], html[data-theme="dark"] div[style*="linear-gradient"] {
+  background: #0B1528 !important;
+  border-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+html.dark div[style*="background"] h4, html[data-theme="dark"] div[style*="background"] h4,
+html.dark div[style*="background"] h3, html[data-theme="dark"] div[style*="background"] h3,
+html.dark div[style*="linear-gradient"] h4, html[data-theme="dark"] div[style*="linear-gradient"] h4,
+html.dark div[style*="linear-gradient"] h3, html[data-theme="dark"] div[style*="linear-gradient"] h3 {
+  color: #60a5fa !important;
+}
+
+html.dark div[style*="background"] ul, html[data-theme="dark"] div[style*="background"] ul,
+html.dark div[style*="background"] p, html[data-theme="dark"] div[style*="background"] p,
+html.dark div[style*="background"] li, html[data-theme="dark"] div[style*="background"] li,
+html.dark div[style*="linear-gradient"] ul, html[data-theme="dark"] div[style*="linear-gradient"] ul,
+html.dark div[style*="linear-gradient"] p, html[data-theme="dark"] div[style*="linear-gradient"] p,
+html.dark div[style*="linear-gradient"] li, html[data-theme="dark"] div[style*="linear-gradient"] li {
+  color: #e2e8f0 !important;
+}
+
+html.dark div[style*="background"] strong, html[data-theme="dark"] div[style*="background"] strong,
+html.dark div[style*="linear-gradient"] strong, html[data-theme="dark"] div[style*="linear-gradient"] strong {
+  color: #ffffff !important;
+}
+
+/* Dedicated Static GK Callout & Data Table Styling */
+html.dark .static-gk-content div,
+html.dark .static-gk-content [class*="bg-"],
+html[data-theme="dark"] .static-gk-content div,
+html[data-theme="dark"] .static-gk-content [class*="bg-"] {
+  background-color: transparent !important;
+  background: transparent !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+  color: #f8fafc !important;
+}
+
+.static-gk-content h4, .static-gk-content h3 {
+  font-weight: 800;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  color: #1e40af;
+}
+html.dark .static-gk-content h4, html.dark .static-gk-content h3 {
+  color: #60a5fa !important;
+}
+
+.static-gk-content ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: #334155;
+}
+html.dark .static-gk-content ul {
+  color: #e2e8f0 !important;
+}
+
+.static-gk-content li {
+  margin-bottom: 0.25rem;
+}
+
+.static-gk-content strong {
+  font-weight: 700;
+  color: #0f172a;
+}
+html.dark .static-gk-content strong {
+  color: #ffffff !important;
+}
+
+.ca-data-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.ca-data-table thead tr,
+.ca-data-table tr.bg-slate-100 {
+  background-color: #f1f5f9;
+}
+html.dark .ca-data-table thead tr,
+html.dark .ca-data-table tr.bg-slate-100 {
+  background-color: #060B16 !important;
+}
+
+.ca-data-table th {
+  padding: 0.625rem 0.875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+  letter-spacing: 0.05em;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+html.dark .ca-data-table th {
+  color: #94a3b8 !important;
+  border-color: #1e293b !important;
+}
+
+.ca-data-table td {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+}
+html.dark .ca-data-table td {
+  border-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+.ca-data-table tbody tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+html.dark .ca-data-table tbody tr:nth-child(even) {
+  background-color: #060B16 !important;
 }
 
 .glow-on-hover {

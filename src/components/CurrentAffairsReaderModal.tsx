@@ -59,6 +59,16 @@ export const CurrentAffairsReaderModal: React.FC<Props> = ({ article, onClose })
     }
   };
 
+  const sanitizeArticleHtml = (htmlStr: string) => {
+    if (!htmlStr) return '';
+    return htmlStr
+      .replace(/style="[^"]*"/gi, '')
+      .replace(/style='[^']*'/gi, '')
+      .replace(/\b(bg-white|bg-slate-50|bg-slate-100|bg-slate-200|bg-indigo-50|bg-blue-50|bg-amber-50|bg-emerald-50|bg-purple-50)\b/gi, 'bg-slate-50 dark:bg-[#0B1528]')
+      .replace(/\b(border-slate-200|border-slate-100|border-indigo-200|border-blue-200|border-amber-200|border-emerald-200|border-purple-200)\b/gi, 'border-slate-200 dark:border-slate-800')
+      .replace(/\b(text-slate-900|text-slate-800|text-slate-700|text-indigo-900|text-amber-900|text-purple-900|text-emerald-900)\b/gi, 'text-slate-800 dark:text-slate-200');
+  };
+
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-slate-950/80 flex items-center justify-center p-0 sm:p-4 animate-fadeIn backdrop-blur-xs">
       <div className="bg-white dark:bg-[#0B1528] border-0 sm:border border-slate-200/90 dark:border-slate-800 rounded-none sm:rounded-3xl shadow-2xl w-full max-w-4xl h-[100dvh] sm:h-auto sm:max-h-[92vh] flex flex-col overflow-hidden transform-gpu">
@@ -118,28 +128,40 @@ export const CurrentAffairsReaderModal: React.FC<Props> = ({ article, onClose })
 
           {/* 2. Full Background Context */}
           <div className="prose prose-slate dark:prose-invert max-w-none text-slate-800 dark:text-slate-200 leading-relaxed text-xs sm:text-base">
-            <div dangerouslySetInnerHTML={{ __html: article.full_context }} />
+            <div dangerouslySetInnerHTML={{ __html: sanitizeArticleHtml(article.full_context) }} />
           </div>
 
           {/* 3. Static GK & Exam Relevance Callout Card */}
           {article.static_gk_pointers && (
-            <div dangerouslySetInnerHTML={{ __html: article.static_gk_pointers }} />
+            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-blue-50/90 to-indigo-50/70 dark:from-[#0B1528] dark:to-[#060B16] border border-blue-200/80 dark:border-blue-900/50 shadow-xs relative overflow-hidden my-4 text-slate-800 dark:text-slate-200">
+              <div 
+                className="static-gk-content" 
+                dangerouslySetInnerHTML={{ 
+                  __html: sanitizeArticleHtml(article.static_gk_pointers)
+                }} 
+              />
+            </div>
           )}
 
           {/* 4. Key Data Table */}
           {article.data_table_html && (
-            <div className="overflow-x-auto rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
-              <div dangerouslySetInnerHTML={{ __html: article.data_table_html }} />
+            <div className="overflow-x-auto rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs my-4 bg-white dark:bg-[#0B1528]">
+              <div 
+                className="ca-data-table" 
+                dangerouslySetInnerHTML={{ 
+                  __html: sanitizeArticleHtml(article.data_table_html)
+                }} 
+              />
             </div>
           )}
 
           {/* 5. Student Community & Channel Promotion Hub Banner */}
           <div className={`rounded-2xl p-3.5 sm:p-5 text-white border shadow-md relative overflow-hidden ${
             cat.includes('odisha')
-              ? 'bg-gradient-to-r from-amber-700 via-amber-850 to-orange-950 border-amber-500/40'
+              ? 'bg-gradient-to-r from-amber-900 via-amber-950 to-orange-950 border-amber-500/40'
               : cat.includes('world') || cat.includes('international')
-              ? 'bg-gradient-to-r from-indigo-850 via-purple-900 to-slate-950 border-purple-500/40'
-              : 'bg-gradient-to-r from-teal-850 via-emerald-900 to-slate-950 border-teal-500/40'
+              ? 'bg-gradient-to-r from-indigo-950 via-purple-900 to-slate-950 border-purple-500/40'
+              : 'bg-gradient-to-r from-teal-950 via-emerald-900 to-slate-950 border-teal-500/40'
           }`}>
             <div className={`absolute -right-8 -bottom-8 w-48 h-48 rounded-full blur-2xl pointer-events-none ${
               cat.includes('odisha') ? 'bg-amber-500/20' : cat.includes('world') ? 'bg-purple-500/20' : 'bg-teal-500/20'

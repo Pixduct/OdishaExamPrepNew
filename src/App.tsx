@@ -424,8 +424,8 @@ const HistoryView = ({
 
   if (!examFilteredActivities || examFilteredActivities.length === 0) {
     return (
-      <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent" style={{ isolation: 'isolate' }}>
-        <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-[0.03] pointer-events-none z-0" />
+      <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-[#060B16]" style={{ isolation: 'isolate' }}>
+        <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#1e293b_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-30 pointer-events-none z-0" />
         <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none z-0" />
         <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none z-0" />
 
@@ -470,7 +470,7 @@ const HistoryView = ({
   }
 
   return (
-    <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent" style={{ isolation: 'isolate' }}>
+    <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-[#060B16]" style={{ isolation: 'isolate' }}>
       {/* Full-Screen Edge-to-Edge Academic Vector Canvas Grid & HSL Glows */}
       <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-[0.03] pointer-events-none z-0" />
       <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none z-0" />
@@ -4879,7 +4879,7 @@ const PurchasesView = ({ user, profile, exams, mockTests, testSeries, dynamicQue
   const isFullAccess = profile.hasFullAccess || profile.role === 'admin';
 
   return (
-    <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent overflow-x-hidden" style={{ isolation: 'isolate' }}>
+    <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-[#060B16] overflow-x-hidden" style={{ isolation: 'isolate' }}>
       {/* Full-Screen Edge-to-Edge Academic Vector Canvas Grid & HSL Glows */}
       <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-[0.03] pointer-events-none z-0" />
       <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none z-0" />
@@ -8181,7 +8181,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     }
 
     return (
-      <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent" style={{ isolation: 'isolate' }}>
+      <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-[#060B16]" style={{ isolation: 'isolate' }}>
         {/* Full-Screen Edge-to-Edge Academic Vector Canvas Grid & HSL Glows */}
         <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-[0.03] pointer-events-none z-0" />
         <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none z-0 gpu-accelerated" />
@@ -8588,187 +8588,181 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             </div>
           </div>
 
-          <div className="relative group -mx-2 px-2">
-            <div 
-              className="pb-2 pt-2 px-1 sm:pb-6 sm:pt-6 sm:px-4 rounded-3xl border-0 sm:border-2 border-transparent sm:border-slate-900 dark:sm:border-slate-700/80 bg-transparent sm:bg-[#FAF8F5] dark:sm:bg-slate-900/40 shadow-none sm:shadow-[6px_6px_0px_rgba(37,99,235,0.15)]"
-            >
-              <motion.div 
-                className={cn(
-                  isMobile 
-                    ? "flex flex-col gap-3" 
-                    : "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-4 md:gap-6 px-1"
-                )}
-              >
-                <AnimatePresence mode="wait">
-                  {loadingExams ? (
-                    Array.from({ length: 6 }).map((_, i) => (
-                      <motion.div
-                        key={`skeleton-${i}`}
-                        className="h-28 sm:h-40 md:h-56 rounded-2xl border-2 border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-800 animate-pulse shadow-[4px_4px_0px_rgba(37,99,235,0.1)]"
-                      />
-                    ))
-                  ) : filteredExams.length === 0 ? (
-                    <motion.div
-                      key="empty-exams"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="col-span-2 sm:col-span-3 lg:col-span-4 flex flex-col items-center justify-center py-12 text-center gap-3 bg-white dark:bg-slate-900/90 border-2 border-slate-900 dark:border-slate-800 rounded-2xl p-6 shadow-[4px_4px_0px_rgba(37,99,235,0.15)]"
+          <motion.div 
+            className={cn(
+              isMobile 
+                ? "flex flex-col gap-2.5 sm:gap-3" 
+                : "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-4 md:gap-6"
+            )}
+          >
+            <AnimatePresence mode="wait">
+              {loadingExams ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <motion.div
+                    key={`skeleton-${i}`}
+                    className="h-28 sm:h-40 md:h-56 rounded-2xl border-2 border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-800 animate-pulse shadow-[4px_4px_0px_rgba(37,99,235,0.1)]"
+                  />
+                ))
+              ) : filteredExams.length === 0 ? (
+                <motion.div
+                  key="empty-exams"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="col-span-2 sm:col-span-3 lg:col-span-4 flex flex-col items-center justify-center py-12 text-center gap-3 bg-white dark:bg-slate-900/90 border-2 border-slate-900 dark:border-slate-800 rounded-2xl p-6 shadow-[4px_4px_0px_rgba(37,99,235,0.15)]"
+                >
+                  <div className="w-14 h-14 rounded-2xl border-2 border-slate-900 dark:border-slate-700 bg-[#FAF8F5] dark:bg-slate-800 flex items-center justify-center text-3xl shadow-[2px_2px_0px_#2563EB]">📚</div>
+                  <p className="font-serif font-bold text-slate-900 dark:text-white text-lg">
+                    {examSearchQuery ? `No results for "${examSearchQuery}"` : `No ${activeTab} exams yet`}
+                  </p>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm font-medium max-w-xs">
+                    {examSearchQuery ? 'Try a different search term' : activeTab === 'upcoming' ? 'Switch to Popular to see available exams' : 'Exams will appear here once added'}
+                  </p>
+                  {!examSearchQuery && activeTab === 'upcoming' && (
+                    <button 
+                      onClick={() => setActiveTab('popular')} 
+                      className="mt-1 px-5 py-2 text-sm font-extrabold text-white bg-[#2563EB] hover:bg-[#1d4ed8] border-2 border-slate-900 rounded-xl transition-all duration-200 shadow-[2px_2px_0px_#0f172a] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_#0f172a] cursor-pointer"
                     >
-                      <div className="w-14 h-14 rounded-2xl border-2 border-slate-900 dark:border-slate-700 bg-[#FAF8F5] dark:bg-slate-800 flex items-center justify-center text-3xl shadow-[2px_2px_0px_#2563EB]">📚</div>
-                      <p className="font-serif font-bold text-slate-900 dark:text-white text-lg">
-                        {examSearchQuery ? `No results for "${examSearchQuery}"` : `No ${activeTab} exams yet`}
-                      </p>
-                      <p className="text-slate-500 dark:text-slate-400 text-sm font-medium max-w-xs">
-                        {examSearchQuery ? 'Try a different search term' : activeTab === 'upcoming' ? 'Switch to Popular to see available exams' : 'Exams will appear here once added'}
-                      </p>
-                      {!examSearchQuery && activeTab === 'upcoming' && (
-                        <button 
-                          onClick={() => setActiveTab('popular')} 
-                          className="mt-1 px-5 py-2 text-sm font-extrabold text-white bg-[#2563EB] hover:bg-[#1d4ed8] border-2 border-slate-900 rounded-xl transition-all duration-200 shadow-[2px_2px_0px_#0f172a] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_#0f172a] cursor-pointer"
-                        >
-                          {t('exams.viewPopular', 'View Popular Exams')}
-                        </button>
-                      )}
-                    </motion.div>
-                  ) : (
-                    filteredExams.map((exam) => {
-                      let displayDesc = exam.description || 'Practice mock tests and quizzes';
-                      if (typeof displayDesc === 'string' && displayDesc.startsWith('JSON_METADATA_')) {
-                        try {
-                          const meta = JSON.parse(displayDesc.replace('JSON_METADATA_', ''));
-                          displayDesc = meta.description || 'Practice mock tests and quizzes';
-                        } catch(e) {}
-                      }
- 
-                      // Replace generic AI placeholder descriptions if empty
-                      if (!displayDesc || displayDesc.trim() === '') {
-                        const nameLower = exam.name.toLowerCase();
-                        if (nameLower.includes('amin')) {
-                          displayDesc = 'Comprehensive practice tests covering Mathematics, Computer Awareness, English, and Odia for the OSSSC Amin recruitment.';
-                        } else if (nameLower.includes('ri') || nameLower === 'ri') {
-                          displayDesc = 'Mock examinations covering General Awareness, Mathematics, Odia, English, and Computer concepts for Revenue Inspector.';
-                        } else if (nameLower.includes('upsc')) {
-                          displayDesc = 'Mock tests and previous year papers for Civil Services Prelims, focusing on General Studies and CSAT paper preparation.';
-                        } else if (nameLower.includes('opsc')) {
-                          displayDesc = 'Mock tests tailored for OPSC OAS Prelims & Mains exams, containing detailed solutions and performance analytics.';
-                        } else if (nameLower.includes('ossc')) {
-                          displayDesc = 'Comprehensive syllabus coverage for OSSC CGL and other graduate level examinations, featuring daily practice quizzes.';
-                        } else if (nameLower.includes('osssc')) {
-                          displayDesc = 'Dedicated preparation tests for various OSSSC cadre posts, including targeted section tests and full-length papers.';
-                        } else {
-                          displayDesc = 'Access specialized syllabus-aligned mock exams, topic-wise practice questions, and previous year papers.';
-                        }
-                      }
- 
-                      return (
-                        <motion.div 
-                          key={exam.id}
-                          initial={{ opacity: 0, scale: 0.95, y: 12 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                          onClick={() => {
-                            setSelectedExam(exam.id);
-                          }}
-                          className="cursor-pointer h-full group/card"
-                        >
-                          {isMobile ? (
-                            // Sleek Premium Mobile Row Item
-                            <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.28)" roundedClass="rounded-2xl" className="w-full">
-                              <div className="p-3.5 bg-white dark:bg-slate-900/90 border border-slate-100/90 dark:border-slate-800 rounded-2xl flex flex-row items-center justify-between gap-3.5 relative shadow-[0_4px_16px_rgba(0,0,0,0.035)] active:scale-[0.98] active:border-brand-300 transition-all duration-300 overflow-hidden">
-                                {/* Inner Vector Grid Overlay */}
-                                <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
-                                
-                                {/* Soft brand left indicator */}
-                                <div className="absolute left-0 top-3.5 bottom-3.5 w-1 bg-gradient-to-b from-[#2563EB] to-brand-700 rounded-r-md opacity-80 z-10" />
-                                
-                                {/* Left Content (Icon & Text) */}
-                                <div className="flex items-center gap-3.5 min-w-0 flex-1 pl-1.5 relative z-10">
-                                  {/* Icon container */}
-                                  <div className="w-12 h-12 rounded-xl border border-brand-100/20 bg-brand-50/50 dark:bg-slate-800 flex justify-center items-center shrink-0 shadow-sm relative overflow-hidden">
-                                    {(exam.icon && (exam.icon.startsWith('http') || exam.icon.startsWith('/'))) ? (
-                                      <img src={getDirectImageUrl(exam.icon)} alt={`Odisha Exam Prep Icon: ${exam.name}`} className="w-8/12 h-8/12 object-contain relative z-10" referrerPolicy="no-referrer" />
-                                    ) : (
-                                      <span className="text-xl relative z-10">{exam.icon || '📚'}</span>
-                                    )}
-                                  </div>
-                                  
-                                  {/* Title and Subtitle */}
-                                  <div className="min-w-0 flex-1">
-                                    <h3 className="text-[13.5px] font-extrabold text-slate-900 dark:text-white leading-snug tracking-tight uppercase line-clamp-1">
-                                      {exam.name}
-                                    </h3>
-                                    <p className="text-slate-455 dark:text-slate-400 text-[11px] font-medium leading-normal mt-0.5 line-clamp-1 pr-1">
-                                      {displayDesc}
-                                    </p>
-                                  </div>
-                                </div>
-   
-                                {/* Right Icon Chevron */}
-                                <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-300 shrink-0 shadow-2xs relative z-10">
-                                  <ChevronRight className="w-4 h-4" />
-                                </div>
-                              </div>
-                            </DynamicVectorCard>
-                          ) : (
-                            // Desktop Card
-                            <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.15)" roundedClass="rounded-2xl sm:rounded-3xl" className="h-full">
-                              <div className="p-3 sm:p-5 md:p-6 h-full bg-white dark:bg-gradient-to-br dark:from-[#0d1b3e] dark:via-[#0f2257] dark:to-[#0b1730] border sm:border-2 border-slate-900 dark:border-brand-800/50 rounded-2xl sm:rounded-3xl flex flex-col items-center text-center justify-center space-y-2 sm:space-y-4 md:space-y-5 relative shadow-[0_4px_16px_rgba(0,0,0,0.035)] sm:shadow-[4px_4px_0px_#2563EB] md:group-hover/card:shadow-[8px_8px_0px_#2563EB] transition-all duration-300 active:scale-[0.98] sm:active:scale-100 active:bg-slate-50/70 sm:active:bg-white dark:active:bg-[#0d1b3e] text-slate-900 dark:text-white overflow-hidden">
-                                {/* Inner Vector Grid Overlay */}
-                                <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
-                              {/* Corner arrow - structured circle */}
-                              <div className="absolute top-2 right-2 sm:top-4 sm:right-4 md:top-5 md:right-5 w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full border-2 border-slate-900 dark:border-brand-700/70 bg-white dark:bg-brand-900/60 flex items-center justify-center transition-all duration-300 shadow-[2px_2px_0px_#2563EB] group-hover/card:bg-[#2563EB] group-hover/card:shadow-none group-hover/card:translate-x-0.5 group-hover/card:translate-y-0.5">
-                                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-900 dark:text-blue-200 group-hover/card:text-white transition-colors" />
-                              </div>
- 
-                              {/* Icon Container */}
-                              <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-2xl border sm:border-2 border-brand-100/20 sm:border-slate-900 dark:border-brand-700/40 bg-brand-50/60 sm:bg-[#FAF8F5] dark:bg-white/10 dark:sm:bg-white/10 flex justify-center items-center shrink-0 shadow-none sm:shadow-[3px_3px_0px_rgba(37,99,235,0.15)] md:group-hover/card:shadow-[4px_4px_0px_#2563EB] transition-all duration-300 relative overflow-hidden">
+                      {t('exams.viewPopular', 'View Popular Exams')}
+                    </button>
+                  )}
+                </motion.div>
+              ) : (
+                filteredExams.map((exam) => {
+                  let displayDesc = exam.description || 'Practice mock tests and quizzes';
+                  if (typeof displayDesc === 'string' && displayDesc.startsWith('JSON_METADATA_')) {
+                    try {
+                      const meta = JSON.parse(displayDesc.replace('JSON_METADATA_', ''));
+                      displayDesc = meta.description || 'Practice mock tests and quizzes';
+                    } catch(e) {}
+                  }
+
+                  // Replace generic AI placeholder descriptions if empty
+                  if (!displayDesc || displayDesc.trim() === '') {
+                    const nameLower = exam.name.toLowerCase();
+                    if (nameLower.includes('amin')) {
+                      displayDesc = 'Comprehensive practice tests covering Mathematics, Computer Awareness, English, and Odia for the OSSSC Amin recruitment.';
+                    } else if (nameLower.includes('ri') || nameLower === 'ri') {
+                      displayDesc = 'Mock examinations covering General Awareness, Mathematics, Odia, English, and Computer concepts for Revenue Inspector.';
+                    } else if (nameLower.includes('upsc')) {
+                      displayDesc = 'Mock tests and previous year papers for Civil Services Prelims, focusing on General Studies and CSAT paper preparation.';
+                    } else if (nameLower.includes('opsc')) {
+                      displayDesc = 'Mock tests tailored for OPSC OAS Prelims & Mains exams, containing detailed solutions and performance analytics.';
+                    } else if (nameLower.includes('ossc')) {
+                      displayDesc = 'Comprehensive syllabus coverage for OSSC CGL and other graduate level examinations, featuring daily practice quizzes.';
+                    } else if (nameLower.includes('osssc')) {
+                      displayDesc = 'Dedicated preparation tests for various OSSSC cadre posts, including targeted section tests and full-length papers.';
+                    } else {
+                      displayDesc = 'Access specialized syllabus-aligned mock exams, topic-wise practice questions, and previous year papers.';
+                    }
+                  }
+
+                  return (
+                    <motion.div 
+                      key={exam.id}
+                      initial={{ opacity: 0, scale: 0.95, y: 12 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                      onClick={() => {
+                        setSelectedExam(exam.id);
+                      }}
+                      className="cursor-pointer h-full group/card"
+                    >
+                      {isMobile ? (
+                        // Sleek Premium Mobile Row Item
+                        <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.28)" roundedClass="rounded-2xl" className="w-full">
+                          <div className="p-3.5 bg-white dark:bg-slate-900/90 border border-slate-100/90 dark:border-slate-800 rounded-2xl flex flex-row items-center justify-between gap-3.5 relative shadow-[0_4px_16px_rgba(0,0,0,0.035)] active:scale-[0.98] active:border-brand-300 transition-all duration-300 overflow-hidden">
+                            {/* Inner Vector Grid Overlay */}
+                            <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
+                            
+                            {/* Soft brand left indicator */}
+                            <div className="absolute left-0 top-3.5 bottom-3.5 w-1 bg-gradient-to-b from-[#2563EB] to-brand-700 rounded-r-md opacity-80 z-10" />
+                            
+                            {/* Left Content (Icon & Text) */}
+                            <div className="flex items-center gap-3.5 min-w-0 flex-1 pl-1.5 relative z-10">
+                              {/* Icon container */}
+                              <div className="w-12 h-12 rounded-xl border border-brand-100/20 bg-brand-50/50 dark:bg-slate-800 flex justify-center items-center shrink-0 shadow-sm relative overflow-hidden">
                                 {(exam.icon && (exam.icon.startsWith('http') || exam.icon.startsWith('/'))) ? (
                                   <img src={getDirectImageUrl(exam.icon)} alt={`Odisha Exam Prep Icon: ${exam.name}`} className="w-8/12 h-8/12 object-contain relative z-10" referrerPolicy="no-referrer" />
                                 ) : (
-                                  <span className="text-xl sm:text-2xl md:text-4xl relative z-10">{exam.icon || '📚'}</span>
+                                  <span className="text-xl relative z-10">{exam.icon || '📚'}</span>
                                 )}
                               </div>
                               
-                              <div className="flex-1 w-full flex flex-col justify-start">
-                                <h3 
-                                  className="text-[12px] sm:text-base md:text-lg lg:text-xl font-serif font-black text-slate-900 dark:text-white md:group-hover/card:text-[#2563EB] dark:md:group-hover/card:text-brand-300 transition-all duration-300 leading-snug tracking-tight uppercase"
-                                  style={{
-                                    display: '-webkit-box',
-                                    WebkitLineClamp: 2,
-                                    WebkitBoxOrient: 'vertical',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis'
-                                  }}
-                                >
+                              {/* Title and Subtitle */}
+                              <div className="min-w-0 flex-1">
+                                <h3 className="text-[13.5px] font-extrabold text-slate-900 dark:text-white leading-snug tracking-tight uppercase line-clamp-1">
                                   {exam.name}
                                 </h3>
-                                <div className="w-full mt-2">
-                                  <p 
-                                    className="text-slate-400 sm:text-slate-500 dark:text-blue-200/70 dark:sm:text-blue-200/70 text-[10px] sm:text-xs font-medium sm:font-bold leading-normal sm:leading-relaxed opacity-85 md:group-hover/card:opacity-100 transition-opacity"
-                                    style={{
-                                      display: '-webkit-box',
-                                      WebkitLineClamp: 2,
-                                      WebkitBoxOrient: 'vertical',
-                                      overflow: 'hidden',
-                                      textOverflow: 'ellipsis'
-                                    }}
-                                  >
-                                    {displayDesc}
-                                  </p>
-                                </div>
+                                <p className="text-slate-455 dark:text-slate-400 text-[11px] font-medium leading-normal mt-0.5 line-clamp-1 pr-1">
+                                  {displayDesc}
+                                </p>
                               </div>
                             </div>
-                          </DynamicVectorCard>
-                        )}
-                      </motion.div>
-                    );
-                  })
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            </div>
-          </div>
+
+                            {/* Right Icon Chevron */}
+                            <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-300 shrink-0 shadow-2xs relative z-10">
+                              <ChevronRight className="w-4 h-4" />
+                            </div>
+                          </div>
+                        </DynamicVectorCard>
+                      ) : (
+                        // Desktop Card
+                        <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.15)" roundedClass="rounded-2xl sm:rounded-3xl" className="h-full">
+                          <div className="p-3 sm:p-5 md:p-6 h-full bg-white dark:bg-gradient-to-br dark:from-[#0d1b3e] dark:via-[#0f2257] dark:to-[#0b1730] border sm:border-2 border-slate-900 dark:border-brand-800/50 rounded-2xl sm:rounded-3xl flex flex-col items-center text-center justify-center space-y-2 sm:space-y-4 md:space-y-5 relative shadow-[0_4px_16px_rgba(0,0,0,0.035)] sm:shadow-[4px_4px_0px_#2563EB] md:group-hover/card:shadow-[8px_8px_0px_#2563EB] transition-all duration-300 active:scale-[0.98] sm:active:scale-100 active:bg-slate-50/70 sm:active:bg-white dark:active:bg-[#0d1b3e] text-slate-900 dark:text-white overflow-hidden">
+                            {/* Inner Vector Grid Overlay */}
+                            <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />
+                          {/* Corner arrow - structured circle */}
+                          <div className="absolute top-2 right-2 sm:top-4 sm:right-4 md:top-5 md:right-5 w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full border-2 border-slate-900 dark:border-brand-700/70 bg-white dark:bg-brand-900/60 flex items-center justify-center transition-all duration-300 shadow-[2px_2px_0px_#2563EB] group-hover/card:bg-[#2563EB] group-hover/card:shadow-none group-hover/card:translate-x-0.5 group-hover/card:translate-y-0.5">
+                            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-900 dark:text-blue-200 group-hover/card:text-white transition-colors" />
+                          </div>
+
+                          {/* Icon Container */}
+                          <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-2xl border sm:border-2 border-brand-100/20 sm:border-slate-900 dark:border-brand-700/40 bg-brand-50/60 sm:bg-[#FAF8F5] dark:bg-white/10 dark:sm:bg-white/10 flex justify-center items-center shrink-0 shadow-none sm:shadow-[3px_3px_0px_rgba(37,99,235,0.15)] md:group-hover/card:shadow-[4px_4px_0px_#2563EB] transition-all duration-300 relative overflow-hidden">
+                            {(exam.icon && (exam.icon.startsWith('http') || exam.icon.startsWith('/'))) ? (
+                              <img src={getDirectImageUrl(exam.icon)} alt={`Odisha Exam Prep Icon: ${exam.name}`} className="w-8/12 h-8/12 object-contain relative z-10" referrerPolicy="no-referrer" />
+                            ) : (
+                              <span className="text-xl sm:text-2xl md:text-4xl relative z-10">{exam.icon || '📚'}</span>
+                            )}
+                          </div>
+                          
+                          <div className="flex-1 w-full flex flex-col justify-start">
+                            <h3 
+                              className="text-[12px] sm:text-base md:text-lg lg:text-xl font-serif font-black text-slate-900 dark:text-white md:group-hover/card:text-[#2563EB] dark:md:group-hover/card:text-brand-300 transition-all duration-300 leading-snug tracking-tight uppercase"
+                              style={{
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                              }}
+                            >
+                              {exam.name}
+                            </h3>
+                            <div className="w-full mt-2">
+                              <p 
+                                className="text-slate-400 sm:text-slate-500 dark:text-blue-200/70 dark:sm:text-blue-200/70 text-[10px] sm:text-xs font-medium sm:font-bold leading-normal sm:leading-relaxed opacity-85 md:group-hover/card:opacity-100 transition-opacity"
+                                style={{
+                                  display: '-webkit-box',
+                                  WebkitLineClamp: 2,
+                                  WebkitBoxOrient: 'vertical',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis'
+                                }}
+                              >
+                                {displayDesc}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </DynamicVectorCard>
+                    )}
+                  </motion.div>
+                );
+              })
+              )}
+            </AnimatePresence>
+          </motion.div>
         </div>
       </div>
     </div>
@@ -9180,9 +9174,9 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
     return (
       <ErrorBoundary>
-      <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-transparent" style={{ isolation: 'isolate' }}>
+      <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-[#060B16]" style={{ isolation: 'isolate' }}>
         {/* Full-Screen Edge-to-Edge Academic Vector Canvas Grid & HSL Glows */}
-        <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-[0.03] pointer-events-none z-0" />
+        <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#1e293b_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-30 pointer-events-none z-0" />
         <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none z-0" />
         <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none z-0" />
 
@@ -9197,7 +9191,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         <div className="w-full mx-auto space-y-4 sm:space-y-8 pb-4 sm:pb-8 relative z-10">
 
         {/* Executive Bright Study Vector Header Card */}
-        <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 border border-slate-200/80 dark:border-indigo-500/20 shadow-xl shadow-slate-200/40 dark:shadow-indigo-950/20 rounded-[2.2rem] relative overflow-hidden z-10 mb-8 sm:mb-10">
+        <div className="p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50/95 to-brand-50/30 dark:bg-gradient-to-br dark:from-[#0B1528] dark:via-[#060B16] dark:to-[#0B1528] border border-slate-200/80 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-slate-950/80 rounded-[2.2rem] relative overflow-hidden z-10 mb-8 sm:mb-10">
           {/* Radial Grid & Floating Header Watermark */}
           <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none" />
           <GraduationCap className="absolute -right-8 -bottom-8 w-52 h-52 sm:w-64 sm:h-64 opacity-10 stroke-[1.2] text-brand-600 pointer-events-none rotate-12" />
@@ -9212,7 +9206,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     scrollToElement('exams', { block: 'start', delay: 100 }); 
                   }
                 }} 
-                className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:border-brand-300 dark:hover:border-slate-600 hover:bg-brand-50 dark:hover:bg-slate-700 text-slate-700 dark:text-white transition-all shrink-0 flex items-center justify-center p-0"
+                className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white dark:bg-[#060B16] border border-slate-200 dark:border-slate-800 shadow-sm hover:border-brand-300 dark:hover:border-slate-700 hover:bg-brand-50 dark:hover:bg-slate-800 text-slate-700 dark:text-white transition-all shrink-0 flex items-center justify-center p-0"
               >
                 <ChevronRight className="w-6 h-6 rotate-180 text-brand-600 dark:text-brand-400" />
               </Button>
@@ -11102,12 +11096,12 @@ const ExamDetailPage = () => {
   if (!user) {
     // Guest view
     return (
-      <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
+      <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#060B16] flex flex-col">
 
 
         <Navbar user={null} isAdmin={false} onSignIn={() => setShowAuthModal(true)} />
 
-        <main className="flex-1 px-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pt-20 sm:pt-24 md:pt-28 pb-16" style={{background: 'linear-gradient(160deg, #FAF8F5 0%, #FAF8F5 40%, #FAF8F5 100%)'}}>
+        <main className="flex-1 px-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pt-20 sm:pt-24 md:pt-28 pb-16">
           <DashboardContent 
             isGuest={true} 
             onSignIn={() => setShowAuthModal(true)} 
@@ -11721,7 +11715,7 @@ function AppContent() {
   }
 
   return (
-    <div className="w-full max-w-full overflow-x-hidden min-h-screen min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0b0f19] font-sans text-slate-900 dark:text-slate-100">
+    <div className="w-full max-w-full overflow-x-hidden min-h-screen min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#060B16] font-sans text-slate-900 dark:text-slate-100">
       {isAIOctive && (
         <div className="w-full max-w-full overflow-x-hidden flex flex-col min-h-screen min-h-[100dvh]">
           <Navbar user={user} isAdmin={isAdmin} onHomeClick={handleHomeClick} />

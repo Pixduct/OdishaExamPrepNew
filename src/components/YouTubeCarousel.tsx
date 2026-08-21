@@ -269,17 +269,16 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
   if (sourceVideos.length === 0) return null;
 
   return (
-    <DynamicVectorCard
-      glowColor="rgba(37, 99, 235, 0.28)"
-      roundedClass="rounded-2xl sm:rounded-[2.5rem]"
-      className="w-full select-none"
+    <div className="w-full select-none">
+    <div 
+      ref={containerRef} 
+      className="w-full relative py-0 sm:py-10 overflow-hidden bg-transparent sm:bg-[#F2EFE9] dark:sm:bg-slate-900 border-0 sm:border-2 border-transparent sm:border-slate-900 dark:sm:border-slate-700 rounded-none sm:rounded-[2.5rem] select-none"
     >
-    <div ref={containerRef} className="w-full relative py-3.5 sm:py-10 overflow-hidden bg-[#F2EFE9] dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-2xl sm:rounded-[2.5rem] select-none">
       {/* Editorial Decorative Grid overlay — desktop only */}
       <div className="hidden sm:block absolute inset-0 grid-bg opacity-[0.02] pointer-events-none" />
 
       {/* ── MOBILE HEADER (CSS Responsive) ─────────────────────────────── */}
-      <div className="block sm:hidden px-3.5 mb-2.5 relative z-10">
+      <div className="block sm:hidden px-0 mb-3 relative z-10">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <div className="w-7 h-7 bg-[#2563EB] text-white rounded-lg flex items-center justify-center border border-slate-900 dark:border-slate-700 shrink-0 shadow-xs">
@@ -510,6 +509,6 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
         )}
       </AnimatePresence>
     </div>
-    </DynamicVectorCard>
+    </div>
   );
 }

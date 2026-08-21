@@ -586,8 +586,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       correctAnswerIndex: 0,
       explanation: '',
       diagram: null,
-      pdfLinks: [],
-      scheduled_at: ''
+      pdfLinks: []
     };
   };
 
@@ -600,7 +599,11 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           type: currentData.type,
           target_mode: currentData.target_mode || (tab === 'practice' ? 'practice' : 'bank'),
           mockSubject: currentData.mockSubject,
-          isPremium: currentData.isPremium
+          tagline: currentData.tagline,
+          isPremium: currentData.isPremium,
+          price: currentData.price,
+          originalPrice: currentData.originalPrice,
+          scheduled_at: currentData.scheduled_at
         };
       } else if (tab === 'tests') {
         sticky = {
@@ -610,7 +613,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           durationMinutes: currentData.durationMinutes,
           totalMarks: currentData.totalMarks,
           negativeMarking: currentData.negativeMarking,
-          isPremium: currentData.isPremium
+          isPremium: currentData.isPremium,
+          price: currentData.price,
+          originalPrice: currentData.originalPrice,
+          scheduled_at: currentData.scheduled_at
         };
       } else if (tab === 'questions') {
         sticky = {
@@ -622,16 +628,28 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         sticky = {
           examId: currentData.examId,
           price: currentData.price,
-          durationDays: currentData.durationDays
+          originalPrice: currentData.originalPrice,
+          durationDays: currentData.durationDays,
+          scheduled_at: currentData.scheduled_at
         };
       } else if (tab === 'exams') {
         sticky = {
-          examCategory: currentData.examCategory
+          examCategory: currentData.examCategory,
+          isPremium: currentData.isPremium,
+          price: currentData.price,
+          originalPrice: currentData.originalPrice
         };
       }
       sessionStorage.setItem(`oep_sticky_${tab}`, JSON.stringify(sticky));
     } catch(e) {}
   };
+
+  // Real-time auto-saving of sticky configuration when editing new item in modal
+  useEffect(() => {
+    if (showAddModal && !editingId) {
+      saveStickyFormData(activeTab, formData);
+    }
+  }, [formData.isPremium, formData.price, formData.originalPrice, formData.scheduled_at, formData.examId, formData.type, formData.tagline, formData.mockCategory, formData.mockSubject, showAddModal, editingId, activeTab]);
 
   const resetStickyFormData = (tab: string) => {
     try {
@@ -640,6 +658,11 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     const initial = { ...initialFormData };
     if (tab === 'practice' || (tab === 'banks' && bankSubTab === 'practice')) initial.target_mode = 'practice';
     else if (tab === 'banks') initial.target_mode = 'bank';
+    initial.tagline = '';
+    initial.isPremium = false;
+    initial.price = 499;
+    initial.originalPrice = 999;
+    initial.scheduled_at = '';
     setFormData(initial);
     setDiagramText('');
     setBankQuestionsJson('');

@@ -1,6 +1,12 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] Strict Non-Exam Noise Gatekeeper & Multi-Layer Filtration Engine (`ca_scraper.py`, `ca_formatter.py`, `ca_website_publisher.py`): Eliminated 5 distinct categories of non-exam irrelevance identified from live broadcasts:
+  1. **Op-Ed Columns & Essays**: Hard-blocked newspaper opinion columns (`Column | ...`, `Opinion | ...`, `In screenshots we trust`, `Essay | ...`).
+  2. **Consumer Electronics Gadgets & Wearables**: Hard-blocked commercial smartphone/smartwatch/earbud launches and specifications (`Samsung Galaxy S26 FE`, `Galaxy Event`, `Redmi Watch 6`, `AMOLED display`, `battery life`, `CNY 349`, `refresh rate`).
+  3. **Private FMCG / Corporate Appointments**: Hard-blocked private commercial corporate leadership moves (`Colgate-Palmolive India`, `KenVue`, `Nestle`, `Swiggy`, `Zomato`, `HUL`). Enforced that only Sovereign/Constitutional/Apex Statutory appointments (RBI, SEBI, UPSC, OPSC, Supreme Court, Army/Navy/Air Chief, ISRO, CAG) are permitted.
+  4. **Municipal Micro-Tariffs**: Hard-blocked routine local municipal/panchayat rate revisions (`Kerala LSGD panchayat parking fees ₹10-₹60`, auto/bus fares, waste charges).
+  5. **Pre-Filtering at Scraper Layer**: Injected regex gatekeeper directly into `ca_scraper.py` so that non-exam noise is eliminated before ever entering the AI prompt.
 - [x] Green API WhatsApp Broadcast Integration (`120363412784897729@g.us`): Fully integrated WhatsApp automation across `ca_publisher.py`, `exam_update_engine.py`, and `shared/telegram.py`. Configured default fallback to WhatsApp Announcement Group `120363412784897729@g.us` (`idInstance: 710722716124`). Every scheduled cron run will now automatically render 1080x1080 slide carousels, exam notifications, and daily quizzes directly to WhatsApp alongside Telegram and YouTube. Verified and synced across GitHub repositories.
 - [x] Enterprise Workflow Observability & Bulletproof Telegram Admin Reporting: Resolved silence and missing notification issues across all 7 GitHub Actions automated engines (`Daily CA Engine`, `CA Website Publisher`, `Recruitment Notice Scraper`, `Exam Update Engine`, `Daily MCQ Engine`, `Strategic Engagement Engine`, `Strategic Evergreen Blog Engine`).
   1. Updated `ca_website_publisher.py` to send complete execution reports even when existing articles are already up-to-date in Supabase DB.

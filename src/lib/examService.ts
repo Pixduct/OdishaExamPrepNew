@@ -871,21 +871,31 @@ export const examService = {
       await callAdminDbProxy('questionBanks', 'update', { is_archived: true }, id);
     } else {
       try {
-        // Fetch bank to get its title
+        // Fetch bank to get its title and target_mode
         const { data: bank } = await supabase
           .from('questionBanks')
-          .select('title, examId')
+          .select('title, examId, target_mode')
           .eq('id', id)
           .single();
         if (bank && bank.title) {
-          // Delete all questions associated with this bank
-          await callAdminDbProxy('questions', 'delete', undefined, undefined, {
-            topic: { op: 'eq', val: bank.title },
-            examId: { op: 'eq', val: bank.examId }
-          });
+          // Check if any other Question Bank or Practice Set shares this topic
+          const { data: siblingBanks } = await supabase
+            .from('questionBanks')
+            .select('id')
+            .eq('title', bank.title)
+            .eq('examId', bank.examId)
+            .neq('id', id);
+
+          // ONLY delete questions from questions table if NO other bank or practice test shares this topic
+          if (!siblingBanks || siblingBanks.length === 0) {
+            await callAdminDbProxy('questions', 'delete', undefined, undefined, {
+              topic: { op: 'eq', val: bank.title },
+              examId: { op: 'eq', val: bank.examId }
+            });
+          }
         }
       } catch (err) {
-        console.error("Failed to delete questions associated with deleted bank:", err);
+        console.error("Failed to safely handle questions associated with deleted bank:", err);
       }
       await callAdminDbProxy('questionBanks', 'delete', undefined, id);
     }

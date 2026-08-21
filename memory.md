@@ -1,61 +1,60 @@
-# Memory — Current Affairs Cognitive AI Training, Geographic Resolution, Date Gate & Slide-by-Slide Admin Verification
+# Memory — Admin Question Bank & Practice Mode Full Decoupling, Safe Deletion & Mode Isolation
 
 Last updated: August 21, 2026
 
 ## What was built
 
-### 1. Mandatory Geographic State & Country Resolution Engine (`automations/ca_formatter.py`, `automations/ca_website_publisher.py`)
-- **Indian State Resolution**: Enforced that whenever an Indian district, city, port, or town is mentioned in national news (e.g. *Nellore*, *Dharwad*, *Indore*, *Wayanad*), the AI must actively resolve and state its parent State (e.g., `Nellore District (Andhra Pradesh)`, `Dharwad District (Karnataka)`).
-- **Odisha Scope**: Mandated `District & Block/Tehsil` formatting without redundant "Odisha, India" suffixes.
-- **Global Scope**: Mandated `City/Region (Country)` formatting (e.g. `Bavaria (Germany)`).
-- **Unique Bullet Headings**: Prohibited bullet headings from repeating card headlines, enforcing distinct 2–4 word topic tags.
+### 1. Top-Level Decoupled Navigation & Tab Views (`src/AdminPanel.tsx`)
+- Added **`Practice Sets`** (🎯) alongside **`Question Banks`** (📦) as independent top-level navigation tabs.
+- Filtered item lists and exam drilldown counters so `Question Banks` tab strictly displays items with `(target_mode || 'both') !== 'practice'` and `Practice Sets` tab strictly displays items with `(target_mode || 'both') !== 'bank'`.
+- Independent search bars, exam dropdown filters, and category hierarchy pill selectors for both tabs.
 
-### 2. Cognitive Acronym Reasoning & Campus Dispute Rejection Engine (`automations/`)
-- **Student Syllabus & Recognition Test**: Replaced rigid acronym restrictions with cognitive syllabus reasoning. Freely allows standard, syllabus-studied exam bodies and statutory institutions (`ISRO`, `DRDO`, `RBI`, `SEBI`, `NABARD`, `NITI Aayog`, `UPSC`, `OPSC`, `IMF`, `NATO`, `ASEAN`, `NCERT`, `ICAR`, `AIIMS`, `CSIR`, `BARC`, `GST`, `SC`, `HC`, `WHO`, `UN`) while strictly forbidding obscure local community unions or niche regional acronyms (like `KPMS`, `KSU`, `DKS`) in headlines.
-- **Campus Dispute Rejection**: Automatically rejects local university protests, college strikes, student-teacher allegations, and regional community petitions.
+### 2. Tailored Creation & Edit Modal Forms (`src/AdminPanel.tsx`)
+- **Question Banks Form (`activeTab === 'banks'`):**
+  - Displays amber guidance banner (*"📦 Question Bank (Step 3) — Interactive web reader & PDF downloads for students"*).
+  - Shows custom PDF download links, cover image URLs, and Question Bank category presets (`Topic-Wise Question Bank`, `Exam-Focused Bank`, `Revision Sets`, `PYQ Collections`).
+  - Defaults strictly to `target_mode: 'bank'`.
+- **Practice Sets Form (`activeTab === 'practice'`):**
+  - Displays blue guidance banner (*"🎯 Practice Set (Step 1) — Interactive CBT drills with instant timer and answer explanations"*).
+  - Renders clean, distraction-free CBT test creation form (hides PDF links and cover image inputs).
+  - Displays Practice category presets (`Chapter-Wise Practice`, `High-Yield Topic Banks`, `Daily Speed Quizzes`, `Topic-Wise PYQs`).
+  - Defaults strictly to `target_mode: 'practice'`.
 
-### 3. Universal Concrete Entity & Zero Ghost Actors Principle (`automations/`)
-- **Zero Ghost Actors**: Strictly eliminated vague ghost actors like *"the government has been under pressure"* or *"according to recent reports"*.
-- **Mandatory Entity Naming**: Enforced naming concrete Authorities, Ministries, Boards, Courts, Scheme/Yojana names, and specific beneficiary groups across all news topics (Space, Defense, Economy, Education, Environment, Law, Agriculture).
+### 3. Non-Destructive Safe Deletion Engine (`src/AdminPanel.tsx`, `src/lib/examService.ts`)
+- **Admin Panel Safe Downgrade**: Deleting an item with legacy `target_mode === 'both'` from the `Practice Sets` tab now safely updates `target_mode = 'bank'`, preserving the Question Bank and its PDFs completely. Deleting from `Question Banks` tab updates `target_mode = 'practice'`.
+- **Backend Co-existence Guard (`src/lib/examService.ts#deleteQuestionBank`)**: Before deleting questions associated with a deleted bank/practice set from the `questions` table, it checks if any other Question Bank or Practice Set shares that topic (`title` and `examId`). If a co-existing bank exists, question deletion is skipped, ensuring zero data loss.
 
-### 4. Strict Same-Day Verified Date Gate (`automations/ca_scraper.py`, `automations/ca_formatter.py`)
-- **Scraper Hard 24h Gate**: Eliminated `UNVERIFIED` date fallbacks in `ca_scraper.py`. Strictly discards any RSS item without a verified timestamp within the last 24 hours. Tested and verified 100% same-day timestamps (263 fresh items).
-- **Critical Date-Match Rule**: Instructs AI to only select and format news whose event date is verified as Today or Yesterday, automatically skipping ambiguous or outdated retrospective statements.
-
-### 5. Slide-by-Slide Verification & Audit Report for Admin Telegram Bot (`automations/ca_publisher.py`)
-- **Item-by-Item Verification**: Upgraded `ca_publisher.py` to send a detailed slide-by-slide verification report to Admin Telegram Bot DM (`1317595163`), displaying region, category, headline, 24h date match proof, lead point, and quality check status for every visual card.
-- **Rejection Audit**: Exposed `_dropped_quality` in `ca_formatter.py` to report gatekeeper rejection details.
-- **Message Chunking Safeguard**: Added automatic message splitting in `send_telegram_admin_status` for reports exceeding 4,000 characters.
+### 4. Memory & Documentation Sync
+- Imprinted **`AdminDecoupledContentModal`** (Item 90) in `context/ui-registry.md`.
+- Updated `context/progress-tracker.md`.
 
 ---
 
 ## Decisions made
-- **Cognitive Syllabus Reasoning over Static Acronym Lists**: Instead of a hardcoded list of 10 acronyms, the AI uses reader empathy to allow all official syllabus bodies while banning obscure local shortcuts.
-- **Universal Entity Principle over Category Silos**: Applied a single universal "No Ghost Actors" rule across all news varieties instead of creating narrow category silos.
-- **Zero Tolerance for Unverified Dates**: Dropped unverified fallback items from the scraper entirely to prevent old archives from ever reaching the AI news pool.
+- **Decoupled User Experience on Unified Schema**: Maintained database schema consistency (`public.questionBanks` with `target_mode: 'bank' | 'practice' | 'both'`) while providing a 100% decoupled, isolated admin experience for Question Banks and Practice Sets.
+- **Safe Downgrade over Hard Delete**: Transitioning legacy combined items into single-mode items on delete rather than wiping the database row.
+- **Topic Co-Existence Preservation**: Ensured `questions` table rows are guarded if multiple entities reference the same topic title.
 
 ---
 
 ## Problems solved
-- **Missing State Names**: Fixed cards like *Nellore Modernising Parks* where the parent state (*Andhra Pradesh*) was previously omitted.
-- **Unknown Shortcuts in Headlines**: Prevented obscure acronyms like *KPMS* from confusing students.
-- **Vague Fluff Cards**: Eliminated cards like *20 Lakh Students Awaiting Fee Reimbursement* that lacked state/scheme names.
-- **Outdated / Deceased Leader News**: Prevented past retrospective statements (e.g. Gen Bipin Rawat quotes) from being published under today's date.
-- **Lack of Admin Visibility**: Transformed admin execution reporting into an exhaustive slide-by-slide verification audit.
+- **Data Loss on Practice Test Deletion**: Eliminated the critical issue where deleting a practice test inadvertently deleted the Question Bank, removed attached PDF links, and purged questions from the database.
+- **Sticky Form Modal Bleed**: Fixed sticky session memory bleed where opening `+ Add New Question Bank` was pre-selecting Practice Mode from prior sessions.
+- **Subject Tag Clarity**: Clarified that the `Select Subject` dropdown assigns category tagging for student frontend filtering and does not create destructive hard foreign-key locks.
 
 ---
 
 ## Current state
-- 100% of automation code and documentation synced and pushed to GitHub `main` across `Pixduct/odisha-mcq-engine` and `Pixduct/OdishaExamPrepNew`.
-- `context/progress-tracker.md` is fully updated.
-- Frontend builds cleanly with **0 TypeScript errors** (`npm run build` exit code 0).
+- Fully tested and verified with `npm run build` passing cleanly with 0 errors (exit code `0`).
+- Both Question Banks and Practice Sets operate with complete independence for adding, editing, and deleting.
 
 ---
 
 ## Next session starts with
-- Ready for any new feature requests, exam study modules, or design system enhancements.
+- Ready for any new feature requests, content additions, or student-facing enhancements.
 
 ---
 
 ## Open questions
-- None. All mobile optimizations have been built, verified, and imprinted.
+- None. All requested decoupling features and safeguards are fully implemented and verified.
+

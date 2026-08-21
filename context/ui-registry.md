@@ -81,6 +81,12 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`TopicWiseQuestionBankMobileCard`** | Data Display / Mobile | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) | Structured Header Row, Compact Single-Row Metadata, Dark Mode Sapphire Shell | App.tsx (Exam Detail) | Active |
 | **`AssessmentGeneralBriefingModal`** | Overlay / Assessment | [`src/MockTestSystem.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/MockTestSystem.tsx) | Practice/Exam Mode Selector, 3-Col Marking Rubric, Target Score Planner, Dark Glass Header/Bottom Bar | MockTestSystem.tsx | Active |
 | **`ExamDetailStepSectionHeader`** | Navigation / Header | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) | Step Micro-Badges (`[ ⚡ STEP 1 ]`, `[ 🏆 STEP 2 ]`, `[ 📚 STEP 3 ]`), Aligned Icon Boxes, Responsive Typography | App.tsx (Exam Detail) | Active |
+| **`BlogPostFeaturedHeroImage`** | Media / Article Hero | [`src/pages/BlogPost.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/BlogPost.tsx#L363-L379) | High-Resolution Cover Frame, In-Article Placement, Official Guide Watermark Badge | Router (`/blog/:id`) | Active |
+| **`ExploreExamsFreeFloating`** | Catalog / Mobile | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L8580-L8770) | Zero Nested Wrapper Box, Direct Background Canvas Flow, Mobile 10px Gap Row Stack | App.tsx (Home) | Active |
+| **`PlatformFooterResponsive`** | Layout / Footer | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L1750-L1920) | Proportional 2-Column Mobile Contact Grid, No-Break Support Email, Floating WhatsApp Clearance | App.tsx (Root) | Active |
+| **`SyllabusPathsMobilePillBar`** | Navigation / Catalog | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L1240-L1365) | Horizontal Snap-Scroll Pill Tabs, 10px Topic Card Gap, Compact Badges | App.tsx (Home) | Active |
+| **`ExamRegistryMobileCards`** | Data Display / Bulletin | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L1105-L1175) | Compact 10px Notification Cards, Standardized 44px Action Targets, Single-Row Header | App.tsx (Home) | Active |
+| **`AdminDecoupledContentModal`** | Admin / Form Modal | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L2625-L3230) | Adaptive Category Presets, Dynamic Header Badges, PDF Link Isolation, Non-Destructive Decoupled Mode | AdminPanel.tsx | Active |
 
 ---
 
@@ -2821,6 +2827,129 @@ Last updated: August 20, 2026
 
 **Pattern notes:**
 - **Zero Metallic Grey Artifacts**: Completely eliminated metallic grey gradients in dark mode across performance report hero banner, metric summary cards, calculation breakdowns, question navigator, MCQ option cards, solution explanations, and sticky bottom navigation. Standardized on deep sapphire midnight tokens (`#060B16` and `#0B1528`).
+
+---
+
+### 85. `BlogPostFeaturedHeroImage` (In-Article Featured Hero Image & Cover Photography Frame)
+
+File: [`src/pages/BlogPost.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/BlogPost.tsx)
+Last updated: August 21, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Hero Image Container** | `my-6 sm:my-8 rounded-xl sm:rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800 shadow-md relative group` |
+| **Cover Photo Element** | `w-full h-auto max-h-[480px] object-cover` |
+| **Verification Watermark Chip** | `absolute bottom-2 right-2 sm:bottom-3 sm:right-3 bg-slate-950/75 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-bold text-slate-300 border border-white/10 flex items-center gap-1.5 pointer-events-none` |
+| **Article Shell Card** | `bg-white dark:bg-[#0B1528] rounded-2xl sm:rounded-[2.5rem] p-4 sm:p-10 md:p-14 shadow-xl border border-slate-200/80 dark:border-slate-800` |
+| **Category Pill Badge** | `bg-brand-50 dark:bg-blue-950/60 text-brand-700 dark:text-blue-400 border border-brand-200/60 dark:border-blue-800/60 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-lg sm:rounded-xl font-black` |
+| **Article Title** | `text-xl sm:text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-4 sm:mb-8 leading-tight font-serif` |
+| **Metadata Tagline** | `flex items-center gap-1 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider` |
+
+**Pattern notes:**
+- **In-Article Prominence**: Placed directly inside `<motion.article>` below the article title, category badge, and read time. Resolves previous layout where images only rendered as background banners behind the breadcrumbs.
+- **Aspect Ratio & Height Guard**: Constrained with `max-h-[480px] object-cover` to prevent excessively tall images from pushing article content below the fold.
+---
+
+### 86. `ExploreExamsFreeFloating` (Explore Exams Free Floating Background Grid on Mobile)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L8580-L8770)
+Last updated: August 21, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Section Flow** | `w-full space-y-5 sm:space-y-7` (Directly on page background) |
+| **Outer Box Elimination** | Removed artificial `rounded-3xl border-2 border-slate-900 bg-[#FAF8F5]` wrapper |
+| **Controls Bar** | `flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4` |
+| **Toggle Pill Container** | `border border-slate-200/80 dark:border-slate-700/80 sm:border-2 sm:border-slate-900 bg-slate-50/50 dark:bg-slate-800/60 sm:bg-white sm:dark:bg-slate-800/80 p-1 rounded-2xl flex gap-1.5 w-full sm:w-auto shrink-0 shadow-none sm:shadow-[4px_4px_0px_rgba(37,99,235,0.15)]` |
+| **Active Tab Pill** | `bg-[#2563EB] rounded-xl shadow-[1px_2px_4px_rgba(37,99,235,0.2)] text-white font-extrabold` |
+| **Search Input** | `pl-10 sm:pl-14 pr-12 py-2.5 sm:py-3.5 rounded-2xl font-bold text-sm sm:text-base w-full border border-slate-200 bg-white/95 dark:bg-slate-900/90 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 sm:border-2 sm:border-slate-900 shadow-sm sm:shadow-[4px_4px_0px_rgba(37,99,235,0.15)] focus:border-brand-500/80 focus:outline-none` |
+| **Exam Card Mobile Stack** | `flex flex-col gap-2.5 sm:gap-3` (Rendered directly on background canvas) |
+| **Mobile Exam Card Item** | `p-3.5 bg-white dark:bg-slate-900/90 border border-slate-100/90 dark:border-slate-800 rounded-2xl flex flex-row items-center justify-between gap-3.5 relative shadow-[0_4px_16px_rgba(0,0,0,0.035)] active:scale-[0.98]` |
+| **Accent Left Indicator** | `absolute left-0 top-3.5 bottom-3.5 w-1 bg-gradient-to-b from-[#2563EB] to-brand-700 rounded-r-md opacity-80` |
+| **Desktop Exam Card Grid** | `grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-4 md:gap-6` |
+
+**Pattern notes:**
+- **Zero Double-Card Nesting**: Eliminates the outer box container on mobile phones so each exam item card floats freely directly on the main backdrop.
+- **Maximum Mobile Reading Width**: Exam names and descriptions extend full width with zero artificial inset margin clipping.
+
+---
+
+### 87. `PlatformFooterResponsive` (Responsive 2-Column Proportional Mobile Footer & WhatsApp Clearance)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L1750-L1920)
+Last updated: August 21, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Footer Outer Shell** | `bg-white dark:bg-slate-950 border-t-2 border-slate-900 dark:border-slate-800 relative overflow-hidden pb-14 sm:pb-4` |
+| **Mobile 2-Column Grid** | `grid grid-cols-[1fr_1.18fr] gap-3 xs:gap-5` |
+| **Contact Support Email** | `whitespace-nowrap text-[11px] xs:text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-brand-600` (Guaranteed single line on `odishaexamprep365@gmail.com`) |
+| **Newsletter Input** | `h-10 sm:h-auto py-2 sm:py-3 px-3 sm:px-4 text-xs sm:text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl` |
+| **WhatsApp Floating Clearance** | `pb-14 sm:pb-4` (Guarantees zero overlap with floating WhatsApp FAB button) |
+
+**Pattern notes:**
+- **Proportional Column Width**: `grid-cols-[1fr_1.18fr]` allocates 54% width to the contact column so long email addresses never wrap across multiple lines on small displays.
+
+---
+
+### 88. `SyllabusPathsMobilePillBar` (Syllabus-Mapped Mobile Horizontal Scroll Tabs & High-Density Card Stack)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L1240-L1365)
+Last updated: August 21, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Tabs Container** | `flex items-center gap-2 overflow-x-auto no-scrollbar py-1 -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth` |
+| **Tab Item Pill** | `shrink-0 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 border whitespace-nowrap` |
+| **Active Tab Pill** | `bg-brand-600 dark:bg-brand-500 text-white border-slate-900 shadow-[2px_2px_0px_#0f172a]` |
+| **Topic Cards Grid** | `grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3.5 md:gap-4` |
+| **Topic Card Shell** | `p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-100/90 dark:border-slate-800 shadow-[0_4px_16px_rgba(0,0,0,0.035)]` |
+
+**Pattern notes:**
+- **Horizontal Smooth Scroll**: Eliminates cramped flex wrapping by enabling smooth horizontal overflow scroll for subject pills on mobile screens.
+
+---
+
+### 89. `ExamRegistryMobileCards` (Odisha Recruitment Bulletin High-Density Mobile Notification Stack)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L1105-L1175)
+Last updated: August 21, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card List Container** | `flex flex-col gap-2.5 sm:gap-4` |
+| **Bulletin Card Shell** | `p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-100/90 dark:border-slate-800 shadow-[0_4px_16px_rgba(0,0,0,0.035)] relative overflow-hidden` |
+| **Header Row** | `flex items-center justify-between gap-2.5` |
+| **Official Board Badge** | `text-[10px] font-black uppercase px-2 py-0.5 rounded-md border` |
+| **Action CTA Button** | `h-11 px-4 rounded-xl font-black text-xs uppercase tracking-wider bg-brand-600 text-white border border-slate-900 flex items-center justify-center` |
+
+**Pattern notes:**
+- **Standardized Touch Target**: 44px (`h-11`) minimum touch height for all mobile recruitment notification triggers.
+
+---
+
+### 90. `AdminDecoupledContentModal` (Decoupled Question Bank & Practice Set Creation/Edit Modal)
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L2625-L3230)
+Last updated: August 21, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Modal Shell** | `bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200/80` |
+| **Top Helper Banner (Bank)** | `bg-amber-50/70 border-amber-200/80 text-amber-900 rounded-2xl p-4` |
+| **Top Helper Banner (Practice)** | `bg-blue-50/70 border-blue-200/80 text-blue-900 rounded-2xl p-4` |
+| **Input Background & Border** | `bg-slate-50/50 border-slate-200/80 focus:border-brand-500 rounded-xl` |
+| **Dropdown Select** | `bg-white border-slate-200/80 rounded-xl text-slate-800 font-bold` |
+| **Display Target Pill (Active)** | `border-brand-500 bg-brand-50 shadow-md shadow-brand-500/10 rounded-2xl p-4` |
+| **Display Target Pill (Inactive)**| `border-slate-200 bg-white hover:border-brand-300 rounded-2xl p-4` |
+| **Primary Save Button** | `px-8 py-3 rounded-xl premium-gradient text-white font-black hover:premium-glow shadow-lg shadow-brand-500/20 active:scale-[0.98]` |
+
+**Pattern notes:**
+- **Mode Isolation**: Automatically adapts inputs based on `activeTab` or `target_mode` — Question Banks display PDF download links and cover image inputs with amber guidance; Practice Sets render clean, distraction-free CBT test creation forms with blue guidance.
+- **Non-Destructive Target Decoupling**: Prevents accidental question or bank deletion across shared topics.
+
+
+
 
 
 

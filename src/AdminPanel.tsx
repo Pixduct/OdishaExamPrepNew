@@ -33,7 +33,8 @@ import {
   BookOpen,
   Eye,
   CheckCircle2,
-  HelpCircle
+  HelpCircle,
+  Target
 } from 'lucide-react';
 import { Reorder } from 'framer-motion';
 import { examService, Question, TestSeries, MockTest, Exam } from './lib/examService';
@@ -233,11 +234,11 @@ export const getExamAdminTracker = (exam: any) => {
 };
 
 const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () => void }) => {
-  const [activeTab, setActiveTab] = useState<'questions' | 'series' | 'tests' | 'exams' | 'banks' | 'users' | 'updates' | 'settings' | 'subscribers' | 'notifications'>(() => {
+  const [activeTab, setActiveTab] = useState<'questions' | 'series' | 'tests' | 'exams' | 'banks' | 'practice' | 'users' | 'updates' | 'settings' | 'subscribers' | 'notifications'>(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       const tabParam = urlParams.get('tab');
-      const validTabs = ['questions', 'series', 'tests', 'exams', 'banks', 'users', 'updates', 'settings', 'subscribers', 'notifications'];
+      const validTabs = ['questions', 'series', 'tests', 'exams', 'banks', 'practice', 'users', 'updates', 'settings', 'subscribers', 'notifications'];
       if (tabParam && validTabs.includes(tabParam)) return tabParam as any;
       const saved = sessionStorage.getItem('oep_adminActiveTab');
       if (saved && validTabs.includes(saved)) return saved as any;
@@ -495,10 +496,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     } catch(e) {}
 
     // Fallback to active drill-down filters if sticky doesn't have them
-    if (tab === 'banks') {
+    if (tab === 'banks' || tab === 'practice') {
       if (!sticky.examId && selectedExamIdForBanks) sticky.examId = selectedExamIdForBanks;
       if (!sticky.type && bankFilter && bankFilter !== 'all') sticky.type = bankFilter;
-      if (!sticky.target_mode && bankSubTab) sticky.target_mode = bankSubTab === 'practice' ? 'practice' : 'bank';
+      sticky.target_mode = tab === 'practice' ? 'practice' : 'bank';
     } else if (tab === 'tests') {
       if (!sticky.examId && selectedExamIdForTests) sticky.examId = selectedExamIdForTests;
       if (!sticky.mockCategory && selectedCategoryForTests) sticky.mockCategory = selectedCategoryForTests;
@@ -533,11 +534,11 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const saveStickyFormData = (tab: string, currentData: any) => {
     try {
       let sticky: any = {};
-      if (tab === 'banks') {
+      if (tab === 'banks' || tab === 'practice') {
         sticky = {
           examId: currentData.examId,
           type: currentData.type,
-          target_mode: currentData.target_mode,
+          target_mode: currentData.target_mode || (tab === 'practice' ? 'practice' : 'bank'),
           mockSubject: currentData.mockSubject,
           isPremium: currentData.isPremium
         };
@@ -576,14 +577,28 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     try {
       sessionStorage.removeItem(`oep_sticky_${tab}`);
     } catch(e) {}
-    setFormData(initialFormData);
+    const initial = { ...initialFormData };
+    if (tab === 'banks') initial.target_mode = 'bank';
+    if (tab === 'practice') initial.target_mode = 'practice';
+    setFormData(initial);
     setDiagramText('');
+    setBankQuestionsJson('');
+    setBankAnswerKeyJson('');
+    setBankQuestionsFileName('');
+    setBankAnswerKeyFileName('');
   };
 
   const openAddModal = (targetTab = activeTab) => {
     setEditingId(null);
-    setFormData(getStickyFormData(targetTab));
+    const initial = getStickyFormData(targetTab);
+    if (targetTab === 'banks') initial.target_mode = 'bank';
+    if (targetTab === 'practice') initial.target_mode = 'practice';
+    setFormData(initial);
     setDiagramText('');
+    setBankQuestionsJson('');
+    setBankAnswerKeyJson('');
+    setBankQuestionsFileName('');
+    setBankAnswerKeyFileName('');
     setShowAddModal(true);
   };
 
@@ -1070,14 +1085,14 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         filtered = filtered.filter(e => (e.name || '').toLowerCase().includes(lowerQ));
       }
       list = filtered;
-    } else if (activeTab === 'banks') {
+    } else if (activeTab === 'banks' || activeTab === 'practice') {
       let filtered = banks;
       if (selectedExamIdForBanks) {
         filtered = filtered.filter(b => b.examId === selectedExamIdForBanks);
       }
-      if (bankSubTab === 'banks') {
+      if (activeTab === 'banks') {
         filtered = filtered.filter(b => (b.target_mode || 'both') !== 'practice');
-      } else if (bankSubTab === 'practice') {
+      } else if (activeTab === 'practice') {
         filtered = filtered.filter(b => (b.target_mode || 'both') !== 'bank');
       }
       if (bankFilter !== 'all') filtered = filtered.filter(b => b.type === bankFilter);
@@ -1258,14 +1273,42 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     else if (activeTab === 'series') setSeries(prev => prev.filter(s => s.id !== id));
     else if (activeTab === 'tests') setMockTests(prev => prev.filter(t => t.id !== id));
     else if (activeTab === 'exams' || activeTab === 'blogs') setExams(prev => prev.filter(ex => ex.id !== id));
-    else if (activeTab === 'banks') setBanks(prev => prev.filter(b => b.id !== id));
+    else if (activeTab === 'banks') {
+      const target = banks.find(b => b.id === id);
+      if (target && target.target_mode === 'both') {
+        setBanks(prev => prev.map(b => b.id === id ? { ...b, target_mode: 'practice' } : b));
+      } else {
+        setBanks(prev => prev.filter(b => b.id !== id));
+      }
+    } else if (activeTab === 'practice') {
+      const target = banks.find(b => b.id === id);
+      if (target && target.target_mode === 'both') {
+        setBanks(prev => prev.map(b => b.id === id ? { ...b, target_mode: 'bank' } : b));
+      } else {
+        setBanks(prev => prev.filter(b => b.id !== id));
+      }
+    }
 
     try {
       if (activeTab === 'questions') await examService.deleteQuestion(id);
       else if (activeTab === 'series') await examService.deleteTestSeries(id);
       else if (activeTab === 'tests') await examService.deleteMockTest(id);
       else if (activeTab === 'exams' || activeTab === 'blogs') await examService.deleteExam(id);
-      else if (activeTab === 'banks') await examService.deleteQuestionBank(id);
+      else if (activeTab === 'banks') {
+        const target = banks.find(b => b.id === id);
+        if (target && target.target_mode === 'both') {
+          await examService.updateQuestionBank(id, { target_mode: 'practice' });
+        } else {
+          await examService.deleteQuestionBank(id);
+        }
+      } else if (activeTab === 'practice') {
+        const target = banks.find(b => b.id === id);
+        if (target && target.target_mode === 'both') {
+          await examService.updateQuestionBank(id, { target_mode: 'bank' });
+        } else {
+          await examService.deleteQuestionBank(id);
+        }
+      }
       
       // Fetch data in the background to ensure consistency, without blocking the UI
       fetchData();
@@ -1282,7 +1325,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     setEditingId(item.id);
     
     let newData = { ...initialFormData };
-    if (activeTab === 'banks') {
+    if (activeTab === 'banks' || activeTab === 'practice') {
       let parsedTagline: any = { text: '', price: 499, originalPrice: 999, subject: '' };
       try { 
         if (item.tagline && (item.tagline.includes('{"text"') || item.tagline.startsWith('{'))) {
@@ -1612,7 +1655,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           if (res) setExams(prev => [...prev, res]);
         }
         try { sessionStorage.removeItem('oep_admin_catalog_cache'); } catch(e) {}
-      } else if (activeTab === 'banks') {
+      } else if (activeTab === 'banks' || activeTab === 'practice') {
         if (!formData.examId) { alert("Please select an exam."); return; }
         
         // Merge questions and answer key if provided
@@ -1634,17 +1677,19 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           subject: formData.mockSubject || ''
         };
 
+        const assignedTargetMode = formData.target_mode || (activeTab === 'practice' ? 'practice' : 'bank');
+
         const payload = {
           examId: formData.examId,
           type: formData.type,
-          target_mode: formData.target_mode || 'both',
+          target_mode: assignedTargetMode,
           title: formData.title,
           questionCount: finalQuestionCount,
           tagline: (formData.isPremium || formData.mockSubject || formData.tagline) ? JSON.stringify(metaTaglineObj) : '',
           image: formData.image,
           isPremium: formData.isPremium,
           pdfUrl: finalPdfPayload,
-          hasPracticeMode: formData.hasPracticeMode,
+          hasPracticeMode: activeTab === 'practice' ? true : formData.hasPracticeMode,
           scheduled_at: formData.scheduled_at ? new Date(formData.scheduled_at).toISOString() : null
         };
         if (!validateChangeBeforePublish('bank', payload, !!editingId)) return;
@@ -1732,7 +1777,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           if (activeTab === 'questions') return examService.updateQuestion(item.id, { sortOrder: targetOrder });
           if (activeTab === 'series') return examService.updateTestSeries(item.id, { sortOrder: targetOrder });
           if (activeTab === 'exams' || activeTab === 'blogs') return examService.updateExam(item.id, { sortOrder: targetOrder });
-          if (activeTab === 'banks') return examService.updateQuestionBank(item.id, { sortOrder: targetOrder });
+          if (activeTab === 'banks' || activeTab === 'practice') return examService.updateQuestionBank(item.id, { sortOrder: targetOrder });
           return Promise.resolve();
         });
         await Promise.all(promises);
@@ -2594,10 +2639,12 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
             </div>
           </>
         );
+      case 'practice':
       case 'banks': {
-        const tMode = (formData.target_mode || 'both') as 'bank' | 'practice' | 'both';
+        const isPracticeTab = activeTab === 'practice';
+        const tMode = (formData.target_mode || (isPracticeTab ? 'practice' : 'bank')) as 'bank' | 'practice' | 'both';
         const showPdf = tMode !== 'practice';
-        const showTagline = tMode !== 'practice';
+        const showTagline = true;
         const showPracticeToggle = tMode === 'both';
 
         // Dynamic category labels based on target_mode
@@ -2642,8 +2689,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                 <span className="text-xl shrink-0">{tMode === 'bank' ? '📦' : '🎯'}</span>
                 <span>
                   {tMode === 'bank'
-                    ? 'Question Bank Only — Interactive web reader & PDF downloads. This will appear in Step 1 Question Banks.'
-                    : 'Practice Mode Only — Upload questions via Questions Manager. PDF links are not needed. This will appear in Step 2 Practice Sets.'}
+                    ? 'Question Bank (Step 3) — Interactive web reader & PDF downloads for students.'
+                    : 'Practice Set (Step 1) — Interactive CBT drills with instant timer and answer explanations.'}
                 </span>
               </div>
             )}
@@ -2664,14 +2711,14 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
 
               {/* Title */}
               <div className="space-y-2">
-                <label className={labelClass}>Question Bank Title *</label>
+                <label className={labelClass}>{isPracticeTab ? 'Practice Set Title *' : 'Question Bank Title *'}</label>
                 <input 
                   required 
                   type="text" 
                   value={formData.title} 
                   onChange={e => setFormData({ ...formData, title: e.target.value })} 
                   className={inputClass} 
-                  placeholder="e.g. Indian Polity & Constitution Master Bank" 
+                  placeholder={isPracticeTab ? "e.g. Fundamental Rights & DPSP Chapter Drill" : "e.g. Indian Polity & Constitution Master Bank"} 
                 />
               </div>
 
@@ -3148,9 +3195,9 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { value: 'bank', icon: '📦', label: 'Question Bank Only', sub: 'Step 1 — PDF downloads & sale' },
-                    { value: 'practice', icon: '🎯', label: 'Practice Mode Only', sub: 'Step 2 — Interactive online drills' },
-                    { value: 'both', icon: '🌟', label: 'Both', sub: 'Step 1 + Step 2 combined' }
+                    { value: 'bank', icon: '📦', label: 'Question Bank Only', sub: 'Step 3 — PDF downloads & web reader' },
+                    { value: 'practice', icon: '🎯', label: 'Practice Mode Only', sub: 'Step 1 — Interactive CBT drills' },
+                    { value: 'both', icon: '🌟', label: 'Both', sub: 'Step 1 + Step 3 combined' }
                   ].map(opt => (
                     <button
                       key={opt.value}
@@ -3902,7 +3949,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
              {[
               { id: 'exams', label: 'Exams', icon: Award },
               { id: 'blogs', label: 'Blog Posts', icon: FileText },
-              { id: 'banks', label: 'Content Banks', icon: BookMarked },
+              { id: 'banks', label: 'Question Banks', icon: BookMarked },
+              { id: 'practice', label: 'Practice Sets', icon: Target },
               { id: 'series', label: 'Test Series', icon: Layers },
               { id: 'tests', label: 'Mock Tests', icon: Check },
               { id: 'questions', label: 'Questions', icon: FileText },
@@ -3938,11 +3986,19 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         <div className="max-w-7xl mx-auto space-y-8">
           <div className="flex justify-between items-end">
             <div className="space-y-1">
-              <h2 className="text-4xl font-extrabold text-slate-950 capitalize tracking-tight">{activeTab} Manager</h2>
-              <p className="text-slate-500 font-medium text-lg">Manage your {activeTab} data efficiently.</p>
+              <h2 className="text-4xl font-extrabold text-slate-950 capitalize tracking-tight">
+                {activeTab === 'banks' ? 'Question Banks' : activeTab === 'practice' ? 'Practice Sets' : `${activeTab} Manager`}
+              </h2>
+              <p className="text-slate-500 font-medium text-lg">
+                {activeTab === 'banks'
+                  ? 'Manage interactive PDF question banks & offline reference material.'
+                  : activeTab === 'practice'
+                  ? 'Manage interactive chapter-wise drills, daily quizzes, and topic practice.'
+                  : `Manage your ${activeTab} data efficiently.`}
+              </p>
             </div>
             <div className="flex gap-3 overflow-x-auto custom-scrollbar pb-2 items-center flex-nowrap">
-              {['questions', 'tests', 'banks', 'exams', 'series', 'blogs', 'users'].includes(activeTab) && (
+              {['questions', 'tests', 'banks', 'practice', 'exams', 'series', 'blogs', 'users'].includes(activeTab) && (
                 <input
                   type="text"
                   placeholder="Search..."
@@ -3951,7 +4007,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                   className="px-4 py-2 border border-slate-200 rounded-xl text-sm font-medium w-40 outline-none focus:border-brand-500 bg-white flex-shrink-0"
                 />
               )}
-              {['questions', 'banks', 'series'].includes(activeTab) && (
+              {['questions', 'banks', 'practice', 'series'].includes(activeTab) && (
                 <select
                   value={filterExamId}
                   onChange={(e) => {
@@ -3969,7 +4025,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                         setSelectedCategoryForQuestions(null);
                         setSelectedTargetIdForQuestions(null);
                       }
-                    } else if (activeTab === 'banks') {
+                    } else if (activeTab === 'banks' || activeTab === 'practice') {
                       if (val === 'all') setSelectedExamIdForBanks(null);
                       else setSelectedExamIdForBanks(val);
                     } else if (activeTab === 'series') {
@@ -4091,36 +4147,39 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                   })()}
                 </>
               )}
-              {activeTab === 'banks' && (
+              {(activeTab === 'banks' || activeTab === 'practice') && (
                 <>
-                  <div className="hidden lg:flex items-center bg-slate-100 p-1 rounded-xl mr-2 h-10 border border-slate-200/50 flex-shrink-0 gap-1">
-                    <button onClick={() => setBankTargetModeFilter('all')} className={cn("px-2.5 py-1 rounded-lg text-xs font-bold transition-all h-full", bankTargetModeFilter === 'all' ? "bg-white shadow-sm text-brand-600 font-extrabold" : "text-slate-500 hover:text-slate-700")}>All Targets</button>
-                    <button onClick={() => setBankTargetModeFilter('bank')} className={cn("px-2.5 py-1 rounded-lg text-xs font-bold transition-all h-full", bankTargetModeFilter === 'bank' ? "bg-white shadow-sm text-amber-700 font-extrabold" : "text-slate-500 hover:text-slate-700")}>📦 Bank Only</button>
-                    <button onClick={() => setBankTargetModeFilter('practice')} className={cn("px-2.5 py-1 rounded-lg text-xs font-bold transition-all h-full", bankTargetModeFilter === 'practice' ? "bg-white shadow-sm text-brand-600 font-extrabold" : "text-slate-500 hover:text-slate-700")}>🎯 Practice Only</button>
-                    <button onClick={() => setBankTargetModeFilter('both')} className={cn("px-2.5 py-1 rounded-lg text-xs font-bold transition-all h-full", bankTargetModeFilter === 'both' ? "bg-white shadow-sm text-emerald-700 font-extrabold" : "text-slate-500 hover:text-slate-700")}>🌟 Both</button>
-                  </div>
                   <div className="hidden lg:flex items-center bg-slate-100 p-1 rounded-xl mr-2 h-10 border border-slate-200/50 flex-shrink-0">
                     <button onClick={() => setBankFilter('all')} className={cn("px-3 py-1.5 rounded-lg text-sm font-bold transition-all h-full", bankFilter === 'all' ? "bg-white shadow-sm text-brand-600 font-extrabold" : "text-slate-500 hover:text-slate-700")}>All</button>
-                    <button onClick={() => setBankFilter('topic-wise')} className={cn("px-3 py-1.5 rounded-lg text-sm font-bold transition-all h-full", bankFilter === 'topic-wise' ? "bg-white shadow-sm text-brand-600 font-extrabold" : "text-slate-500 hover:text-slate-700")}>Chapter-Wise</button>
+                    <button onClick={() => setBankFilter('topic-wise')} className={cn("px-3 py-1.5 rounded-lg text-sm font-bold transition-all h-full", bankFilter === 'topic-wise' ? "bg-white shadow-sm text-brand-600 font-extrabold" : "text-slate-500 hover:text-slate-700")}>{activeTab === 'practice' ? 'Chapter Practice' : 'Chapter-Wise'}</button>
                     <button onClick={() => setBankFilter('exam-focused')} className={cn("px-3 py-1.5 rounded-lg text-sm font-bold transition-all h-full", bankFilter === 'exam-focused' ? "bg-white shadow-sm text-brand-600 font-extrabold" : "text-slate-500 hover:text-slate-700")}>High-Yield</button>
-                    <button onClick={() => setBankFilter('revision-sets')} className={cn("px-3 py-1.5 rounded-lg text-sm font-bold transition-all h-full", bankFilter === 'revision-sets' ? "bg-white shadow-sm text-brand-600 font-extrabold" : "text-slate-500 hover:text-slate-700")}>Daily Quizzes</button>
+                    <button onClick={() => setBankFilter('revision-sets')} className={cn("px-3 py-1.5 rounded-lg text-sm font-bold transition-all h-full", bankFilter === 'revision-sets' ? "bg-white shadow-sm text-brand-600 font-extrabold" : "text-slate-500 hover:text-slate-700")}>{activeTab === 'practice' ? 'Daily Quizzes' : 'Revision Sets'}</button>
                     <button onClick={() => setBankFilter('pyq-collections')} className={cn("px-3 py-1.5 rounded-lg text-sm font-bold transition-all h-full", bankFilter === 'pyq-collections' ? "bg-white shadow-sm text-brand-600 font-extrabold" : "text-slate-500 hover:text-slate-700")}>Topic PYQs</button>
                   </div>
                   {(() => {
                      if (items.length === 0 || filterExamId === 'all') return null;
+                     const itemLabel = activeTab === 'practice' ? 'Practice Sets' : 'Question Banks';
                      return (
                        <button 
                          onClick={async () => {
-                            const confirmMessage = `WARNING: Are you sure you want to delete ALL ${items.length} Question Banks currently displayed?\n\nThis will permanently delete the bank configurations. This action cannot be undone.`;
+                            const confirmMessage = `WARNING: Are you sure you want to delete ALL ${items.length} ${itemLabel} currently displayed?\n\nThis will safely remove these ${itemLabel}. This action cannot be undone.`;
                             if (!confirm(confirmMessage)) return;
                             
                             try {
-                                const promises = items.map((item: any) => examService.deleteQuestionBank(item.id));
+                                const promises = items.map((item: any) => {
+                                  if (activeTab === 'practice') {
+                                    if (item.target_mode === 'both') return examService.updateQuestionBank(item.id, { target_mode: 'bank' });
+                                    return examService.deleteQuestionBank(item.id);
+                                  } else {
+                                    if (item.target_mode === 'both') return examService.updateQuestionBank(item.id, { target_mode: 'practice' });
+                                    return examService.deleteQuestionBank(item.id);
+                                  }
+                                });
                                 await Promise.all(promises);
-                                alert(`Successfully deleted ${items.length} Question Banks.`);
+                                alert(`Successfully processed ${items.length} ${itemLabel}.`);
                                 fetchData();
                             } catch(e: any) {
-                                alert(`Failed to delete some or all banks: ${e.message}`);
+                                alert(`Failed to delete some or all items: ${e.message}`);
                                 fetchData();
                             }
                          }}
@@ -4128,7 +4187,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                        >
                          <Trash2 className="w-4 h-4" /> Bulk Delete Filtered
                        </button>
-                      );
+                     );
                   })()}
                 </>
               )}
@@ -4147,6 +4206,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                       tests: 'mock test(s)',
                       series: 'test series',
                       banks: 'question bank(s)',
+                      practice: 'practice set(s)',
                       exams: 'exam(s)',
                       blogs: 'blog post(s)'
                     };
@@ -4162,7 +4222,19 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                     else if (activeTab === 'series') setSeries(prev => prev.filter(s => !selectedItemIds.has(s.id)));
                     else if (activeTab === 'tests') setMockTests(prev => prev.filter(t => !selectedItemIds.has(t.id)));
                     else if (activeTab === 'exams' || activeTab === 'blogs') setExams(prev => prev.filter(ex => !selectedItemIds.has(ex.id)));
-                    else if (activeTab === 'banks') setBanks(prev => prev.filter(b => !selectedItemIds.has(b.id)));
+                    else if (activeTab === 'banks') {
+                      setBanks(prev => prev.map(b => {
+                        if (!selectedItemIds.has(b.id)) return b;
+                        if (b.target_mode === 'both') return { ...b, target_mode: 'practice' };
+                        return null as any;
+                      }).filter(Boolean));
+                    } else if (activeTab === 'practice') {
+                      setBanks(prev => prev.map(b => {
+                        if (!selectedItemIds.has(b.id)) return b;
+                        if (b.target_mode === 'both') return { ...b, target_mode: 'bank' };
+                        return null as any;
+                      }).filter(Boolean));
+                    }
                     
                     setSelectedItemIds(new Set());
                     
@@ -4172,7 +4244,20 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                         if (activeTab === 'series') return examService.deleteTestSeries(id);
                         if (activeTab === 'tests') return examService.deleteMockTest(id);
                         if (activeTab === 'exams' || activeTab === 'blogs') return examService.deleteExam(id);
-                        if (activeTab === 'banks') return examService.deleteQuestionBank(id);
+                        if (activeTab === 'banks') {
+                          const target = banks.find(b => b.id === id);
+                          if (target && target.target_mode === 'both') {
+                            return examService.updateQuestionBank(id, { target_mode: 'practice' });
+                          }
+                          return examService.deleteQuestionBank(id);
+                        }
+                        if (activeTab === 'practice') {
+                          const target = banks.find(b => b.id === id);
+                          if (target && target.target_mode === 'both') {
+                            return examService.updateQuestionBank(id, { target_mode: 'bank' });
+                          }
+                          return examService.deleteQuestionBank(id);
+                        }
                         return Promise.resolve();
                       });
                       await Promise.all(promises);
@@ -5838,58 +5923,60 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                     </tbody>
                  </table>
               </div>
-           ) : activeTab === 'banks' && selectedExamIdForBanks === null ? (
-               <div className="space-y-6 animate-in fade-in duration-200">
-                 <div className="flex justify-between items-center">
-                   <h3 className="text-2xl font-black text-slate-800 tracking-tight">Select an Exam for Content Banks</h3>
-                 </div>
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                   {(() => {
-                      const lowerQ = searchQuery.toLowerCase();
-                      const filteredExams = actualExams.filter(exam => (exam.name || '').toLowerCase().includes(lowerQ));
-                      if (filteredExams.length === 0) {
+            ) : (activeTab === 'banks' || activeTab === 'practice') && selectedExamIdForBanks === null ? (
+                <div className="space-y-6 animate-in fade-in duration-200">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-2xl font-black text-slate-800 tracking-tight">Select an Exam for {activeTab === 'practice' ? 'Practice Sets' : 'Question Banks'}</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {(() => {
+                       const lowerQ = searchQuery.toLowerCase();
+                       const filteredExams = actualExams.filter(exam => (exam.name || '').toLowerCase().includes(lowerQ));
+                       if (filteredExams.length === 0) {
+                          return (
+                            <div className="col-span-full bg-white rounded-[2rem] border border-slate-200/50 p-12 text-center text-slate-400 font-extrabold shadow-sm">
+                              No exams found matching your search.
+                            </div>
+                          );
+                       }
+                       return filteredExams.map(exam => {
+                         const count = activeTab === 'practice' 
+                           ? banks.filter(b => b.examId === exam.id && (b.target_mode || 'both') !== 'bank').length 
+                           : banks.filter(b => b.examId === exam.id && (b.target_mode || 'both') !== 'practice').length;
                          return (
-                           <div className="col-span-full bg-white rounded-[2rem] border border-slate-200/50 p-12 text-center text-slate-400 font-extrabold shadow-sm">
-                             No exams found matching your search.
-                           </div>
+                           <motion.div
+                             key={exam.id}
+                             whileHover={{ y: -4, scale: 1.02 }}
+                             whileTap={{ scale: 0.98 }}
+                             onClick={() => { setSelectedExamIdForBanks(exam.id as string); setFilterExamId(exam.id as string); }}
+                             className="bg-white rounded-[2rem] border border-slate-200/60 p-6 flex flex-col justify-between hover:border-brand-500/50 hover:shadow-xl hover:shadow-brand-500/5 transition-all duration-300 cursor-pointer premium-shadow group relative overflow-hidden"
+                           >
+                             <div className="absolute inset-0 bg-gradient-to-br from-brand-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                             <div className="relative space-y-4">
+                               <div className="flex justify-between items-start">
+                                 <div className="w-14 h-14 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-3xl shadow-inner shrink-0 group-hover:bg-brand-100 transition-colors">
+                                   {exam.icon && (exam.icon.startsWith('http') || exam.icon.startsWith('/')) ? <img src={getDirectImageUrl(exam.icon)} alt="" className="w-8 h-8 object-contain" referrerPolicy="no-referrer" /> : exam.icon || '🏛️'}
+                                 </div>
+                                 <ChevronRight className="w-6 h-6 text-slate-300 group-hover:text-brand-500 group-hover:translate-x-1 transition-all" />
+                               </div>
+                               <div className="space-y-2">
+                                 <h4 className="text-xl font-extrabold text-slate-900 group-hover:text-brand-600 transition-colors line-clamp-2 tracking-tight leading-snug">{exam.name}</h4>
+                                 <p className="text-slate-500 font-medium text-sm line-clamp-2">{exam.description || (activeTab === 'practice' ? 'Manage chapter drills and topic practice under this exam.' : 'Manage question banks and PDF material under this exam.')}</p>
+                               </div>
+                             </div>
+                             <div className="relative pt-6 mt-6 border-t border-slate-100 flex items-center justify-between">
+                               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-slate-50 text-slate-500 group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors border border-slate-100">
+                                 {activeTab === 'practice' ? <Target className="w-3.5 h-3.5" /> : <BookMarked className="w-3.5 h-3.5" />}
+                                 {count} {activeTab === 'practice' ? (count === 1 ? 'Practice Set' : 'Practice Sets') : (count === 1 ? 'Question Bank' : 'Question Banks')}
+                               </span>
+                               <span className="text-xs font-bold text-slate-400 capitalize bg-slate-100 px-2.5 py-1 rounded-lg">{exam.category}</span>
+                             </div>
+                           </motion.div>
                          );
-                      }
-                      return filteredExams.map(exam => {
-                        const count = banks.filter(b => b.examId === exam.id).length;
-                        return (
-                          <motion.div
-                            key={exam.id}
-                            whileHover={{ y: -4, scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => { setSelectedExamIdForBanks(exam.id as string); setFilterExamId(exam.id as string); }}
-                            className="bg-white rounded-[2rem] border border-slate-200/60 p-6 flex flex-col justify-between hover:border-brand-500/50 hover:shadow-xl hover:shadow-brand-500/5 transition-all duration-300 cursor-pointer premium-shadow group relative overflow-hidden"
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-br from-brand-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <div className="relative space-y-4">
-                              <div className="flex justify-between items-start">
-                                <div className="w-14 h-14 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-3xl shadow-inner shrink-0 group-hover:bg-brand-100 transition-colors">
-                                  {exam.icon && (exam.icon.startsWith('http') || exam.icon.startsWith('/')) ? <img src={getDirectImageUrl(exam.icon)} alt="" className="w-8 h-8 object-contain" referrerPolicy="no-referrer" /> : exam.icon || '🏛️'}
-                                </div>
-                                <ChevronRight className="w-6 h-6 text-slate-300 group-hover:text-brand-500 group-hover:translate-x-1 transition-all" />
-                              </div>
-                              <div className="space-y-2">
-                                <h4 className="text-xl font-extrabold text-slate-900 group-hover:text-brand-600 transition-colors line-clamp-2 tracking-tight leading-snug">{exam.name}</h4>
-                                <p className="text-slate-500 font-medium text-sm line-clamp-2">{exam.description || 'Manage question banks under this exam.'}</p>
-                              </div>
-                            </div>
-                            <div className="relative pt-6 mt-6 border-t border-slate-100 flex items-center justify-between">
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-slate-50 text-slate-500 group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors border border-slate-100">
-                                <BookMarked className="w-3.5 h-3.5" />
-                                {count} {count === 1 ? 'Question Bank' : 'Question Banks'}
-                              </span>
-                              <span className="text-xs font-bold text-slate-400 capitalize bg-slate-100 px-2.5 py-1 rounded-lg">{exam.category}</span>
-                            </div>
-                          </motion.div>
-                        );
-                      });
-                   })()}
-                 </div>
-               </div>
+                       });
+                    })()}
+                  </div>
+                </div>
             ) : activeTab === 'series' && selectedExamIdForSeries === null ? (
                <div className="space-y-6 animate-in fade-in duration-200">
                  <div className="flex justify-between items-center">
@@ -6520,7 +6607,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
               </div>
            ) : (
               <div className="space-y-6">
-                {activeTab === 'banks' && selectedExamIdForBanks && (
+                {(activeTab === 'banks' || activeTab === 'practice') && selectedExamIdForBanks && (
                   <div className="animate-in fade-in duration-200 space-y-6">
                     <div className="flex items-center gap-2 text-sm font-bold text-slate-400 mb-2 bg-slate-100/50 px-4 py-2.5 rounded-2xl border border-slate-200/40 w-fit">
                       <button onClick={() => { setSelectedExamIdForBanks(null); setFilterExamId('all'); }} className="hover:text-brand-600 transition-colors">
@@ -6529,16 +6616,18 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                       <ChevronRight className="w-4 h-4" />
                       <span className="text-slate-700 font-extrabold">{exams.find(e => e.id === selectedExamIdForBanks)?.name || 'Selected Exam'}</span>
                       <ChevronRight className="w-4 h-4" />
-                      <span className="text-slate-700 font-extrabold">Content Banks & Practice Sets</span>
+                      <span className="text-slate-700 font-extrabold">{activeTab === 'practice' ? 'Practice Sets' : 'Question Banks'}</span>
                     </div>
 
                     <div className="bg-white rounded-[2rem] border border-slate-200/50 p-6 flex flex-col md:flex-row gap-5 items-center justify-between shadow-sm">
                       <div className="flex items-center gap-5">
                         <div className="w-16 h-16 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-4xl shadow-inner shrink-0">
-                          📚
+                          {activeTab === 'practice' ? '🎯' : '📚'}
                         </div>
                         <div>
-                          <h3 className="text-2xl font-black text-slate-900 tracking-tight">Content Banks & Practice Sets</h3>
+                          <h3 className="text-2xl font-black text-slate-900 tracking-tight">
+                            {activeTab === 'practice' ? 'Practice Sets (Interactive Drills)' : 'Question Banks (PDFs & Web Reader)'}
+                          </h3>
                           <p className="text-slate-500 font-semibold text-sm mt-1">
                             Exam: <span className="font-extrabold text-slate-800">{exams.find(e => e.id === selectedExamIdForBanks)?.name}</span>
                           </p>
@@ -6862,7 +6951,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
 
                 <div className="glass rounded-[2rem] border border-slate-200/50 shadow-xl overflow-hidden bg-white/70">
                   <div className="grid grid-cols-12 bg-slate-100/50 border-b border-slate-200/60 px-8 py-5 text-xs font-black uppercase text-slate-500 tracking-widest">
-                      {activeTab === 'tests' || activeTab === 'banks' ? (
+                      {activeTab === 'tests' || activeTab === 'banks' || activeTab === 'practice' ? (
                         <>
                           <div className="col-span-1 flex items-center">
                             <input 
@@ -6957,7 +7046,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                       {items.map((item) => (
                         <Reorder.Item key={item.id} value={item} className="bg-white/50">
                            <div className="hover:bg-brand-50/30 transition-colors group px-8 py-6 grid grid-cols-12 items-center">
-                              {activeTab === 'tests' || activeTab === 'banks' ? (
+                              {activeTab === 'tests' || activeTab === 'banks' || activeTab === 'practice' ? (
                                  <>
                                     <div className="col-span-1 flex items-center">
                                       <input 
@@ -6994,7 +7083,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                               if (newVal !== (mockTests.find(t => t.id === item.id)?.sortOrder || 0)) {
                                                 handleInlineOrderChange(item.id, newVal);
                                               }
-                                            } else if (activeTab === 'banks') {
+                                            } else if (activeTab === 'banks' || activeTab === 'practice') {
                                               if (newVal !== (banks.find(b => b.id === item.id)?.sortOrder || 0)) {
                                                 handleBankInlineOrderChange(item.id, newVal);
                                               }
@@ -7009,7 +7098,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                                 if (newVal !== (mockTests.find(t => t.id === item.id)?.sortOrder || 0)) {
                                                   handleInlineOrderChange(item.id, newVal);
                                                 }
-                                              } else if (activeTab === 'banks') {
+                                              } else if (activeTab === 'banks' || activeTab === 'practice') {
                                                 if (newVal !== (banks.find(b => b.id === item.id)?.sortOrder || 0)) {
                                                   handleBankInlineOrderChange(item.id, newVal);
                                                 }
@@ -7025,12 +7114,12 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                        <div className="font-extrabold text-slate-900 text-lg line-clamp-2 pr-4">{item.name || item.title || item.questionText || 'Untitled'}</div>
                                        <div className="text-xs text-slate-400 font-bold mt-1 uppercase tracking-wider">
                                           {(() => {
-                                            if (activeTab === 'banks') {
+                                            if (activeTab === 'banks' || activeTab === 'practice') {
                                               let subj = '';
                                               if (item.tagline && item.tagline.includes('"subject"')) {
                                                 try { subj = JSON.parse(item.tagline).subject; } catch(e) {}
                                               }
-                                              const typeLabel = item.target_mode === 'practice' ? 'Practice' : (item.type || 'Default');
+                                              const typeLabel = item.target_mode === 'both' ? 'Both' : item.target_mode === 'practice' ? 'Practice' : (item.type || 'Bank');
                                               return subj ? `${subj} • ${typeLabel}` : (item.type || 'Default');
                                             }
                                             return item.category || item.type || item.difficulty || 'Default';
@@ -7039,7 +7128,9 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                     </div>
                                     <div className="col-span-2">
                                        <div className="text-sm font-bold text-slate-600">
-                                          {item.durationMinutes} Min • {item.totalMarks} Marks
+                                          {activeTab === 'banks' || activeTab === 'practice'
+                                            ? `${item.questionCount || 0} Qs • ${item.isPremium ? 'Premium' : 'Free'}`
+                                            : `${item.durationMinutes} Min • ${item.totalMarks} Marks`}
                                        </div>
                                        <div className="text-[10px] text-slate-400 font-bold uppercase mt-1">ID: {item.id?.slice(0, 8)}</div>
                                     </div>
@@ -7100,7 +7191,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                                   </div>
                                                 );
                                              }
-                                             if (activeTab === 'banks') return `${item.questionCount} Qs • ${item.isPremium ? 'Premium' : 'Free'}`;
+                                             if (activeTab === 'banks' || activeTab === 'practice') return `${item.questionCount || 0} Qs • ${item.isPremium ? 'Premium' : 'Free'}`;
                                              return '-';
                                           })()}
                                        </div>
@@ -7426,7 +7517,9 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                    </div>
                    <h3 className="font-black text-xl tracking-tight text-slate-900">
                      {editingId ? 'Edit ' : 'Add New '}
-                     <span className="text-brand-600 capitalize">{activeTab}</span>
+                     <span className="text-brand-600 capitalize">
+                       {activeTab === 'banks' ? 'Question Bank' : activeTab === 'practice' ? 'Practice Set' : activeTab}
+                     </span>
                    </h3>
                 </div>
                 <div className="flex items-center gap-2">
@@ -7452,7 +7545,9 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
 
                 <div className="flex justify-end gap-3.5 mt-8 pt-6 border-t border-slate-100">
                   <button type="button" onClick={() => setShowAddModal(false)} className="px-6 py-3 rounded-xl border border-slate-200 font-bold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all text-sm shrink-0 bg-white shadow-sm">Cancel</button>
-                  <button type="submit" className="px-8 py-3 rounded-xl premium-gradient text-white font-black hover:premium-glow shadow-lg shadow-brand-500/20 transition-all active:scale-[0.98] text-sm shrink-0">Save {activeTab}</button>
+                  <button type="submit" className="px-8 py-3 rounded-xl premium-gradient text-white font-black hover:premium-glow shadow-lg shadow-brand-500/20 transition-all active:scale-[0.98] text-sm shrink-0">
+                    Save {activeTab === 'banks' ? 'Question Bank' : activeTab === 'practice' ? 'Practice Set' : activeTab}
+                  </button>
                 </div>
               </form>
             </motion.div>

@@ -1,6 +1,7 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] The Golden MCQ Invertibility Test & Structured Evidence Verification Schema (`ca_formatter.py`): Injected a deterministic paper-setter exam rubric into the core AI architecture. Every candidate news event must prove mathematical "MCQ Invertibility" (the ability to form an unambiguous 4-option UPSC/OPSC preliminary examination question with 1 definitive factual answer). The AI JSON schema enforces structured evidence fields (`sovereign_entity` and `exam_questionability_fact`) which are validated against blacklists before any slide is approved. Any non-invertible story (commercial unboxing, private corporate reshuffle, philosophical musing, or protocol visit) is rejected instantly. Verified and synced across GitHub repositories.
 - [x] Full 15-Category Non-Exam Threat Model Matrix & Escape-Proof Gatekeeper (`ca_scraper.py`, `ca_formatter.py`, `ca_website_publisher.py`): Systematically mapped and blocked every subtle escape loophole across 15 distinct categories:
   1. **Sovereign Name Hijack / Ceremonial Routine**: Protocol temple visits, family functions, condolences, ribbon cutting.
   2. **Corporate Financials & Tickers**: Quarterly earnings (Q1-Q4 net profit), share prices, Sensex/Nifty daily movements.

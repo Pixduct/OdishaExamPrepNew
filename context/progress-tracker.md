@@ -1,6 +1,11 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] Deterministic `ExamFactualIntegrityValidator` Gate (`exam_update_engine.py`): Injected a pure Python post-LLM integrity validation class that executes with absolute veto power before any exam update can be broadcasted:
+  1. **Year Freshness Anchor**: Enforces that the notice document strictly belongs to active 2026/2025 cycles, rejecting archived PDFs from 2024 or earlier.
+  2. **Post-AI Deadline Expired Gate**: Scans AI-generated output for passed deadlines and drops any expired notices.
+  3. **Numerical Vacancy Grounding & Sanitizer**: Cross-checks AI vacancy numbers against raw official portal text. If an LLM hallucinates an unverified number (e.g. '9,999'), it automatically sanitizes the field to 'Refer to Official Notification PDF'.
+  4. **Anti-Speculation Filter**: Blocks unofficial leak keywords ('expected soon', 'as per coaching sources'). Tested with 100% pass rate.
 - [x] Zero-Speculation & Anti-Hallucination Truth Engine (`exam_update_engine.py`, `shared/source_validator.py`, `config/trusted_sources.json`): Implemented strict defense-in-depth against fake, speculative, or coaching rumor exam posts:
   1. **Strict Official-Domain-Only Gate**: Restricted candidate retrieval 100% to verified government endpoints (`.gov.in`, `.nic.in`, `.ac.in`, `.edu.in`, `orissahighcourt.nic.in`, `sbi.co.in`, `rbi.org.in`, `ibps.in`). Dropped all third-party coaching blogs, speculative rumor portals, and clickbait.
   2. **PDF Grounding & Anti-Hallucination Rule**: Vacancy numbers, educational qualifications, age limits, and schedules must be strictly grounded in parsed official notification PDF text. If a detail is omitted by the board, the engine outputs 'N/A' or 'Refer to PDF' instead of guessing or hallucinating numbers.

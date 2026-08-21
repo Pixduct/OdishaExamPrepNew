@@ -32,8 +32,12 @@ export const ActiveExamContextBar: React.FC<ActiveExamContextBarProps> = ({
   return (
     <>
       {/* Active Context Bar Container */}
-      <DynamicVectorCard glowColor="rgba(37, 99, 235, 0.20)" className={`w-full mb-4 sm:mb-8 ${className}`}>
-        <div className="w-full bg-gradient-to-r from-white via-blue-50/50 to-indigo-50/40 dark:bg-gradient-to-br dark:from-[#0B1528] dark:via-[#112240] dark:to-[#0B1528] text-slate-900 dark:text-white border border-slate-200/90 dark:border-blue-500/35 rounded-xl sm:rounded-[2rem] p-3 sm:p-5 shadow-lg shadow-blue-500/5 dark:shadow-2xl dark:shadow-slate-950/60 relative overflow-hidden group">
+      <DynamicVectorCard
+        glowColor="rgba(37, 99, 235, 0.20)"
+        roundedClass="rounded-xl sm:rounded-[2rem]"
+        className={`w-full mb-4 sm:mb-8 bg-gradient-to-r from-white via-blue-50/50 to-indigo-50/40 dark:bg-gradient-to-br dark:from-[#0B1528] dark:via-[#112240] dark:to-[#0B1528] text-slate-900 dark:text-white border border-slate-200/90 dark:border-blue-500/35 shadow-lg shadow-blue-500/5 dark:shadow-2xl dark:shadow-slate-950/60 ${className}`}
+      >
+        <div className="w-full p-3 sm:p-5 relative overflow-hidden group">
           {/* Radial Grid & 3D Watermark */}
           <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#60a5fa_1px,transparent_1px)] [background-size:16px_16px] opacity-35 dark:opacity-10 pointer-events-none z-0" />
           <Target className="absolute -right-6 -bottom-6 w-44 h-44 opacity-10 dark:opacity-15 stroke-[1.2] text-brand-600 dark:text-blue-400 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6 z-0" />

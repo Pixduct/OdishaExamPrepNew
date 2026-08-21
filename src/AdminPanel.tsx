@@ -557,7 +557,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     if (tab === 'banks' || tab === 'practice') {
       if (!sticky.examId && selectedExamIdForBanks) sticky.examId = selectedExamIdForBanks;
       if (!sticky.type && bankFilter && bankFilter !== 'all') sticky.type = bankFilter;
-      sticky.target_mode = tab === 'practice' ? 'practice' : 'bank';
+      const effectiveMode = tab === 'practice' || (tab === 'banks' && bankSubTab === 'practice') ? 'practice' : 'bank';
+      sticky.target_mode = effectiveMode;
       sticky.sortOrder = getNextAvailableOrder(tab, sticky.examId, sticky.type || 'topic-wise', sticky.target_mode);
     } else if (tab === 'tests') {
       if (!sticky.examId && selectedExamIdForTests) sticky.examId = selectedExamIdForTests;
@@ -637,8 +638,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       sessionStorage.removeItem(`oep_sticky_${tab}`);
     } catch(e) {}
     const initial = { ...initialFormData };
-    if (tab === 'banks') initial.target_mode = 'bank';
-    if (tab === 'practice') initial.target_mode = 'practice';
+    if (tab === 'practice' || (tab === 'banks' && bankSubTab === 'practice')) initial.target_mode = 'practice';
+    else if (tab === 'banks') initial.target_mode = 'bank';
     setFormData(initial);
     setDiagramText('');
     setBankQuestionsJson('');
@@ -650,8 +651,11 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const openAddModal = (targetTab = activeTab) => {
     setEditingId(null);
     const initial = getStickyFormData(targetTab);
-    if (targetTab === 'banks') initial.target_mode = 'bank';
-    if (targetTab === 'practice') initial.target_mode = 'practice';
+    if (targetTab === 'practice' || (targetTab === 'banks' && bankSubTab === 'practice')) {
+      initial.target_mode = 'practice';
+    } else if (targetTab === 'banks') {
+      initial.target_mode = 'bank';
+    }
     setFormData(initial);
     setDiagramText('');
     setBankQuestionsJson('');
@@ -1150,7 +1154,11 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         filtered = filtered.filter(b => b.examId === selectedExamIdForBanks);
       }
       if (activeTab === 'banks') {
-        filtered = filtered.filter(b => (b.target_mode || 'both') !== 'practice');
+        if (bankSubTab === 'banks') {
+          filtered = filtered.filter(b => (b.target_mode || 'both') !== 'practice');
+        } else if (bankSubTab === 'practice') {
+          filtered = filtered.filter(b => (b.target_mode || 'both') !== 'bank');
+        }
       } else if (activeTab === 'practice') {
         filtered = filtered.filter(b => (b.target_mode || 'both') !== 'bank');
       }
@@ -2672,7 +2680,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         );
       case 'practice':
       case 'banks': {
-        const isPracticeTab = activeTab === 'practice';
+        const isPracticeTab = activeTab === 'practice' || (activeTab === 'banks' && bankSubTab === 'practice');
         const tMode = (formData.target_mode || (isPracticeTab ? 'practice' : 'bank')) as 'bank' | 'practice' | 'both';
         const showPdf = tMode !== 'practice';
         const showTagline = true;

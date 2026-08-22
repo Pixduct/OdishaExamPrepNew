@@ -8278,11 +8278,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     container.scrollLeft += e.deltaY * 0.85;
                   }
                 }}
-                className="flex gap-2.5 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory py-2.5 sm:py-4 px-4 sm:px-6"
-                style={{
-                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)',
-                  maskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)'
-                }}
+                className="flex gap-2.5 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory py-2.5 sm:py-4 px-1 sm:px-1"
               >
                 {incompleteTests.slice(0, 6).map((a: any, i: number) => {
                   // Support both full-question activities (local) and lite cloud-synced ones
@@ -8346,7 +8342,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           }
                           handleStartTest(testToResume, a);
                         }}
-                        className={`w-full h-full rounded-2xl border border-slate-100/90 sm:border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 hover:border-brand-300/60 dark:hover:border-brand-600/50 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 group p-3 sm:p-4.5 flex flex-col gap-2 premium-shine-container relative overflow-hidden ${
+                        className={`w-full h-full rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0A1628] hover:border-brand-300 dark:hover:border-brand-500/50 shadow-md dark:shadow-xl dark:shadow-slate-950/40 transition-all duration-300 group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container relative overflow-hidden ${
                           canResume ? 'cursor-pointer active:scale-[0.98]' : 'opacity-60 cursor-not-allowed'
                         }`}
                       >
@@ -8446,11 +8442,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     container.scrollLeft += e.deltaY * 0.85;
                   }
                 }}
-                className="flex gap-2.5 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory py-2.5 sm:py-4 px-4 sm:px-6"
-                style={{
-                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)',
-                  maskImage: 'linear-gradient(to right, transparent 0%, black 16px, black calc(100% - 32px), transparent 100%)'
-                }}
+                className="flex gap-2.5 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory py-2.5 sm:py-4 px-1 sm:px-1"
               >
                 {activities.filter((a: any) => a.type !== 'test_incomplete').slice(0, 6).map((a: any, i: number) => {
                   const isTestResult = a.type === 'mock_test_completed' || a.type === 'practice_test_completed';
@@ -8481,7 +8473,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           if (isTestResult) handleViewResults(a.metadata);
                           else if (a.type === 'question_bank_accessed' && a.metadata?.pdfUrl) window.open(a.metadata.pdfUrl, '_blank');
                         }}
-                        className="w-full h-full rounded-2xl border border-slate-100/90 sm:border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 hover:border-brand-300/60 dark:hover:border-brand-600/50 shadow-[0_4px_16px_rgba(0,0,0,0.035)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.2)] sm:hover:shadow-2xl hover:shadow-brand-500/8 transition-all duration-300 cursor-pointer group p-3 sm:p-4.5 flex flex-col gap-2 premium-shine-container relative overflow-hidden active:scale-[0.98]"
+                        className="w-full h-full rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0A1628] hover:border-brand-300 dark:hover:border-brand-500/50 shadow-md dark:shadow-xl dark:shadow-slate-950/40 transition-all duration-300 cursor-pointer group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container relative overflow-hidden active:scale-[0.98]"
                       >
                         {/* Inner Vector Grid Overlay */}
                         <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-25 dark:opacity-[0.04] pointer-events-none z-0" />

@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useEffect } from 'react';
+import React, { useRef, useCallback } from 'react';
 import { useTheme } from '../lib/themeStore';
 
 interface DynamicVectorCardProps {
@@ -26,49 +26,39 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
   children,
   className = '',
   glowColor = 'rgba(37, 99, 235, 0.25)',
-  roundedClass = 'rounded-2xl sm:rounded-[2.5rem]',
+  roundedClass = 'rounded-3xl sm:rounded-[2.5rem]',
   enableTilt = true,
   onClick,
   style = {}
 }) => {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const ambientRef = useRef<HTMLDivElement>(null);
-  const shineRef = useRef<HTMLDivElement>(null);
-  const isHovered = useRef(false);
-  const rectRef = useRef<DOMRect | null>(null);
-  const mousePosRef = useRef<{ clientX: number; clientY: number } | null>(null);
-  const rafIdRef = useRef<number | null>(null);
+  const cardRef      = useRef<HTMLDivElement>(null);
+  const ambientRef   = useRef<HTMLDivElement>(null);
+  const hotspotRef   = useRef<HTMLDivElement>(null);
+  const rimRef       = useRef<HTMLDivElement>(null);
+  const isHovered    = useRef(false);
 
   const [theme] = useTheme();
   const isDark = theme === 'dark';
 
-  // Ambient layer config ─ soft spread fading to 0% alpha well before card edge
-  const ambientRadius = isDark ? 360 : 300;
-  const coreAlpha = isDark ? 0.40 : 0.22;
-  const midAlpha = isDark ? 0.12 : 0.06;
+  // Ambient layer config  ─ wide soft spread with bright cursor-center (physics: frosted glass backlit)
+  const ambientRadius  = isDark ? 550 : 480;
+  // Core stop (0%), mid-fade (40%), transparent edge (100%)
+  const coreAlpha  = isDark ? 0.55 : 0.30;  // bright at exact cursor
+  const midAlpha   = isDark ? 0.22 : 0.10;  // soft mid-ring
 
-  const triggerShineSweep = useCallback(() => {
-    const sh = shineRef.current;
-    if (!sh) return;
-    // Reset animation to allow replaying
-    sh.style.animation = 'none';
-    // Force reflow so the browser registers the reset
-    void sh.getBoundingClientRect();
-    // Trigger the sweep — identical timing to premium-shine-container::after
-    sh.style.animation = 'shine-sweep 1.2s cubic-bezier(0.4, 0, 0.2, 1)';
-  }, []);
+  // Rim border config  ─ glowing card edge
+  const rimAlpha  = isDark ? 0.95 : 0.75;
 
-  // Frame update synced to display refresh rate (60Hz/120Hz/144Hz) with 0ms lag
-  const updateCardState = useCallback(() => {
-    rafIdRef.current = null;
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const card = cardRef.current;
-    if (!card || !isHovered.current || !mousePosRef.current) return;
+    if (!card) return;
+    if (typeof document !== 'undefined' && document.body.classList.contains('is-scrolling')) return;
 
-    const rect = rectRef.current || card.getBoundingClientRect();
+    const rect = card.getBoundingClientRect();
     if (rect.width === 0 || rect.height === 0) return;
 
-    const pxX = mousePosRef.current.clientX - rect.left;
-    const pxY = mousePosRef.current.clientY - rect.top;
+    const pxX = e.clientX - rect.left;
+    const pxY = e.clientY - rect.top;
     const pctX = Math.max(0, Math.min(100, (pxX / rect.width) * 100));
     const pctY = Math.max(0, Math.min(100, (pxY / rect.height) * 100));
 
@@ -77,122 +67,75 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
       ambientRef.current.style.background =
         `radial-gradient(${ambientRadius}px circle at ${pctX.toFixed(1)}% ${pctY.toFixed(1)}%,` +
         ` ${withAlpha(glowColor, coreAlpha)} 0%,` +
-        ` ${withAlpha(glowColor, midAlpha)} 30%,` +
-        ` transparent 60%)`;
+        ` ${withAlpha(glowColor, midAlpha)} 40%,` +
+        ` transparent 72%)`;
     }
 
-    // ── 3-D Tilt: Instant 0ms synchronization ─────────────────────
-    if (enableTilt && typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches) {
-      const cX = rect.width / 2;
+    // ── Rim Border Glow ────────────────────────────────────────────
+    if (rimRef.current) {
+      rimRef.current.style.background =
+        `radial-gradient(220px circle at ${pctX.toFixed(1)}% ${pctY.toFixed(1)}%,` +
+        ` ${withAlpha(glowColor, rimAlpha)},` +
+        ` transparent 70%)`;
+    }
+
+    // ── 3-D Tilt ──────────────────────────────────────────────────
+    if (enableTilt && window.matchMedia('(pointer: fine)').matches) {
+      const cX = rect.width  / 2;
       const cY = rect.height / 2;
-      const rotX = (((cY - pxY) / cY) * 3.5).toFixed(2);
-      const rotY = (((pxX - cX) / cX) * 3.5).toFixed(2);
-      card.style.transform = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.015, 1.015, 1.015)`;
-    } else {
-      card.style.transform = `perspective(1000px) scale3d(1.015, 1.015, 1.015)`;
+      card.style.setProperty('--rotate-x', `${(((cY - pxY) / cY) * 3.5).toFixed(2)}deg`);
+      card.style.setProperty('--rotate-y', `${(((pxX - cX) / cX) * 3.5).toFixed(2)}deg`);
     }
-  }, [ambientRadius, coreAlpha, midAlpha, glowColor, enableTilt]);
-
-  const handleMouseEnter = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const card = cardRef.current;
-    if (!card) return;
-    if (typeof document !== 'undefined' && document.body.classList.contains('is-scrolling')) return;
-
-    isHovered.current = true;
-    rectRef.current = card.getBoundingClientRect();
-    mousePosRef.current = { clientX: e.clientX, clientY: e.clientY };
-
-    if (ambientRef.current) {
-      ambientRef.current.style.opacity = '1';
-    }
-
-    // Instant tracking: eliminate CSS transition delay so card tracks cursor with 0ms latency
-    card.style.transition = 'none';
-
-    // ── Premium Shine Sweep ── fires once per hover entry ────────
-    triggerShineSweep();
-
-    if (!rafIdRef.current) {
-      rafIdRef.current = requestAnimationFrame(updateCardState);
-    }
-  }, [triggerShineSweep, updateCardState]);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (typeof document !== 'undefined' && document.body.classList.contains('is-scrolling')) return;
-
-    mousePosRef.current = { clientX: e.clientX, clientY: e.clientY };
 
     if (!isHovered.current) {
-      handleMouseEnter(e);
-      return;
+      isHovered.current = true;
+      // Fade in all layers at GPU speed (no React re-render)
+      [ambientRef, hotspotRef, rimRef].forEach(r => {
+        if (r.current) r.current.style.opacity = '1';
+      });
+      card.classList.add('is-card-hovered');
     }
-
-    const card = cardRef.current;
-    if (card && card.style.transition !== 'none') {
-      card.style.transition = 'none';
-    }
-
-    if (!rafIdRef.current) {
-      rafIdRef.current = requestAnimationFrame(updateCardState);
-    }
-  }, [handleMouseEnter, updateCardState]);
+  }, [isDark, glowColor, ambientRadius, coreAlpha, midAlpha, rimAlpha, enableTilt]);
 
   const handleMouseLeave = useCallback(() => {
-    isHovered.current = false;
-    mousePosRef.current = null;
-    rectRef.current = null;
-
-    if (rafIdRef.current) {
-      cancelAnimationFrame(rafIdRef.current);
-      rafIdRef.current = null;
-    }
-
     const card = cardRef.current;
     if (!card) return;
+    isHovered.current = false;
 
-    if (ambientRef.current) {
-      ambientRef.current.style.opacity = '0';
-    }
-
-    // Buttery-smooth spring return to flat resting state on exit
-    card.style.transition = 'transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s ease';
-    card.style.transform = 'none';
+    [ambientRef, hotspotRef, rimRef].forEach(r => {
+      if (r.current) r.current.style.opacity = '0';
+    });
+    card.style.setProperty('--rotate-x', '0deg');
+    card.style.setProperty('--rotate-y', '0deg');
+    card.classList.remove('is-card-hovered');
   }, []);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (rafIdRef.current) {
-        cancelAnimationFrame(rafIdRef.current);
-      }
-    };
-  }, []);
-
-  // Shared layer style ─ absolute fill, no pointer events
+  // Shared layer style ─ absolute fill, no pointer events, GPU-composited
   const layerBase: React.CSSProperties = {
-    position: 'absolute',
-    inset: 0,
-    pointerEvents: 'none',
-    opacity: 0,
-    transition: 'opacity 200ms ease',
-    borderRadius: 'inherit',
+    position:         'absolute',
+    inset:            0,
+    pointerEvents:    'none',
+    opacity:          0,
+    transition:       'opacity 200ms ease',
+    willChange:       'opacity',
+    borderRadius:     'inherit',
   };
 
   return (
     <div
       ref={cardRef}
-      onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
       style={{
-        transform: 'none',
-        transition: 'transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s ease',
-        WebkitFontSmoothing: 'antialiased',
-        MozOsxFontSmoothing: 'grayscale',
+        perspective:          '1000px',
+        transformStyle:       'preserve-3d',
+        WebkitFontSmoothing:  'antialiased',
+        MozOsxFontSmoothing:  'grayscale',
+        willChange:           'transform',
         ...style
       }}
-      className={`relative isolate overflow-hidden ${roundedClass} ${className} group/vector-card hover:will-change-transform`}
+      className={`relative isolate ${roundedClass} ${className} group/vector-card transition-transform duration-200 ease-out [.is-card-hovered_&]:[transform:perspective(1000px)_rotateX(var(--rotate-x,0deg))_rotateY(var(--rotate-y,0deg))_scale3d(1.015,1.015,1.015)]`}
     >
       {/* ── Layer A: Ambient + cursor warmth (z-0, behind content) ───── */}
       <div
@@ -201,21 +144,23 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
       />
 
       {/* ── Layer C: Content  (z-10, always on top of light) ───────── */}
-      <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: 'inherit' }}>
+      <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%' }}>
         {children}
       </div>
 
-      {/* ── Layer D: Shine Sweep (z-20, fires once per hover, over content) ── */}
+      {/* ── Layer D: Rim border glow  (z-20, painted as 1-px inset border light) */}
+      {/*    Technique: 1px inset box-shadow uses the radial gradient as its colour */}
+      {/*    We paint it as a border-box background on a 1px-bordered div           */}
       <div
-        ref={shineRef}
+        ref={rimRef}
         style={{
-          position: 'absolute',
-          inset: 0,
-          pointerEvents: 'none',
-          zIndex: 20,
-          borderRadius: 'inherit',
-          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)',
-          transform: 'translateX(-200%) skewX(-30deg)',
+          ...layerBase,
+          zIndex:      20,
+          padding:     '1px',
+          background:  `radial-gradient(220px circle at 50% 50%, ${withAlpha(glowColor, rimAlpha)}, transparent 70%)`,
+          WebkitMask:  'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+          WebkitMaskComposite: 'xor',
+          maskComposite: 'exclude',
         }}
       />
     </div>

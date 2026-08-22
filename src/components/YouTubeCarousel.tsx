@@ -269,12 +269,7 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
   if (sourceVideos.length === 0) return null;
 
   return (
-    <DynamicVectorCard
-      glowColor="rgba(37, 99, 235, 0.28)"
-      roundedClass="rounded-2xl sm:rounded-[2.5rem]"
-      className="w-full select-none"
-    >
-    <div ref={containerRef} className="w-full relative py-3.5 sm:py-10 overflow-hidden bg-[#F2EFE9] dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-2xl sm:rounded-[2.5rem] select-none">
+    <div ref={containerRef} className="w-full relative py-3.5 sm:py-10 overflow-hidden bg-[#F2EFE9] dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-2xl sm:rounded-[2.5rem] select-none shadow-xl">
       {/* Editorial Decorative Grid overlay — desktop only */}
       <div className="hidden sm:block absolute inset-0 grid-bg opacity-[0.02] pointer-events-none" />
 
@@ -510,6 +505,5 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
         )}
       </AnimatePresence>
     </div>
-    </DynamicVectorCard>
   );
 }

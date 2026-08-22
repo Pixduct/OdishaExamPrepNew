@@ -1585,22 +1585,22 @@ Last updated: August 15, 2026
 
 ---
 
-### 23. `DynamicVectorCard`
+### 23. `DynamicVectorCard` & `premium-shine-container`
 
-File: [`src/components/DynamicVectorCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/DynamicVectorCard.tsx)
-Last updated: August 15, 2026
+File: [`src/components/DynamicVectorCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/DynamicVectorCard.tsx), [`src/index.css`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/index.css#L1012-L1045)
+Last updated: August 21, 2026
 
-| Property | Class |
+| Property | Class / Token |
 | :--- | :--- |
-| **Card Container** | `relative rounded-3xl sm:rounded-[2.5rem]` |
-| **3D Transform Engine** | `perspective: 1000px, transformStyle: preserve-3d, scale3d(1.015, 1.015, 1.015)` |
-| **Surface Spotlight Overlay** | `pointer-events-none absolute inset-0 z-20 overflow-hidden mix-blend-soft-light` |
-| **Ambient Light Flare** | `pointer-events-none absolute inset-0 z-20 opacity-30 dark:opacity-40` |
-| **Border Ring Illumination** | `pointer-events-none absolute -inset-[1.5px] z-30 (WebkitMaskComposite: xor)` |
+| **Card Container** | `relative isolate overflow-hidden rounded-3xl sm:rounded-[2.5rem] premium-shine-container` |
+| **3D Transform Engine** | `perspective: 1000px`, `transformStyle: preserve-3d`, `scale3d(1.015, 1.015, 1.015)` |
+| **Hover Shine Sweep** | Pure CSS `.premium-shine-container::after` with `@keyframes shine-sweep 1.2s cubic-bezier(0.4, 0, 0.2, 1)` |
+| **Shine Gradient** | `linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent)` |
+| **Shine Trajectory** | `transform: translateX(-200%) skewX(-30deg)` to `transform: translateX(200%) skewX(-30deg)` |
 
 **Pattern notes:**
-- **Layering Order**: Surface spotlight overlay (`z-20`) and edge illumination ring (`z-30`) MUST sit on top of `{children}` so cursor tracking remains visible over opaque card backgrounds.
-- **Subtle 3D Perspective**: 3D magnetic parallax tilt (`rotateX`, `rotateY`) is capped at `3.5deg` max for a refined tactile response.
+- **Unified CSS Shine Engine**: Uses 100% identical pure CSS pseudo-element hover sweep (`.premium-shine-container::after`) as the Admin Control Center card across all site vector cards.
+- **Zero JS Reflow Lag**: Eliminates custom JS `getBoundingClientRect()` reflow triggers, ensuring smooth hardware-accelerated 120 FPS shine sweeps on every hover event.
 
 ---
 

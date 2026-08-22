@@ -1,7 +1,7 @@
-// OdishaExamPrep Push Notification Service Worker
-// Handles push events and notification clicks even when the site is closed.
+// OdishaExamPrep Push Notification & Offline Service Worker
+// Handles push events, offline caching, and PWA WebAPK installability
 
-const CACHE_NAME = 'oep-pwa-v2';
+const CACHE_NAME = 'oep-pwa-v10';
 const STATIC_ASSETS = [
   '/',
   '/favicon.svg',

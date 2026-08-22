@@ -1945,14 +1945,39 @@ Sitemap: ${sitemapUrl}
     });
     app.use(vite.middlewares);
   } else {
+    app.get(["/site.webmanifest", "/manifest.json"], (req, res) => {
+      const manifestPath = path.join(distPath, "site.webmanifest");
+      if (fs.existsSync(manifestPath)) {
+        res.setHeader("Content-Type", "application/manifest+json; charset=utf-8");
+        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0");
+        res.setHeader("Pragma", "no-cache");
+        res.setHeader("Expires", "0");
+        return res.sendFile(manifestPath);
+      }
+      res.status(404).send("Manifest not found");
+    });
+    app.get("/sw.js", (req, res) => {
+      const swPath = path.join(distPath, "sw.js");
+      if (fs.existsSync(swPath)) {
+        res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0");
+        res.setHeader("Pragma", "no-cache");
+        res.setHeader("Expires", "0");
+        return res.sendFile(swPath);
+      }
+      res.status(404).send("Service worker not found");
+    });
     app.use(express.static(distPath, {
-      setHeaders: (res, path2) => {
-        if (path2.endsWith(".html")) {
-          res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+      setHeaders: (res, filePath) => {
+        const normalized = filePath.replace(/\\/g, "/");
+        if (normalized.endsWith(".html") || normalized.endsWith("sw.js") || normalized.endsWith("site.webmanifest") || normalized.endsWith("manifest.json") || normalized.includes("/favicon") || normalized.includes("/android-chrome") || normalized.includes("/apple-touch-icon")) {
+          res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0");
           res.setHeader("Pragma", "no-cache");
           res.setHeader("Expires", "0");
-        } else {
+        } else if (normalized.includes("/assets/")) {
           res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        } else {
+          res.setHeader("Cache-Control", "public, max-age=3600");
         }
       }
     }));

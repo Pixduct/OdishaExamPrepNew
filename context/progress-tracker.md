@@ -1,11 +1,12 @@
 # Progress Tracker
 
 ## Completed Tasks
-- [x] Brand Sapphire Vector Icons Generation & PWA "OEP" Short Name Calibration (`public/android-chrome-*`, `public/favicon-*`, `public/apple-touch-icon.png`, `public/site.webmanifest`, `index.html`):
-  1. **High-Res Adaptive Brand Icons**: Generated crisp, high-resolution Brand Sapphire (`#2563EB` ➔ `#1D4ED8` ➔ `#0F172A`) PNG assets using `sharp` across all dimensions (512x512, 192x192, 180x180, 96x96, 48x48, 32x32, 16x16) with proper Android maskable safe-zone padding (central 65% scale) to prevent clipping.
-  2. **Short Name "OEP"**: Updated `short_name: "OEP"` in `site.webmanifest` and `<meta name="apple-mobile-web-app-title" content="OEP" />` in `index.html` so the app launcher name fits cleanly on Android home screens without awkward `OdishaExa...` truncation.
-  3. **Manifest Cache Busting**: Bumped manifest link to `/site.webmanifest?v=4` to force Android Chrome to refresh cached WebAPK metadata.
-  4. **Clean Verification**: Tested production compilation with `npm run build` exiting 0 with zero errors.
+- [x] Authentic Lucide BookOpen Rounded Floating Badge & Dedicated Maskable Icons (`public/android-chrome-*`, `public/favicon-*`, `public/apple-touch-icon.png`, `public/site.webmanifest`, `index.html`):
+  1. **1:1 Lucide BookOpen Match**: Re-rendered all PNG assets with the exact Lucide `BookOpen` vector icon paths (`M2 3h6a4 4 0 0 1 4 4v14...` + `M22 3h-6a4 4 0 0 0-4 4v14...`) identical to the live website navbar logo.
+  2. **Floating Rounded-3xl Splash Badge**: Rendered standalone / splash icons (`android-chrome-512x512.png`, `192x192.png`) with transparent outer canvas and a centered `rounded-3xl` (`rx="92"`) blue badge with subtle drop shadow, completely fixing the harsh 90° square box on Android app launch.
+  3. **Dedicated Launcher Maskable Icons**: Created `android-chrome-maskable-512x512.png` and `192x192.png` with full-bleed background and 60% safe-zone centering for Android home screen squircle/circle adaptive mask packing.
+  4. **Zero-Cache Deployment**: Pushed to GitHub `main` with `/site.webmanifest?v=5`, zero-cache Express routes, and service worker cache `oep-pwa-v10`.
+  5. **Clean Verification**: Tested production compilation with `npm run build` exiting 0 with zero errors.
 - [x] Universal 0ms Smooth Scrolling & 120FPS Performance Engine (`src/lib/lenisScroll.ts`, `src/main.tsx`, `src/lib/scrollManager.ts`, `src/pages/BlogPost.tsx`, `src/pages/AiMentor.tsx`):
   1. **0ms Instant Startup**: Hoisted `initLenis()` directly to `src/main.tsx` before initial React mount, eliminating the 1-second hydration lag so smooth physics scrolling applies from the very first frame.
   2. **Active Auto-Resize Observer**: Injected `ResizeObserver` on `document.body` inside `lenisScroll.ts` to dynamically refresh scroll boundaries as exams, test banks, and study plans load.

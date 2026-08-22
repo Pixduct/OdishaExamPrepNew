@@ -1,6 +1,22 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] Secondary Front-End Odia Localization & Smart Date Translation Engine (`src/App.tsx`, `src/components/LoadingPortal.tsx`, `src/lib/LanguageContext.tsx`, `src/lib/i18n/translations/home.ts`, `src/lib/i18n/translations/common.ts`, `src/lib/i18n/phraseDictionary.ts`):
+  1. **Loading Portal Splash Localization**: Connected `LoadingPortal.tsx` to `useLanguage` with fallback to `getStoredLanguage()`, rendering *"ପୋର୍ଟାଲ୍ ଲୋଡ୍ ହେଉଛି..."* when Odia is selected.
+  2. **Hero Mobile Trust Pill**: Localized mobile trust badge via `t('home.hero.trustedByMobile')` (*"୧୦,୦୦୦+ ଆଶାୟୀ ଛାତ୍ରଛାତ୍ରୀଙ୍କ ବିଶ୍ୱାସ"*).
+  3. **Recruitment Bulletin Heading Dual-Part Localization**: Split and localized heading parts `home.bulletin.title1` (*"ସର୍ବଶେଷ ଓଡ଼ିଶା ସରକାରୀ ଚାକିରି ବିଜ୍ଞପ୍ତି"*) and `home.bulletin.title2` (*"ଓ ଲକ୍ଷ୍ୟଭିତ୍ତିକ ମକ୍ ଟେଷ୍ଟ"*), fixing the unlocalized English "& Targeted Mock Tests" fragment.
+  4. **Recruitment Bulletin Cards & Status Badges**: Localized status badges (*"ବିଜ୍ଞପ୍ତି ପ୍ରକାଶିତ"*, *"ଆଡମିଟ୍ କାର୍ଡ ଉପଲବ୍ଧ"*, *"ଆବେଦନ ଚାଲୁଅଛି"*, *"ଫଳାଫଳ ପ୍ରକାଶିତ"*, *"ସ୍ଥଗିତ"*) and dynamic action CTA (*"ମାଗଣା ଟେଷ୍ଟ →"*).
+  5. **Smart Date & Month Translation Engine**: Enhanced `translatePhrase` in `phraseDictionary.ts` with prefix and month name parser + Odia numeral converter (*"Registration Date: 13 Jun 2026 - 7 Jul 2026"* ➔ *"ପଞ୍ଜୀକରଣ ତାରିଖ: ୧୩ ଜୁନ୍ ୨୦୨୬ - ୭ ଜୁଲାଇ ୨୦୨୬"*).
+  6. **Toppers Journal Search Box Localization**: Localized placeholder text (*"ନାମ, ଜିଲ୍ଲା କିମ୍ବା ପରୀକ୍ଷା ଖୋଜନ୍ତୁ..."*).
+  7. **Clean Verification**: Tested production compilation with `npm run build` exiting 0 with zero errors.
+- [x] Comprehensive Odia i18n Translation & Dynamic Card Localization (`src/App.tsx`, `src/lib/i18n/translations/home.ts`, `src/lib/i18n/translations/exams.ts`, `src/lib/i18n/translations/common.ts`, `src/lib/i18n/phraseDictionary.ts`):
+  1. **Guest Personalization Banner Localization**: Wired dynamic `t('home.guestBanner.*')` translations across badge (*"Personalized Preparation Engine"* ➔ *"ବ୍ୟକ୍ତିଗତ ପ୍ରସ୍ତୁତି ଇଞ୍ଜିନ୍"*), mobile & desktop headings (*"Sign In for Your AI Study Plan & Score Tracker"* ➔ *"ଆପଣଙ୍କ AI ଷ୍ଟଡି ପ୍ଲାନ ଏବଂ ସ୍କୋର ଟ୍ରାକର ପାଇଁ ସାଇନ୍ ଇନ୍ କରନ୍ତୁ"*), subtitle description, and registration CTA button.
+  2. **Upcoming & Popular Tab Navigation**: Fixed missing Odia dictionary entries in `examsTranslations.or` for `upcomingTab` (*"ଆଗାମୀ ପରୀକ୍ଷା"*), `popularTab` (*"ଲୋକପ୍ରିୟ ପରୀକ୍ଷା"*), search placeholder, and view popular button.
+  3. **Syllabus-Mapped Preparation Section**: Injected `syllabus` translation tree (`badge`, `title`, `subtitle`, `subtitleDesktop`) across `examsTranslations.en` and `examsTranslations.or`, ensuring 100% authentic Odia rendering (*"🎯 ସିଲାବସ୍-ଅନୁମୋଦିତ ପ୍ରସ୍ତୁତି"*, *"ଲକ୍ଷ୍ୟଭିତ୍ତିକ ଅଧ୍ୟାୟ ଟେଷ୍ଟ ସହିତ ପ୍ରତ୍ୟେକ ବିଷୟରେ ଦକ୍ଷତା ହାସଲ କରନ୍ତୁ"*).
+  4. **Topper Preparation Journals Load More CTA**: Wired `t('home.achievers.loadMore')` with dynamic parameter interpolation (`{count}`) for clean Odia numerals (*"ଅଧିକ ପ୍ରସ୍ତୁତି ଅନୁଭୂତି ଦେଖନ୍ତୁ (+{count} ବାକି ଅଛି)"*).
+  5. **Pre-Footer Stats Dashboard Localization**: Added missing Odia translations and values for Mock Tests Attempted (*"ମକ୍ ଟେଷ୍ଟ ସମ୍ପନ୍ନ / ୧୦,୦୦୦+"*), Syllabus Coverage (*"ସିଲାବସ୍ କଭରେଜ୍ / ୯୮.୪%"*), Score Analytics (*"ସ୍କୋର ବିଶ୍ଳେଷଣ / ରିଅଲ-ଟାଇମ୍"*), and Expert Support (*"ବିଶେଷଜ୍ଞ ସହାୟତା / ୨୪/୭ ସହାୟତା"*).
+  6. **Phrase Dictionary Resilience**: Synchronized all newly localized strings into `universalPhraseDictionary` in `phraseDictionary.ts` as universal fallbacks.
+  7. **Clean Verification**: Tested production compilation with `npm run build` exiting 0 with zero errors.
 - [x] Seamless Full-Screen Brand Sapphire Blue (`#2563EB`) Native Splash Architecture (`public/site.webmanifest`, `index.html`, `public/android-chrome-*`, `public/favicon.*`):
   1. **Zero-Box Color Continuity**: Configured `background_color: "#2563EB"` and `theme_color: "#2563EB"` in `site.webmanifest` and `index.html`, perfectly matching the PNG icon fill color (`#2563EB`) so Android renders a continuous, full-screen brand blue launch canvas with **zero black borders and zero square box discontinuities**.
   2. **1:1 Lucide BookOpen Geometry**: Centered pure white Lucide `BookOpen` vector icon inside the 60% safe zone for both splash screen and adaptive home screen launcher icons.

@@ -8,6 +8,7 @@ export const homeTranslations = {
       subtitleMobile: 'Verified PYQs, chapter practice, and mock tests for OPSC, OSSC, and OSSSC.',
       searchPlaceholder: 'Search exam (e.g. OPSC OAS, OSSC CGL, OSSSC RI/AMIN)...',
       trustedBy: 'Trusted by 10,000+ Odisha Government Job Aspirants',
+      trustedByMobile: 'Trusted by 10,000+ Aspirants',
       exploreExamsBtn: 'Explore All Exams',
       freeMockTestBtn: 'Start Free Mock Test',
       stats: {
@@ -65,19 +66,35 @@ export const homeTranslations = {
       subtitle: 'Read how thousands of students across Odisha cracked OPSC, OSSC, and OSSSC with our mock test platform.',
       subtitleMobile: 'Strategies and scorecard stories from Odisha exam toppers.',
       verifiedAspirant: 'Verified Aspirant',
-      examCleared: 'Cleared {exam}'
+      examCleared: 'Cleared {exam}',
+      loadMore: 'Load More preparation journals (+{count} remaining)',
+      searchPlaceholder: 'Search by name, district, keyword...'
+    },
+    guestBanner: {
+      badge: 'Personalized Preparation Engine',
+      titleMobile: 'Sign In for Your AI Study Plan & Score Tracker',
+      titleDesktop: 'Sign In to Access Your Personal AI Study Plan & Score Tracker',
+      subtitle: 'Your readiness score, daily weak-topic drills, and streak goals are securely tied to your user account.',
+      signInBtn: 'Sign In / Register Free →'
     },
     bulletin: {
       sectionBadge: 'Recruitment Bulletin',
       title: 'Latest Odisha Exam Notifications & Updates',
+      title1: 'Official Exam Notifications',
+      title2: '& Targeted Mock Tests',
       subtitle: 'Stay updated with official notification releases, admit card downloads, and exam date schedules.',
       viewAllNotices: 'View All Notifications',
       officialPortal: 'Official Board Link',
+      freeTest: 'FREE TEST →',
       status: {
-        active: 'Form Open',
-        upcoming: 'Upcoming',
+        notification: 'Notification Released',
         admitCard: 'Admit Card Out',
-        result: 'Results Declared',
+        'admit-card': 'Admit Card Out',
+        applications: 'Applications Active',
+        active: 'Form Open',
+        result: 'Result Declared',
+        postponed: 'Postponed',
+        upcoming: 'Upcoming',
         closed: 'Closed'
       }
     },
@@ -109,6 +126,7 @@ export const homeTranslations = {
       subtitleMobile: 'OPSC, OSSC ଏବଂ OSSSC ପାଇଁ ପ୍ରମାଣିତ PYQ, ଚାପ୍ଟର ଅଭ୍ୟାସ ଓ ମକ୍ ଟେଷ୍ଟ।',
       searchPlaceholder: 'ପରୀକ୍ଷା ଖୋଜନ୍ତୁ (ଯଥା: OPSC OAS, OSSC CGL, OSSSC RI/AMIN)...',
       trustedBy: 'ଓଡ଼ିଶାର ୧୦,୦୦୦+ ଆଶାୟୀ ଛାତ୍ରଛାତ୍ରୀଙ୍କ ଦ୍ୱାରା ବିଶ୍ୱସନୀୟ',
+      trustedByMobile: '୧୦,୦୦୦+ ଆଶାୟୀ ଛାତ୍ରଛାତ୍ରୀଙ୍କ ବିଶ୍ୱାସ',
       exploreExamsBtn: 'ସମସ୍ତ ପରୀକ୍ଷା ଦେଖନ୍ତୁ',
       freeMockTestBtn: 'ମାଗଣା ମକ୍ ଟେଷ୍ଟ ଦିଅନ୍ତୁ',
       stats: {
@@ -166,19 +184,35 @@ export const homeTranslations = {
       subtitle: 'ଜାଣନ୍ତୁ କିପରି ଓଡ଼ିଶାର ହଜାର ହଜାର ଛାତ୍ରଛାତ୍ରୀ ଆମ ମକ୍ ଟେଷ୍ଟ ମାଧ୍ୟମରେ OPSC, OSSC ଏବଂ OSSSC ରେ ଉତ୍ତୀର୍ଣ୍ଣ ହୋଇଛନ୍ତି।',
       subtitleMobile: 'ଓଡ଼ିଶା ଟପ୍ପରମାନଙ୍କ ପ୍ରସ୍ତୁତି ରଣନୀତି ଏବଂ ସ୍କୋରକାର୍ଡ।',
       verifiedAspirant: 'ପ୍ରମାଣିତ କୃତୀ ଛାତ୍ର',
-      examCleared: '{exam} ରେ ସଫଳ'
+      examCleared: '{exam} ରେ ସଫଳ',
+      loadMore: 'ଅଧିକ ପ୍ରସ୍ତୁତି ଅନୁଭୂତି ଦେଖନ୍ତୁ (+{count} ବାକି ଅଛି)',
+      searchPlaceholder: 'ନାମ, ଜିଲ୍ଲା କିମ୍ବା ପରୀକ୍ଷା ଖୋଜନ୍ତୁ...'
+    },
+    guestBanner: {
+      badge: 'ବ୍ୟକ୍ତିଗତ ପ୍ରସ୍ତୁତି ଇଞ୍ଜିନ୍',
+      titleMobile: 'ଆପଣଙ୍କ AI ଷ୍ଟଡି ପ୍ଲାନ ଏବଂ ସ୍କୋର ଟ୍ରାକର ପାଇଁ ସାଇନ୍ ଇନ୍ କରନ୍ତୁ',
+      titleDesktop: 'ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ AI ଷ୍ଟଡି ପ୍ଲାନ ଓ ସ୍କୋର ଟ୍ରାକର ପାଇବା ପାଇଁ ସାଇନ୍ ଇନ୍ କରନ୍ତୁ',
+      subtitle: 'ଆପଣଙ୍କ ପରୀକ୍ଷା ପ୍ରସ୍ତୁତି ସ୍କୋର, ଦୈନିକ ଅଭ୍ୟାସ ଏବଂ ଷ୍ଟ୍ରିକ୍ ଲକ୍ଷ୍ୟ ଆପଣଙ୍କ ଆକାଉଣ୍ଟରେ ସୁରକ୍ଷିତ ରହିଥାଏ।',
+      signInBtn: 'ସାଇନ୍ ଇନ୍ / ମାଗଣା ରେଜିଷ୍ଟ୍ରେସନ →'
     },
     bulletin: {
       sectionBadge: 'ନିଯୁକ୍ତି ବୁଲେଟିନ୍',
       title: 'ସର୍ବଶେଷ ଓଡ଼ିଶା ସରକାରୀ ଚାକିରି ବିଜ୍ଞପ୍ତି',
+      title1: 'ସର୍ବଶେଷ ଓଡ଼ିଶା ସରକାରୀ ଚାକିରି ବିଜ୍ଞପ୍ତି',
+      title2: 'ଓ ଲକ୍ଷ୍ୟଭିତ୍ତିକ ମକ୍ ଟେଷ୍ଟ',
       subtitle: 'ନୂତନ ବିଜ୍ଞପ୍ତି, ଆଡମିଟ୍ କାର୍ଡ ଡାଉନଲୋଡ୍ ଏବଂ ପରୀକ୍ଷା ତାରିଖ ସମ୍ବନ୍ଧୀୟ ସଦ୍ୟତମ ତଥ୍ୟ।',
       viewAllNotices: 'ସମସ୍ତ ବିଜ୍ଞପ୍ତି ଦେଖନ୍ତୁ',
       officialPortal: 'ଅଫିସିଆଲ ବୋର୍ଡ ଲିଙ୍କ୍',
+      freeTest: 'ମାଗଣା ଟେଷ୍ଟ →',
       status: {
-        active: 'ଆବେଦନ ଚାଲୁଅଛି',
-        upcoming: 'ଖୁବ୍ ଶୀଘ୍ର ଆସୁଛି',
+        notification: 'ବିଜ୍ଞପ୍ତି ପ୍ରକାଶିତ',
         admitCard: 'ଆଡମିଟ୍ କାର୍ଡ ଉପଲବ୍ଧ',
+        'admit-card': 'ଆଡମିଟ୍ କାର୍ଡ ଉପଲବ୍ଧ',
+        applications: 'ଆବେଦନ ଚାଲୁଅଛି',
+        active: 'ଆବେଦନ ଚାଲୁଅଛି',
         result: 'ଫଳାଫଳ ପ୍ରକାଶିତ',
+        postponed: 'ସ୍ଥଗିତ',
+        upcoming: 'ଖୁବ୍ ଶୀଘ୍ର ଆସୁଛି',
         closed: 'ଆବେଦନ ବନ୍ଦ'
       }
     },

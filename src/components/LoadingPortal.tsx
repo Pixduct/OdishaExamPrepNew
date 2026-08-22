@@ -1,7 +1,10 @@
 import React from 'react';
 import { BookOpen } from 'lucide-react';
+import { useLanguage } from '../lib/LanguageContext';
 
 export const LoadingPortal = () => {
+  const { t } = useLanguage();
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAF8F5] dark:bg-[#060B16] text-slate-900 dark:text-white transition-colors duration-300 relative overflow-hidden">
       {/* Ambient background grid and glowing orb */}
@@ -29,7 +32,7 @@ export const LoadingPortal = () => {
             Odisha<span className="text-[#2563EB] dark:text-blue-400">Exam</span>Prep
           </h1>
           <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500">
-            Loading Portal...
+            {t('common.loadingPortal', 'Loading Portal...')}
           </p>
         </div>
       </div>

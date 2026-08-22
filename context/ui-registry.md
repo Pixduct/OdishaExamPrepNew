@@ -90,6 +90,10 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`AdminDecoupledContentModal`** | Admin / Form Modal | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L2625-L3230) | Adaptive Category Presets, Dynamic Header Badges, PDF Link Isolation, Non-Destructive Decoupled Mode | AdminPanel.tsx | Active |
 | **`CurrentAffairsStudentCommunityBanner`** | Social / Banner | [`src/components/CurrentAffairsReaderModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/CurrentAffairsReaderModal.tsx#L136-L203) | Multi-Domain (Odisha, International, National) Dual-Theme Gradient Community Banners & CTA Actions | CurrentAffairsReaderModal.tsx, StreakDetailModal.tsx | Active |
 | **`BlogPostDraftPreviewBar`** | Admin / Banner | [`src/pages/BlogPost.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/BlogPost.tsx#L391-L424) | Sticky Amber Draft Preview Bar, 1-Click Approve/Publish, Discard & Live Transition | BlogPost.tsx | Active |
+| **`GuestPersonalizationBanner`** | Banner / Auth Trigger | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L3606-L3635) | Responsive 2-tier typography, localized action pills & primary gradient CTA | App.tsx (Home) | Active |
+| **`PreFooterStatsDashboard`** | Data Display / Metrics | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L1720-L1750) | 4-col multi-accent stat cards with Lucide icons & dual-language numerals | App.tsx (Footer) | Active |
+| **`LoadingPortal`** | Overlay / Loading | [`src/components/LoadingPortal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/LoadingPortal.tsx) | Triple concentric spinner with ambient orb, Lucide pulse & dynamic localized typography | LoadingPortal.tsx | Active |
+| **`HeroTrustBadge`** | Hero / Social Proof | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L3388-L3405) | Overlapping avatar icon stack, zero-truncation responsive labels & dual-language numerals | App.tsx (Hero) | Active |
 
 ---
 
@@ -3081,6 +3085,90 @@ Last updated: August 22, 2026
 **Pattern notes:**
 - **Hard Fatal Invariants**: Zero speculative countdowns ("30-day plan", "exam confirmed next week"), zero truncated ellipses (`...`), zero undefined tokens, zero unreplaced placeholders (`[Topic]`, `[Formula]`).
 - **Fail-Closed Gatekeeper**: Any article scoring below 88 or containing a fatal invariant is immediately dropped before Supabase database insertion.
+
+---
+
+### 95. `GuestPersonalizationBanner`
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L3606-L3635)
+Last updated: August 22, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Container Background** | `bg-white dark:bg-slate-900` |
+| **Container Border** | `border border-slate-200/80 dark:border-slate-800` |
+| **Border Radius** | `rounded-2xl` (via `DynamicVectorCard`) |
+| **Spacing** | `py-3 sm:py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`, inner `p-4 sm:p-7` |
+| **Badge** | `inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider bg-brand-500/10 dark:bg-brand-500/20 text-brand-600 dark:text-brand-300 border border-brand-500/20 dark:border-brand-500/30` |
+| **Text — Primary** | `text-base xs:text-lg sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-snug` |
+| **Text — Secondary** | `text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed` |
+| **CTA Button** | `w-full sm:w-auto h-11 sm:h-auto px-6 py-2.5 sm:py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-indigo-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-xs sm:text-sm shadow-lg shadow-brand-500/25` |
+| **Shadow** | `shadow-xl` |
+
+**Pattern notes:**
+- **Full i18n Localization**: Must always use `t('home.guestBanner.*')` for badge, heading variants, description, and registration CTA.
+- **Responsive 2-Tier Headings**: Uses `sm:hidden` short label (*"Sign In for Your AI Study Plan & Score Tracker"*) for mobile, and `hidden sm:inline` extended label (*"Sign In to Access Your Personal AI Study Plan & Score Tracker"*) for desktop.
+- **Dynamic 3D Vector Shell**: Wrapped inside `<DynamicVectorCard>` with dark-mode compatibility.
+
+---
+
+### 96. `PreFooterStatsDashboard`
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L1720-L1750)
+Last updated: August 22, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Grid Layout** | `grid grid-cols-2 lg:grid-cols-4 border-b border-slate-800/80 gap-3 sm:gap-6 pb-8 sm:pb-16 mb-8 sm:mb-16` |
+| **Card Background** | `bg-slate-900/90` |
+| **Card Border** | `border-2 border-slate-800 hover:border-brand-500/50` |
+| **Border Radius** | `rounded-2xl` |
+| **Card Padding** | `p-3.5 sm:p-5` |
+| **Icon Container** | `p-1.5 sm:p-2 rounded-xl border` with color-specific accents (`blue-400`, `rose-400`, `amber-400`, `emerald-400`) |
+| **Text — Label** | `font-black uppercase text-slate-300 text-[10px] sm:text-xs tracking-wide` |
+| **Text — Metric Value** | `font-serif font-black text-white tracking-tight text-lg sm:text-2xl` |
+| **Text — Description** | `font-semibold text-slate-300 text-[10px] sm:text-[11px]` |
+| **Shadow & Hover** | `shadow-lg hover:-translate-y-1 transition-all duration-300` |
+
+**Pattern notes:**
+- **Dynamic i18n Values & Numeral Formatting**: Stat values (*"10,000+"* / *"୧୦,୦୦୦+"*, *"98.4%"* / *"୯୮.୪%"*, *"Real-Time"* / *"ରିଅଲ-ଟାଇମ୍"*, *"24/7 Support"* / *"୨୪/୭ ସହାୟତା"*) must use `t('footer.stats*Val')` to ensure authentic numerals and localized text in Odia.
+- **Mobile Touch Padding**: Responsive `p-3.5` with `w-3.5 h-3.5` icons on mobile viewports for compact screen density.
+
+---
+
+### 97. `LoadingPortal`
+File: [`src/components/LoadingPortal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/LoadingPortal.tsx)
+Last updated: August 22, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Full-Page Background** | `bg-[#FAF8F5] dark:bg-[#060B16] text-slate-900 dark:text-white transition-colors duration-300` |
+| **Ambient Glow** | `w-64 h-64 sm:w-80 sm:h-80 bg-brand-500/5 dark:bg-brand-500/10 rounded-full blur-[80px]` |
+| **Outer Orbit Spinner** | `rounded-full border border-dashed border-blue-500/30 dark:border-blue-400/30 animate-[spin_15s_linear_infinite]` |
+| **Middle Orbit Spinner** | `rounded-full border border-blue-500/10 dark:border-blue-400/20 border-t-blue-500/50 dark:border-t-blue-400/70 animate-[spin_3s_linear_infinite_reverse]` |
+| **Core Pulse Icon** | `rounded-full bg-white dark:bg-[#0B1528] border border-blue-500/20 dark:border-slate-800 shadow-md shadow-blue-500/10` with `<BookOpen className="text-[#2563EB] dark:text-blue-400 animate-pulse" />` |
+| **Brand Typography** | `text-base sm:text-xl font-black text-slate-900 dark:text-white tracking-tight` |
+| **Loading Subtitle** | `text-[9px] sm:text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500` |
+
+**Pattern notes:**
+- **Dynamic Localization Resiliency**: Wired to `useLanguage` with direct fallback to `getStoredLanguage()`, rendering *"Loading Portal..."* or *"ପୋର୍ଟାଲ୍ ଲୋଡ୍ ହେଉଛି..."* regardless of provider initialization order.
+
+---
+
+### 98. `HeroTrustBadge`
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L3388-L3405)
+Last updated: August 22, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Pill Background** | `bg-white dark:bg-slate-900 shadow-[0_4px_20px_rgb(0,0,0,0.03)]` |
+| **Pill Border** | `border border-slate-100 dark:border-slate-800` |
+| **Border Radius** | `rounded-full sm:rounded-2xl` |
+| **Avatar Stack** | `flex -space-x-1.5 sm:-space-x-2 shrink-0` with `w-5 h-5 sm:w-7 sm:h-7 rounded-full border border-white dark:border-slate-800 bg-slate-100 dark:bg-slate-800` containing `Target`, `Award`, `Star` |
+| **Text — Primary** | `text-[9.5px] sm:text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wide` |
+
+**Pattern notes:**
+- **Responsive 2-Tier Typography**: Uses `sm:hidden` short label (*"Trusted by 10,000+ Aspirants"* / *"୧୦,୦୦୦+ ଆଶାୟୀ ଛାତ୍ରଛାତ୍ରୀଙ୍କ ବିଶ୍ୱାସ"*) and `hidden sm:inline` extended label (*"🎯 Trusted by 10K+ Odisha Aspirants"* / *"🎯 ଓଡ଼ିଶାର ୧୦,୦୦୦+ ଆଶାୟୀ ଛାତ୍ରଛାତ୍ରୀଙ୍କ ଦ୍ୱାରା ବିଶ୍ୱସନୀୟ"*).
+
+
 
 
 

@@ -94,6 +94,33 @@ export const universalPhraseDictionary: Record<string, string> = {
   "Explore Free Mock Tests": "ମାଗଣା ମକ୍ ଟେଷ୍ଟ ଦେଖନ୍ତୁ",
   "View Syllabus Paths": "ପାଠ୍ୟକ୍ରମ ପଥ ଦେଖନ୍ତୁ",
   "Focused Preparation For:": "ନିର୍ଦ୍ଦିଷ୍ଟ ପ୍ରସ୍ତୁତି:",
+  "Personalized Preparation Engine": "ବ୍ୟକ୍ତିଗତ ପ୍ରସ୍ତୁତି ଇଞ୍ଜିନ୍",
+  "PERSONALIZED PREPARATION ENGINE": "ବ୍ୟକ୍ତିଗତ ପ୍ରସ୍ତୁତି ଇଞ୍ଜିନ୍",
+  "Sign In for Your AI Study Plan & Score Tracker": "ଆପଣଙ୍କ AI ଷ୍ଟଡି ପ୍ଲାନ ଏବଂ ସ୍କୋର ଟ୍ରାକର ପାଇଁ ସାଇନ୍ ଇନ୍ କରନ୍ତୁ",
+  "Sign In to Access Your Personal AI Study Plan & Score Tracker": "ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ AI ଷ୍ଟଡି ପ୍ଲାନ ଓ ସ୍କୋର ଟ୍ରାକର ପାଇବା ପାଇଁ ସାଇନ୍ ଇନ୍ କରନ୍ତୁ",
+  "Your readiness score, daily weak-topic drills, and streak goals are securely tied to your user account.": "ଆପଣଙ୍କ ପରୀକ୍ଷା ପ୍ରସ୍ତୁତି ସ୍କୋର, ଦୈନିକ ଅଭ୍ୟାସ ଏବଂ ଷ୍ଟ୍ରିକ୍ ଲକ୍ଷ୍ୟ ଆପଣଙ୍କ ଆକାଉଣ୍ଟରେ ସୁରକ୍ଷିତ ରହିଥାଏ।",
+  "Sign In / Register Free →": "ସାଇନ୍ ଇନ୍ / ମାଗଣା ରେଜିଷ୍ଟ୍ରେସନ →",
+  "SYLLABUS-MAPPED PREPARATION": "ସିଲାବସ୍-ଅନୁମୋଦିତ ପ୍ରସ୍ତୁତି",
+  "🎯 SYLLABUS-MAPPED PREPARATION": "🎯 ସିଲାବସ୍-ଅନୁମୋଦିତ ପ୍ରସ୍ତୁତି",
+  "Master Every Topic with Targeted Chapter-Wise Tests": "ଲକ୍ଷ୍ୟଭିତ୍ତିକ ଅଧ୍ୟାୟ ଟେଷ୍ଟ ସହିତ ପ୍ରତ୍ୟେକ ବିଷୟରେ ଦକ୍ଷତା ହାସଲ କରନ୍ତୁ",
+  "Stop blindly studying. Unlock full-length mock tests and PYQs designed exactly for the OPSC and OSSC curriculum.": "ଅନ୍ଧ ଭାବରେ ପଢ଼ିବା ବନ୍ଦ କରନ୍ତୁ। OPSC ଏବଂ OSSC ପାଇଁ ସଠିକ୍ ସିଲାବସ୍ ଆଧାରିତ ମକ୍ ଟେଷ୍ଟ ଓ ପୂର୍ବ ବର୍ଷର ପ୍ରଶ୍ନୋତ୍ତର ଅଭ୍ୟାସ କରନ୍ତୁ।",
+  "Stop blindly studying. Master Odisha History to Indian Polity with full-length mock tests and PYQs mapped exactly to the OPSC and OSSC curriculum.": "ଅନ୍ଧ ଭାବରେ ପଢ଼ିବା ବନ୍ଦ କରନ୍ତୁ। ଓଡ଼ିଶା ଇତିହାସରୁ ଭାରତୀୟ ସମ୍ବିଧାନ ପର୍ଯ୍ୟନ୍ତ ସମସ୍ତ ବିଷୟ OPSC ଓ OSSC ପ୍ୟାଟର୍ଣ୍ଣ ମକ୍ ଟେଷ୍ଟ ମାଧ୍ୟମରେ ପ୍ରସ୍ତୁତ କରନ୍ତୁ।",
+  "Load More preparation journals": "ଅଧିକ ପ୍ରସ୍ତୁତି ଅନୁଭୂତି ଦେଖନ୍ତୁ",
+  "LOAD MORE PREPARATION JOURNALS": "ଅଧିକ ପ୍ରସ୍ତୁତି ଅନୁଭୂତି ଦେଖନ୍ତୁ",
+  "Mock Tests Attempted": "ମକ୍ ଟେଷ୍ଟ ସମ୍ପନ୍ନ",
+  "MOCK TESTS ATTEMPTED": "ମକ୍ ଟେଷ୍ଟ ସମ୍ପନ୍ନ",
+  "Syllabus Coverage": "ସିଲାବସ୍ କଭରେଜ୍",
+  "SYLLABUS COVERAGE": "ସିଲାବସ୍ କଭରେଜ୍",
+  "Score Analytics": "ସ୍କୋର ବିଶ୍ଳେଷଣ",
+  "SCORE ANALYTICS": "ସ୍କୋର ବିଶ୍ଳେଷଣ",
+  "Expert Support": "ବିଶେଷଜ୍ଞ ସହାୟତା",
+  "EXPERT SUPPORT": "ବିଶେଷଜ୍ଞ ସହାୟତା",
+  "Real exam simulations": "ପ୍ରକୃତ ପରୀକ୍ଷା ସିମୁଲେସନ୍",
+  "Mapped to state boards": "ରାଜ୍ୟ ନିଯୁକ୍ତି ବୋର୍ଡ ଅନୁସାରେ",
+  "Detailed rank mapping": "ସଠିକ୍ ରାଜ୍ୟ ର‍୍ୟାଙ୍କିଙ୍ଗ୍",
+  "Priority Telegram & Call": "ଟେଲିଗ୍ରାମ୍ ଓ କଲ୍ ସୁବିଧା",
+  "24/7 Support": "୨୪/୭ ସହାୟତା",
+  "Real-Time": "ରିଅଲ-ଟାଇମ୍",
 
   // ── Home & Dashboard Strings ──
   "Continue Practice": "ଅଭ୍ୟାସ ଜାରି ରଖନ୍ତୁ",
@@ -207,6 +234,25 @@ export const universalPhraseDictionary: Record<string, string> = {
 
   // ── Status & Utilities ──
   "Loading...": "ଲୋଡ୍ ହେଉଛି...",
+  "Loading Portal...": "ପୋର୍ଟାଲ୍ ଲୋଡ୍ ହେଉଛି...",
+  "LOADING PORTAL...": "ପୋର୍ଟାଲ୍ ଲୋଡ୍ ହେଉଛି...",
+  "Trusted by 10,000+ Aspirants": "୧୦,୦୦୦+ ଆଶାୟୀ ଛାତ୍ରଛାତ୍ରୀଙ୍କ ବିଶ୍ୱାସ",
+  "TRUSTED BY 10,000+ ASPIRANTS": "୧୦,୦୦୦+ ଆଶାୟୀ ଛାତ୍ରଛାତ୍ରୀଙ୍କ ବିଶ୍ୱାସ",
+  "Notification Released": "ବିଜ୍ଞପ୍ତି ପ୍ରକାଶିତ",
+  "NOTIFICATION RELEASED": "ବିଜ୍ଞପ୍ତି ପ୍ରକାଶିତ",
+  "Admit Card Out": "ଆଡମିଟ୍ କାର୍ଡ ଉପଲବ୍ଧ",
+  "ADMIT CARD OUT": "ଆଡମିଟ୍ କାର୍ଡ ଉପଲବ୍ଧ",
+  "Applications Active": "ଆବେଦନ ଚାଲୁଅଛି",
+  "APPLICATIONS ACTIVE": "ଆବେଦନ ଚାଲୁଅଛି",
+  "Result Declared": "ଫଳାଫଳ ପ୍ରକାଶିତ",
+  "RESULT DECLARED": "ଫଳାଫଳ ପ୍ରକାଶିତ",
+  "Postponed": "ସ୍ଥଗିତ",
+  "POSTPONED": "ସ୍ଥଗିତ",
+  "Free Test": "ମାଗଣା ଟେଷ୍ଟ",
+  "FREE TEST": "ମାଗଣା ଟେଷ୍ଟ",
+  "FREE TEST →": "ମାଗଣା ଟେଷ୍ଟ →",
+  "Registration Date:": "ପଞ୍ଜୀକରଣ ତାରିଖ:",
+  "Search by name, district, keyword...": "ନାମ, ଜିଲ୍ଲା କିମ୍ବା ପରୀକ୍ଷା ଖୋଜନ୍ତୁ...",
   "Please wait...": "ଦୟାକରି ଅପେକ୍ଷା କରନ୍ତୁ...",
   "No data available": "କୌଣସି ତଥ୍ୟ ଉପଲବ୍ଧ ନାହିଁ",
   "No tests found": "କୌଣସି ଟେଷ୍ଟ ମିଳିଲା ନାହିଁ",
@@ -223,6 +269,36 @@ export const universalPhraseDictionary: Record<string, string> = {
   "Strategy": "ରଣନୀତି ଓ ଟିପ୍ସ",
   "General Studies": "ସାଧାରଣ ଜ୍ଞାନ",
   "Language Subject": "ଭାଷା (ଓଡ଼ିଆ/ଇଂରାଜୀ)"
+};
+
+const ODIA_DIGITS = ['୦', '୧', '୨', '୩', '୪', '୫', '୬', '୭', '୮', '୯'];
+const toOdiaDigitsInternal = (str: string): string => {
+  return str.replace(/[0-9]/g, (d) => ODIA_DIGITS[parseInt(d, 10)]);
+};
+
+const MONTH_MAP: Record<string, string> = {
+  'january': 'ଜାନୁଆରୀ', 'jan': 'ଜାନୁଆରୀ',
+  'february': 'ଫେବୃଆରୀ', 'feb': 'ଫେବୃଆରୀ',
+  'march': 'ମାର୍ଚ୍ଚ', 'mar': 'ମାର୍ଚ୍ଚ',
+  'april': 'ଏପ୍ରିଲ୍', 'apr': 'ଏପ୍ରିଲ୍',
+  'may': 'ମେ',
+  'june': 'ଜୁନ୍', 'jun': 'ଜୁନ୍',
+  'july': 'ଜୁଲାଇ', 'jul': 'ଜୁଲାଇ',
+  'august': 'ଅଗଷ୍ଟ', 'aug': 'ଅଗଷ୍ଟ',
+  'september': 'ସେପ୍ଟେମ୍ବର', 'sep': 'ସେପ୍ଟେମ୍ବର',
+  'october': 'ଅକ୍ଟୋବର', 'oct': 'ଅକ୍ଟୋବର',
+  'november': 'ନଭେମ୍ବର', 'nov': 'ନଭେମ୍ବର',
+  'december': 'ଡିସେମ୍ବର', 'dec': 'ଡିସେମ୍ବର'
+};
+
+const DATE_PREFIX_MAP: Record<string, string> = {
+  'registration date:': 'ପଞ୍ଜୀକରଣ ତାରିଖ:',
+  'prelims:': 'ପ୍ରିଲିମ୍ସ:',
+  'mains:': 'ମେନ୍ସ:',
+  'exam:': 'ପରୀକ୍ଷା:',
+  'closing:': 'ଶେଷ ତାରିଖ:',
+  'start date:': 'ଆରମ୍ଭ ତାରିଖ:',
+  'end date:': 'ଶେଷ ତାରିଖ:'
 };
 
 /**
@@ -249,6 +325,21 @@ export const translatePhrase = (phrase: string): string | undefined => {
   for (const [key, value] of Object.entries(universalPhraseDictionary)) {
     if (key.toLowerCase() === lower) {
       return value;
+    }
+  }
+
+  // Handle date-like strings (e.g. "Registration Date: 13 Jun 2026 - 7 Jul 2026", "Exam: June 28, 2026")
+  for (const [prefix, odiaPrefix] of Object.entries(DATE_PREFIX_MAP)) {
+    if (lower.startsWith(prefix)) {
+      let remainder = normalized.slice(prefix.length).trim();
+      // Replace English month names
+      for (const [enMonth, orMonth] of Object.entries(MONTH_MAP)) {
+        const monthRegex = new RegExp(`\\b${enMonth}\\b`, 'gi');
+        remainder = remainder.replace(monthRegex, orMonth);
+      }
+      // Convert numbers to Odia numerals
+      remainder = toOdiaDigitsInternal(remainder);
+      return `${odiaPrefix} ${remainder}`;
     }
   }
 

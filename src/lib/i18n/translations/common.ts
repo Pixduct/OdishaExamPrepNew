@@ -129,8 +129,22 @@ export const commonTranslations = {
       refundPolicy: 'Refund Policy',
       contactUs: 'Contact Us',
       allRightsReserved: 'All rights reserved.',
-      builtForOdisha: 'Crafted with ❤️ exclusively for the aspirants of Odisha.'
+      builtForOdisha: 'Crafted with ❤️ exclusively for the aspirants of Odisha.',
+      mockTestsAttempted: 'Mock Tests Attempted',
+      syllabusCoverage: 'Syllabus Coverage',
+      scoreAnalytics: 'Score Analytics',
+      expertSupport: 'Expert Support',
+      realSimulations: 'Real exam simulations',
+      mappedToBoards: 'Mapped to state boards',
+      rankMapping: 'Detailed rank mapping',
+      supportChannels: 'Priority Telegram & Call',
+      statsTestsCount: '10,000+',
+      statsSyllabusVal: '98.4%',
+      statsScoreVal: 'Real-Time',
+      statsSupportVal: '24/7 Support'
     },
+    loadingPortal: 'Loading Portal...',
+    freeTest: 'FREE TEST →',
     history: {
       header: {
         title: 'Activity History',
@@ -295,8 +309,22 @@ export const commonTranslations = {
       refundPolicy: 'ଫେରସ୍ତ ନୀତି',
       contactUs: 'ଯୋଗାଯୋଗ',
       allRightsReserved: 'ସର୍ବସ୍ୱତ୍ୱ ସଂରକ୍ଷିତ।',
-      builtForOdisha: 'ଓଡ଼ିଶାର ସମସ୍ତ ପରୀକ୍ଷାର୍ଥୀଙ୍କ ସଫଳତା ପାଇଁ ସ୍ୱତନ୍ତ୍ର ଭାବରେ ନିର୍ମିତ।'
+      builtForOdisha: 'ଓଡ଼ିଶାର ସମସ୍ତ ପରୀକ୍ଷାର୍ଥୀଙ୍କ ସଫଳତା ପାଇଁ ସ୍ୱତନ୍ତ୍ର ଭାବରେ ନିର୍ମିତ।',
+      mockTestsAttempted: 'ମକ୍ ଟେଷ୍ଟ ସମ୍ପନ୍ନ',
+      syllabusCoverage: 'ସିଲାବସ୍ କଭରେଜ୍',
+      scoreAnalytics: 'ସ୍କୋର ବିଶ୍ଳେଷଣ',
+      expertSupport: 'ବିଶେଷଜ୍ଞ ସହାୟତା',
+      realSimulations: 'ପ୍ରକୃତ ପରୀକ୍ଷା ସିମୁଲେସନ୍',
+      mappedToBoards: 'ରାଜ୍ୟ ନିଯୁକ୍ତି ବୋର୍ଡ ଅନୁସାରେ',
+      rankMapping: 'ସଠିକ୍ ରାଜ୍ୟ ର‍୍ୟାଙ୍କିଙ୍ଗ୍',
+      supportChannels: 'ଟେଲିଗ୍ରାମ୍ ଓ କଲ୍ ସୁବିଧା',
+      statsTestsCount: '୧୦,୦୦୦+',
+      statsSyllabusVal: '୯୮.୪%',
+      statsScoreVal: 'ରିଅଲ-ଟାଇମ୍',
+      statsSupportVal: '୨୪/୭ ସହାୟତା'
     },
+    loadingPortal: 'ପୋର୍ଟାଲ୍ ଲୋଡ୍ ହେଉଛି...',
+    freeTest: 'ମାଗଣା ଟେଷ୍ଟ →',
     history: {
       header: {
         title: 'କାର୍ଯ୍ୟକଳାପ ଇତିହାସ',

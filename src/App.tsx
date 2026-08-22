@@ -94,6 +94,7 @@ import { examService } from './lib/examService';
 import { ThemeToggle } from './components/ThemeToggle';
 import { LanguageToggle } from './components/LanguageToggle';
 import { useLanguage, toOdiaDigits } from './lib/LanguageContext';
+import { translatePhrase } from './lib/i18n/phraseDictionary';
 import { initLenis, destroyLenis } from './lib/lenisScroll';
 import { QuestionBankReaderModal } from './components/QuestionBankReaderModal';
 import { exportQuestionBankToPdf } from './lib/pdfExportEngine';
@@ -1109,7 +1110,10 @@ const ExamRegistrySection = ({
             {t('home.bulletin.sectionBadge', '⏰ ODISHA RECRUITMENT BULLETIN')}
           </span>
           <h2 className={cn("font-serif font-extrabold text-slate-955 dark:text-white tracking-tight leading-[1.18]", isMobile ? "text-2xl xs:text-3xl" : "text-3xl md:text-5xl")}>
-            {t('home.bulletin.title', 'Official Exam Notifications')} <span className="premium-text-gradient font-serif font-extrabold">& Targeted <span className="whitespace-nowrap">Mock Tests</span></span>
+            {t('home.bulletin.title1', 'Official Exam Notifications')}{" "}
+            <span className="premium-text-gradient font-serif font-extrabold">
+              {t('home.bulletin.title2', '& Targeted Mock Tests')}
+            </span>
           </h2>
           {isMobile ? null : <div className="section-divider" />}
           {/* Mobile Version (Shorter & Punchier) */}
@@ -1145,14 +1149,14 @@ const ExamRegistrySection = ({
                 <div className={cn("w-full", isMobile ? "space-y-1.5" : "space-y-3")}>
                   <div className={cn("flex flex-wrap items-center gap-2", isMobile ? "justify-start" : "justify-center md:justify-start")}>
                     <span className={cn("px-2 py-0.5 rounded text-[9.5px] font-black uppercase tracking-wider border", statusMeta.color)}>
-                      {statusMeta.label}
+                      {t(`home.bulletin.status.${item.status}`, statusMeta.label)}
                     </span>
                     <span className="text-xs font-bold text-slate-500 dark:text-slate-300 font-mono">
-                      {item.date}
+                      {isOdia && translatePhrase(item.date) ? translatePhrase(item.date) : item.date}
                     </span>
                   </div>
                   <h3 className={cn("font-serif font-extrabold text-slate-900 dark:text-white", isMobile ? "text-[14px] text-left leading-snug" : "text-lg sm:text-xl text-center md:text-left")}>
-                    {item.exam}
+                    {isOdia && translatePhrase(item.exam) ? translatePhrase(item.exam) : item.exam}
                   </h3>
                 </div>
                 <button 
@@ -1164,7 +1168,7 @@ const ExamRegistrySection = ({
                       : "py-3 bg-[#2563EB] dark:bg-[#2563EB] hover:bg-brand-500 dark:hover:bg-brand-500 text-white border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_rgba(15,23,42,1)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
                   )}
                 >
-                  {item.actionLabel || 'FREE TEST →'}
+                  {item.actionLabel ? (isOdia && translatePhrase(item.actionLabel) ? translatePhrase(item.actionLabel) : item.actionLabel) : t('home.bulletin.freeTest', 'FREE TEST →')}
                   {isMobile ? null : <ArrowRight className="w-4 h-4 text-white" />}
                 </button>
               </div>
@@ -1254,7 +1258,7 @@ const SYLLABUS_ROADMAPS_DEFAULT = [
           </p>
           {/* Desktop Version (Optimized) */}
           <p className="max-w-2xl mx-auto md:text-lg md:leading-relaxed text-slate-600 dark:text-slate-300 hidden md:block">
-            {t('exams.syllabus.subtitle', 'Stop blindly studying. Master Odisha History to Indian Polity with full-length mock tests and PYQs mapped exactly to the OPSC and OSSC curriculum.')}
+            {t('exams.syllabus.subtitleDesktop', 'Stop blindly studying. Master Odisha History to Indian Polity with full-length mock tests and PYQs mapped exactly to the OPSC and OSSC curriculum.')}
           </p>
         </div>
 
@@ -1493,7 +1497,7 @@ const AchieversJournalSection = () => {
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input 
               type="text"
-              placeholder="Search by name, district, keyword..."
+              placeholder={t('home.achievers.searchPlaceholder', 'Search by name, district, keyword...')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={cn(
@@ -1655,7 +1659,7 @@ const AchieversJournalSection = () => {
                   : "px-8 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-900 dark:text-white border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_#2563EB] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.5)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
               )}
             >
-              Load More preparation journals (+{filteredStories.length - visibleCount} remaining)
+              {t('home.achievers.loadMore', 'Load More preparation journals (+{count} remaining)', { count: filteredStories.length - visibleCount })}
             </button>
           </div>
         )}
@@ -1720,10 +1724,10 @@ export const Footer = () => {
         {/* Pre-footer Stats Dashboard */}
         <div className={cn("grid grid-cols-2 lg:grid-cols-4 border-b border-slate-800/80", isMobile ? "gap-3 pb-8 mb-8" : "gap-4 sm:gap-6 pb-16 mb-16")}>
           {[
-            { label: t('footer.mockTestsAttempted', 'Mock Tests Attempted'), value: "10,000+", icon: BarChart3, color: "text-blue-400 bg-blue-500/15 border-blue-500/30", desc: t('footer.realSimulations', 'Real exam simulations') },
-            { label: t('footer.syllabusCoverage', 'Syllabus Coverage'), value: "98.4%", icon: Target, color: "text-rose-400 bg-rose-500/15 border-rose-500/30", desc: t('footer.mappedToBoards', 'Mapped to state boards') },
-            { label: t('footer.scoreAnalytics', 'Score Analytics'), value: "Real-Time", icon: Zap, color: "text-amber-400 bg-amber-500/15 border-amber-500/30", desc: t('footer.rankMapping', 'Detailed rank mapping') },
-            { label: t('footer.expertSupport', 'Expert Support'), value: "24/7 Support", icon: MessageSquare, color: "text-emerald-400 bg-emerald-500/15 border-emerald-500/30", desc: t('footer.supportChannels', 'Priority Telegram & Call') }
+            { label: t('footer.mockTestsAttempted', 'Mock Tests Attempted'), value: t('footer.statsTestsCount', '10,000+'), icon: BarChart3, color: "text-blue-400 bg-blue-500/15 border-blue-500/30", desc: t('footer.realSimulations', 'Real exam simulations') },
+            { label: t('footer.syllabusCoverage', 'Syllabus Coverage'), value: t('footer.statsSyllabusVal', '98.4%'), icon: Target, color: "text-rose-400 bg-rose-500/15 border-rose-500/30", desc: t('footer.mappedToBoards', 'Mapped to state boards') },
+            { label: t('footer.scoreAnalytics', 'Score Analytics'), value: t('footer.statsScoreVal', 'Real-Time'), icon: Zap, color: "text-amber-400 bg-amber-500/15 border-amber-500/30", desc: t('footer.rankMapping', 'Detailed rank mapping') },
+            { label: t('footer.expertSupport', 'Expert Support'), value: t('footer.statsSupportVal', '24/7 Support'), icon: MessageSquare, color: "text-emerald-400 bg-emerald-500/15 border-emerald-500/30", desc: t('footer.supportChannels', 'Priority Telegram & Call') }
           ].map((stat, idx) => (
             <div 
               key={idx}
@@ -3395,7 +3399,7 @@ const LandingPage = () => {
                       ))}
                     </div>
                     <span className="text-[9.5px] sm:text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                      <span className="sm:hidden">Trusted by 10,000+ Aspirants</span>
+                      <span className="sm:hidden">{t('home.hero.trustedByMobile', 'Trusted by 10,000+ Aspirants')}</span>
                       <span className="hidden sm:inline">{t('home.hero.trustedBy', '🎯 Trusted by 10K+ Odisha Aspirants')}</span>
                     </span>
                   </div>
@@ -3609,14 +3613,14 @@ const LandingPage = () => {
                 <div className="space-y-2 sm:space-y-3 text-center sm:text-left max-w-2xl flex flex-col items-center sm:items-start w-full">
                   <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider bg-brand-500/10 dark:bg-brand-500/20 text-brand-600 dark:text-brand-300 border border-brand-500/20 dark:border-brand-500/30">
                     <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-600 dark:text-brand-400" />
-                    Personalized Preparation Engine
+                    {t('home.guestBanner.badge', 'Personalized Preparation Engine')}
                   </div>
                   <h3 className="text-base xs:text-lg sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-snug">
-                    <span className="sm:hidden">Sign In for Your AI Study Plan & Score Tracker</span>
-                    <span className="hidden sm:inline">Sign In to Access Your Personal AI Study Plan & Score Tracker</span>
+                    <span className="sm:hidden">{t('home.guestBanner.titleMobile', 'Sign In for Your AI Study Plan & Score Tracker')}</span>
+                    <span className="hidden sm:inline">{t('home.guestBanner.titleDesktop', 'Sign In to Access Your Personal AI Study Plan & Score Tracker')}</span>
                   </h3>
                   <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
-                    Your readiness score, daily weak-topic drills, and streak goals are securely tied to your user account.
+                    {t('home.guestBanner.subtitle', 'Your readiness score, daily weak-topic drills, and streak goals are securely tied to your user account.')}
                   </p>
                 </div>
 
@@ -3626,7 +3630,7 @@ const LandingPage = () => {
                     onClick={() => setShowAuthModal(true)}
                     className="w-full sm:w-auto h-11 sm:h-auto px-6 py-2.5 sm:py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-indigo-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-xs sm:text-sm shadow-lg shadow-brand-500/25 transition-all duration-200 active:scale-95 cursor-pointer border-none text-center flex items-center justify-center"
                   >
-                    Sign In / Register Free →
+                    {t('home.guestBanner.signInBtn', 'Sign In / Register Free →')}
                   </button>
                 </div>
               </div>

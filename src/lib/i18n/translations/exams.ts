@@ -146,6 +146,12 @@ export const examsTranslations = {
       computerAwareness: 'Computer Awareness',
       currentAffairs: 'Current Affairs & Odisha GK'
     },
+    syllabus: {
+      badge: '🎯 SYLLABUS-MAPPED PREPARATION',
+      title: 'Master Every Topic with Targeted Chapter-Wise Tests',
+      subtitle: 'Stop blindly studying. Unlock full-length mock tests and PYQs designed exactly for the OPSC and OSSC curriculum.',
+      subtitleDesktop: 'Stop blindly studying. Master Odisha History to Indian Polity with full-length mock tests and PYQs mapped exactly to the OPSC and OSSC curriculum.'
+    },
     upcomingTab: 'Upcoming',
     popularTab: 'Popular',
     searchPlaceholder: 'Search exams...',
@@ -298,7 +304,18 @@ export const examsTranslations = {
       englishLanguage: 'ଇଂରାଜୀ ଭାଷା',
       computerAwareness: 'କମ୍ପ୍ୟୁଟର ଜ୍ଞାନ',
       currentAffairs: 'କରେଣ୍ଟ ଆଫେୟାର୍ସ ଓ ଓଡ଼ିଶା GK'
-    }
+    },
+    syllabus: {
+      badge: '🎯 ସିଲାବସ୍-ଅନୁମୋଦିତ ପ୍ରସ୍ତୁତି',
+      title: 'ଲକ୍ଷ୍ୟଭିତ୍ତିକ ଅଧ୍ୟାୟ ଟେଷ୍ଟ ସହିତ ପ୍ରତ୍ୟେକ ବିଷୟରେ ଦକ୍ଷତା ହାସଲ କରନ୍ତୁ',
+      subtitle: 'ଅନ୍ଧ ଭାବରେ ପଢ଼ିବା ବନ୍ଦ କରନ୍ତୁ। OPSC ଏବଂ OSSC ପାଇଁ ସଠିକ୍ ସିଲାବସ୍ ଆଧାରିତ ମକ୍ ଟେଷ୍ଟ ଓ ପୂର୍ବ ବର୍ଷର ପ୍ରଶ୍ନୋତ୍ତର ଅଭ୍ୟାସ କରନ୍ତୁ।',
+      subtitleDesktop: 'ଅନ୍ଧ ଭାବରେ ପଢ଼ିବା ବନ୍ଦ କରନ୍ତୁ। ଓଡ଼ିଶା ଇତିହାସରୁ ଭାରତୀୟ ସମ୍ବିଧାନ ପର୍ଯ୍ୟନ୍ତ ସମସ୍ତ ବିଷୟ OPSC ଓ OSSC ପ୍ୟାଟର୍ଣ୍ଣ ମକ୍ ଟେଷ୍ଟ ମାଧ୍ୟମରେ ପ୍ରସ୍ତୁତ କରନ୍ତୁ।'
+    },
+    upcomingTab: 'ଆଗାମୀ ପରୀକ୍ଷା',
+    popularTab: 'ଲୋକପ୍ରିୟ ପରୀକ୍ଷା',
+    searchPlaceholder: 'ପରୀକ୍ଷା ଖୋଜନ୍ତୁ...',
+    viewPopular: 'ଲୋକପ୍ରିୟ ପରୀକ୍ଷା ଦେଖନ୍ତୁ',
+    swipeToExplore: 'ଦେଖିବା ପାଇଁ ସ୍ୱାଇପ୍ କରନ୍ତୁ'
   }
 };
 

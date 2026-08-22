@@ -189,13 +189,18 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 export const useLanguage = (): LanguageContextType => {
   const context = useContext(LanguageContext);
   if (!context) {
-    // Return a safe fallback if used outside Provider
+    const storedLang = getStoredLanguage();
     return {
-      language: 'en',
+      language: storedLang,
       setLanguage: () => {},
       toggleLanguage: () => {},
-      isOdia: false,
-      t: (key: string, fallback?: string) => fallback || key
+      isOdia: storedLang === 'or',
+      t: (key: string, fallback?: string) => {
+        if (storedLang === 'or') {
+          return translatePhrase(fallback || key);
+        }
+        return fallback || key;
+      }
     };
   }
   return context;

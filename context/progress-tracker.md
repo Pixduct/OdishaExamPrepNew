@@ -1,6 +1,11 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] Brand Sapphire Vector Icons Generation & PWA "OEP" Short Name Calibration (`public/android-chrome-*`, `public/favicon-*`, `public/apple-touch-icon.png`, `public/site.webmanifest`, `index.html`):
+  1. **High-Res Adaptive Brand Icons**: Generated crisp, high-resolution Brand Sapphire (`#2563EB` ➔ `#1D4ED8` ➔ `#0F172A`) PNG assets using `sharp` across all dimensions (512x512, 192x192, 180x180, 96x96, 48x48, 32x32, 16x16) with proper Android maskable safe-zone padding (central 65% scale) to prevent clipping.
+  2. **Short Name "OEP"**: Updated `short_name: "OEP"` in `site.webmanifest` and `<meta name="apple-mobile-web-app-title" content="OEP" />` in `index.html` so the app launcher name fits cleanly on Android home screens without awkward `OdishaExa...` truncation.
+  3. **Manifest Cache Busting**: Bumped manifest link to `/site.webmanifest?v=4` to force Android Chrome to refresh cached WebAPK metadata.
+  4. **Clean Verification**: Tested production compilation with `npm run build` exiting 0 with zero errors.
 - [x] Universal 0ms Smooth Scrolling & 120FPS Performance Engine (`src/lib/lenisScroll.ts`, `src/main.tsx`, `src/lib/scrollManager.ts`, `src/pages/BlogPost.tsx`, `src/pages/AiMentor.tsx`):
   1. **0ms Instant Startup**: Hoisted `initLenis()` directly to `src/main.tsx` before initial React mount, eliminating the 1-second hydration lag so smooth physics scrolling applies from the very first frame.
   2. **Active Auto-Resize Observer**: Injected `ResizeObserver` on `document.body` inside `lenisScroll.ts` to dynamically refresh scroll boundaries as exams, test banks, and study plans load.

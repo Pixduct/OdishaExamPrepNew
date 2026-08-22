@@ -1,22 +1,32 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#2563eb" />
-      <stop offset="100%" stop-color="#0c2340" />
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563EB" />
+      <stop offset="50%" stop-color="#1D4ED8" />
+      <stop offset="100%" stop-color="#0F172A" />
     </linearGradient>
+    <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60A5FA" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#2563EB" stop-opacity="0" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
   </defs>
 
-  <!-- Rounded square background — matches premium-gradient + rounded-2xl -->
-  <rect width="256" height="256" rx="56" fill="url(#bg)" />
+  <!-- Background Base (Full bleed for adaptive / maskable compatibility) -->
+  <rect width="512" height="512" fill="url(#bgGrad)" />
 
-  <!-- BookOpen icon — matches the Lucide BookOpen used in the navbar logo -->
-  <!-- Scaled and centered to fill the icon nicely -->
-  <g transform="translate(44, 52)" stroke="white" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" fill="none">
+  <!-- Subtle Radial Inner Glow -->
+  <circle cx="256" cy="256" r="220" fill="url(#glowGrad)" />
+
+  <!-- Lucide BookOpen Icon in safe zone (central 65% area for Android maskable icons) -->
+  <g transform="translate(112, 136) scale(1.75)" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#shadow)">
     <!-- Left page -->
-    <path d="M84 16 C64 8, 24 10, 4 22 L4 142 C24 130, 64 128, 84 136 Z" />
+    <path d="M80 14 C60 6, 20 8, 2 20 L2 136 C20 124, 60 122, 80 130 Z" fill="rgba(255, 255, 255, 0.08)" />
     <!-- Right page -->
-    <path d="M84 16 C104 8, 144 10, 164 22 L164 142 C144 130, 104 128, 84 136 Z" />
+    <path d="M80 14 C100 6, 140 8, 158 20 L158 136 C140 124, 100 122, 80 130 Z" fill="rgba(255, 255, 255, 0.08)" />
     <!-- Center spine -->
-    <line x1="84" y1="16" x2="84" y2="136" />
+    <line x1="80" y1="14" x2="80" y2="130" stroke="#93C5FD" stroke-width="10" />
   </g>
 </svg>

@@ -105,13 +105,14 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **Background / Splash** | `#0b0f19` (`background_color` in manifest for dark theme bootstrap) |
 | **Border / Frame** | Standalone Android App Window (`display: standalone`) |
 | **Icons & Purpose** | `purpose: "any"` + `purpose: "maskable"` across 192x192 & 512x512 PNGs |
-| **App Title** | `OdishaExamPrep` (`short_name` & `name`) |
+| **App Title** | `name: "OdishaExamPrep"`, `short_name: "OEP"` (prevents home screen text truncation) |
 | **Service Worker** | Network-first fetch caching with offline fallback (`public/sw.js`) |
 | **Theme Color** | `#0b0f19` (Dark Sapphire status bar) |
 
 **Pattern notes:**
-- **Relative Manifest URL**: Manifest link MUST always use relative `<link rel="manifest" href="/site.webmanifest" />` in `index.html` to avoid CORS / cross-origin failures when navigating across `odishaexamprep.in` vs `www.odishaexamprep.in`.
-- **Adaptive Maskable Icons**: Manifest MUST provide explicit `purpose: "any"` and `purpose: "maskable"` declarations for 192px and 512px assets to satisfy Android WebAPK compilation.
+- **Relative Manifest URL**: Manifest link MUST always use relative `<link rel="manifest" href="/site.webmanifest?v=..." />` in `index.html` to avoid CORS / cross-origin failures when navigating across `odishaexamprep.in` vs `www.odishaexamprep.in`.
+- **Adaptive Maskable Safe Zone**: PNG icons MUST declare both `purpose: "any"` and `purpose: "maskable"` and place the primary emblem inside the central 65% safe-zone to avoid clipping when Android masks into circle or squircle shapes.
+- **Short Name Constraint**: `short_name` MUST be set to concise `OEP` (<= 8 chars) to prevent Android home screen icon label truncation (e.g. `OdishaExa...`).
 - **Offline / Fetch Handler**: `public/sw.js` MUST implement a `fetch` event listener to pass Chrome's mandatory PWA installability audit.
 - **Bootstrap Registration**: Service worker MUST register on startup in `src/main.tsx` so the page controller is active on first visit.
 

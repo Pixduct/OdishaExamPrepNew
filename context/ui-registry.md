@@ -104,15 +104,18 @@ Before creating any new component, developers and AI agents MUST consult this re
 | :--- | :--- |
 | **Background / Splash** | `#0b0f19` (`background_color` in manifest for dark theme bootstrap) |
 | **Border / Frame** | Standalone Android App Window (`display: standalone`) |
-| **Icons & Purpose** | `purpose: "any"` + `purpose: "maskable"` across 192x192 & 512x512 PNGs |
+| **Icons & Purpose** | `purpose: "any"` (Transparent Floating `rounded-3xl` Badge) + `purpose: "maskable"` (Full-Bleed 60% Safe-Zone) |
 | **App Title** | `name: "OdishaExamPrep"`, `short_name: "OEP"` (prevents home screen text truncation) |
+| **Vector Geometry** | 1:1 Authentic Lucide `BookOpen` (`M2 3h6...` + `M22 3h...`) matching Navbar Logo |
 | **Service Worker** | Network-first fetch caching with offline fallback (`public/sw.js`) |
 | **Theme Color** | `#0b0f19` (Dark Sapphire status bar) |
 
 **Pattern notes:**
-- **Relative Manifest URL**: Manifest link MUST always use relative `<link rel="manifest" href="/site.webmanifest?v=..." />` in `index.html` to avoid CORS / cross-origin failures when navigating across `odishaexamprep.in` vs `www.odishaexamprep.in`.
-- **Adaptive Maskable Safe Zone**: PNG icons MUST declare both `purpose: "any"` and `purpose: "maskable"` and place the primary emblem inside the central 65% safe-zone to avoid clipping when Android masks into circle or squircle shapes.
+- **Floating Splash Badge**: `purpose: "any"` icons (`android-chrome-512x512.png`, `192x192.png`) MUST use a transparent outer canvas and a centered `rounded-3xl` (`rx="92"`) blue badge (`#3B82F6` ➔ `#1D4ED8`) so Android displays a floating curved badge without harsh 90° square box borders on app launch.
+- **Dedicated Maskable Icons**: `purpose: "maskable"` icons (`android-chrome-maskable-*.png`) MUST use full-bleed fill with the Lucide `BookOpen` emblem centered inside the 60% safe zone for Android launcher squircle/circle masks.
 - **Short Name Constraint**: `short_name` MUST be set to concise `OEP` (<= 8 chars) to prevent Android home screen icon label truncation (e.g. `OdishaExa...`).
+- **Relative Manifest URL**: Manifest link MUST always use relative `<link rel="manifest" href="/site.webmanifest?v=..." />` in `index.html` to avoid CORS / cross-origin failures when navigating across `odishaexamprep.in` vs `www.odishaexamprep.in`.
+- **Zero-Cache Server Headers**: Manifest and PWA assets MUST be served with `no-store, no-cache, must-revalidate` so browsers immediately pick up manifest and icon updates.
 - **Offline / Fetch Handler**: `public/sw.js` MUST implement a `fetch` event listener to pass Chrome's mandatory PWA installability audit.
 - **Bootstrap Registration**: Service worker MUST register on startup in `src/main.tsx` so the page controller is active on first visit.
 

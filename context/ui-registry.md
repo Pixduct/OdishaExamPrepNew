@@ -94,6 +94,7 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`PreFooterStatsDashboard`** | Data Display / Metrics | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L1720-L1750) | 4-col multi-accent stat cards with Lucide icons & dual-language numerals | App.tsx (Footer) | Active |
 | **`LoadingPortal`** | Overlay / Loading | [`src/components/LoadingPortal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/LoadingPortal.tsx) | Triple concentric spinner with ambient orb, Lucide pulse & dynamic localized typography | LoadingPortal.tsx | Active |
 | **`HeroTrustBadge`** | Hero / Social Proof | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L3388-L3405) | Overlapping avatar icon stack, zero-truncation responsive labels & dual-language numerals | App.tsx (Hero) | Active |
+| **`AdminAddNewModalQuickSaveButton`** | Admin / Modal Header | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7663-L7672) | Compact brand-blue Save pill in modal header, HTML5 `form` attribute wiring (no JS) | AdminPanel.tsx (Add New / Edit modal) | Active |
 
 ---
 
@@ -3176,4 +3177,30 @@ Last updated: August 22, 2026
 
 
 
+
+### 99. `AdminAddNewModalQuickSaveButton`
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7663-L7672)
+Last updated: August 22, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Background** | `bg-brand-600` |
+| **Hover state — Background** | `hover:bg-brand-700` |
+| **Border** | `border border-brand-700/20` |
+| **Border Radius** | `rounded-xl` |
+| **Text** | `text-xs font-black text-white` |
+| **Spacing** | `px-3 py-1.5` |
+| **Icon** | `Save` (lucide-react) `w-3.5 h-3.5` |
+| **Gap** | `gap-1.5` |
+| **Shadow** | `shadow-sm` |
+| **Shrink** | `shrink-0` |
+| **Submission method** | HTML5 `form="add-new-form"` + `type="submit"` (no JS handler) |
+
+**Pattern notes:**
+- **Out-of-form Submission via HTML5 `form` attribute**: The button lives in the modal header (`px-8 py-5` header strip) but submits the `<form id="add-new-form">` body below it. This is standard HTML5 — no `onClick` handler, no ref, no duplicated logic. The same `handleAdd` `onSubmit` fires regardless of which Save button is clicked.
+- **Always Visible**: Unlike the bottom Save button which requires scrolling, this button is always visible at the top of the modal. It renders for both Add New and Edit modes — unlike `Reset Form` which is hidden on `editingId`.
+- **Visual differentiation from Reset Form**: `bg-brand-600 text-white` (solid blue) is intentionally distinct from the `Reset Form` pill (`bg-white text-slate-500 border-slate-200/60`) sitting to its left. This makes the two actions impossible to confuse at a glance.
+- **Icon sizing match**: `w-3.5 h-3.5` matches exactly the `RotateCcw` icon used in the adjacent `Reset Form` button — maintains visual rhythm in the header pill row.
+- **Form ID invariant**: The `id="add-new-form"` on the `<form>` element MUST remain unique on the page. Since `showAddModal` is a single boolean, the modal renders at most once — the duplicate-ID risk is architecturally impossible in the current design.
+- **Future extension rule**: If any future admin modal needs a quick-save header button, follow this exact pattern: add `id="[modal-name]-form"` to the form, add a compact `bg-brand-600 rounded-xl px-3 py-1.5 text-xs font-black` pill button with `form="[modal-name]-form" type="submit"` in the header. Do NOT use `onClick` to re-call the submit handler directly.
 

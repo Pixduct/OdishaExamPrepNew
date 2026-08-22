@@ -34,7 +34,8 @@ import {
   Eye,
   CheckCircle2,
   HelpCircle,
-  Target
+  Target,
+  Save
 } from 'lucide-react';
 import { Reorder } from 'framer-motion';
 import { examService, Question, TestSeries, MockTest, Exam } from './lib/examService';
@@ -7659,12 +7660,22 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                       <span>Reset Form</span>
                     </button>
                   )}
+                  {/* Quick Save — submits form without scrolling to bottom */}
+                  <button
+                    form="add-new-form"
+                    type="submit"
+                    title="Save without scrolling to bottom"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-black text-white bg-brand-600 hover:bg-brand-700 rounded-xl transition-all shadow-sm shrink-0 border border-brand-700/20"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    <span>Save</span>
+                  </button>
                   <button type="button" onClick={() => setShowAddModal(false)} className="p-2.5 text-slate-400 hover:bg-slate-50 hover:text-slate-700 rounded-xl transition-all border border-slate-200/50 shadow-sm bg-white shrink-0">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
               </div>
-              <form onSubmit={handleAdd} className="p-8 sm:p-10">
+              <form id="add-new-form" onSubmit={handleAdd} className="p-8 sm:p-10">
                 
                 {renderFormFields()}
 

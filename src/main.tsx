@@ -9,10 +9,16 @@ import LoadingPortal from './components/LoadingPortal';
 import { applyThemeToDocument, getStoredTheme } from './lib/themeStore';
 import { LanguageProvider, applyLanguageToDocument, getStoredLanguage } from './lib/LanguageContext';
 import { registerServiceWorker } from './lib/pushNotifications';
+import { initLenis } from './lib/lenisScroll';
 
 // Ensure dark/light theme and language are synchronously applied to HTML root before React mounts
 applyThemeToDocument(getStoredTheme());
 applyLanguageToDocument(getStoredLanguage());
+
+// Initialize 0ms Universal Smooth Scrolling Engine immediately on bootstrap
+if (typeof window !== 'undefined') {
+  initLenis();
+}
 
 // Bootstrap Service Worker for PWA installability and push notifications
 if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {

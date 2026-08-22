@@ -26,6 +26,7 @@ import { getDirectImageUrl, cn } from '../lib/utils';
 import { fadeSlideDown, durations } from '../lib/animations';
 import PageLayout from '../components/PageLayout';
 import { calculateReadingTime, getBlogCategory } from './BlogList';
+import { scrollToTop as scrollPageToTop, scrollToElement } from '../lib/scrollManager';
 
 interface TocItem {
   id: string;
@@ -337,7 +338,7 @@ export default function BlogPost() {
     }
   };
 
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  const scrollToTop = () => scrollPageToTop({ behavior: 'smooth' });
 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
@@ -348,35 +349,11 @@ export default function BlogPost() {
     setActiveId(id);
     if (manualScrollTimeout.current) window.clearTimeout(manualScrollTimeout.current);
 
-    const targetY = el.getBoundingClientRect().top + window.scrollY - 100; // 100px offset for padding/header
-    const startY = window.scrollY;
-    const difference = targetY - startY;
-    const duration = 800; // Duration in milliseconds
-    let start: number | null = null;
+    scrollToElement(id, { block: 'start', behavior: 'smooth' });
 
-    const step = (timestamp: number) => {
-      if (!start) start = timestamp;
-      const progress = timestamp - start;
-      const percentage = Math.min(progress / duration, 1);
-      
-      // Easing: easeInOutCubic
-      const ease = percentage < 0.5 
-        ? 4 * percentage * percentage * percentage 
-        : 1 - Math.pow(-2 * percentage + 2, 3) / 2;
-
-      window.scrollTo(0, startY + difference * ease);
-
-      if (progress < duration) {
-        window.requestAnimationFrame(step);
-      } else {
-        // Unlock observer scrolling after settles
-        manualScrollTimeout.current = window.setTimeout(() => {
-          isManualScrolling.current = false;
-        }, 100);
-      }
-    };
-
-    window.requestAnimationFrame(step);
+    manualScrollTimeout.current = window.setTimeout(() => {
+      isManualScrolling.current = false;
+    }, 800);
   };
 
   if (loading) return <PageLayout className="flex items-center justify-center min-h-screen"><div className="w-10 h-10 border-4 border-brand-600 dark:border-blue-500 border-t-transparent rounded-full animate-spin" /></PageLayout>;

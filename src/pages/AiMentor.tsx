@@ -4412,8 +4412,9 @@ JSON structure:
 
             <div 
               ref={chatConsoleRef} 
-              className="flex-1 overflow-y-auto overscroll-y-auto [touch-action:pan-y] p-3 sm:p-5 lg:p-6 space-y-4 md:space-y-5 no-scrollbar"
+              className="flex-1 overflow-y-auto overscroll-contain [touch-action:pan-y] p-3 sm:p-5 lg:p-6 space-y-4 md:space-y-5 no-scrollbar"
               style={{ scrollBehavior: loading ? 'auto' : 'smooth' }}
+              data-lenis-prevent
             >
               {messages.map((m, idx) => (
                 <div 

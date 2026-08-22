@@ -59,7 +59,7 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`DynamicVectorCard`** | Container / Utility | [`src/components/DynamicVectorCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/DynamicVectorCard.tsx) | 3D Magnetic Parallax, Surface Spotlight, Edge Ring Illumination | StudyPlanView, AnalyticsView, App.tsx | Active |
 | **`MouseTrackingCanvas`** | Background / Canvas | [`src/components/MouseTrackingCanvas.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MouseTrackingCanvas.tsx) | 60fps Lerp Viewport Ambient Light Orb | App.tsx (Root) | Active |
 | **`VectorCursorFollower`** | Utility / Feedback | [`src/components/VectorCursorFollower.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/VectorCursorFollower.tsx) | Interactive Ring Follower + Center Precision Pointer Dot | App.tsx (Root) | Active |
-| **`AntigravityMicroDistanceLenisScrollEngine`** | Performance / Physics | [`src/lib/lenisScroll.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/lenisScroll.ts) | Micro-Distance Scaling (`0.60`), `lerp: 0.18`, `touchMultiplier: 0` | App.tsx (Root) | Active |
+| **`UniversalZeroDelayLenisScrollEngine`** | Performance / Physics | [`src/lib/lenisScroll.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/lenisScroll.ts) | 0ms Instant Bootstrap, ResizeObserver, `lerp: 0.16`, `touchMultiplier: 0` | `main.tsx`, `App.tsx` | Active |
 | **`OffscreenCardVirtualizationEngine`** | Performance / Rendering | [`src/index.css`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/index.css) | `.cv-card-auto` Offscreen Layout Bypass | App.tsx (All Cards) | Active |
 | **`AdminSWRControlCenterEngine`** | Admin / Performance | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx) | 0ms SWR Catalog Caching (`getAllMockTestsLite`), Skeleton Shimmer | AdminPanel.tsx | Active |
 | **`AdminRefreshPersistenceEngine`** | Admin / Navigation | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx) | URL Param State Sync (`replaceState`), Session Persistence | AdminPanel.tsx | Active |
@@ -114,6 +114,27 @@ Before creating any new component, developers and AI agents MUST consult this re
 - **Adaptive Maskable Icons**: Manifest MUST provide explicit `purpose: "any"` and `purpose: "maskable"` declarations for 192px and 512px assets to satisfy Android WebAPK compilation.
 - **Offline / Fetch Handler**: `public/sw.js` MUST implement a `fetch` event listener to pass Chrome's mandatory PWA installability audit.
 - **Bootstrap Registration**: Service worker MUST register on startup in `src/main.tsx` so the page controller is active on first visit.
+
+---
+
+### 0.1 `UniversalZeroDelayLenisScrollEngine`
+- **File Path:** [`src/lib/lenisScroll.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/lenisScroll.ts) & [`src/main.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/main.tsx)
+- **Category:** Performance / Physics Scroll
+- **Last Updated:** August 22, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Physics Interpolation** | `lerp: 0.16`, `duration: 1.1`, `smoothWheel: true` |
+| **Mobile Touch Physics** | `touchMultiplier: 0` (Native GPU momentum, 0ms touch input latency) |
+| **Active Scroll Guard** | `body.is-scrolling` (Pauses keyframe animations and removes backdrop filters) |
+| **Section Jump Clearance**| `96px` navbar compensation (`scroll-mt-24`) |
+| **Container Isolation** | `data-lenis-prevent`, `overscroll-contain`, `overscroll-behavior-x: contain` |
+
+**Pattern notes:**
+- **0ms Instant Startup**: Lenis MUST be initialized in `src/main.tsx` synchronously before React mount to prevent any initial hydration lag.
+- **Dynamic Resize Observer**: `lenisScroll.ts` utilizes a `ResizeObserver` on `document.body` to automatically adjust scroll boundaries as dynamic exam catalogs or test series load.
+- **Sub-Container Isolation**: Internal chat threads, modals, and palettes MUST declare `data-lenis-prevent` and `overscroll-contain` so their internal scrolling never bubbles to outer page views.
+- **Horizontal & Vertical Coexistence**: Horizontal sliders and category pill bars MUST support directional gesture detection and horizontal mouse drag without halting vertical page scroll.
 
 ---
 

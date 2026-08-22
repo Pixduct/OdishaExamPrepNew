@@ -1,6 +1,13 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] Universal 0ms Smooth Scrolling & 120FPS Performance Engine (`src/lib/lenisScroll.ts`, `src/main.tsx`, `src/lib/scrollManager.ts`, `src/pages/BlogPost.tsx`, `src/pages/AiMentor.tsx`):
+  1. **0ms Instant Startup**: Hoisted `initLenis()` directly to `src/main.tsx` before initial React mount, eliminating the 1-second hydration lag so smooth physics scrolling applies from the very first frame.
+  2. **Active Auto-Resize Observer**: Injected `ResizeObserver` on `document.body` inside `lenisScroll.ts` to dynamically refresh scroll boundaries as exams, test banks, and study plans load.
+  3. **Bi-Modal 120FPS Performance Architecture**: Preserved `touchMultiplier: 0` for zero touch input lag and native GPU momentum on mobile devices, paired with ultra-smooth lerp physics (`lerp: 0.16`) for desktop wheels/trackpads.
+  4. **Universal Horizontal & Vertical Coexistence**: Integrated horizontal swipe and mouse-drag delegation across category pill bars, Continue Practice sliders, Recent Activity cards, and YouTube Carousel with touch direction disambiguation.
+  5. **Sub-Container Scroll Isolation**: Attached `data-lenis-prevent` and `overscroll-contain` to chat consoles, question bank reader modals, palettes, and dropdown menus to prevent inner scrolls from bubbling to the outer page.
+  6. **Clean Verification**: Tested production compilation with `npm run build` exiting 0 with zero errors.
 - [x] PWA Standalone WebAPK Installation & Offline Engine Recovery (`public/site.webmanifest`, `public/sw.js`, `index.html`, `src/main.tsx`):
   1. **Cross-Origin Manifest Fix**: Replaced absolute manifest/icon links with relative paths (`/site.webmanifest`, `/favicon...`) in `index.html`, eliminating cross-origin blocks and origin mismatch when loading via `www.odishaexamprep.in`.
   2. **WebAPK Metadata & Maskable Icons**: Added `"id": "/"`, `"scope": "/"`, `"orientation": "any"`, `"categories"`, and explicit `"purpose": "any"` / `"purpose": "maskable"` icons in `site.webmanifest` for Android adaptive app icons.

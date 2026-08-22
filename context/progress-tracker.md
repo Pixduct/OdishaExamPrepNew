@@ -1,12 +1,11 @@
 # Progress Tracker
 
 ## Completed Tasks
-- [x] Authentic Lucide BookOpen Rounded Floating Badge & Dedicated Maskable Icons (`public/android-chrome-*`, `public/favicon-*`, `public/apple-touch-icon.png`, `public/site.webmanifest`, `index.html`):
-  1. **1:1 Lucide BookOpen Match**: Re-rendered all PNG assets with the exact Lucide `BookOpen` vector icon paths (`M2 3h6a4 4 0 0 1 4 4v14...` + `M22 3h-6a4 4 0 0 0-4 4v14...`) identical to the live website navbar logo.
-  2. **Floating Rounded-3xl Splash Badge**: Rendered standalone / splash icons (`android-chrome-512x512.png`, `192x192.png`) with transparent outer canvas and a centered `rounded-3xl` (`rx="92"`) blue badge with subtle drop shadow, completely fixing the harsh 90° square box on Android app launch.
-  3. **Dedicated Launcher Maskable Icons**: Created `android-chrome-maskable-512x512.png` and `192x192.png` with full-bleed background and 60% safe-zone centering for Android home screen squircle/circle adaptive mask packing.
-  4. **Zero-Cache Deployment**: Pushed to GitHub `main` with `/site.webmanifest?v=5`, zero-cache Express routes, and service worker cache `oep-pwa-v10`.
-  5. **Clean Verification**: Tested production compilation with `npm run build` exiting 0 with zero errors.
+- [x] Seamless Full-Screen Brand Sapphire Blue (`#2563EB`) Native Splash Architecture (`public/site.webmanifest`, `index.html`, `public/android-chrome-*`, `public/favicon.*`):
+  1. **Zero-Box Color Continuity**: Configured `background_color: "#2563EB"` and `theme_color: "#2563EB"` in `site.webmanifest` and `index.html`, perfectly matching the PNG icon fill color (`#2563EB`) so Android renders a continuous, full-screen brand blue launch canvas with **zero black borders and zero square box discontinuities**.
+  2. **1:1 Lucide BookOpen Geometry**: Centered pure white Lucide `BookOpen` vector icon inside the 60% safe zone for both splash screen and adaptive home screen launcher icons.
+  3. **Zero-Cache Deployment**: Manifest bumped to `/site.webmanifest?v=6` with zero-cache server headers (`no-store, no-cache, must-revalidate, max-age=0`).
+  4. **Clean Verification**: Tested production compilation with `npm run build` exiting 0 with zero errors and pushed live to GitHub `main`.
 - [x] Universal 0ms Smooth Scrolling & 120FPS Performance Engine (`src/lib/lenisScroll.ts`, `src/main.tsx`, `src/lib/scrollManager.ts`, `src/pages/BlogPost.tsx`, `src/pages/AiMentor.tsx`):
   1. **0ms Instant Startup**: Hoisted `initLenis()` directly to `src/main.tsx` before initial React mount, eliminating the 1-second hydration lag so smooth physics scrolling applies from the very first frame.
   2. **Active Auto-Resize Observer**: Injected `ResizeObserver` on `document.body` inside `lenisScroll.ts` to dynamically refresh scroll boundaries as exams, test banks, and study plans load.

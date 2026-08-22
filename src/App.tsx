@@ -5286,6 +5286,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
   const [selectedMockCategory, setSelectedMockCategory] = useState<string | null>(() => sessionStorage.getItem('oep_selectedMockCategory') || null);
   const [selectedPracticeCategory, setSelectedPracticeCategory] = useState<string | null>(() => sessionStorage.getItem('oep_selectedPracticeCategory') || null);
   const [selectedSectionalSubject, setSelectedSectionalSubject] = useState<string>('All');
+  const [selectedPracticeSubject, setSelectedPracticeSubject] = useState<string>('All');
   const [internalSelectedExam, setInternalSelectedExam] = useState<string | null>(() => sessionStorage.getItem('oep_selectedExam') || null);
   
   const selectedExam = propsSelectedExam !== undefined
@@ -7067,6 +7068,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
   useEffect(() => {
     if (selectedPracticeCategory) sessionStorage.setItem('oep_selectedPracticeCategory', selectedPracticeCategory);
     else sessionStorage.removeItem('oep_selectedPracticeCategory');
+    setSelectedPracticeSubject('All');
   }, [selectedPracticeCategory]);
   const actualExams = useMemo(() => {
     return exams.filter(e => !e.is_archived && e.category !== 'blog' && e.category !== 'system' && !(e.name || '').startsWith('SYSTEM_SETTINGS_'));
@@ -7185,14 +7187,15 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         const groupedBanks: Record<string, any[]> = {};
         fetchedBanks.forEach((bank: any) => {
           if (!groupedBanks[bank.type]) groupedBanks[bank.type] = [];
-          let parsedTagline = { text: bank.tagline || '', price: 499 };
+          let parsedTagline = { text: bank.tagline || '', price: 499, subject: '' };
           if (bank.tagline && typeof bank.tagline === 'string' && bank.tagline.trim().startsWith('{')) {
             try { 
               const parsed = JSON.parse(bank.tagline);
               if (parsed && typeof parsed === 'object') {
                 parsedTagline = {
                   text: parsed.text !== undefined ? parsed.text : bank.tagline,
-                  price: parsed.price || 499
+                  price: parsed.price || 499,
+                  subject: parsed.subject || ''
                 };
               }
             } catch(e) {}
@@ -7241,6 +7244,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             })(),
             sortOrder: bank.sortOrder ?? bank.sort_order ?? null,
             hasPracticeMode: bank.hasPracticeMode,
+            subject: parsedTagline.subject || '',
             is_archived: bank.is_archived || false
           });
         });
@@ -8185,20 +8189,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     }
 
     return (
-      <div className="relative w-full min-h-screen bg-[#F8FAFC] dark:bg-[#060B16]" style={{ isolation: 'isolate' }}>
-        {/* Full-Screen Edge-to-Edge Academic Vector Canvas Grid & HSL Glows */}
-        <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-[0.03] pointer-events-none z-0" />
-        <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none z-0 gpu-accelerated" />
-        <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none z-0 gpu-accelerated" />
-
-        {/* Floating Viewport Academic Vector Watermarks */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-20">
-          <GraduationCap className="absolute top-24 left-[5%] w-44 h-44 text-slate-800 opacity-[0.08] stroke-[1.2] rotate-12" />
-          <BookOpen className="absolute top-1/3 right-[5%] w-48 h-48 text-brand-600 opacity-[0.08] stroke-[1.2] -rotate-6" />
-          <Award className="absolute bottom-1/3 left-[6%] w-44 h-44 text-amber-600 opacity-[0.08] stroke-[1.2] rotate-45" />
-          <Compass className="absolute bottom-28 right-[6%] w-36 h-36 text-indigo-600 opacity-[0.08] stroke-[1.2] -rotate-12" />
-        </div>
-
+      <div className="relative w-full">
         <div className="w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 space-y-4 sm:space-y-10 pt-2 sm:pt-4 pb-4 sm:pb-8 relative z-10">
           <YouTubeCarousel videoIds={globalVideoIds} />
         
@@ -10151,7 +10142,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   }} className="p-1.5 sm:p-3 rounded-xl sm:rounded-2xl hover:bg-brand-50 dark:hover:bg-slate-800 shrink-0">
                     <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6 rotate-180 text-brand-600 dark:text-indigo-400" />
                   </Button>
-                  <div className="min-w-0 flex-1">
+                  <div className="min-w-0 flex items-center gap-2 flex-wrap">
                     <h3 className="text-lg sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white capitalize tracking-tight leading-tight">
                       {({
                         'topic-wise': t('exams.step1.chapterWise', 'Chapter-Wise Practice'),
@@ -10160,6 +10151,11 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         'pyq-collections': t('exams.step1.pyqTopic', 'Topic-Wise Solved PYQs')
                       } as Record<string, string>)[selectedPracticeCategory] || selectedPracticeCategory.replace('-', ' ')}
                     </h3>
+                    {selectedPracticeCategory === 'topic-wise' && (dynamicQuestionBanks['topic-wise'] || []).some((b: any) => b.examId === selectedExam && b.subject) && (
+                      <span className="bg-brand-100 dark:bg-indigo-950/60 text-brand-600 dark:text-indigo-300 text-[10px] sm:text-xs font-black uppercase tracking-widest px-2.5 py-0.5 sm:py-1 rounded-full border border-brand-200 dark:border-indigo-800 shrink-0">
+                        {t('exams.step2.subjectWise', 'Subject-Wise')}
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -10193,18 +10189,69 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     );
                   }
 
+                  // Derive unique non-empty subjects for topic-wise category
+                  const practiceSubjects = selectedPracticeCategory === 'topic-wise'
+                    ? Array.from(new Set(
+                        matchingBanks
+                          .map((b: any) => b.subject || '')
+                          .filter(Boolean)
+                      )).sort()
+                    : [];
+
+                  const subjectsList = practiceSubjects.length > 0 ? ['All', ...practiceSubjects] : [];
+
+                  // Apply subject filter
+                  const visibleBanks = (subjectsList.length > 0 && selectedPracticeSubject !== 'All')
+                    ? matchingBanks.filter((b: any) => (b.subject || '') === selectedPracticeSubject)
+                    : matchingBanks;
+
                   return (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {matchingBanks.map((bank: any) => (
-                        <ScheduledPracticeBankCard
-                          key={bank.id}
-                          bank={bank}
-                          isMobile={isMobile}
-                          hasAccessTo={hasAccessTo}
-                          activities={activities}
-                          handleStartDirectPractice={handleStartDirectPractice}
-                        />
-                      ))}
+                    <div className="space-y-6">
+                      {/* Subject filter pill bar — only renders when subjects exist */}
+                      {subjectsList.length > 0 && (
+                        <div
+                          className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-1 -mx-1 sm:mx-0"
+                          onWheel={(e) => {
+                            const container = e.currentTarget;
+                            const isAtRightEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 2;
+                            const isAtLeftEnd = container.scrollLeft <= 2;
+                            if ((e.deltaY > 0 && !isAtRightEnd) || (e.deltaY < 0 && !isAtLeftEnd)) {
+                              container.scrollLeft += e.deltaY * 0.85;
+                            }
+                          }}
+                        >
+                          {subjectsList.map((subj) => {
+                            const isActive = selectedPracticeSubject === subj;
+                            return (
+                              <button
+                                key={subj}
+                                onClick={() => setSelectedPracticeSubject(subj)}
+                                className={cn(
+                                  "px-4 py-2 text-xs sm:text-sm font-bold rounded-xl whitespace-nowrap transition-all duration-200 border cursor-pointer shadow-sm",
+                                  isActive
+                                    ? "bg-blue-600 dark:bg-blue-600 border-blue-600 dark:border-blue-500 text-white font-black scale-[1.02] shadow-md shadow-blue-600/25"
+                                    : "bg-white dark:bg-[#0B1528] hover:bg-slate-50 dark:hover:bg-slate-800 border-slate-200/80 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                                )}
+                              >
+                                {subj === 'All' ? t('exams.step2.allSubjects', 'All') : subj}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {visibleBanks.map((bank: any) => (
+                          <ScheduledPracticeBankCard
+                            key={bank.id}
+                            bank={bank}
+                            isMobile={isMobile}
+                            hasAccessTo={hasAccessTo}
+                            activities={activities}
+                            handleStartDirectPractice={handleStartDirectPractice}
+                          />
+                        ))}
+                      </div>
                     </div>
                   );
                 })()}
@@ -10889,30 +10936,34 @@ const GlobalHorizontalScrollEngine = () => {
       return null;
     };
 
-    // 1. Universal Wheel Scroll Delegation: Converts vertical delta into horizontal scrolling
+    // 1. Universal Wheel Scroll Delegation: Only convert to horizontal when shiftKey is held
     const onWheel = (e: WheelEvent) => {
+      if (!e.shiftKey) return; // Allow natural vertical smooth scrolling via Lenis when shift is not held
       const container = findHorizontalContainer(e.target as HTMLElement);
       if (!container) return;
 
-      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-        const maxScroll = container.scrollWidth - container.clientWidth;
-        if (maxScroll > 0) {
-          const atLeft = container.scrollLeft <= 0;
-          const atRight = container.scrollLeft >= maxScroll - 1;
+      const maxScroll = container.scrollWidth - container.clientWidth;
+      if (maxScroll > 0) {
+        const atLeft = container.scrollLeft <= 0;
+        const atRight = container.scrollLeft >= maxScroll - 1;
 
-          if ((e.deltaY > 0 && !atRight) || (e.deltaY < 0 && !atLeft)) {
-            e.preventDefault();
-            container.scrollLeft += e.deltaY;
-          }
+        if ((e.deltaY > 0 && !atRight) || (e.deltaY < 0 && !atLeft)) {
+          container.scrollLeft += e.deltaY;
         }
       }
     };
 
-    // 2. Universal Mouse Drag-to-Scroll: Grab and slide any horizontal track
+    // 2. Universal Mouse Drag-to-Scroll: Grab and slide any horizontal track without blocking buttons/links
     const onMouseDown = (e: MouseEvent) => {
       if (e.button !== 0) return; // Left-click only
       const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') return;
+      if (
+        target.tagName === 'INPUT' || 
+        target.tagName === 'TEXTAREA' || 
+        target.tagName === 'SELECT' ||
+        target.tagName === 'BUTTON' ||
+        target.closest('button, a, [role="button"]')
+      ) return;
 
       const container = findHorizontalContainer(target);
       if (container) {
@@ -10929,7 +10980,6 @@ const GlobalHorizontalScrollEngine = () => {
       const walk = (x - startX) * 1.35;
       if (Math.abs(walk) > 4) {
         hasMoved = true;
-        e.preventDefault();
         activeDragEl.scrollLeft = scrollLeft - walk;
       }
     };
@@ -10946,7 +10996,7 @@ const GlobalHorizontalScrollEngine = () => {
       hasMoved = false;
     };
 
-    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('wheel', onWheel, { passive: true });
     window.addEventListener('mousedown', onMouseDown);
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);

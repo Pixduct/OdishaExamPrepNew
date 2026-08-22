@@ -1,32 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#2563EB" />
-      <stop offset="50%" stop-color="#1D4ED8" />
-      <stop offset="100%" stop-color="#0F172A" />
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6" />
+      <stop offset="100%" stop-color="#1D4ED8" />
     </linearGradient>
-    <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#60A5FA" stop-opacity="0.4" />
-      <stop offset="100%" stop-color="#2563EB" stop-opacity="0" />
-    </linearGradient>
-    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.3" />
+    <filter id="badgeShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.35" />
     </filter>
   </defs>
 
-  <!-- Background Base (Full bleed for adaptive / maskable compatibility) -->
-  <rect width="512" height="512" fill="url(#bgGrad)" />
+  <!-- Transparent outer canvas — so splash screen dark background shows around the rounded badge -->
+  
+  <!-- Rounded-3xl Blue Badge (420x420 centered in 512x512) -->
+  <rect x="46" y="46" width="420" height="420" rx="92" fill="url(#blueGrad)" stroke="#60A5FA" stroke-width="6" filter="url(#badgeShadow)" />
 
-  <!-- Subtle Radial Inner Glow -->
-  <circle cx="256" cy="256" r="220" fill="url(#glowGrad)" />
-
-  <!-- Lucide BookOpen Icon in safe zone (central 65% area for Android maskable icons) -->
-  <g transform="translate(112, 136) scale(1.75)" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#shadow)">
-    <!-- Left page -->
-    <path d="M80 14 C60 6, 20 8, 2 20 L2 136 C20 124, 60 122, 80 130 Z" fill="rgba(255, 255, 255, 0.08)" />
-    <!-- Right page -->
-    <path d="M80 14 C100 6, 140 8, 158 20 L158 136 C140 124, 100 122, 80 130 Z" fill="rgba(255, 255, 255, 0.08)" />
-    <!-- Center spine -->
-    <line x1="80" y1="14" x2="80" y2="130" stroke="#93C5FD" stroke-width="10" />
+  <!-- Exact Authentic Lucide BookOpen Vector Icon (240x240 centered) -->
+  <g transform="translate(136, 136) scale(10)" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
   </g>
 </svg>

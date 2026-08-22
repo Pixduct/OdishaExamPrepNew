@@ -1,15 +1,86 @@
 // OdishaExamPrep Push Notification Service Worker
 // Handles push events and notification clicks even when the site is closed.
 
-const CACHE_NAME = 'oep-push-sw-v1';
+const CACHE_NAME = 'oep-pwa-v2';
+const STATIC_ASSETS = [
+  '/',
+  '/favicon.svg',
+  '/android-chrome-192x192.png',
+  '/android-chrome-512x512.png',
+  '/site.webmanifest'
+];
 
 // ── Lifecycle ──────────────────────────────────────────────────────────────
 self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(STATIC_ASSETS).catch((err) => {
+        console.warn('[SW] Pre-caching static assets failed:', err);
+      });
+    })
+  );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(clients.claim());
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+    }).then(() => clients.claim())
+  );
+});
+
+// ── Fetch Event (Required for PWA Installability & WebAPK Minting) ──────────
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+
+  // Ignore non-GET, API calls, and non-http schemes
+  if (request.method !== 'GET' || !request.url.startsWith('http')) {
+    return;
+  }
+
+  // Bypass service worker for API endpoints and Supabase requests
+  const url = new URL(request.url);
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/app-api/') || url.hostname.includes('supabase.co')) {
+    return;
+  }
+
+  // Network-First with Cache Fallback for navigation and static assets
+  event.respondWith(
+    fetch(request)
+      .then((response) => {
+        // Cache successful basic responses for static assets and HTML
+        if (response && response.status === 200 && response.type === 'basic') {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, responseClone);
+          }).catch(() => {});
+        }
+        return response;
+      })
+      .catch(async () => {
+        const cached = await caches.match(request);
+        if (cached) return cached;
+
+        // If navigating to a page while offline, fallback to cached root index
+        if (request.mode === 'navigate') {
+          const rootCached = await caches.match('/');
+          if (rootCached) return rootCached;
+        }
+
+        return new Response('Offline - OdishaExamPrep', {
+          status: 503,
+          statusText: 'Service Unavailable',
+          headers: { 'Content-Type': 'text/plain' }
+        });
+      })
+  );
 });
 
 // ── Push Event ─────────────────────────────────────────────────────────────

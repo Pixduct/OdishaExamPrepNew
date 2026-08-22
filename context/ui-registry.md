@@ -19,6 +19,7 @@ Before creating any new component, developers and AI agents MUST consult this re
 
 | Component Name | Category | File Path | Variants | Used By | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
+| **`PWAEngine`** | Platform / PWA | [`public/site.webmanifest`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/site.webmanifest) & [`public/sw.js`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/sw.js) | Standalone WebAPK, Maskable Icons, Offline Cache | Root, Service Worker | Active |
 | **`PageLayout`** | Layout | [`src/components/PageLayout.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/PageLayout.tsx) | Default, Full Width | All Page Views | Active |
 | **`Button`** | Utility | [`src/components/Button.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/Button.tsx) | Primary, Secondary, Glass | App.tsx, AdminPanel.tsx | Active |
 | **`MathTextRenderer`** | Data Display | [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx) | Inline, Block Math | MockTestSystem, BlogPost | Active |
@@ -93,6 +94,28 @@ Before creating any new component, developers and AI agents MUST consult this re
 ---
 
 ## Component Details
+
+### 0. `PWAEngine` (Progressive Web App & Standalone WebAPK)
+- **File Path:** [`public/site.webmanifest`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/site.webmanifest) & [`public/sw.js`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/sw.js)
+- **Category:** Platform / PWA
+- **Last Updated:** August 22, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Background / Splash** | `#0b0f19` (`background_color` in manifest for dark theme bootstrap) |
+| **Border / Frame** | Standalone Android App Window (`display: standalone`) |
+| **Icons & Purpose** | `purpose: "any"` + `purpose: "maskable"` across 192x192 & 512x512 PNGs |
+| **App Title** | `OdishaExamPrep` (`short_name` & `name`) |
+| **Service Worker** | Network-first fetch caching with offline fallback (`public/sw.js`) |
+| **Theme Color** | `#0b0f19` (Dark Sapphire status bar) |
+
+**Pattern notes:**
+- **Relative Manifest URL**: Manifest link MUST always use relative `<link rel="manifest" href="/site.webmanifest" />` in `index.html` to avoid CORS / cross-origin failures when navigating across `odishaexamprep.in` vs `www.odishaexamprep.in`.
+- **Adaptive Maskable Icons**: Manifest MUST provide explicit `purpose: "any"` and `purpose: "maskable"` declarations for 192px and 512px assets to satisfy Android WebAPK compilation.
+- **Offline / Fetch Handler**: `public/sw.js` MUST implement a `fetch` event listener to pass Chrome's mandatory PWA installability audit.
+- **Bootstrap Registration**: Service worker MUST register on startup in `src/main.tsx` so the page controller is active on first visit.
+
+---
 
 ### 1. `PageLayout`
 - **File Path:** [`src/components/PageLayout.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/PageLayout.tsx)

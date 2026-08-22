@@ -1,6 +1,12 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] PWA Standalone WebAPK Installation & Offline Engine Recovery (`public/site.webmanifest`, `public/sw.js`, `index.html`, `src/main.tsx`):
+  1. **Cross-Origin Manifest Fix**: Replaced absolute manifest/icon links with relative paths (`/site.webmanifest`, `/favicon...`) in `index.html`, eliminating cross-origin blocks and origin mismatch when loading via `www.odishaexamprep.in`.
+  2. **WebAPK Metadata & Maskable Icons**: Added `"id": "/"`, `"scope": "/"`, `"orientation": "any"`, `"categories"`, and explicit `"purpose": "any"` / `"purpose": "maskable"` icons in `site.webmanifest` for Android adaptive app icons.
+  3. **Service Worker Fetch & Offline Handler**: Injected network-first with cache-fallback `fetch` event listener in `public/sw.js`, satisfying Chrome's mandatory PWA offline / fetch handler installability audit.
+  4. **Bootstrap Service Worker Registration**: Initialized service worker registration during initial application bootstrap in `src/main.tsx` so Chrome immediately registers an active controller on first visit.
+  5. **Clean Verification**: Tested production compilation with `npm run build` exiting 0 with zero errors.
 - [x] Zero-Trust, Fail-Closed Enterprise Guardrail Architecture ($P = 1.0$) across All 7 Automation Engines (`ca_formatter.py`, `ca_scraper.py`, `ca_website_publisher.py`, `exam_update_engine.py`, `engagement_engine.py`, `seo_blog_engine.py`, `shared/blog_linter.py`):
   1. **Zero-False-Positive Policy Enforcement**: Configured a default-deny pipeline where candidate items are marked `REJECTED` by default and must pass strict multi-tier cryptographic and heuristic proofs before reaching production.
   2. **Ingestion-Layer Pre-Filtering & Sovereign Word-Boundary Lock**: Pre-compiled all sovereign entities with `\b` regex word boundaries, eliminating substring collisions (e.g. `'bee'` in `'been'`), purged raw district names to prevent local crime bypass, and filtered 97% of noise at the RSS ingestion layer.

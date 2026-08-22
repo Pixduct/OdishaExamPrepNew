@@ -8,10 +8,18 @@ import { ErrorBoundary } from './ErrorBoundary';
 import LoadingPortal from './components/LoadingPortal';
 import { applyThemeToDocument, getStoredTheme } from './lib/themeStore';
 import { LanguageProvider, applyLanguageToDocument, getStoredLanguage } from './lib/LanguageContext';
+import { registerServiceWorker } from './lib/pushNotifications';
 
 // Ensure dark/light theme and language are synchronously applied to HTML root before React mounts
 applyThemeToDocument(getStoredTheme());
 applyLanguageToDocument(getStoredLanguage());
+
+// Bootstrap Service Worker for PWA installability and push notifications
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  registerServiceWorker().catch((err) => {
+    console.warn('[PWA] Service worker registration failed on bootstrap:', err);
+  });
+}
 
 // Global client-side error reporter for remote diagnostics
 window.onerror = function(message, source, lineno, colno, error) {

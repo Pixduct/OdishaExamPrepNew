@@ -102,17 +102,17 @@ Before creating any new component, developers and AI agents MUST consult this re
 
 | Property | Class / Token |
 | :--- | :--- |
-| **Background / Splash** | `#0b0f19` (`background_color` in manifest for dark theme bootstrap) |
+| **Background / Splash** | `#2563EB` (Seamless Brand Sapphire Blue matching icon background) |
 | **Border / Frame** | Standalone Android App Window (`display: standalone`) |
-| **Icons & Purpose** | `purpose: "any"` (Transparent Floating `rounded-3xl` Badge) + `purpose: "maskable"` (Full-Bleed 60% Safe-Zone) |
+| **Icons & Purpose** | `purpose: "any"` + `purpose: "maskable"` (`#2563EB` fill with centered white Lucide `BookOpen`) |
 | **App Title** | `name: "OdishaExamPrep"`, `short_name: "OEP"` (prevents home screen text truncation) |
 | **Vector Geometry** | 1:1 Authentic Lucide `BookOpen` (`M2 3h6...` + `M22 3h...`) matching Navbar Logo |
 | **Service Worker** | Network-first fetch caching with offline fallback (`public/sw.js`) |
-| **Theme Color** | `#0b0f19` (Dark Sapphire status bar) |
+| **Theme Color** | `#2563EB` (Brand Sapphire Blue status bar) |
 
 **Pattern notes:**
-- **Floating Splash Badge**: `purpose: "any"` icons (`android-chrome-512x512.png`, `192x192.png`) MUST use a transparent outer canvas and a centered `rounded-3xl` (`rx="92"`) blue badge (`#3B82F6` ➔ `#1D4ED8`) so Android displays a floating curved badge without harsh 90° square box borders on app launch.
-- **Dedicated Maskable Icons**: `purpose: "maskable"` icons (`android-chrome-maskable-*.png`) MUST use full-bleed fill with the Lucide `BookOpen` emblem centered inside the 60% safe zone for Android launcher squircle/circle masks.
+- **Seamless Full-Screen Brand Blue Splash**: `background_color` and `theme_color` MUST be set to `#2563EB` in `site.webmanifest` and `index.html`, matching the exact fill of the PNG icon. This eliminates all box borders and black contrasts, rendering a continuous native Android launch experience.
+- **1:1 Lucide BookOpen Geometry**: All PNG assets use the authentic Lucide `BookOpen` paths centered within the 60% safe-zone for both splash display and adaptive squircle launcher masks.
 - **Short Name Constraint**: `short_name` MUST be set to concise `OEP` (<= 8 chars) to prevent Android home screen icon label truncation (e.g. `OdishaExa...`).
 - **Relative Manifest URL**: Manifest link MUST always use relative `<link rel="manifest" href="/site.webmanifest?v=..." />` in `index.html` to avoid CORS / cross-origin failures when navigating across `odishaexamprep.in` vs `www.odishaexamprep.in`.
 - **Zero-Cache Server Headers**: Manifest and PWA assets MUST be served with `no-store, no-cache, must-revalidate` so browsers immediately pick up manifest and icon updates.

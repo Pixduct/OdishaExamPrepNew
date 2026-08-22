@@ -2995,6 +2995,45 @@ Last updated: August 22, 2026
 - **Zero-Disruption Draft Sandbox**: Automatically renders atop unpublished draft articles when accessed by an admin (`?preview=true` or status `draft`). Regular users without admin sessions see standard 404/Not Found.
 - **1-Click Live Transition**: Approving draft immediately calls `/api/publish-blog-draft` to change status from `draft` to `published`, triggers automated social alerts, and transitions the UI to active live view without full page reload.
 
+---
+
+### 93. `FailClosedEngagementPollCard` (Interactive Student Community Poll & Explanation Strategy Card)
+
+Files: [`automations/engagement_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/engagement_engine.py), [`automations/post_to_youtube.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/post_to_youtube.py)
+Last updated: August 22, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Poll Shell** | Telegram API `type="regular"` (Anonymous Student Poll, No Green Spoilers) |
+| **Question Typography** | 25-300 characters, syllabus-grounded, ending with valid question mark |
+| **Options Matrix** | Exactly 3 to 4 distinct options, non-empty, zero duplicate choices |
+| **Follow-up Strategy Card** | `💡 Strategy Insights:\n{explanation}\n\n🎯 Practice Daily Mock Tests & Question Banks:\n👉 https://www.odishaexamprep.in/` |
+| **Attached Daily Visual** | Rotational Student Photo of the Day (`student {day_of_week}.png`) |
+| **Quantitative Score Gate** | **Passing Threshold $\ge 80/100$** (Question Clarity +25, Option Structure +25, Syllabus Grounding +25, Educational Proof +25) |
+
+**Pattern notes:**
+- **Zero-Motivation Invariant**: Banned all generic motivational fluff ("study hard", "stay focused", "believe in yourself", "never give up") and administrative news/tenders.
+- **Template Placeholder Veto**: Strict regex drops any bracketed template text (`[Topic]`, `[Option A]`).
+
+---
+
+### 94. `DomainAdaptiveMasterclassAuditor` (Autonomous Academic Masterclass Blog Quality Linter)
+
+Files: [`automations/shared/blog_linter.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/blog_linter.py), [`automations/seo_blog_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/seo_blog_engine.py)
+Last updated: August 22, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Article Container** | `.oep-article-prose`, `.oep-table-wrapper` |
+| **Worked Example Cards** | `<div class="worked-example">` with Problem Statement, Common Trap, Shortcut Algorithm, and Final Answer |
+| **Formula Matrix Table** | Responsive `<table>` with `<thead>` and $\ge 3$ data rows |
+| **Word Count Floors** | Quantitative/DI: 1,150+ words; Reasoning/English: 1,200+ words; GS/Odisha GK: 1,350+ words |
+| **Linter Score Standard** | **Passing Threshold $\ge 88/100$ AND Zero Critical Errors** |
+
+**Pattern notes:**
+- **Hard Fatal Invariants**: Zero speculative countdowns ("30-day plan", "exam confirmed next week"), zero truncated ellipses (`...`), zero undefined tokens, zero unreplaced placeholders (`[Topic]`, `[Formula]`).
+- **Fail-Closed Gatekeeper**: Any article scoring below 88 or containing a fatal invariant is immediately dropped before Supabase database insertion.
+
 
 
 

@@ -87,6 +87,8 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`SyllabusPathsMobilePillBar`** | Navigation / Catalog | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L1240-L1365) | Horizontal Snap-Scroll Pill Tabs, 10px Topic Card Gap, Compact Badges | App.tsx (Home) | Active |
 | **`ExamRegistryMobileCards`** | Data Display / Bulletin | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L1105-L1175) | Compact 10px Notification Cards, Standardized 44px Action Targets, Single-Row Header | App.tsx (Home) | Active |
 | **`AdminDecoupledContentModal`** | Admin / Form Modal | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L2625-L3230) | Adaptive Category Presets, Dynamic Header Badges, PDF Link Isolation, Non-Destructive Decoupled Mode | AdminPanel.tsx | Active |
+| **`CurrentAffairsStudentCommunityBanner`** | Social / Banner | [`src/components/CurrentAffairsReaderModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/CurrentAffairsReaderModal.tsx#L136-L203) | Multi-Domain (Odisha, International, National) Dual-Theme Gradient Community Banners & CTA Actions | CurrentAffairsReaderModal.tsx, StreakDetailModal.tsx | Active |
+| **`BlogPostDraftPreviewBar`** | Admin / Banner | [`src/pages/BlogPost.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/BlogPost.tsx#L391-L424) | Sticky Amber Draft Preview Bar, 1-Click Approve/Publish, Discard & Live Transition | BlogPost.tsx | Active |
 
 ---
 
@@ -2970,6 +2972,29 @@ Last updated: August 21, 2026
 **Pattern notes:**
 - **Valid Color Steps**: Standardized on valid Tailwind CSS 900/950 color steps (`from-indigo-950`, `from-amber-900`, `from-teal-950`, `from-slate-900`) instead of non-standard `-850` step classes.
 - **Dual-Theme Legibility**: Banner starting stop (`from-`) is guaranteed to render dark indigo/teal/amber hues across all CSS browsers, permanently eliminating light mode white-start background fallback bugs behind white text.
+
+---
+
+### 92. `BlogPostDraftPreviewBar` (Admin Blog Draft Preview Sandbox & 1-Click Publishing Banner)
+
+File: [`src/pages/BlogPost.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/BlogPost.tsx#L391-L424)
+Last updated: August 22, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Sticky Bar Shell** | `sticky top-0 z-[110] bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 text-white px-4 py-2.5 sm:py-3 shadow-xl backdrop-blur-md border-b border-amber-400/30 flex flex-wrap items-center justify-between gap-3` |
+| **Admin Preview Badge** | `bg-white/20 px-2 py-0.5 rounded-lg text-[10px] tracking-wider uppercase font-black` |
+| **Draft Mode Label** | `text-xs sm:text-sm font-bold` (`🔒 Draft Mode · Unpublished`) |
+| **Published Success Chip** | `bg-emerald-500 text-white px-2 py-0.5 rounded-md text-xs font-black animate-pulse` |
+| **Discarded Chip** | `bg-rose-500 text-white px-2 py-0.5 rounded-md text-xs font-black` |
+| **Approve & Publish CTA** | `px-3 sm:px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs sm:text-sm font-extrabold shadow transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 disabled:opacity-50` |
+| **Discard Button** | `px-2.5 sm:px-3 py-1.5 bg-black/40 hover:bg-black/60 text-white/90 rounded-xl text-xs font-bold transition-all cursor-pointer` |
+| **View Live Page Button** | `px-3 py-1.5 bg-white text-emerald-800 rounded-xl text-xs font-black shadow` |
+
+**Pattern notes:**
+- **Zero-Disruption Draft Sandbox**: Automatically renders atop unpublished draft articles when accessed by an admin (`?preview=true` or status `draft`). Regular users without admin sessions see standard 404/Not Found.
+- **1-Click Live Transition**: Approving draft immediately calls `/api/publish-blog-draft` to change status from `draft` to `published`, triggers automated social alerts, and transitions the UI to active live view without full page reload.
+
 
 
 

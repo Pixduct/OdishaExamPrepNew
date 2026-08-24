@@ -96,6 +96,7 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`HeroTrustBadge`** | Hero / Social Proof | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L3388-L3405) | Overlapping avatar icon stack, zero-truncation responsive labels & dual-language numerals | App.tsx (Hero) | Active |
 | **`AdminAddNewModalQuickSaveButton`** | Admin / Modal Header | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7663-L7672) | Compact brand-blue Save pill in modal header, HTML5 `form` attribute wiring (no JS) | AdminPanel.tsx (Add New / Edit modal) | Active |
 | **`PracticeSubjectFilterPillBar`** | Filter / Navigation | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L10184-L10230) | Horizontal scrollable subject pills (`All \| Subject A \| â€¦`) above Chapter-Wise Practice cards; mirrors Sectional Tests filter | App.tsx (Step 1 â€” Chapter-Wise Practice) | Active |
+| **AdminBulkImportModal** | Admin / Bulk Creation | [src/AdminPanel.tsx](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7935-L8240) | Multi-entity bulk JSON uploader with auto-sequential sortOrder, dynamic premium pricing controls, and real-time sessionStorage sticky memory | AdminPanel.tsx (Banks / Practice / Tests tabs) | Active |
 
 ---
 
@@ -3213,24 +3214,24 @@ Last updated: August 23, 2026
 | Property | Class / Token |
 | :--- | :--- |
 | **Container** | `flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-1 -mx-1 sm:mx-0` |
-| **Active pill — Background** | `bg-blue-600 dark:bg-blue-600` |
-| **Active pill — Border** | `border-blue-600 dark:border-blue-500` |
-| **Active pill — Text** | `text-white font-black` |
-| **Active pill — Scale** | `scale-[1.02] shadow-md shadow-blue-600/25` |
-| **Inactive pill — Background** | `bg-white dark:bg-[#0B1528]` |
-| **Inactive pill — Border** | `border-slate-200/80 dark:border-slate-800` |
-| **Inactive pill — Text** | `text-slate-600 dark:text-slate-300` |
-| **Inactive pill — Hover** | `hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white` |
+| **Active pill ï¿½ Background** | `bg-blue-600 dark:bg-blue-600` |
+| **Active pill ï¿½ Border** | `border-blue-600 dark:border-blue-500` |
+| **Active pill ï¿½ Text** | `text-white font-black` |
+| **Active pill ï¿½ Scale** | `scale-[1.02] shadow-md shadow-blue-600/25` |
+| **Inactive pill ï¿½ Background** | `bg-white dark:bg-[#0B1528]` |
+| **Inactive pill ï¿½ Border** | `border-slate-200/80 dark:border-slate-800` |
+| **Inactive pill ï¿½ Text** | `text-slate-600 dark:text-slate-300` |
+| **Inactive pill ï¿½ Hover** | `hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white` |
 | **Pill shared** | `px-4 py-2 text-xs sm:text-sm font-bold rounded-xl whitespace-nowrap transition-all duration-200 border cursor-pointer shadow-sm` |
-| **State** | `selectedPracticeSubject` / `setSelectedPracticeSubject` — default `'All'` |
+| **State** | `selectedPracticeSubject` / `setSelectedPracticeSubject` ï¿½ default `'All'` |
 | **Subject source** | `bank.subject` extracted from tagline JSON `parsed.subject` |
 
 **Pattern notes:**
-- Identical pill style to SectionalSubjectFilterPillBar — keep both in sync.
+- Identical pill style to SectionalSubjectFilterPillBar ï¿½ keep both in sync.
 - Conditional render: pill bar only renders when `subjectsList.length > 0`. Invisible for exams with no subject set.
-- Subject derivation: `Array.from(new Set(matchingBanks.map(b => b.subject).filter(Boolean))).sort()` — alphabetically sorted, deduped.
+- Subject derivation: `Array.from(new Set(matchingBanks.map(b => b.subject).filter(Boolean))).sort()` ï¿½ alphabetically sorted, deduped.
 - All pill always first. Reset on category change via useEffect.
-- Only active for `topic-wise` category — other categories compute `practiceSubjects = []`.
+- Only active for `topic-wise` category ï¿½ other categories compute `practiceSubjects = []`.
 
 ### 101. `AdminBulkImportModal`
 File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7935-L8240)

@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <!-- MP4 Client-side Muxer -->
+  <script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.4/build/mp4-muxer.min.js"></script>
   <style>
     :root {
       --bg-main: #060911;
@@ -402,12 +404,19 @@
 
     .preview-bar {
       display: flex;
-      gap: 0.75rem;
+      flex-direction: column;
+      gap: 0.6rem;
       width: 100%;
       max-width: 360px;
     }
 
-    .preview-bar .btn {
+    .preview-buttons-row {
+      display: flex;
+      gap: 0.5rem;
+      width: 100%;
+    }
+
+    .preview-buttons-row .btn {
       flex: 1;
     }
 
@@ -591,11 +600,10 @@
             </label>
           </div>
 
-          <!-- CUSTOM SUSPENSE MP3 UPLOAD BOX (shown when custom is selected) -->
           <div id="customBgAudioUploadBox" style="display: none;">
             <div class="file-upload-box" onclick="document.getElementById('bgAudioInput').click()">
               <div style="text-align: left;">
-                <div id="bgAudioFileName" style="font-size: 0.85rem; font-weight: 800; color: var(--text-main);">Click to Select Suspense Music MP3 (e.g. KBC / Tension clock)</div>
+                <div id="bgAudioFileName" style="font-size: 0.85rem; font-weight: 800; color: var(--text-main);">Click to Select Suspense Music MP3</div>
                 <div style="font-size: 0.7rem; color: var(--text-dim);">Audio stays in browser memory. Automatically loops during question & countdown, fades on answer reveal.</div>
               </div>
               <button type="button" class="btn" style="pointer-events: none;">Select Track</button>
@@ -699,7 +707,7 @@
       
       <div class="record-status-badge" id="recordStatusBadge">
         <div class="pulse-dot"></div>
-        <span id="recordStatusText">Recording Short (1080x1920)...</span>
+        <span id="recordStatusText">Exporting Short...</span>
       </div>
 
       <div class="canvas-frame">
@@ -711,11 +719,20 @@
         📱 Show Real YouTube Mobile Overlay Guide
       </button>
 
-      <!-- SHORTS PREVIEW CONTROLS -->
+      <!-- SHORTS PREVIEW & EXPORT BUTTONS -->
       <div class="preview-bar" id="shortsControlsBar">
-        <button class="btn" id="playPreviewBtn" onclick="playShortsSequence(false)">▶ Play Preview</button>
-        <button class="btn btn-danger" id="stopPreviewBtn" onclick="stopSequence()" style="display: none;">⏹ Stop</button>
-        <button class="btn btn-emerald" id="recordBtn" onclick="recordAndDownloadShort()">⏺ Record & Download (.webm)</button>
+        <div class="preview-buttons-row">
+          <button class="btn" id="playPreviewBtn" onclick="playShortsSequence(false)">▶ Play Preview</button>
+          <button class="btn btn-danger" id="stopPreviewBtn" onclick="stopSequence()" style="display: none;">⏹ Stop</button>
+        </div>
+
+        <button class="btn btn-emerald" id="recordMp4Btn" onclick="recordAndDownloadShort('mp4')" style="font-size: 0.95rem; padding: 0.75rem; font-weight: 800;">
+          📥 Download Video as .MP4
+        </button>
+
+        <button class="btn" id="recordWebmBtn" onclick="recordAndDownloadShort('webm')" style="font-size: 0.75rem; color: var(--text-muted);">
+          📥 Or Download as .WebM
+        </button>
       </div>
 
       <!-- COVER PREVIEW CONTROLS -->
@@ -724,7 +741,7 @@
       </div>
 
       <div style="font-size: 0.75rem; color: var(--text-dim); text-align: center; max-width: 320px;">
-        💡 Multi-Layer Studio Suspense Engine + Custom MP3 Support.
+        💡 Native .MP4 and .WebM direct video downloads.
       </div>
     </div>
 
@@ -752,7 +769,7 @@
     let ctaAudioDuration = 4.0;
 
     // Background Suspense Music
-    let bgAudioMode = 'synth'; // 'synth' or 'custom'
+    let bgAudioMode = 'synth';
     let bgMusicAudio = new Audio();
     let bgMusicObjectUrl = null;
 
@@ -818,7 +835,7 @@
       }
       bgMusicAudio.src = '';
       document.getElementById('bgAudioInput').value = '';
-      document.getElementById('bgAudioFileName').innerText = 'Click to Select Suspense Music MP3 (e.g. KBC / Tension clock)';
+      document.getElementById('bgAudioFileName').innerText = 'Click to Select Suspense Music MP3';
       document.getElementById('bgAudioControlsRow').style.display = 'none';
     }
 
@@ -848,7 +865,6 @@
     // 🎬 MULTI-LAYER CINEMATIC STUDIO SUSPENSE SYNTHESIZER
     // ==============================================================
 
-    // Layer 1: Dark Atmospheric Tension Pad (Continuous Drone)
     function startAtmosphericDrone() {
       stopAtmosphericDrone();
       if (isMuted || !audioCtx || bgAudioMode !== 'synth') return;
@@ -863,7 +879,6 @@
         filter.type = 'lowpass';
         filter.frequency.setValueAtTime(240, now);
 
-        // Rich minor root & fifth interval (D2 = 73.42Hz, A2 = 110Hz, D3 = 146.83Hz)
         const freqs = [73.42, 110.0, 146.83];
         freqs.forEach(function(f) {
           const osc = audioCtx.createOscillator();
@@ -894,7 +909,6 @@
       }, 350);
     }
 
-    // Layer 2: Movie Trailer Sub-Boom / Chest Impact
     function playCinematicSubBoom(intensity) {
       intensity = intensity || 1.0;
       if (isMuted || !audioCtx || bgAudioMode !== 'synth') return;
@@ -902,7 +916,6 @@
       try {
         const now = audioCtx.currentTime;
 
-        // Sub oscillator sweep (75Hz -> 28Hz)
         const osc = audioCtx.createOscillator();
         const oscGain = audioCtx.createGain();
         osc.type = 'sine';
@@ -919,7 +932,6 @@
         osc.start(now);
         osc.stop(now + 0.4);
 
-        // Filtered low rumble noise burst
         const bufferSize = audioCtx.sampleRate * 0.25;
         const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
         const output = noiseBuffer.getChannelData(0);
@@ -947,14 +959,12 @@
       } catch (e) {}
     }
 
-    // Layer 3: Precision Clockwork Tension Tick
     function playCountdownTick(pitch) {
       pitch = pitch || 600;
       if (isMuted || !audioCtx) return;
       try {
         const now = audioCtx.currentTime;
 
-        // High metallic metronome ratchet
         const osc1 = audioCtx.createOscillator();
         const gain1 = audioCtx.createGain();
         osc1.type = 'triangle';
@@ -970,14 +980,12 @@
         osc1.start(now);
         osc1.stop(now + 0.08);
 
-        // Sub punch accompaniment
         if (bgAudioMode === 'synth') {
           playCinematicSubBoom(0.85);
         }
       } catch (e) {}
     }
 
-    // Layer 4: Answer Reveal Celebratory Chime
     function playRevealChime() {
       if (isMuted || !audioCtx) return;
       try {
@@ -1734,7 +1742,6 @@
 
         const elapsed = (now - startTime) / 1000;
 
-        // Sub-boom impacts during reading phase
         if (elapsed >= 0.2 && !subBoomPlayedIntro) {
           subBoomPlayedIntro = true;
           playCinematicSubBoom(1.0);
@@ -1752,7 +1759,6 @@
           const isRevealed = elapsed >= (tIntro + tQuestion + tOptions + tCountdown);
           drawDynamicOptionsCards(options, isRevealed, correct, 1);
 
-          // Countdown Phase (Rushed Tension Ticks + Sub Impacts)
           if (elapsed >= (tIntro + tQuestion + tOptions) && !isRevealed) {
             const cdElapsed = elapsed - (tIntro + tQuestion + tOptions);
             const remaining = Math.max(1, Math.ceil(countdownSecs - cdElapsed));
@@ -1765,7 +1771,6 @@
           }
 
           if (isRevealed) {
-            // Cut tension drone on reveal
             if (!revealPlayed) {
               revealPlayed = true;
               stopAtmosphericDrone();
@@ -1808,22 +1813,29 @@
       if (currentMode === 'shorts') drawIdleFrame();
     }
 
-    function recordAndDownloadShort() {
+    // ==============================================================
+    // 🎥 DIRECT MP4 & WEBM RECORDING ENGINE
+    // ==============================================================
+    function recordAndDownloadShort(format) {
+      format = format || 'mp4';
       initAudioContext();
       if (isRecording) return;
 
       isRecording = true;
       const statusBadge = document.getElementById('recordStatusBadge');
-      const recordBtn = document.getElementById('recordBtn');
+      const recordStatusText = document.getElementById('recordStatusText');
+      const recordMp4Btn = document.getElementById('recordMp4Btn');
+      const recordWebmBtn = document.getElementById('recordWebmBtn');
+
       statusBadge.classList.add('active');
-      recordBtn.disabled = true;
-      recordBtn.innerText = '⏳ Recording Short...';
+      recordStatusText.innerText = 'Recording Video (' + format.toUpperCase() + ')...';
+      recordMp4Btn.disabled = true;
+      recordWebmBtn.disabled = true;
 
       const canvasStream = canvas.captureStream(60);
       const combinedTracks = [...canvasStream.getVideoTracks()];
 
       if (audioDestination) {
-        // Connect CTA audio to masterGain if not attached
         if (ctaAudioObjectUrl && !ctaAudio.sourceNodeAttached) {
           try {
             const source = audioCtx.createMediaElementSource(ctaAudio);
@@ -1831,7 +1843,6 @@
             ctaAudio.sourceNodeAttached = true;
           } catch (e) {}
         }
-        // Connect Custom Background Music audio to masterGain if not attached
         if (bgMusicObjectUrl && !bgMusicAudio.sourceNodeAttached) {
           try {
             const bgSource = audioCtx.createMediaElementSource(bgMusicAudio);
@@ -1847,15 +1858,35 @@
       }
 
       const stream = new MediaStream(combinedTracks);
-      let options = { mimeType: 'video/webm;codecs=vp9,opus' };
-      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-        options = { mimeType: 'video/webm;codecs=vp8,opus' };
-        if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-          options = { mimeType: 'video/webm' };
+
+      // Determine best container & codecs
+      let mimeType = '';
+      let fileExtension = format === 'mp4' ? 'mp4' : 'webm';
+      let isMp4 = format === 'mp4';
+
+      if (isMp4) {
+        if (MediaRecorder.isTypeSupported('video/mp4;codecs=avc1,mp4a.40.2')) {
+          mimeType = 'video/mp4;codecs=avc1,mp4a.40.2';
+        } else if (MediaRecorder.isTypeSupported('video/mp4;codecs=h264,aac')) {
+          mimeType = 'video/mp4;codecs=h264,aac';
+        } else if (MediaRecorder.isTypeSupported('video/mp4')) {
+          mimeType = 'video/mp4';
+        } else if (MediaRecorder.isTypeSupported('video/webm;codecs=h264,opus')) {
+          mimeType = 'video/webm;codecs=h264,opus';
+        } else {
+          mimeType = 'video/webm;codecs=vp9,opus';
+        }
+      } else {
+        if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')) {
+          mimeType = 'video/webm;codecs=vp9,opus';
+        } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')) {
+          mimeType = 'video/webm;codecs=vp8,opus';
+        } else {
+          mimeType = 'video/webm';
         }
       }
 
-      const recorder = new MediaRecorder(stream, options);
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType: mimeType } : undefined);
       const chunks = [];
 
       recorder.ondataavailable = function(e) {
@@ -1863,12 +1894,14 @@
       };
 
       recorder.onstop = function() {
-        const blob = new Blob(chunks, { type: 'video/webm' });
+        const actualType = recorder.mimeType || (isMp4 ? 'video/mp4' : 'video/webm');
+        const blob = new Blob(chunks, { type: actualType });
         const videoUrl = URL.createObjectURL(blob);
         const a = document.createElement('a');
         const examName = (document.getElementById('examName').value || 'Short').replace(/[^a-zA-Z0-9]/g, '_');
+        
         a.href = videoUrl;
-        a.download = 'YouTube_Short_' + examName + '_' + Date.now() + '.webm';
+        a.download = 'YouTube_Short_' + examName + '_' + Date.now() + '.' + fileExtension;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -1876,8 +1909,8 @@
 
         isRecording = false;
         statusBadge.classList.remove('active');
-        recordBtn.disabled = false;
-        recordBtn.innerText = '⏺ Record & Download (.webm)';
+        recordMp4Btn.disabled = false;
+        recordWebmBtn.disabled = false;
         drawIdleFrame();
       };
 

@@ -1940,6 +1940,19 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       return subjectOrderCounters[key];
     };
 
+    // Hoist schedule helper above the loop — pure function, no loop-varying dependencies.
+    // totalIntervalMs is pre-computed once so it is not recalculated per item.
+    const totalIntervalMs = (bulkAutoScheduleIntervalDays * 24 + bulkAutoScheduleIntervalHours) * 60 * 60 * 1000;
+    const computeScheduleForItem = (item: any, itemIndex: number): string | null => {
+      if (item.scheduled_at) return new Date(item.scheduled_at).toISOString();
+      if (!bulkGlobalScheduledAt) return null;
+      const base = new Date(bulkGlobalScheduledAt);
+      if (bulkAutoScheduleEnabled && totalIntervalMs > 0) {
+        base.setTime(base.getTime() + (itemIndex * totalIntervalMs));
+      }
+      return base.toISOString();
+    };
+
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (!item.title || typeof item.title !== 'string' || !item.title.trim()) {
@@ -1954,24 +1967,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       const itemTagline = item.tagline || bulkGlobalTagline || '';
       const itemSubject = item.subject || (activeTab === 'tests' && bulkGlobalCategory === 'sectional' ? item.subject : '');
       const itemSortOrder = item.sortOrder !== undefined ? Number(item.sortOrder) : getNextOrderForItem(itemSubject);
-
-      // Compute per-item scheduled_at:
-      //   - If item has its own scheduled_at → use it directly (overrides global)
-      //   - Else if Auto-Interval is ON and a base date is set → base + (i * totalIntervalMs)
-      //   - Else fall back to global scheduled_at (same for all)
-      const computeScheduleForItem = (itemIndex: number): string | null => {
-        if (item.scheduled_at) return new Date(item.scheduled_at).toISOString();
-        if (!bulkGlobalScheduledAt) return null;
-        const base = new Date(bulkGlobalScheduledAt);
-        if (bulkAutoScheduleEnabled) {
-          const totalIntervalMs = (
-            (bulkAutoScheduleIntervalDays * 24 + bulkAutoScheduleIntervalHours) * 60 * 60 * 1000
-          );
-          base.setTime(base.getTime() + (itemIndex * totalIntervalMs));
-        }
-        return base.toISOString();
-      };
-      const itemScheduledAt = computeScheduleForItem(i);
+      const itemScheduledAt = computeScheduleForItem(item, i);
 
       try {
         if (activeTab === 'banks' || activeTab === 'practice') {
@@ -8669,20 +8665,36 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
 
                     {/* Row 3: Live Preview Panel — only when auto-interval is ON and we have a start date + items */}
                     {bulkAutoScheduleEnabled && bulkGlobalScheduledAt && (() => {
-                      let previewItems: { title: string }[] = [];
-                      try { const p = JSON.parse(bulkJsonInput.trim()); if (Array.isArray(p)) previewItems = p.slice(0, 10); } catch {}
-                      if (previewItems.length === 0) return null;
-                      const totalIntervalMs = (bulkAutoScheduleIntervalDays * 24 + bulkAutoScheduleIntervalHours) * 60 * 60 * 1000;
+                      // Fix 3: Parse JSON once — derive both previewItems and totalInJson from one parse
+                      let allItems: { title?: string }[] = [];
+                      try { const p = JSON.parse(bulkJsonInput.trim()); if (Array.isArray(p)) allItems = p; } catch {}
+                      if (allItems.length === 0) return null;
+                      const totalInJson = allItems.length;
+                      const previewItems = allItems.slice(0, 10);
+                      const previewIntervalMs = (bulkAutoScheduleIntervalDays * 24 + bulkAutoScheduleIntervalHours) * 60 * 60 * 1000;
                       const base = new Date(bulkGlobalScheduledAt);
                       const fmt = (d: Date) => d.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
-                      const totalInJson = (() => { try { const p = JSON.parse(bulkJsonInput.trim()); return Array.isArray(p) ? p.length : 0; } catch { return 0; } })();
+
+                      // Fix 2: Warn the user when interval is 0 — all items would silently get same timestamp
+                      if (previewIntervalMs === 0) {
+                        return (
+                          <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3 flex items-start gap-2.5">
+                            <span className="text-amber-500 text-base leading-none mt-0.5">⚠️</span>
+                            <div>
+                              <p className="text-xs font-black text-amber-800">Interval is 0 — all {totalInJson} items will unlock at the same time</p>
+                              <p className="text-[10px] text-amber-700 font-semibold mt-0.5">Set at least 1 Day or 1 Hour to stagger the unlock schedule.</p>
+                            </div>
+                          </div>
+                        );
+                      }
+
                       return (
                         <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 space-y-1.5">
                           <p className="text-[10px] font-black text-emerald-700 uppercase tracking-wider mb-2">
                             📅 Unlock Schedule Preview ({totalInJson} items total)
                           </p>
                           {previewItems.map((item, idx) => {
-                            const unlockDate = new Date(base.getTime() + idx * totalIntervalMs);
+                            const unlockDate = new Date(base.getTime() + idx * previewIntervalMs);
                             return (
                               <div key={idx} className="flex items-center gap-3">
                                 <span className="w-6 h-6 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-700 text-[10px] font-black flex items-center justify-center shrink-0">

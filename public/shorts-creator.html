@@ -382,7 +382,7 @@
 
     .canvas-frame {
       width: 320px;
-      height: 568px; /* 9:16 aspect ratio scaled */
+      height: 568px;
       background: #000;
       border-radius: 28px;
       overflow: hidden;
@@ -689,7 +689,7 @@
       </div>
 
       <div style="font-size: 0.75rem; color: var(--text-dim); text-align: center; max-width: 320px;">
-        💡 100% Dynamic Auto-Fit Font Engine (Handles Long Sentences).
+        💡 100% Studio Symmetrical & Safe Zone Layout.
       </div>
     </div>
 
@@ -893,7 +893,6 @@
       }
     }
 
-    // Helper to calculate line wraps based on canvas measureText
     function getWrappedLines(ctx, text, maxWidth) {
       const words = text.split(' ');
       let line = '';
@@ -943,14 +942,14 @@
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, 1080, 1920);
 
-      // Top Sapphire Ambient
+      // Top Ambient Glow
       const glowTop = ctx.createRadialGradient(540, 240, 40, 540, 240, 550);
       glowTop.addColorStop(0, 'rgba(37, 99, 235, 0.28)');
       glowTop.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = glowTop;
       ctx.fillRect(0, 0, 1080, 800);
 
-      // Bottom Emerald Ambient
+      // Bottom Ambient Glow
       const glowBottom = ctx.createRadialGradient(540, 1400, 40, 540, 1400, 600);
       glowBottom.addColorStop(0, 'rgba(16, 185, 129, 0.12)');
       glowBottom.addColorStop(1, 'rgba(0, 0, 0, 0)');
@@ -994,7 +993,7 @@
     }
 
     // ==========================================
-    // 🧠 DYNAMIC AUTO-FIT VIDEO RENDERER
+    // 📐 VIDEO RENDERER
     // ==========================================
 
     function drawHeaderBar(exam, brand, alpha) {
@@ -1029,7 +1028,6 @@
       ctx.restore();
     }
 
-    // Dynamic Question Card that automatically calculates font size & wraps any sentence length
     function drawDynamicQuestionCard(question, alpha) {
       alpha = alpha !== undefined ? alpha : 1;
       ctx.save();
@@ -1045,7 +1043,6 @@
       ctx.lineWidth = 3;
       roundRect(ctx, cardX, cardY, cardW, cardH, 26, true, true);
 
-      // "QUESTION" Badge Header Pill
       ctx.fillStyle = 'rgba(37, 99, 235, 0.25)';
       roundRect(ctx, 105, 396, 180, 40, 12, true, false);
       ctx.fillStyle = '#93C5FD';
@@ -1053,9 +1050,8 @@
       ctx.textAlign = 'center';
       ctx.fillText('❓ QUESTION', 195, 424);
 
-      // Adaptive Font Sizing Engine for Question Text
-      const maxWidth = cardW - 100; // 840px usable text width
-      const maxAvailableHeight = cardH - 85; // Area below header pill
+      const maxWidth = cardW - 100;
+      const maxAvailableHeight = cardH - 85;
       
       let optimalSize = 40;
       let optimalLines = [];
@@ -1093,7 +1089,6 @@
       ctx.restore();
     }
 
-    // Dynamic Option Cards that wrap long options effortlessly
     function drawDynamicOptionsCards(options, revealed, correctKey, alpha) {
       revealed = revealed || false;
       correctKey = correctKey || 'A';
@@ -1129,7 +1124,6 @@
 
         roundRect(ctx, 70, y, cardW, cardH, 20, true, true);
 
-        // Letter Circle (A, B, C, D)
         const circleCenterX = 135;
         const circleCenterY = y + cardH / 2;
 
@@ -1153,7 +1147,6 @@
           ctx.fillText(key, circleCenterX, circleCenterY + 10);
         }
 
-        // Option Text Auto-Fit Engine (Single-line or Two-line Wrap)
         const optionText = options[key] || '';
         const maxOptWidth = 720;
         
@@ -1171,7 +1164,7 @@
             break;
           }
           optSize = s;
-          optLines = lines.slice(0, 2); // Cap at 2 lines
+          optLines = lines.slice(0, 2);
           optLineHeight = s * 1.25;
         }
 
@@ -1254,7 +1247,6 @@
       ctx.font = '800 24px "Plus Jakarta Sans", sans-serif';
       ctx.fillText('⭐ 10,000+ Aspirants Trusted Platform', 540, 532);
 
-      // Auto-Fit CTA Text
       ctx.font = '800 40px "Plus Jakarta Sans", sans-serif';
       const ctaLines = getWrappedLines(ctx, cta || 'Visit website for 1000+ Practice Tests & Chapter Notes!', 800);
       const ctaLineH = 54;
@@ -1304,13 +1296,12 @@
     }
 
     // ==========================================
-    // 🌟 100K PRO YOUTUBER COVER GENERATOR
+    // 🌟 100K PRO YOUTUBER BALANCED COVER GENERATOR
     // ==========================================
     function drawCoverCanvas() {
       const exam = document.getElementById('examName').value || 'OSSC CGL & OPSC ASO 2026';
       const question = document.getElementById('questionText').value || 'Who was the first Chief Minister of Odisha?';
       const brand = document.getElementById('brandName').value || 'OdishaExamPrep';
-      const websiteUrl = document.getElementById('websiteUrl').value || 'www.odishaexamprep.in';
       
       const hookText = document.getElementById('coverHookText') ? document.getElementById('coverHookText').value : '⚠️ 99% ASPIRANTS GET THIS WRONG!';
       const questionBadge = document.getElementById('coverQuestionBadge') ? document.getElementById('coverQuestionBadge').value : '❓ QUESTION #01 • IMPORTANT GK';
@@ -1319,19 +1310,19 @@
 
       drawBaseBackground();
 
-      // 1. TOP VIRAL HOOK BANNER (Y: 175 to 305)
+      // 1. TOP VIRAL HOOK BANNER (Y: 100 to 220 - Height 120px)
       ctx.save();
       ctx.shadowColor = 'rgba(239, 68, 68, 0.45)';
-      ctx.shadowBlur = 25;
+      ctx.shadowBlur = 24;
       ctx.shadowOffsetY = 8;
-      const hookGrad = ctx.createLinearGradient(70, 175, 1010, 175);
+      const hookGrad = ctx.createLinearGradient(70, 100, 1010, 100);
       hookGrad.addColorStop(0, '#EF4444');
       hookGrad.addColorStop(1, '#DC2626');
       ctx.fillStyle = hookGrad;
-      roundRect(ctx, 70, 175, 940, 130, 26, true, false);
+      roundRect(ctx, 70, 100, 940, 120, 26, true, false);
       ctx.restore();
 
-      // Dynamic Auto-Fit Hook text
+      // Auto-Fit Hook text
       let hookSize = 42;
       ctx.font = '900 ' + hookSize + 'px "Outfit", sans-serif';
       let hookLines = getWrappedLines(ctx, hookText.toUpperCase(), 880);
@@ -1345,46 +1336,46 @@
       ctx.textAlign = 'center';
       const hookLineH = hookSize * 1.25;
       const hookTotalH = (hookLines.length - 1) * hookLineH;
-      const hookStartY = 240 - (hookTotalH / 2);
+      const hookStartY = 160 - (hookTotalH / 2);
 
       for (let h = 0; h < hookLines.length; h++) {
         ctx.fillText(hookLines[h], 540, hookStartY + (h * hookLineH));
       }
 
-      // 2. FLOATING EXAM TARGET PILL (Y: 320 to 390)
+      // 2. FLOATING EXAM TARGET PILL (Y: 240 to 310 - Height 70px)
       ctx.fillStyle = 'rgba(37, 99, 235, 0.25)';
       ctx.strokeStyle = '#3B82F6';
       ctx.lineWidth = 3;
-      roundRect(ctx, 140, 320, 800, 70, 20, true, true);
+      roundRect(ctx, 140, 240, 800, 70, 20, true, true);
 
       ctx.fillStyle = '#93C5FD';
       ctx.font = '900 30px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('🎯 ' + exam.toUpperCase(), 540, 365);
+      ctx.fillText('🎯 ' + exam.toUpperCase(), 540, 285);
 
-      // 3. CENTERPIECE MYSTERY QUESTION CARD (Y: 410 to 920 - Height 510px)
+      // 3. CENTERPIECE MYSTERY QUESTION CARD (Y: 330 to 860 - Height 530px)
       ctx.save();
       ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
       ctx.shadowBlur = 35;
       ctx.shadowOffsetY = 12;
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.96)';
       ctx.strokeStyle = 'rgba(59, 130, 246, 0.55)';
       ctx.lineWidth = 3.5;
-      roundRect(ctx, 70, 410, 940, 510, 32, true, true);
+      roundRect(ctx, 70, 330, 940, 530, 32, true, true);
       ctx.restore();
 
       // Question Badge Header Pill
       ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
       ctx.lineWidth = 2;
-      roundRect(ctx, 110, 435, 860, 56, 16, true, true);
+      roundRect(ctx, 110, 355, 860, 56, 16, true, true);
 
       ctx.fillStyle = '#F59E0B';
       ctx.font = '800 24px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(questionBadge.toUpperCase(), 540, 472);
+      ctx.fillText(questionBadge.toUpperCase(), 540, 392);
 
-      // Auto-Fit Cover Question Text (Up to 5 Lines)
+      // Dynamic Auto-Fit Question Typography
       let coverQSize = 48;
       let coverQLines = [];
       let coverQLineH = 64;
@@ -1393,7 +1384,7 @@
         ctx.font = '800 ' + qs + 'px "Plus Jakarta Sans", sans-serif';
         const qLines = getWrappedLines(ctx, question, 840);
         const lH = qs * 1.34;
-        if (qLines.length * lH <= 380) {
+        if (qLines.length * lH <= 390) {
           coverQSize = qs;
           coverQLines = qLines;
           coverQLineH = lH;
@@ -1409,59 +1400,66 @@
       ctx.textAlign = 'center';
 
       const qTotalH = (coverQLines.length - 1) * coverQLineH;
-      const qStartY = 710 - (qTotalH / 2);
+      const qStartY = 640 - (qTotalH / 2);
 
       for (let q = 0; q < coverQLines.length; q++) {
         ctx.fillText(coverQLines[q], 540, qStartY + (q * coverQLineH));
       }
 
-      // 4. GAMIFIED CHALLENGE STRIP (Y: 945 to 1025)
+      // 4. GAMIFIED CHALLENGE STRIP (Y: 885 to 965 - Height 80px)
       ctx.save();
       ctx.fillStyle = 'rgba(245, 158, 11, 0.15)';
       ctx.strokeStyle = '#F59E0B';
       ctx.lineWidth = 3;
-      roundRect(ctx, 160, 945, 760, 80, 22, true, true);
+      roundRect(ctx, 160, 885, 760, 80, 22, true, true);
 
       ctx.fillStyle = '#FCD34D';
       ctx.font = '900 32px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(challengeText.toUpperCase(), 540, 996);
+      ctx.fillText(challengeText.toUpperCase(), 540, 936);
       ctx.restore();
 
-      // 5. MASSIVE 3D ACTION CTA BUTTON (Y: 1050 to 1190)
+      // 5. MASSIVE 3D ACTION CTA BUTTON (Y: 990 to 1130 - Height 140px)
       ctx.save();
       ctx.shadowColor = 'rgba(245, 158, 11, 0.55)';
       ctx.shadowBlur = 30;
       ctx.shadowOffsetY = 10;
       
-      const btnGrad = ctx.createLinearGradient(90, 1050, 990, 1050);
+      const btnGrad = ctx.createLinearGradient(90, 990, 990, 990);
       btnGrad.addColorStop(0, '#F59E0B');
       btnGrad.addColorStop(1, '#D97706');
       ctx.fillStyle = btnGrad;
-      roundRect(ctx, 90, 1050, 900, 140, 32, true, false);
+      roundRect(ctx, 90, 990, 900, 140, 32, true, false);
       ctx.restore();
 
       ctx.fillStyle = '#000000';
       ctx.font = '900 40px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(actionBtnText, 540, 1136);
+      ctx.fillText(actionBtnText, 540, 1076);
 
-      // 6. PRO BRANDING FOOTER (Y: 1215 to 1315)
+      // 6. PRO BRANDING FOOTER (Y: 1155 to 1255 - Height 100px)
       ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
       ctx.lineWidth = 2;
-      roundRect(ctx, 160, 1215, 760, 100, 24, true, true);
+      roundRect(ctx, 160, 1155, 760, 100, 24, true, true);
 
       try {
         if (logoImg.complete && logoImg.naturalWidth !== 0) {
-          ctx.drawImage(logoImg, 190, 1230, 70, 70);
+          ctx.drawImage(logoImg, 190, 1170, 70, 70);
         }
       } catch (e) {}
 
       ctx.fillStyle = '#FFFFFF';
       ctx.font = '800 34px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText(brand + ' ✔', 280, 1276);
+      ctx.fillText(brand + ' ✔', 280, 1216);
+
+      // 7. BOTTOM SCRIM BACKDROP (Y: 1260 to 1920) - Sits cleanly as a studio dark backdrop
+      const bottomScrim = ctx.createLinearGradient(0, 1260, 0, 1920);
+      bottomScrim.addColorStop(0, 'rgba(6, 9, 17, 0.4)');
+      bottomScrim.addColorStop(1, 'rgba(3, 5, 10, 0.95)');
+      ctx.fillStyle = bottomScrim;
+      ctx.fillRect(0, 1260, 1080, 660);
 
       renderYouTubeOverlayGuide();
     }

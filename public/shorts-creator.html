@@ -9,6 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
   <!-- MP4 Fast-Muxer Client Library -->
   <script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.4/build/mp4-muxer.min.js"></script>
+  <!-- Client-Side ZIP Packaging -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
     :root {
       --bg-main: #060911;
@@ -521,6 +523,7 @@
     <div class="nav-tabs">
       <button class="nav-btn active" id="tabShortsBtn" onclick="switchTab('shorts')">📹 9:16 Shorts Video</button>
       <button class="nav-btn" id="tabCoverBtn" onclick="switchTab('cover')">🖼️ 100k Pro Cover <span class="pro-badge">HIGH CTR</span></button>
+      <button class="nav-btn" id="tabBulkBtn" onclick="switchTab('bulk')">📦 Bulk Studio <span class="pro-badge" style="background:#F59E0B; color:#000;">BATCH 10–100</span></button>
     </div>
   </header>
 
@@ -823,6 +826,123 @@
     </div>
 
   </main>
+
+  <!-- ============================================================== -->
+  <!-- 📦 BULK SHORTS STUDIO (BATCH 10–100 GENERATOR & ZIP EXPORTER) -->
+  <!-- ============================================================== -->
+  <div class="bulk-container" id="bulkStudioContainer">
+    <div class="bulk-grid">
+      
+      <!-- LEFT COLUMN: IMPORT & SETTINGS -->
+      <div class="card" style="margin-bottom: 0;">
+        <div class="card-title" style="display: flex; align-items: center; justify-content: space-between;">
+          <span>📥 1. Import Multiple MCQs</span>
+          <span style="font-size: 0.75rem; background: rgba(37,99,235,0.2); color: #93C5FD; padding: 2px 8px; border-radius: 6px;">CSV or Copy-Paste</span>
+        </div>
+
+        <!-- CSV Dropzone -->
+        <div style="border: 2px dashed rgba(59,130,246,0.4); border-radius: 12px; padding: 1.25rem; text-align: center; background: rgba(37,99,235,0.04); margin-bottom: 1rem; cursor: pointer;" onclick="document.getElementById('bulkCsvInput').click()">
+          <div style="font-size: 2rem; margin-bottom: 0.35rem;">📂</div>
+          <div style="font-weight: 800; color: #FFF; font-size: 0.95rem;">Click to Upload CSV / Excel File</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">Supports .csv files with 10–100+ questions</div>
+          <input type="file" id="bulkCsvInput" accept=".csv" style="display: none;" onchange="handleBulkCsvUpload(event)">
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem;">
+          <button type="button" class="btn btn-secondary" style="flex: 1; font-size: 0.8rem; padding: 0.5rem;" onclick="downloadSampleCsvTemplate()">
+            📥 Download Sample CSV Template
+          </button>
+        </div>
+
+        <!-- OR Paste Raw Text / ChatGPT Output -->
+        <div class="form-group" style="margin-bottom: 0.75rem;">
+          <label style="display: flex; justify-content: space-between;">
+            <span>📋 Or Paste ChatGPT / Raw Questions</span>
+            <span style="font-size: 0.7rem; color: var(--amber-accent); cursor: pointer;" onclick="loadDemoBulkQuestions()">Load 5 Demo Questions</span>
+          </label>
+          <textarea id="bulkPasteInput" style="height: 140px; font-family: monospace; font-size: 0.8rem;" placeholder="Paste questions here... e.g.&#10;Q1: Who was the first Chief Minister of Odisha?&#10;A) Dr. Harekrushna Mahatab&#10;B) Nabakrushna Choudhury&#10;C) Biju Patnaik&#10;D) Janaki Ballabh Patnaik&#10;Answer: A&#10;Exam: OSSC CGL 2026"></textarea>
+          <button type="button" class="btn btn-primary" style="width: 100%; margin-top: 0.4rem; padding: 0.55rem;" onclick="parsePastedBulkQuestions()">
+            ➕ Parse & Add to Queue
+          </button>
+        </div>
+
+        <!-- Default Meta Settings -->
+        <div style="border-top: 1px solid var(--border-color); padding-top: 0.85rem; margin-top: 0.85rem;">
+          <div class="form-group">
+            <label>Default Exam Target (If not set per row)</label>
+            <input type="text" id="bulkDefaultExam" value="OSSC CGL & OPSC ASO 2026">
+          </div>
+          <div class="form-group">
+            <label>Visual Template Theme for Batch</label>
+            <select id="bulkTemplateTheme" class="form-control" style="background: var(--bg-card); color: #FFF; border: 1.5px solid var(--border-color); border-radius: 8px; padding: 0.55rem; width: 100%;">
+              <option value="obsidian-cobalt" selected>🌌 Obsidian Cobalt (Default)</option>
+              <option value="royal-gold">👑 Royal Gold & Onyx (Luxury)</option>
+              <option value="crimson-danger">🔥 Crimson Danger (99% Fail)</option>
+              <option value="cyber-mint">⚡ Cyber Neon Mint (Gamified)</option>
+              <option value="galactic-purple">🔮 Galactic Purple (Studio)</option>
+              <option value="slate-academy">🏛️ Slate Academy (Official)</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: BATCH QUEUE & GENERATE -->
+      <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column;">
+        <div class="card-title" style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span>📋 2. Batch Queue</span>
+            <span class="badge-info" id="bulkQueueCountBadge">0 Questions</span>
+          </div>
+          <button type="button" class="btn btn-danger" style="font-size: 0.75rem; padding: 0.35rem 0.7rem;" onclick="clearBulkQueue()">
+            🗑️ Clear Queue
+          </button>
+        </div>
+
+        <!-- Queue Table -->
+        <div class="bulk-table-wrap" style="flex: 1; min-height: 320px;">
+          <table class="bulk-table">
+            <thead>
+              <tr>
+                <th style="width: 40px;">#</th>
+                <th style="width: 140px;">Exam</th>
+                <th>Question & Options</th>
+                <th style="width: 70px;">Ans</th>
+                <th style="width: 50px;">Act</th>
+              </tr>
+            </thead>
+            <tbody id="bulkQueueTableBody">
+              <tr>
+                <td colspan="5" style="text-align: center; padding: 3rem 1rem; color: var(--text-dim);">
+                  <div style="font-size: 2rem; margin-bottom: 0.5rem;">📦</div>
+                  <div>No questions in queue yet.</div>
+                  <div style="font-size: 0.75rem; margin-top: 0.25rem;">Upload a CSV file or paste questions on the left to start.</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Export Options & Action -->
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem; font-size: 0.85rem;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: var(--text-main); font-weight: 700;">
+              <input type="checkbox" id="bulkIncludeCoverCheckbox" checked style="width: 16px; height: 16px;">
+              <span>Include matching 100K Cover Thumbnail (.PNG) in ZIP</span>
+            </label>
+            <span style="color: var(--text-dim); font-size: 0.75rem;">Fast Muxer: ~1.8s / video</span>
+          </div>
+
+          <button type="button" class="btn btn-primary" id="startBulkExportBtn" style="width: 100%; padding: 0.9rem; font-size: 1.05rem; font-weight: 900; background: linear-gradient(135deg, #10B981, #059669); border: none; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);" onclick="runBulkExportToZip()">
+            ⚡ Generate & Download All (.ZIP)
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
 
   <!-- JAVASCRIPT STATE MACHINE & RENDERING ENGINE -->
   <script>
@@ -1352,18 +1472,33 @@
       currentMode = mode;
       document.getElementById('tabShortsBtn').classList.toggle('active', mode === 'shorts');
       document.getElementById('tabCoverBtn').classList.toggle('active', mode === 'cover');
+      const tabBulkBtn = document.getElementById('tabBulkBtn');
+      if (tabBulkBtn) tabBulkBtn.classList.toggle('active', mode === 'bulk');
 
-      if (mode === 'shorts') {
-        document.getElementById('coverFieldsWrapper').style.display = 'none';
-        document.getElementById('shortsControlsBar').style.display = 'flex';
-        document.getElementById('coverControlsBar').style.display = 'none';
-        drawIdleFrame();
-      } else {
+      const singleContainer = document.querySelector('.main-container');
+      const bulkContainer = document.getElementById('bulkStudioContainer');
+
+      if (mode === 'bulk') {
         stopSequence();
-        document.getElementById('coverFieldsWrapper').style.display = 'block';
-        document.getElementById('shortsControlsBar').style.display = 'none';
-        document.getElementById('coverControlsBar').style.display = 'flex';
-        drawCoverCanvas();
+        if (singleContainer) singleContainer.style.display = 'none';
+        if (bulkContainer) bulkContainer.style.display = 'block';
+        renderBulkQueueTable();
+      } else {
+        if (singleContainer) singleContainer.style.display = 'grid';
+        if (bulkContainer) bulkContainer.style.display = 'none';
+
+        if (mode === 'shorts') {
+          document.getElementById('coverFieldsWrapper').style.display = 'none';
+          document.getElementById('shortsControlsBar').style.display = 'flex';
+          document.getElementById('coverControlsBar').style.display = 'none';
+          drawIdleFrame();
+        } else {
+          stopSequence();
+          document.getElementById('coverFieldsWrapper').style.display = 'block';
+          document.getElementById('shortsControlsBar').style.display = 'none';
+          document.getElementById('coverControlsBar').style.display = 'flex';
+          drawCoverCanvas();
+        }
       }
     }
 
@@ -2829,6 +2964,636 @@
       showSafeZoneGuide = prevGuideState;
       drawCoverCanvas();
     }
+
+
+    // ==============================================================
+    // 📦 BULK SHORTS STUDIO STATE & ZIP EXPORT ENGINE
+    // ==============================================================
+    let bulkQueue = [];
+
+    function downloadSampleCsvTemplate() {
+      const csvHeader = "Exam,Question,OptionA,OptionB,OptionC,OptionD,CorrectAnswer,CountdownSeconds\n";
+      const sampleRows = [
+        '"OSSC CGL 2026","Who was the first Chief Minister of Odisha after Indian Independence?","Dr. Harekrushna Mahatab","Nabakrushna Choudhury","Biju Patnaik","Janaki Ballabh Patnaik","A",5',
+        '"OPSC ASO 2026","Which river is popularly known as the Sorrow of Odisha?","Baitarani River","Mahanadi River","Brahmani River","Subarnarekha River","B",5',
+        '"Odisha Police 2026","In which year was the separate state of Odisha formed?","1 April 1936","15 August 1947","26 January 1950","1 April 1912","A",5',
+        '"OTET 2026","What is the state animal of Odisha?","Blackbuck","Sambar Deer","Spotted Deer","Indian Elephant","B",5',
+        '"OSSSC RI 2026","Which temple in Odisha is known as the Black Pagoda?","Jagannath Temple","Lingaraj Temple","Konark Sun Temple","Mukteshvara Temple","C",5'
+      ].join('\n');
+
+      const blob = new Blob([csvHeader + sampleRows], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'OdishaExamPrep_Sample_Bulk_Questions_Template.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    }
+
+    function parseCsvLine(line) {
+      const result = [];
+      let startValueIndex = 0;
+      let insideQuote = false;
+
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (c === '"') {
+          insideQuote = !insideQuote;
+        } else if (c === ',' && !insideQuote) {
+          let val = line.substring(startValueIndex, i).trim();
+          if (val.startsWith('"') && val.endsWith('"')) {
+            val = val.substring(1, val.length - 1).replace(/""/g, '"');
+          }
+          result.push(val);
+          startValueIndex = i + 1;
+        }
+      }
+      let lastVal = line.substring(startValueIndex).trim();
+      if (lastVal.startsWith('"') && lastVal.endsWith('"')) {
+        lastVal = lastVal.substring(1, lastVal.length - 1).replace(/""/g, '"');
+      }
+      result.push(lastVal);
+      return result;
+    }
+
+    function handleBulkCsvUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const text = e.target.result;
+        const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+        if (lines.length <= 1) {
+          alert('CSV file is empty or has only header row.');
+          return;
+        }
+
+        const defaultExam = document.getElementById('bulkDefaultExam').value || 'OSSC CGL 2026';
+        let addedCount = 0;
+
+        // Skip header if it contains 'Question' or 'Option'
+        const startIndex = lines[0].toLowerCase().includes('question') ? 1 : 0;
+
+        for (let i = startIndex; i < lines.length; i++) {
+          const cols = parseCsvLine(lines[i]);
+          if (cols.length >= 6) {
+            let exam = cols[0] || defaultExam;
+            let question = cols[1];
+            let optA = cols[2] || '';
+            let optB = cols[3] || '';
+            let optC = cols[4] || '';
+            let optD = cols[5] || '';
+            let correct = (cols[6] || 'A').toUpperCase().replace(/[^ABCD]/g, '') || 'A';
+            let cd = parseInt(cols[7], 10) || 5;
+
+            // Handle case where column 0 is question (no exam column)
+            if (cols.length === 6 || cols.length === 7) {
+              if (cols[0].length > 15 && !cols[0].toLowerCase().includes('exam')) {
+                exam = defaultExam;
+                question = cols[0];
+                optA = cols[1] || '';
+                optB = cols[2] || '';
+                optC = cols[3] || '';
+                optD = cols[4] || '';
+                correct = (cols[5] || 'A').toUpperCase().replace(/[^ABCD]/g, '') || 'A';
+                cd = parseInt(cols[6], 10) || 5;
+              }
+            }
+
+            if (question) {
+              bulkQueue.push({
+                id: Date.now() + Math.random(),
+                exam,
+                question,
+                options: { A: optA, B: optB, C: optC, D: optD },
+                correct,
+                countdownSecs: cd
+              });
+              addedCount++;
+            }
+          }
+        }
+
+        renderBulkQueueTable();
+        alert('✅ Successfully added ' + addedCount + ' questions to the Batch Queue!');
+        document.getElementById('bulkCsvInput').value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    function parsePastedBulkQuestions() {
+      const raw = document.getElementById('bulkPasteInput').value.trim();
+      if (!raw) {
+        alert('Please paste some question text or MCQs first.');
+        return;
+      }
+
+      const defaultExam = document.getElementById('bulkDefaultExam').value || 'OSSC CGL & OPSC ASO 2026';
+      const blocks = raw.split(/\n\s*\n/);
+      let addedCount = 0;
+
+      blocks.forEach(block => {
+        const lines = block.split(/\n/).map(l => l.trim()).filter(l => l.length > 0);
+        let exam = defaultExam;
+        let question = '';
+        let optA = '', optB = '', optC = '', optD = '';
+        let correct = 'A';
+        let cd = 5;
+
+        lines.forEach(l => {
+          if (l.match(/^(exam|subject):/i)) {
+            exam = l.replace(/^(exam|subject):/i, '').trim();
+          } else if (l.match(/^q(\d+)?:/i) || l.match(/^\d+[.)]/)) {
+            question = l.replace(/^q(\d+)?:/i, '').replace(/^\d+[.)]/, '').trim();
+          } else if (l.match(/^[aA][.)]/) || l.match(/^option\s*a:/i)) {
+            optA = l.replace(/^[aA][.)]/, '').replace(/^option\s*a:/i, '').trim();
+          } else if (l.match(/^[bB][.)]/) || l.match(/^option\s*b:/i)) {
+            optB = l.replace(/^[bB][.)]/, '').replace(/^option\s*b:/i, '').trim();
+          } else if (l.match(/^[cC][.)]/) || l.match(/^option\s*c:/i)) {
+            optC = l.replace(/^[cC][.)]/, '').replace(/^option\s*c:/i, '').trim();
+          } else if (l.match(/^[dD][.)]/) || l.match(/^option\s*d:/i)) {
+            optD = l.replace(/^[dD][.)]/, '').replace(/^option\s*d:/i, '').trim();
+          } else if (l.match(/^(ans|answer|correct):/i)) {
+            const parsedAns = l.replace(/^(ans|answer|correct):/i, '').trim().toUpperCase();
+            const match = parsedAns.match(/[ABCD]/);
+            if (match) correct = match[0];
+          } else if (!question) {
+            question = l;
+          }
+        });
+
+        if (question && (optA || optB)) {
+          bulkQueue.push({
+            id: Date.now() + Math.random(),
+            exam,
+            question,
+            options: { A: optA, B: optB, C: optC, D: optD },
+            correct,
+            countdownSecs: cd
+          });
+          addedCount++;
+        }
+      });
+
+      renderBulkQueueTable();
+      document.getElementById('bulkPasteInput').value = '';
+      alert('✅ Parsed and added ' + addedCount + ' questions to Batch Queue!');
+    }
+
+    function loadDemoBulkQuestions() {
+      const demo = [
+        'Q1: Who was the first Chief Minister of Odisha after Indian Independence?\nA) Dr. Harekrushna Mahatab\nB) Nabakrushna Choudhury\nC) Biju Patnaik\nD) Janaki Ballabh Patnaik\nAnswer: A\nExam: OSSC CGL 2026',
+        'Q2: Which river is known as the Sorrow of Odisha?\nA) Baitarani River\nB) Mahanadi River\nC) Brahmani River\nD) Subarnarekha River\nAnswer: B\nExam: OPSC ASO 2026',
+        'Q3: In which year was the state of Odisha formed under British rule?\nA) 1 April 1936\nB) 15 August 1947\nC) 26 January 1950\nD) 1 April 1912\nAnswer: A\nExam: Odisha Police 2026',
+        'Q4: Which temple in Odisha is famously called the Black Pagoda?\nA) Jagannath Temple\nB) Lingaraj Temple\nC) Konark Sun Temple\nD) Mukteshvara Temple\nAnswer: C\nExam: OSSSC RI 2026',
+        'Q5: What is the famous saltwater lagoon in Odisha?\nA) Chilika Lake\nB) Ansupa Lake\nC) Sara Lake\nD) Kanjia Lake\nAnswer: A\nExam: OSSC CGL 2026'
+      ].join('\n\n');
+
+      document.getElementById('bulkPasteInput').value = demo;
+    }
+
+    function renderBulkQueueTable() {
+      const tbody = document.getElementById('bulkQueueTableBody');
+      const badge = document.getElementById('bulkQueueCountBadge');
+      if (badge) badge.innerText = bulkQueue.length + ' Question' + (bulkQueue.length === 1 ? '' : 's');
+
+      if (!tbody) return;
+      if (bulkQueue.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 3rem 1rem; color: var(--text-dim);"><div style="font-size: 2rem; margin-bottom: 0.5rem;">📦</div><div>No questions in queue yet.</div><div style="font-size: 0.75rem; margin-top: 0.25rem;">Upload a CSV file or paste questions on the left to start.</div></td></tr>';
+        return;
+      }
+
+      let html = '';
+      bulkQueue.forEach((item, index) => {
+        const qSnippet = item.question.length > 55 ? item.question.substring(0, 52) + '...' : item.question;
+        const optSummary = 'A: ' + (item.options.A || '') + ' | B: ' + (item.options.B || '');
+        html += '<tr>' +
+          '<td style="font-weight: 800; color: #94A3B8;">' + (index + 1) + '</td>' +
+          '<td style="font-weight: 700; color: #93C5FD; font-size: 0.78rem;">' + (item.exam || 'OSSC CGL') + '</td>' +
+          '<td>' +
+            '<div style="font-weight: 700; color: #FFF;">' + qSnippet + '</div>' +
+            '<div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 2px;">' + optSummary + '</div>' +
+          '</td>' +
+          '<td><span class="correct-pill-tag">' + item.correct + '</span></td>' +
+          '<td><button type="button" style="background: none; border: none; color: #EF4444; font-size: 1.1rem; cursor: pointer;" title="Remove" onclick="removeBulkItem(' + index + ')">🗑️</button></td>' +
+        '</tr>';
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    function removeBulkItem(index) {
+      bulkQueue.splice(index, 1);
+      renderBulkQueueTable();
+    }
+
+    function clearBulkQueue() {
+      if (bulkQueue.length === 0) return;
+      if (confirm('Are you sure you want to clear all ' + bulkQueue.length + ' questions in the batch queue?')) {
+        bulkQueue = [];
+        renderBulkQueueTable();
+      }
+    }
+
+    // ==============================================================
+    // ⚡ BATCH MP4 & COVER RENDERING + ZIP PACKAGING PIPELINE
+    // ==============================================================
+    async function runBulkExportToZip() {
+      if (bulkQueue.length === 0) {
+        alert('Please import or paste at least 1 question into the Batch Queue first.');
+        return;
+      }
+      if (isExporting || isPlaying) return;
+      if (!window.JSZip) {
+        alert('JSZip library is still loading. Please check internet connection and try again.');
+        return;
+      }
+
+      isExporting = true;
+      stopSequence();
+
+      const modal = document.getElementById('exportModalOverlay');
+      const progressBar = document.getElementById('exportProgressBar');
+      const progressPercent = document.getElementById('exportProgressPercent');
+      const progressFrame = document.getElementById('exportProgressFrame');
+      const modalTitle = document.getElementById('exportModalTitle');
+      const modalSubtitle = document.getElementById('exportModalSubtitle');
+
+      modal.classList.add('active');
+      modalTitle.innerText = '⚡ Batch Generating ' + bulkQueue.length + ' Shorts (.ZIP)...';
+      modalSubtitle.innerText = 'Rendering silent MP4 video frames and audio tracks...';
+      progressBar.style.width = '0%';
+      progressPercent.innerText = '0%';
+
+      const zip = new JSZip();
+      const includeCover = document.getElementById('bulkIncludeCoverCheckbox') ? document.getElementById('bulkIncludeCoverCheckbox').checked : true;
+      const tplName = document.getElementById('bulkTemplateTheme') ? document.getElementById('bulkTemplateTheme').value : 'obsidian-cobalt';
+      const batchTemplate = TEMPLATES[tplName] || TEMPLATES['obsidian-cobalt'];
+
+      const totalItems = bulkQueue.length;
+      let completedItems = 0;
+
+      try {
+        for (let i = 0; i < totalItems; i++) {
+          const item = bulkQueue[i];
+          const itemNum = String(i + 1).padStart(2, '0');
+          const safeTitle = (item.exam + '_' + item.question).replace(/[^a-zA-Z0-9]/g, '_').substring(0, 35);
+          const baseName = itemNum + '_' + safeTitle;
+
+          modalTitle.innerText = '⚡ Generating Video ' + (i + 1) + ' of ' + totalItems;
+          modalSubtitle.innerText = item.question;
+
+          // Build single short config
+          const tRead = 4.0;
+          const tCountdown = item.countdownSecs || 5;
+          const tReveal = 2.5;
+          const tCta = ctaAudioObjectUrl ? ctaAudioDuration : 4.0;
+          const totalDuration = tRead + tCountdown + tReveal + tCta;
+
+          const itemConfig = {
+            exam: item.exam || document.getElementById('examName').value,
+            brand: document.getElementById('brandName').value,
+            cta: document.getElementById('ctaPitchText').value,
+            websiteName: document.getElementById('websiteName').value,
+            websiteUrl: document.getElementById('websiteUrl').value,
+            template: batchTemplate,
+            questions: [item],
+            questionsCount: 1,
+            intervals: [{
+              index: 0,
+              start: 0,
+              readEnd: tRead,
+              timerEnd: tRead + tCountdown,
+              revealEnd: tRead + tCountdown + tReveal,
+              q: item
+            }],
+            totalQuestionsDuration: tRead + tCountdown + tReveal,
+            ctaStart: tRead + tCountdown + tReveal,
+            tCta,
+            totalDuration
+          };
+
+          // 1. Render Video Blob
+          const videoBlob = await renderSingleShortBlob(itemConfig, (itemPct) => {
+            const overallPct = Math.round(((i + (itemPct / 100)) / totalItems) * 92);
+            progressBar.style.width = overallPct + '%';
+            progressPercent.innerText = overallPct + '%';
+            progressFrame.innerText = 'Video ' + (i + 1) + ' / ' + totalItems + ' (' + itemPct + '%)';
+          });
+
+          if (videoBlob) {
+            zip.file(baseName + '.mp4', videoBlob);
+          }
+
+          // 2. Render Matching Cover PNG (if enabled)
+          if (includeCover) {
+            const coverBlob = await renderSingleCoverBlobForItem(item, batchTemplate);
+            if (coverBlob) {
+              zip.file(baseName + '_Cover.png', coverBlob);
+            }
+          }
+
+          completedItems++;
+          const overallPct = Math.round((completedItems / totalItems) * 92);
+          progressBar.style.width = overallPct + '%';
+          progressPercent.innerText = overallPct + '%';
+        }
+
+        // 3. Compress into ZIP archive
+        modalTitle.innerText = '📦 Compressing ' + totalItems + ' Shorts into .ZIP archive...';
+        modalSubtitle.innerText = 'Almost ready! Packaging all MP4s and Cover Thumbnails...';
+        progressBar.style.width = '96%';
+        progressPercent.innerText = '96%';
+
+        const zipBlob = await zip.generateAsync({ type: 'blob' }, (meta) => {
+          const zipPct = 92 + Math.round((meta.percent / 100) * 7);
+          progressBar.style.width = zipPct + '%';
+          progressPercent.innerText = zipPct + '%';
+        });
+
+        // 4. Download ZIP file
+        progressBar.style.width = '100%';
+        progressPercent.innerText = '100%';
+        downloadExportedBlob(zipBlob, 'zip', 'Batch_' + totalItems + '_Shorts');
+
+      } catch (err) {
+        console.error('Batch export failed:', err);
+        alert('Batch export encountered an error: ' + err.message);
+      } finally {
+        setTimeout(() => {
+          modal.classList.remove('active');
+          isExporting = false;
+          drawIdleFrame();
+        }, 800);
+      }
+    }
+
+    async function renderSingleShortBlob(config, onProgress) {
+      const fps = 30;
+      const totalFrames = Math.ceil(config.totalDuration * fps);
+
+      if (window.Mp4Muxer && window.VideoEncoder) {
+        const renderedAudio = await renderOfflineAudioBuffer(config, config.totalDuration);
+        const muxerConfig = {
+          target: new Mp4Muxer.ArrayBufferTarget(),
+          video: {
+            codec: 'avc',
+            width: 1080,
+            height: 1920
+          },
+          fastStart: 'in-memory'
+        };
+
+        const canEncodeAudio = renderedAudio && window.AudioEncoder;
+        if (canEncodeAudio) {
+          muxerConfig.audio = {
+            codec: 'aac',
+            numberOfChannels: 2,
+            sampleRate: 44100
+          };
+        }
+
+        const muxer = new Mp4Muxer.Muxer(muxerConfig);
+
+        const videoEncoder = new VideoEncoder({
+          output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+          error: (e) => console.error('VideoEncoder error in batch:', e)
+        });
+
+        videoEncoder.configure({
+          codec: 'avc1.4d0034',
+          width: 1080,
+          height: 1920,
+          bitrate: 8000000,
+          framerate: fps
+        });
+
+        let audioEncoder = null;
+        if (canEncodeAudio) {
+          audioEncoder = new AudioEncoder({
+            output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
+            error: (e) => console.error('AudioEncoder error in batch:', e)
+          });
+
+          audioEncoder.configure({
+            codec: 'mp4a.40.2',
+            numberOfChannels: 2,
+            sampleRate: 44100,
+            bitrate: 128000
+          });
+
+          const channel0 = renderedAudio.getChannelData(0);
+          const channel1 = renderedAudio.getChannelData(1);
+          const totalSamples = renderedAudio.length;
+          const chunkSize = 1024;
+
+          for (let s = 0; s < totalSamples; s += chunkSize) {
+            const currentChunkSize = Math.min(chunkSize, totalSamples - s);
+            const planarBuffer = new Float32Array(currentChunkSize * 2);
+            planarBuffer.set(channel0.subarray(s, s + currentChunkSize), 0);
+            planarBuffer.set(channel1.subarray(s, s + currentChunkSize), currentChunkSize);
+
+            const audioData = new AudioData({
+              format: 'f32-planar',
+              sampleRate: 44100,
+              numberOfFrames: currentChunkSize,
+              numberOfChannels: 2,
+              timestamp: Math.round((s / 44100) * 1000000),
+              data: planarBuffer
+            });
+
+            audioEncoder.encode(audioData);
+            audioData.close();
+          }
+        }
+
+        for (let f = 0; f < totalFrames; f++) {
+          const elapsed = f / fps;
+          renderShortsFrameAtTime(elapsed, config.totalDuration, config);
+
+          const timestampMicros = Math.round((f / fps) * 1000000);
+          const videoFrame = new VideoFrame(canvas, { timestamp: timestampMicros });
+          videoEncoder.encode(videoFrame, { keyFrame: f % 45 === 0 });
+          videoFrame.close();
+
+          if (f % 10 === 0) {
+            const pct = Math.round((f / totalFrames) * 100);
+            if (onProgress) onProgress(pct);
+            await new Promise(r => setTimeout(r, 0));
+          }
+        }
+
+        await videoEncoder.flush();
+        if (audioEncoder) await audioEncoder.flush();
+        muxer.finalize();
+
+        return new Blob([muxer.target.buffer], { type: 'video/mp4' });
+      }
+
+      return null;
+    }
+
+    async function renderSingleCoverBlobForItem(item, tpl) {
+      const prevGuideState = showSafeZoneGuide;
+      showSafeZoneGuide = false;
+
+      // Draw custom cover for this item
+      const exam = item.exam || 'OSSC CGL 2026';
+      const question = item.question;
+      const brand = document.getElementById('brandName').value || 'OdishaExamPrep';
+      const websiteUrl = document.getElementById('websiteUrl').value || 'www.odishaexamprep.in';
+      const hookText = '⚠️ 99% ASPIRANTS GET THIS WRONG!';
+      const questionBadge = '❓ QUESTION #01 • IMPORTANT GK';
+      const challengeText = '⏱️ 5-SECOND RAPID CHALLENGE';
+      const actionBtnText = '▶ TAP TO PLAY & TEST YOUR RANK 🏆';
+
+      drawBaseBackground(tpl);
+
+      // Top Viral Hook Banner
+      ctx.save();
+      ctx.shadowColor = tpl.coverHookGrad[0] + '80';
+      ctx.shadowBlur = 28;
+      ctx.shadowOffsetY = 10;
+      const hookGrad = ctx.createLinearGradient(70, 110, 1010, 110);
+      hookGrad.addColorStop(0, tpl.coverHookGrad[0]);
+      hookGrad.addColorStop(1, tpl.coverHookGrad[1]);
+      ctx.fillStyle = hookGrad;
+      roundRect(ctx, 70, 110, 940, 135, 28, true, false);
+      ctx.restore();
+
+      let hookSize = 44;
+      ctx.font = '900 ' + hookSize + 'px "Outfit", sans-serif';
+      let hookLines = getWrappedLines(ctx, hookText.toUpperCase(), 880);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textAlign = 'center';
+      const hookLineH = hookSize * 1.25;
+      const hookTotalH = (hookLines.length - 1) * hookLineH;
+      const hookStartY = 177 - (hookTotalH / 2);
+      for (let h = 0; h < hookLines.length; h++) {
+        ctx.fillText(hookLines[h], 540, hookStartY + (h * hookLineH));
+      }
+
+      // Exam Target Pill
+      ctx.fillStyle = tpl.qBadgeBg;
+      ctx.strokeStyle = tpl.coverExamBorder;
+      ctx.lineWidth = 3;
+      roundRect(ctx, 130, 270, 820, 80, 22, true, true);
+      ctx.fillStyle = tpl.coverExamText;
+      ctx.font = '900 32px "Outfit", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🎯 ' + exam.toUpperCase(), 540, 321);
+
+      // Question Card
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
+      ctx.shadowBlur = 40;
+      ctx.shadowOffsetY = 16;
+      ctx.fillStyle = tpl.qCardBg;
+      ctx.strokeStyle = tpl.qCardBorder;
+      ctx.lineWidth = 4;
+      roundRect(ctx, 70, 375, 940, 645, 36, true, true);
+      ctx.restore();
+
+      ctx.fillStyle = tpl.qBadgeBg;
+      ctx.strokeStyle = tpl.qCardBorder;
+      ctx.lineWidth = 2;
+      roundRect(ctx, 110, 405, 860, 60, 18, true, true);
+      ctx.fillStyle = tpl.qBadgeText;
+      ctx.font = '800 26px "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(questionBadge.toUpperCase(), 540, 444);
+
+      let coverQSize = 52;
+      let coverQLines = [];
+      let coverQLineH = 70;
+      for (let qs = 54; qs >= 32; qs -= 2) {
+        ctx.font = '800 ' + qs + 'px "Plus Jakarta Sans", sans-serif';
+        const qLines = getWrappedLines(ctx, question, 840);
+        const lH = qs * 1.34;
+        if (qLines.length * lH <= 480) {
+          coverQSize = qs;
+          coverQLines = qLines;
+          coverQLineH = lH;
+          break;
+        }
+        coverQSize = qs;
+        coverQLines = qLines;
+        coverQLineH = lH;
+      }
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '800 ' + coverQSize + 'px "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'center';
+      const qTotalH = (coverQLines.length - 1) * coverQLineH;
+      const qStartY = 740 - (qTotalH / 2);
+      for (let q = 0; q < coverQLines.length; q++) {
+        ctx.fillText(coverQLines[q], 540, qStartY + (q * coverQLineH));
+      }
+
+      // Challenge Strip
+      ctx.save();
+      ctx.fillStyle = tpl.qBadgeBg;
+      ctx.strokeStyle = tpl.coverChallengeBorder;
+      ctx.lineWidth = 3.5;
+      roundRect(ctx, 140, 1045, 800, 90, 24, true, true);
+      ctx.fillStyle = tpl.coverChallengeText;
+      ctx.font = '900 36px "Outfit", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(challengeText.toUpperCase(), 540, 1102);
+      ctx.restore();
+
+      // CTA Button
+      ctx.save();
+      ctx.shadowColor = tpl.coverBtnGrad[0] + '99';
+      ctx.shadowBlur = 35;
+      ctx.shadowOffsetY = 12;
+      const btnGrad = ctx.createLinearGradient(70, 1160, 1010, 1160);
+      btnGrad.addColorStop(0, tpl.coverBtnGrad[0]);
+      btnGrad.addColorStop(1, tpl.coverBtnGrad[1]);
+      ctx.fillStyle = btnGrad;
+      roundRect(ctx, 70, 1160, 940, 160, 36, true, false);
+      ctx.restore();
+
+      ctx.fillStyle = tpl.name.includes('Gold') ? '#000000' : '#FFFFFF';
+      ctx.font = '900 44px "Outfit", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(actionBtnText, 540, 1256);
+
+      // Footer
+      ctx.fillStyle = tpl.headerCardBg;
+      ctx.strokeStyle = tpl.headerCardBorder;
+      ctx.lineWidth = 2.5;
+      roundRect(ctx, 120, 1350, 840, 120, 28, true, true);
+      try {
+        if (logoImg.complete && logoImg.naturalWidth !== 0) {
+          ctx.drawImage(logoImg, 160, 1370, 80, 80);
+        }
+      } catch (e) {}
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '800 38px "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(brand + ' ✔', 265, 1412);
+      ctx.fillStyle = tpl.qBadgeText;
+      ctx.font = '700 24px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText(websiteUrl, 265, 1445);
+
+      // Scrim
+      const bottomScrim = ctx.createLinearGradient(0, 1540, 0, 1920);
+      bottomScrim.addColorStop(0, 'rgba(6, 9, 17, 0.2)');
+      bottomScrim.addColorStop(1, 'rgba(2, 4, 8, 0.95)');
+      ctx.fillStyle = bottomScrim;
+      ctx.fillRect(0, 1540, 1080, 380);
+
+      showSafeZoneGuide = prevGuideState;
+
+      return new Promise(resolve => {
+        canvas.toBlob(blob => resolve(blob), 'image/png');
+      });
+    }
+
 
     window.onload = function() {
       loadQuestionToForm(0);

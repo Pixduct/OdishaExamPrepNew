@@ -495,8 +495,8 @@
   <div class="export-modal-overlay" id="exportModalOverlay">
     <div class="export-modal-card">
       <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">⚡</div>
-      <div style="font-size: 1.2rem; font-weight: 800; color: #FFF;" id="exportModalTitle">Rendering Fast MP4 Video...</div>
-      <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;" id="exportModalSubtitle">Silent offline rendering (2–3 seconds). No waiting!</div>
+      <div style="font-size: 1.2rem; font-weight: 800; color: #FFF;" id="exportModalTitle">Rendering Fast MP4 Video + Audio...</div>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;" id="exportModalSubtitle">Silent offline rendering (2–3 seconds). Complete audio track included!</div>
       
       <div class="progress-track">
         <div class="progress-fill" id="exportProgressBar"></div>
@@ -768,7 +768,7 @@
       </div>
 
       <div style="font-size: 0.75rem; color: var(--text-dim); text-align: center; max-width: 320px;">
-        ⚡ Instant offline rendering engine. 0 waiting, 0 screen locking.
+        ⚡ Instant offline rendering engine. Complete audio + video.
       </div>
     </div>
 
@@ -1863,6 +1863,150 @@
     }
 
     // ==============================================================
+    // 🎧 OFFLINE AUDIO TRACK SYNTHESIZER (Renders Full Audio in <100ms)
+    // ==============================================================
+    async function renderOfflineAudioBuffer(config, totalDuration) {
+      if (isMuted) return null;
+
+      const sampleRate = 44100;
+      const totalSamples = Math.ceil(sampleRate * totalDuration);
+      const offlineCtx = new OfflineAudioContext(2, totalSamples, sampleRate);
+      const masterGainNode = offlineCtx.createGain();
+      masterGainNode.gain.value = 0.88;
+      masterGainNode.connect(offlineCtx.destination);
+
+      const tIntro = 1.5;
+      const tQuestion = 2.5;
+      const tOptions = 2.0;
+      const tCountdown = config.countdownSecs;
+      const tReveal = 2.5;
+      const tRevealStart = tIntro + tQuestion + tOptions + tCountdown;
+      const tCtaStart = tRevealStart + tReveal;
+
+      if (bgAudioMode === 'synth') {
+        // Layer 1: Drone (0s to tRevealStart)
+        const droneGain = offlineCtx.createGain();
+        droneGain.gain.setValueAtTime(0, 0);
+        droneGain.gain.linearRampToValueAtTime(0.24, 0.8);
+        droneGain.gain.setValueAtTime(0.24, tRevealStart);
+        droneGain.gain.linearRampToValueAtTime(0.001, tRevealStart + 0.1);
+
+        const filter = offlineCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(240, 0);
+
+        [73.42, 110.0, 146.83].forEach(function(f) {
+          const osc = offlineCtx.createOscillator();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(f, 0);
+          osc.connect(filter);
+          osc.start(0);
+          osc.stop(tRevealStart + 0.15);
+        });
+        filter.connect(droneGain);
+        droneGain.connect(masterGainNode);
+
+        // Layer 2: Sub-booms
+        function addSubBoom(time, intensity) {
+          intensity = intensity || 1.0;
+          const osc = offlineCtx.createOscillator();
+          const oscGain = offlineCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(75, time);
+          osc.frequency.exponentialRampToValueAtTime(28, time + 0.35);
+
+          oscGain.gain.setValueAtTime(0, time);
+          oscGain.gain.linearRampToValueAtTime(0.5 * intensity, time + 0.02);
+          oscGain.gain.exponentialRampToValueAtTime(0.001, time + 0.38);
+
+          osc.connect(oscGain);
+          oscGain.connect(masterGainNode);
+          osc.start(time);
+          osc.stop(time + 0.4);
+        }
+
+        addSubBoom(0.2, 1.0);
+        addSubBoom(tIntro + tQuestion, 0.9);
+
+        // Layer 3: Countdown Ticks + Sub impacts
+        const cdStart = tIntro + tQuestion + tOptions;
+        for (let c = 0; c < config.countdownSecs; c++) {
+          const tickTime = cdStart + c;
+          const pitch = 520 + (c + 1) * 95;
+
+          const osc = offlineCtx.createOscillator();
+          const oscGain = offlineCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(pitch, tickTime);
+          osc.frequency.exponentialRampToValueAtTime(pitch * 0.4, tickTime + 0.06);
+
+          oscGain.gain.setValueAtTime(0.38, tickTime);
+          oscGain.gain.exponentialRampToValueAtTime(0.001, tickTime + 0.07);
+
+          osc.connect(oscGain);
+          oscGain.connect(masterGainNode);
+          osc.start(tickTime);
+          osc.stop(tickTime + 0.08);
+
+          addSubBoom(tickTime, 0.85);
+        }
+      } else if (bgAudioMode === 'custom' && bgMusicAudio.src) {
+        try {
+          const resp = await fetch(bgMusicAudio.src);
+          const arrayBuf = await resp.arrayBuffer();
+          const decodedBg = await offlineCtx.decodeAudioData(arrayBuf);
+          const bgSource = offlineCtx.createBufferSource();
+          bgSource.buffer = decodedBg;
+          bgSource.loop = true;
+          const bgGain = offlineCtx.createGain();
+          bgGain.gain.setValueAtTime(0.7, 0);
+          bgGain.gain.setValueAtTime(0.7, tRevealStart);
+          bgGain.gain.linearRampToValueAtTime(0.001, tRevealStart + 0.1);
+          bgSource.connect(bgGain);
+          bgGain.connect(masterGainNode);
+          bgSource.start(0);
+          bgSource.stop(tRevealStart + 0.15);
+        } catch (e) {}
+      }
+
+      // Layer 4: Celebratory Chime arpeggio
+      const notes = [523.25, 659.25, 783.99, 1046.50];
+      notes.forEach(function(freq, idx) {
+        const osc = offlineCtx.createOscillator();
+        const gain = offlineCtx.createGain();
+        const startTime = tRevealStart + (idx * 0.06);
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, startTime);
+
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(0.38, startTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.7);
+
+        osc.connect(gain);
+        gain.connect(masterGainNode);
+
+        osc.start(startTime);
+        osc.stop(startTime + 0.75);
+      });
+
+      // Layer 5: CTA Voiceover Audio
+      if (ctaAudio.src) {
+        try {
+          const resp = await fetch(ctaAudio.src);
+          const arrayBuf = await resp.arrayBuffer();
+          const decodedCta = await offlineCtx.decodeAudioData(arrayBuf);
+          const ctaSource = offlineCtx.createBufferSource();
+          ctaSource.buffer = decodedCta;
+          ctaSource.connect(masterGainNode);
+          ctaSource.start(tCtaStart);
+        } catch (e) {}
+      }
+
+      return await offlineCtx.startRendering();
+    }
+
+    // ==============================================================
     // ⚡ FAST-EXPORT OFFLINE MP4 / WEBM RENDERING ENGINE (2–3 SECONDS)
     // ==============================================================
     async function fastExportShort(format) {
@@ -1880,7 +2024,7 @@
 
       modal.classList.add('active');
       modalTitle.innerText = '⚡ Fast-Exporting Video (.' + format.toUpperCase() + ')...';
-      modalSubtitle.innerText = 'Generating all frames in background (takes ~2 seconds).';
+      modalSubtitle.innerText = 'Generating all video frames and audio track (~2s)...';
       progressBar.style.width = '0%';
       progressPercent.innerText = '0%';
 
@@ -1897,9 +2041,11 @@
       const totalFrames = Math.ceil(totalDuration * fps);
 
       try {
-        // Step 1: Render Video Frames rapidly into WebCodecs / MP4 Muxer if available
         if (format === 'mp4' && window.Mp4Muxer && window.VideoEncoder) {
-          const muxer = new Mp4Muxer.Muxer({
+          // Render the complete audio track silently in <100ms
+          const renderedAudio = await renderOfflineAudioBuffer(config, totalDuration);
+
+          const muxerConfig = {
             target: new Mp4Muxer.ArrayBufferTarget(),
             video: {
               codec: 'avc',
@@ -1907,8 +2053,20 @@
               height: 1920
             },
             fastStart: 'in-memory'
-          });
+          };
 
+          const canEncodeAudio = renderedAudio && window.AudioEncoder;
+          if (canEncodeAudio) {
+            muxerConfig.audio = {
+              codec: 'aac',
+              numberOfChannels: 2,
+              sampleRate: 44100
+            };
+          }
+
+          const muxer = new Mp4Muxer.Muxer(muxerConfig);
+
+          // Configure Video Encoder
           const videoEncoder = new VideoEncoder({
             output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
             error: (e) => console.error('VideoEncoder error:', e)
@@ -1922,6 +2080,47 @@
             framerate: fps
           });
 
+          // Encode Audio if available
+          let audioEncoder = null;
+          if (canEncodeAudio) {
+            audioEncoder = new AudioEncoder({
+              output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
+              error: (e) => console.error('AudioEncoder error:', e)
+            });
+
+            audioEncoder.configure({
+              codec: 'mp4a.40.2',
+              numberOfChannels: 2,
+              sampleRate: 44100,
+              bitrate: 128000
+            });
+
+            const channel0 = renderedAudio.getChannelData(0);
+            const channel1 = renderedAudio.getChannelData(1);
+            const totalSamples = renderedAudio.length;
+            const chunkSize = 1024;
+
+            for (let s = 0; s < totalSamples; s += chunkSize) {
+              const currentChunkSize = Math.min(chunkSize, totalSamples - s);
+              const planarBuffer = new Float32Array(currentChunkSize * 2);
+              planarBuffer.set(channel0.subarray(s, s + currentChunkSize), 0);
+              planarBuffer.set(channel1.subarray(s, s + currentChunkSize), currentChunkSize);
+
+              const audioData = new AudioData({
+                format: 'f32-planar',
+                sampleRate: 44100,
+                numberOfFrames: currentChunkSize,
+                numberOfChannels: 2,
+                timestamp: Math.round((s / 44100) * 1000000),
+                data: planarBuffer
+              });
+
+              audioEncoder.encode(audioData);
+              audioData.close();
+            }
+          }
+
+          // Encode Video Frames
           for (let f = 0; f < totalFrames; f++) {
             const elapsed = f / fps;
             renderShortsFrameAtTime(elapsed, totalDuration, config);
@@ -1936,19 +2135,18 @@
             progressPercent.innerText = pct + '%';
             progressFrame.innerText = 'Frame ' + (f + 1) + ' / ' + totalFrames;
 
-            // Yield every 8 frames so browser stays super responsive
             if (f % 8 === 0) {
               await new Promise(resolve => setTimeout(resolve, 0));
             }
           }
 
           await videoEncoder.flush();
+          if (audioEncoder) await audioEncoder.flush();
           muxer.finalize();
 
           const blob = new Blob([muxer.target.buffer], { type: 'video/mp4' });
           downloadExportedBlob(blob, 'mp4', config.exam);
         } else {
-          // Fallback: Realtime MediaRecorder stream
           await runMediaRecorderExport(format, config, totalDuration, progressBar, progressPercent, progressFrame);
         }
       } catch (err) {
@@ -1969,6 +2167,21 @@
       const combinedTracks = [...canvasStream.getVideoTracks()];
 
       if (audioDestination) {
+        if (ctaAudioObjectUrl && !ctaAudio.sourceNodeAttached) {
+          try {
+            const source = audioCtx.createMediaElementSource(ctaAudio);
+            source.connect(masterGain);
+            ctaAudio.sourceNodeAttached = true;
+          } catch (e) {}
+        }
+        if (bgMusicObjectUrl && !bgMusicAudio.sourceNodeAttached) {
+          try {
+            const bgSource = audioCtx.createMediaElementSource(bgMusicAudio);
+            bgSource.connect(masterGain);
+            bgMusicAudio.sourceNodeAttached = true;
+          } catch (e) {}
+        }
+
         const audioTracks = audioDestination.stream.getAudioTracks();
         if (audioTracks.length > 0) combinedTracks.push(audioTracks[0]);
       }
@@ -1991,7 +2204,6 @@
       recorder.start();
       playShortsSequence(true, () => recorder.stop());
 
-      // Progress bar simulation
       const startT = performance.now();
       while (isExporting && recorder.state === 'recording') {
         const elapsed = (performance.now() - startT) / 1000;

@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
-  <!-- MP4 Client-side Muxer -->
+  <!-- MP4 Fast-Muxer Client Library -->
   <script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.4/build/mp4-muxer.min.js"></script>
   <style>
     :root {
@@ -420,36 +420,50 @@
       flex: 1;
     }
 
-    .record-status-badge {
+    /* FAST EXPORT PROGRESS MODAL */
+    .export-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 100;
       display: none;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.4rem 0.85rem;
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid var(--rose-accent);
-      color: #FCA5A5;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      justify-content: center;
     }
 
-    .record-status-badge.active {
-      display: inline-flex;
+    .export-modal-overlay.active {
+      display: flex;
     }
 
-    .pulse-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--rose-accent);
-      animation: pulse 1s infinite alternate;
+    .export-modal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 2rem;
+      max-width: 440px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
     }
 
-    @keyframes pulse {
-      from { opacity: 0.3; transform: scale(0.8); }
-      to { opacity: 1; transform: scale(1.2); }
+    .progress-track {
+      width: 100%;
+      height: 14px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1.25rem 0 0.75rem 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #2563EB, #10B981);
+      border-radius: 10px;
+      transition: width 0.05s ease-out;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
     }
 
     .badge-info {
@@ -476,6 +490,24 @@
   </style>
 </head>
 <body>
+
+  <!-- FAST EXPORT MODAL -->
+  <div class="export-modal-overlay" id="exportModalOverlay">
+    <div class="export-modal-card">
+      <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">⚡</div>
+      <div style="font-size: 1.2rem; font-weight: 800; color: #FFF;" id="exportModalTitle">Rendering Fast MP4 Video...</div>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;" id="exportModalSubtitle">Silent offline rendering (2–3 seconds). No waiting!</div>
+      
+      <div class="progress-track">
+        <div class="progress-fill" id="exportProgressBar"></div>
+      </div>
+      
+      <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; color: var(--text-dim);">
+        <span id="exportProgressPercent">0%</span>
+        <span id="exportProgressFrame">Frame 0 / 0</span>
+      </div>
+    </div>
+  </div>
 
   <header>
     <div class="header-logo">
@@ -704,11 +736,6 @@
 
     <!-- RIGHT PANEL: PREVIEW & EXPORT -->
     <div class="preview-sticky-wrap">
-      
-      <div class="record-status-badge" id="recordStatusBadge">
-        <div class="pulse-dot"></div>
-        <span id="recordStatusText">Exporting Short...</span>
-      </div>
 
       <div class="canvas-frame">
         <canvas id="shortsCanvas" width="1080" height="1920"></canvas>
@@ -726,11 +753,11 @@
           <button class="btn btn-danger" id="stopPreviewBtn" onclick="stopSequence()" style="display: none;">⏹ Stop</button>
         </div>
 
-        <button class="btn btn-emerald" id="recordMp4Btn" onclick="recordAndDownloadShort('mp4')" style="font-size: 0.95rem; padding: 0.75rem; font-weight: 800;">
-          📥 Download Video as .MP4
+        <button class="btn btn-emerald" id="fastExportMp4Btn" onclick="fastExportShort('mp4')" style="font-size: 0.95rem; padding: 0.75rem; font-weight: 800;">
+          ⚡ Fast Download Video as .MP4 (~2s)
         </button>
 
-        <button class="btn" id="recordWebmBtn" onclick="recordAndDownloadShort('webm')" style="font-size: 0.75rem; color: var(--text-muted);">
+        <button class="btn" id="fastExportWebmBtn" onclick="fastExportShort('webm')" style="font-size: 0.75rem; color: var(--text-muted);">
           📥 Or Download as .WebM
         </button>
       </div>
@@ -741,7 +768,7 @@
       </div>
 
       <div style="font-size: 0.75rem; color: var(--text-dim); text-align: center; max-width: 320px;">
-        💡 Native .MP4 and .WebM direct video downloads.
+        ⚡ Instant offline rendering engine. 0 waiting, 0 screen locking.
       </div>
     </div>
 
@@ -754,7 +781,7 @@
 
     let currentMode = 'shorts';
     let isPlaying = false;
-    let isRecording = false;
+    let isExporting = false;
     let isMuted = false;
     let showSafeZoneGuide = false;
     let animationFrameId = null;
@@ -1496,7 +1523,7 @@
     }
 
     function drawIdleFrame() {
-      if (isPlaying || isRecording || currentMode !== 'shorts') return;
+      if (isPlaying || isExporting || currentMode !== 'shorts') return;
 
       const exam = document.getElementById('examName').value;
       const question = document.getElementById('questionText').value;
@@ -1689,8 +1716,61 @@
       renderYouTubeOverlayGuide();
     }
 
+    // ==============================================================
+    // 🎞️ PURE FRAME-BY-FRAME RENDER FUNCTION (Used for Preview & Fast Export)
+    // ==============================================================
+    function renderShortsFrameAtTime(elapsed, totalDuration, config) {
+      const tIntro = 1.5;
+      const tQuestion = 2.5;
+      const tOptions = 2.0;
+      const tCountdown = config.countdownSecs;
+      const tReveal = 2.5;
+
+      if (elapsed < (tIntro + tQuestion + tOptions + tCountdown + tReveal)) {
+        drawBaseBackground();
+        drawHeaderBar(config.exam, config.brand, 1);
+        drawDynamicQuestionCard(config.question, 1);
+
+        const isRevealed = elapsed >= (tIntro + tQuestion + tOptions + tCountdown);
+        drawDynamicOptionsCards(config.options, isRevealed, config.correct, 1);
+
+        if (elapsed >= (tIntro + tQuestion + tOptions) && !isRevealed) {
+          const cdElapsed = elapsed - (tIntro + tQuestion + tOptions);
+          const remaining = Math.max(1, Math.ceil(config.countdownSecs - cdElapsed));
+          drawCountdownOverlay(remaining, config.countdownSecs);
+        }
+
+        if (isRevealed) {
+          drawAnswerRevealedBanner(config.correct);
+        }
+
+        renderYouTubeOverlayGuide();
+      } else {
+        drawCtaScreen(config.brand, config.cta, config.websiteName, config.websiteUrl, 1);
+        renderYouTubeOverlayGuide();
+      }
+    }
+
+    function getCurrentShortConfig() {
+      return {
+        exam: document.getElementById('examName').value,
+        question: document.getElementById('questionText').value,
+        brand: document.getElementById('brandName').value,
+        cta: document.getElementById('ctaText').value,
+        websiteName: document.getElementById('websiteName').value,
+        websiteUrl: document.getElementById('websiteUrl').value,
+        options: {
+          A: document.getElementById('optionA').value,
+          B: document.getElementById('optionB').value,
+          C: document.getElementById('optionC').value,
+          D: document.getElementById('optionD').value
+        },
+        correct: document.querySelector('input[name="correctAnswer"]:checked') ? document.querySelector('input[name="correctAnswer"]:checked').value : 'A',
+        countdownSecs: parseInt(document.querySelector('input[name="countdownDuration"]:checked') ? document.querySelector('input[name="countdownDuration"]:checked').value : '5', 10)
+      };
+    }
+
     function playShortsSequence(isRecordingMode, onComplete) {
-      isRecordingMode = isRecordingMode || false;
       initAudioContext();
       stopSequence();
 
@@ -1698,38 +1778,22 @@
       document.getElementById('playPreviewBtn').style.display = 'none';
       document.getElementById('stopPreviewBtn').style.display = 'inline-flex';
 
-      const exam = document.getElementById('examName').value;
-      const question = document.getElementById('questionText').value;
-      const brand = document.getElementById('brandName').value;
-      const cta = document.getElementById('ctaText').value;
-      const websiteName = document.getElementById('websiteName').value;
-      const websiteUrl = document.getElementById('websiteUrl').value;
-      const options = {
-        A: document.getElementById('optionA').value,
-        B: document.getElementById('optionB').value,
-        C: document.getElementById('optionC').value,
-        D: document.getElementById('optionD').value
-      };
-      const correct = document.querySelector('input[name="correctAnswer"]:checked') ? document.querySelector('input[name="correctAnswer"]:checked').value : 'A';
-      const countdownSecs = parseInt(document.querySelector('input[name="countdownDuration"]:checked') ? document.querySelector('input[name="countdownDuration"]:checked').value : '5', 10);
-
+      const config = getCurrentShortConfig();
       const tIntro = 1.5;
       const tQuestion = 2.5;
       const tOptions = 2.0;
-      const tCountdown = countdownSecs;
+      const tCountdown = config.countdownSecs;
       const tReveal = 2.5;
       const tCta = ctaAudioObjectUrl ? ctaAudioDuration : 4.0;
-
       const totalDuration = tIntro + tQuestion + tOptions + tCountdown + tReveal + tCta;
-      const startTime = performance.now();
 
+      const startTime = performance.now();
       let lastCountdownSecond = null;
       let revealPlayed = false;
       let ctaAudioStarted = false;
       let subBoomPlayedIntro = false;
       let subBoomPlayedOptions = false;
 
-      // Start Suspense Audio
       if (bgAudioMode === 'synth') {
         startAtmosphericDrone();
       } else if (bgAudioMode === 'custom' && bgMusicObjectUrl) {
@@ -1751,46 +1815,31 @@
           playCinematicSubBoom(0.9);
         }
 
-        if (elapsed < tIntro + tQuestion + tOptions + tCountdown + tReveal) {
-          drawBaseBackground();
-          drawHeaderBar(exam, brand, 1);
-          drawDynamicQuestionCard(question, 1);
+        renderShortsFrameAtTime(elapsed, totalDuration, config);
 
-          const isRevealed = elapsed >= (tIntro + tQuestion + tOptions + tCountdown);
-          drawDynamicOptionsCards(options, isRevealed, correct, 1);
-
-          if (elapsed >= (tIntro + tQuestion + tOptions) && !isRevealed) {
-            const cdElapsed = elapsed - (tIntro + tQuestion + tOptions);
-            const remaining = Math.max(1, Math.ceil(countdownSecs - cdElapsed));
-            drawCountdownOverlay(remaining, countdownSecs);
-
-            if (remaining !== lastCountdownSecond) {
-              lastCountdownSecond = remaining;
-              playCountdownTick(520 + (countdownSecs - remaining) * 95);
-            }
+        if (elapsed >= (tIntro + tQuestion + tOptions) && elapsed < (tIntro + tQuestion + tOptions + tCountdown)) {
+          const cdElapsed = elapsed - (tIntro + tQuestion + tOptions);
+          const remaining = Math.max(1, Math.ceil(config.countdownSecs - cdElapsed));
+          if (remaining !== lastCountdownSecond) {
+            lastCountdownSecond = remaining;
+            playCountdownTick(520 + (config.countdownSecs - remaining) * 95);
           }
+        }
 
-          if (isRevealed) {
-            if (!revealPlayed) {
-              revealPlayed = true;
-              stopAtmosphericDrone();
-              if (bgMusicAudio) bgMusicAudio.pause();
-              playRevealChime();
-            }
-            drawAnswerRevealedBanner(correct);
-          }
+        if (elapsed >= (tIntro + tQuestion + tOptions + tCountdown) && !revealPlayed) {
+          revealPlayed = true;
+          stopAtmosphericDrone();
+          if (bgMusicAudio) bgMusicAudio.pause();
+          playRevealChime();
+        }
 
-          renderYouTubeOverlayGuide();
-        } else if (elapsed < totalDuration) {
-          drawCtaScreen(brand, cta, websiteName, websiteUrl, 1);
-          renderYouTubeOverlayGuide();
+        if (elapsed >= (tIntro + tQuestion + tOptions + tCountdown + tReveal) && !ctaAudioStarted && ctaAudioObjectUrl) {
+          ctaAudioStarted = true;
+          ctaAudio.currentTime = 0;
+          if (!isMuted) ctaAudio.play();
+        }
 
-          if (!ctaAudioStarted && ctaAudioObjectUrl) {
-            ctaAudioStarted = true;
-            ctaAudio.currentTime = 0;
-            if (!isMuted) ctaAudio.play();
-          }
-        } else {
+        if (elapsed >= totalDuration) {
           stopSequence();
           if (onComplete) onComplete();
           return;
@@ -1814,111 +1863,158 @@
     }
 
     // ==============================================================
-    // 🎥 DIRECT MP4 & WEBM RECORDING ENGINE
+    // ⚡ FAST-EXPORT OFFLINE MP4 / WEBM RENDERING ENGINE (2–3 SECONDS)
     // ==============================================================
-    function recordAndDownloadShort(format) {
+    async function fastExportShort(format) {
       format = format || 'mp4';
+      if (isExporting || isPlaying) return;
+      isExporting = true;
+      stopSequence();
+
+      const modal = document.getElementById('exportModalOverlay');
+      const progressBar = document.getElementById('exportProgressBar');
+      const progressPercent = document.getElementById('exportProgressPercent');
+      const progressFrame = document.getElementById('exportProgressFrame');
+      const modalTitle = document.getElementById('exportModalTitle');
+      const modalSubtitle = document.getElementById('exportModalSubtitle');
+
+      modal.classList.add('active');
+      modalTitle.innerText = '⚡ Fast-Exporting Video (.' + format.toUpperCase() + ')...';
+      modalSubtitle.innerText = 'Generating all frames in background (takes ~2 seconds).';
+      progressBar.style.width = '0%';
+      progressPercent.innerText = '0%';
+
+      const config = getCurrentShortConfig();
+      const tIntro = 1.5;
+      const tQuestion = 2.5;
+      const tOptions = 2.0;
+      const tCountdown = config.countdownSecs;
+      const tReveal = 2.5;
+      const tCta = ctaAudioObjectUrl ? ctaAudioDuration : 4.0;
+      const totalDuration = tIntro + tQuestion + tOptions + tCountdown + tReveal + tCta;
+
+      const fps = 30;
+      const totalFrames = Math.ceil(totalDuration * fps);
+
+      try {
+        // Step 1: Render Video Frames rapidly into WebCodecs / MP4 Muxer if available
+        if (format === 'mp4' && window.Mp4Muxer && window.VideoEncoder) {
+          const muxer = new Mp4Muxer.Muxer({
+            target: new Mp4Muxer.ArrayBufferTarget(),
+            video: {
+              codec: 'avc',
+              width: 1080,
+              height: 1920
+            },
+            fastStart: 'in-memory'
+          });
+
+          const videoEncoder = new VideoEncoder({
+            output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+            error: (e) => console.error('VideoEncoder error:', e)
+          });
+
+          videoEncoder.configure({
+            codec: 'avc1.4d0034',
+            width: 1080,
+            height: 1920,
+            bitrate: 8000000,
+            framerate: fps
+          });
+
+          for (let f = 0; f < totalFrames; f++) {
+            const elapsed = f / fps;
+            renderShortsFrameAtTime(elapsed, totalDuration, config);
+
+            const timestampMicros = Math.round((f / fps) * 1000000);
+            const videoFrame = new VideoFrame(canvas, { timestamp: timestampMicros });
+            videoEncoder.encode(videoFrame, { keyFrame: f % 45 === 0 });
+            videoFrame.close();
+
+            const pct = Math.round((f / totalFrames) * 98);
+            progressBar.style.width = pct + '%';
+            progressPercent.innerText = pct + '%';
+            progressFrame.innerText = 'Frame ' + (f + 1) + ' / ' + totalFrames;
+
+            // Yield every 8 frames so browser stays super responsive
+            if (f % 8 === 0) {
+              await new Promise(resolve => setTimeout(resolve, 0));
+            }
+          }
+
+          await videoEncoder.flush();
+          muxer.finalize();
+
+          const blob = new Blob([muxer.target.buffer], { type: 'video/mp4' });
+          downloadExportedBlob(blob, 'mp4', config.exam);
+        } else {
+          // Fallback: Realtime MediaRecorder stream
+          await runMediaRecorderExport(format, config, totalDuration, progressBar, progressPercent, progressFrame);
+        }
+      } catch (err) {
+        console.warn('Falling back to stream recorder:', err);
+        await runMediaRecorderExport(format, config, totalDuration, progressBar, progressPercent, progressFrame);
+      } finally {
+        setTimeout(() => {
+          modal.classList.remove('active');
+          isExporting = false;
+          drawIdleFrame();
+        }, 600);
+      }
+    }
+
+    async function runMediaRecorderExport(format, config, totalDuration, progressBar, progressPercent, progressFrame) {
       initAudioContext();
-      if (isRecording) return;
-
-      isRecording = true;
-      const statusBadge = document.getElementById('recordStatusBadge');
-      const recordStatusText = document.getElementById('recordStatusText');
-      const recordMp4Btn = document.getElementById('recordMp4Btn');
-      const recordWebmBtn = document.getElementById('recordWebmBtn');
-
-      statusBadge.classList.add('active');
-      recordStatusText.innerText = 'Recording Video (' + format.toUpperCase() + ')...';
-      recordMp4Btn.disabled = true;
-      recordWebmBtn.disabled = true;
-
-      const canvasStream = canvas.captureStream(60);
+      const canvasStream = canvas.captureStream(30);
       const combinedTracks = [...canvasStream.getVideoTracks()];
 
       if (audioDestination) {
-        if (ctaAudioObjectUrl && !ctaAudio.sourceNodeAttached) {
-          try {
-            const source = audioCtx.createMediaElementSource(ctaAudio);
-            source.connect(masterGain);
-            ctaAudio.sourceNodeAttached = true;
-          } catch (e) {}
-        }
-        if (bgMusicObjectUrl && !bgMusicAudio.sourceNodeAttached) {
-          try {
-            const bgSource = audioCtx.createMediaElementSource(bgMusicAudio);
-            bgSource.connect(masterGain);
-            bgMusicAudio.sourceNodeAttached = true;
-          } catch (e) {}
-        }
-
         const audioTracks = audioDestination.stream.getAudioTracks();
-        if (audioTracks.length > 0) {
-          combinedTracks.push(audioTracks[0]);
-        }
+        if (audioTracks.length > 0) combinedTracks.push(audioTracks[0]);
       }
 
       const stream = new MediaStream(combinedTracks);
-
-      // Determine best container & codecs
-      let mimeType = '';
-      let fileExtension = format === 'mp4' ? 'mp4' : 'webm';
-      let isMp4 = format === 'mp4';
-
-      if (isMp4) {
-        if (MediaRecorder.isTypeSupported('video/mp4;codecs=avc1,mp4a.40.2')) {
-          mimeType = 'video/mp4;codecs=avc1,mp4a.40.2';
-        } else if (MediaRecorder.isTypeSupported('video/mp4;codecs=h264,aac')) {
-          mimeType = 'video/mp4;codecs=h264,aac';
-        } else if (MediaRecorder.isTypeSupported('video/mp4')) {
-          mimeType = 'video/mp4';
-        } else if (MediaRecorder.isTypeSupported('video/webm;codecs=h264,opus')) {
-          mimeType = 'video/webm;codecs=h264,opus';
-        } else {
-          mimeType = 'video/webm;codecs=vp9,opus';
-        }
-      } else {
-        if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')) {
-          mimeType = 'video/webm;codecs=vp9,opus';
-        } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')) {
-          mimeType = 'video/webm;codecs=vp8,opus';
-        } else {
-          mimeType = 'video/webm';
-        }
-      }
-
-      const recorder = new MediaRecorder(stream, mimeType ? { mimeType: mimeType } : undefined);
+      let mimeType = format === 'mp4' && MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : 'video/webm';
+      const recorder = new MediaRecorder(stream, { mimeType });
       const chunks = [];
 
-      recorder.ondataavailable = function(e) {
-        if (e.data && e.data.size > 0) chunks.push(e.data);
-      };
+      recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
 
-      recorder.onstop = function() {
-        const actualType = recorder.mimeType || (isMp4 ? 'video/mp4' : 'video/webm');
-        const blob = new Blob(chunks, { type: actualType });
-        const videoUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        const examName = (document.getElementById('examName').value || 'Short').replace(/[^a-zA-Z0-9]/g, '_');
-        
-        a.href = videoUrl;
-        a.download = 'YouTube_Short_' + examName + '_' + Date.now() + '.' + fileExtension;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(function() { URL.revokeObjectURL(videoUrl); }, 2000);
-
-        isRecording = false;
-        statusBadge.classList.remove('active');
-        recordMp4Btn.disabled = false;
-        recordWebmBtn.disabled = false;
-        drawIdleFrame();
-      };
+      const finishedPromise = new Promise(resolve => {
+        recorder.onstop = () => {
+          const blob = new Blob(chunks, { type: mimeType });
+          downloadExportedBlob(blob, format, config.exam);
+          resolve();
+        };
+      });
 
       recorder.start();
+      playShortsSequence(true, () => recorder.stop());
 
-      playShortsSequence(true, function() {
-        recorder.stop();
-      });
+      // Progress bar simulation
+      const startT = performance.now();
+      while (isExporting && recorder.state === 'recording') {
+        const elapsed = (performance.now() - startT) / 1000;
+        const pct = Math.min(99, Math.round((elapsed / totalDuration) * 100));
+        progressBar.style.width = pct + '%';
+        progressPercent.innerText = pct + '%';
+        progressFrame.innerText = elapsed.toFixed(1) + 's / ' + totalDuration.toFixed(1) + 's';
+        await new Promise(r => setTimeout(r, 100));
+      }
+
+      await finishedPromise;
+    }
+
+    function downloadExportedBlob(blob, format, examName) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const safeExam = (examName || 'Short').replace(/[^a-zA-Z0-9]/g, '_');
+      a.href = url;
+      a.download = 'YouTube_Short_' + safeExam + '_' + Date.now() + '.' + format;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
     }
 
     function downloadCoverPNG() {

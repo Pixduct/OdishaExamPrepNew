@@ -3255,3 +3255,4 @@ Last updated: August 24, 2026
 - **Header Reset Button**: Includes Reset Form button (`RotateCcw`) in header for 1-click memory clearing.
 - **Dynamic Pricing Controls**: Offer Price and MRP inputs display cleanly upon toggling Premium/Locked.
 - **Sequential Sort Ordering**: Evaluates `getNextAvailableOrder` at batch start and auto-increments for zero collision.
+- **Dynamic Target-Mode Category Mapping**: Display Target buttons (\Bank Only\ / \Practice Only\ / \Both\) dynamically update the Category section label, the modal title, and the category pill labels (\Topic-Wise Bank\ vs \Chapter-Wise Practice\).

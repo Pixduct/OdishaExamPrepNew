@@ -588,6 +588,9 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const [bulkGlobalNegativeMarking, setBulkGlobalNegativeMarking] = useState(0);
   const [bulkLoading, setBulkLoading] = useState(false);
   const [bulkResults, setBulkResults] = useState<{ success: number; failed: number; errors: string[] } | null>(null);
+  const [bulkAutoScheduleEnabled, setBulkAutoScheduleEnabled] = useState(false);
+  const [bulkAutoScheduleIntervalDays, setBulkAutoScheduleIntervalDays] = useState(1);
+  const [bulkAutoScheduleIntervalHours, setBulkAutoScheduleIntervalHours] = useState(0);
 
   // Helper to calculate next category- and subject-scoped sequential sort order (starting from 1, filling missing gaps)
   const getNextAvailableOrder = (
@@ -813,7 +816,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       durationMinutes: sticky.durationMinutes ?? 60,
       totalMarks: sticky.totalMarks ?? 100,
       negativeMarking: sticky.negativeMarking ?? 0,
-      jsonInput: sticky.jsonInput || ''
+      jsonInput: sticky.jsonInput || '',
+      autoScheduleEnabled: sticky.autoScheduleEnabled ?? false,
+      autoScheduleIntervalDays: sticky.autoScheduleIntervalDays ?? 1,
+      autoScheduleIntervalHours: sticky.autoScheduleIntervalHours ?? 0
     };
   };
 
@@ -845,6 +851,9 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     setBulkGlobalDurationMinutes(60);
     setBulkGlobalTotalMarks(100);
     setBulkGlobalNegativeMarking(0);
+    setBulkAutoScheduleEnabled(false);
+    setBulkAutoScheduleIntervalDays(1);
+    setBulkAutoScheduleIntervalHours(0);
     setBulkJsonInput('');
     setBulkResults(null);
   };
@@ -864,7 +873,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         durationMinutes: bulkGlobalDurationMinutes,
         totalMarks: bulkGlobalTotalMarks,
         negativeMarking: bulkGlobalNegativeMarking,
-        jsonInput: bulkJsonInput
+        jsonInput: bulkJsonInput,
+        autoScheduleEnabled: bulkAutoScheduleEnabled,
+        autoScheduleIntervalDays: bulkAutoScheduleIntervalDays,
+        autoScheduleIntervalHours: bulkAutoScheduleIntervalHours
       });
     }
   }, [
@@ -881,7 +893,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     bulkGlobalDurationMinutes,
     bulkGlobalTotalMarks,
     bulkGlobalNegativeMarking,
-    bulkJsonInput
+    bulkJsonInput,
+    bulkAutoScheduleEnabled,
+    bulkAutoScheduleIntervalDays,
+    bulkAutoScheduleIntervalHours
   ]);
 
   const openAddModal = (targetTab = activeTab) => {
@@ -1940,6 +1955,24 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       const itemSubject = item.subject || (activeTab === 'tests' && bulkGlobalCategory === 'sectional' ? item.subject : '');
       const itemSortOrder = item.sortOrder !== undefined ? Number(item.sortOrder) : getNextOrderForItem(itemSubject);
 
+      // Compute per-item scheduled_at:
+      //   - If item has its own scheduled_at → use it directly (overrides global)
+      //   - Else if Auto-Interval is ON and a base date is set → base + (i * totalIntervalMs)
+      //   - Else fall back to global scheduled_at (same for all)
+      const computeScheduleForItem = (itemIndex: number): string | null => {
+        if (item.scheduled_at) return new Date(item.scheduled_at).toISOString();
+        if (!bulkGlobalScheduledAt) return null;
+        const base = new Date(bulkGlobalScheduledAt);
+        if (bulkAutoScheduleEnabled) {
+          const totalIntervalMs = (
+            (bulkAutoScheduleIntervalDays * 24 + bulkAutoScheduleIntervalHours) * 60 * 60 * 1000
+          );
+          base.setTime(base.getTime() + (itemIndex * totalIntervalMs));
+        }
+        return base.toISOString();
+      };
+      const itemScheduledAt = computeScheduleForItem(i);
+
       try {
         if (activeTab === 'banks' || activeTab === 'practice') {
           const metaTaglineObj = {
@@ -1961,7 +1994,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
             isPremium: itemIsPremium,
             pdfUrl: '',
             hasPracticeMode: activeTab === 'practice' ? true : (item.hasPracticeMode ?? true),
-            scheduled_at: bulkGlobalScheduledAt ? new Date(bulkGlobalScheduledAt).toISOString() : (item.scheduled_at || null)
+            scheduled_at: itemScheduledAt
           };
           await examService.createQuestionBank(payload as any);
         } else if (activeTab === 'tests') {
@@ -1973,7 +2006,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
             isPremium: itemIsPremium,
             price: itemPrice,
             originalPrice: itemOrigPrice,
-            scheduled_at: bulkGlobalScheduledAt ? new Date(bulkGlobalScheduledAt).toISOString() : (item.scheduled_at || null)
+            scheduled_at: itemScheduledAt
           });
           const payload = {
             examId: bulkGlobalExamId,
@@ -1983,6 +2016,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
             totalMarks: Number(item.totalMarks) || bulkGlobalTotalMarks,
             negativeMarking: Number(item.negativeMarking) ?? bulkGlobalNegativeMarking,
             sortOrder: itemSortOrder,
+            scheduled_at: itemScheduledAt,
             questionIds: []
           };
           await examService.createMockTest(payload as any);
@@ -4885,6 +4919,9 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                     setBulkGlobalTotalMarks(sticky.totalMarks);
                     setBulkGlobalNegativeMarking(sticky.negativeMarking);
                     setBulkJsonInput(sticky.jsonInput);
+                    setBulkAutoScheduleEnabled(sticky.autoScheduleEnabled ?? false);
+                    setBulkAutoScheduleIntervalDays(sticky.autoScheduleIntervalDays ?? 1);
+                    setBulkAutoScheduleIntervalHours(sticky.autoScheduleIntervalHours ?? 0);
                     setShowBulkModal(true);
                   }}
                   className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 rounded-xl text-sm font-extrabold transition-all shadow-sm active:scale-95"
@@ -8567,20 +8604,35 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                     </div>
                   )}
 
-                  {/* Premium + Schedule + Pricing */}
-                  <div className="space-y-3 pt-1">
-                    <div className="flex items-center gap-6 flex-wrap">
+                  {/* ── SCHEDULE + AUTO-INTERVAL ENGINE ── */}
+                  <div className="space-y-3 pt-1 border border-slate-200/80 rounded-2xl p-4 bg-slate-50/60">
+                    {/* Row 1: Header + Toggle */}
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-black text-slate-700">🗓️ Schedule Settings</span>
+                        {bulkAutoScheduleEnabled && (
+                          <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            ⚡ Auto-Interval ON
+                          </span>
+                        )}
+                      </div>
                       <label className="flex items-center gap-2 cursor-pointer select-none">
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Auto-Interval</span>
                         <div
-                          onClick={() => setBulkGlobalIsPremium(p => !p)}
-                          className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer ${bulkGlobalIsPremium ? 'bg-brand-600' : 'bg-slate-300'}`}
+                          onClick={() => setBulkAutoScheduleEnabled(p => !p)}
+                          className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer ${bulkAutoScheduleEnabled ? 'bg-emerald-500' : 'bg-slate-300'}`}
                         >
-                          <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${bulkGlobalIsPremium ? 'translate-x-4' : ''}`} />
+                          <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${bulkAutoScheduleEnabled ? 'translate-x-4' : ''}`} />
                         </div>
-                        <span className="text-xs font-black text-slate-600">Premium / Locked Content</span>
                       </label>
+                    </div>
+
+                    {/* Row 2: Start Date + interval inputs */}
+                    <div className="flex items-center gap-3 flex-wrap">
                       <div className="flex items-center gap-2 flex-1 min-w-[200px]">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider whitespace-nowrap">Schedule:</label>
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                          {bulkAutoScheduleEnabled ? 'Start At:' : 'Schedule:'}
+                        </label>
                         <input
                           type="datetime-local"
                           value={bulkGlobalScheduledAt}
@@ -8588,7 +8640,91 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                           className="flex-1 px-3 py-1.5 rounded-xl border border-slate-200 focus:border-brand-400 focus:outline-none text-xs font-bold bg-white"
                         />
                       </div>
+
+                      {/* Interval inputs — only visible when auto-interval is ON */}
+                      {bulkAutoScheduleEnabled && (
+                        <div className="flex items-center gap-2">
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider whitespace-nowrap">Every</label>
+                          <input
+                            type="number"
+                            min={0}
+                            value={bulkAutoScheduleIntervalDays}
+                            onChange={e => setBulkAutoScheduleIntervalDays(Math.max(0, Number(e.target.value)))}
+                            className="w-16 px-2 py-1.5 rounded-xl border border-slate-200 focus:border-emerald-400 focus:outline-none text-xs font-black text-center bg-white"
+                          />
+                          <span className="text-[10px] font-black text-slate-500">Days</span>
+                          <span className="text-[10px] text-slate-400 font-bold">+</span>
+                          <input
+                            type="number"
+                            min={0}
+                            max={23}
+                            value={bulkAutoScheduleIntervalHours}
+                            onChange={e => setBulkAutoScheduleIntervalHours(Math.max(0, Math.min(23, Number(e.target.value))))}
+                            className="w-16 px-2 py-1.5 rounded-xl border border-slate-200 focus:border-emerald-400 focus:outline-none text-xs font-black text-center bg-white"
+                          />
+                          <span className="text-[10px] font-black text-slate-500">Hrs</span>
+                        </div>
+                      )}
                     </div>
+
+                    {/* Row 3: Live Preview Panel — only when auto-interval is ON and we have a start date + items */}
+                    {bulkAutoScheduleEnabled && bulkGlobalScheduledAt && (() => {
+                      let previewItems: { title: string }[] = [];
+                      try { const p = JSON.parse(bulkJsonInput.trim()); if (Array.isArray(p)) previewItems = p.slice(0, 10); } catch {}
+                      if (previewItems.length === 0) return null;
+                      const totalIntervalMs = (bulkAutoScheduleIntervalDays * 24 + bulkAutoScheduleIntervalHours) * 60 * 60 * 1000;
+                      const base = new Date(bulkGlobalScheduledAt);
+                      const fmt = (d: Date) => d.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+                      const totalInJson = (() => { try { const p = JSON.parse(bulkJsonInput.trim()); return Array.isArray(p) ? p.length : 0; } catch { return 0; } })();
+                      return (
+                        <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 space-y-1.5">
+                          <p className="text-[10px] font-black text-emerald-700 uppercase tracking-wider mb-2">
+                            📅 Unlock Schedule Preview ({totalInJson} items total)
+                          </p>
+                          {previewItems.map((item, idx) => {
+                            const unlockDate = new Date(base.getTime() + idx * totalIntervalMs);
+                            return (
+                              <div key={idx} className="flex items-center gap-3">
+                                <span className="w-6 h-6 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-700 text-[10px] font-black flex items-center justify-center shrink-0">
+                                  {idx + 1}
+                                </span>
+                                <span className="text-xs font-bold text-slate-700 truncate flex-1 min-w-0" title={item.title || `Item ${idx + 1}`}>
+                                  {item.title || `Item ${idx + 1}`}
+                                </span>
+                                <span className="text-[10px] font-black text-emerald-700 whitespace-nowrap shrink-0">
+                                  🔓 {fmt(unlockDate)}
+                                </span>
+                              </div>
+                            );
+                          })}
+                          {totalInJson > 10 && (
+                            <p className="text-[10px] text-slate-400 font-bold text-center pt-1">
+                              …and {totalInJson - 10} more (pattern continues every {bulkAutoScheduleIntervalDays}d {bulkAutoScheduleIntervalHours}h)
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    {/* Auto-interval hint when OFF */}
+                    {!bulkAutoScheduleEnabled && (
+                      <p className="text-[10px] text-slate-400 font-semibold">
+                        💡 Toggle <span className="font-black text-slate-500">Auto-Interval</span> ON to unlock each item at a different time automatically.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Premium + Pricing */}
+                  <div className="space-y-3 pt-1">
+                    <label className="flex items-center gap-2 cursor-pointer select-none w-fit">
+                      <div
+                        onClick={() => setBulkGlobalIsPremium(p => !p)}
+                        className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer ${bulkGlobalIsPremium ? 'bg-brand-600' : 'bg-slate-300'}`}
+                      >
+                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${bulkGlobalIsPremium ? 'translate-x-4' : ''}`} />
+                      </div>
+                      <span className="text-xs font-black text-slate-600">Premium / Locked Content</span>
+                    </label>
 
                     {/* Premium Price Inputs — smoothly shown when Premium is ON */}
                     {bulkGlobalIsPremium && (

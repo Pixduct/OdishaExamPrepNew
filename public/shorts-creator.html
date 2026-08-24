@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Shorts & Cover Creator — OdishaExamPrep</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Outfit:wght@600;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #090D16;
+      --bg-card: #111827;
+      --bg-card-glass: rgba(17, 24, 39, 0.85);
+      --border-color: rgba(255, 255, 255, 0.1);
+      --border-focus: #3B82F6;
+      --brand-primary: #2563EB;
+      --brand-gradient: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%);
+      --emerald-accent: #10B981;
+      --amber-accent: #F59E0B;
+      --rose-accent: #EF4444;
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --text-dim: #64748B;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(37, 99, 235, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(79, 70, 229, 0.10) 0%, transparent 45%);
+    }
+
+    header {
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-card-glass);
+      backdrop-filter: blur(12px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--brand-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    }
+
+    .header-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .header-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .nav-tabs {
+      display: flex;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-btn.active {
+      background: var(--brand-primary);
+      color: #FFF;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+    }
+
+    .main-container {
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem;
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+      .main-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-card-glass);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 1.5rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-main);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group.col-span-2 {
+      grid-column: span 2;
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.65rem 0.85rem;
+      color: var(--text-main);
+      font-size: 0.9rem;
+      font-family: inherit;
+      font-weight: 600;
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 75px;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .option-input-wrapper {
+      position: relative;
+    }
+
+    .option-badge {
+      position: absolute;
+      left: 0.65rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .option-input-wrapper input {
+      padding-left: 2rem;
+    }
+
+    .correct-answer-selector {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .radio-pill {
+      flex: 1;
+      position: relative;
+    }
+
+    .radio-pill input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .radio-pill span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.03);
+      font-weight: 800;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .radio-pill input[type="radio"]:checked + span {
+      background: var(--emerald-accent);
+      color: #042F2E;
+      border-color: var(--emerald-accent);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+    }
+
+    .file-upload-box {
+      border: 1.5px dashed var(--border-color);
+      border-radius: 12px;
+      padding: 0.75rem;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .file-upload-box:hover {
+      border-color: var(--border-focus);
+      background: rgba(59, 130, 246, 0.05);
+    }
+
+    .file-preview-thumb {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      object-fit: contain;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+    }
+
+    .audio-controls-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.5rem 0.85rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      border-color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-danger {
+      color: var(--rose-accent);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: var(--rose-accent);
+    }
+
+    .btn-primary {
+      background: var(--brand-gradient);
+      color: #FFF;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 800;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+      transform: translateY(-1px);
+    }
+
+    .btn-emerald {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      color: #FFF;
+      border: none;
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-emerald:hover {
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+      transform: translateY(-1px);
+    }
+
+    .preview-sticky-wrap {
+      position: sticky;
+      top: 5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .canvas-frame {
+      width: 320px;
+      height: 568px; /* 9:16 aspect ratio scaled */
+      background: #000;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.15);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .preview-bar {
+      display: flex;
+      gap: 0.75rem;
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .preview-bar .btn {
+      flex: 1;
+    }
+
+    .record-status-badge {
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.8rem;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--rose-accent);
+      color: #FCA5A5;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .record-status-badge.active {
+      display: inline-flex;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--rose-accent);
+      animation: pulse 1s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { opacity: 0.3; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1.2); }
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: contents;
+    }
+
+    .badge-info {
+      font-size: 0.75rem;
+      color: var(--emerald-accent);
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      font-weight: 700;
+      display: inline-block;
+      margin-top: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-logo">
+      <div class="logo-badge">⚡</div>
+      <div>
+        <div class="header-title">YouTube Shorts Creator</div>
+        <div class="header-sub">OdishaExamPrep High-Conversion Video & Cover Suite</div>
+      </div>
+    </div>
+
+    <div class="nav-tabs">
+      <button class="nav-btn active" onclick="switchTab('shorts')">📹 9:16 Shorts Video</button>
+      <button class="nav-btn" onclick="switchTab('cover')">🖼️ Shorts Cover (Thumbnail)</button>
+    </div>
+  </header>
+
+  <main class="main-container">
+
+    <!-- LEFT PANEL: FORM INPUTS -->
+    <div class="card">
+      
+      <!-- MCQ & EXAM SECTION -->
+      <div class="card-title">📝 Question & Exam Details</div>
+      
+      <div class="form-grid">
+        <div class="form-group col-span-2">
+          <label>Exam / Subject Name</label>
+          <input type="text" id="examName" value="OSSC CGL & OPSC ASO 2026" placeholder="e.g. OSSC CGL 2026 / Odisha Geography" oninput="drawIdleFrame()">
+        </div>
+
+        <div class="form-group col-span-2">
+          <label>MCQ Question</label>
+          <textarea id="questionText" placeholder="Enter your MCQ Question here..." oninput="drawIdleFrame()">Who was the first Chief Minister of Odisha after Indian Independence?</textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Option A</label>
+          <div class="option-input-wrapper">
+            <span class="option-badge">A</span>
+            <input type="text" id="optionA" value="Dr. Harekrushna Mahatab" oninput="drawIdleFrame()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Option B</label>
+          <div class="option-input-wrapper">
+            <span class="option-badge">B</span>
+            <input type="text" id="optionB" value="Nabakrushna Choudhury" oninput="drawIdleFrame()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Option C</label>
+          <div class="option-input-wrapper">
+            <span class="option-badge">C</span>
+            <input type="text" id="optionC" value="Biju Patnaik" oninput="drawIdleFrame()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Option D</label>
+          <div class="option-input-wrapper">
+            <span class="option-badge">D</span>
+            <input type="text" id="optionD" value="Janaki Ballabh Patnaik" oninput="drawIdleFrame()">
+          </div>
+        </div>
+
+        <div class="form-group col-span-2">
+          <label>Select Correct Answer</label>
+          <div class="correct-answer-selector">
+            <label class="radio-pill">
+              <input type="radio" name="correctAnswer" value="A" checked onchange="drawIdleFrame()">
+              <span>A</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="correctAnswer" value="B" onchange="drawIdleFrame()">
+              <span>B</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="correctAnswer" value="C" onchange="drawIdleFrame()">
+              <span>C</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="correctAnswer" value="D" onchange="drawIdleFrame()">
+              <span>D</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Countdown Timer</label>
+          <div class="correct-answer-selector">
+            <label class="radio-pill">
+              <input type="radio" name="countdownDuration" value="3">
+              <span>3 Seconds</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="countdownDuration" value="5" checked>
+              <span>5 Seconds</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Audio Preview</label>
+          <button class="btn" style="width: 100%; margin-top: 0.4rem;" id="muteToggleBtn" onclick="toggleMute()">
+            🔊 Sound Enabled
+          </button>
+        </div>
+      </div>
+
+      <!-- BRANDING & CTA SECTION -->
+      <div class="card-title" style="margin-top: 1.5rem;">🎯 Branding & CTA Voiceover</div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Brand Name</label>
+          <input type="text" id="brandName" value="OdishaExamPrep" oninput="drawIdleFrame()">
+        </div>
+
+        <div class="form-group">
+          <label>Brand Logo (PNG/SVG/JPG)</label>
+          <label class="file-upload-box" for="logoInput">
+            <span id="logoFileName" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); truncate;">Default Icon</span>
+            <img id="logoPreview" class="file-preview-thumb" src="/favicon.svg" alt="Logo">
+          </label>
+          <input type="file" id="logoInput" accept="image/*" style="display: none;" onchange="handleLogoUpload(event)">
+        </div>
+
+        <div class="form-group col-span-2">
+          <label>Final CTA Text</label>
+          <input type="text" id="ctaText" value="Visit website for 1,000+ Topic Tests & Mock Series!" oninput="drawIdleFrame()">
+        </div>
+
+        <div class="form-group">
+          <label>Website Name</label>
+          <input type="text" id="websiteName" value="OdishaExamPrep.in" oninput="drawIdleFrame()">
+        </div>
+
+        <div class="form-group">
+          <label>Website URL</label>
+          <input type="text" id="websiteUrl" value="www.odishaexamprep.in" oninput="drawIdleFrame()">
+        </div>
+
+        <div class="form-group col-span-2">
+          <label>CTA Voice Audio (Local MP3 only — In-Memory)</label>
+          <div class="file-upload-box" onclick="document.getElementById('audioInput').click()">
+            <div style="text-align: left;">
+              <div id="audioFileName" style="font-size: 0.85rem; font-weight: 800; color: var(--text-main);">Click to Select MP3 Audio File</div>
+              <div style="font-size: 0.7rem; color: var(--text-dim);">Audio stays 100% inside browser memory. Never uploaded to database or server.</div>
+            </div>
+            <button type="button" class="btn" style="pointer-events: none;">Select File</button>
+          </div>
+          <input type="file" id="audioInput" accept="audio/mp3,audio/wav,audio/mpeg" style="display: none;" onchange="handleAudioUpload(event)">
+
+          <div class="audio-controls-row" id="audioControlsRow" style="display: none;">
+            <button type="button" class="btn" onclick="previewAudio()"><span id="audioPlayIcon">▶</span> Preview Voice</button>
+            <button type="button" class="btn" onclick="document.getElementById('audioInput').click()">🔄 Replace</button>
+            <button type="button" class="btn btn-danger" onclick="removeAudio()">🗑️ Remove</button>
+            <span class="badge-info" id="audioDurationBadge">Duration: 0.0s</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- COVER GENERATOR HOOK SECTION (Visible in Cover Mode) -->
+      <div id="coverFieldsWrapper" style="display: none; margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+        <div class="card-title">🔥 High-CTR Hook Text (Thumbnail Only)</div>
+        <div class="form-group">
+          <label>Catchy Question Hook</label>
+          <input type="text" id="coverHookText" value="99% Aspirants Get This Wrong! 😱" placeholder="e.g. Can you solve in 5 seconds?" oninput="drawCoverCanvas()">
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT PANEL: PREVIEW & EXPORT -->
+    <div class="preview-sticky-wrap">
+      
+      <div class="record-status-badge" id="recordStatusBadge">
+        <div class="pulse-dot"></div>
+        <span id="recordStatusText">Recording Short (1080x1920)...</span>
+      </div>
+
+      <div class="canvas-frame">
+        <canvas id="shortsCanvas" width="1080" height="1920"></canvas>
+      </div>
+
+      <!-- SHORTS PREVIEW CONTROLS -->
+      <div class="preview-bar" id="shortsControlsBar">
+        <button class="btn" id="playPreviewBtn" onclick="playShortsSequence(false)">▶ Play Preview</button>
+        <button class="btn btn-danger" id="stopPreviewBtn" onclick="stopSequence()" style="display: none;">⏹ Stop</button>
+        <button class="btn btn-emerald" id="recordBtn" onclick="recordAndDownloadShort()">⏺ Record & Download (.webm)</button>
+      </div>
+
+      <!-- COVER PREVIEW CONTROLS -->
+      <div class="preview-bar" id="coverControlsBar" style="display: none;">
+        <button class="btn btn-primary" onclick="downloadCoverPNG()" style="width: 100%;">📥 Download Cover (1080x1920 PNG)</button>
+      </div>
+
+      <div style="font-size: 0.75rem; color: var(--text-dim); text-align: center; max-width: 320px;">
+        💡 Resolution: 1080×1920 Vertical HD. Direct YouTube Shorts format.
+      </div>
+    </div>
+
+  </main>
+
+  <!-- JAVASCRIPT STATE MACHINE & RENDERING ENGINE -->
+  <script>
+    // Canvas & Render Setup
+    const canvas = document.getElementById('shortsCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // In-memory state (Zero Server/DB persistence)
+    let currentMode = 'shorts'; // 'shorts' | 'cover'
+    let isPlaying = false;
+    let isRecording = false;
+    let isMuted = false;
+    let animationFrameId = null;
+
+    let logoImg = new Image();
+    logoImg.src = '/favicon.svg'; // Default platform logo
+    let logoObjectUrl = null;
+
+    let ctaAudio = new Audio();
+    let ctaAudioObjectUrl = null;
+    let ctaAudioDuration = 4.0; // default 4s fallback
+
+    // Web Audio API Synth setup for countdown and reveal effects
+    let audioCtx = null;
+    let masterGain = null;
+    let audioDestination = null; // Stream destination for MediaRecorder
+
+    function initAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContextClass();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = isMuted ? 0 : 0.8;
+        masterGain.connect(audioCtx.destination);
+        audioDestination = audioCtx.createMediaStreamDestination();
+        masterGain.connect(audioDestination);
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function toggleMute() {
+      isMuted = !isMuted;
+      const btn = document.getElementById('muteToggleBtn');
+      if (isMuted) {
+        btn.innerHTML = '🔇 Sound Muted';
+        btn.style.color = 'var(--rose-accent)';
+        if (masterGain) masterGain.gain.value = 0;
+        ctaAudio.muted = true;
+      } else {
+        btn.innerHTML = '🔊 Sound Enabled';
+        btn.style.color = 'var(--text-main)';
+        if (masterGain) masterGain.gain.value = 0.8;
+        ctaAudio.muted = false;
+      }
+    }
+
+    // Play synthesized Countdown Suspense Tick
+    function playCountdownTick(pitch = 440) {
+      if (isMuted || !audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(pitch, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(pitch * 0.7, audioCtx.currentTime + 0.08);
+
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+
+        osc.connect(gain);
+        gain.connect(masterGain);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.09);
+      } catch (e) {
+        console.warn('Audio tick error', e);
+      }
+    }
+
+    // Play synthesized Reveal Chime Sound
+    function playRevealChime() {
+      if (isMuted || !audioCtx) return;
+      try {
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6 arpeggio
+        notes.forEach((freq, index) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          const startTime = audioCtx.currentTime + (index * 0.06);
+
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, startTime);
+
+          gain.gain.setValueAtTime(0, startTime);
+          gain.gain.linearRampToValueAtTime(0.3, startTime + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.6);
+
+          osc.connect(gain);
+          gain.connect(masterGain);
+
+          osc.start(startTime);
+          osc.stop(startTime + 0.65);
+        });
+      } catch (e) {
+        console.warn('Reveal chime error', e);
+      }
+    }
+
+    // Temporary Logo Upload Handler
+    function handleLogoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (logoObjectUrl) URL.revokeObjectURL(logoObjectUrl);
+      logoObjectUrl = URL.createObjectURL(file);
+      logoImg = new Image();
+      logoImg.onload = () => {
+        document.getElementById('logoPreview').src = logoObjectUrl;
+        document.getElementById('logoFileName').innerText = file.name;
+        if (currentMode === 'shorts') drawIdleFrame();
+        else drawCoverCanvas();
+      };
+      logoImg.src = logoObjectUrl;
+    }
+
+    // Temporary MP3 Audio Upload Handler
+    function handleAudioUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (ctaAudioObjectUrl) URL.revokeObjectURL(ctaAudioObjectUrl);
+      ctaAudioObjectUrl = URL.createObjectURL(file);
+      ctaAudio.src = ctaAudioObjectUrl;
+      ctaAudio.onloadedmetadata = () => {
+        ctaAudioDuration = Math.max(2.5, ctaAudio.duration || 4.0);
+        document.getElementById('audioFileName').innerText = '🎵 ' + file.name;
+        document.getElementById('audioDurationBadge').innerText = `Duration: ${ctaAudioDuration.toFixed(1)}s`;
+        document.getElementById('audioControlsRow').style.display = 'flex';
+      };
+    }
+
+    function removeAudio() {
+      if (ctaAudioObjectUrl) {
+        URL.revokeObjectURL(ctaAudioObjectUrl);
+        ctaAudioObjectUrl = null;
+      }
+      ctaAudio.src = '';
+      ctaAudioDuration = 4.0;
+      document.getElementById('audioInput').value = '';
+      document.getElementById('audioFileName').innerText = 'Click to Select MP3 Audio File';
+      document.getElementById('audioControlsRow').style.display = 'none';
+    }
+
+    function previewAudio() {
+      if (!ctaAudio.src) return;
+      if (ctaAudio.paused) {
+        ctaAudio.currentTime = 0;
+        ctaAudio.play();
+        document.getElementById('audioPlayIcon').innerText = '⏸';
+        ctaAudio.onended = () => {
+          document.getElementById('audioPlayIcon').innerText = '▶';
+        };
+      } else {
+        ctaAudio.pause();
+        document.getElementById('audioPlayIcon').innerText = '▶';
+      }
+    }
+
+    // Cleanup object URLs on tab unload
+    window.addEventListener('beforeunload', () => {
+      if (logoObjectUrl) URL.revokeObjectURL(logoObjectUrl);
+      if (ctaAudioObjectUrl) URL.revokeObjectURL(ctaAudioObjectUrl);
+    });
+
+    // Switch between Shorts & Cover mode
+    function switchTab(mode) {
+      currentMode = mode;
+      document.querySelectorAll('.nav-btn').forEach((b, idx) => {
+        b.classList.toggle('active', (mode === 'shorts' && idx === 0) || (mode === 'cover' && idx === 1));
+      });
+
+      if (mode === 'shorts') {
+        document.getElementById('coverFieldsWrapper').style.display = 'none';
+        document.getElementById('shortsControlsBar').style.display = 'flex';
+        document.getElementById('coverControlsBar').style.display = 'none';
+        drawIdleFrame();
+      } else {
+        stopSequence();
+        document.getElementById('coverFieldsWrapper').style.display = 'block';
+        document.getElementById('shortsControlsBar').style.display = 'none';
+        document.getElementById('coverControlsBar').style.display = 'flex';
+        drawCoverCanvas();
+      }
+    }
+
+    // Wrap canvas text helper with word-break
+    function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight, align = 'center') {
+      ctx.textAlign = align;
+      const words = text.split(' ');
+      let line = '';
+      const lines = [];
+
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && n > 0) {
+          lines.push(line.trim());
+          line = words[n] + ' ';
+        } else {
+          line = testLine;
+        }
+      }
+      lines.push(line.trim());
+
+      const totalHeight = (lines.length - 1) * lineHeight;
+      let startY = y - (totalHeight / 2);
+
+      for (let k = 0; k < lines.length; k++) {
+        ctx.fillText(lines[k], x, startY + (k * lineHeight));
+      }
+      return lines.length;
+    }
+
+    // Rounded rectangle helper
+    function roundRect(ctx, x, y, width, height, radius, fill = true, stroke = false) {
+      if (typeof radius === 'number') {
+        radius = { tl: radius, tr: radius, br: radius, bl: radius };
+      }
+      ctx.beginPath();
+      ctx.moveTo(x + radius.tl, y);
+      ctx.lineTo(x + width - radius.tr, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+      ctx.lineTo(x + width, y + height - radius.br);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+      ctx.lineTo(x + radius.bl, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+      ctx.lineTo(x, y + radius.tl);
+      ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+      ctx.closePath();
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+
+    // Draw Background Grid / Glow
+    function drawBaseBackground() {
+      // Deep Slate Gradient
+      const grad = ctx.createLinearGradient(0, 0, 0, 1920);
+      grad.addColorStop(0, '#060A12');
+      grad.addColorStop(0.5, '#0B1120');
+      grad.addColorStop(1, '#020408');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 1080, 1920);
+
+      // Subtle Top / Bottom Glow Orbs
+      const glowTop = ctx.createRadialGradient(540, 150, 50, 540, 150, 500);
+      glowTop.addColorStop(0, 'rgba(37, 99, 235, 0.25)');
+      glowTop.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = glowTop;
+      ctx.fillRect(0, 0, 1080, 800);
+
+      const glowBottom = ctx.createRadialGradient(540, 1750, 50, 540, 1750, 550);
+      glowBottom.addColorStop(0, 'rgba(79, 70, 229, 0.2)');
+      glowBottom.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = glowBottom;
+      ctx.fillRect(0, 1200, 1080, 720);
+    }
+
+    // Draw Header Bar (Logo + Brand + Exam Pill)
+    function drawHeaderBar(exam, brand, alpha = 1) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+
+      // Brand Logo + Name Pill
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 2;
+      roundRect(ctx, 80, 100, 920, 130, 28, true, true);
+
+      // Logo thumbnail
+      try {
+        if (logoImg.complete && logoImg.naturalWidth !== 0) {
+          ctx.drawImage(logoImg, 110, 125, 80, 80);
+        }
+      } catch (e) {}
+
+      // Brand Name
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '800 44px "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(brand || 'OdishaExamPrep', 215, 178);
+
+      // Exam Name Tag Pill
+      ctx.fillStyle = '#2563EB';
+      roundRect(ctx, 80, 255, 920, 85, 20, true, false);
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '900 36px "Outfit", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🎯 ' + (exam || 'EXAM TARGET 2026').toUpperCase(), 540, 310);
+
+      ctx.restore();
+    }
+
+    // Draw MCQ Question Box
+    function drawQuestionCard(question, alpha = 1) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+
+      // Question Glass Card
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.4)';
+      ctx.lineWidth = 3;
+      roundRect(ctx, 80, 370, 920, 390, 32, true, true);
+
+      // "QUESTION" Badge
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+      roundRect(ctx, 120, 405, 180, 48, 12, true, false);
+      ctx.fillStyle = '#93C5FD';
+      ctx.font = '800 24px "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('QUESTION', 210, 438);
+
+      // Question Text
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '700 42px "Plus Jakarta Sans", sans-serif';
+      drawWrappedText(ctx, question, 540, 580, 840, 58, 'center');
+
+      ctx.restore();
+    }
+
+    // Draw 4 Options Cards
+    function drawOptionsCards(options, revealed = false, correctKey = 'A', alpha = 1) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+
+      const keys = ['A', 'B', 'C', 'D'];
+      const startY = 800;
+      const cardH = 135;
+      const gap = 26;
+
+      keys.forEach((key, index) => {
+        const y = startY + (index * (cardH + gap));
+        const isCorrect = key === correctKey;
+
+        // Background & Border
+        if (revealed) {
+          if (isCorrect) {
+            ctx.fillStyle = '#064E3B'; // Emerald Green Active
+            ctx.strokeStyle = '#10B981';
+            ctx.lineWidth = 6;
+          } else {
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.45)'; // Dimmed wrong
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 2;
+          }
+        } else {
+          ctx.fillStyle = 'rgba(30, 41, 59, 0.85)';
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+          ctx.lineWidth = 2;
+        }
+
+        roundRect(ctx, 80, y, 920, cardH, 24, true, true);
+
+        // Letter Circle (A, B, C, D)
+        if (revealed && isCorrect) {
+          ctx.fillStyle = '#10B981';
+          ctx.beginPath();
+          ctx.arc(150, y + cardH / 2, 40, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#064E3B';
+          ctx.font = '900 36px "Outfit", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('✓', 150, y + cardH / 2 + 12);
+        } else {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+          ctx.beginPath();
+          ctx.arc(150, y + cardH / 2, 40, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = revealed && !isCorrect ? '#64748B' : '#93C5FD';
+          ctx.font = '800 34px "Outfit", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(key, 150, y + cardH / 2 + 12);
+        }
+
+        // Option Text
+        ctx.fillStyle = revealed && !isCorrect ? '#64748B' : '#FFFFFF';
+        ctx.font = isCorrect && revealed ? '800 38px "Plus Jakarta Sans", sans-serif' : '700 36px "Plus Jakarta Sans", sans-serif';
+        ctx.textAlign = 'left';
+        
+        const optionText = options[key] || '';
+        const metrics = ctx.measureText(optionText);
+        if (metrics.width > 680) {
+          drawWrappedText(ctx, optionText, 215, y + cardH / 2, 680, 42, 'left');
+        } else {
+          ctx.fillText(optionText, 215, y + cardH / 2 + 12);
+        }
+      });
+
+      ctx.restore();
+    }
+
+    // Draw Animated Countdown Section
+    function drawCountdownOverlay(secondsLeft, totalSeconds) {
+      ctx.save();
+      const centerY = 1550;
+
+      // Radial Timer Box
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+      ctx.strokeStyle = '#F59E0B';
+      ctx.lineWidth = 4;
+      roundRect(ctx, 360, centerY - 80, 360, 150, 36, true, true);
+
+      // Glowing Timer Number
+      ctx.fillStyle = '#F59E0B';
+      ctx.font = '900 78px "Outfit", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`⏳ ${secondsLeft}s`, 540, centerY + 24);
+
+      ctx.restore();
+    }
+
+    // Draw Answer Revealed Banner
+    function drawAnswerRevealedBanner(correctKey) {
+      ctx.save();
+      const centerY = 1550;
+
+      ctx.fillStyle = '#10B981';
+      roundRect(ctx, 240, centerY - 70, 600, 130, 32, true, false);
+
+      ctx.fillStyle = '#042F2E';
+      ctx.font = '900 46px "Outfit", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`CORRECT ANSWER: (${correctKey}) 🎉`, 540, centerY + 15);
+
+      ctx.restore();
+    }
+
+    // Draw CTA Screen (End Screen)
+    function drawCtaScreen(brand, cta, websiteName, websiteUrl, alpha = 1) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+
+      drawBaseBackground();
+
+      // CTA Center Box
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.5)';
+      ctx.lineWidth = 4;
+      roundRect(ctx, 80, 260, 920, 1400, 48, true, true);
+
+      // Brand Logo large
+      try {
+        if (logoImg.complete && logoImg.naturalWidth !== 0) {
+          ctx.drawImage(logoImg, 465, 360, 150, 150);
+        }
+      } catch (e) {}
+
+      // Brand Title
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '900 64px "Outfit", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(brand || 'OdishaExamPrep', 540, 580);
+
+      // Verified Student Platform Badge
+      ctx.fillStyle = 'rgba(37, 99, 235, 0.2)';
+      roundRect(ctx, 220, 620, 640, 60, 16, true, false);
+      ctx.fillStyle = '#93C5FD';
+      ctx.font = '800 28px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('⭐ 10,000+ Aspirants Trusted Platform', 540, 660);
+
+      // CTA Main Pitch
+      ctx.fillStyle = '#F8FAFC';
+      ctx.font = '800 48px "Plus Jakarta Sans", sans-serif';
+      drawWrappedText(ctx, cta || 'Visit website for 1000+ Practice Tests & Chapter Notes!', 540, 840, 780, 68, 'center');
+
+      // Website URL Button
+      ctx.fillStyle = '#2563EB';
+      roundRect(ctx, 160, 1150, 760, 140, 36, true, false);
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '900 46px "Outfit", sans-serif';
+      ctx.fillText('🔗 ' + (websiteUrl || 'www.odishaexamprep.in'), 540, 1235);
+
+      // Tap link hint
+      ctx.fillStyle = '#F59E0B';
+      ctx.font = '800 36px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('👇 Check Pinned Comment & Bio Link 👇', 540, 1420);
+
+      ctx.restore();
+    }
+
+    // Default Idle Frame (Rendered when form changes or page loads)
+    function drawIdleFrame() {
+      if (isPlaying || isRecording || currentMode !== 'shorts') return;
+
+      const exam = document.getElementById('examName').value;
+      const question = document.getElementById('questionText').value;
+      const brand = document.getElementById('brandName').value;
+      const options = {
+        A: document.getElementById('optionA').value,
+        B: document.getElementById('optionB').value,
+        C: document.getElementById('optionC').value,
+        D: document.getElementById('optionD').value
+      };
+      const correct = document.querySelector('input[name="correctAnswer"]:checked')?.value || 'A';
+
+      drawBaseBackground();
+      drawHeaderBar(exam, brand, 1);
+      drawQuestionCard(question, 1);
+      drawOptionsCards(options, false, correct, 1);
+      drawAnswerRevealedBanner(correct);
+    }
+
+    // YouTube Shorts Cover Generator (1080x1920 PNG)
+    function drawCoverCanvas() {
+      const exam = document.getElementById('examName').value;
+      const question = document.getElementById('questionText').value;
+      const brand = document.getElementById('brandName').value;
+      const hook = document.getElementById('coverHookText').value || '99% Aspirants Get This Wrong! 😱';
+      const options = {
+        A: document.getElementById('optionA').value,
+        B: document.getElementById('optionB').value,
+        C: document.getElementById('optionC').value,
+        D: document.getElementById('optionD').value
+      };
+      const correct = document.querySelector('input[name="correctAnswer"]:checked')?.value || 'A';
+
+      drawBaseBackground();
+
+      // Top High-CTR Hook Banner (Attention Magnet)
+      ctx.fillStyle = '#EF4444';
+      roundRect(ctx, 60, 60, 960, 160, 32, true, false);
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '900 48px "Outfit", sans-serif';
+      ctx.textAlign = 'center';
+      drawWrappedText(ctx, hook.toUpperCase(), 540, 140, 900, 56, 'center');
+
+      // Header & Exam Badge
+      drawHeaderBar(exam, brand, 1);
+
+      // Question Card
+      drawQuestionCard(question, 1);
+
+      // Options
+      drawOptionsCards(options, false, correct, 1);
+
+      // Bottom Cover CTA Sticker
+      ctx.fillStyle = '#F59E0B';
+      roundRect(ctx, 180, 1500, 720, 120, 28, true, false);
+      ctx.fillStyle = '#78350F';
+      ctx.font = '900 42px "Outfit", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('CAN YOU SOLVE IN 5 SECONDS? ⏱️', 540, 1575);
+
+      // Bottom Brand Tag
+      ctx.fillStyle = '#94A3B8';
+      ctx.font = '700 32px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText(document.getElementById('websiteUrl').value, 540, 1720);
+    }
+
+    // Play Sequential Shorts Animation
+    function playShortsSequence(isRecordingMode = false, onComplete = null) {
+      initAudioContext();
+      stopSequence();
+
+      isPlaying = true;
+      document.getElementById('playPreviewBtn').style.display = 'none';
+      document.getElementById('stopPreviewBtn').style.display = 'inline-flex';
+
+      const exam = document.getElementById('examName').value;
+      const question = document.getElementById('questionText').value;
+      const brand = document.getElementById('brandName').value;
+      const cta = document.getElementById('ctaText').value;
+      const websiteName = document.getElementById('websiteName').value;
+      const websiteUrl = document.getElementById('websiteUrl').value;
+      const options = {
+        A: document.getElementById('optionA').value,
+        B: document.getElementById('optionB').value,
+        C: document.getElementById('optionC').value,
+        D: document.getElementById('optionD').value
+      };
+      const correct = document.querySelector('input[name="correctAnswer"]:checked')?.value || 'A';
+      const countdownSecs = parseInt(document.querySelector('input[name="countdownDuration"]:checked')?.value || '5', 10);
+
+      // Timings (in seconds)
+      const tIntro = 2.0;
+      const tQuestion = 2.0;
+      const tOptions = 1.5;
+      const tCountdown = countdownSecs;
+      const tReveal = 2.5;
+      const tCta = ctaAudioObjectUrl ? ctaAudioDuration : 4.0;
+
+      const totalDuration = tIntro + tQuestion + tOptions + tCountdown + tReveal + tCta;
+      const startTime = performance.now();
+
+      let lastCountdownSecond = null;
+      let revealPlayed = false;
+      let ctaAudioStarted = false;
+
+      function renderFrame(now) {
+        if (!isPlaying) return;
+
+        const elapsed = (now - startTime) / 1000;
+
+        if (elapsed < tIntro + tQuestion + tOptions + tCountdown + tReveal) {
+          // --- STAGE 1: MCQ Flow ---
+          drawBaseBackground();
+          drawHeaderBar(exam, brand, 1);
+          drawQuestionCard(question, 1);
+
+          const isRevealed = elapsed >= (tIntro + tQuestion + tOptions + tCountdown);
+          drawOptionsCards(options, isRevealed, correct, 1);
+
+          // In Countdown Stage
+          if (elapsed >= (tIntro + tQuestion + tOptions) && !isRevealed) {
+            const cdElapsed = elapsed - (tIntro + tQuestion + tOptions);
+            const remaining = Math.max(1, Math.ceil(countdownSecs - cdElapsed));
+            drawCountdownOverlay(remaining, countdownSecs);
+
+            if (remaining !== lastCountdownSecond) {
+              lastCountdownSecond = remaining;
+              playCountdownTick(520 + (countdownSecs - remaining) * 80);
+            }
+          }
+
+          // In Answer Reveal Stage
+          if (isRevealed) {
+            drawAnswerRevealedBanner(correct);
+            if (!revealPlayed) {
+              revealPlayed = true;
+              playRevealChime();
+            }
+          }
+        } else if (elapsed < totalDuration) {
+          // --- STAGE 2: CTA Final Screen ---
+          drawCtaScreen(brand, cta, websiteName, websiteUrl, 1);
+
+          if (!ctaAudioStarted && ctaAudioObjectUrl) {
+            ctaAudioStarted = true;
+            ctaAudio.currentTime = 0;
+            if (!isMuted) ctaAudio.play();
+          }
+        } else {
+          // Sequence Finished
+          stopSequence();
+          if (onComplete) onComplete();
+          return;
+        }
+
+        animationFrameId = requestAnimationFrame(renderFrame);
+      }
+
+      animationFrameId = requestAnimationFrame(renderFrame);
+    }
+
+    function stopSequence() {
+      isPlaying = false;
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      if (ctaAudio) ctaAudio.pause();
+      document.getElementById('playPreviewBtn').style.display = 'inline-flex';
+      document.getElementById('stopPreviewBtn').style.display = 'none';
+      if (currentMode === 'shorts') drawIdleFrame();
+    }
+
+    // High-Resolution 60FPS Video Recording & Instant Download
+    function recordAndDownloadShort() {
+      initAudioContext();
+      if (isRecording) return;
+
+      isRecording = true;
+      const statusBadge = document.getElementById('recordStatusBadge');
+      const recordBtn = document.getElementById('recordBtn');
+      statusBadge.classList.add('active');
+      recordBtn.disabled = true;
+      recordBtn.innerText = '⏳ Recording Short...';
+
+      // 1. Capture 60FPS Canvas Video Stream
+      const canvasStream = canvas.captureStream(60);
+
+      // 2. Capture Combined Web Audio & MP3 Stream
+      const combinedTracks = [...canvasStream.getVideoTracks()];
+
+      if (audioDestination) {
+        // If CTA audio exists, route it into Web Audio Destination
+        if (ctaAudioObjectUrl && !ctaAudio.sourceNodeAttached) {
+          try {
+            const source = audioCtx.createMediaElementSource(ctaAudio);
+            source.connect(masterGain);
+            ctaAudio.sourceNodeAttached = true;
+          } catch (e) {}
+        }
+        const audioTracks = audioDestination.stream.getAudioTracks();
+        if (audioTracks.length > 0) {
+          combinedTracks.push(audioTracks[0]);
+        }
+      }
+
+      const stream = new MediaStream(combinedTracks);
+      let options = { mimeType: 'video/webm;codecs=vp9,opus' };
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options = { mimeType: 'video/webm;codecs=vp8,opus' };
+        if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+          options = { mimeType: 'video/webm' };
+        }
+      }
+
+      const recorder = new MediaRecorder(stream, options);
+      const chunks = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) chunks.push(e.data);
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        const videoUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const examName = (document.getElementById('examName').value || 'Short').replace(/[^a-zA-Z0-9]/g, '_');
+        a.href = videoUrl;
+        a.download = `YouTube_Short_${examName}_${Date.now()}.webm`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(videoUrl), 2000);
+
+        isRecording = false;
+        statusBadge.classList.remove('active');
+        recordBtn.disabled = false;
+        recordBtn.innerText = '⏺ Record & Download (.webm)';
+        drawIdleFrame();
+      };
+
+      recorder.start();
+
+      // Play and complete recording
+      playShortsSequence(true, () => {
+        recorder.stop();
+      });
+    }
+
+    // Download Cover PNG
+    function downloadCoverPNG() {
+      drawCoverCanvas();
+      const examName = (document.getElementById('examName').value || 'Cover').replace(/[^a-zA-Z0-9]/g, '_');
+      const link = document.createElement('a');
+      link.download = `Cover_${examName}_${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    // Initial render
+    window.onload = () => {
+      drawIdleFrame();
+    };
+  </script>
+</body>
+</html>

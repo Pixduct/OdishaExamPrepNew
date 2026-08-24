@@ -285,6 +285,38 @@ const ADMIN_TAGLINE_PRESETS: Record<string, { label: string; value: string }[]> 
   ]
 };
 
+const getBankSubject = (b: any): string => {
+  if (!b) return '';
+  if (b.mockSubject) return b.mockSubject;
+  if (b.tagline) {
+    if (b.tagline.includes('"subject"') || b.tagline.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(b.tagline);
+        if (parsed.subject && typeof parsed.subject === 'string' && parsed.subject.trim()) {
+          return parsed.subject.trim();
+        }
+      } catch(e) {}
+    }
+  }
+  return '';
+};
+
+const getMockTestSubject = (t: any): string => {
+  if (!t) return '';
+  if (t.mockSubject) return t.mockSubject;
+  if (t.seriesId) {
+    if (t.seriesId.includes('"subject"') || t.seriesId.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(t.seriesId);
+        if (parsed.subject && typeof parsed.subject === 'string' && parsed.subject.trim()) {
+          return parsed.subject.trim();
+        }
+      } catch(e) {}
+    }
+  }
+  return '';
+};
+
 const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () => void }) => {
   const [activeTab, setActiveTab] = useState<'questions' | 'series' | 'tests' | 'exams' | 'banks' | 'practice' | 'users' | 'updates' | 'settings' | 'subscribers' | 'notifications'>(() => {
     if (typeof window !== 'undefined') {
@@ -301,6 +333,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const [examFilter, setExamFilter] = useState<'all' | 'popular' | 'upcoming'>('all');
   const [testFilter, setTestFilter] = useState<'all' | 'full-length' | 'sectional' | 'pyq' | 'daily'>('all');
   const [testSortDirection, setTestSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [selectedAdminBankSubject, setSelectedAdminBankSubject] = useState<string>('all');
   const [selectedExamIdForTests, setSelectedExamIdForTests] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
@@ -556,13 +589,14 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const [bulkLoading, setBulkLoading] = useState(false);
   const [bulkResults, setBulkResults] = useState<{ success: number; failed: number; errors: string[] } | null>(null);
 
-  // Helper to calculate next category-scoped sequential sort order (starting from 1, filling missing gaps)
+  // Helper to calculate next category- and subject-scoped sequential sort order (starting from 1, filling missing gaps)
   const getNextAvailableOrder = (
     tab: string,
     examId?: string,
     category?: string,
     targetMode?: string,
-    topic?: string
+    topic?: string,
+    subject?: string
   ): number => {
     if (tab === 'banks' || tab === 'practice') {
       const isPractice = (targetMode || tab) === 'practice';
@@ -571,7 +605,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         const matchExam = !examId || b.examId === examId;
         const matchMode = isPractice ? (b.target_mode || 'both') !== 'bank' : (b.target_mode || 'both') !== 'practice';
         const matchCategory = (b.type || 'topic-wise') === targetCategory;
-        return matchExam && matchMode && matchCategory;
+        const matchSubject = !subject || getBankSubject(b).toLowerCase() === subject.toLowerCase();
+        return matchExam && matchMode && matchCategory && matchSubject;
       });
       const existingOrders = scopedBanks
         .map((b: any) => Number(b.sortOrder))
@@ -586,7 +621,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       const scopedTests = mockTests.filter((t: any) => {
         const matchExam = !examId || t.examId === examId;
         const matchCategory = (t.category || t.mockCategory || 'full-length') === targetCategory;
-        return matchExam && matchCategory;
+        const matchSubject = !subject || getMockTestSubject(t).toLowerCase() === subject.toLowerCase();
+        return matchExam && matchCategory && matchSubject;
       });
       const existingOrders = scopedTests
         .map((t: any) => Number(t.sortOrder))
@@ -1372,10 +1408,14 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       }
       if (bankFilter !== 'all') filtered = filtered.filter(b => b.type === bankFilter);
       if (bankTargetModeFilter !== 'all') filtered = filtered.filter(b => (b.target_mode || 'both') === bankTargetModeFilter);
+      if (selectedAdminBankSubject !== 'all') {
+        filtered = filtered.filter(b => getBankSubject(b) === selectedAdminBankSubject);
+      }
       if (searchQuery.trim()) {
         const lowerQ = searchQuery.toLowerCase();
         filtered = filtered.filter(b => {
           const titleMatch = (b.title || '').toLowerCase().includes(lowerQ);
+          const subjMatch = getBankSubject(b).toLowerCase().includes(lowerQ);
           let examNameMatch = false;
           let catMatch = false;
           if (b.examId) {
@@ -1383,10 +1423,15 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
              if (ex && ex.name.toLowerCase().includes(lowerQ)) examNameMatch = true;
           }
           if (b.type && b.type.toLowerCase().includes(lowerQ)) catMatch = true;
-          return titleMatch || examNameMatch || catMatch;
+          return titleMatch || subjMatch || examNameMatch || catMatch;
         });
       }
       filtered = [...filtered].sort((a, b) => {
+        const subjA = getBankSubject(a);
+        const subjB = getBankSubject(b);
+        if (subjA !== subjB && selectedAdminBankSubject === 'all') {
+          return subjA.localeCompare(subjB);
+        }
         const orderA = a.sortOrder ?? 9999;
         const orderB = b.sortOrder ?? 9999;
         return bankSortDirection === 'desc' ? orderB - orderA : orderA - orderB;
@@ -1443,11 +1488,76 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         const orderB = b.sortOrder ?? 9999;
         return dir === 'desc' ? orderB - orderA : orderA - orderB;
       });
+    } else if (activeTab === 'banks' || activeTab === 'practice') {
+      sorted.sort((a, b) => {
+        const subjA = getBankSubject(a);
+        const subjB = getBankSubject(b);
+        if (subjA !== subjB && selectedAdminBankSubject === 'all') {
+          return subjA.localeCompare(subjB);
+        }
+        const orderA = a.sortOrder ?? 9999;
+        const orderB = b.sortOrder ?? 9999;
+        return bankSortDirection === 'desc' ? orderB - orderA : orderA - orderB;
+      });
     } else {
       sorted.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
     }
     setItems(sorted);
-  }, [activeTab, questions, series, mockTests, exams, banks, users, filterExamId, searchQuery, examFilter, questionFilter, testFilter, bankFilter, bankTargetModeFilter, bankSubTab, testSortDirection, selectedExamIdForTests, selectedCategoryForTests, selectedExamIdForBanks, selectedExamIdForSeries, selectedExamIdForQuestions, selectedTypeForQuestions, selectedCategoryForQuestions, selectedTargetIdForQuestions]);
+  }, [activeTab, questions, series, mockTests, exams, banks, users, filterExamId, searchQuery, examFilter, questionFilter, testFilter, bankFilter, bankTargetModeFilter, bankSubTab, bankSortDirection, testSortDirection, selectedAdminBankSubject, selectedExamIdForTests, selectedCategoryForTests, selectedExamIdForBanks, selectedExamIdForSeries, selectedExamIdForQuestions, selectedTypeForQuestions, selectedCategoryForQuestions, selectedTargetIdForQuestions]);
+
+  const availableAdminSubjects = useMemo(() => {
+    if (activeTab === 'banks' || activeTab === 'practice') {
+      let scoped = banks;
+      if (selectedExamIdForBanks) {
+        scoped = scoped.filter(b => b.examId === selectedExamIdForBanks);
+      }
+      if (activeTab === 'banks') {
+        if (bankSubTab === 'banks') scoped = scoped.filter(b => (b.target_mode || 'both') !== 'practice');
+        else if (bankSubTab === 'practice') scoped = scoped.filter(b => (b.target_mode || 'both') !== 'bank');
+      } else if (activeTab === 'practice') {
+        scoped = scoped.filter(b => (b.target_mode || 'both') !== 'bank');
+      }
+      if (bankFilter !== 'all') {
+        scoped = scoped.filter(b => b.type === bankFilter);
+      }
+      const subjectsMap = new Map<string, number>();
+      scoped.forEach(b => {
+        const subj = getBankSubject(b);
+        if (subj) {
+          subjectsMap.set(subj, (subjectsMap.get(subj) || 0) + 1);
+        }
+      });
+      return Array.from(subjectsMap.entries()).map(([name, count]) => ({ name, count }));
+    } else if (activeTab === 'tests' && selectedCategoryForTests === 'sectional') {
+      let scoped = mockTests;
+      if (selectedExamIdForTests) {
+        scoped = scoped.filter(mt => {
+          try {
+            if (mt.seriesId) return JSON.parse(mt.seriesId).examId === selectedExamIdForTests;
+          } catch(e) {}
+          return mt.examId === selectedExamIdForTests;
+        });
+      }
+      const subjectsMap = new Map<string, number>();
+      scoped.forEach(mt => {
+        const subj = getMockTestSubject(mt);
+        if (subj) {
+          subjectsMap.set(subj, (subjectsMap.get(subj) || 0) + 1);
+        }
+      });
+      return Array.from(subjectsMap.entries()).map(([name, count]) => ({ name, count }));
+    }
+    return [];
+  }, [activeTab, banks, mockTests, selectedExamIdForBanks, selectedExamIdForTests, bankSubTab, bankFilter, selectedCategoryForTests]);
+
+  useEffect(() => {
+    if (selectedAdminBankSubject !== 'all') {
+      const exists = availableAdminSubjects.some(s => s.name === selectedAdminBankSubject);
+      if (!exists && availableAdminSubjects.length > 0) {
+        setSelectedAdminBankSubject('all');
+      }
+    }
+  }, [availableAdminSubjects, selectedAdminBankSubject]);
 
   const actualExams = React.useMemo(() => {
     return exams.filter(e => {
@@ -7042,6 +7152,22 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                       <span className="text-slate-700 font-extrabold">{exams.find(e => e.id === selectedExamIdForBanks)?.name || 'Selected Exam'}</span>
                       <ChevronRight className="w-4 h-4" />
                       <span className="text-slate-700 font-extrabold">{activeTab === 'practice' ? 'Practice Sets' : 'Question Banks'}</span>
+                      {selectedAdminBankSubject !== 'all' && (
+                        <>
+                          <ChevronRight className="w-4 h-4" />
+                          <span className="text-brand-600 font-extrabold flex items-center gap-1 bg-brand-50 px-2.5 py-0.5 rounded-lg border border-brand-200/60">
+                            <span>📘 {selectedAdminBankSubject}</span>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedAdminBankSubject('all')}
+                              className="ml-1 text-slate-400 hover:text-red-500 font-black cursor-pointer transition-colors"
+                              title="Clear subject filter"
+                            >
+                              ✕
+                            </button>
+                          </span>
+                        </>
+                      )}
                     </div>
 
                     <div className="bg-white rounded-[2rem] border border-slate-200/50 p-6 flex flex-col md:flex-row gap-5 items-center justify-between shadow-sm">
@@ -7203,6 +7329,22 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                            return selectedCategoryForTests ? (selectedCategoryForTests.charAt(0).toUpperCase() + selectedCategoryForTests.slice(1).replace('-', ' ') + ' Tests') : 'Mock Tests';
                         })()}
                       </span>
+                      {selectedCategoryForTests === 'sectional' && selectedAdminBankSubject !== 'all' && (
+                        <>
+                          <ChevronRight className="w-4 h-4" />
+                          <span className="text-brand-600 font-extrabold flex items-center gap-1 bg-brand-50 px-2.5 py-0.5 rounded-lg border border-brand-200/60">
+                            <span>📘 {selectedAdminBankSubject}</span>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedAdminBankSubject('all')}
+                              className="ml-1 text-slate-400 hover:text-red-500 font-black cursor-pointer transition-colors"
+                              title="Clear subject filter"
+                            >
+                              ✕
+                            </button>
+                          </span>
+                        </>
+                      )}
                     </div>
 
                     <div className="bg-white rounded-[2rem] border border-slate-200/50 p-6 flex flex-col md:flex-row gap-5 items-center justify-between shadow-sm">
@@ -7374,6 +7516,58 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                   </div>
                 )}
 
+                {/* ── Subject Hierarchy Filter Pills Bar ── */}
+                {availableAdminSubjects.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-2 p-2.5 bg-white/80 backdrop-blur-md rounded-2xl border border-slate-200/80 shadow-2xs mb-4">
+                    <span className="text-xs font-black uppercase tracking-wider text-slate-400 px-3 py-1 flex items-center gap-1.5">
+                      <span>🏷️</span> Subject Hierarchy ({availableAdminSubjects.length}):
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedAdminBankSubject('all')}
+                      className={cn(
+                        "flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer",
+                        selectedAdminBankSubject === 'all'
+                          ? "bg-brand-600 text-white shadow-md shadow-brand-500/20"
+                          : "bg-slate-100/80 text-slate-600 hover:text-slate-900 border border-slate-200/60 hover:bg-slate-200/60"
+                      )}
+                    >
+                      <span>🌟 All Subjects</span>
+                      <span className={cn(
+                        "px-2 py-0.5 rounded-md text-[10px] font-black",
+                        selectedAdminBankSubject === 'all' ? "bg-white/20 text-white" : "bg-slate-200/80 text-slate-700"
+                      )}>
+                        {availableAdminSubjects.reduce((acc, s) => acc + s.count, 0)}
+                      </span>
+                    </button>
+
+                    {availableAdminSubjects.map(subj => {
+                      const isActive = selectedAdminBankSubject === subj.name;
+                      return (
+                        <button
+                          key={subj.name}
+                          type="button"
+                          onClick={() => setSelectedAdminBankSubject(subj.name)}
+                          className={cn(
+                            "flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer",
+                            isActive
+                              ? "bg-slate-900 text-white shadow-md shadow-slate-900/10"
+                              : "bg-slate-100/80 text-slate-600 hover:text-slate-900 border border-slate-200/60 hover:bg-slate-200/60"
+                          )}
+                        >
+                          <span>📘 {subj.name}</span>
+                          <span className={cn(
+                            "px-2 py-0.5 rounded-md text-[10px] font-black",
+                            isActive ? "bg-white/20 text-white" : "bg-slate-200/80 text-slate-700"
+                          )}>
+                            {subj.count}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
                 <div className="glass rounded-[2rem] border border-slate-200/50 shadow-xl overflow-hidden bg-white/70">
                   <div className="grid grid-cols-12 bg-slate-100/50 border-b border-slate-200/60 px-8 py-5 text-xs font-black uppercase text-slate-500 tracking-widest">
                       {activeTab === 'tests' || activeTab === 'banks' || activeTab === 'practice' ? (
@@ -7402,7 +7596,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                           <div className="col-span-1">Order</div>
                           <div className="col-span-5">Basic Info</div>
                           <div className="col-span-2">Details</div>
-                          <div className="col-span-3 text-right pr-4">Actions</div>
+                          <div className="col-span-3 text-right">Actions</div>
                         </>
                       ) : (
                         <>
@@ -7429,24 +7623,24 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                           </div>
                           <div className="col-span-5">Basic Info</div>
                           <div className="col-span-3">Details</div>
-                          <div className="col-span-3 text-right pr-4">Actions</div>
+                          <div className="col-span-3 text-right">Actions</div>
                         </>
                       )}
                   </div>
 
-                  {loading && items.length === 0 ? (
-                    <div className="divide-y divide-slate-100/80 animate-pulse">
-                      {[1, 2, 3, 4, 5].map((idx) => (
-                        <div key={idx} className="px-8 py-6 grid grid-cols-12 items-center gap-4">
+                  {loading ? (
+                    <div className="divide-y divide-slate-100">
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <div key={i} className="px-8 py-6 grid grid-cols-12 items-center animate-pulse">
                           <div className="col-span-1 flex items-center">
-                            <div className="w-4 h-4 bg-slate-200/80 rounded-lg" />
+                            <div className="w-4 h-4 bg-slate-200/70 rounded-lg" />
                           </div>
-                          <div className="col-span-5 flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-2xl bg-slate-200/80 shrink-0" />
-                            <div className="space-y-2 flex-1 min-w-0">
-                              <div className="h-4 bg-slate-200/80 rounded-md w-3/4" />
-                              <div className="h-3 bg-slate-100 rounded-md w-1/2" />
-                            </div>
+                          <div className="col-span-1">
+                            <div className="w-8 h-8 bg-slate-200/70 rounded-xl" />
+                          </div>
+                          <div className="col-span-4 space-y-2">
+                            <div className="h-4 bg-slate-200/80 rounded-md w-3/4" />
+                            <div className="h-3 bg-slate-200/50 rounded-md w-1/3" />
                           </div>
                           <div className="col-span-3">
                             <div className="h-3.5 bg-slate-200/60 rounded-md w-2/3" />
@@ -7468,11 +7662,49 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                      </div>
                   ) : (
                     <Reorder.Group axis="y" values={items} onReorder={handleReorder} className="divide-y divide-slate-100">
-                      {items.map((item) => (
-                        <Reorder.Item key={item.id} value={item} className="bg-white/50">
-                           <div className="hover:bg-brand-50/30 transition-colors group px-8 py-6 grid grid-cols-12 items-center">
-                              {activeTab === 'tests' || activeTab === 'banks' || activeTab === 'practice' ? (
-                                 <>
+                      {items.map((item, index) => {
+                        const isSubjectScoped = activeTab === 'banks' || activeTab === 'practice' || (activeTab === 'tests' && selectedCategoryForTests === 'sectional');
+                        const itemSubject = isSubjectScoped ? ((activeTab === 'banks' || activeTab === 'practice') ? getBankSubject(item) : getMockTestSubject(item)) : '';
+                        const prevItem = index > 0 ? items[index - 1] : null;
+                        const prevSubject = prevItem && isSubjectScoped ? ((activeTab === 'banks' || activeTab === 'practice') ? getBankSubject(prevItem) : getMockTestSubject(prevItem)) : null;
+                        const showSubjectHeader = isSubjectScoped && availableAdminSubjects.length > 1 && selectedAdminBankSubject === 'all' && (index === 0 || itemSubject !== prevSubject);
+                        const subjectItemCount = showSubjectHeader
+                          ? items.filter(it => ((activeTab === 'banks' || activeTab === 'practice') ? getBankSubject(it) : getMockTestSubject(it)) === itemSubject).length
+                          : 0;
+
+                        return (
+                          <React.Fragment key={item.id}>
+                            {showSubjectHeader && (
+                              <div className="bg-gradient-to-r from-slate-100 via-slate-50 to-white px-8 py-3.5 border-y border-slate-200/80 flex items-center justify-between shadow-2xs select-none">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-sm border border-brand-100/60 shadow-2xs">
+                                    📘
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-black text-sm text-slate-800 tracking-tight uppercase">
+                                      {itemSubject || 'General / Unassigned'}
+                                    </span>
+                                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-brand-50 text-brand-700 border border-brand-200/60">
+                                      {subjectItemCount} {activeTab === 'tests' ? 'Tests' : 'Sets'}
+                                    </span>
+                                  </div>
+                                </div>
+                                {itemSubject && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedAdminBankSubject(itemSubject)}
+                                    className="px-3 py-1 bg-white hover:bg-brand-50 text-slate-600 hover:text-brand-600 rounded-lg text-xs font-black border border-slate-200 shadow-2xs transition-all flex items-center gap-1 cursor-pointer"
+                                    title={`Filter list to ${itemSubject}`}
+                                  >
+                                    <span>Focus on {itemSubject} →</span>
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                            <Reorder.Item value={item} className="bg-white/50">
+                              <div className="hover:bg-brand-50/30 transition-colors group px-8 py-6 grid grid-cols-12 items-center">
+                                {activeTab === 'tests' || activeTab === 'banks' || activeTab === 'practice' ? (
+                                  <>
                                     <div className="col-span-1 flex items-center">
                                       <input 
                                         type="checkbox"
@@ -7719,8 +7951,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                               </div>
                            </div>
                         </Reorder.Item>
-                      ))}
-                    </Reorder.Group>
+                      </React.Fragment>
+                    );
+                  })}
+                </Reorder.Group>
                   )}
 
                   {/* Pagination Controls */}

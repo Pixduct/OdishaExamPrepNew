@@ -1793,6 +1793,7 @@
       let ctaAudioStarted = false;
       let subBoomPlayedIntro = false;
       let subBoomPlayedOptions = false;
+      let bgStoppedForTimer = false;
 
       if (bgAudioMode === 'synth') {
         startAtmosphericDrone();
@@ -1816,6 +1817,40 @@
         }
 
         renderShortsFrameAtTime(elapsed, totalDuration, config);
+
+        if (elapsed >= (tIntro + tQuestion + tOptions) && !bgStoppedForTimer) {
+          bgStoppedForTimer = true;
+          // ⏱ Timer started — fade out background music smoothly (0.8s)
+          if (bgAudioMode === 'synth' && droneGainNode && audioCtx) {
+            try {
+              droneGainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+              droneGainNode.gain.setValueAtTime(droneGainNode.gain.value, audioCtx.currentTime);
+              droneGainNode.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + 0.8);
+            } catch(e) {}
+            setTimeout(function() {
+              activeDroneOscs.forEach(function(osc) {
+                try { osc.stop(); osc.disconnect(); } catch(e) {}
+              });
+              activeDroneOscs = [];
+              droneGainNode = null;
+            }, 900);
+          } else if (bgAudioMode === 'custom' && bgMusicAudio && !bgMusicAudio.paused) {
+            // Fade out custom MP3 over 0.8 seconds
+            const startVol = bgMusicAudio.volume;
+            const steps = 20;
+            const stepTime = 800 / steps;
+            let step = 0;
+            const fadeInterval = setInterval(function() {
+              step++;
+              bgMusicAudio.volume = Math.max(0, startVol * (1 - step / steps));
+              if (step >= steps) {
+                clearInterval(fadeInterval);
+                bgMusicAudio.pause();
+                bgMusicAudio.volume = startVol; // restore for next play
+              }
+            }, stepTime);
+          }
+        }
 
         if (elapsed >= (tIntro + tQuestion + tOptions) && elapsed < (tIntro + tQuestion + tOptions + tCountdown)) {
           const cdElapsed = elapsed - (tIntro + tQuestion + tOptions);

@@ -1891,11 +1891,13 @@
 
         renderShortsFrameAtTime(elapsed, totalDuration, config);
 
-        if (elapsed >= (tIntro + tQuestion + tOptions) && !bgStoppedForTimer) {
+        // Start fade XFADE seconds BEFORE countdown so it finishes at tick-zero (no overlap)
+        const XFADE = 1.2;
+        const fadeStartsAt = (tIntro + tQuestion + tOptions) - XFADE;
+        if (elapsed >= fadeStartsAt && !bgStoppedForTimer) {
           bgStoppedForTimer = true;
-          const XFADE = 1.2; // crossfade duration in seconds
 
-          // ① Fade OUT background music
+          // ① Fade OUT background music — completes exactly when first tick plays
           if (bgAudioMode === 'synth' && droneGainNode && audioCtx) {
             try {
               droneGainNode.gain.cancelScheduledValues(audioCtx.currentTime);
@@ -1925,7 +1927,7 @@
             }, stepTime);
           }
 
-          // ② Simultaneously fade IN timer tension music
+          // ② Timer tension music fades in over same XFADE window — fully loud at tick-zero
           startTimerTensionMusic(XFADE);
         }
 

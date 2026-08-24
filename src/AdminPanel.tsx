@@ -7953,7 +7953,13 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                     <h3 className="font-black text-xl tracking-tight text-slate-900">
                       Bulk Import{' '}
                       <span className="text-brand-600 capitalize">
-                        {activeTab === 'banks' ? 'Question Banks' : activeTab === 'practice' ? 'Practice Sets' : 'Mock Tests'}
+                        {activeTab === 'tests'
+                          ? 'Mock Tests'
+                          : bulkGlobalTargetMode === 'bank'
+                            ? 'Question Banks'
+                            : bulkGlobalTargetMode === 'practice'
+                              ? 'Practice Sets'
+                              : 'Question Banks & Practice Sets'}
                       </span>
                     </h3>
                     <p className="text-xs text-slate-400 font-semibold mt-0.5">Paste JSON → one click → all records created with auto sortOrder</p>
@@ -7996,33 +8002,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                     </select>
                   </div>
 
-                  {/* Category pills */}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-black text-slate-600 uppercase tracking-wider">
-                      {activeTab === 'tests' ? 'Mock Category *' : 'Practice Category *'}
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {(activeTab === 'tests'
-                        ? ['full-length', 'sectional', 'pyq', 'daily']
-                        : ['topic-wise', 'exam-focused', 'revision-sets', 'pyq-collections']
-                      ).map(cat => (
-                        <button
-                          key={cat}
-                          type="button"
-                          onClick={() => setBulkGlobalCategory(cat)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                            bulkGlobalCategory === cat
-                              ? 'bg-brand-600 text-white border-brand-600 shadow-md'
-                              : 'bg-white text-slate-600 border-slate-200 hover:border-brand-300'
-                          }`}
-                        >
-                          {cat.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Target Mode — banks/practice only */}
+                  {/* Target Mode — banks/practice only (placed above Category for dynamic sync) */}
                   {(activeTab === 'banks' || activeTab === 'practice') && (
                     <div className="space-y-1.5">
                       <label className="text-xs font-black text-slate-600 uppercase tracking-wider">Display Target *</label>
@@ -8034,7 +8014,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                             onClick={() => setBulkGlobalTargetMode(m)}
                             className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                               bulkGlobalTargetMode === m
-                                ? 'bg-brand-600 text-white border-brand-600'
+                                ? 'bg-brand-600 text-white border-brand-600 shadow-sm font-black'
                                 : 'bg-white text-slate-600 border-slate-200 hover:border-brand-300'
                             }`}
                           >
@@ -8044,6 +8024,62 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                       </div>
                     </div>
                   )}
+
+                  {/* Category pills — dynamically rendered based on target mode */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-black text-slate-600 uppercase tracking-wider">
+                      {activeTab === 'tests'
+                        ? 'Mock Test Category *'
+                        : bulkGlobalTargetMode === 'bank'
+                          ? 'Question Bank Category *'
+                          : bulkGlobalTargetMode === 'practice'
+                            ? 'Practice Category *'
+                            : 'Category (Bank & Practice) *'}
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {(activeTab === 'tests'
+                        ? [
+                            { value: 'full-length', label: 'Full-Length' },
+                            { value: 'sectional', label: 'Sectional' },
+                            { value: 'pyq', label: 'Previous Year (PYQ)' },
+                            { value: 'daily', label: 'Daily Practice' }
+                          ]
+                        : bulkGlobalTargetMode === 'bank'
+                          ? [
+                              { value: 'topic-wise', label: 'Topic-Wise Bank' },
+                              { value: 'exam-focused', label: 'Exam-Focused Bank' },
+                              { value: 'revision-sets', label: 'Revision Sets' },
+                              { value: 'pyq-collections', label: 'PYQ Collections' }
+                            ]
+                          : bulkGlobalTargetMode === 'practice'
+                            ? [
+                                { value: 'topic-wise', label: 'Chapter-Wise Practice' },
+                                { value: 'exam-focused', label: 'High-Yield Topic Banks' },
+                                { value: 'revision-sets', label: 'Daily Speed Quizzes' },
+                                { value: 'pyq-collections', label: 'Topic-Wise PYQs' }
+                              ]
+                            : [
+                                { value: 'topic-wise', label: 'Chapter-Wise / Topic-Wise' },
+                                { value: 'exam-focused', label: 'High-Yield / Exam-Focused' },
+                                { value: 'revision-sets', label: 'Daily Quizzes / Revision' },
+                                { value: 'pyq-collections', label: 'Topic PYQs / PYQ Collections' }
+                              ]
+                      ).map(cat => (
+                        <button
+                          key={cat.value}
+                          type="button"
+                          onClick={() => setBulkGlobalCategory(cat.value)}
+                          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                            bulkGlobalCategory === cat.value
+                              ? 'bg-brand-600 text-white border-brand-600 shadow-md font-black'
+                              : 'bg-white text-slate-600 border-slate-200 hover:border-brand-300'
+                          }`}
+                        >
+                          {cat.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
                   {/* Duration / Marks / Negative — tests only */}
                   {activeTab === 'tests' && (

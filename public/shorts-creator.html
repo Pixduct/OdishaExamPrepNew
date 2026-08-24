@@ -673,7 +673,7 @@
 
       <!-- SAFE ZONE HELPER TOGGLE -->
       <button type="button" class="btn" id="safeZoneToggleBtn" onclick="toggleSafeZoneGuide()" style="font-size: 0.75rem; border-color: rgba(59, 130, 246, 0.4);">
-        📱 Show YouTube Feed & Mobile Overlay Guide
+        📱 Show Real YouTube Mobile Overlay Guide
       </button>
 
       <!-- SHORTS PREVIEW CONTROLS -->
@@ -689,7 +689,7 @@
       </div>
 
       <div style="font-size: 0.75rem; color: var(--text-dim); text-align: center; max-width: 320px;">
-        💡 Perfectly proportioned 9:16 layout with feed title safety zone.
+        💡 Real-world YouTube mobile proportions (Y: 120 to 1540 filled).
       </div>
     </div>
 
@@ -755,7 +755,7 @@
       const btn = document.getElementById('safeZoneToggleBtn');
       btn.style.background = showSafeZoneGuide ? 'rgba(59, 130, 246, 0.2)' : 'var(--bg-card)';
       btn.style.color = showSafeZoneGuide ? '#93C5FD' : 'var(--text-main)';
-      btn.innerText = showSafeZoneGuide ? '📱 Hide Guide Overlay' : '📱 Show YouTube Feed & Mobile Overlay Guide';
+      btn.innerText = showSafeZoneGuide ? '📱 Hide Guide Overlay' : '📱 Show Real YouTube Mobile Overlay Guide';
       if (currentMode === 'shorts') drawIdleFrame();
       else drawCoverCanvas();
     }
@@ -957,53 +957,55 @@
       ctx.fillRect(0, 1000, 1080, 920);
     }
 
+    // Accurate Real-World YouTube Mobile UI Overlay Guide
     function renderYouTubeOverlayGuide() {
       if (!showSafeZoneGuide) return;
 
       ctx.save();
-      ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.16)';
       ctx.strokeStyle = '#EF4444';
       ctx.lineWidth = 2;
       ctx.setLineDash([10, 10]);
 
       if (currentMode === 'shorts') {
-        ctx.fillRect(0, 0, 1080, 160);
-        ctx.strokeRect(0, 0, 1080, 160);
+        // Real-world Top status/search margin (0 to 100px)
+        ctx.fillRect(0, 0, 1080, 100);
+        ctx.strokeRect(0, 0, 1080, 100);
 
-        ctx.fillRect(0, 1360, 1080, 560);
-        ctx.strokeRect(0, 1360, 1080, 560);
+        // Real-world Bottom channel avatar, subscribe button, and title overlay (Y: 1540 to 1920)
+        ctx.fillRect(0, 1540, 1080, 380);
+        ctx.strokeRect(0, 1540, 1080, 380);
 
-        ctx.fillRect(920, 650, 160, 710);
-        ctx.strokeRect(920, 650, 160, 710);
+        // Real-world Right-side narrow button margin (X: 980 to 1080)
+        ctx.fillRect(980, 750, 100, 680);
+        ctx.strokeRect(980, 750, 100, 680);
 
         ctx.setLineDash([]);
         ctx.fillStyle = '#EF4444';
         ctx.font = '800 24px "Plus Jakarta Sans", sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('⚠️ TOP OVERLAY (Search & Menu)', 540, 100);
-        ctx.fillText('⚠️ BOTTOM OVERLAY (Title, Channel Avatar, Subscribe & Nav)', 540, 1500);
-        ctx.fillText('⚠️ SIDE BUTTONS', 1000, 700);
+        ctx.fillText('⚠️ TOP STATUS & SEARCH', 540, 60);
+        ctx.fillText('⚠️ BOTTOM CHANNEL AVATAR, TITLE & NAV (Y: 1540–1920)', 540, 1720);
 
         ctx.strokeStyle = '#10B981';
         ctx.lineWidth = 3;
-        ctx.strokeRect(60, 170, 960, 1180);
+        ctx.strokeRect(50, 110, 980, 1420);
         ctx.fillStyle = '#10B981';
-        ctx.fillText('✅ YOUTUBE SHORTS 100% VISIBLE SAFE ZONE', 540, 195);
+        ctx.fillText('✅ 100% VISIBLE REAL SHORTS VIDEO SAFE ZONE', 540, 135);
       } else {
-        // Feed Grid View overlay Guide for Cover Thumbnail
-        ctx.fillRect(0, 1580, 1080, 340);
-        ctx.strokeRect(0, 1580, 1080, 340);
+        // Cover Feed Guide
+        ctx.fillRect(0, 1540, 1080, 380);
+        ctx.strokeRect(0, 1540, 1080, 380);
 
         ctx.setLineDash([]);
         ctx.fillStyle = '#EF4444';
         ctx.font = '800 28px "Plus Jakarta Sans", sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText('⚠️ YOUTUBE FEED TITLE OVERLAY ZONE (Bottom ~18%)', 540, 1720);
-        ctx.fillText('White video title renders here with zero card collision', 540, 1760);
 
         ctx.strokeStyle = '#10B981';
         ctx.lineWidth = 3;
-        ctx.strokeRect(50, 80, 980, 1480);
+        ctx.strokeRect(50, 80, 980, 1450);
         ctx.fillStyle = '#10B981';
         ctx.fillText('✅ 100% VISIBLE COVER THUMBNAIL ZONE', 540, 60);
       }
@@ -1012,7 +1014,8 @@
     }
 
     // ==========================================
-    // 📐 VIDEO RENDERER
+    // 📐 RE-ENGINEERED 9:16 SHORTS VIDEO RENDERER
+    // (Fills Y: 120 to Y: 1530 with studio proportions)
     // ==========================================
 
     function drawHeaderBar(exam, brand, alpha) {
@@ -1020,29 +1023,31 @@
       ctx.save();
       ctx.globalAlpha = alpha;
 
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+      // Brand Header Pill (Y: 120 to 220 - Height 100px)
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
-      ctx.lineWidth = 2;
-      roundRect(ctx, 70, 175, 940, 95, 22, true, true);
+      ctx.lineWidth = 2.5;
+      roundRect(ctx, 60, 120, 960, 100, 24, true, true);
 
       try {
         if (logoImg.complete && logoImg.naturalWidth !== 0) {
-          ctx.drawImage(logoImg, 95, 190, 65, 65);
+          ctx.drawImage(logoImg, 90, 135, 70, 70);
         }
       } catch (e) {}
 
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = '800 36px "Plus Jakarta Sans", sans-serif';
+      ctx.font = '800 38px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText((brand || 'OdishaExamPrep') + ' ✔', 180, 236);
+      ctx.fillText((brand || 'OdishaExamPrep') + ' ✔', 180, 184);
 
+      // Exam Target Pill (Y: 235 to 310 - Height 75px)
       ctx.fillStyle = '#2563EB';
-      roundRect(ctx, 70, 285, 940, 70, 18, true, false);
+      roundRect(ctx, 60, 235, 960, 75, 20, true, false);
 
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = '900 30px "Outfit", sans-serif';
+      ctx.font = '900 32px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('🎯 ' + (exam || 'EXAM TARGET 2026').toUpperCase(), 540, 331);
+      ctx.fillText('🎯 ' + (exam || 'EXAM TARGET 2026').toUpperCase(), 540, 284);
 
       ctx.restore();
     }
@@ -1052,34 +1057,35 @@
       ctx.save();
       ctx.globalAlpha = alpha;
 
-      const cardX = 70;
-      const cardY = 375;
-      const cardW = 940;
-      const cardH = 270;
+      const cardX = 60;
+      const cardY = 325;
+      const cardW = 960;
+      const cardH = 345; // Grand, spacious question card
 
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
-      ctx.strokeStyle = 'rgba(59, 130, 246, 0.55)';
-      ctx.lineWidth = 3;
-      roundRect(ctx, cardX, cardY, cardW, cardH, 26, true, true);
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.96)';
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.6)';
+      ctx.lineWidth = 3.5;
+      roundRect(ctx, cardX, cardY, cardW, cardH, 28, true, true);
 
-      ctx.fillStyle = 'rgba(37, 99, 235, 0.25)';
-      roundRect(ctx, 105, 396, 180, 40, 12, true, false);
+      // "QUESTION" Badge Header Pill
+      ctx.fillStyle = 'rgba(37, 99, 235, 0.28)';
+      roundRect(ctx, 100, 350, 190, 44, 14, true, false);
       ctx.fillStyle = '#93C5FD';
-      ctx.font = '800 20px "Plus Jakarta Sans", sans-serif';
+      ctx.font = '800 22px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('❓ QUESTION', 195, 424);
+      ctx.fillText('❓ QUESTION', 195, 380);
 
       const maxWidth = cardW - 100;
-      const maxAvailableHeight = cardH - 85;
+      const maxAvailableHeight = cardH - 95;
       
-      let optimalSize = 40;
+      let optimalSize = 44;
       let optimalLines = [];
-      let optimalLineHeight = 52;
+      let optimalLineHeight = 56;
 
-      for (let size = 42; size >= 26; size -= 2) {
+      for (let size = 46; size >= 28; size -= 2) {
         ctx.font = '700 ' + size + 'px "Plus Jakarta Sans", sans-serif';
         const lines = getWrappedLines(ctx, question, maxWidth);
-        const lHeight = size * 1.32;
+        const lHeight = size * 1.34;
         const totalH = lines.length * lHeight;
 
         if (totalH <= maxAvailableHeight && lines.length <= 4) {
@@ -1098,7 +1104,7 @@
       ctx.textAlign = 'center';
 
       const totalBlockHeight = (optimalLines.length - 1) * optimalLineHeight;
-      const centerY = (cardY + 50) + (maxAvailableHeight / 2);
+      const centerY = (cardY + 55) + (maxAvailableHeight / 2);
       const startY = centerY - (totalBlockHeight / 2);
 
       for (let i = 0; i < optimalLines.length; i++) {
@@ -1116,10 +1122,10 @@
       ctx.globalAlpha = alpha;
 
       const keys = ['A', 'B', 'C', 'D'];
-      const startY = 665;
-      const cardH = 110;
+      const startY = 690;
+      const cardH = 135; // Luxurious 135px option card
       const gap = 16;
-      const cardW = 940;
+      const cardW = 960;
 
       keys.forEach(function(key, index) {
         const y = startY + (index * (cardH + gap));
@@ -1141,39 +1147,40 @@
           ctx.lineWidth = 2;
         }
 
-        roundRect(ctx, 70, y, cardW, cardH, 20, true, true);
+        roundRect(ctx, 60, y, cardW, cardH, 24, true, true);
 
-        const circleCenterX = 135;
+        // Letter Circle (A, B, C, D)
+        const circleCenterX = 130;
         const circleCenterY = y + cardH / 2;
 
         if (revealed && isCorrect) {
           ctx.fillStyle = '#10B981';
           ctx.beginPath();
-          ctx.arc(circleCenterX, circleCenterY, 34, 0, Math.PI * 2);
+          ctx.arc(circleCenterX, circleCenterY, 38, 0, Math.PI * 2);
           ctx.fill();
           ctx.fillStyle = '#064E3B';
-          ctx.font = '900 32px "Outfit", sans-serif';
+          ctx.font = '900 36px "Outfit", sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText('✓', circleCenterX, circleCenterY + 11);
+          ctx.fillText('✓', circleCenterX, circleCenterY + 13);
         } else {
           ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
           ctx.beginPath();
-          ctx.arc(circleCenterX, circleCenterY, 34, 0, Math.PI * 2);
+          ctx.arc(circleCenterX, circleCenterY, 38, 0, Math.PI * 2);
           ctx.fill();
           ctx.fillStyle = revealed && !isCorrect ? '#64748B' : '#93C5FD';
-          ctx.font = '800 30px "Outfit", sans-serif';
+          ctx.font = '800 34px "Outfit", sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText(key, circleCenterX, circleCenterY + 10);
+          ctx.fillText(key, circleCenterX, circleCenterY + 12);
         }
 
         const optionText = options[key] || '';
-        const maxOptWidth = 720;
+        const maxOptWidth = 750;
         
-        let optSize = 34;
+        let optSize = 36;
         let optLines = [];
-        let optLineHeight = 40;
+        let optLineHeight = 44;
 
-        for (let s = 34; s >= 24; s -= 2) {
+        for (let s = 36; s >= 24; s -= 2) {
           ctx.font = (isCorrect && revealed ? '800 ' : '700 ') + s + 'px "Plus Jakarta Sans", sans-serif';
           const lines = getWrappedLines(ctx, optionText, maxOptWidth);
           if (lines.length <= 2) {
@@ -1207,32 +1214,32 @@
 
     function drawCountdownOverlay(secondsLeft, totalSeconds) {
       ctx.save();
-      const centerY = 1240;
+      const centerY = 1385; // Positioned right above the bottom margin
 
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.96)';
       ctx.strokeStyle = '#F59E0B';
       ctx.lineWidth = 4;
-      roundRect(ctx, 340, centerY - 60, 400, 120, 28, true, true);
+      roundRect(ctx, 320, centerY - 65, 440, 130, 30, true, true);
 
       ctx.fillStyle = '#F59E0B';
-      ctx.font = '900 68px "Outfit", sans-serif';
+      ctx.font = '900 72px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('⏳ ' + secondsLeft + 's', 540, centerY + 22);
+      ctx.fillText('⏳ ' + secondsLeft + 's', 540, centerY + 24);
 
       ctx.restore();
     }
 
     function drawAnswerRevealedBanner(correctKey) {
       ctx.save();
-      const centerY = 1240;
+      const centerY = 1385;
 
       ctx.fillStyle = '#10B981';
-      roundRect(ctx, 190, centerY - 55, 700, 110, 26, true, false);
+      roundRect(ctx, 160, centerY - 60, 760, 120, 28, true, false);
 
       ctx.fillStyle = '#042F2E';
-      ctx.font = '900 42px "Outfit", sans-serif';
+      ctx.font = '900 46px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('CORRECT ANSWER: (' + correctKey + ') 🎉', 540, centerY + 14);
+      ctx.fillText('CORRECT ANSWER: (' + correctKey + ') 🎉', 540, centerY + 16);
 
       ctx.restore();
     }
@@ -1244,33 +1251,34 @@
 
       drawBaseBackground();
 
+      // CTA Screen inside Real Safe Zone (Y: 130 to 1500 - Height 1370px)
       ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
-      ctx.strokeStyle = 'rgba(59, 130, 246, 0.5)';
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.55)';
       ctx.lineWidth = 4;
-      roundRect(ctx, 70, 200, 940, 1120, 40, true, true);
+      roundRect(ctx, 60, 130, 960, 1370, 44, true, true);
 
       try {
         if (logoImg.complete && logoImg.naturalWidth !== 0) {
-          ctx.drawImage(logoImg, 470, 260, 140, 140);
+          ctx.drawImage(logoImg, 460, 200, 160, 160);
         }
       } catch (e) {}
 
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = '900 58px "Outfit", sans-serif';
+      ctx.font = '900 64px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(brand || 'OdishaExamPrep', 540, 460);
+      ctx.fillText(brand || 'OdishaExamPrep', 540, 430);
 
       ctx.fillStyle = 'rgba(37, 99, 235, 0.25)';
-      roundRect(ctx, 200, 495, 680, 56, 16, true, false);
+      roundRect(ctx, 160, 470, 760, 64, 18, true, false);
       ctx.fillStyle = '#93C5FD';
-      ctx.font = '800 24px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText('⭐ 10,000+ Aspirants Trusted Platform', 540, 532);
+      ctx.font = '800 26px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('⭐ 10,000+ Aspirants Trusted Platform', 540, 512);
 
-      ctx.font = '800 40px "Plus Jakarta Sans", sans-serif';
-      const ctaLines = getWrappedLines(ctx, cta || 'Visit website for 1000+ Practice Tests & Chapter Notes!', 800);
-      const ctaLineH = 54;
+      ctx.font = '800 44px "Plus Jakarta Sans", sans-serif';
+      const ctaLines = getWrappedLines(ctx, cta || 'Visit website for 1000+ Practice Tests & Chapter Notes!', 820);
+      const ctaLineH = 60;
       const ctaTotalH = (ctaLines.length - 1) * ctaLineH;
-      const ctaStartY = 700 - (ctaTotalH / 2);
+      const ctaStartY = 730 - (ctaTotalH / 2);
 
       ctx.fillStyle = '#F8FAFC';
       ctx.textAlign = 'center';
@@ -1279,15 +1287,15 @@
       }
 
       ctx.fillStyle = '#2563EB';
-      roundRect(ctx, 140, 920, 800, 130, 32, true, false);
+      roundRect(ctx, 120, 1000, 840, 145, 36, true, false);
 
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = '900 42px "Outfit", sans-serif';
-      ctx.fillText('🔗 ' + (websiteUrl || 'www.odishaexamprep.in'), 540, 1000);
+      ctx.font = '900 46px "Outfit", sans-serif';
+      ctx.fillText('🔗 ' + (websiteUrl || 'www.odishaexamprep.in'), 540, 1090);
 
       ctx.fillStyle = '#F59E0B';
-      ctx.font = '800 32px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText('👇 Check Pinned Comment & Bio Link 👇', 540, 1150);
+      ctx.font = '800 36px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('👇 Check Pinned Comment & Bio Link 👇', 540, 1280);
 
       ctx.restore();
     }
@@ -1342,7 +1350,6 @@
       roundRect(ctx, 70, 110, 940, 135, 28, true, false);
       ctx.restore();
 
-      // Auto-Fit Hook text
       let hookSize = 44;
       ctx.font = '900 ' + hookSize + 'px "Outfit", sans-serif';
       let hookLines = getWrappedLines(ctx, hookText.toUpperCase(), 880);
@@ -1395,7 +1402,6 @@
       ctx.textAlign = 'center';
       ctx.fillText(questionBadge.toUpperCase(), 540, 444);
 
-      // Dynamic Auto-Fit Question Typography (Spacious & Grand)
       let coverQSize = 52;
       let coverQLines = [];
       let coverQLineH = 70;
@@ -1478,7 +1484,7 @@
       ctx.font = '700 24px "Plus Jakarta Sans", sans-serif';
       ctx.fillText(websiteUrl, 265, 1445);
 
-      // 7. BOTTOM FEED SCRIM ZONE (Y: 1540 to 1920) - Subtle clean backdrop for YouTube title
+      // 7. BOTTOM FEED SCRIM ZONE (Y: 1540 to 1920)
       const bottomScrim = ctx.createLinearGradient(0, 1540, 0, 1920);
       bottomScrim.addColorStop(0, 'rgba(6, 9, 17, 0.2)');
       bottomScrim.addColorStop(1, 'rgba(2, 4, 8, 0.95)');

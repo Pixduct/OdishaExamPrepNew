@@ -673,7 +673,7 @@
 
       <!-- SAFE ZONE HELPER TOGGLE -->
       <button type="button" class="btn" id="safeZoneToggleBtn" onclick="toggleSafeZoneGuide()" style="font-size: 0.75rem; border-color: rgba(59, 130, 246, 0.4);">
-        📱 Show YouTube Mobile Overlay Guide
+        📱 Show YouTube Feed & Mobile Overlay Guide
       </button>
 
       <!-- SHORTS PREVIEW CONTROLS -->
@@ -689,7 +689,7 @@
       </div>
 
       <div style="font-size: 0.75rem; color: var(--text-dim); text-align: center; max-width: 320px;">
-        💡 100% Studio Symmetrical & Safe Zone Layout.
+        💡 Perfectly proportioned 9:16 layout with feed title safety zone.
       </div>
     </div>
 
@@ -755,7 +755,7 @@
       const btn = document.getElementById('safeZoneToggleBtn');
       btn.style.background = showSafeZoneGuide ? 'rgba(59, 130, 246, 0.2)' : 'var(--bg-card)';
       btn.style.color = showSafeZoneGuide ? '#93C5FD' : 'var(--text-main)';
-      btn.innerText = showSafeZoneGuide ? '📱 Hide YouTube Mobile Guide' : '📱 Show YouTube Mobile Overlay Guide';
+      btn.innerText = showSafeZoneGuide ? '📱 Hide Guide Overlay' : '📱 Show YouTube Feed & Mobile Overlay Guide';
       if (currentMode === 'shorts') drawIdleFrame();
       else drawCoverCanvas();
     }
@@ -966,28 +966,47 @@
       ctx.lineWidth = 2;
       ctx.setLineDash([10, 10]);
 
-      ctx.fillRect(0, 0, 1080, 160);
-      ctx.strokeRect(0, 0, 1080, 160);
+      if (currentMode === 'shorts') {
+        ctx.fillRect(0, 0, 1080, 160);
+        ctx.strokeRect(0, 0, 1080, 160);
 
-      ctx.fillRect(0, 1360, 1080, 560);
-      ctx.strokeRect(0, 1360, 1080, 560);
+        ctx.fillRect(0, 1360, 1080, 560);
+        ctx.strokeRect(0, 1360, 1080, 560);
 
-      ctx.fillRect(920, 650, 160, 710);
-      ctx.strokeRect(920, 650, 160, 710);
+        ctx.fillRect(920, 650, 160, 710);
+        ctx.strokeRect(920, 650, 160, 710);
 
-      ctx.setLineDash([]);
-      ctx.fillStyle = '#EF4444';
-      ctx.font = '800 24px "Plus Jakarta Sans", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('⚠️ TOP OVERLAY (Search & Menu)', 540, 100);
-      ctx.fillText('⚠️ BOTTOM OVERLAY (Title, Channel Avatar, Subscribe & Nav)', 540, 1500);
-      ctx.fillText('⚠️ SIDE BUTTONS', 1000, 700);
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#EF4444';
+        ctx.font = '800 24px "Plus Jakarta Sans", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('⚠️ TOP OVERLAY (Search & Menu)', 540, 100);
+        ctx.fillText('⚠️ BOTTOM OVERLAY (Title, Channel Avatar, Subscribe & Nav)', 540, 1500);
+        ctx.fillText('⚠️ SIDE BUTTONS', 1000, 700);
 
-      ctx.strokeStyle = '#10B981';
-      ctx.lineWidth = 3;
-      ctx.strokeRect(60, 170, 960, 1180);
-      ctx.fillStyle = '#10B981';
-      ctx.fillText('✅ YOUTUBE SHORTS 100% VISIBLE SAFE ZONE', 540, 195);
+        ctx.strokeStyle = '#10B981';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(60, 170, 960, 1180);
+        ctx.fillStyle = '#10B981';
+        ctx.fillText('✅ YOUTUBE SHORTS 100% VISIBLE SAFE ZONE', 540, 195);
+      } else {
+        // Feed Grid View overlay Guide for Cover Thumbnail
+        ctx.fillRect(0, 1580, 1080, 340);
+        ctx.strokeRect(0, 1580, 1080, 340);
+
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#EF4444';
+        ctx.font = '800 28px "Plus Jakarta Sans", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('⚠️ YOUTUBE FEED TITLE OVERLAY ZONE (Bottom ~18%)', 540, 1720);
+        ctx.fillText('White video title renders here with zero card collision', 540, 1760);
+
+        ctx.strokeStyle = '#10B981';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(50, 80, 980, 1480);
+        ctx.fillStyle = '#10B981';
+        ctx.fillText('✅ 100% VISIBLE COVER THUMBNAIL ZONE', 540, 60);
+      }
 
       ctx.restore();
     }
@@ -1296,12 +1315,13 @@
     }
 
     // ==========================================
-    // 🌟 100K PRO YOUTUBER BALANCED COVER GENERATOR
+    // 🌟 100K PRO YOUTUBER EXPANDED COVER GENERATOR
     // ==========================================
     function drawCoverCanvas() {
       const exam = document.getElementById('examName').value || 'OSSC CGL & OPSC ASO 2026';
       const question = document.getElementById('questionText').value || 'Who was the first Chief Minister of Odisha?';
       const brand = document.getElementById('brandName').value || 'OdishaExamPrep';
+      const websiteUrl = document.getElementById('websiteUrl').value || 'www.odishaexamprep.in';
       
       const hookText = document.getElementById('coverHookText') ? document.getElementById('coverHookText').value : '⚠️ 99% ASPIRANTS GET THIS WRONG!';
       const questionBadge = document.getElementById('coverQuestionBadge') ? document.getElementById('coverQuestionBadge').value : '❓ QUESTION #01 • IMPORTANT GK';
@@ -1310,24 +1330,24 @@
 
       drawBaseBackground();
 
-      // 1. TOP VIRAL HOOK BANNER (Y: 100 to 220 - Height 120px)
+      // 1. TOP VIRAL HOOK BANNER (Y: 110 to 245 - Height 135px)
       ctx.save();
-      ctx.shadowColor = 'rgba(239, 68, 68, 0.45)';
-      ctx.shadowBlur = 24;
-      ctx.shadowOffsetY = 8;
-      const hookGrad = ctx.createLinearGradient(70, 100, 1010, 100);
+      ctx.shadowColor = 'rgba(239, 68, 68, 0.5)';
+      ctx.shadowBlur = 28;
+      ctx.shadowOffsetY = 10;
+      const hookGrad = ctx.createLinearGradient(70, 110, 1010, 110);
       hookGrad.addColorStop(0, '#EF4444');
       hookGrad.addColorStop(1, '#DC2626');
       ctx.fillStyle = hookGrad;
-      roundRect(ctx, 70, 100, 940, 120, 26, true, false);
+      roundRect(ctx, 70, 110, 940, 135, 28, true, false);
       ctx.restore();
 
       // Auto-Fit Hook text
-      let hookSize = 42;
+      let hookSize = 44;
       ctx.font = '900 ' + hookSize + 'px "Outfit", sans-serif';
       let hookLines = getWrappedLines(ctx, hookText.toUpperCase(), 880);
       if (hookLines.length > 2) {
-        hookSize = 34;
+        hookSize = 36;
         ctx.font = '900 ' + hookSize + 'px "Outfit", sans-serif';
         hookLines = getWrappedLines(ctx, hookText.toUpperCase(), 880);
       }
@@ -1336,55 +1356,55 @@
       ctx.textAlign = 'center';
       const hookLineH = hookSize * 1.25;
       const hookTotalH = (hookLines.length - 1) * hookLineH;
-      const hookStartY = 160 - (hookTotalH / 2);
+      const hookStartY = 177 - (hookTotalH / 2);
 
       for (let h = 0; h < hookLines.length; h++) {
         ctx.fillText(hookLines[h], 540, hookStartY + (h * hookLineH));
       }
 
-      // 2. FLOATING EXAM TARGET PILL (Y: 240 to 310 - Height 70px)
+      // 2. FLOATING EXAM TARGET PILL (Y: 270 to 350 - Height 80px)
       ctx.fillStyle = 'rgba(37, 99, 235, 0.25)';
       ctx.strokeStyle = '#3B82F6';
       ctx.lineWidth = 3;
-      roundRect(ctx, 140, 240, 800, 70, 20, true, true);
+      roundRect(ctx, 130, 270, 820, 80, 22, true, true);
 
       ctx.fillStyle = '#93C5FD';
-      ctx.font = '900 30px "Outfit", sans-serif';
+      ctx.font = '900 32px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('🎯 ' + exam.toUpperCase(), 540, 285);
+      ctx.fillText('🎯 ' + exam.toUpperCase(), 540, 321);
 
-      // 3. CENTERPIECE MYSTERY QUESTION CARD (Y: 330 to 860 - Height 530px)
+      // 3. CENTERPIECE MYSTERY QUESTION CARD (Y: 375 to 1020 - Height 645px)
       ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-      ctx.shadowBlur = 35;
-      ctx.shadowOffsetY = 12;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
+      ctx.shadowBlur = 40;
+      ctx.shadowOffsetY = 16;
       ctx.fillStyle = 'rgba(15, 23, 42, 0.96)';
-      ctx.strokeStyle = 'rgba(59, 130, 246, 0.55)';
-      ctx.lineWidth = 3.5;
-      roundRect(ctx, 70, 330, 940, 530, 32, true, true);
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.6)';
+      ctx.lineWidth = 4;
+      roundRect(ctx, 70, 375, 940, 645, 36, true, true);
       ctx.restore();
 
-      // Question Badge Header Pill
+      // Question Badge Header Pill (Y: 405 to 465)
       ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
       ctx.lineWidth = 2;
-      roundRect(ctx, 110, 355, 860, 56, 16, true, true);
+      roundRect(ctx, 110, 405, 860, 60, 18, true, true);
 
       ctx.fillStyle = '#F59E0B';
-      ctx.font = '800 24px "Plus Jakarta Sans", sans-serif';
+      ctx.font = '800 26px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(questionBadge.toUpperCase(), 540, 392);
+      ctx.fillText(questionBadge.toUpperCase(), 540, 444);
 
-      // Dynamic Auto-Fit Question Typography
-      let coverQSize = 48;
+      // Dynamic Auto-Fit Question Typography (Spacious & Grand)
+      let coverQSize = 52;
       let coverQLines = [];
-      let coverQLineH = 64;
+      let coverQLineH = 70;
 
-      for (let qs = 50; qs >= 30; qs -= 2) {
+      for (let qs = 54; qs >= 32; qs -= 2) {
         ctx.font = '800 ' + qs + 'px "Plus Jakarta Sans", sans-serif';
         const qLines = getWrappedLines(ctx, question, 840);
         const lH = qs * 1.34;
-        if (qLines.length * lH <= 390) {
+        if (qLines.length * lH <= 480) {
           coverQSize = qs;
           coverQLines = qLines;
           coverQLineH = lH;
@@ -1400,66 +1420,70 @@
       ctx.textAlign = 'center';
 
       const qTotalH = (coverQLines.length - 1) * coverQLineH;
-      const qStartY = 640 - (qTotalH / 2);
+      const qStartY = 740 - (qTotalH / 2);
 
       for (let q = 0; q < coverQLines.length; q++) {
         ctx.fillText(coverQLines[q], 540, qStartY + (q * coverQLineH));
       }
 
-      // 4. GAMIFIED CHALLENGE STRIP (Y: 885 to 965 - Height 80px)
+      // 4. GAMIFIED CHALLENGE STRIP (Y: 1045 to 1135 - Height 90px)
       ctx.save();
-      ctx.fillStyle = 'rgba(245, 158, 11, 0.15)';
+      ctx.fillStyle = 'rgba(245, 158, 11, 0.16)';
       ctx.strokeStyle = '#F59E0B';
-      ctx.lineWidth = 3;
-      roundRect(ctx, 160, 885, 760, 80, 22, true, true);
+      ctx.lineWidth = 3.5;
+      roundRect(ctx, 140, 1045, 800, 90, 24, true, true);
 
       ctx.fillStyle = '#FCD34D';
-      ctx.font = '900 32px "Outfit", sans-serif';
+      ctx.font = '900 36px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(challengeText.toUpperCase(), 540, 936);
+      ctx.fillText(challengeText.toUpperCase(), 540, 1102);
       ctx.restore();
 
-      // 5. MASSIVE 3D ACTION CTA BUTTON (Y: 990 to 1130 - Height 140px)
+      // 5. MASSIVE 3D ACTION CTA BUTTON (Y: 1160 to 1320 - Height 160px)
       ctx.save();
-      ctx.shadowColor = 'rgba(245, 158, 11, 0.55)';
-      ctx.shadowBlur = 30;
-      ctx.shadowOffsetY = 10;
+      ctx.shadowColor = 'rgba(245, 158, 11, 0.6)';
+      ctx.shadowBlur = 35;
+      ctx.shadowOffsetY = 12;
       
-      const btnGrad = ctx.createLinearGradient(90, 990, 990, 990);
+      const btnGrad = ctx.createLinearGradient(70, 1160, 1010, 1160);
       btnGrad.addColorStop(0, '#F59E0B');
       btnGrad.addColorStop(1, '#D97706');
       ctx.fillStyle = btnGrad;
-      roundRect(ctx, 90, 990, 900, 140, 32, true, false);
+      roundRect(ctx, 70, 1160, 940, 160, 36, true, false);
       ctx.restore();
 
       ctx.fillStyle = '#000000';
-      ctx.font = '900 40px "Outfit", sans-serif';
+      ctx.font = '900 44px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(actionBtnText, 540, 1076);
+      ctx.fillText(actionBtnText, 540, 1256);
 
-      // 6. PRO BRANDING FOOTER (Y: 1155 to 1255 - Height 100px)
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-      ctx.lineWidth = 2;
-      roundRect(ctx, 160, 1155, 760, 100, 24, true, true);
+      // 6. PRO BRANDING FOOTER (Y: 1350 to 1470 - Height 120px)
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+      ctx.lineWidth = 2.5;
+      roundRect(ctx, 120, 1350, 840, 120, 28, true, true);
 
       try {
         if (logoImg.complete && logoImg.naturalWidth !== 0) {
-          ctx.drawImage(logoImg, 190, 1170, 70, 70);
+          ctx.drawImage(logoImg, 160, 1370, 80, 80);
         }
       } catch (e) {}
 
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = '800 34px "Plus Jakarta Sans", sans-serif';
+      ctx.font = '800 38px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText(brand + ' ✔', 280, 1216);
+      ctx.fillText(brand + ' ✔', 265, 1412);
 
-      // 7. BOTTOM SCRIM BACKDROP (Y: 1260 to 1920) - Sits cleanly as a studio dark backdrop
-      const bottomScrim = ctx.createLinearGradient(0, 1260, 0, 1920);
-      bottomScrim.addColorStop(0, 'rgba(6, 9, 17, 0.4)');
-      bottomScrim.addColorStop(1, 'rgba(3, 5, 10, 0.95)');
+      ctx.fillStyle = '#60A5FA';
+      ctx.font = '700 24px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText(websiteUrl, 265, 1445);
+
+      // 7. BOTTOM FEED SCRIM ZONE (Y: 1540 to 1920) - Subtle clean backdrop for YouTube title
+      const bottomScrim = ctx.createLinearGradient(0, 1540, 0, 1920);
+      bottomScrim.addColorStop(0, 'rgba(6, 9, 17, 0.2)');
+      bottomScrim.addColorStop(1, 'rgba(2, 4, 8, 0.95)');
       ctx.fillStyle = bottomScrim;
-      ctx.fillRect(0, 1260, 1080, 660);
+      ctx.fillRect(0, 1540, 1080, 380);
 
       renderYouTubeOverlayGuide();
     }

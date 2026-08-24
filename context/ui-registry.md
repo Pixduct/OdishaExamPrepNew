@@ -3231,3 +3231,26 @@ Last updated: August 23, 2026
 - Subject derivation: `Array.from(new Set(matchingBanks.map(b => b.subject).filter(Boolean))).sort()` — alphabetically sorted, deduped.
 - All pill always first. Reset on category change via useEffect.
 - Only active for `topic-wise` category — other categories compute `practiceSubjects = []`.
+
+### 101. `AdminBulkImportModal`
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7935-L8240)
+Last updated: August 24, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Trigger Button** | `bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 rounded-xl text-sm font-extrabold shadow-sm active:scale-95` |
+| **Modal Backdrop** | `fixed inset-0 bg-slate-950/60 z-[65] backdrop-blur-md overflow-y-auto overscroll-contain` |
+| **Modal Card** | `bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-[0_25px_60px_-15px_rgba(0,0,0,0.25)] border border-slate-100` |
+| **Header** | `px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50` |
+| **Global Settings Card** | `bg-slate-50 rounded-2xl border border-slate-200/60 p-5 space-y-5` |
+| **Category Pills Active** | `bg-brand-600 text-white border-brand-600 shadow-md` |
+| **Category Pills Inactive** | `bg-white text-slate-600 border-slate-200 hover:border-brand-300` |
+| **Premium Pricing Card** | `grid grid-cols-2 gap-3 p-3.5 bg-brand-50/50 rounded-xl border border-brand-100/60` |
+| **Textarea** | `w-full px-4 py-3 rounded-2xl border border-slate-200 focus:border-brand-400 focus:outline-none font-mono text-xs resize-y bg-slate-50` |
+| **Primary CTA** | `px-8 py-3 rounded-xl premium-gradient text-white font-black hover:premium-glow shadow-lg shadow-brand-500/20 active:scale-[0.98]` |
+
+**Pattern notes:**
+- **Full Sticky Form Persistence**: Automatically syncs state to sessionStorage (`oep_sticky_bulk_`) in real-time.
+- **Header Reset Button**: Includes Reset Form button (`RotateCcw`) in header for 1-click memory clearing.
+- **Dynamic Pricing Controls**: Offer Price and MRP inputs display cleanly upon toggling Premium/Locked.
+- **Sequential Sort Ordering**: Evaluates `getNextAvailableOrder` at batch start and auto-increments for zero collision.

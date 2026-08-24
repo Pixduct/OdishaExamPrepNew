@@ -496,6 +496,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const [bulkGlobalCategory, setBulkGlobalCategory] = useState('topic-wise');
   const [bulkGlobalTargetMode, setBulkGlobalTargetMode] = useState<'bank' | 'practice' | 'both'>('practice');
   const [bulkGlobalIsPremium, setBulkGlobalIsPremium] = useState(false);
+  const [bulkGlobalPrice, setBulkGlobalPrice] = useState<number>(499);
+  const [bulkGlobalOriginalPrice, setBulkGlobalOriginalPrice] = useState<number>(999);
   const [bulkGlobalScheduledAt, setBulkGlobalScheduledAt] = useState('');
   const [bulkGlobalDurationMinutes, setBulkGlobalDurationMinutes] = useState(60);
   const [bulkGlobalTotalMarks, setBulkGlobalTotalMarks] = useState(100);
@@ -686,6 +688,110 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     setBankQuestionsFileName('');
     setBankAnswerKeyFileName('');
   };
+
+  // --- Sticky Bulk Memory Helpers per Tab ---
+  const getStickyBulkData = (tab: string) => {
+    let sticky: any = {};
+    try {
+      const stored = sessionStorage.getItem(`oep_sticky_bulk_${tab}`);
+      if (stored) sticky = JSON.parse(stored);
+    } catch(e) {}
+
+    let defExam = sticky.examId;
+    if (!defExam) {
+      if (tab === 'banks' || tab === 'practice') defExam = selectedExamIdForBanks || '';
+      else if (tab === 'tests') defExam = selectedExamIdForTests || '';
+    }
+
+    let defCat = sticky.category;
+    if (!defCat) {
+      if (tab === 'banks' || tab === 'practice') defCat = (bankFilter !== 'all' ? bankFilter : 'topic-wise') || 'topic-wise';
+      else if (tab === 'tests') defCat = selectedCategoryForTests || 'full-length';
+    }
+
+    let defMode = sticky.target_mode;
+    if (!defMode) {
+      defMode = tab === 'practice' ? 'practice' : 'bank';
+    }
+
+    return {
+      examId: defExam || '',
+      category: defCat || (tab === 'tests' ? 'full-length' : 'topic-wise'),
+      target_mode: defMode || (tab === 'practice' ? 'practice' : 'bank'),
+      isPremium: sticky.isPremium ?? false,
+      price: sticky.price ?? 499,
+      originalPrice: sticky.originalPrice ?? 999,
+      scheduled_at: sticky.scheduled_at || '',
+      durationMinutes: sticky.durationMinutes ?? 60,
+      totalMarks: sticky.totalMarks ?? 100,
+      negativeMarking: sticky.negativeMarking ?? 0,
+      jsonInput: sticky.jsonInput || ''
+    };
+  };
+
+  const saveStickyBulkData = (tab: string, data: any) => {
+    try {
+      sessionStorage.setItem(`oep_sticky_bulk_${tab}`, JSON.stringify(data));
+    } catch(e) {}
+  };
+
+  const resetStickyBulkData = (tab: string) => {
+    try {
+      sessionStorage.removeItem(`oep_sticky_bulk_${tab}`);
+    } catch(e) {}
+    let defExam = '';
+    if (tab === 'banks' || tab === 'practice') defExam = selectedExamIdForBanks || '';
+    else if (tab === 'tests') defExam = selectedExamIdForTests || '';
+
+    let defCat = tab === 'tests' ? (selectedCategoryForTests || 'full-length') : ((bankFilter !== 'all' ? bankFilter : 'topic-wise') || 'topic-wise');
+    let defMode: 'bank' | 'practice' | 'both' = tab === 'practice' ? 'practice' : 'bank';
+
+    setBulkGlobalExamId(defExam);
+    setBulkGlobalCategory(defCat);
+    setBulkGlobalTargetMode(defMode);
+    setBulkGlobalIsPremium(false);
+    setBulkGlobalPrice(499);
+    setBulkGlobalOriginalPrice(999);
+    setBulkGlobalScheduledAt('');
+    setBulkGlobalDurationMinutes(60);
+    setBulkGlobalTotalMarks(100);
+    setBulkGlobalNegativeMarking(0);
+    setBulkJsonInput('');
+    setBulkResults(null);
+  };
+
+  // Real-time auto-saving of sticky bulk configuration when editing in modal
+  useEffect(() => {
+    if (showBulkModal) {
+      saveStickyBulkData(activeTab, {
+        examId: bulkGlobalExamId,
+        category: bulkGlobalCategory,
+        target_mode: bulkGlobalTargetMode,
+        isPremium: bulkGlobalIsPremium,
+        price: bulkGlobalPrice,
+        originalPrice: bulkGlobalOriginalPrice,
+        scheduled_at: bulkGlobalScheduledAt,
+        durationMinutes: bulkGlobalDurationMinutes,
+        totalMarks: bulkGlobalTotalMarks,
+        negativeMarking: bulkGlobalNegativeMarking,
+        jsonInput: bulkJsonInput
+      });
+    }
+  }, [
+    showBulkModal,
+    activeTab,
+    bulkGlobalExamId,
+    bulkGlobalCategory,
+    bulkGlobalTargetMode,
+    bulkGlobalIsPremium,
+    bulkGlobalPrice,
+    bulkGlobalOriginalPrice,
+    bulkGlobalScheduledAt,
+    bulkGlobalDurationMinutes,
+    bulkGlobalTotalMarks,
+    bulkGlobalNegativeMarking,
+    bulkJsonInput
+  ]);
 
   const openAddModal = (targetTab = activeTab) => {
     setEditingId(null);
@@ -1643,15 +1749,19 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         continue;
       }
 
+      const itemIsPremium = item.isPremium ?? bulkGlobalIsPremium;
+      const itemPrice = item.price !== undefined ? Number(item.price) : (itemIsPremium ? (Number(bulkGlobalPrice) || 499) : 0);
+      const itemOrigPrice = item.originalPrice !== undefined ? Number(item.originalPrice) : (itemIsPremium ? (Number(bulkGlobalOriginalPrice) || (itemPrice * 2)) : 0);
+
       try {
         if (activeTab === 'banks' || activeTab === 'practice') {
           const metaTaglineObj = {
             text: item.tagline || '',
-            price: Number(item.price) || 499,
-            originalPrice: Number(item.originalPrice) || ((Number(item.price) || 499) * 2),
+            price: itemPrice,
+            originalPrice: itemOrigPrice,
             subject: item.subject || ''
           };
-          const hasTaglineMeta = item.subject || item.tagline || item.price;
+          const hasTaglineMeta = itemIsPremium || item.subject || item.tagline || item.price !== undefined;
           const payload = {
             examId: bulkGlobalExamId,
             type: bulkGlobalCategory,
@@ -1661,7 +1771,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
             questionCount: Number(item.questionCount) || 0,
             tagline: hasTaglineMeta ? JSON.stringify(metaTaglineObj) : '',
             image: item.image || '',
-            isPremium: item.isPremium ?? bulkGlobalIsPremium,
+            isPremium: itemIsPremium,
             pdfUrl: '',
             hasPracticeMode: activeTab === 'practice' ? true : (item.hasPracticeMode ?? true),
             scheduled_at: bulkGlobalScheduledAt ? new Date(bulkGlobalScheduledAt).toISOString() : (item.scheduled_at || null)
@@ -1672,9 +1782,9 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
             examId: bulkGlobalExamId,
             category: bulkGlobalCategory,
             subject: bulkGlobalCategory === 'sectional' ? (item.subject || '') : null,
-            isPremium: item.isPremium ?? bulkGlobalIsPremium,
-            price: Number(item.price) || 499,
-            originalPrice: Number(item.originalPrice) || ((Number(item.price) || 499) * 2),
+            isPremium: itemIsPremium,
+            price: itemPrice,
+            originalPrice: itemOrigPrice,
             scheduled_at: bulkGlobalScheduledAt ? new Date(bulkGlobalScheduledAt).toISOString() : (item.scheduled_at || null)
           });
           const payload = {
@@ -4520,15 +4630,18 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                 <button
                   onClick={() => {
                     setBulkResults(null);
-                    setBulkJsonInput('');
-                    if (activeTab === 'banks' || activeTab === 'practice') {
-                      setBulkGlobalExamId(selectedExamIdForBanks || '');
-                      setBulkGlobalCategory((bankFilter !== 'all' ? bankFilter : 'topic-wise') || 'topic-wise');
-                      setBulkGlobalTargetMode(activeTab === 'practice' ? 'practice' : 'bank');
-                    } else if (activeTab === 'tests') {
-                      setBulkGlobalExamId(selectedExamIdForTests || '');
-                      setBulkGlobalCategory(selectedCategoryForTests || 'full-length');
-                    }
+                    const sticky = getStickyBulkData(activeTab);
+                    setBulkGlobalExamId(sticky.examId);
+                    setBulkGlobalCategory(sticky.category);
+                    setBulkGlobalTargetMode(sticky.target_mode);
+                    setBulkGlobalIsPremium(sticky.isPremium);
+                    setBulkGlobalPrice(sticky.price);
+                    setBulkGlobalOriginalPrice(sticky.originalPrice);
+                    setBulkGlobalScheduledAt(sticky.scheduled_at);
+                    setBulkGlobalDurationMinutes(sticky.durationMinutes);
+                    setBulkGlobalTotalMarks(sticky.totalMarks);
+                    setBulkGlobalNegativeMarking(sticky.negativeMarking);
+                    setBulkJsonInput(sticky.jsonInput);
                     setShowBulkModal(true);
                   }}
                   className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 rounded-xl text-sm font-extrabold transition-all shadow-sm active:scale-95"
@@ -7846,9 +7959,20 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                     <p className="text-xs text-slate-400 font-semibold mt-0.5">Paste JSON → one click → all records created with auto sortOrder</p>
                   </div>
                 </div>
-                <button type="button" onClick={() => setShowBulkModal(false)} className="p-2.5 text-slate-400 hover:bg-slate-50 hover:text-slate-700 rounded-xl transition-all border border-slate-200/50 shadow-sm bg-white shrink-0">
-                  <X className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button 
+                    type="button" 
+                    onClick={() => resetStickyBulkData(activeTab)} 
+                    title="Clear prefilled memory and reset all fields"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all border border-slate-200/60 bg-white shadow-xs"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Reset Form</span>
+                  </button>
+                  <button type="button" onClick={() => setShowBulkModal(false)} className="p-2.5 text-slate-400 hover:bg-slate-50 hover:text-slate-700 rounded-xl transition-all border border-slate-200/50 shadow-sm bg-white shrink-0">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
               <div className="p-8 space-y-6">
@@ -7939,26 +8063,62 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                     </div>
                   )}
 
-                  {/* Premium + Schedule */}
-                  <div className="flex items-center gap-6 flex-wrap">
-                    <label className="flex items-center gap-2 cursor-pointer select-none">
-                      <div
-                        onClick={() => setBulkGlobalIsPremium(p => !p)}
-                        className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer ${bulkGlobalIsPremium ? 'bg-brand-600' : 'bg-slate-300'}`}
-                      >
-                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${bulkGlobalIsPremium ? 'translate-x-4' : ''}`} />
+                  {/* Premium + Schedule + Pricing */}
+                  <div className="space-y-3 pt-1">
+                    <div className="flex items-center gap-6 flex-wrap">
+                      <label className="flex items-center gap-2 cursor-pointer select-none">
+                        <div
+                          onClick={() => setBulkGlobalIsPremium(p => !p)}
+                          className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer ${bulkGlobalIsPremium ? 'bg-brand-600' : 'bg-slate-300'}`}
+                        >
+                          <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${bulkGlobalIsPremium ? 'translate-x-4' : ''}`} />
+                        </div>
+                        <span className="text-xs font-black text-slate-600">Premium / Locked Content</span>
+                      </label>
+                      <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider whitespace-nowrap">Schedule:</label>
+                        <input
+                          type="datetime-local"
+                          value={bulkGlobalScheduledAt}
+                          onChange={e => setBulkGlobalScheduledAt(e.target.value)}
+                          className="flex-1 px-3 py-1.5 rounded-xl border border-slate-200 focus:border-brand-400 focus:outline-none text-xs font-bold bg-white"
+                        />
                       </div>
-                      <span className="text-xs font-black text-slate-600">Premium / Locked</span>
-                    </label>
-                    <div className="flex items-center gap-2 flex-1 min-w-[180px]">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider whitespace-nowrap">Schedule:</label>
-                      <input
-                        type="datetime-local"
-                        value={bulkGlobalScheduledAt}
-                        onChange={e => setBulkGlobalScheduledAt(e.target.value)}
-                        className="flex-1 px-3 py-1.5 rounded-xl border border-slate-200 focus:border-brand-400 focus:outline-none text-xs font-bold"
-                      />
                     </div>
+
+                    {/* Premium Price Inputs — smoothly shown when Premium is ON */}
+                    {bulkGlobalIsPremium && (
+                      <div className="grid grid-cols-2 gap-3 p-3.5 bg-brand-50/50 rounded-xl border border-brand-100/60 animate-in fade-in slide-in-from-top-1 duration-200">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-brand-900 uppercase tracking-wider">Offer Price (₹) *</label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={bulkGlobalPrice}
+                            onChange={e => {
+                              const val = Number(e.target.value);
+                              setBulkGlobalPrice(val);
+                              if (!bulkGlobalOriginalPrice || bulkGlobalOriginalPrice <= val) {
+                                setBulkGlobalOriginalPrice(val * 2);
+                              }
+                            }}
+                            placeholder="e.g. 499"
+                            className="w-full px-3 py-2 rounded-xl border border-brand-200 focus:border-brand-500 focus:outline-none text-sm font-bold bg-white text-slate-900"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Original / MRP (₹)</label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={bulkGlobalOriginalPrice}
+                            onChange={e => setBulkGlobalOriginalPrice(Number(e.target.value))}
+                            placeholder="e.g. 999"
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-brand-400 focus:outline-none text-sm font-bold bg-white text-slate-700"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 

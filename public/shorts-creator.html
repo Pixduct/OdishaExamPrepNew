@@ -2397,12 +2397,18 @@
       const tCta = ctaAudioObjectUrl ? ctaAudioDuration : 4.0;
       const totalDuration = totalQuestionsDuration + tCta;
 
+      const examEl = document.getElementById('examName');
+      const brandEl = document.getElementById('brandName');
+      const ctaEl = document.getElementById('ctaText') || document.getElementById('ctaPitchText');
+      const websiteNameEl = document.getElementById('websiteName');
+      const websiteUrlEl = document.getElementById('websiteUrl');
+
       return {
-        exam: document.getElementById('examName').value,
-        brand: document.getElementById('brandName').value,
-        cta: document.getElementById('ctaPitchText').value,
-        websiteName: document.getElementById('websiteName').value,
-        websiteUrl: document.getElementById('websiteUrl').value,
+        exam: examEl ? examEl.value : 'OSSC CGL 2026',
+        brand: brandEl ? brandEl.value : 'OdishaExamPrep',
+        cta: ctaEl ? ctaEl.value : 'Visit website for 1000+ Practice Tests & Chapter Notes!',
+        websiteName: websiteNameEl ? websiteNameEl.value : 'OdishaExamPrep.in',
+        websiteUrl: websiteUrlEl ? websiteUrlEl.value : 'www.odishaexamprep.in',
         template: getActiveTemplate(),
         questions: activeQuestions,
         questionsCount: questionsCount,
@@ -3253,12 +3259,19 @@
           const tCta = ctaAudioObjectUrl ? ctaAudioDuration : 4.0;
           const totalDuration = tRead + tCountdown + tReveal + tCta;
 
+          const defaultExamEl = document.getElementById('bulkDefaultExam');
+          const defaultExam = defaultExamEl ? defaultExamEl.value : 'OSSC CGL 2026';
+          const brandEl = document.getElementById('brandName');
+          const ctaEl = document.getElementById('ctaText') || document.getElementById('ctaPitchText');
+          const websiteNameEl = document.getElementById('websiteName');
+          const websiteUrlEl = document.getElementById('websiteUrl');
+
           const itemConfig = {
-            exam: item.exam || document.getElementById('examName').value,
-            brand: document.getElementById('brandName').value,
-            cta: document.getElementById('ctaPitchText').value,
-            websiteName: document.getElementById('websiteName').value,
-            websiteUrl: document.getElementById('websiteUrl').value,
+            exam: item.exam || defaultExam,
+            brand: brandEl ? brandEl.value : 'OdishaExamPrep',
+            cta: ctaEl ? ctaEl.value : 'Visit website for 1000+ Practice Tests & Chapter Notes!',
+            websiteName: websiteNameEl ? websiteNameEl.value : 'OdishaExamPrep.in',
+            websiteUrl: websiteUrlEl ? websiteUrlEl.value : 'www.odishaexamprep.in',
             template: batchTemplate,
             questions: [item],
             questionsCount: 1,
@@ -3443,8 +3456,10 @@
       // Draw custom cover for this item
       const exam = item.exam || 'OSSC CGL 2026';
       const question = item.question;
-      const brand = document.getElementById('brandName').value || 'OdishaExamPrep';
-      const websiteUrl = document.getElementById('websiteUrl').value || 'www.odishaexamprep.in';
+      const brandEl = document.getElementById('brandName');
+      const websiteUrlEl = document.getElementById('websiteUrl');
+      const brand = brandEl ? brandEl.value : 'OdishaExamPrep';
+      const websiteUrl = websiteUrlEl ? websiteUrlEl.value : 'www.odishaexamprep.in';
       const hookText = '⚠️ 99% ASPIRANTS GET THIS WRONG!';
       const questionBadge = '❓ QUESTION #01 • IMPORTANT GK';
       const challengeText = '⏱️ 5-SECOND RAPID CHALLENGE';

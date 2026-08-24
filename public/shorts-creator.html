@@ -1344,6 +1344,44 @@
 
     window.addEventListener('beforeunload', function() {
       if (logoObjectUrl) URL.revokeObjectURL(logoObjectUrl);
+      if (ctaAudioObjectUrl) URL.revokeObjectURL(ctaAudioObjectUrl);
+      if (bgMusicObjectUrl) URL.revokeObjectURL(bgMusicObjectUrl);
+    });
+
+    function switchTab(mode) {
+      currentMode = mode;
+      document.getElementById('tabShortsBtn').classList.toggle('active', mode === 'shorts');
+      document.getElementById('tabCoverBtn').classList.toggle('active', mode === 'cover');
+
+      if (mode === 'shorts') {
+        document.getElementById('coverFieldsWrapper').style.display = 'none';
+        document.getElementById('shortsControlsBar').style.display = 'flex';
+        document.getElementById('coverControlsBar').style.display = 'none';
+        drawIdleFrame();
+      } else {
+        stopSequence();
+        document.getElementById('coverFieldsWrapper').style.display = 'block';
+        document.getElementById('shortsControlsBar').style.display = 'none';
+        document.getElementById('coverControlsBar').style.display = 'flex';
+        drawCoverCanvas();
+      }
+    }
+
+    function handleFormUpdate() {
+      saveCurrentQuestionForm();
+      if (currentMode === 'shorts') {
+        drawIdleFrame();
+      } else {
+        drawCoverCanvas();
+      }
+    }
+
+    function getWrappedLines(ctx, text, maxWidth) {
+      const words = (text || '').split(' ');
+      let line = '';
+      const lines = [];
+
+      for (let n = 0; n < words.length; n++) {
         const testLine = line + words[n] + ' ';
         const metrics = ctx.measureText(testLine);
         if (metrics.width > maxWidth && n > 0) {

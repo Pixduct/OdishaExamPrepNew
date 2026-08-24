@@ -255,6 +255,7 @@
       font-weight: 800;
       font-size: 0.85rem;
       transition: all 0.2s;
+      text-align: center;
     }
 
     .radio-pill input[type="radio"]:checked + span {
@@ -570,11 +571,45 @@
         </div>
 
         <div class="form-group">
-          <label>Suspense Audio Mode</label>
+          <label>Master Sound Toggle</label>
           <button class="btn" style="width: 100%; margin-top: 0.4rem;" id="muteToggleBtn" onclick="toggleMute()">
-            💓 Cinematic Heartbeat + Ticks
+            🔊 Sound Enabled
           </button>
         </div>
+
+        <!-- CINEMATIC SUSPENSE AUDIO SELECTION -->
+        <div class="form-group col-span-2" style="border-top: 1px solid var(--border-color); padding-top: 0.9rem; margin-top: 0.4rem;">
+          <label>🎵 Suspense Background Audio (Reading & Countdown)</label>
+          <div class="correct-answer-selector" style="margin-bottom: 0.6rem;">
+            <label class="radio-pill">
+              <input type="radio" name="bgAudioMode" value="synth" checked onchange="handleBgAudioModeChange('synth')">
+              <span>🎬 Studio Drone & Sub-Booms (Built-in)</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="bgAudioMode" value="custom" onchange="handleBgAudioModeChange('custom')">
+              <span>📁 Upload Custom Suspense MP3</span>
+            </label>
+          </div>
+
+          <!-- CUSTOM SUSPENSE MP3 UPLOAD BOX (shown when custom is selected) -->
+          <div id="customBgAudioUploadBox" style="display: none;">
+            <div class="file-upload-box" onclick="document.getElementById('bgAudioInput').click()">
+              <div style="text-align: left;">
+                <div id="bgAudioFileName" style="font-size: 0.85rem; font-weight: 800; color: var(--text-main);">Click to Select Suspense Music MP3 (e.g. KBC / Tension clock)</div>
+                <div style="font-size: 0.7rem; color: var(--text-dim);">Audio stays in browser memory. Automatically loops during question & countdown, fades on answer reveal.</div>
+              </div>
+              <button type="button" class="btn" style="pointer-events: none;">Select Track</button>
+            </div>
+            <input type="file" id="bgAudioInput" accept="audio/mp3,audio/wav,audio/mpeg" style="display: none;" onchange="handleBgAudioUpload(event)">
+
+            <div class="audio-controls-row" id="bgAudioControlsRow" style="display: none; margin-top: 0.5rem;">
+              <button type="button" class="btn" onclick="previewBgAudio()"><span id="bgAudioPlayIcon">▶</span> Preview Suspense Music</button>
+              <button type="button" class="btn" onclick="document.getElementById('bgAudioInput').click()">🔄 Replace</button>
+              <button type="button" class="btn btn-danger" onclick="removeBgAudio()">🗑️ Remove</button>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- BRANDING & CTA SECTION -->
@@ -614,7 +649,7 @@
           <label>CTA Voice Audio (Local MP3 only — In-Memory)</label>
           <div class="file-upload-box" onclick="document.getElementById('audioInput').click()">
             <div style="text-align: left;">
-              <div id="audioFileName" style="font-size: 0.85rem; font-weight: 800; color: var(--text-main);">Click to Select MP3 Audio File</div>
+              <div id="audioFileName" style="font-size: 0.85rem; font-weight: 800; color: var(--text-main);">Click to Select CTA Voice MP3 File</div>
               <div style="font-size: 0.7rem; color: var(--text-dim);">Audio stays 100% inside browser memory. Never uploaded to database or server.</div>
             </div>
             <button type="button" class="btn" style="pointer-events: none;">Select File</button>
@@ -689,7 +724,7 @@
       </div>
 
       <div style="font-size: 0.75rem; color: var(--text-dim); text-align: center; max-width: 320px;">
-        💡 Real-world YouTube mobile proportions with Heartbeat Audio Synthesizer.
+        💡 Multi-Layer Studio Suspense Engine + Custom MP3 Support.
       </div>
     </div>
 
@@ -711,20 +746,28 @@
     logoImg.src = '/favicon.svg';
     let logoObjectUrl = null;
 
+    // CTA Audio Voiceover
     let ctaAudio = new Audio();
     let ctaAudioObjectUrl = null;
     let ctaAudioDuration = 4.0;
 
+    // Background Suspense Music
+    let bgAudioMode = 'synth'; // 'synth' or 'custom'
+    let bgMusicAudio = new Audio();
+    let bgMusicObjectUrl = null;
+
     let audioCtx = null;
     let masterGain = null;
     let audioDestination = null;
+    let activeDroneOscs = [];
+    let droneGainNode = null;
 
     function initAudioContext() {
       if (!audioCtx) {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         audioCtx = new AudioContextClass();
         masterGain = audioCtx.createGain();
-        masterGain.gain.value = isMuted ? 0 : 0.85;
+        masterGain.gain.value = isMuted ? 0 : 0.88;
         masterGain.connect(audioCtx.destination);
         audioDestination = audioCtx.createMediaStreamDestination();
         masterGain.connect(audioDestination);
@@ -742,11 +785,52 @@
         btn.style.color = 'var(--rose-accent)';
         if (masterGain) masterGain.gain.value = 0;
         ctaAudio.muted = true;
+        bgMusicAudio.muted = true;
       } else {
-        btn.innerHTML = '💓 Cinematic Heartbeat + Ticks';
+        btn.innerHTML = '🔊 Sound Enabled';
         btn.style.color = 'var(--text-main)';
-        if (masterGain) masterGain.gain.value = 0.85;
+        if (masterGain) masterGain.gain.value = 0.88;
         ctaAudio.muted = false;
+        bgMusicAudio.muted = false;
+      }
+    }
+
+    function handleBgAudioModeChange(mode) {
+      bgAudioMode = mode;
+      document.getElementById('customBgAudioUploadBox').style.display = mode === 'custom' ? 'block' : 'none';
+    }
+
+    function handleBgAudioUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (bgMusicObjectUrl) URL.revokeObjectURL(bgMusicObjectUrl);
+      bgMusicObjectUrl = URL.createObjectURL(file);
+      bgMusicAudio.src = bgMusicObjectUrl;
+      bgMusicAudio.loop = true;
+      document.getElementById('bgAudioFileName').innerText = '🎵 ' + file.name;
+      document.getElementById('bgAudioControlsRow').style.display = 'flex';
+    }
+
+    function removeBgAudio() {
+      if (bgMusicObjectUrl) {
+        URL.revokeObjectURL(bgMusicObjectUrl);
+        bgMusicObjectUrl = null;
+      }
+      bgMusicAudio.src = '';
+      document.getElementById('bgAudioInput').value = '';
+      document.getElementById('bgAudioFileName').innerText = 'Click to Select Suspense Music MP3 (e.g. KBC / Tension clock)';
+      document.getElementById('bgAudioControlsRow').style.display = 'none';
+    }
+
+    function previewBgAudio() {
+      if (!bgMusicAudio.src) return;
+      if (bgMusicAudio.paused) {
+        bgMusicAudio.currentTime = 0;
+        bgMusicAudio.play();
+        document.getElementById('bgAudioPlayIcon').innerText = '⏸';
+      } else {
+        bgMusicAudio.pause();
+        document.getElementById('bgAudioPlayIcon').innerText = '▶';
       }
     }
 
@@ -760,81 +844,140 @@
       else drawCoverCanvas();
     }
 
-    // ==========================================
-    // 💓 CINEMATIC HEARTBEAT & SUSPENSE SYNTHESIZER
-    // ==========================================
-    function playHeartbeatThump(intensity, isRushed) {
+    // ==============================================================
+    // 🎬 MULTI-LAYER CINEMATIC STUDIO SUSPENSE SYNTHESIZER
+    // ==============================================================
+
+    // Layer 1: Dark Atmospheric Tension Pad (Continuous Drone)
+    function startAtmosphericDrone() {
+      stopAtmosphericDrone();
+      if (isMuted || !audioCtx || bgAudioMode !== 'synth') return;
+
+      try {
+        const now = audioCtx.currentTime;
+        droneGainNode = audioCtx.createGain();
+        droneGainNode.gain.setValueAtTime(0, now);
+        droneGainNode.gain.linearRampToValueAtTime(0.24, now + 0.8);
+
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(240, now);
+
+        // Rich minor root & fifth interval (D2 = 73.42Hz, A2 = 110Hz, D3 = 146.83Hz)
+        const freqs = [73.42, 110.0, 146.83];
+        freqs.forEach(function(f) {
+          const osc = audioCtx.createOscillator();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(f, now);
+          osc.connect(filter);
+          osc.start(now);
+          activeDroneOscs.push(osc);
+        });
+
+        filter.connect(droneGainNode);
+        droneGainNode.connect(masterGain);
+      } catch (e) {}
+    }
+
+    function stopAtmosphericDrone() {
+      if (droneGainNode && audioCtx) {
+        try {
+          droneGainNode.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        } catch (e) {}
+      }
+      setTimeout(function() {
+        activeDroneOscs.forEach(function(osc) {
+          try { osc.stop(); osc.disconnect(); } catch (e) {}
+        });
+        activeDroneOscs = [];
+        droneGainNode = null;
+      }, 350);
+    }
+
+    // Layer 2: Movie Trailer Sub-Boom / Chest Impact
+    function playCinematicSubBoom(intensity) {
       intensity = intensity || 1.0;
-      isRushed = isRushed || false;
-      if (isMuted || !audioCtx) return;
+      if (isMuted || !audioCtx || bgAudioMode !== 'synth') return;
 
       try {
         const now = audioCtx.currentTime;
 
-        // "LUB" (First beat) - Deep sub-bass punch
+        // Sub oscillator sweep (75Hz -> 28Hz)
+        const osc = audioCtx.createOscillator();
+        const oscGain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(75, now);
+        osc.frequency.exponentialRampToValueAtTime(28, now + 0.35);
+
+        oscGain.gain.setValueAtTime(0, now);
+        oscGain.gain.linearRampToValueAtTime(0.5 * intensity, now + 0.02);
+        oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+
+        osc.connect(oscGain);
+        oscGain.connect(masterGain);
+
+        osc.start(now);
+        osc.stop(now + 0.4);
+
+        // Filtered low rumble noise burst
+        const bufferSize = audioCtx.sampleRate * 0.25;
+        const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = Math.random() * 2 - 1;
+        }
+
+        const whiteNoise = audioCtx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+
+        const noiseFilter = audioCtx.createBiquadFilter();
+        noiseFilter.type = 'lowpass';
+        noiseFilter.frequency.setValueAtTime(140, now);
+        noiseFilter.frequency.exponentialRampToValueAtTime(40, now + 0.25);
+
+        const noiseGain = audioCtx.createGain();
+        noiseGain.gain.setValueAtTime(0.25 * intensity, now);
+        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+        whiteNoise.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(masterGain);
+
+        whiteNoise.start(now);
+      } catch (e) {}
+    }
+
+    // Layer 3: Precision Clockwork Tension Tick
+    function playCountdownTick(pitch) {
+      pitch = pitch || 600;
+      if (isMuted || !audioCtx) return;
+      try {
+        const now = audioCtx.currentTime;
+
+        // High metallic metronome ratchet
         const osc1 = audioCtx.createOscillator();
         const gain1 = audioCtx.createGain();
-        osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(isRushed ? 95 : 82, now);
-        osc1.frequency.exponentialRampToValueAtTime(38, now + 0.12);
+        osc1.type = 'triangle';
+        osc1.frequency.setValueAtTime(pitch, now);
+        osc1.frequency.exponentialRampToValueAtTime(pitch * 0.4, now + 0.06);
 
-        gain1.gain.setValueAtTime(0, now);
-        gain1.gain.linearRampToValueAtTime(0.42 * intensity, now + 0.015);
-        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+        gain1.gain.setValueAtTime(0.38, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
 
         osc1.connect(gain1);
         gain1.connect(masterGain);
 
         osc1.start(now);
-        osc1.stop(now + 0.14);
+        osc1.stop(now + 0.08);
 
-        // "DUB" (Second beat - 0.11s later) - Resonant cardiac response
-        const dubTime = now + (isRushed ? 0.09 : 0.12);
-        const osc2 = audioCtx.createOscillator();
-        const gain2 = audioCtx.createGain();
-        osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(isRushed ? 78 : 68, dubTime);
-        osc2.frequency.exponentialRampToValueAtTime(32, dubTime + 0.14);
-
-        gain2.gain.setValueAtTime(0, dubTime);
-        gain2.gain.linearRampToValueAtTime(0.32 * intensity, dubTime + 0.018);
-        gain2.gain.exponentialRampToValueAtTime(0.001, dubTime + 0.15);
-
-        osc2.connect(gain2);
-        gain2.connect(masterGain);
-
-        osc2.start(dubTime);
-        osc2.stop(dubTime + 0.16);
+        // Sub punch accompaniment
+        if (bgAudioMode === 'synth') {
+          playCinematicSubBoom(0.85);
+        }
       } catch (e) {}
     }
 
-    function playCountdownTick(pitch) {
-      pitch = pitch || 440;
-      if (isMuted || !audioCtx) return;
-      try {
-        const now = audioCtx.currentTime;
-
-        // 1. Sharp Click / Tick
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(pitch, now);
-        osc.frequency.exponentialRampToValueAtTime(pitch * 0.5, now + 0.08);
-
-        gain.gain.setValueAtTime(0.35, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-
-        osc.connect(gain);
-        gain.connect(masterGain);
-
-        osc.start(now);
-        osc.stop(now + 0.09);
-
-        // 2. Accompanying accelerated heartbeat thump
-        playHeartbeatThump(1.15, true);
-      } catch (e) {}
-    }
-
+    // Layer 4: Answer Reveal Celebratory Chime
     function playRevealChime() {
       if (isMuted || !audioCtx) return;
       try {
@@ -848,7 +991,7 @@
           osc.frequency.setValueAtTime(freq, startTime);
 
           gain.gain.setValueAtTime(0, startTime);
-          gain.gain.linearRampToValueAtTime(0.35, startTime + 0.02);
+          gain.gain.linearRampToValueAtTime(0.38, startTime + 0.02);
           gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.7);
 
           osc.connect(gain);
@@ -896,7 +1039,7 @@
       ctaAudio.src = '';
       ctaAudioDuration = 4.0;
       document.getElementById('audioInput').value = '';
-      document.getElementById('audioFileName').innerText = 'Click to Select MP3 Audio File';
+      document.getElementById('audioFileName').innerText = 'Click to Select CTA Voice MP3 File';
       document.getElementById('audioControlsRow').style.display = 'none';
     }
 
@@ -918,6 +1061,7 @@
     window.addEventListener('beforeunload', function() {
       if (logoObjectUrl) URL.revokeObjectURL(logoObjectUrl);
       if (ctaAudioObjectUrl) URL.revokeObjectURL(ctaAudioObjectUrl);
+      if (bgMusicObjectUrl) URL.revokeObjectURL(bgMusicObjectUrl);
     });
 
     function switchTab(mode) {
@@ -1574,20 +1718,30 @@
       let lastCountdownSecond = null;
       let revealPlayed = false;
       let ctaAudioStarted = false;
-      let lastHeartbeatTime = 0;
+      let subBoomPlayedIntro = false;
+      let subBoomPlayedOptions = false;
+
+      // Start Suspense Audio
+      if (bgAudioMode === 'synth') {
+        startAtmosphericDrone();
+      } else if (bgAudioMode === 'custom' && bgMusicObjectUrl) {
+        bgMusicAudio.currentTime = 0;
+        if (!isMuted) bgMusicAudio.play();
+      }
 
       function renderFrame(now) {
         if (!isPlaying) return;
 
         const elapsed = (now - startTime) / 1000;
 
-        // Reading phase suspense heartbeat (~72 BPM pulse)
-        if (elapsed < (tIntro + tQuestion + tOptions)) {
-          const heartInterval = elapsed < tIntro ? 0.95 : 0.82;
-          if (elapsed - lastHeartbeatTime >= heartInterval) {
-            lastHeartbeatTime = elapsed;
-            playHeartbeatThump(elapsed < tIntro ? 0.75 : 0.95, false);
-          }
+        // Sub-boom impacts during reading phase
+        if (elapsed >= 0.2 && !subBoomPlayedIntro) {
+          subBoomPlayedIntro = true;
+          playCinematicSubBoom(1.0);
+        }
+        if (elapsed >= (tIntro + tQuestion) && !subBoomPlayedOptions) {
+          subBoomPlayedOptions = true;
+          playCinematicSubBoom(0.9);
         }
 
         if (elapsed < tIntro + tQuestion + tOptions + tCountdown + tReveal) {
@@ -1598,7 +1752,7 @@
           const isRevealed = elapsed >= (tIntro + tQuestion + tOptions + tCountdown);
           drawDynamicOptionsCards(options, isRevealed, correct, 1);
 
-          // Countdown Phase (Rushed Heartbeat + Suspense Ticks)
+          // Countdown Phase (Rushed Tension Ticks + Sub Impacts)
           if (elapsed >= (tIntro + tQuestion + tOptions) && !isRevealed) {
             const cdElapsed = elapsed - (tIntro + tQuestion + tOptions);
             const remaining = Math.max(1, Math.ceil(countdownSecs - cdElapsed));
@@ -1606,16 +1760,19 @@
 
             if (remaining !== lastCountdownSecond) {
               lastCountdownSecond = remaining;
-              playCountdownTick(520 + (countdownSecs - remaining) * 80);
+              playCountdownTick(520 + (countdownSecs - remaining) * 95);
             }
           }
 
           if (isRevealed) {
-            drawAnswerRevealedBanner(correct);
+            // Cut tension drone on reveal
             if (!revealPlayed) {
               revealPlayed = true;
+              stopAtmosphericDrone();
+              if (bgMusicAudio) bgMusicAudio.pause();
               playRevealChime();
             }
+            drawAnswerRevealedBanner(correct);
           }
 
           renderYouTubeOverlayGuide();
@@ -1643,6 +1800,8 @@
     function stopSequence() {
       isPlaying = false;
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      stopAtmosphericDrone();
+      if (bgMusicAudio) bgMusicAudio.pause();
       if (ctaAudio) ctaAudio.pause();
       document.getElementById('playPreviewBtn').style.display = 'inline-flex';
       document.getElementById('stopPreviewBtn').style.display = 'none';
@@ -1664,6 +1823,7 @@
       const combinedTracks = [...canvasStream.getVideoTracks()];
 
       if (audioDestination) {
+        // Connect CTA audio to masterGain if not attached
         if (ctaAudioObjectUrl && !ctaAudio.sourceNodeAttached) {
           try {
             const source = audioCtx.createMediaElementSource(ctaAudio);
@@ -1671,6 +1831,15 @@
             ctaAudio.sourceNodeAttached = true;
           } catch (e) {}
         }
+        // Connect Custom Background Music audio to masterGain if not attached
+        if (bgMusicObjectUrl && !bgMusicAudio.sourceNodeAttached) {
+          try {
+            const bgSource = audioCtx.createMediaElementSource(bgMusicAudio);
+            bgSource.connect(masterGain);
+            bgMusicAudio.sourceNodeAttached = true;
+          } catch (e) {}
+        }
+
         const audioTracks = audioDestination.stream.getAudioTracks();
         if (audioTracks.length > 0) {
           combinedTracks.push(audioTracks[0]);

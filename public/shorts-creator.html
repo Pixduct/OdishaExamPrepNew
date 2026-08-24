@@ -2608,16 +2608,28 @@
       masterGainNode.gain.value = 0.88;
       masterGainNode.connect(offlineCtx.destination);
 
-      const tIntro = 1.5;
-      const tQuestion = 2.5;
-      const tOptions = 2.0;
-      const tCountdown = config.countdownSecs;
-      const tReveal = 2.5;
-      const tRevealStart = tIntro + tQuestion + tOptions + tCountdown;
-      const tCtaStart = tRevealStart + tReveal;
+      // Use intervals-based timing if available (multi-question config),
+      // otherwise fall back to legacy single-question fields
+      let tRevealStart, tCtaStart;
+      if (config.intervals && config.intervals.length > 0) {
+        const lastInterval = config.intervals[config.intervals.length - 1];
+        tRevealStart = lastInterval.timerEnd || 9.0;
+        tCtaStart    = config.ctaStart || (tRevealStart + 2.5);
+      } else {
+        const tIntro   = 1.5;
+        const tQCard   = 2.5;
+        const tOpts    = 2.0;
+        const tCd      = Math.max(1, Number(config.countdownSecs) || 5);
+        tRevealStart   = tIntro + tQCard + tOpts + tCd;
+        tCtaStart      = tRevealStart + 2.5;
+      }
+
+      // Guard all times
+      tRevealStart = isFinite(tRevealStart) ? Math.max(0, tRevealStart) : 9.0;
+      tCtaStart    = isFinite(tCtaStart)    ? Math.max(0, tCtaStart)    : 11.5;
 
       if (bgAudioMode === 'synth') {
-        // Layer 1: Drone (0s to tRevealStart)
+        // Layer 1: Suspense drone (0 → tRevealStart)
         const droneGain = offlineCtx.createGain();
         droneGain.gain.setValueAtTime(0, 0);
         droneGain.gain.linearRampToValueAtTime(0.24, 0.8);
@@ -2641,17 +2653,16 @@
 
         // Layer 2: Sub-booms
         function addSubBoom(time, intensity) {
-          intensity = intensity || 1.0;
+          intensity = isFinite(intensity) ? intensity : 1.0;
+          time = isFinite(time) && time >= 0 ? time : 0;
           const osc = offlineCtx.createOscillator();
           const oscGain = offlineCtx.createGain();
           osc.type = 'sine';
           osc.frequency.setValueAtTime(75, time);
           osc.frequency.exponentialRampToValueAtTime(28, time + 0.35);
-
           oscGain.gain.setValueAtTime(0, time);
           oscGain.gain.linearRampToValueAtTime(0.5 * intensity, time + 0.02);
           oscGain.gain.exponentialRampToValueAtTime(0.001, time + 0.38);
-
           osc.connect(oscGain);
           oscGain.connect(masterGainNode);
           osc.start(time);
@@ -2659,39 +2670,58 @@
         }
 
         addSubBoom(0.2, 1.0);
-        addSubBoom(tIntro + tQuestion, 0.9);
 
-        // Layer 3: Countdown Ticks + Sub impacts
-        const cdStart = tIntro + tQuestion + tOptions;
-        for (let c = 0; c < config.countdownSecs; c++) {
-          const tickTime = cdStart + c;
-          const pitch = 520 + (c + 1) * 95;
-
-          const osc = offlineCtx.createOscillator();
-          const oscGain = offlineCtx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(pitch, tickTime);
-          osc.frequency.exponentialRampToValueAtTime(pitch * 0.4, tickTime + 0.06);
-
-          oscGain.gain.setValueAtTime(0.38, tickTime);
-          oscGain.gain.exponentialRampToValueAtTime(0.001, tickTime + 0.07);
-
-          osc.connect(oscGain);
-          oscGain.connect(masterGainNode);
-          osc.start(tickTime);
-          osc.stop(tickTime + 0.08);
-
-          addSubBoom(tickTime, 0.85);
+        // Layer 3: Countdown ticks — derive tick positions from intervals or fallback
+        if (config.intervals && config.intervals.length > 0) {
+          config.intervals.forEach(function(iv) {
+            const cdSecs = Math.max(1, Math.round(iv.timerEnd - iv.readEnd));
+            for (let c = 0; c < cdSecs; c++) {
+              const tickTime = iv.readEnd + c;
+              const pitch    = 520 + (c + 1) * 95;
+              const osc      = offlineCtx.createOscillator();
+              const oscGain  = offlineCtx.createGain();
+              osc.type = 'triangle';
+              osc.frequency.setValueAtTime(pitch, tickTime);
+              osc.frequency.exponentialRampToValueAtTime(pitch * 0.4, tickTime + 0.06);
+              oscGain.gain.setValueAtTime(0.38, tickTime);
+              oscGain.gain.exponentialRampToValueAtTime(0.001, tickTime + 0.07);
+              osc.connect(oscGain);
+              oscGain.connect(masterGainNode);
+              osc.start(tickTime);
+              osc.stop(tickTime + 0.08);
+              addSubBoom(tickTime, 0.85);
+            }
+          });
+        } else {
+          const cdSecs  = Math.max(1, Number(config.countdownSecs) || 5);
+          const cdStart = tRevealStart - cdSecs;
+          for (let c = 0; c < cdSecs; c++) {
+            const tickTime = cdStart + c;
+            const pitch    = 520 + (c + 1) * 95;
+            const osc      = offlineCtx.createOscillator();
+            const oscGain  = offlineCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(pitch, tickTime);
+            osc.frequency.exponentialRampToValueAtTime(pitch * 0.4, tickTime + 0.06);
+            oscGain.gain.setValueAtTime(0.38, tickTime);
+            oscGain.gain.exponentialRampToValueAtTime(0.001, tickTime + 0.07);
+            osc.connect(oscGain);
+            oscGain.connect(masterGainNode);
+            osc.start(tickTime);
+            osc.stop(tickTime + 0.08);
+            addSubBoom(tickTime, 0.85);
+          }
         }
-      } else if (bgAudioMode === 'custom' && bgMusicAudio.src) {
+
+      } else if (bgAudioMode === 'custom' && bgMusicObjectUrl) {
         try {
-          const resp = await fetch(bgMusicAudio.src);
-          const arrayBuf = await resp.arrayBuffer();
+          const resp      = await fetch(bgMusicObjectUrl);
+          const arrayBuf  = await resp.arrayBuffer();
           const decodedBg = await offlineCtx.decodeAudioData(arrayBuf);
-          const bgSource = offlineCtx.createBufferSource();
+          const bgSource  = offlineCtx.createBufferSource();
           bgSource.buffer = decodedBg;
-          bgSource.loop = true;
-          const bgGain = offlineCtx.createGain();
+          bgSource.loop   = true;
+          const bgGain    = offlineCtx.createGain();
           bgGain.gain.setValueAtTime(0.7, 0);
           bgGain.gain.setValueAtTime(0.7, tRevealStart);
           bgGain.gain.linearRampToValueAtTime(0.001, tRevealStart + 0.1);
@@ -2702,35 +2732,32 @@
         } catch (e) {}
       }
 
-      // Layer 4: Celebratory Chime arpeggio
+      // Layer 4: Reveal chime arpeggio
       const notes = [523.25, 659.25, 783.99, 1046.50];
       notes.forEach(function(freq, idx) {
-        const osc = offlineCtx.createOscillator();
-        const gain = offlineCtx.createGain();
+        const osc       = offlineCtx.createOscillator();
+        const gain      = offlineCtx.createGain();
         const startTime = tRevealStart + (idx * 0.06);
-
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(freq, startTime);
-
         gain.gain.setValueAtTime(0, startTime);
         gain.gain.linearRampToValueAtTime(0.38, startTime + 0.02);
         gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.7);
-
         osc.connect(gain);
         gain.connect(masterGainNode);
-
         osc.start(startTime);
         osc.stop(startTime + 0.75);
       });
 
-      // Layer 5: CTA Voiceover Audio
-      if (ctaAudio.src) {
+      // Layer 5: CTA Voiceover
+      const ctaSrc = ctaAudioObjectUrl || (ctaAudio && ctaAudio.src ? ctaAudio.src : null);
+      if (ctaSrc && tCtaStart < totalDuration) {
         try {
-          const resp = await fetch(ctaAudio.src);
+          const resp     = await fetch(ctaSrc);
           const arrayBuf = await resp.arrayBuffer();
-          const decodedCta = await offlineCtx.decodeAudioData(arrayBuf);
+          const decoded  = await offlineCtx.decodeAudioData(arrayBuf);
           const ctaSource = offlineCtx.createBufferSource();
-          ctaSource.buffer = decodedCta;
+          ctaSource.buffer = decoded;
           ctaSource.connect(masterGainNode);
           ctaSource.start(tCtaStart);
         } catch (e) {}

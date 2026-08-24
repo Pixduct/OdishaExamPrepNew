@@ -928,6 +928,148 @@
       </div>
 
     </div>
+
+    <!-- ====================================================== -->
+    <!-- ⚙️ 3. BATCH VIDEO SETTINGS (FULL CREATIVE FREEDOM) -->
+    <!-- ====================================================== -->
+    <div class="card" style="margin-top: 1.25rem;">
+      <div class="card-title" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.6rem; margin-bottom: 1.25rem;">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span>⚙️ 3. Batch Video Settings</span>
+          <span style="font-size: 0.72rem; background: rgba(245,158,11,0.2); color: #F59E0B; padding: 2px 8px; border-radius: 6px; font-weight: 800;">FULL CREATIVE CONTROL</span>
+        </div>
+      </div>
+
+      <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+
+        <!-- COLUMN 1: STRUCTURE & THEME -->
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem;">
+          <div style="font-weight: 800; color: #93C5FD; font-size: 0.85rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+            🎬 1. Video Structure & Theme
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.9rem;">
+            <label style="font-weight: 700;">🔢 Questions Per Video</label>
+            <div class="correct-answer-selector" style="margin-top: 0.35rem;">
+              <label class="radio-pill">
+                <input type="radio" name="bulkQPerVideo" value="1" checked onchange="updateBulkVideoEstimate()">
+                <span>1 Question</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="bulkQPerVideo" value="2" onchange="updateBulkVideoEstimate()">
+                <span>2 Questions</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="bulkQPerVideo" value="3" onchange="updateBulkVideoEstimate()">
+                <span>3 Questions</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.9rem;">
+            <label style="font-weight: 700;">⏱️ Countdown Timer</label>
+            <div class="correct-answer-selector" style="margin-top: 0.35rem;">
+              <label class="radio-pill">
+                <input type="radio" name="bulkCountdown" value="3">
+                <span>3 Seconds</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="bulkCountdown" value="5" checked>
+                <span>5 Seconds</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="bulkCountdown" value="7">
+                <span>7 Seconds</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-weight: 700;">🎨 Visual Template Theme</label>
+            <select id="bulkTemplateTheme" style="background: var(--bg-card); color: #FFF; border: 1.5px solid var(--border-color); border-radius: 8px; padding: 0.55rem; width: 100%; margin-top: 0.35rem; font-weight: 600;">
+              <option value="obsidian-cobalt" selected>🌌 1. Obsidian Cobalt (Default • Pro Tech & GK)</option>
+              <option value="royal-gold">👑 2. Royal Gold & Onyx (Luxury)</option>
+              <option value="crimson-danger">🔥 3. Crimson Danger (99% Fail Warning)</option>
+              <option value="cyber-mint">⚡ 4. Cyber Neon Mint (Gamified)</option>
+              <option value="galactic-purple">🔮 5. Galactic Purple (Studio)</option>
+              <option value="slate-academy">🏛️ 6. Slate Academy (Official)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- COLUMN 2: AUDIO & MUSIC -->
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem;">
+          <div style="font-weight: 800; color: #93C5FD; font-size: 0.85rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+            🎵 2. Audio & Sound FX
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.9rem;">
+            <label style="font-weight: 700;">Background Tension Audio</label>
+            <div class="correct-answer-selector" style="margin-top: 0.35rem;">
+              <label class="radio-pill">
+                <input type="radio" name="bulkBgAudio" value="synth" checked onchange="handleBulkAudioModeChange(this.value)">
+                <span>🎛️ Synth Drone</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="bulkBgAudio" value="custom" onchange="handleBulkAudioModeChange(this.value)">
+                <span>📁 Custom MP3</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="bulkBgAudio" value="muted" onchange="handleBulkAudioModeChange(this.value)">
+                <span>🔇 Mute</span>
+              </label>
+            </div>
+          </div>
+
+          <div id="bulkCustomBgAudioBox" style="display: none; margin-bottom: 0.9rem;">
+            <div class="file-upload-box" style="padding: 0.65rem; cursor: pointer;" onclick="document.getElementById('bulkBgAudioInput').click()">
+              <div id="bulkBgAudioFileName" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-align: left;">Click to Select Suspense Music MP3</div>
+              <button type="button" class="btn" style="pointer-events: none; padding: 0.25rem 0.6rem; font-size: 0.75rem;">Select MP3</button>
+            </div>
+            <input type="file" id="bulkBgAudioInput" accept="audio/mp3,audio/wav,audio/mpeg" style="display: none;" onchange="handleBulkBgAudioUpload(event)">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-weight: 700;">🎙️ CTA Voice Audio (Optional)</label>
+            <div class="file-upload-box" style="padding: 0.65rem; cursor: pointer; margin-top: 0.35rem;" onclick="document.getElementById('bulkCtaAudioInput').click()">
+              <div id="bulkCtaAudioFileName" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-align: left;">Click to Select CTA Voice MP3</div>
+              <button type="button" class="btn" style="pointer-events: none; padding: 0.25rem 0.6rem; font-size: 0.75rem;">Select MP3</button>
+            </div>
+            <input type="file" id="bulkCtaAudioInput" accept="audio/mp3,audio/wav,audio/mpeg" style="display: none;" onchange="handleBulkCtaAudioUpload(event)">
+          </div>
+        </div>
+
+        <!-- COLUMN 3: BRANDING & CTA -->
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem;">
+          <div style="font-weight: 800; color: #93C5FD; font-size: 0.85rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+            ✏️ 3. Branding & CTA
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.6rem;">
+            <label>Brand Name</label>
+            <input type="text" id="bulkBrandName" value="OdishaExamPrep">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.6rem;">
+            <label>CTA Pitch Text</label>
+            <input type="text" id="bulkCtaText" value="Visit website for 1,000+ Topic Tests & Mock Series!">
+          </div>
+
+          <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>Website Name</label>
+              <input type="text" id="bulkWebsiteName" value="OdishaExamPrep.in">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>Website URL</label>
+              <input type="text" id="bulkWebsiteUrl" value="www.odishaexamprep.in">
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 
 

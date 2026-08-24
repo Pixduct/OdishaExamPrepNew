@@ -531,6 +531,41 @@
       <!-- MCQ & EXAM SECTION -->
       <div class="card-title">📝 Question & Exam Details</div>
 
+      <!-- 🔢 MULTI-QUESTION COUNT & TABS SELECTOR -->
+      <div class="form-group col-span-2" style="background: rgba(37,99,235,0.06); padding: 0.85rem; border-radius: 12px; border: 1.5px solid rgba(59,130,246,0.35); margin-bottom: 0.6rem;">
+        <label style="color: #93C5FD; font-weight: 800; display: flex; align-items: center; justify-content: space-between; font-size: 0.95rem;">
+          <span>🔢 Questions in this Short</span>
+          <span class="q-count-badge" id="qCountDisplayBadge">1 Question Mode</span>
+        </label>
+        <div class="correct-answer-selector" style="margin-top: 0.5rem;">
+          <label class="radio-pill">
+            <input type="radio" name="questionsCountRadio" value="1" checked onchange="handleQuestionsCountChange(1)">
+            <span>1 Question (Quick)</span>
+          </label>
+          <label class="radio-pill">
+            <input type="radio" name="questionsCountRadio" value="2" onchange="handleQuestionsCountChange(2)">
+            <span>2 Questions (Duo)</span>
+          </label>
+          <label class="radio-pill">
+            <input type="radio" name="questionsCountRadio" value="3" onchange="handleQuestionsCountChange(3)">
+            <span>3 Questions (Rapid Challenge 🔥)</span>
+          </label>
+        </div>
+
+        <div class="q-tabs-row" id="questionTabsRow" style="margin-top: 0.75rem; margin-bottom: 0.2rem;">
+          <button type="button" class="q-tab-btn active" id="qTab0" onclick="switchQuestionTab(0)">
+            <span>❓ Question 1</span>
+          </button>
+          <button type="button" class="q-tab-btn" id="qTab1" style="display: none;" onclick="switchQuestionTab(1)">
+            <span>❓ Question 2</span>
+          </button>
+          <button type="button" class="q-tab-btn" id="qTab2" style="display: none;" onclick="switchQuestionTab(2)">
+            <span>❓ Question 3</span>
+          </button>
+        </div>
+      </div>
+
+
       <!-- 🎨 MULTI-TEMPLATE VISUAL THEME SELECTOR -->
       <div class="form-group col-span-2" style="background: rgba(255,255,255,0.03); padding: 0.85rem; border-radius: 12px; border: 1.5px solid rgba(245,158,11,0.4); margin-bottom: 0.5rem;">
         <label style="color: var(--amber-accent); font-weight: 800; display: flex; align-items: center; justify-content: space-between; font-size: 0.95rem;">
@@ -1622,9 +1657,12 @@
       ctx.restore();
     }
 
-    function drawDynamicQuestionCard(question, alpha, tpl) {
+    function drawDynamicQuestionCard(question, alpha, tpl, qNum, totalQ) {
       tpl = tpl || getActiveTemplate();
       alpha = alpha !== undefined ? alpha : 1;
+      qNum = qNum || (activeQuestionIndex + 1);
+      totalQ = totalQ || questionsCount;
+
       ctx.save();
       ctx.globalAlpha = alpha;
 
@@ -1638,12 +1676,14 @@
       ctx.lineWidth = 3.5;
       roundRect(ctx, cardX, cardY, cardW, cardH, 28, true, true);
 
+      const badgeText = totalQ > 1 ? '❓ QUESTION ' + qNum + '/' + totalQ : '❓ QUESTION';
+      const badgeW = totalQ > 1 ? 230 : 190;
       ctx.fillStyle = tpl.qBadgeBg;
-      roundRect(ctx, 100, 350, 190, 44, 14, true, false);
+      roundRect(ctx, 100, 350, badgeW, 44, 14, true, false);
       ctx.fillStyle = tpl.qBadgeText;
       ctx.font = '800 22px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('❓ QUESTION', 195, 380);
+      ctx.fillText(badgeText, 100 + (badgeW / 2), 380);
 
       const maxWidth = cardW - 100;
       const maxAvailableHeight = cardH - 95;
@@ -1874,24 +1914,18 @@
 
     function drawIdleFrame() {
       if (isPlaying || isExporting || currentMode !== 'shorts') return;
+      saveCurrentQuestionForm();
 
       const exam = document.getElementById('examName').value;
-      const question = document.getElementById('questionText').value;
       const brand = document.getElementById('brandName').value;
-      const options = {
-        A: document.getElementById('optionA').value,
-        B: document.getElementById('optionB').value,
-        C: document.getElementById('optionC').value,
-        D: document.getElementById('optionD').value
-      };
-      const correct = document.querySelector('input[name="correctAnswer"]:checked') ? document.querySelector('input[name="correctAnswer"]:checked').value : 'A';
-
+      const currentQ = questionsData[activeQuestionIndex];
       const tpl = getActiveTemplate();
+
       drawBaseBackground(tpl);
       drawHeaderBar(exam, brand, 1, tpl);
-      drawDynamicQuestionCard(question, 1, tpl);
-      drawDynamicOptionsCards(options, false, correct, 1, tpl);
-      drawAnswerRevealedBanner(correct, tpl);
+      drawDynamicQuestionCard(currentQ.question, 1, tpl, activeQuestionIndex + 1, questionsCount);
+      drawDynamicOptionsCards(currentQ.options, false, currentQ.correct, 1, tpl);
+      drawAnswerRevealedBanner(currentQ.correct, tpl);
       renderYouTubeOverlayGuide();
     }
 
@@ -2068,58 +2102,91 @@
       renderYouTubeOverlayGuide();
     }
 
+
+    function computeQuestionIntervals(questions) {
+      let accum = 0;
+      const tRead = 4.0;   // Direct question & options reading (no intro delay)
+      const tReveal = 2.5; // Answer highlight & celebratory chime
+      const intervals = questions.map((q, idx) => {
+        const start = accum;
+        const readEnd = start + tRead;
+        const timerEnd = readEnd + (q.countdownSecs || 5);
+        const revealEnd = timerEnd + tReveal;
+        accum = revealEnd;
+        return {
+          index: idx,
+          start,
+          readEnd,
+          timerEnd,
+          revealEnd,
+          q
+        };
+      });
+      return {
+        intervals,
+        totalQuestionsDuration: accum
+      };
+    }
+
+    function getCurrentShortConfig() {
+      saveCurrentQuestionForm();
+      const activeQuestions = questionsData.slice(0, questionsCount);
+      const { intervals, totalQuestionsDuration } = computeQuestionIntervals(activeQuestions);
+      const tCta = ctaAudioObjectUrl ? ctaAudioDuration : 4.0;
+      const totalDuration = totalQuestionsDuration + tCta;
+
+      return {
+        exam: document.getElementById('examName').value,
+        brand: document.getElementById('brandName').value,
+        cta: document.getElementById('ctaPitchText').value,
+        websiteName: document.getElementById('websiteName').value,
+        websiteUrl: document.getElementById('websiteUrl').value,
+        template: getActiveTemplate(),
+        questions: activeQuestions,
+        questionsCount: questionsCount,
+        intervals,
+        totalQuestionsDuration,
+        ctaStart: totalQuestionsDuration,
+        tCta,
+        totalDuration
+      };
+    }
+
     function renderShortsFrameAtTime(elapsed, totalDuration, config) {
-      const tIntro = 1.5;
-      const tQuestion = 2.5;
-      const tOptions = 2.0;
-      const tCountdown = config.countdownSecs;
-      const tReveal = 2.5;
+      const tpl = config.template || getActiveTemplate();
+      const intervals = config.intervals;
+      const ctaStart = config.ctaStart;
 
-      if (elapsed < (tIntro + tQuestion + tOptions + tCountdown + tReveal)) {
-        drawBaseBackground();
-        drawHeaderBar(config.exam, config.brand, 1);
-        drawDynamicQuestionCard(config.question, 1);
+      if (elapsed < ctaStart) {
+        const activeInterval = intervals.find(it => elapsed >= it.start && elapsed < it.revealEnd) || intervals[intervals.length - 1];
+        
+        drawBaseBackground(tpl);
+        drawHeaderBar(config.exam, config.brand, 1, tpl);
+        drawDynamicQuestionCard(activeInterval.q.question, 1, tpl, activeInterval.index + 1, config.questionsCount);
 
-        const isRevealed = elapsed >= (tIntro + tQuestion + tOptions + tCountdown);
-        drawDynamicOptionsCards(config.options, isRevealed, config.correct, 1);
+        const isRevealed = elapsed >= activeInterval.timerEnd;
+        drawDynamicOptionsCards(activeInterval.q.options, isRevealed, activeInterval.q.correct, 1, tpl);
 
-        if (elapsed >= (tIntro + tQuestion + tOptions) && !isRevealed) {
-          const cdElapsed = elapsed - (tIntro + tQuestion + tOptions);
-          const remaining = Math.max(1, Math.ceil(config.countdownSecs - cdElapsed));
-          drawCountdownOverlay(remaining, config.countdownSecs);
+        if (elapsed >= activeInterval.readEnd && !isRevealed) {
+          const cdElapsed = elapsed - activeInterval.readEnd;
+          const remaining = Math.max(1, Math.ceil(activeInterval.q.countdownSecs - cdElapsed));
+          drawCountdownOverlay(remaining, activeInterval.q.countdownSecs, tpl);
         }
 
         if (isRevealed) {
-          drawAnswerRevealedBanner(config.correct);
+          drawAnswerRevealedBanner(activeInterval.q.correct, tpl);
         }
 
         renderYouTubeOverlayGuide();
       } else {
-        drawCtaScreen(config.brand, config.cta, config.websiteName, config.websiteUrl, 1);
+        drawCtaScreen(config.brand, config.cta, config.websiteName, config.websiteUrl, 1, tpl);
         renderYouTubeOverlayGuide();
       }
     }
 
-    function getCurrentShortConfig() {
-      return {
-        exam: document.getElementById('examName').value,
-        question: document.getElementById('questionText').value,
-        brand: document.getElementById('brandName').value,
-        cta: document.getElementById('ctaText').value,
-        websiteName: document.getElementById('websiteName').value,
-        websiteUrl: document.getElementById('websiteUrl').value,
-        options: {
-          A: document.getElementById('optionA').value,
-          B: document.getElementById('optionB').value,
-          C: document.getElementById('optionC').value,
-          D: document.getElementById('optionD').value
-        },
-        correct: document.querySelector('input[name="correctAnswer"]:checked') ? document.querySelector('input[name="correctAnswer"]:checked').value : 'A',
-        template: getActiveTemplate(),
-        countdownSecs: parseInt(document.querySelector('input[name="countdownDuration"]:checked') ? document.querySelector('input[name="countdownDuration"]:checked').value : '5', 10)
-      };
-    }
-
+    // ==============================================================
+    // 🎬 MULTI-QUESTION VIDEO PLAYBACK & AUDIO ENGINE
+    // ==============================================================
     function playShortsSequence(isRecordingMode, onComplete) {
       initAudioContext();
       stopSequence();
@@ -2129,106 +2196,112 @@
       document.getElementById('stopPreviewBtn').style.display = 'inline-flex';
 
       const config = getCurrentShortConfig();
-      const tIntro = 1.5;
-      const tQuestion = 2.5;
-      const tOptions = 2.0;
-      const tCountdown = config.countdownSecs;
-      const tReveal = 2.5;
-      const tCta = ctaAudioObjectUrl ? ctaAudioDuration : 4.0;
-      const totalDuration = tIntro + tQuestion + tOptions + tCountdown + tReveal + tCta;
+      const intervals = config.intervals;
+      const totalDuration = config.totalDuration;
+      const ctaStart = config.ctaStart;
 
       const startTime = performance.now();
-      let lastCountdownSecond = null;
-      let revealPlayed = false;
-      let ctaAudioStarted = false;
-      let subBoomPlayedIntro = false;
-      let subBoomPlayedOptions = false;
-      let bgStoppedForTimer = false;
+      const XFADE = 1.2; // Smooth crossfade duration
 
-      if (bgAudioMode === 'synth') {
-        startAtmosphericDrone();
-      } else if (bgAudioMode === 'custom' && bgMusicObjectUrl) {
-        bgMusicAudio.currentTime = 0;
-        if (!isMuted) bgMusicAudio.play();
-      }
+      // Track audio trigger state per question
+      const qAudioState = intervals.map(() => ({
+        droneStarted: false,
+        droneFaded: false,
+        lastTickSec: null,
+        revealChimePlayed: false,
+        subBoomPlayed: false
+      }));
+      let ctaVoiceStarted = false;
 
       function renderFrame(now) {
         if (!isPlaying) return;
 
         const elapsed = (now - startTime) / 1000;
-
-        if (elapsed >= 0.2 && !subBoomPlayedIntro) {
-          subBoomPlayedIntro = true;
-          playCinematicSubBoom(1.0);
-        }
-        if (elapsed >= (tIntro + tQuestion) && !subBoomPlayedOptions) {
-          subBoomPlayedOptions = true;
-          playCinematicSubBoom(0.9);
-        }
-
         renderShortsFrameAtTime(elapsed, totalDuration, config);
 
-        // Start fade XFADE seconds BEFORE countdown so it finishes at tick-zero (no overlap)
-        const XFADE = 1.2;
-        const fadeStartsAt = (tIntro + tQuestion + tOptions) - XFADE;
-        if (elapsed >= fadeStartsAt && !bgStoppedForTimer) {
-          bgStoppedForTimer = true;
+        // Process audio triggers for the active question
+        if (elapsed < ctaStart) {
+          const activeInterval = intervals.find(it => elapsed >= it.start && elapsed < it.revealEnd);
+          if (activeInterval) {
+            const idx = activeInterval.index;
+            const state = qAudioState[idx];
+            const qElapsed = elapsed - activeInterval.start;
 
-          // ① Fade OUT background music — completes exactly when first tick plays
-          if (bgAudioMode === 'synth' && droneGainNode && audioCtx) {
-            try {
-              droneGainNode.gain.cancelScheduledValues(audioCtx.currentTime);
-              droneGainNode.gain.setValueAtTime(droneGainNode.gain.value, audioCtx.currentTime);
-              droneGainNode.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + XFADE);
-            } catch(e) {}
-            setTimeout(function() {
-              activeDroneOscs.forEach(function(osc) {
-                try { osc.stop(); osc.disconnect(); } catch(e) {}
-              });
-              activeDroneOscs = [];
-              droneGainNode = null;
-            }, (XFADE * 1000) + 100);
-          } else if (bgAudioMode === 'custom' && bgMusicAudio && !bgMusicAudio.paused) {
-            const startVol = bgMusicAudio.volume;
-            const steps = 24;
-            const stepTime = (XFADE * 1000) / steps;
-            let step = 0;
-            const fadeInterval = setInterval(function() {
-              step++;
-              bgMusicAudio.volume = Math.max(0, startVol * (1 - step / steps));
-              if (step >= steps) {
-                clearInterval(fadeInterval);
-                bgMusicAudio.pause();
-                bgMusicAudio.volume = startVol;
+            // ① Start tension background music for this question
+            if (qElapsed < (4.0 - XFADE) && !state.droneStarted) {
+              state.droneStarted = true;
+              if (bgAudioMode === 'synth') {
+                startAtmosphericDrone();
+              } else if (bgAudioMode === 'custom' && bgMusicAudio && bgMusicObjectUrl) {
+                bgMusicAudio.currentTime = 0;
+                if (!isMuted) bgMusicAudio.play();
               }
-            }, stepTime);
+            }
+
+            // ② Sub-boom impact on question entrance
+            if (qElapsed >= 0.2 && !state.subBoomPlayed) {
+              state.subBoomPlayed = true;
+              playCinematicSubBoom(1.0);
+            }
+
+            // ③ Smoothly fade OUT background music before timer starts (lands at tick #1)
+            const fadeStart = activeInterval.readEnd - XFADE;
+            if (elapsed >= fadeStart && !state.droneFaded) {
+              state.droneFaded = true;
+              if (bgAudioMode === 'synth' && droneGainNode && audioCtx) {
+                try {
+                  droneGainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+                  droneGainNode.gain.setValueAtTime(droneGainNode.gain.value, audioCtx.currentTime);
+                  droneGainNode.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + XFADE);
+                } catch(e) {}
+                setTimeout(() => {
+                  activeDroneOscs.forEach(osc => { try { osc.stop(); osc.disconnect(); } catch(e) {} });
+                  activeDroneOscs = [];
+                  droneGainNode = null;
+                }, (XFADE * 1000) + 100);
+              } else if (bgAudioMode === 'custom' && bgMusicAudio && !bgMusicAudio.paused) {
+                const startVol = bgMusicAudio.volume;
+                const steps = 24;
+                const stepTime = (XFADE * 1000) / steps;
+                let step = 0;
+                const fadeInterval = setInterval(() => {
+                  step++;
+                  bgMusicAudio.volume = Math.max(0, startVol * (1 - step / steps));
+                  if (step >= steps) {
+                    clearInterval(fadeInterval);
+                    bgMusicAudio.pause();
+                    bgMusicAudio.volume = startVol;
+                  }
+                }, stepTime);
+              }
+            }
+
+            // ④ Countdown ticks during timer phase
+            if (elapsed >= activeInterval.readEnd && elapsed < activeInterval.timerEnd) {
+              const cdElapsed = elapsed - activeInterval.readEnd;
+              const remaining = Math.max(1, Math.ceil(activeInterval.q.countdownSecs - cdElapsed));
+              if (remaining !== state.lastTickSec) {
+                state.lastTickSec = remaining;
+                playCountdownTick(520 + (activeInterval.q.countdownSecs - remaining) * 95);
+              }
+            }
+
+            // ⑤ Answer reveal chime
+            if (elapsed >= activeInterval.timerEnd && !state.revealChimePlayed) {
+              state.revealChimePlayed = true;
+              stopAtmosphericDrone();
+              stopTimerTensionMusic(0.3);
+              if (bgMusicAudio) bgMusicAudio.pause();
+              playRevealChime();
+            }
           }
-
-          // ② Timer tension music fades in over same XFADE window — fully loud at tick-zero
-          startTimerTensionMusic(XFADE);
-        }
-
-        if (elapsed >= (tIntro + tQuestion + tOptions) && elapsed < (tIntro + tQuestion + tOptions + tCountdown)) {
-          const cdElapsed = elapsed - (tIntro + tQuestion + tOptions);
-          const remaining = Math.max(1, Math.ceil(config.countdownSecs - cdElapsed));
-          if (remaining !== lastCountdownSecond) {
-            lastCountdownSecond = remaining;
-            playCountdownTick(520 + (config.countdownSecs - remaining) * 95);
+        } else {
+          // CTA Outro Voiceover
+          if (!ctaVoiceStarted && ctaAudioObjectUrl) {
+            ctaVoiceStarted = true;
+            ctaAudio.currentTime = 0;
+            if (!isMuted) ctaAudio.play();
           }
-        }
-
-        if (elapsed >= (tIntro + tQuestion + tOptions + tCountdown) && !revealPlayed) {
-          revealPlayed = true;
-          stopAtmosphericDrone();
-          stopTimerTensionMusic(0.4);
-          if (bgMusicAudio) bgMusicAudio.pause();
-          playRevealChime();
-        }
-
-        if (elapsed >= (tIntro + tQuestion + tOptions + tCountdown + tReveal) && !ctaAudioStarted && ctaAudioObjectUrl) {
-          ctaAudioStarted = true;
-          ctaAudio.currentTime = 0;
-          if (!isMuted) ctaAudio.play();
         }
 
         if (elapsed >= totalDuration) {
@@ -2242,7 +2315,6 @@
 
       animationFrameId = requestAnimationFrame(renderFrame);
     }
-
     function stopSequence() {
       isPlaying = false;
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
@@ -2422,13 +2494,7 @@
       progressPercent.innerText = '0%';
 
       const config = getCurrentShortConfig();
-      const tIntro = 1.5;
-      const tQuestion = 2.5;
-      const tOptions = 2.0;
-      const tCountdown = config.countdownSecs;
-      const tReveal = 2.5;
-      const tCta = ctaAudioObjectUrl ? ctaAudioDuration : 4.0;
-      const totalDuration = tIntro + tQuestion + tOptions + tCountdown + tReveal + tCta;
+      const totalDuration = config.totalDuration;
 
       const fps = 30;
       const totalFrames = Math.ceil(totalDuration * fps);

@@ -570,9 +570,9 @@
         </div>
 
         <div class="form-group">
-          <label>Audio Preview</label>
+          <label>Suspense Audio Mode</label>
           <button class="btn" style="width: 100%; margin-top: 0.4rem;" id="muteToggleBtn" onclick="toggleMute()">
-            🔊 Sound Enabled
+            💓 Cinematic Heartbeat + Ticks
           </button>
         </div>
       </div>
@@ -689,7 +689,7 @@
       </div>
 
       <div style="font-size: 0.75rem; color: var(--text-dim); text-align: center; max-width: 320px;">
-        💡 Real-world YouTube mobile proportions (Y: 120 to 1540 filled).
+        💡 Real-world YouTube mobile proportions with Heartbeat Audio Synthesizer.
       </div>
     </div>
 
@@ -724,7 +724,7 @@
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         audioCtx = new AudioContextClass();
         masterGain = audioCtx.createGain();
-        masterGain.gain.value = isMuted ? 0 : 0.8;
+        masterGain.gain.value = isMuted ? 0 : 0.85;
         masterGain.connect(audioCtx.destination);
         audioDestination = audioCtx.createMediaStreamDestination();
         masterGain.connect(audioDestination);
@@ -743,9 +743,9 @@
         if (masterGain) masterGain.gain.value = 0;
         ctaAudio.muted = true;
       } else {
-        btn.innerHTML = '🔊 Sound Enabled';
+        btn.innerHTML = '💓 Cinematic Heartbeat + Ticks';
         btn.style.color = 'var(--text-main)';
-        if (masterGain) masterGain.gain.value = 0.8;
+        if (masterGain) masterGain.gain.value = 0.85;
         ctaAudio.muted = false;
       }
     }
@@ -760,24 +760,78 @@
       else drawCoverCanvas();
     }
 
+    // ==========================================
+    // 💓 CINEMATIC HEARTBEAT & SUSPENSE SYNTHESIZER
+    // ==========================================
+    function playHeartbeatThump(intensity, isRushed) {
+      intensity = intensity || 1.0;
+      isRushed = isRushed || false;
+      if (isMuted || !audioCtx) return;
+
+      try {
+        const now = audioCtx.currentTime;
+
+        // "LUB" (First beat) - Deep sub-bass punch
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(isRushed ? 95 : 82, now);
+        osc1.frequency.exponentialRampToValueAtTime(38, now + 0.12);
+
+        gain1.gain.setValueAtTime(0, now);
+        gain1.gain.linearRampToValueAtTime(0.42 * intensity, now + 0.015);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+
+        osc1.connect(gain1);
+        gain1.connect(masterGain);
+
+        osc1.start(now);
+        osc1.stop(now + 0.14);
+
+        // "DUB" (Second beat - 0.11s later) - Resonant cardiac response
+        const dubTime = now + (isRushed ? 0.09 : 0.12);
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(isRushed ? 78 : 68, dubTime);
+        osc2.frequency.exponentialRampToValueAtTime(32, dubTime + 0.14);
+
+        gain2.gain.setValueAtTime(0, dubTime);
+        gain2.gain.linearRampToValueAtTime(0.32 * intensity, dubTime + 0.018);
+        gain2.gain.exponentialRampToValueAtTime(0.001, dubTime + 0.15);
+
+        osc2.connect(gain2);
+        gain2.connect(masterGain);
+
+        osc2.start(dubTime);
+        osc2.stop(dubTime + 0.16);
+      } catch (e) {}
+    }
+
     function playCountdownTick(pitch) {
       pitch = pitch || 440;
       if (isMuted || !audioCtx) return;
       try {
+        const now = audioCtx.currentTime;
+
+        // 1. Sharp Click / Tick
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(pitch, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(pitch * 0.7, audioCtx.currentTime + 0.08);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(pitch, now);
+        osc.frequency.exponentialRampToValueAtTime(pitch * 0.5, now + 0.08);
 
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
 
         osc.connect(gain);
         gain.connect(masterGain);
 
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.09);
+        osc.start(now);
+        osc.stop(now + 0.09);
+
+        // 2. Accompanying accelerated heartbeat thump
+        playHeartbeatThump(1.15, true);
       } catch (e) {}
     }
 
@@ -794,14 +848,14 @@
           osc.frequency.setValueAtTime(freq, startTime);
 
           gain.gain.setValueAtTime(0, startTime);
-          gain.gain.linearRampToValueAtTime(0.3, startTime + 0.02);
-          gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.6);
+          gain.gain.linearRampToValueAtTime(0.35, startTime + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.7);
 
           osc.connect(gain);
           gain.connect(masterGain);
 
           osc.start(startTime);
-          osc.stop(startTime + 0.65);
+          osc.stop(startTime + 0.75);
         });
       } catch (e) {}
     }
@@ -957,7 +1011,6 @@
       ctx.fillRect(0, 1000, 1080, 920);
     }
 
-    // Accurate Real-World YouTube Mobile UI Overlay Guide
     function renderYouTubeOverlayGuide() {
       if (!showSafeZoneGuide) return;
 
@@ -968,15 +1021,12 @@
       ctx.setLineDash([10, 10]);
 
       if (currentMode === 'shorts') {
-        // Real-world Top status/search margin (0 to 100px)
         ctx.fillRect(0, 0, 1080, 100);
         ctx.strokeRect(0, 0, 1080, 100);
 
-        // Real-world Bottom channel avatar, subscribe button, and title overlay (Y: 1540 to 1920)
         ctx.fillRect(0, 1540, 1080, 380);
         ctx.strokeRect(0, 1540, 1080, 380);
 
-        // Real-world Right-side narrow button margin (X: 980 to 1080)
         ctx.fillRect(980, 750, 100, 680);
         ctx.strokeRect(980, 750, 100, 680);
 
@@ -993,7 +1043,6 @@
         ctx.fillStyle = '#10B981';
         ctx.fillText('✅ 100% VISIBLE REAL SHORTS VIDEO SAFE ZONE', 540, 135);
       } else {
-        // Cover Feed Guide
         ctx.fillRect(0, 1540, 1080, 380);
         ctx.strokeRect(0, 1540, 1080, 380);
 
@@ -1014,8 +1063,7 @@
     }
 
     // ==========================================
-    // 📐 RE-ENGINEERED 9:16 SHORTS VIDEO RENDERER
-    // (Fills Y: 120 to Y: 1530 with studio proportions)
+    // 📐 9:16 SHORTS VIDEO RENDERER
     // ==========================================
 
     function drawHeaderBar(exam, brand, alpha) {
@@ -1023,7 +1071,6 @@
       ctx.save();
       ctx.globalAlpha = alpha;
 
-      // Brand Header Pill (Y: 120 to 220 - Height 100px)
       ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
       ctx.lineWidth = 2.5;
@@ -1040,7 +1087,6 @@
       ctx.textAlign = 'left';
       ctx.fillText((brand || 'OdishaExamPrep') + ' ✔', 180, 184);
 
-      // Exam Target Pill (Y: 235 to 310 - Height 75px)
       ctx.fillStyle = '#2563EB';
       roundRect(ctx, 60, 235, 960, 75, 20, true, false);
 
@@ -1060,14 +1106,13 @@
       const cardX = 60;
       const cardY = 325;
       const cardW = 960;
-      const cardH = 345; // Grand, spacious question card
+      const cardH = 345;
 
       ctx.fillStyle = 'rgba(15, 23, 42, 0.96)';
       ctx.strokeStyle = 'rgba(59, 130, 246, 0.6)';
       ctx.lineWidth = 3.5;
       roundRect(ctx, cardX, cardY, cardW, cardH, 28, true, true);
 
-      // "QUESTION" Badge Header Pill
       ctx.fillStyle = 'rgba(37, 99, 235, 0.28)';
       roundRect(ctx, 100, 350, 190, 44, 14, true, false);
       ctx.fillStyle = '#93C5FD';
@@ -1123,7 +1168,7 @@
 
       const keys = ['A', 'B', 'C', 'D'];
       const startY = 690;
-      const cardH = 135; // Luxurious 135px option card
+      const cardH = 135;
       const gap = 16;
       const cardW = 960;
 
@@ -1149,7 +1194,6 @@
 
         roundRect(ctx, 60, y, cardW, cardH, 24, true, true);
 
-        // Letter Circle (A, B, C, D)
         const circleCenterX = 130;
         const circleCenterY = y + cardH / 2;
 
@@ -1214,7 +1258,7 @@
 
     function drawCountdownOverlay(secondsLeft, totalSeconds) {
       ctx.save();
-      const centerY = 1385; // Positioned right above the bottom margin
+      const centerY = 1385;
 
       ctx.fillStyle = 'rgba(15, 23, 42, 0.96)';
       ctx.strokeStyle = '#F59E0B';
@@ -1251,7 +1295,6 @@
 
       drawBaseBackground();
 
-      // CTA Screen inside Real Safe Zone (Y: 130 to 1500 - Height 1370px)
       ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
       ctx.strokeStyle = 'rgba(59, 130, 246, 0.55)';
       ctx.lineWidth = 4;
@@ -1518,9 +1561,9 @@
       const correct = document.querySelector('input[name="correctAnswer"]:checked') ? document.querySelector('input[name="correctAnswer"]:checked').value : 'A';
       const countdownSecs = parseInt(document.querySelector('input[name="countdownDuration"]:checked') ? document.querySelector('input[name="countdownDuration"]:checked').value : '5', 10);
 
-      const tIntro = 2.0;
-      const tQuestion = 2.0;
-      const tOptions = 1.5;
+      const tIntro = 1.5;
+      const tQuestion = 2.5;
+      const tOptions = 2.0;
       const tCountdown = countdownSecs;
       const tReveal = 2.5;
       const tCta = ctaAudioObjectUrl ? ctaAudioDuration : 4.0;
@@ -1531,11 +1574,21 @@
       let lastCountdownSecond = null;
       let revealPlayed = false;
       let ctaAudioStarted = false;
+      let lastHeartbeatTime = 0;
 
       function renderFrame(now) {
         if (!isPlaying) return;
 
         const elapsed = (now - startTime) / 1000;
+
+        // Reading phase suspense heartbeat (~72 BPM pulse)
+        if (elapsed < (tIntro + tQuestion + tOptions)) {
+          const heartInterval = elapsed < tIntro ? 0.95 : 0.82;
+          if (elapsed - lastHeartbeatTime >= heartInterval) {
+            lastHeartbeatTime = elapsed;
+            playHeartbeatThump(elapsed < tIntro ? 0.75 : 0.95, false);
+          }
+        }
 
         if (elapsed < tIntro + tQuestion + tOptions + tCountdown + tReveal) {
           drawBaseBackground();
@@ -1545,6 +1598,7 @@
           const isRevealed = elapsed >= (tIntro + tQuestion + tOptions + tCountdown);
           drawDynamicOptionsCards(options, isRevealed, correct, 1);
 
+          // Countdown Phase (Rushed Heartbeat + Suspense Ticks)
           if (elapsed >= (tIntro + tQuestion + tOptions) && !isRevealed) {
             const cdElapsed = elapsed - (tIntro + tQuestion + tOptions);
             const remaining = Math.max(1, Math.ceil(countdownSecs - cdElapsed));

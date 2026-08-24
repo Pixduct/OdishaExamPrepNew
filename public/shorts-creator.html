@@ -525,12 +525,27 @@
   </header>
 
   <main class="main-container">
-
     <!-- LEFT PANEL: FORM INPUTS -->
     <div class="card">
       
       <!-- MCQ & EXAM SECTION -->
       <div class="card-title">📝 Question & Exam Details</div>
+
+      <!-- 🎨 MULTI-TEMPLATE VISUAL THEME SELECTOR -->
+      <div class="form-group col-span-2" style="background: rgba(255,255,255,0.03); padding: 0.85rem; border-radius: 12px; border: 1.5px solid rgba(245,158,11,0.4); margin-bottom: 0.5rem;">
+        <label style="color: var(--amber-accent); font-weight: 800; display: flex; align-items: center; justify-content: space-between; font-size: 0.95rem;">
+          <span>🎨 Video & Cover Visual Template</span>
+          <span style="font-size: 0.72rem; background: rgba(245,158,11,0.25); color: #FCD34D; padding: 2px 8px; border-radius: 6px; font-weight: 900;">100K YOUTUBER SUITE</span>
+        </label>
+        <select id="templateTheme" class="form-control" style="width: 100%; margin-top: 0.5rem; font-weight: 700; background: var(--bg-card); color: #FFF; border: 1.5px solid var(--border-color); border-radius: 8px; padding: 0.75rem 0.85rem; font-size: 0.95rem; cursor: pointer;" onchange="handleTemplateChange()">
+          <option value="obsidian-cobalt" selected>🌌 1. Obsidian Cobalt (Default • Pro Tech & GK)</option>
+          <option value="royal-gold">👑 2. Royal Gold & Onyx (Luxury • Top Rankers / OPSC ASO)</option>
+          <option value="crimson-danger">🔥 3. Crimson Danger (Adrenaline • 99% Fail Challenge)</option>
+          <option value="cyber-mint">⚡ 4. Cyber Neon Mint (Gamified • High-Energy Quiz)</option>
+          <option value="galactic-purple">🔮 5. Galactic Purple (Studio • Modern AI Academy)</option>
+          <option value="slate-academy">🏛️ 6. Slate Academy (Official • Prestigious Exam Authority)</option>
+        </select>
+      </div>
       
       <div class="form-grid">
         <div class="form-group col-span-2">

@@ -35,7 +35,8 @@ import {
   CheckCircle2,
   HelpCircle,
   Target,
-  Save
+  Save,
+  FileJson
 } from 'lucide-react';
 import { Reorder } from 'framer-motion';
 import { examService, Question, TestSeries, MockTest, Exam } from './lib/examService';
@@ -487,6 +488,20 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const [bankQuestionsFileName, setBankQuestionsFileName] = useState('');
   const [bankAnswerKeyFileName, setBankAnswerKeyFileName] = useState('');
   const [showBankPreviewModal, setShowBankPreviewModal] = useState(false);
+
+  // --- Bulk JSON Importer State ---
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [bulkJsonInput, setBulkJsonInput] = useState('');
+  const [bulkGlobalExamId, setBulkGlobalExamId] = useState('');
+  const [bulkGlobalCategory, setBulkGlobalCategory] = useState('topic-wise');
+  const [bulkGlobalTargetMode, setBulkGlobalTargetMode] = useState<'bank' | 'practice' | 'both'>('practice');
+  const [bulkGlobalIsPremium, setBulkGlobalIsPremium] = useState(false);
+  const [bulkGlobalScheduledAt, setBulkGlobalScheduledAt] = useState('');
+  const [bulkGlobalDurationMinutes, setBulkGlobalDurationMinutes] = useState(60);
+  const [bulkGlobalTotalMarks, setBulkGlobalTotalMarks] = useState(100);
+  const [bulkGlobalNegativeMarking, setBulkGlobalNegativeMarking] = useState(0);
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const [bulkResults, setBulkResults] = useState<{ success: number; failed: number; errors: string[] } | null>(null);
 
   // Helper to calculate next category-scoped sequential sort order (starting from 1, filling missing gaps)
   const getNextAvailableOrder = (
@@ -1593,6 +1608,98 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     }
     setFormData(newData);
     setShowAddModal(true);
+  };
+  // --- Bulk JSON Importer Handler ---
+  const handleBulkImport = async () => {
+    if (!bulkGlobalExamId) { alert('Please select an exam first.'); return; }
+    let items: any[] = [];
+    try {
+      const cleaned = bulkJsonInput.trim();
+      items = JSON.parse(cleaned);
+      if (!Array.isArray(items) || items.length === 0) {
+        alert('JSON must be a non-empty array: [ { "title": "...", "subject": "..." }, ... ]');
+        return;
+      }
+    } catch (e) {
+      alert('Invalid JSON. Please check your input and try again.');
+      return;
+    }
+
+    setBulkLoading(true);
+    setBulkResults(null);
+
+    let success = 0;
+    let failed = 0;
+    const errors: string[] = [];
+
+    // Compute starting sortOrder for the whole batch
+    let nextOrder = getNextAvailableOrder(activeTab, bulkGlobalExamId, bulkGlobalCategory, bulkGlobalTargetMode);
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (!item.title || typeof item.title !== 'string' || !item.title.trim()) {
+        failed++;
+        errors.push(`Item ${i + 1}: missing or empty "title" field`);
+        continue;
+      }
+
+      try {
+        if (activeTab === 'banks' || activeTab === 'practice') {
+          const metaTaglineObj = {
+            text: item.tagline || '',
+            price: Number(item.price) || 499,
+            originalPrice: Number(item.originalPrice) || ((Number(item.price) || 499) * 2),
+            subject: item.subject || ''
+          };
+          const hasTaglineMeta = item.subject || item.tagline || item.price;
+          const payload = {
+            examId: bulkGlobalExamId,
+            type: bulkGlobalCategory,
+            target_mode: bulkGlobalTargetMode,
+            title: item.title.trim(),
+            sortOrder: nextOrder,
+            questionCount: Number(item.questionCount) || 0,
+            tagline: hasTaglineMeta ? JSON.stringify(metaTaglineObj) : '',
+            image: item.image || '',
+            isPremium: item.isPremium ?? bulkGlobalIsPremium,
+            pdfUrl: '',
+            hasPracticeMode: activeTab === 'practice' ? true : (item.hasPracticeMode ?? true),
+            scheduled_at: bulkGlobalScheduledAt ? new Date(bulkGlobalScheduledAt).toISOString() : (item.scheduled_at || null)
+          };
+          await examService.createQuestionBank(payload as any);
+        } else if (activeTab === 'tests') {
+          const mockConfig = JSON.stringify({
+            examId: bulkGlobalExamId,
+            category: bulkGlobalCategory,
+            subject: bulkGlobalCategory === 'sectional' ? (item.subject || '') : null,
+            isPremium: item.isPremium ?? bulkGlobalIsPremium,
+            price: Number(item.price) || 499,
+            originalPrice: Number(item.originalPrice) || ((Number(item.price) || 499) * 2),
+            scheduled_at: bulkGlobalScheduledAt ? new Date(bulkGlobalScheduledAt).toISOString() : (item.scheduled_at || null)
+          });
+          const payload = {
+            examId: bulkGlobalExamId,
+            seriesId: mockConfig,
+            title: item.title.trim(),
+            durationMinutes: Number(item.durationMinutes) || bulkGlobalDurationMinutes,
+            totalMarks: Number(item.totalMarks) || bulkGlobalTotalMarks,
+            negativeMarking: Number(item.negativeMarking) ?? bulkGlobalNegativeMarking,
+            sortOrder: nextOrder,
+            questionIds: []
+          };
+          await examService.createMockTest(payload as any);
+        }
+        success++;
+        nextOrder++;
+      } catch (err: any) {
+        failed++;
+        errors.push(`Item ${i + 1} ("${item.title}"): ${err?.message || 'Unknown error'}`);
+      }
+    }
+
+    setBulkLoading(false);
+    setBulkResults({ success, failed, errors });
+    if (success > 0) await fetchData();
   };
 
   const handleAdd = async (e: React.FormEvent) => {
@@ -4406,6 +4513,27 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                   className="flex items-center gap-2 px-8 py-2.5 premium-gradient text-white rounded-xl text-sm font-extrabold hover:premium-glow shadow-lg shadow-brand-500/20 transition-all active:scale-95"
                 >
                   <Plus className="w-5 h-5" /> Add New
+                </button>
+              )}
+              {/* Bulk Import button — banks, practice, tests only */}
+              {(['banks', 'practice', 'tests'].includes(activeTab)) && (
+                <button
+                  onClick={() => {
+                    setBulkResults(null);
+                    setBulkJsonInput('');
+                    if (activeTab === 'banks' || activeTab === 'practice') {
+                      setBulkGlobalExamId(selectedExamIdForBanks || '');
+                      setBulkGlobalCategory((bankFilter !== 'all' ? bankFilter : 'topic-wise') || 'topic-wise');
+                      setBulkGlobalTargetMode(activeTab === 'practice' ? 'practice' : 'bank');
+                    } else if (activeTab === 'tests') {
+                      setBulkGlobalExamId(selectedExamIdForTests || '');
+                      setBulkGlobalCategory(selectedCategoryForTests || 'full-length');
+                    }
+                    setShowBulkModal(true);
+                  }}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 rounded-xl text-sm font-extrabold transition-all shadow-sm active:scale-95"
+                >
+                  <FileJson className="w-4 h-4 text-brand-600" /> Bulk Import
                 </button>
               )}
             </div>
@@ -7691,7 +7819,242 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         )}
       </AnimatePresence>
 
-      {/* Mock Test Bulk Upload Modal */}
+      {/* ── Bulk JSON Importer Modal ── */}
+      <AnimatePresence>
+        {showBulkModal && (
+          <div className="fixed inset-0 bg-slate-950/60 z-[65] flex items-start justify-center p-4 sm:p-6 backdrop-blur-md overflow-y-auto overscroll-contain" data-lenis-prevent>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 20 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              className="bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-[0_25px_60px_-15px_rgba(0,0,0,0.25)] border border-slate-100 my-auto"
+            >
+              {/* Header */}
+              <div className="px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-brand-50 text-brand-600 rounded-xl flex items-center justify-center border border-brand-100/50 shadow-sm shrink-0">
+                    <FileJson className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-xl tracking-tight text-slate-900">
+                      Bulk Import{' '}
+                      <span className="text-brand-600 capitalize">
+                        {activeTab === 'banks' ? 'Question Banks' : activeTab === 'practice' ? 'Practice Sets' : 'Mock Tests'}
+                      </span>
+                    </h3>
+                    <p className="text-xs text-slate-400 font-semibold mt-0.5">Paste JSON → one click → all records created with auto sortOrder</p>
+                  </div>
+                </div>
+                <button type="button" onClick={() => setShowBulkModal(false)} className="p-2.5 text-slate-400 hover:bg-slate-50 hover:text-slate-700 rounded-xl transition-all border border-slate-200/50 shadow-sm bg-white shrink-0">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="p-8 space-y-6">
+
+                {/* ── GLOBAL CONFIG ── */}
+                <div className="bg-slate-50 rounded-2xl border border-slate-200/60 p-5 space-y-5">
+                  <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Global Settings — applied to every item in the batch</p>
+
+                  {/* Exam selector */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-black text-slate-600 uppercase tracking-wider">Select Exam *</label>
+                    <select
+                      value={bulkGlobalExamId}
+                      onChange={e => setBulkGlobalExamId(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-brand-400 focus:outline-none font-bold text-sm bg-white"
+                    >
+                      <option value="">-- Choose Exam --</option>
+                      {exams.filter((ex: any) => ex.category !== 'blog' && ex.category !== 'system' && !ex.is_archived && !(ex.name || '').startsWith('SYSTEM_SETTINGS_')).map((ex: any) => (
+                        <option key={ex.id} value={ex.id}>{ex.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Category pills */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-black text-slate-600 uppercase tracking-wider">
+                      {activeTab === 'tests' ? 'Mock Category *' : 'Practice Category *'}
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {(activeTab === 'tests'
+                        ? ['full-length', 'sectional', 'pyq', 'daily']
+                        : ['topic-wise', 'exam-focused', 'revision-sets', 'pyq-collections']
+                      ).map(cat => (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setBulkGlobalCategory(cat)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                            bulkGlobalCategory === cat
+                              ? 'bg-brand-600 text-white border-brand-600 shadow-md'
+                              : 'bg-white text-slate-600 border-slate-200 hover:border-brand-300'
+                          }`}
+                        >
+                          {cat.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Target Mode — banks/practice only */}
+                  {(activeTab === 'banks' || activeTab === 'practice') && (
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-black text-slate-600 uppercase tracking-wider">Display Target *</label>
+                      <div className="flex gap-2">
+                        {(['bank', 'practice', 'both'] as const).map(m => (
+                          <button
+                            key={m}
+                            type="button"
+                            onClick={() => setBulkGlobalTargetMode(m)}
+                            className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                              bulkGlobalTargetMode === m
+                                ? 'bg-brand-600 text-white border-brand-600'
+                                : 'bg-white text-slate-600 border-slate-200 hover:border-brand-300'
+                            }`}
+                          >
+                            {m === 'bank' ? '📚 Bank Only' : m === 'practice' ? '🎯 Practice Only' : '✅ Both'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Duration / Marks / Negative — tests only */}
+                  {activeTab === 'tests' && (
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Duration (min)</label>
+                        <input type="number" value={bulkGlobalDurationMinutes} onChange={e => setBulkGlobalDurationMinutes(Number(e.target.value))} className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-brand-400 focus:outline-none text-sm font-bold" />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Total Marks</label>
+                        <input type="number" value={bulkGlobalTotalMarks} onChange={e => setBulkGlobalTotalMarks(Number(e.target.value))} className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-brand-400 focus:outline-none text-sm font-bold" />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Negative Marking</label>
+                        <input type="number" step="0.25" value={bulkGlobalNegativeMarking} onChange={e => setBulkGlobalNegativeMarking(Number(e.target.value))} className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-brand-400 focus:outline-none text-sm font-bold" />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Premium + Schedule */}
+                  <div className="flex items-center gap-6 flex-wrap">
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <div
+                        onClick={() => setBulkGlobalIsPremium(p => !p)}
+                        className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer ${bulkGlobalIsPremium ? 'bg-brand-600' : 'bg-slate-300'}`}
+                      >
+                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${bulkGlobalIsPremium ? 'translate-x-4' : ''}`} />
+                      </div>
+                      <span className="text-xs font-black text-slate-600">Premium / Locked</span>
+                    </label>
+                    <div className="flex items-center gap-2 flex-1 min-w-[180px]">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider whitespace-nowrap">Schedule:</label>
+                      <input
+                        type="datetime-local"
+                        value={bulkGlobalScheduledAt}
+                        onChange={e => setBulkGlobalScheduledAt(e.target.value)}
+                        className="flex-1 px-3 py-1.5 rounded-xl border border-slate-200 focus:border-brand-400 focus:outline-none text-xs font-bold"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── JSON INPUT ── */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs font-black text-slate-600 uppercase tracking-wider">Paste JSON Array *</label>
+                    {(() => {
+                      let count = 0;
+                      try { const p = JSON.parse(bulkJsonInput.trim()); if (Array.isArray(p)) count = p.length; } catch {}
+                      return count > 0 ? (
+                        <span className="text-xs font-black text-brand-600 bg-brand-50 px-2.5 py-0.5 rounded-full border border-brand-100">
+                          {count} item{count !== 1 ? 's' : ''} detected
+                        </span>
+                      ) : null;
+                    })()}
+                  </div>
+                  <textarea
+                    value={bulkJsonInput}
+                    onChange={e => { setBulkJsonInput(e.target.value); setBulkResults(null); }}
+                    rows={10}
+                    className="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:border-brand-400 focus:outline-none font-mono text-xs resize-y bg-slate-50"
+                    placeholder={activeTab === 'tests'
+                      ? `[\n  { "title": "Full Mock Test 1" },\n  { "title": "Full Mock Test 2" },\n  { "title": "Sectional - Physics", "subject": "Physics" }\n]`
+                      : `[\n  { "title": "Force Systems & Fundamentals", "subject": "Physics" },\n  { "title": "Equilibrium of Forces", "subject": "Physics" },\n  { "title": "Community Health Nursing", "subject": "Nursing" }\n]`}
+                  />
+                  <p className="text-[10px] text-slate-400 font-semibold">
+                    Required per item: <code className="bg-slate-100 px-1 rounded">title</code>
+                    {' · '}Optional: <code className="bg-slate-100 px-1 rounded">subject</code>
+                    {activeTab !== 'tests' ? <>, <code className="bg-slate-100 px-1 rounded">tagline</code>, <code className="bg-slate-100 px-1 rounded">price</code>, <code className="bg-slate-100 px-1 rounded">scheduled_at</code>, <code className="bg-slate-100 px-1 rounded">questionCount</code></> : <>, <code className="bg-slate-100 px-1 rounded">durationMinutes</code>, <code className="bg-slate-100 px-1 rounded">totalMarks</code>, <code className="bg-slate-100 px-1 rounded">scheduled_at</code></>}
+                    {' '}(per-item values override global settings)
+                  </p>
+                </div>
+
+                {/* ── RESULTS BANNER ── */}
+                {bulkResults && (
+                  <div className={`rounded-2xl p-4 border ${bulkResults.failed === 0 ? 'bg-green-50 border-green-200' : bulkResults.success === 0 ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      {bulkResults.failed === 0
+                        ? <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
+                        : bulkResults.success === 0
+                        ? <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+                        : <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />}
+                      <p className="text-sm font-black text-slate-800">
+                        {bulkResults.success} created successfully
+                        {bulkResults.failed > 0 && ` · ${bulkResults.failed} failed`}
+                      </p>
+                    </div>
+                    {bulkResults.errors.length > 0 && (
+                      <ul className="mt-2 space-y-0.5 max-h-32 overflow-y-auto">
+                        {bulkResults.errors.map((err, i) => (
+                          <li key={i} className="text-[11px] font-mono text-red-700 bg-red-50 px-2 py-0.5 rounded">⚠ {err}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="px-8 py-5 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/50">
+                <button
+                  type="button"
+                  onClick={() => setShowBulkModal(false)}
+                  className="px-6 py-3 rounded-xl border border-slate-200 font-bold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all text-sm bg-white shadow-sm"
+                >
+                  {bulkResults?.success ? 'Close' : 'Cancel'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleBulkImport}
+                  disabled={bulkLoading || !bulkJsonInput.trim() || !bulkGlobalExamId}
+                  className="flex items-center gap-2 px-8 py-3 rounded-xl premium-gradient text-white font-black hover:premium-glow shadow-lg shadow-brand-500/20 transition-all active:scale-[0.98] text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+                >
+                  {bulkLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                      Importing…
+                    </>
+                  ) : (
+                    <>
+                      <FileJson className="w-4 h-4" />
+                      {(() => {
+                        let count = 0;
+                        try { const p = JSON.parse(bulkJsonInput.trim()); if (Array.isArray(p)) count = p.length; } catch {}
+                        return count > 0 ? `Import ${count} Items` : 'Import';
+                      })()}
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {showMockUploadModal && (
           <div className="fixed inset-0 bg-slate-950/40 z-[70] flex items-center justify-center p-6 backdrop-blur-sm">

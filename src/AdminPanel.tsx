@@ -1429,8 +1429,12 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       filtered = [...filtered].sort((a, b) => {
         const subjA = getBankSubject(a);
         const subjB = getBankSubject(b);
-        if (subjA !== subjB && selectedAdminBankSubject === 'all') {
-          return subjA.localeCompare(subjB);
+        if (selectedAdminBankSubject === 'all') {
+          if (subjA && !subjB) return -1;
+          if (!subjA && subjB) return 1;
+          if (subjA !== subjB) {
+            return subjA.localeCompare(subjB);
+          }
         }
         const orderA = a.sortOrder ?? 9999;
         const orderB = b.sortOrder ?? 9999;
@@ -1480,6 +1484,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           }
         } catch(e) {}
         
+        if (subjectA && !subjectB) return -1;
+        if (!subjectA && subjectB) return 1;
         if (subjectA !== subjectB) {
           return subjectA.localeCompare(subjectB);
         }
@@ -1492,8 +1498,12 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       sorted.sort((a, b) => {
         const subjA = getBankSubject(a);
         const subjB = getBankSubject(b);
-        if (subjA !== subjB && selectedAdminBankSubject === 'all') {
-          return subjA.localeCompare(subjB);
+        if (selectedAdminBankSubject === 'all') {
+          if (subjA && !subjB) return -1;
+          if (!subjA && subjB) return 1;
+          if (subjA !== subjB) {
+            return subjA.localeCompare(subjB);
+          }
         }
         const orderA = a.sortOrder ?? 9999;
         const orderB = b.sortOrder ?? 9999;
@@ -1903,8 +1913,17 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     let failed = 0;
     const errors: string[] = [];
 
-    // Compute starting sortOrder for the whole batch
-    let nextOrder = getNextAvailableOrder(activeTab, bulkGlobalExamId, bulkGlobalCategory, bulkGlobalTargetMode);
+    // Compute starting sortOrder counters per subject so each subject starts at its own sequential order
+    const subjectOrderCounters: Record<string, number> = {};
+    const getNextOrderForItem = (subj: string) => {
+      const key = subj.trim().toLowerCase();
+      if (subjectOrderCounters[key] === undefined) {
+        subjectOrderCounters[key] = getNextAvailableOrder(activeTab, bulkGlobalExamId, bulkGlobalCategory, bulkGlobalTargetMode, undefined, subj || undefined);
+      } else {
+        subjectOrderCounters[key]++;
+      }
+      return subjectOrderCounters[key];
+    };
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
@@ -1918,6 +1937,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       const itemPrice = item.price !== undefined ? Number(item.price) : (itemIsPremium ? (Number(bulkGlobalPrice) || 499) : 0);
       const itemOrigPrice = item.originalPrice !== undefined ? Number(item.originalPrice) : (itemIsPremium ? (Number(bulkGlobalOriginalPrice) || (itemPrice * 2)) : 0);
       const itemTagline = item.tagline || bulkGlobalTagline || '';
+      const itemSubject = item.subject || (activeTab === 'tests' && bulkGlobalCategory === 'sectional' ? item.subject : '');
+      const itemSortOrder = item.sortOrder !== undefined ? Number(item.sortOrder) : getNextOrderForItem(itemSubject);
 
       try {
         if (activeTab === 'banks' || activeTab === 'practice') {
@@ -1933,7 +1954,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
             type: bulkGlobalCategory,
             target_mode: bulkGlobalTargetMode,
             title: item.title.trim(),
-            sortOrder: nextOrder,
+            sortOrder: itemSortOrder,
             questionCount: Number(item.questionCount) || 0,
             tagline: hasTaglineMeta ? JSON.stringify(metaTaglineObj) : '',
             image: item.image || '',
@@ -1961,13 +1982,12 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
             durationMinutes: Number(item.durationMinutes) || bulkGlobalDurationMinutes,
             totalMarks: Number(item.totalMarks) || bulkGlobalTotalMarks,
             negativeMarking: Number(item.negativeMarking) ?? bulkGlobalNegativeMarking,
-            sortOrder: nextOrder,
+            sortOrder: itemSortOrder,
             questionIds: []
           };
           await examService.createMockTest(payload as any);
         }
         success++;
-        nextOrder++;
       } catch (err: any) {
         failed++;
         errors.push(`Item ${i + 1} ("${item.title}"): ${err?.message || 'Unknown error'}`);
@@ -2216,6 +2236,40 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     }
   };
 
+  const handleAutoRenumberBySubject = async () => {
+    if (items.length === 0) return;
+    const itemLabel = activeTab === 'practice' ? 'practice sets' : 'question banks';
+    const confirmMsg = `Auto-renumber all ${items.length} ${itemLabel} sequentially starting from 1 for each subject?\n\nThis will organize each subject's tests cleanly as #1, #2, #3... #N.`;
+    if (!confirm(confirmMsg)) return;
+
+    try {
+      setLoading(true);
+      const groups: Record<string, any[]> = {};
+      items.forEach(item => {
+        const subject = getBankSubject(item) || '__unassigned__';
+        if (!groups[subject]) groups[subject] = [];
+        groups[subject].push(item);
+      });
+
+      const promises: Promise<any>[] = [];
+      Object.keys(groups).forEach(subject => {
+        const groupItems = groups[subject];
+        groupItems.forEach((item, idx) => {
+          const targetOrder = idx + 1;
+          promises.push(examService.updateQuestionBank(item.id, { sortOrder: targetOrder }));
+        });
+      });
+
+      await Promise.all(promises);
+      await fetchData();
+      alert(`Success! Renumbered all ${itemLabel} cleanly starting from 1 for each subject.`);
+    } catch(e: any) {
+      alert(`Failed to renumber items: ${e.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleReorder = async (newOrder: any[]) => {
     // 1. Update local state immediately for smooth UI
     setItems(newOrder);
@@ -2249,13 +2303,34 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
 
         const promises = updates.map(u => examService.updateMockTest(u.id, { sortOrder: u.sortOrder }));
         await Promise.all(promises);
+      } else if (activeTab === 'banks' || activeTab === 'practice') {
+        const groups: Record<string, any[]> = {};
+        newOrder.forEach(item => {
+          const subject = getBankSubject(item) || '__unassigned__';
+          if (!groups[subject]) groups[subject] = [];
+          groups[subject].push(item);
+        });
+
+        const updates: { id: string, sortOrder: number }[] = [];
+        Object.keys(groups).forEach(subject => {
+          const groupItems = groups[subject];
+          groupItems.forEach((item, idx) => {
+            let targetOrder = idx + 1;
+            if (bankSortDirection === 'desc') {
+              targetOrder = groupItems.length - idx;
+            }
+            updates.push({ id: item.id, sortOrder: targetOrder });
+          });
+        });
+
+        const promises = updates.map(u => examService.updateQuestionBank(u.id, { sortOrder: u.sortOrder }));
+        await Promise.all(promises);
       } else {
         const promises = newOrder.map((item, index) => {
           let targetOrder = index + 1; // 1-based order
           if (activeTab === 'questions') return examService.updateQuestion(item.id, { sortOrder: targetOrder });
           if (activeTab === 'series') return examService.updateTestSeries(item.id, { sortOrder: targetOrder });
           if (activeTab === 'exams' || activeTab === 'blogs') return examService.updateExam(item.id, { sortOrder: targetOrder });
-          if (activeTab === 'banks' || activeTab === 'practice') return examService.updateQuestionBank(item.id, { sortOrder: targetOrder });
           return Promise.resolve();
         });
         await Promise.all(promises);
@@ -7565,6 +7640,17 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                         </button>
                       );
                     })}
+
+                    {(activeTab === 'banks' || activeTab === 'practice') && availableAdminSubjects.length > 0 && items.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={handleAutoRenumberBySubject}
+                        className="ml-auto flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-600 rounded-xl text-xs font-black border border-slate-200/80 transition-all cursor-pointer shadow-2xs"
+                        title="Auto-renumber each subject's tests sequentially starting from 1 (#1, #2, #3...)"
+                      >
+                        <span>🔢 Renumber 1..N by Subject</span>
+                      </button>
+                    )}
                   </div>
                 )}
 
@@ -7667,7 +7753,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                         const itemSubject = isSubjectScoped ? ((activeTab === 'banks' || activeTab === 'practice') ? getBankSubject(item) : getMockTestSubject(item)) : '';
                         const prevItem = index > 0 ? items[index - 1] : null;
                         const prevSubject = prevItem && isSubjectScoped ? ((activeTab === 'banks' || activeTab === 'practice') ? getBankSubject(prevItem) : getMockTestSubject(prevItem)) : null;
-                        const showSubjectHeader = isSubjectScoped && availableAdminSubjects.length > 1 && selectedAdminBankSubject === 'all' && (index === 0 || itemSubject !== prevSubject);
+                        const showSubjectHeader = isSubjectScoped && availableAdminSubjects.length > 0 && selectedAdminBankSubject === 'all' && (index === 0 || itemSubject !== prevSubject);
                         const subjectItemCount = showSubjectHeader
                           ? items.filter(it => ((activeTab === 'banks' || activeTab === 'practice') ? getBankSubject(it) : getMockTestSubject(it)) === itemSubject).length
                           : 0;
@@ -7675,16 +7761,31 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                         return (
                           <React.Fragment key={item.id}>
                             {showSubjectHeader && (
-                              <div className="bg-gradient-to-r from-slate-100 via-slate-50 to-white px-8 py-3.5 border-y border-slate-200/80 flex items-center justify-between shadow-2xs select-none">
+                              <div className={cn(
+                                "px-8 py-3.5 border-y flex items-center justify-between shadow-2xs select-none",
+                                itemSubject 
+                                  ? "bg-gradient-to-r from-slate-100 via-slate-50 to-white border-slate-200/80" 
+                                  : "bg-gradient-to-r from-amber-50/60 via-amber-50/20 to-white border-amber-200/60"
+                              )}>
                                 <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-sm border border-brand-100/60 shadow-2xs">
-                                    📘
+                                  <div className={cn(
+                                    "w-8 h-8 rounded-xl flex items-center justify-center font-bold text-sm border shadow-2xs",
+                                    itemSubject 
+                                      ? "bg-brand-50 text-brand-600 border-brand-100/60" 
+                                      : "bg-amber-100 text-amber-700 border-amber-200/60"
+                                  )}>
+                                    {itemSubject ? '📘' : '📦'}
                                   </div>
                                   <div className="flex items-center gap-2">
                                     <span className="font-black text-sm text-slate-800 tracking-tight uppercase">
-                                      {itemSubject || 'General / Unassigned'}
+                                      {itemSubject || 'Unassigned Subject (No Subject Set)'}
                                     </span>
-                                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-brand-50 text-brand-700 border border-brand-200/60">
+                                    <span className={cn(
+                                      "px-2.5 py-0.5 rounded-full text-[11px] font-black border",
+                                      itemSubject 
+                                        ? "bg-brand-50 text-brand-700 border-brand-200/60" 
+                                        : "bg-amber-100 text-amber-800 border-amber-200"
+                                    )}>
                                       {subjectItemCount} {activeTab === 'tests' ? 'Tests' : 'Sets'}
                                     </span>
                                   </div>

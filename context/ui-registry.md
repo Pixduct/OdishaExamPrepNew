@@ -3220,20 +3220,7 @@ Last updated: August 23, 2026
 | **Active pill � Scale** | `scale-[1.02] shadow-md shadow-blue-600/25` |
 | **Inactive pill � Background** | `bg-white dark:bg-[#0B1528]` |
 | **Inactive pill � Border** | `border-slate-200/80 dark:border-slate-800` |
-| **Inactive pill � Text** | `text-slate-600 dark:text-slate-300` |
-| **Inactive pill � Hover** | `hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white` |
-| **Pill shared** | `px-4 py-2 text-xs sm:text-sm font-bold rounded-xl whitespace-nowrap transition-all duration-200 border cursor-pointer shadow-sm` |
-| **State** | `selectedPracticeSubject` / `setSelectedPracticeSubject` � default `'All'` |
-| **Subject source** | `bank.subject` extracted from tagline JSON `parsed.subject` |
-
-**Pattern notes:**
-- Identical pill style to SectionalSubjectFilterPillBar � keep both in sync.
-- Conditional render: pill bar only renders when `subjectsList.length > 0`. Invisible for exams with no subject set.
-- Subject derivation: `Array.from(new Set(matchingBanks.map(b => b.subject).filter(Boolean))).sort()` � alphabetically sorted, deduped.
-- All pill always first. Reset on category change via useEffect.
-- Only active for `topic-wise` category � other categories compute `practiceSubjects = []`.
-
-### 101. `AdminBulkImportModal`
+| **Inactive### 101. `AdminBulkImportModal`
 File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7935-L8240)
 Last updated: August 24, 2026
 
@@ -3255,5 +3242,49 @@ Last updated: August 24, 2026
 - **Header Reset Button**: Includes Reset Form button (`RotateCcw`) in header for 1-click memory clearing.
 - **Dynamic Pricing Controls**: Offer Price and MRP inputs display cleanly upon toggling Premium/Locked.
 - **Sequential Sort Ordering**: Evaluates `getNextAvailableOrder` at batch start and auto-increments for zero collision.
-- **Dynamic Target-Mode Category Mapping**: Display Target buttons (\Bank Only\ / \Practice Only\ / \Both\) dynamically update the Category section label, the modal title, and the category pill labels (\Topic-Wise Bank\ vs \Chapter-Wise Practice\).
+- **Dynamic Target-Mode Category Mapping**: Display Target buttons (Bank Only / Practice Only / Both) dynamically update the Category section label, the modal title, and the category pill labels (Topic-Wise Bank vs Chapter-Wise Practice).
 - **Category-Aware Tagline / Subtitle Engine**: Includes Topic/Subtitle dropdown with category presets (ADMIN_TAGLINE_PRESETS) and custom text input, automatically propagated to all Question Banks, Practice Sets, and Mock Tests in the batch.
+- **Auto-Interval Scheduler**: See sub-component `AdminAutoIntervalScheduler` below. The Schedule section is now a bordered card (`border border-slate-200/80 rounded-2xl p-4 bg-slate-50/60`) containing the start datetime, toggle, interval inputs, and live preview — all in a self-contained visual block.
+
+---
+### 101a. `AdminAutoIntervalScheduler`
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx)
+Last updated: August 24, 2026
+
+Sub-component of `AdminBulkImportModal`. Appears in the Schedule Settings section for all tabs (banks, practice, tests).
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Section Card Container** | `border border-slate-200/80 rounded-2xl p-4 bg-slate-50/60 space-y-3` |
+| **Section Header Text** | `text-sm font-black text-slate-700` |
+| **Active Status Badge** | `text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full uppercase tracking-wider` |
+| **Toggle ON** | `w-10 h-6 rounded-full bg-emerald-500 relative cursor-pointer` |
+| **Toggle OFF** | `w-10 h-6 rounded-full bg-slate-300 relative cursor-pointer` |
+| **Toggle Thumb** | `absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform` (translated `translate-x-4` when ON) |
+| **Toggle Label Text** | `text-[10px] font-black text-slate-500 uppercase tracking-wider` |
+| **Start At Label** | `text-[10px] font-black text-slate-500 uppercase tracking-wider whitespace-nowrap` |
+| **Datetime Input** | `flex-1 px-3 py-1.5 rounded-xl border border-slate-200 focus:border-brand-400 focus:outline-none text-xs font-bold bg-white` |
+| **Interval Number Input** | `w-16 px-2 py-1.5 rounded-xl border border-slate-200 focus:border-emerald-400 focus:outline-none text-xs font-black text-center bg-white` |
+| **Interval Unit Labels** | `text-[10px] font-black text-slate-500` |
+| **Preview Panel** | `rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 space-y-1.5` |
+| **Preview Header Label** | `text-[10px] font-black text-emerald-700 uppercase tracking-wider` |
+| **Preview Item Row** | `flex items-center gap-3` |
+| **Preview Item Number Badge** | `w-6 h-6 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-700 text-[10px] font-black flex items-center justify-center shrink-0` |
+| **Preview Item Title** | `text-xs font-bold text-slate-700 truncate flex-1 min-w-0` |
+| **Preview Item Timestamp** | `text-[10px] font-black text-emerald-700 whitespace-nowrap shrink-0` |
+| **Zero-Interval Warning Panel** | `rounded-xl border border-amber-200 bg-amber-50/70 p-3 flex items-start gap-2.5` |
+| **Warning Heading** | `text-xs font-black text-amber-800` |
+| **Warning Sub-text** | `text-[10px] text-amber-700 font-semibold` |
+| **Hint Text (toggle OFF)** | `text-[10px] text-slate-400 font-semibold` |
+
+**Pattern notes:**
+- **Opt-in toggle, default OFF**: When OFF, the schedule input is unchanged (same date for all). When ON, label changes to "Start At:" and interval inputs appear.
+- **Emerald accent color**: All active states use `emerald-*` tokens only — never `brand-*` blue. Keeps scheduling visually separate from premium (brand-blue) and danger (rose) in the same modal.
+- **Amber for zero-interval warning**: `amber-*` tokens match the project-wide amber-for-caution convention used elsewhere.
+- **Preview panel is live**: Parse JSON once per render, derive both `previewItems` and `totalInJson` from the same parse result. Never parse twice.
+- **Zero-interval guard**: When `totalIntervalMs === 0`, show amber warning panel instead of green schedule list. The import loop also skips offset with the guard `&& totalIntervalMs > 0`.
+- **Per-item escape hatch**: JSON items with their own `scheduled_at` always override the auto-interval calculation.
+- **Helper hoisted above loop**: `computeScheduleForItem(item, index)` is declared once above the `for` loop with `totalIntervalMs` pre-computed. Never re-declare a function inside a loop.
+- **Sticky persistence**: `bulkAutoScheduleEnabled`, `bulkAutoScheduleIntervalDays`, `bulkAutoScheduleIntervalHours` persist in sessionStorage and restore on modal reopen.
+- **All tabs**: Works for banks, practice, and tests tabs equally — no category restriction.

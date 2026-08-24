@@ -1,6 +1,12 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] Auto-Interval Rolling Unlock Scheduler for Bulk Importer (`src/AdminPanel.tsx`):
+  1. **Staggered Per-Item Unlock Engine**: Added `bulkAutoScheduleEnabled`, `bulkAutoScheduleIntervalDays`, and `bulkAutoScheduleIntervalHours` state controls supporting custom day/hour intervals with zero-collision sequential sort order.
+  2. **Dedicated Schedule Card UI**: Implemented self-contained schedule settings container with active status badge (`⚡ Auto-Interval ON`), emerald toggle, dynamic start datetime picker, and separate Days + Hours interval inputs.
+  3. **Live Unlock Schedule Preview**: Integrated live real-time preview table showing exact unlock dates and times formatted in `en-IN` locale for up to 10 items, with zero-interval amber safety warning panel when interval is unset.
+  4. **Universal Multi-Tab Support & Sticky State**: Applied schedule resolution across `banks`, `practice`, and `tests` tabs with full `sessionStorage` sticky persistence and single-pass JSON parser.
+  5. **Clean Verification**: Tested compilation with `npm run build` exiting 0 with zero errors and pushed live to GitHub `main`.
 - [x] Secondary Front-End Odia Localization & Smart Date Translation Engine (`src/App.tsx`, `src/components/LoadingPortal.tsx`, `src/lib/LanguageContext.tsx`, `src/lib/i18n/translations/home.ts`, `src/lib/i18n/translations/common.ts`, `src/lib/i18n/phraseDictionary.ts`):
   1. **Loading Portal Splash Localization**: Connected `LoadingPortal.tsx` to `useLanguage` with fallback to `getStoredLanguage()`, rendering *"ପୋର୍ଟାଲ୍ ଲୋଡ୍ ହେଉଛି..."* when Odia is selected.
   2. **Hero Mobile Trust Pill**: Localized mobile trust badge via `t('home.hero.trustedByMobile')` (*"୧୦,୦୦୦+ ଆଶାୟୀ ଛାତ୍ରଛାତ୍ରୀଙ୍କ ବିଶ୍ୱାସ"*).

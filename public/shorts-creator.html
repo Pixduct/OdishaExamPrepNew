@@ -1512,23 +1512,23 @@
     function drawBaseBackground(tpl) {
       tpl = tpl || getActiveTemplate();
       const grad = ctx.createLinearGradient(0, 0, 0, 1920);
-      grad.addColorStop(0, '#05070E');
-      grad.addColorStop(0.35, '#0B1120');
-      grad.addColorStop(0.7, '#070C18');
-      grad.addColorStop(1, '#020408');
+      grad.addColorStop(0, tpl.bgGrad[0]);
+      grad.addColorStop(0.35, tpl.bgGrad[1]);
+      grad.addColorStop(0.7, tpl.bgGrad[2]);
+      grad.addColorStop(1, tpl.bgGrad[3]);
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, 1080, 1920);
 
       // Top Ambient Glow
       const glowTop = ctx.createRadialGradient(540, 240, 40, 540, 240, 550);
-      glowTop.addColorStop(0, 'rgba(37, 99, 235, 0.28)');
+      glowTop.addColorStop(0, tpl.glowTop);
       glowTop.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = glowTop;
       ctx.fillRect(0, 0, 1080, 800);
 
       // Bottom Ambient Glow
       const glowBottom = ctx.createRadialGradient(540, 1400, 40, 540, 1400, 600);
-      glowBottom.addColorStop(0, 'rgba(16, 185, 129, 0.12)');
+      glowBottom.addColorStop(0, tpl.glowBottom);
       glowBottom.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = glowBottom;
       ctx.fillRect(0, 1000, 1080, 920);
@@ -1589,13 +1589,14 @@
     // 📐 9:16 SHORTS VIDEO RENDERER
     // ==========================================
 
-    function drawHeaderBar(exam, brand, alpha) {
+    function drawHeaderBar(exam, brand, alpha, tpl) {
+      tpl = tpl || getActiveTemplate();
       alpha = alpha !== undefined ? alpha : 1;
       ctx.save();
       ctx.globalAlpha = alpha;
 
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+      ctx.fillStyle = tpl.headerCardBg;
+      ctx.strokeStyle = tpl.headerCardBorder;
       ctx.lineWidth = 2.5;
       roundRect(ctx, 60, 120, 960, 100, 24, true, true);
 
@@ -1610,10 +1611,10 @@
       ctx.textAlign = 'left';
       ctx.fillText((brand || 'OdishaExamPrep') + ' ✔', 180, 184);
 
-      ctx.fillStyle = '#2563EB';
+      ctx.fillStyle = tpl.headerPillBg;
       roundRect(ctx, 60, 235, 960, 75, 20, true, false);
 
-      ctx.fillStyle = '#FFFFFF';
+      ctx.fillStyle = tpl.headerPillText;
       ctx.font = '900 32px "Outfit", sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('🎯 ' + (exam || 'EXAM TARGET 2026').toUpperCase(), 540, 284);
@@ -1621,7 +1622,8 @@
       ctx.restore();
     }
 
-    function drawDynamicQuestionCard(question, alpha) {
+    function drawDynamicQuestionCard(question, alpha, tpl) {
+      tpl = tpl || getActiveTemplate();
       alpha = alpha !== undefined ? alpha : 1;
       ctx.save();
       ctx.globalAlpha = alpha;
@@ -1631,14 +1633,14 @@
       const cardW = 960;
       const cardH = 345;
 
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.96)';
-      ctx.strokeStyle = 'rgba(59, 130, 246, 0.6)';
+      ctx.fillStyle = tpl.qCardBg;
+      ctx.strokeStyle = tpl.qCardBorder;
       ctx.lineWidth = 3.5;
       roundRect(ctx, cardX, cardY, cardW, cardH, 28, true, true);
 
-      ctx.fillStyle = 'rgba(37, 99, 235, 0.28)';
+      ctx.fillStyle = tpl.qBadgeBg;
       roundRect(ctx, 100, 350, 190, 44, 14, true, false);
-      ctx.fillStyle = '#93C5FD';
+      ctx.fillStyle = tpl.qBadgeText;
       ctx.font = '800 22px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('❓ QUESTION', 195, 380);
@@ -1682,7 +1684,8 @@
       ctx.restore();
     }
 
-    function drawDynamicOptionsCards(options, revealed, correctKey, alpha) {
+    function drawDynamicOptionsCards(options, revealed, correctKey, alpha, tpl) {
+      tpl = tpl || getActiveTemplate();
       revealed = revealed || false;
       correctKey = correctKey || 'A';
       alpha = alpha !== undefined ? alpha : 1;
@@ -1701,8 +1704,8 @@
 
         if (revealed) {
           if (isCorrect) {
-            ctx.fillStyle = '#064E3B';
-            ctx.strokeStyle = '#10B981';
+            ctx.fillStyle = tpl.optCorrectBg;
+            ctx.strokeStyle = tpl.optCorrectBorder;
             ctx.lineWidth = 5;
           } else {
             ctx.fillStyle = 'rgba(15, 23, 42, 0.45)';
@@ -1710,8 +1713,8 @@
             ctx.lineWidth = 2;
           }
         } else {
-          ctx.fillStyle = 'rgba(30, 41, 59, 0.88)';
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+          ctx.fillStyle = tpl.optCardBg;
+          ctx.strokeStyle = tpl.optCardBorder;
           ctx.lineWidth = 2;
         }
 
@@ -1721,20 +1724,20 @@
         const circleCenterY = y + cardH / 2;
 
         if (revealed && isCorrect) {
-          ctx.fillStyle = '#10B981';
+          ctx.fillStyle = tpl.optCorrectKeyBg;
           ctx.beginPath();
           ctx.arc(circleCenterX, circleCenterY, 38, 0, Math.PI * 2);
           ctx.fill();
-          ctx.fillStyle = '#064E3B';
+          ctx.fillStyle = tpl.optCorrectKeyText;
           ctx.font = '900 36px "Outfit", sans-serif';
           ctx.textAlign = 'center';
           ctx.fillText('✓', circleCenterX, circleCenterY + 13);
         } else {
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+          ctx.fillStyle = tpl.optKeyBg;
           ctx.beginPath();
           ctx.arc(circleCenterX, circleCenterY, 38, 0, Math.PI * 2);
           ctx.fill();
-          ctx.fillStyle = revealed && !isCorrect ? '#64748B' : '#93C5FD';
+          ctx.fillStyle = revealed && !isCorrect ? '#64748B' : tpl.optKeyText;
           ctx.font = '800 34px "Outfit", sans-serif';
           ctx.textAlign = 'center';
           ctx.fillText(key, circleCenterX, circleCenterY + 12);
@@ -1779,16 +1782,17 @@
       ctx.restore();
     }
 
-    function drawCountdownOverlay(secondsLeft, totalSeconds) {
+    function drawCountdownOverlay(secondsLeft, totalSeconds, tpl) {
+      tpl = tpl || getActiveTemplate();
       ctx.save();
       const centerY = 1385;
 
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.96)';
-      ctx.strokeStyle = '#F59E0B';
+      ctx.fillStyle = tpl.timerBg;
+      ctx.strokeStyle = tpl.timerBorder;
       ctx.lineWidth = 4;
       roundRect(ctx, 320, centerY - 65, 440, 130, 30, true, true);
 
-      ctx.fillStyle = '#F59E0B';
+      ctx.fillStyle = tpl.timerText;
       ctx.font = '900 72px "Outfit", sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('⏳ ' + secondsLeft + 's', 540, centerY + 24);
@@ -1796,14 +1800,15 @@
       ctx.restore();
     }
 
-    function drawAnswerRevealedBanner(correctKey) {
+    function drawAnswerRevealedBanner(correctKey, tpl) {
+      tpl = tpl || getActiveTemplate();
       ctx.save();
       const centerY = 1385;
 
-      ctx.fillStyle = '#10B981';
+      ctx.fillStyle = tpl.revealBg;
       roundRect(ctx, 160, centerY - 60, 760, 120, 28, true, false);
 
-      ctx.fillStyle = '#042F2E';
+      ctx.fillStyle = tpl.revealText;
       ctx.font = '900 46px "Outfit", sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('CORRECT ANSWER: (' + correctKey + ') 🎉', 540, centerY + 16);
@@ -1811,15 +1816,16 @@
       ctx.restore();
     }
 
-    function drawCtaScreen(brand, cta, websiteName, websiteUrl, alpha) {
+    function drawCtaScreen(brand, cta, websiteName, websiteUrl, alpha, tpl) {
+      tpl = tpl || getActiveTemplate();
       alpha = alpha !== undefined ? alpha : 1;
       ctx.save();
       ctx.globalAlpha = alpha;
 
-      drawBaseBackground();
+      drawBaseBackground(tpl);
 
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
-      ctx.strokeStyle = 'rgba(59, 130, 246, 0.55)';
+      ctx.fillStyle = tpl.ctaCardBg;
+      ctx.strokeStyle = tpl.ctaCardBorder;
       ctx.lineWidth = 4;
       roundRect(ctx, 60, 130, 960, 1370, 44, true, true);
 
@@ -1834,9 +1840,9 @@
       ctx.textAlign = 'center';
       ctx.fillText(brand || 'OdishaExamPrep', 540, 430);
 
-      ctx.fillStyle = 'rgba(37, 99, 235, 0.25)';
+      ctx.fillStyle = tpl.ctaBadgeBg;
       roundRect(ctx, 160, 470, 760, 64, 18, true, false);
-      ctx.fillStyle = '#93C5FD';
+      ctx.fillStyle = tpl.ctaBadgeText;
       ctx.font = '800 26px "Plus Jakarta Sans", sans-serif';
       ctx.fillText('⭐ 10,000+ Aspirants Trusted Platform', 540, 512);
 
@@ -1852,10 +1858,10 @@
         ctx.fillText(ctaLines[c], 540, ctaStartY + (c * ctaLineH));
       }
 
-      ctx.fillStyle = '#2563EB';
+      ctx.fillStyle = tpl.ctaBtnBg;
       roundRect(ctx, 120, 1000, 840, 145, 36, true, false);
 
-      ctx.fillStyle = '#FFFFFF';
+      ctx.fillStyle = tpl.ctaBtnText;
       ctx.font = '900 46px "Outfit", sans-serif';
       ctx.fillText('🔗 ' + (websiteUrl || 'www.odishaexamprep.in'), 540, 1090);
 
@@ -1880,11 +1886,12 @@
       };
       const correct = document.querySelector('input[name="correctAnswer"]:checked') ? document.querySelector('input[name="correctAnswer"]:checked').value : 'A';
 
-      drawBaseBackground();
-      drawHeaderBar(exam, brand, 1);
-      drawDynamicQuestionCard(question, 1);
-      drawDynamicOptionsCards(options, false, correct, 1);
-      drawAnswerRevealedBanner(correct);
+      const tpl = getActiveTemplate();
+      drawBaseBackground(tpl);
+      drawHeaderBar(exam, brand, 1, tpl);
+      drawDynamicQuestionCard(question, 1, tpl);
+      drawDynamicOptionsCards(options, false, correct, 1, tpl);
+      drawAnswerRevealedBanner(correct, tpl);
       renderYouTubeOverlayGuide();
     }
 
@@ -1892,6 +1899,7 @@
     // 🌟 100K PRO YOUTUBER EXPANDED COVER GENERATOR
     // ==========================================
     function drawCoverCanvas() {
+      const tpl = getActiveTemplate();
       const exam = document.getElementById('examName').value || 'OSSC CGL & OPSC ASO 2026';
       const question = document.getElementById('questionText').value || 'Who was the first Chief Minister of Odisha?';
       const brand = document.getElementById('brandName').value || 'OdishaExamPrep';
@@ -1902,16 +1910,16 @@
       const challengeText = document.getElementById('coverChallengeText') ? document.getElementById('coverChallengeText').value : '⏱️ 5-SECOND RAPID CHALLENGE';
       const actionBtnText = document.getElementById('coverActionBtnText') ? document.getElementById('coverActionBtnText').value : '▶ TAP TO PLAY & TEST YOUR RANK 🏆';
 
-      drawBaseBackground();
+      drawBaseBackground(tpl);
 
       // 1. TOP VIRAL HOOK BANNER (Y: 110 to 245 - Height 135px)
       ctx.save();
-      ctx.shadowColor = 'rgba(239, 68, 68, 0.5)';
+      ctx.shadowColor = tpl.coverHookGrad[0] + '80';
       ctx.shadowBlur = 28;
       ctx.shadowOffsetY = 10;
       const hookGrad = ctx.createLinearGradient(70, 110, 1010, 110);
-      hookGrad.addColorStop(0, '#EF4444');
-      hookGrad.addColorStop(1, '#DC2626');
+      hookGrad.addColorStop(0, tpl.coverHookGrad[0]);
+      hookGrad.addColorStop(1, tpl.coverHookGrad[1]);
       ctx.fillStyle = hookGrad;
       roundRect(ctx, 70, 110, 940, 135, 28, true, false);
       ctx.restore();
@@ -1936,12 +1944,12 @@
       }
 
       // 2. FLOATING EXAM TARGET PILL (Y: 270 to 350 - Height 80px)
-      ctx.fillStyle = 'rgba(37, 99, 235, 0.25)';
-      ctx.strokeStyle = '#3B82F6';
+      ctx.fillStyle = tpl.qBadgeBg;
+      ctx.strokeStyle = tpl.coverExamBorder;
       ctx.lineWidth = 3;
       roundRect(ctx, 130, 270, 820, 80, 22, true, true);
 
-      ctx.fillStyle = '#93C5FD';
+      ctx.fillStyle = tpl.coverExamText;
       ctx.font = '900 32px "Outfit", sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('🎯 ' + exam.toUpperCase(), 540, 321);
@@ -1951,19 +1959,19 @@
       ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
       ctx.shadowBlur = 40;
       ctx.shadowOffsetY = 16;
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.96)';
-      ctx.strokeStyle = 'rgba(59, 130, 246, 0.6)';
+      ctx.fillStyle = tpl.qCardBg;
+      ctx.strokeStyle = tpl.qCardBorder;
       ctx.lineWidth = 4;
       roundRect(ctx, 70, 375, 940, 645, 36, true, true);
       ctx.restore();
 
       // Question Badge Header Pill (Y: 405 to 465)
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
+      ctx.fillStyle = tpl.qBadgeBg;
+      ctx.strokeStyle = tpl.qCardBorder;
       ctx.lineWidth = 2;
       roundRect(ctx, 110, 405, 860, 60, 18, true, true);
 
-      ctx.fillStyle = '#F59E0B';
+      ctx.fillStyle = tpl.qBadgeText;
       ctx.font = '800 26px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(questionBadge.toUpperCase(), 540, 444);
@@ -2000,12 +2008,12 @@
 
       // 4. GAMIFIED CHALLENGE STRIP (Y: 1045 to 1135 - Height 90px)
       ctx.save();
-      ctx.fillStyle = 'rgba(245, 158, 11, 0.16)';
-      ctx.strokeStyle = '#F59E0B';
+      ctx.fillStyle = tpl.qBadgeBg;
+      ctx.strokeStyle = tpl.coverChallengeBorder;
       ctx.lineWidth = 3.5;
       roundRect(ctx, 140, 1045, 800, 90, 24, true, true);
 
-      ctx.fillStyle = '#FCD34D';
+      ctx.fillStyle = tpl.coverChallengeText;
       ctx.font = '900 36px "Outfit", sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(challengeText.toUpperCase(), 540, 1102);
@@ -2013,25 +2021,25 @@
 
       // 5. MASSIVE 3D ACTION CTA BUTTON (Y: 1160 to 1320 - Height 160px)
       ctx.save();
-      ctx.shadowColor = 'rgba(245, 158, 11, 0.6)';
+      ctx.shadowColor = tpl.coverBtnGrad[0] + '99';
       ctx.shadowBlur = 35;
       ctx.shadowOffsetY = 12;
       
       const btnGrad = ctx.createLinearGradient(70, 1160, 1010, 1160);
-      btnGrad.addColorStop(0, '#F59E0B');
-      btnGrad.addColorStop(1, '#D97706');
+      btnGrad.addColorStop(0, tpl.coverBtnGrad[0]);
+      btnGrad.addColorStop(1, tpl.coverBtnGrad[1]);
       ctx.fillStyle = btnGrad;
       roundRect(ctx, 70, 1160, 940, 160, 36, true, false);
       ctx.restore();
 
-      ctx.fillStyle = '#000000';
+      ctx.fillStyle = tpl.name.includes('Gold') ? '#000000' : '#FFFFFF';
       ctx.font = '900 44px "Outfit", sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(actionBtnText, 540, 1256);
 
       // 6. PRO BRANDING FOOTER (Y: 1350 to 1470 - Height 120px)
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+      ctx.fillStyle = tpl.headerCardBg;
+      ctx.strokeStyle = tpl.headerCardBorder;
       ctx.lineWidth = 2.5;
       roundRect(ctx, 120, 1350, 840, 120, 28, true, true);
 
@@ -2046,7 +2054,7 @@
       ctx.textAlign = 'left';
       ctx.fillText(brand + ' ✔', 265, 1412);
 
-      ctx.fillStyle = '#60A5FA';
+      ctx.fillStyle = tpl.qBadgeText;
       ctx.font = '700 24px "Plus Jakarta Sans", sans-serif';
       ctx.fillText(websiteUrl, 265, 1445);
 
@@ -2060,9 +2068,6 @@
       renderYouTubeOverlayGuide();
     }
 
-    // ==============================================================
-    // 🎞️ PURE FRAME-BY-FRAME RENDER FUNCTION (Used for Preview & Fast Export)
-    // ==============================================================
     function renderShortsFrameAtTime(elapsed, totalDuration, config) {
       const tIntro = 1.5;
       const tQuestion = 2.5;

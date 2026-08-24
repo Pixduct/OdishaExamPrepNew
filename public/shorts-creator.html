@@ -1068,6 +1068,1150 @@
           </div>
         </div>
 
+        <!-- COLUMN 4: 100K PRO COVER DESIGN & AUTO-VARIATIONS -->
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem;">
+          <div style="font-weight: 800; color: #F59E0B; font-size: 0.85rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: space-between;">
+            <span>🖼️ 4. 100k Pro Cover Diversity</span>
+            <span class="pro-badge">SMART CTR</span>
+          </div>
+
+          <!-- Variation Strategy Mode -->
+          <div class="form-group" style="margin-bottom: 0.75rem;">
+            <label style="font-weight: 700; color: #93C5FD;">🎲 Thumbnail Variation Strategy</label>
+            <div class="correct-answer-selector" style="margin-top: 0.35rem;">
+              <label class="radio-pill">
+                <input type="radio" name="bulkCoverVarMode" value="auto" checked onchange="handleCoverVarModeChange(this.value)">
+                <span>🎲 Smart Auto-Variation</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="bulkCoverVarMode" value="fixed" onchange="handleCoverVarModeChange(this.value)">
+                <span>🔒 Fixed Text</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="bulkCoverVarMode" value="custom" onchange="handleCoverVarModeChange(this.value)">
+                <span>✏️ Custom Pool</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Theme Palette Rotation Toggle -->
+          <div style="margin-bottom: 0.75rem; background: rgba(37,99,235,0.08); padding: 0.5rem 0.65rem; border-radius: 8px; border: 1px solid rgba(59,130,246,0.3);">
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: #FFF; font-weight: 700; font-size: 0.78rem;">
+              <input type="checkbox" id="bulkAutoRotateThemesCheckbox" checked style="width: 15px; height: 15px;">
+              <span>🎨 Auto-Rotate Visual Themes Across Batch</span>
+            </label>
+            <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 2px; padding-left: 22px;">
+              Rotates Obsidian Cobalt, Royal Gold, Crimson Danger, Cyber Mint, Purple & Slate!
+            </div>
+          </div>
+
+          <!-- FIXED MODE INPUTS -->
+          <div id="bulkCoverFixedBox" style="display: none;">
+            <div class="form-group" style="margin-bottom: 0.5rem;">
+              <label style="font-size: 0.75rem;">Top Viral Hook Banner</label>
+              <input type="text" id="bulkDefaultCoverHook" value="⚠️ 99% ASPIRANTS GET THIS WRONG!" style="font-size: 0.8rem; padding: 0.4rem;">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.5rem;">
+              <label style="font-size: 0.75rem;">Gamified Challenge Strip</label>
+              <input type="text" id="bulkDefaultCoverChallenge" value="⏱️ 5-SECOND RAPID CHALLENGE" style="font-size: 0.8rem; padding: 0.4rem;">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label style="font-size: 0.75rem;">High-Click Action CTA Button</label>
+              <input type="text" id="bulkDefaultCoverAction" value="▶ TAP TO PLAY & TEST YOUR RANK 🏆" style="font-size: 0.8rem; padding: 0.4rem;">
+            </div>
+          </div>
+
+          <!-- SMART AUTO VARIATION PREVIEW INFO -->
+          <div id="bulkCoverAutoInfoBox" style="background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.3); border-radius: 8px; padding: 0.65rem; font-size: 0.72rem; color: var(--text-main);">
+            <div style="font-weight: 800; color: #10B981; margin-bottom: 0.35rem;">✨ 6 High-CTR Universal Variations Active:</div>
+            <div style="color: var(--text-muted); line-height: 1.4;">
+              • <b>Hooks:</b> 99% Fail Warning, Most Repeated in Competitive Exams, 5s Brain Challenge, Top 1% Rankers, Sure Shot Questions.<br>
+              • <b>Action CTAs:</b> Tap to Test Rank, Comment Before Timer, Test Preparation Level, Beat 5s Clock, Claim 1st Rank.
+            </div>
+          </div>
+
+          <!-- CUSTOM POOL BOX -->
+          <div id="bulkCoverCustomPoolBox" style="display: none;">
+            <div class="form-group" style="margin-bottom: 0.5rem;">
+              <label style="font-size: 0.75rem;">Custom Viral Hooks Pool (1 per line)</label>
+              <textarea id="bulkCustomHooksPool" style="height: 65px; font-size: 0.75rem; font-family: monospace;" placeholder="⚠️ 99% ASPIRANTS GET THIS WRONG!&#10;🔥 MOST REPEATED QUESTION IN COMPETITIVE EXAMS!&#10;🧠 CAN YOU SOLVE THIS IN 5 SECONDS?"></textarea>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label style="font-size: 0.75rem;">Custom Action CTAs Pool (1 per line)</label>
+              <textarea id="bulkCustomCtasPool" style="height: 65px; font-size: 0.75rem; font-family: monospace;" placeholder="▶ TAP TO PLAY & TEST YOUR RANK 🏆&#10;💬 COMMENT YOUR ANSWER BEFORE TIMER ENDS ⏱️&#10;🔥 TEST YOUR PREPARATION LEVEL NOW 🎯"></textarea>
+            </div>
+          </div>
+
+        </div><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Shorts & Cover Creator — OdishaExamPrep</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <!-- MP4 Fast-Muxer Client Library -->
+  <script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.4/build/mp4-muxer.min.js"></script>
+  <!-- Client-Side ZIP Packaging -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    :root {
+      --bg-main: #060911;
+      --bg-card: #0F172A;
+      --bg-card-glass: rgba(15, 23, 42, 0.9);
+      --border-color: rgba(255, 255, 255, 0.12);
+      --border-focus: #3B82F6;
+      --brand-primary: #2563EB;
+      --brand-gradient: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%);
+      --emerald-accent: #10B981;
+      --amber-accent: #F59E0B;
+      --amber-gradient: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+      --rose-accent: #EF4444;
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --text-dim: #64748B;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(circle at 10% 15%, rgba(37, 99, 235, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 90% 85%, rgba(16, 185, 129, 0.1) 0%, transparent 45%);
+    }
+
+    header {
+      padding: 0.85rem 2rem;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-card-glass);
+      backdrop-filter: blur(16px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: var(--brand-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+    }
+
+    .header-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .header-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .nav-tabs {
+      display: flex;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.55rem 1.15rem;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .nav-btn.active {
+      background: var(--brand-gradient);
+      color: #FFF;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.45);
+    }
+
+    .main-container {
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem;
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+      .main-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-card-glass);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 1.5rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-bottom: 1.15rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-main);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 0.9rem;
+    }
+
+    .form-group.col-span-2 {
+      grid-column: span 2;
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 0.7rem 0.9rem;
+      color: var(--text-main);
+      font-size: 0.9rem;
+      font-family: inherit;
+      font-weight: 600;
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 85px;
+    }
+
+    .option-input-wrapper {
+      position: relative;
+    }
+
+    .option-badge {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .option-input-wrapper input {
+      padding-left: 2.2rem;
+    }
+
+    .correct-answer-selector {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.4rem;
+    }
+
+    .radio-pill {
+      flex: 1;
+      position: relative;
+    }
+
+    .radio-pill input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .radio-pill span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.55rem;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.04);
+      font-weight: 800;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .radio-pill input[type="radio"]:checked + span {
+      background: var(--emerald-accent);
+      color: #042F2E;
+      border-color: var(--emerald-accent);
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.4);
+    }
+
+    .file-upload-box {
+      border: 1.5px dashed var(--border-color);
+      border-radius: 14px;
+      padding: 0.75rem 1rem;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .file-upload-box:hover {
+      border-color: var(--border-focus);
+      background: rgba(59, 130, 246, 0.08);
+    }
+
+    .file-preview-thumb {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      object-fit: contain;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-color);
+    }
+
+    .audio-controls-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.6rem 1rem;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      border-color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-danger {
+      color: var(--rose-accent);
+      border-color: rgba(239, 68, 68, 0.35);
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: var(--rose-accent);
+    }
+
+    .btn-primary {
+      background: var(--brand-gradient);
+      color: #FFF;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 800;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 6px 22px rgba(37, 99, 235, 0.65);
+      transform: translateY(-1px);
+    }
+
+    .btn-emerald {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      color: #FFF;
+      border: none;
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-emerald:hover {
+      box-shadow: 0 6px 22px rgba(16, 185, 129, 0.65);
+      transform: translateY(-1px);
+    }
+
+    .btn-gold {
+      background: var(--amber-gradient);
+      color: #000;
+      border: none;
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+      font-weight: 900;
+    }
+
+    .btn-gold:hover {
+      box-shadow: 0 6px 22px rgba(245, 158, 11, 0.65);
+      transform: translateY(-1px);
+    }
+
+    .preview-sticky-wrap {
+      position: sticky;
+      top: 5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .canvas-frame {
+      width: 320px;
+      height: 568px;
+      background: #000;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 0 1.5px rgba(255, 255, 255, 0.15);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .preview-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .preview-buttons-row {
+      display: flex;
+      gap: 0.5rem;
+      width: 100%;
+    }
+
+    .preview-buttons-row .btn {
+      flex: 1;
+    }
+
+    /* FAST EXPORT PROGRESS MODAL */
+    .export-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .export-modal-overlay.active {
+      display: flex;
+    }
+
+    .export-modal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 2rem;
+      max-width: 440px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 14px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1.25rem 0 0.75rem 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #2563EB, #10B981);
+      border-radius: 10px;
+      transition: width 0.05s ease-out;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+    }
+
+    .badge-info {
+      font-size: 0.75rem;
+      color: var(--emerald-accent);
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    .pro-badge {
+      background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+      color: #FFF;
+      font-size: 0.65rem;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- FAST EXPORT MODAL -->
+  <div class="export-modal-overlay" id="exportModalOverlay">
+    <div class="export-modal-card">
+      <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">⚡</div>
+      <div style="font-size: 1.2rem; font-weight: 800; color: #FFF;" id="exportModalTitle">Rendering Fast MP4 Video + Audio...</div>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;" id="exportModalSubtitle">Silent offline rendering (2–3 seconds). Complete audio track included!</div>
+      
+      <div class="progress-track">
+        <div class="progress-fill" id="exportProgressBar"></div>
+      </div>
+      
+      <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700; color: var(--text-dim);">
+        <span id="exportProgressPercent">0%</span>
+        <span id="exportProgressFrame">Frame 0 / 0</span>
+      </div>
+    </div>
+  </div>
+
+  <header>
+    <div class="header-logo">
+      <div class="logo-badge">⚡</div>
+      <div>
+        <div class="header-title">YouTube Shorts Creator</div>
+        <div class="header-sub">OdishaExamPrep High-Conversion Video & Cover Suite</div>
+      </div>
+    </div>
+
+    <div class="nav-tabs">
+      <button class="nav-btn active" id="tabShortsBtn" onclick="switchTab('shorts')">📹 9:16 Shorts Video</button>
+      <button class="nav-btn" id="tabCoverBtn" onclick="switchTab('cover')">🖼️ 100k Pro Cover <span class="pro-badge">HIGH CTR</span></button>
+      <button class="nav-btn" id="tabBulkBtn" onclick="switchTab('bulk')">📦 Bulk Studio <span class="pro-badge" style="background:#F59E0B; color:#000;">BATCH 10–100</span></button>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <!-- LEFT PANEL: FORM INPUTS -->
+    <div class="card">
+      
+      <!-- MCQ & EXAM SECTION -->
+      <div class="card-title">📝 Question & Exam Details</div>
+
+      <!-- 🔢 MULTI-QUESTION COUNT & TABS SELECTOR -->
+      <div class="form-group col-span-2" style="background: rgba(37,99,235,0.06); padding: 0.85rem; border-radius: 12px; border: 1.5px solid rgba(59,130,246,0.35); margin-bottom: 0.6rem;">
+        <label style="color: #93C5FD; font-weight: 800; display: flex; align-items: center; justify-content: space-between; font-size: 0.95rem;">
+          <span>🔢 Questions in this Short</span>
+          <span class="q-count-badge" id="qCountDisplayBadge">1 Question Mode</span>
+        </label>
+        <div class="correct-answer-selector" style="margin-top: 0.5rem;">
+          <label class="radio-pill">
+            <input type="radio" name="questionsCountRadio" value="1" checked onchange="handleQuestionsCountChange(1)">
+            <span>1 Question (Quick)</span>
+          </label>
+          <label class="radio-pill">
+            <input type="radio" name="questionsCountRadio" value="2" onchange="handleQuestionsCountChange(2)">
+            <span>2 Questions (Duo)</span>
+          </label>
+          <label class="radio-pill">
+            <input type="radio" name="questionsCountRadio" value="3" onchange="handleQuestionsCountChange(3)">
+            <span>3 Questions (Rapid Challenge 🔥)</span>
+          </label>
+        </div>
+
+        <div class="q-tabs-row" id="questionTabsRow" style="margin-top: 0.75rem; margin-bottom: 0.2rem;">
+          <button type="button" class="q-tab-btn active" id="qTab0" onclick="switchQuestionTab(0)">
+            <span>❓ Question 1</span>
+          </button>
+          <button type="button" class="q-tab-btn" id="qTab1" style="display: none;" onclick="switchQuestionTab(1)">
+            <span>❓ Question 2</span>
+          </button>
+          <button type="button" class="q-tab-btn" id="qTab2" style="display: none;" onclick="switchQuestionTab(2)">
+            <span>❓ Question 3</span>
+          </button>
+        </div>
+      </div>
+
+
+      <!-- 🎨 MULTI-TEMPLATE VISUAL THEME SELECTOR -->
+      <div class="form-group col-span-2" style="background: rgba(255,255,255,0.03); padding: 0.85rem; border-radius: 12px; border: 1.5px solid rgba(245,158,11,0.4); margin-bottom: 0.5rem;">
+        <label style="color: var(--amber-accent); font-weight: 800; display: flex; align-items: center; justify-content: space-between; font-size: 0.95rem;">
+          <span>🎨 Video & Cover Visual Template</span>
+          <span style="font-size: 0.72rem; background: rgba(245,158,11,0.25); color: #FCD34D; padding: 2px 8px; border-radius: 6px; font-weight: 900;">100K YOUTUBER SUITE</span>
+        </label>
+        <select id="templateTheme" class="form-control" style="width: 100%; margin-top: 0.5rem; font-weight: 700; background: var(--bg-card); color: #FFF; border: 1.5px solid var(--border-color); border-radius: 8px; padding: 0.75rem 0.85rem; font-size: 0.95rem; cursor: pointer;" onchange="handleTemplateChange()">
+          <option value="obsidian-cobalt" selected>🌌 1. Obsidian Cobalt (Default • Pro Tech & GK)</option>
+          <option value="royal-gold">👑 2. Royal Gold & Onyx (Luxury • Top Rankers / OPSC ASO)</option>
+          <option value="crimson-danger">🔥 3. Crimson Danger (Adrenaline • 99% Fail Challenge)</option>
+          <option value="cyber-mint">⚡ 4. Cyber Neon Mint (Gamified • High-Energy Quiz)</option>
+          <option value="galactic-purple">🔮 5. Galactic Purple (Studio • Modern AI Academy)</option>
+          <option value="slate-academy">🏛️ 6. Slate Academy (Official • Prestigious Exam Authority)</option>
+        </select>
+      </div>
+      
+      <div class="form-grid">
+        <div class="form-group col-span-2">
+          <label>Exam / Subject Target</label>
+          <input type="text" id="examName" value="OSSC CGL & OPSC ASO 2026" placeholder="e.g. OSSC CGL 2026 / Odisha Geography" oninput="handleFormUpdate()">
+        </div>
+
+        <div class="form-group col-span-2">
+          <label>MCQ Question Text (Supports Any Length)</label>
+          <textarea id="questionText" placeholder="Enter your MCQ Question here..." oninput="handleFormUpdate()">Who was the first Chief Minister of Odisha after Indian Independence?</textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Option A</label>
+          <div class="option-input-wrapper">
+            <span class="option-badge">A</span>
+            <input type="text" id="optionA" value="Dr. Harekrushna Mahatab" oninput="handleFormUpdate()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Option B</label>
+          <div class="option-input-wrapper">
+            <span class="option-badge">B</span>
+            <input type="text" id="optionB" value="Nabakrushna Choudhury" oninput="handleFormUpdate()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Option C</label>
+          <div class="option-input-wrapper">
+            <span class="option-badge">C</span>
+            <input type="text" id="optionC" value="Biju Patnaik" oninput="handleFormUpdate()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Option D</label>
+          <div class="option-input-wrapper">
+            <span class="option-badge">D</span>
+            <input type="text" id="optionD" value="Janaki Ballabh Patnaik" oninput="handleFormUpdate()">
+          </div>
+        </div>
+
+        <div class="form-group col-span-2">
+          <label>Select Correct Answer</label>
+          <div class="correct-answer-selector">
+            <label class="radio-pill">
+              <input type="radio" name="correctAnswer" value="A" checked onchange="handleFormUpdate()">
+              <span>A</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="correctAnswer" value="B" onchange="handleFormUpdate()">
+              <span>B</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="correctAnswer" value="C" onchange="handleFormUpdate()">
+              <span>C</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="correctAnswer" value="D" onchange="handleFormUpdate()">
+              <span>D</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Countdown Timer</label>
+          <div class="correct-answer-selector">
+            <label class="radio-pill">
+              <input type="radio" name="countdownDuration" value="3">
+              <span>3 Seconds</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="countdownDuration" value="5" checked>
+              <span>5 Seconds</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Master Sound Toggle</label>
+          <button class="btn" style="width: 100%; margin-top: 0.4rem;" id="muteToggleBtn" onclick="toggleMute()">
+            🔊 Sound Enabled
+          </button>
+        </div>
+
+        <!-- CINEMATIC SUSPENSE AUDIO SELECTION -->
+        <div class="form-group col-span-2" style="border-top: 1px solid var(--border-color); padding-top: 0.9rem; margin-top: 0.4rem;">
+          <label>🎵 Suspense Background Audio (Reading & Countdown)</label>
+          <div class="correct-answer-selector" style="margin-bottom: 0.6rem;">
+            <label class="radio-pill">
+              <input type="radio" name="bgAudioMode" value="synth" checked onchange="handleBgAudioModeChange('synth')">
+              <span>🎬 Studio Drone & Sub-Booms (Built-in)</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="bgAudioMode" value="custom" onchange="handleBgAudioModeChange('custom')">
+              <span>📁 Upload Custom Suspense MP3</span>
+            </label>
+          </div>
+
+          <div id="customBgAudioUploadBox" style="display: none;">
+            <div class="file-upload-box" onclick="document.getElementById('bgAudioInput').click()">
+              <div style="text-align: left;">
+                <div id="bgAudioFileName" style="font-size: 0.85rem; font-weight: 800; color: var(--text-main);">Click to Select Suspense Music MP3</div>
+                <div style="font-size: 0.7rem; color: var(--text-dim);">Audio stays in browser memory. Automatically loops during question & countdown, fades on answer reveal.</div>
+              </div>
+              <button type="button" class="btn" style="pointer-events: none;">Select Track</button>
+            </div>
+            <input type="file" id="bgAudioInput" accept="audio/mp3,audio/wav,audio/mpeg" style="display: none;" onchange="handleBgAudioUpload(event)">
+
+            <div class="audio-controls-row" id="bgAudioControlsRow" style="display: none; margin-top: 0.5rem;">
+              <button type="button" class="btn" onclick="previewBgAudio()"><span id="bgAudioPlayIcon">▶</span> Preview Suspense Music</button>
+              <button type="button" class="btn" onclick="document.getElementById('bgAudioInput').click()">🔄 Replace</button>
+              <button type="button" class="btn btn-danger" onclick="removeBgAudio()">🗑️ Remove</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BRANDING & CTA SECTION -->
+      <div class="card-title" style="margin-top: 1.5rem;">🎯 Branding & CTA Voiceover</div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Brand Name</label>
+          <input type="text" id="brandName" value="OdishaExamPrep" oninput="handleFormUpdate()">
+        </div>
+
+        <div class="form-group">
+          <label>Brand Logo (PNG/SVG/JPG)</label>
+          <label class="file-upload-box" for="logoInput">
+            <span id="logoFileName" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); truncate;">Default Icon</span>
+            <img id="logoPreview" class="file-preview-thumb" src="/favicon.svg" alt="Logo">
+          </label>
+          <input type="file" id="logoInput" accept="image/*" style="display: none;" onchange="handleLogoUpload(event)">
+        </div>
+
+        <div class="form-group col-span-2">
+          <label>Final CTA Pitch Text</label>
+          <input type="text" id="ctaText" value="Visit website for 1,000+ Topic Tests & Mock Series!" oninput="handleFormUpdate()">
+        </div>
+
+        <div class="form-group">
+          <label>Website Name</label>
+          <input type="text" id="websiteName" value="OdishaExamPrep.in" oninput="handleFormUpdate()">
+        </div>
+
+        <div class="form-group">
+          <label>Website URL</label>
+          <input type="text" id="websiteUrl" value="www.odishaexamprep.in" oninput="handleFormUpdate()">
+        </div>
+
+        <div class="form-group col-span-2">
+          <label>CTA Voice Audio (Local MP3 only — In-Memory)</label>
+          <div class="file-upload-box" onclick="document.getElementById('audioInput').click()">
+            <div style="text-align: left;">
+              <div id="audioFileName" style="font-size: 0.85rem; font-weight: 800; color: var(--text-main);">Click to Select CTA Voice MP3 File</div>
+              <div style="font-size: 0.7rem; color: var(--text-dim);">Audio stays 100% inside browser memory. Never uploaded to database or server.</div>
+            </div>
+            <button type="button" class="btn" style="pointer-events: none;">Select File</button>
+          </div>
+          <input type="file" id="audioInput" accept="audio/mp3,audio/wav,audio/mpeg" style="display: none;" onchange="handleAudioUpload(event)">
+
+          <div class="audio-controls-row" id="audioControlsRow" style="display: none;">
+            <button type="button" class="btn" onclick="previewAudio()"><span id="audioPlayIcon">▶</span> Preview Voice</button>
+            <button type="button" class="btn" onclick="document.getElementById('audioInput').click()">🔄 Replace</button>
+            <button type="button" class="btn btn-danger" onclick="removeAudio()">🗑️ Remove</button>
+            <span class="badge-info" id="audioDurationBadge">Duration: 0.0s</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 100K CREATOR COVER CUSTOMIZATION SECTION (Visible in Cover Mode) -->
+      <div id="coverFieldsWrapper" style="display: none; margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+        <div class="card-title">🔥 100k Pro Creator Thumbnail Controls</div>
+        
+        <div class="form-grid">
+          <div class="form-group col-span-2">
+            <label>Viral Top Hook (High Contrast Banner)</label>
+            <input type="text" id="coverHookText" value="⚠️ 99% ASPIRANTS GET THIS WRONG!" placeholder="e.g. ⚠️ 99% ASPIRANTS GET THIS WRONG!" oninput="drawCoverCanvas()">
+          </div>
+
+          <div class="form-group">
+            <label>Question Topic / Number Badge</label>
+            <input type="text" id="coverQuestionBadge" value="❓ QUESTION #01 • IMPORTANT GK" oninput="drawCoverCanvas()">
+          </div>
+
+          <div class="form-group">
+            <label>Gamified Challenge Strip</label>
+            <input type="text" id="coverChallengeText" value="⏱️ 5-SECOND RAPID CHALLENGE" oninput="drawCoverCanvas()">
+          </div>
+
+          <div class="form-group col-span-2">
+            <label>High-Click Action CTA Button Text</label>
+            <input type="text" id="coverActionBtnText" value="▶ TAP TO PLAY & TEST YOUR RANK 🏆" oninput="drawCoverCanvas()">
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT PANEL: PREVIEW & EXPORT -->
+    <div class="preview-sticky-wrap">
+
+      <div class="canvas-frame">
+        <canvas id="shortsCanvas" width="1080" height="1920"></canvas>
+      </div>
+
+      <!-- SAFE ZONE HELPER TOGGLE -->
+      <button type="button" class="btn" id="safeZoneToggleBtn" onclick="toggleSafeZoneGuide()" style="font-size: 0.75rem; border-color: rgba(59, 130, 246, 0.4);">
+        📱 Show Real YouTube Mobile Overlay Guide
+      </button>
+
+      <!-- SHORTS PREVIEW & EXPORT BUTTONS -->
+      <div class="preview-bar" id="shortsControlsBar">
+        <div class="preview-buttons-row">
+          <button class="btn" id="playPreviewBtn" onclick="playShortsSequence(false)">▶ Play Preview</button>
+          <button class="btn btn-danger" id="stopPreviewBtn" onclick="stopSequence()" style="display: none;">⏹ Stop</button>
+        </div>
+
+        <button class="btn btn-emerald" id="fastExportMp4Btn" onclick="fastExportShort('mp4')" style="font-size: 0.95rem; padding: 0.75rem; font-weight: 800;">
+          ⚡ Fast Download Video as .MP4 (~2s)
+        </button>
+
+        <button class="btn" id="fastExportWebmBtn" onclick="fastExportShort('webm')" style="font-size: 0.75rem; color: var(--text-muted);">
+          📥 Or Download as .WebM
+        </button>
+      </div>
+
+      <!-- COVER PREVIEW CONTROLS -->
+      <div class="preview-bar" id="coverControlsBar" style="display: none;">
+        <button class="btn btn-gold" onclick="downloadCoverPNG()" style="width: 100%; font-size: 0.95rem; padding: 0.75rem;">📥 Download 100k Pro Cover (PNG)</button>
+      </div>
+
+      <div style="font-size: 0.75rem; color: var(--text-dim); text-align: center; max-width: 320px;">
+        ⚡ Instant offline rendering engine. Complete audio + video.
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- 📦 BULK SHORTS STUDIO (BATCH 10–100 GENERATOR & ZIP EXPORTER) -->
+  <!-- ============================================================== -->
+  <div class="bulk-container" id="bulkStudioContainer">
+    <div class="bulk-grid">
+      
+      <!-- LEFT COLUMN: IMPORT & SETTINGS -->
+      <div class="card" style="margin-bottom: 0;">
+        <div class="card-title" style="display: flex; align-items: center; justify-content: space-between;">
+          <span>📥 1. Import Multiple MCQs</span>
+          <span style="font-size: 0.75rem; background: rgba(37,99,235,0.2); color: #93C5FD; padding: 2px 8px; border-radius: 6px;">CSV or Copy-Paste</span>
+        </div>
+
+        <!-- CSV Dropzone -->
+        <div style="border: 2px dashed rgba(59,130,246,0.4); border-radius: 12px; padding: 1.25rem; text-align: center; background: rgba(37,99,235,0.04); margin-bottom: 1rem; cursor: pointer;" onclick="document.getElementById('bulkCsvInput').click()">
+          <div style="font-size: 2rem; margin-bottom: 0.35rem;">📂</div>
+          <div style="font-weight: 800; color: #FFF; font-size: 0.95rem;">Click to Upload CSV / Excel File</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">Supports .csv files with 10–100+ questions</div>
+          <input type="file" id="bulkCsvInput" accept=".csv" style="display: none;" onchange="handleBulkCsvUpload(event)">
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem;">
+          <button type="button" class="btn btn-secondary" style="flex: 1; font-size: 0.8rem; padding: 0.5rem;" onclick="downloadSampleCsvTemplate()">
+            📥 Download Sample CSV Template
+          </button>
+        </div>
+
+        <!-- OR Paste Raw Text / ChatGPT Output -->
+        <div class="form-group" style="margin-bottom: 0.75rem;">
+          <label style="display: flex; justify-content: space-between;">
+            <span>📋 Or Paste ChatGPT / Raw Questions</span>
+            <span style="font-size: 0.7rem; color: var(--amber-accent); cursor: pointer;" onclick="loadDemoBulkQuestions()">Load 5 Demo Questions</span>
+          </label>
+          <textarea id="bulkPasteInput" style="height: 140px; font-family: monospace; font-size: 0.8rem;" placeholder="Paste questions here... e.g.&#10;Q1: Who was the first Chief Minister of Odisha?&#10;A) Dr. Harekrushna Mahatab&#10;B) Nabakrushna Choudhury&#10;C) Biju Patnaik&#10;D) Janaki Ballabh Patnaik&#10;Answer: A&#10;Exam: OSSC CGL 2026"></textarea>
+          <button type="button" class="btn btn-primary" style="width: 100%; margin-top: 0.4rem; padding: 0.55rem;" onclick="parsePastedBulkQuestions()">
+            ➕ Parse & Add to Queue
+          </button>
+        </div>
+
+        <!-- Default Exam Target -->
+        <div class="form-group" style="margin-top: 0.85rem;">
+          <label>Default Exam Target (If not set per row)</label>
+          <input type="text" id="bulkDefaultExam" value="OSSC CGL & OPSC ASO 2026">
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: BATCH QUEUE & GENERATE -->
+      <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column;">
+        <div class="card-title" style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <span>📋 2. Batch Queue</span>
+            <span class="badge-info" id="bulkQueueCountBadge">0 Questions</span>
+            <span id="bulkVideoEstimateBadge" style="font-size: 0.72rem; background: rgba(16,185,129,0.18); color: #10B981; padding: 2px 8px; border-radius: 6px; font-weight: 800; display: none;"></span>
+          </div>
+          <button type="button" class="btn btn-danger" style="font-size: 0.75rem; padding: 0.35rem 0.7rem;" onclick="clearBulkQueue()">
+            🗑️ Clear Queue
+          </button>
+        </div>
+
+        <!-- Queue Table -->
+        <div class="bulk-table-wrap" style="flex: 1; min-height: 280px;">
+          <table class="bulk-table">
+            <thead>
+              <tr>
+                <th style="width: 35px;">#</th>
+                <th style="width: 110px;">Exam</th>
+                <th>Question & Options</th>
+                <th style="width: 50px;">Ans</th>
+                <th style="width: 170px;">👁️ Preview & Cover</th>
+                <th style="width: 45px;">Act</th>
+              </tr>
+            </thead>
+            <tbody id="bulkQueueTableBody">
+              <tr>
+                <td colspan="5" style="text-align: center; padding: 3rem 1rem; color: var(--text-dim);">
+                  <div style="font-size: 2rem; margin-bottom: 0.5rem;">📦</div>
+                  <div>No questions in queue yet.</div>
+                  <div style="font-size: 0.75rem; margin-top: 0.25rem;">Upload a CSV file or paste questions on the left to start.</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Export Options & Action -->
+        <div style="margin-top: 0.85rem; padding-top: 0.85rem; border-top: 1px solid var(--border-color);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.7rem;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: var(--text-main); font-weight: 700; font-size: 0.85rem;">
+              <input type="checkbox" id="bulkIncludeCoverCheckbox" checked style="width: 16px; height: 16px;">
+              <span>Include matching 100K Cover Thumbnail (.PNG) in ZIP</span>
+            </label>
+            <span style="color: var(--text-dim); font-size: 0.72rem;">Fast Muxer: ~1.8s / video</span>
+          </div>
+          <button type="button" class="btn btn-primary" id="startBulkExportBtn" style="width: 100%; padding: 0.9rem; font-size: 1.05rem; font-weight: 900; background: linear-gradient(135deg, #10B981, #059669); border: none; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);" onclick="runBulkExportToZip()">
+            ⚡ Generate & Download All (.ZIP)
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ====================================================== -->
+    <!-- ⚙️ 3. BATCH VIDEO SETTINGS (FULL CREATIVE FREEDOM) -->
+    <!-- ====================================================== -->
+    <div class="card" style="margin-top: 1.25rem;">
+      <div class="card-title" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.6rem; margin-bottom: 1.25rem;">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span>⚙️ 3. Batch Video Settings</span>
+          <span style="font-size: 0.72rem; background: rgba(245,158,11,0.2); color: #F59E0B; padding: 2px 8px; border-radius: 6px; font-weight: 800;">FULL CREATIVE CONTROL</span>
+        </div>
+      </div>
+
+      <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+
+        <!-- COLUMN 1: STRUCTURE & THEME -->
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem;">
+          <div style="font-weight: 800; color: #93C5FD; font-size: 0.85rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+            🎬 1. Video Structure & Theme
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.9rem;">
+            <label style="font-weight: 700;">🔢 Questions Per Video</label>
+            <div class="correct-answer-selector" style="margin-top: 0.35rem;">
+              <label class="radio-pill">
+                <input type="radio" name="bulkQPerVideo" value="1" checked onchange="updateBulkVideoEstimate()">
+                <span>1 Question</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="bulkQPerVideo" value="2" onchange="updateBulkVideoEstimate()">
+                <span>2 Questions</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="bulkQPerVideo" value="3" onchange="updateBulkVideoEstimate()">
+                <span>3 Questions</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.9rem;">
+            <label style="font-weight: 700;">⏱️ Countdown Timer</label>
+            <div class="correct-answer-selector" style="margin-top: 0.35rem;">
+              <label class="radio-pill">
+                <input type="radio" name="bulkCountdown" value="3">
+                <span>3 Seconds</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="bulkCountdown" value="5" checked>
+                <span>5 Seconds</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="bulkCountdown" value="7">
+                <span>7 Seconds</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-weight: 700;">🎨 Visual Template Theme</label>
+            <select id="bulkTemplateTheme" style="background: var(--bg-card); color: #FFF; border: 1.5px solid var(--border-color); border-radius: 8px; padding: 0.55rem; width: 100%; margin-top: 0.35rem; font-weight: 600;">
+              <option value="obsidian-cobalt" selected>🌌 1. Obsidian Cobalt (Default • Pro Tech & GK)</option>
+              <option value="royal-gold">👑 2. Royal Gold & Onyx (Luxury)</option>
+              <option value="crimson-danger">🔥 3. Crimson Danger (99% Fail Warning)</option>
+              <option value="cyber-mint">⚡ 4. Cyber Neon Mint (Gamified)</option>
+              <option value="galactic-purple">🔮 5. Galactic Purple (Studio)</option>
+              <option value="slate-academy">🏛️ 6. Slate Academy (Official)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- COLUMN 2: AUDIO & MUSIC -->
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem;">
+          <div style="font-weight: 800; color: #93C5FD; font-size: 0.85rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+            🎵 2. Audio & Sound FX
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.9rem;">
+            <label style="font-weight: 700;">Background Tension Audio</label>
+            <div class="correct-answer-selector" style="margin-top: 0.35rem;">
+              <label class="radio-pill">
+                <input type="radio" name="bulkBgAudio" value="synth" checked onchange="handleBulkAudioModeChange(this.value)">
+                <span>🎛️ Synth Drone</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="bulkBgAudio" value="custom" onchange="handleBulkAudioModeChange(this.value)">
+                <span>📁 Custom MP3</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="bulkBgAudio" value="muted" onchange="handleBulkAudioModeChange(this.value)">
+                <span>🔇 Mute</span>
+              </label>
+            </div>
+          </div>
+
+          <div id="bulkCustomBgAudioBox" style="display: none; margin-bottom: 0.9rem;">
+            <div class="file-upload-box" style="padding: 0.65rem; cursor: pointer;" onclick="document.getElementById('bulkBgAudioInput').click()">
+              <div id="bulkBgAudioFileName" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-align: left;">Click to Select Suspense Music MP3</div>
+              <button type="button" class="btn" style="pointer-events: none; padding: 0.25rem 0.6rem; font-size: 0.75rem;">Select MP3</button>
+            </div>
+            <input type="file" id="bulkBgAudioInput" accept="audio/mp3,audio/wav,audio/mpeg" style="display: none;" onchange="handleBulkBgAudioUpload(event)">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-weight: 700;">🎙️ CTA Voice Audio (Optional)</label>
+            <div class="file-upload-box" style="padding: 0.65rem; cursor: pointer; margin-top: 0.35rem;" onclick="document.getElementById('bulkCtaAudioInput').click()">
+              <div id="bulkCtaAudioFileName" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-align: left;">Click to Select CTA Voice MP3</div>
+              <button type="button" class="btn" style="pointer-events: none; padding: 0.25rem 0.6rem; font-size: 0.75rem;">Select MP3</button>
+            </div>
+            <input type="file" id="bulkCtaAudioInput" accept="audio/mp3,audio/wav,audio/mpeg" style="display: none;" onchange="handleBulkCtaAudioUpload(event)">
+          </div>
+        </div>
+
+        <!-- COLUMN 3: BRANDING & CTA -->
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem;">
+          <div style="font-weight: 800; color: #93C5FD; font-size: 0.85rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+            ✏️ 3. Branding & CTA
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.6rem;">
+            <label>Brand Name</label>
+            <input type="text" id="bulkBrandName" value="OdishaExamPrep">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.6rem;">
+            <label>CTA Pitch Text</label>
+            <input type="text" id="bulkCtaText" value="Visit website for 1,000+ Topic Tests & Mock Series!">
+          </div>
+
+          <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>Website Name</label>
+              <input type="text" id="bulkWebsiteName" value="OdishaExamPrep.in">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>Website URL</label>
+              <input type="text" id="bulkWebsiteUrl" value="www.odishaexamprep.in">
+            </div>
+          </div>
+        </div>
+
         <!-- COLUMN 4: 100K PRO COVER SETTINGS -->
         <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem;">
           <div style="font-weight: 800; color: #F59E0B; font-size: 0.85rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: space-between;">
@@ -3518,17 +4662,20 @@
           }
 
           // 2. Render Matching Cover PNG (if enabled)
+          // Apply dynamic theme rotation if enabled
+          const itemTemplate = getTemplateForBatchIndex(i, tplName);
+          itemConfig.template = itemTemplate;
+
           if (includeCover) {
-            const defHook = (document.getElementById('bulkDefaultCoverHook') || {}).value || '⚠️ 99% ASPIRANTS GET THIS WRONG!';
-            const defBadge = ((document.getElementById('bulkDefaultCoverBadge') || {}).value || '❓ QUESTION #{NUM} • IMPORTANT GK').replace('{NUM}', String(i + 1).padStart(2, '0'));
-            const defChal = (document.getElementById('bulkDefaultCoverChallenge') || {}).value || '⏱️ 5-SECOND RAPID CHALLENGE';
-            const defAction = (document.getElementById('bulkDefaultCoverAction') || {}).value || '▶ TAP TO PLAY & TEST YOUR RANK 🏆';
+            const variation = getCoverVariationForIndex(i);
+            const defBadge = '❓ QUESTION #' + String(i + 1).padStart(2, '0') + ' • IMPORTANT GK';
 
-            const itemHook = firstQ.customCoverHook || defHook;
+            const itemHook = firstQ.customCoverHook || variation.hook;
             const itemBadge = firstQ.customCoverBadge || defBadge;
-            const itemChal = firstQ.customCoverChallenge || defChal;
+            const itemChal = firstQ.customCoverChallenge || variation.chal;
+            const itemAction = variation.act;
 
-            const coverBlob = await renderSingleCoverBlobForItem(firstQ, batchTemplate, bulkBrand, bulkUrl, itemHook, itemBadge, itemChal, defAction);
+            const coverBlob = await renderSingleCoverBlobForItem(firstQ, itemTemplate, bulkBrand, bulkUrl, itemHook, itemBadge, itemChal, itemAction);
             if (coverBlob) {
               zip.file(baseName + '_Cover.png', coverBlob);
             }
@@ -3997,13 +5144,12 @@
         '<b>D:</b> ' + (opts.D || '-') + '<br>' +
         '<span style="color: #10B981; font-weight: 800;">Correct Answer: (' + (item.correct || 'A') + ')</span>';
 
-      const defHook = document.getElementById('bulkDefaultCoverHook') ? document.getElementById('bulkDefaultCoverHook').value : '⚠️ 99% ASPIRANTS GET THIS WRONG!';
-      const defBadge = (document.getElementById('bulkDefaultCoverBadge') ? document.getElementById('bulkDefaultCoverBadge').value : '❓ QUESTION #{NUM} • IMPORTANT GK').replace('{NUM}', String(index + 1).padStart(2, '0'));
-      const defChal = document.getElementById('bulkDefaultCoverChallenge') ? document.getElementById('bulkDefaultCoverChallenge').value : '⏱️ 5-SECOND RAPID CHALLENGE';
+      const variation = getCoverVariationForIndex(index);
+      const defBadge = '❓ QUESTION #' + String(index + 1).padStart(2, '0') + ' • IMPORTANT GK';
 
-      document.getElementById('bulkItemCustomHook').value = item.customCoverHook || defHook;
+      document.getElementById('bulkItemCustomHook').value = item.customCoverHook || variation.hook;
       document.getElementById('bulkItemCustomBadge').value = item.customCoverBadge || defBadge;
-      document.getElementById('bulkItemCustomChallenge').value = item.customCoverChallenge || defChal;
+      document.getElementById('bulkItemCustomChallenge').value = item.customCoverChallenge || variation.chal;
     }
 
     function closeBulkPreviewModal() {
@@ -4136,15 +5282,16 @@
       drawBulkModalCover(item, bulkModalActiveIndex);
     }
 
-    function drawBulkModalCover(item, index) {
+        function drawBulkModalCover(item, index) {
       initBulkModalCanvas();
-      const tplName = document.getElementById('bulkTemplateTheme') ? document.getElementById('bulkTemplateTheme').value : 'obsidian-cobalt';
-      const tpl = TEMPLATES[tplName] || TEMPLATES['obsidian-cobalt'];
+      const variation = getCoverVariationForIndex(index);
+      const baseTplName = document.getElementById('bulkTemplateTheme') ? document.getElementById('bulkTemplateTheme').value : 'obsidian-cobalt';
+      const tpl = getTemplateForBatchIndex(index, baseTplName);
 
-      const hookText = document.getElementById('bulkItemCustomHook').value || '⚠️ 99% ASPIRANTS GET THIS WRONG!';
-      const badgeText = document.getElementById('bulkItemCustomBadge').value || ('❓ QUESTION #' + String(index + 1).padStart(2, '0') + ' • IMPORTANT GK');
-      const chalText = document.getElementById('bulkItemCustomChallenge').value || '⏱️ 5-SECOND RAPID CHALLENGE';
-      const actionText = (document.getElementById('bulkDefaultCoverAction') || {}).value || '▶ TAP TO PLAY & TEST YOUR RANK 🏆';
+      const hookText = (document.getElementById('bulkItemCustomHook') && document.getElementById('bulkItemCustomHook').value) ? document.getElementById('bulkItemCustomHook').value : variation.hook;
+      const badgeText = (document.getElementById('bulkItemCustomBadge') && document.getElementById('bulkItemCustomBadge').value) ? document.getElementById('bulkItemCustomBadge').value : ('❓ QUESTION #' + String(index + 1).padStart(2, '0') + ' • IMPORTANT GK');
+      const chalText = (document.getElementById('bulkItemCustomChallenge') && document.getElementById('bulkItemCustomChallenge').value) ? document.getElementById('bulkItemCustomChallenge').value : variation.chal;
+      const actionText = variation.act;
       const brand = (document.getElementById('bulkBrandName') || {}).value || 'OdishaExamPrep';
       const websiteUrl = (document.getElementById('bulkWebsiteUrl') || {}).value || 'www.odishaexamprep.in';
       const exam = item.exam || 'OSSC CGL 2026';
@@ -4301,6 +5448,95 @@
       link.download = '100k_Cover_' + examName + '_Short_' + (bulkModalActiveIndex + 1) + '.png';
       link.href = canvas.toDataURL('image/png');
       link.click();
+    }
+
+
+
+    // ==============================================================
+    // 🎲 SMART THUMBNAIL AUTO-VARIATION & THEME ROTATION ENGINE
+    // ==============================================================
+    const SMART_VIRAL_HOOKS = [
+      '⚠️ 99% ASPIRANTS GET THIS WRONG!',
+      '🔥 MOST REPEATED QUESTION IN COMPETITIVE EXAMS!',
+      '🧠 CAN YOU SOLVE THIS IN 5 SECONDS?',
+      '🏆 ONLY TOP 1% RANKERS GET THIS RIGHT!',
+      '📌 100% SURE SHOT QUESTION FOR UPCOMING EXAMS!',
+      '⚡ CHALLENGE YOUR BRAIN IN 5 SECONDS!'
+    ];
+
+    const SMART_ACTION_CTAS = [
+      '▶ TAP TO PLAY & TEST YOUR RANK 🏆',
+      '💬 COMMENT YOUR ANSWER BEFORE TIMER ENDS ⏱️',
+      '🔥 TEST YOUR PREPARATION LEVEL NOW 🎯',
+      '▶ CAN YOU BEAT THE 5-SECOND CLOCK? ⚡',
+      '🥇 TAP TO PLAY & CLAIM 1ST RANK 👑'
+    ];
+
+    const SMART_CHALLENGES = [
+      '⏱️ 5-SECOND RAPID CHALLENGE',
+      '⚡ GENERAL KNOWLEDGE SPEED TEST',
+      '🔥 FASTEST FINGER FIRST QUIZ',
+      '🎯 INSTANT RANK CHECKER'
+    ];
+
+    const ROTATING_THEMES_LIST = [
+      'obsidian-cobalt',
+      'royal-gold',
+      'crimson-danger',
+      'cyber-mint',
+      'galactic-purple',
+      'slate-academy'
+    ];
+
+    function handleCoverVarModeChange(mode) {
+      const autoBox = document.getElementById('bulkCoverAutoInfoBox');
+      const fixedBox = document.getElementById('bulkCoverFixedBox');
+      const customBox = document.getElementById('bulkCoverCustomPoolBox');
+
+      if (autoBox) autoBox.style.display = (mode === 'auto') ? 'block' : 'none';
+      if (fixedBox) fixedBox.style.display = (mode === 'fixed') ? 'block' : 'none';
+      if (customBox) customBox.style.display = (mode === 'custom') ? 'block' : 'none';
+    }
+
+    function getCoverVariationForIndex(index) {
+      const modeRadios = document.querySelectorAll('input[name="bulkCoverVarMode"]');
+      let mode = 'auto';
+      for (const r of modeRadios) {
+        if (r.checked) { mode = r.value; break; }
+      }
+
+      if (mode === 'fixed') {
+        const hook = (document.getElementById('bulkDefaultCoverHook') || {}).value || '⚠️ 99% ASPIRANTS GET THIS WRONG!';
+        const chal = (document.getElementById('bulkDefaultCoverChallenge') || {}).value || '⏱️ 5-SECOND RAPID CHALLENGE';
+        const act  = (document.getElementById('bulkDefaultCoverAction') || {}).value || '▶ TAP TO PLAY & TEST YOUR RANK 🏆';
+        return { hook, chal, act };
+      }
+
+      if (mode === 'custom') {
+        const customHooks = ((document.getElementById('bulkCustomHooksPool') || {}).value || '').split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        const customCtas = ((document.getElementById('bulkCustomCtasPool') || {}).value || '').split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+        const hook = customHooks.length > 0 ? customHooks[index % customHooks.length] : SMART_VIRAL_HOOKS[index % SMART_VIRAL_HOOKS.length];
+        const act  = customCtas.length > 0 ? customCtas[index % customCtas.length] : SMART_ACTION_CTAS[index % SMART_ACTION_CTAS.length];
+        const chal = SMART_CHALLENGES[index % SMART_CHALLENGES.length];
+        return { hook, chal, act };
+      }
+
+      // Default: SMART AUTO-VARIATION
+      return {
+        hook: SMART_VIRAL_HOOKS[index % SMART_VIRAL_HOOKS.length],
+        chal: SMART_CHALLENGES[index % SMART_CHALLENGES.length],
+        act:  SMART_ACTION_CTAS[index % SMART_ACTION_CTAS.length]
+      };
+    }
+
+    function getTemplateForBatchIndex(index, baseTemplateKey) {
+      const autoRotateEl = document.getElementById('bulkAutoRotateThemesCheckbox');
+      if (autoRotateEl && autoRotateEl.checked) {
+        const tplKey = ROTATING_THEMES_LIST[index % ROTATING_THEMES_LIST.length];
+        return TEMPLATES[tplKey] || TEMPLATES[baseTemplateKey] || TEMPLATES['obsidian-cobalt'];
+      }
+      return TEMPLATES[baseTemplateKey] || TEMPLATES['obsidian-cobalt'];
     }
 
 

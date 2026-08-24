@@ -805,6 +805,8 @@
     let audioDestination = null;
     let activeDroneOscs = [];
     let droneGainNode = null;
+    let timerMusicOscs = [];   // timer tension layer
+    let timerMusicGain = null; // controls timer tension volume
 
     function initAudioContext() {
       if (!audioCtx) {
@@ -934,6 +936,77 @@
         activeDroneOscs = [];
         droneGainNode = null;
       }, 350);
+    }
+
+    // 🎵 TIMER TENSION MUSIC — swells in as countdown begins
+    function startTimerTensionMusic(fadeInDuration) {
+      stopTimerTensionMusic();
+      if (isMuted || !audioCtx) return;
+      fadeInDuration = fadeInDuration || 1.2;
+      try {
+        const now = audioCtx.currentTime;
+        timerMusicGain = audioCtx.createGain();
+        timerMusicGain.gain.setValueAtTime(0, now);
+        timerMusicGain.gain.linearRampToValueAtTime(0.18, now + fadeInDuration);
+        timerMusicGain.connect(masterGain);
+
+        // Layer A: Low ominous pulse (like a heartbeat bed)
+        const pulseFreqs = [55.0, 82.41]; // A1, E2 — dark minor interval
+        pulseFreqs.forEach(function(freq) {
+          const osc = audioCtx.createOscillator();
+          const oscGain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now);
+          // Slow tremolo — 2Hz amplitude pulse for urgency feel
+          const lfo = audioCtx.createOscillator();
+          const lfoGain = audioCtx.createGain();
+          lfo.type = 'sine';
+          lfo.frequency.setValueAtTime(2.2, now);
+          lfoGain.gain.setValueAtTime(0.3, now);
+          lfo.connect(lfoGain);
+          lfoGain.connect(oscGain.gain);
+          lfo.start(now);
+          oscGain.gain.setValueAtTime(0.6, now);
+          osc.connect(oscGain);
+          oscGain.connect(timerMusicGain);
+          osc.start(now);
+          timerMusicOscs.push(osc, lfo);
+        });
+
+        // Layer B: High shimmer — adds urgency & air
+        const shimmerOsc = audioCtx.createOscillator();
+        const shimmerFilter = audioCtx.createBiquadFilter();
+        const shimmerGain = audioCtx.createGain();
+        shimmerOsc.type = 'sawtooth';
+        shimmerOsc.frequency.setValueAtTime(880, now); // A5 — tense high note
+        shimmerFilter.type = 'bandpass';
+        shimmerFilter.frequency.setValueAtTime(1200, now);
+        shimmerFilter.Q.setValueAtTime(4.0, now);
+        shimmerGain.gain.setValueAtTime(0.12, now);
+        shimmerOsc.connect(shimmerFilter);
+        shimmerFilter.connect(shimmerGain);
+        shimmerGain.connect(timerMusicGain);
+        shimmerOsc.start(now);
+        timerMusicOscs.push(shimmerOsc);
+      } catch(e) {}
+    }
+
+    function stopTimerTensionMusic(fadeOut) {
+      fadeOut = fadeOut || 0.5;
+      if (timerMusicGain && audioCtx) {
+        try {
+          timerMusicGain.gain.cancelScheduledValues(audioCtx.currentTime);
+          timerMusicGain.gain.setValueAtTime(timerMusicGain.gain.value, audioCtx.currentTime);
+          timerMusicGain.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + fadeOut);
+        } catch(e) {}
+      }
+      setTimeout(function() {
+        timerMusicOscs.forEach(function(osc) {
+          try { osc.stop(); osc.disconnect(); } catch(e) {}
+        });
+        timerMusicOscs = [];
+        timerMusicGain = null;
+      }, (fadeOut * 1000) + 100);
     }
 
     function playCinematicSubBoom(intensity) {
@@ -1820,12 +1893,14 @@
 
         if (elapsed >= (tIntro + tQuestion + tOptions) && !bgStoppedForTimer) {
           bgStoppedForTimer = true;
-          // ⏱ Timer started — fade out background music smoothly (0.8s)
+          const XFADE = 1.2; // crossfade duration in seconds
+
+          // ① Fade OUT background music
           if (bgAudioMode === 'synth' && droneGainNode && audioCtx) {
             try {
               droneGainNode.gain.cancelScheduledValues(audioCtx.currentTime);
               droneGainNode.gain.setValueAtTime(droneGainNode.gain.value, audioCtx.currentTime);
-              droneGainNode.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + 0.8);
+              droneGainNode.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + XFADE);
             } catch(e) {}
             setTimeout(function() {
               activeDroneOscs.forEach(function(osc) {
@@ -1833,12 +1908,11 @@
               });
               activeDroneOscs = [];
               droneGainNode = null;
-            }, 900);
+            }, (XFADE * 1000) + 100);
           } else if (bgAudioMode === 'custom' && bgMusicAudio && !bgMusicAudio.paused) {
-            // Fade out custom MP3 over 0.8 seconds
             const startVol = bgMusicAudio.volume;
-            const steps = 20;
-            const stepTime = 800 / steps;
+            const steps = 24;
+            const stepTime = (XFADE * 1000) / steps;
             let step = 0;
             const fadeInterval = setInterval(function() {
               step++;
@@ -1846,10 +1920,13 @@
               if (step >= steps) {
                 clearInterval(fadeInterval);
                 bgMusicAudio.pause();
-                bgMusicAudio.volume = startVol; // restore for next play
+                bgMusicAudio.volume = startVol;
               }
             }, stepTime);
           }
+
+          // ② Simultaneously fade IN timer tension music
+          startTimerTensionMusic(XFADE);
         }
 
         if (elapsed >= (tIntro + tQuestion + tOptions) && elapsed < (tIntro + tQuestion + tOptions + tCountdown)) {
@@ -1864,6 +1941,7 @@
         if (elapsed >= (tIntro + tQuestion + tOptions + tCountdown) && !revealPlayed) {
           revealPlayed = true;
           stopAtmosphericDrone();
+          stopTimerTensionMusic(0.4);
           if (bgMusicAudio) bgMusicAudio.pause();
           playRevealChime();
         }
@@ -1890,6 +1968,7 @@
       isPlaying = false;
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
       stopAtmosphericDrone();
+      stopTimerTensionMusic(0.2);
       if (bgMusicAudio) bgMusicAudio.pause();
       if (ctaAudio) ctaAudio.pause();
       document.getElementById('playPreviewBtn').style.display = 'inline-flex';

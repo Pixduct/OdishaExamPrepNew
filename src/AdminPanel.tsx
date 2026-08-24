@@ -235,6 +235,56 @@ export const getExamAdminTracker = (exam: any) => {
   };
 };
 
+const ADMIN_TAGLINE_PRESETS: Record<string, { label: string; value: string }[]> = {
+  'topic-wise': [
+    { label: 'Chapter-Wise High-Yield MCQs & Explanations', value: 'Chapter-Wise High-Yield MCQs & Explanations' },
+    { label: 'Concept Mastery & Topic Practice Drill', value: 'Concept Mastery & Topic Practice Drill' },
+    { label: 'Complete Chapter Revision & Formula Drills', value: 'Complete Chapter Revision & Formula Drills' },
+    { label: 'Comprehensive Subject & Topic Test Series', value: 'Comprehensive Subject & Topic Test Series' },
+  ],
+  'exam-focused': [
+    { label: 'Most Expected Questions for Upcoming Exam', value: 'Most Expected Questions for Upcoming Exam' },
+    { label: 'High-Weightage Core Topics Mastery', value: 'High-Weightage Core Topics Mastery' },
+    { label: 'Exam Pattern Mock Drills & Speed Booster', value: 'Exam Pattern Mock Drills & Speed Booster' },
+    { label: 'Target Score Booster & Critical Concepts', value: 'Target Score Booster & Critical Concepts' },
+  ],
+  'revision-sets': [
+    { label: 'Daily Speed Drill & Quick Accuracy Booster', value: 'Daily Speed Drill & Quick Accuracy Booster' },
+    { label: 'Timed Daily Practice & Rapid Revision', value: 'Timed Daily Practice & Rapid Revision' },
+    { label: '15-Min Daily Challenge & Instant Rank', value: '15-Min Daily Challenge & Instant Rank' },
+    { label: 'Daily Warmup Quiz for Exam Readiness', value: 'Daily Warmup Quiz for Exam Readiness' },
+  ],
+  'pyq-collections': [
+    { label: 'Previous Years Solved Questions (PYQ) with Solutions', value: 'Previous Years Solved Questions (PYQ) with Solutions' },
+    { label: '10-Year Trend Analysis & Official PYQ Breakdown', value: '10-Year Trend Analysis & Official PYQ Breakdown' },
+    { label: 'Topic-Wise Past Exam MCQs & Detailed Explanations', value: 'Topic-Wise Past Exam MCQs & Detailed Explanations' },
+    { label: 'Authentic Exam Board Questions & Model Answers', value: 'Authentic Exam Board Questions & Model Answers' },
+  ],
+  'full-length': [
+    { label: 'Full Syllabus Mock Test with All India Rank & Analytics', value: 'Full Syllabus Mock Test with All India Rank & Analytics' },
+    { label: 'Real Exam Pattern Simulation & Score Predictor', value: 'Real Exam Pattern Simulation & Score Predictor' },
+    { label: 'Comprehensive Mock Exam with Detailed Solutions', value: 'Comprehensive Mock Exam with Detailed Solutions' },
+  ],
+  'sectional': [
+    { label: 'Subject-Wise High-Yield Mock Drill & Explanations', value: 'Subject-Wise High-Yield Mock Drill & Explanations' },
+    { label: 'Section-Specific Speed & Accuracy Booster Test', value: 'Section-Specific Speed & Accuracy Booster Test' },
+    { label: 'Targeted Subject Test Series with Instant Rank', value: 'Targeted Subject Test Series with Instant Rank' },
+  ],
+  'pyq': [
+    { label: 'Official Previous Year Question Paper with Solutions', value: 'Official Previous Year Question Paper with Solutions' },
+    { label: 'Authentic Board PYQ Mock Test with Detailed Analysis', value: 'Authentic Board PYQ Mock Test with Detailed Analysis' },
+  ],
+  'daily': [
+    { label: 'Daily Practice Quiz for Speed & Accuracy', value: 'Daily Practice Quiz for Speed & Accuracy' },
+    { label: 'Daily Subject Capsule & Rapid Fire Mock Drill', value: 'Daily Subject Capsule & Rapid Fire Mock Drill' },
+  ],
+  'general': [
+    { label: '500+ High-Yield MCQs with Step-by-Step Solutions', value: '500+ High-Yield MCQs with Step-by-Step Solutions' },
+    { label: 'Complete Syllabus Practice & Speed Drill', value: 'Complete Syllabus Practice & Speed Drill' },
+    { label: 'Topic Concepts & Standard Exam Drills', value: 'Topic Concepts & Standard Exam Drills' },
+  ]
+};
+
 const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () => void }) => {
   const [activeTab, setActiveTab] = useState<'questions' | 'series' | 'tests' | 'exams' | 'banks' | 'practice' | 'users' | 'updates' | 'settings' | 'subscribers' | 'notifications'>(() => {
     if (typeof window !== 'undefined') {
@@ -494,6 +544,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const [bulkJsonInput, setBulkJsonInput] = useState('');
   const [bulkGlobalExamId, setBulkGlobalExamId] = useState('');
   const [bulkGlobalCategory, setBulkGlobalCategory] = useState('topic-wise');
+  const [bulkGlobalTagline, setBulkGlobalTagline] = useState('');
   const [bulkGlobalTargetMode, setBulkGlobalTargetMode] = useState<'bank' | 'practice' | 'both'>('practice');
   const [bulkGlobalIsPremium, setBulkGlobalIsPremium] = useState(false);
   const [bulkGlobalPrice, setBulkGlobalPrice] = useState<number>(499);
@@ -717,6 +768,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     return {
       examId: defExam || '',
       category: defCat || (tab === 'tests' ? 'full-length' : 'topic-wise'),
+      tagline: sticky.tagline || '',
       target_mode: defMode || (tab === 'practice' ? 'practice' : 'bank'),
       isPremium: sticky.isPremium ?? false,
       price: sticky.price ?? 499,
@@ -748,6 +800,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
 
     setBulkGlobalExamId(defExam);
     setBulkGlobalCategory(defCat);
+    setBulkGlobalTagline('');
     setBulkGlobalTargetMode(defMode);
     setBulkGlobalIsPremium(false);
     setBulkGlobalPrice(499);
@@ -766,6 +819,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       saveStickyBulkData(activeTab, {
         examId: bulkGlobalExamId,
         category: bulkGlobalCategory,
+        tagline: bulkGlobalTagline,
         target_mode: bulkGlobalTargetMode,
         isPremium: bulkGlobalIsPremium,
         price: bulkGlobalPrice,
@@ -782,6 +836,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     activeTab,
     bulkGlobalExamId,
     bulkGlobalCategory,
+    bulkGlobalTagline,
     bulkGlobalTargetMode,
     bulkGlobalIsPremium,
     bulkGlobalPrice,
@@ -1752,16 +1807,17 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       const itemIsPremium = item.isPremium ?? bulkGlobalIsPremium;
       const itemPrice = item.price !== undefined ? Number(item.price) : (itemIsPremium ? (Number(bulkGlobalPrice) || 499) : 0);
       const itemOrigPrice = item.originalPrice !== undefined ? Number(item.originalPrice) : (itemIsPremium ? (Number(bulkGlobalOriginalPrice) || (itemPrice * 2)) : 0);
+      const itemTagline = item.tagline || bulkGlobalTagline || '';
 
       try {
         if (activeTab === 'banks' || activeTab === 'practice') {
           const metaTaglineObj = {
-            text: item.tagline || '',
+            text: itemTagline,
             price: itemPrice,
             originalPrice: itemOrigPrice,
             subject: item.subject || ''
           };
-          const hasTaglineMeta = itemIsPremium || item.subject || item.tagline || item.price !== undefined;
+          const hasTaglineMeta = itemIsPremium || item.subject || itemTagline || item.price !== undefined;
           const payload = {
             examId: bulkGlobalExamId,
             type: bulkGlobalCategory,
@@ -1782,6 +1838,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
             examId: bulkGlobalExamId,
             category: bulkGlobalCategory,
             subject: bulkGlobalCategory === 'sectional' ? (item.subject || '') : null,
+            tagline: itemTagline || undefined,
             isPremium: itemIsPremium,
             price: itemPrice,
             originalPrice: itemOrigPrice,
@@ -4633,6 +4690,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                     const sticky = getStickyBulkData(activeTab);
                     setBulkGlobalExamId(sticky.examId);
                     setBulkGlobalCategory(sticky.category);
+                    setBulkGlobalTagline(sticky.tagline || '');
                     setBulkGlobalTargetMode(sticky.target_mode);
                     setBulkGlobalIsPremium(sticky.isPremium);
                     setBulkGlobalPrice(sticky.price);
@@ -8080,6 +8138,81 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                       ))}
                     </div>
                   </div>
+
+                  {/* Topic / Subject Subtitle (Tagline) — dynamically populated based on active category */}
+                  {(() => {
+                    const categoryPresets = ADMIN_TAGLINE_PRESETS[bulkGlobalCategory] || [];
+                    const generalPresets = ADMIN_TAGLINE_PRESETS['general'] || [];
+                    const allPresets = [...categoryPresets, ...generalPresets];
+                    const presetValues = allPresets.map(p => p.value);
+                    const isPreset = presetValues.includes(bulkGlobalTagline);
+                    const selectedSelectValue = isPreset ? bulkGlobalTagline : (bulkGlobalTagline ? '__custom__' : '');
+
+                    return (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-black text-slate-600 uppercase tracking-wider">
+                            Topic / Subject Subtitle (Tagline)
+                          </label>
+                          {bulkGlobalTagline && (
+                            <button
+                              type="button"
+                              onClick={() => setBulkGlobalTagline('')}
+                              className="text-[11px] font-bold text-slate-400 hover:text-red-500 transition-colors"
+                            >
+                              Clear
+                            </button>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <div className="relative">
+                            <select
+                              value={selectedSelectValue}
+                              onChange={e => {
+                                const val = e.target.value;
+                                if (val === '__custom__') {
+                                  if (isPreset) {
+                                    setBulkGlobalTagline('');
+                                  }
+                                } else {
+                                  setBulkGlobalTagline(val);
+                                }
+                              }}
+                              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-brand-400 focus:outline-none font-bold text-sm bg-white appearance-none cursor-pointer pr-10 text-slate-700"
+                            >
+                              <option value="">-- Choose Pre-made CTA Subtitle or Custom --</option>
+                              {categoryPresets.length > 0 && (
+                                <optgroup label="✨ Category-Recommended Taglines">
+                                  {categoryPresets.map(p => (
+                                    <option key={p.value} value={p.value}>{p.label}</option>
+                                  ))}
+                                </optgroup>
+                              )}
+                              <optgroup label="🌟 General / Popular CTA Taglines">
+                                {generalPresets.map(p => (
+                                  <option key={p.value} value={p.value}>{p.label}</option>
+                                ))}
+                              </optgroup>
+                              <option value="__custom__">✏️ + Enter Custom Subtitle / Topic List...</option>
+                            </select>
+                            <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          </div>
+
+                          {(!isPreset || selectedSelectValue === '__custom__') && (
+                            <input
+                              type="text"
+                              value={bulkGlobalTagline}
+                              onChange={e => setBulkGlobalTagline(e.target.value)}
+                              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-brand-400 focus:outline-none text-sm font-bold bg-white text-slate-800"
+                              placeholder={activeTab === 'tests'
+                                ? "e.g. 10 Full-Length Mocks with Detailed Analysis & All India Rank"
+                                : "e.g. Fundamental Rights, DPSP, Judiciary & Amendments (500 High-Yield MCQs)"}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {/* Duration / Marks / Negative — tests only */}
                   {activeTab === 'tests' && (

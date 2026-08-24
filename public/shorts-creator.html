@@ -836,6 +836,132 @@
     let showSafeZoneGuide = false;
     let animationFrameId = null;
 
+    // 🔢 Multi-Question State (1 to 3 Questions)
+    let questionsCount = 1;
+    let activeQuestionIndex = 0;
+    let questionsData = [
+      {
+        question: "Who was the first Chief Minister of Odisha after Indian Independence?",
+        options: {
+          A: "Dr. Harekrushna Mahatab",
+          B: "Nabakrushna Choudhury",
+          C: "Biju Patnaik",
+          D: "Janaki Ballabh Patnaik"
+        },
+        correct: "A",
+        countdownSecs: 5
+      },
+      {
+        question: "Which river is popularly known as the 'Sorrow of Odisha'?",
+        options: {
+          A: "Baitarani River",
+          B: "Mahanadi River",
+          C: "Brahmani River",
+          D: "Subarnarekha River"
+        },
+        correct: "B",
+        countdownSecs: 5
+      },
+      {
+        question: "In which year was the separate state of Odisha formed under British rule?",
+        options: {
+          A: "1 April 1936",
+          B: "15 August 1947",
+          C: "26 January 1950",
+          D: "1 April 1912"
+        },
+        correct: "A",
+        countdownSecs: 5
+      }
+    ];
+
+    function saveCurrentQuestionForm() {
+      const q = questionsData[activeQuestionIndex];
+      if (!q) return;
+      const qEl = document.getElementById('questionText');
+      if (qEl) q.question = qEl.value;
+      const optA = document.getElementById('optionA');
+      if (optA) q.options.A = optA.value;
+      const optB = document.getElementById('optionB');
+      if (optB) q.options.B = optB.value;
+      const optC = document.getElementById('optionC');
+      if (optC) q.options.C = optC.value;
+      const optD = document.getElementById('optionD');
+      if (optD) q.options.D = optD.value;
+      const correctChecked = document.querySelector('input[name="correctAnswer"]:checked');
+      if (correctChecked) q.correct = correctChecked.value;
+      const cdChecked = document.querySelector('input[name="countdownDuration"]:checked');
+      if (cdChecked) q.countdownSecs = parseInt(cdChecked.value, 10);
+    }
+
+    function loadQuestionToForm(index) {
+      activeQuestionIndex = index;
+      const q = questionsData[index];
+      if (!q) return;
+
+      const qEl = document.getElementById('questionText');
+      if (qEl) qEl.value = q.question;
+      const optA = document.getElementById('optionA');
+      if (optA) optA.value = q.options.A;
+      const optB = document.getElementById('optionB');
+      if (optB) optB.value = q.options.B;
+      const optC = document.getElementById('optionC');
+      if (optC) optC.value = q.options.C;
+      const optD = document.getElementById('optionD');
+      if (optD) optD.value = q.options.D;
+      
+      const correctRadio = document.querySelector(`input[name="correctAnswer"][value="${q.correct}"]`);
+      if (correctRadio) correctRadio.checked = true;
+
+      const cdRadio = document.querySelector(`input[name="countdownDuration"][value="${q.countdownSecs}"]`);
+      if (cdRadio) cdRadio.checked = true;
+
+      for (let i = 0; i < 3; i++) {
+        const tabBtn = document.getElementById(`qTab${i}`);
+        if (tabBtn) {
+          if (i === index) {
+            tabBtn.classList.add('active');
+          } else {
+            tabBtn.classList.remove('active');
+          }
+        }
+      }
+
+      if (currentMode === 'shorts') {
+        drawIdleFrame();
+      } else {
+        drawCoverCanvas();
+      }
+    }
+
+    function handleQuestionsCountChange(count) {
+      saveCurrentQuestionForm();
+      questionsCount = count;
+      
+      const badge = document.getElementById('qCountDisplayBadge');
+      if (badge) {
+        badge.innerText = count === 1 ? '1 Question Mode' : (count === 2 ? '2 Questions (Duo)' : '3 Questions (Rapid Fire 🔥)');
+      }
+
+      for (let i = 0; i < 3; i++) {
+        const tabBtn = document.getElementById(`qTab${i}`);
+        if (tabBtn) {
+          tabBtn.style.display = i < count ? 'flex' : 'none';
+        }
+      }
+
+      if (activeQuestionIndex >= count) {
+        switchQuestionTab(0);
+      } else {
+        loadQuestionToForm(activeQuestionIndex);
+      }
+    }
+
+    function switchQuestionTab(index) {
+      saveCurrentQuestionForm();
+      loadQuestionToForm(index);
+    }
+
     let logoImg = new Image();
     logoImg.src = '/favicon.svg';
     let logoObjectUrl = null;
@@ -1218,43 +1344,6 @@
 
     window.addEventListener('beforeunload', function() {
       if (logoObjectUrl) URL.revokeObjectURL(logoObjectUrl);
-      if (ctaAudioObjectUrl) URL.revokeObjectURL(ctaAudioObjectUrl);
-      if (bgMusicObjectUrl) URL.revokeObjectURL(bgMusicObjectUrl);
-    });
-
-    function switchTab(mode) {
-      currentMode = mode;
-      document.getElementById('tabShortsBtn').classList.toggle('active', mode === 'shorts');
-      document.getElementById('tabCoverBtn').classList.toggle('active', mode === 'cover');
-
-      if (mode === 'shorts') {
-        document.getElementById('coverFieldsWrapper').style.display = 'none';
-        document.getElementById('shortsControlsBar').style.display = 'flex';
-        document.getElementById('coverControlsBar').style.display = 'none';
-        drawIdleFrame();
-      } else {
-        stopSequence();
-        document.getElementById('coverFieldsWrapper').style.display = 'block';
-        document.getElementById('shortsControlsBar').style.display = 'none';
-        document.getElementById('coverControlsBar').style.display = 'flex';
-        drawCoverCanvas();
-      }
-    }
-
-    function handleFormUpdate() {
-      if (currentMode === 'shorts') {
-        drawIdleFrame();
-      } else {
-        drawCoverCanvas();
-      }
-    }
-
-    function getWrappedLines(ctx, text, maxWidth) {
-      const words = text.split(' ');
-      let line = '';
-      const lines = [];
-
-      for (let n = 0; n < words.length; n++) {
         const testLine = line + words[n] + ' ';
         const metrics = ctx.measureText(testLine);
         if (metrics.width > maxWidth && n > 0) {
@@ -2704,6 +2793,7 @@
     }
 
     window.onload = function() {
+      loadQuestionToForm(0);
       drawIdleFrame();
     };
   </script>

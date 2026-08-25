@@ -196,11 +196,11 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
   }, [scheduleResume, onMouseMove]);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button, a')) return;
     isDragging.current = true;
     dragStartX.current = e.clientX;
     dragStartOffset.current = offsetRef.current;
     pauseAuto();
-    e.preventDefault();
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup',   onMouseUp);
   }, [pauseAuto, onMouseMove, onMouseUp]);
@@ -245,13 +245,14 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
   }, [applyOffset, scheduleResume, onTouchEnd]);
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
+    if ((e.target as HTMLElement).closest('button, a')) return;
     isDragging.current = true;
     dragStartX.current = e.touches[0].clientX;
     dragStartY.current = e.touches[0].clientY;
     dragStartOffset.current = offsetRef.current;
     touchDirection.current = null;
     pauseAuto();
-    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
     window.addEventListener('touchend',  onTouchEnd);
   }, [pauseAuto, onTouchMove, onTouchEnd]);
 
@@ -330,10 +331,11 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
 
       {/* ── DRAGGABLE CAROUSEL TRACK ──────────────────────────────────── */}
       <div
-        className="relative overflow-hidden cursor-grab active:cursor-grabbing py-2"
+        className="relative overflow-hidden cursor-grab active:cursor-grabbing py-2 touch-pan-y"
         style={{
           WebkitMaskImage: 'linear-gradient(to right, transparent 0px, black 36px, black calc(100% - 36px), transparent 100%)',
-          maskImage: 'linear-gradient(to right, transparent 0px, black 36px, black calc(100% - 36px), transparent 100%)'
+          maskImage: 'linear-gradient(to right, transparent 0px, black 36px, black calc(100% - 36px), transparent 100%)',
+          touchAction: 'pan-y'
         }}
         onMouseDown={onMouseDown}
         onTouchStart={onTouchStart}
@@ -342,8 +344,8 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
         {/* Scrolling track */}
         <div
           ref={trackRef}
-          className={cn("flex will-change-transform", isMobile ? "gap-3 px-4 pb-1" : "gap-6 px-10 py-2")}
-          style={{ width: `${totalWidth}px` }}
+          className={cn("flex will-change-transform touch-pan-y", isMobile ? "gap-3 px-4 pb-1" : "gap-6 px-10 py-2")}
+          style={{ width: `${totalWidth}px`, touchAction: 'pan-y' }}
         >
           {items.map((video, idx) => {
             const catStyle = categoryColours[video.category] ?? defaultCatStyle;

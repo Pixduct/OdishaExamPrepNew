@@ -1,6 +1,13 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] 100K YouTube Shorts, Pro Cover Creator & Multi-MCQ Bulk Studio Suite (`public/shorts-creator.html`):
+  1. **1-to-3 Multi-Question Sequential Video Engine**: Built interactive radio pill selector supporting 1 Question (Quick), 2 Questions (Duo), or 3 Questions (Rapid Challenge) with seamless frame-1 start, audio loops, countdown timers, sub-boom impacts, and reveal chimes.
+  2. **6-Template Visual Theme Engine**: 6 professional themes (*Obsidian Cobalt, Royal Gold, Crimson Danger, Cyber Neon Mint, Galactic Purple, Slate Academy*) with dynamic canvas background, borders, glows, and text palettes.
+  3. **Multi-MCQ Bulk Studio**: CSV file dropzone with 1-click sample template download + copy-paste parser (ChatGPT & plain text formats) with batch queue table, interactive live video player modal (`▶ Play`), and 1-click 100k cover generator (`🖼️ Cover`).
+  4. **Smart Cover Auto-Variation Engine**: Added 3 variation modes (Smart Auto-Variation, Fixed, Custom Pool) cycling through 6 universal non-exam-specific hooks, dynamic action CTAs, and automated theme palette rotation.
+  5. **Dynamic Auto-Scaling Text Protection (`drawAutoScaledText`)**: Built canvas text measuring loop that automatically scales font sizes down to prevent any text overflowing out of buttons, pills, badges, and exam authority banners.
+  6. **Client-Side Hardware Video Muxing & ZIP Batch Pipeline**: 100% in-browser offline hardware video encoding via WebAudio API (`OfflineAudioContext`), `VideoEncoder`, `Mp4Muxer`, and `JSZip` producing instant `.zip` downloads containing all `.mp4` videos and `.png` covers.
 - [x] Auto-Interval Rolling Unlock Scheduler for Bulk Importer (`src/AdminPanel.tsx`):
   1. **Staggered Per-Item Unlock Engine**: Added `bulkAutoScheduleEnabled`, `bulkAutoScheduleIntervalDays`, and `bulkAutoScheduleIntervalHours` state controls supporting custom day/hour intervals with zero-collision sequential sort order.
   2. **Dedicated Schedule Card UI**: Implemented self-contained schedule settings container with active status badge (`⚡ Auto-Interval ON`), emerald toggle, dynamic start datetime picker, and separate Days + Hours interval inputs.

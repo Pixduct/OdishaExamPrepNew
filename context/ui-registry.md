@@ -3288,3 +3288,30 @@ Sub-component of `AdminBulkImportModal`. Appears in the Schedule Settings sectio
 - **Helper hoisted above loop**: `computeScheduleForItem(item, index)` is declared once above the `for` loop with `totalIntervalMs` pre-computed. Never re-declare a function inside a loop.
 - **Sticky persistence**: `bulkAutoScheduleEnabled`, `bulkAutoScheduleIntervalDays`, `bulkAutoScheduleIntervalHours` persist in sessionStorage and restore on modal reopen.
 - **All tabs**: Works for banks, practice, and tests tabs equally — no category restriction.
+
+---
+
+### 102. `YouTubeShortsAndBulkStudioSuite`
+
+File: [`public/shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/shorts-creator.html)
+Last updated: August 25, 2026
+
+High-conversion 100K YouTube Shorts, Cover Thumbnail, and Multi-MCQ Bulk Studio Suite.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Workspace Background** | Radial Obsidian: `radial-gradient(circle at 50% 0%, #0D1527 0%, #060911 100%)` |
+| **Card Containers** | Dark Glass: `rgba(15, 23, 42, 0.94)`, `border: 1px solid rgba(255, 255, 255, 0.1)`, `border-radius: 20px` |
+| **Navigation Tabs** | Glass Pill: `padding: 0.5rem 1.1rem`, active: `bg-brand-600` / `gradient`, badge: `pro-badge` |
+| **Pills & Selectors** | Radio Pill: `border-radius: 10px`, active: `bg-emerald-500` / `#042F2E`, `box-shadow: 0 0 14px rgba(16,185,129,0.4)` |
+| **Typography** | Headlines: `Outfit` (`900` / `800`), Body/Questions: `Plus Jakarta Sans` (`700` / `800`) |
+| **Action Buttons** | Primary: `bg-gradient(#2563EB, #1D4ED8)`, Emerald: `bg-gradient(#10B981, #059669)`, Gold: `bg-gradient(#F59E0B, #D97706)` |
+| **Batch Queue Table** | Glass Wrap: `border: 1px solid rgba(255, 255, 255, 0.08)`, rows: `border-bottom: rgba(255,255,255,0.06)` |
+| **Modal Overlays** | Ultra-Dark Blur: `rgba(0,0,0,0.88)`, `backdrop-filter: blur(12px)`, `border-radius: 20px` |
+
+**Pattern notes:**
+- **In-Memory Zero-Server Processing**: 100% client-side hardware-accelerated video (`VideoEncoder` + `Mp4Muxer`), audio (`OfflineAudioContext`), and ZIP packaging (`JSZip`).
+- **Dynamic Auto-Scaling Engine**: `drawAutoScaledText()` dynamically steps down font sizes on canvas buttons, pills, and badges to ensure 0 text overflow or boundary clipping.
+- **Smart Thumbnail Variation**: Automatically alternates across 6 universal high-CTR viral hooks, high-engagement action CTAs, and 6 visual themes (*Obsidian Cobalt, Royal Gold, Crimson Danger, Cyber Mint, Galactic Purple, Slate Academy*).
+- **Multi-Question Sequences**: Supports 1, 2, or 3 questions per Short with dynamic tension drone crossfade, sub-boom impacts, and ticking timer synchronization.
+

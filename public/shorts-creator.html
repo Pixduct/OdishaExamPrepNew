@@ -2738,46 +2738,49 @@
       ctx.textBaseline = 'alphabetic';
 
       // 3. Collision-Free Question Text Zone (Dedicated area strictly below badge)
-      const textTopY = badgeY + badgeH + 14; // ~403px
-      const textBottomY = cardY + cardH - 18; // ~652px
-      const textAvailableH = textBottomY - textTopY; // ~249px
-      const textCenterY = textTopY + (textAvailableH / 2); // ~527px
-      const maxWidth = cardW - 80; // 880px
-      
+      const textTopY = badgeY + badgeH + 14; // ~403px — strictly below badge
+      const textBottomY = cardY + cardH - 16; // ~654px — card bottom padding
+      const textAvailableH = textBottomY - textTopY; // ~251px available
+      const textCenterY = textTopY + (textAvailableH / 2);
+      const maxWidth = cardW - 80; // 880px horizontal text zone
+
+      // Adaptive font sizing: scale DOWN until ALL lines fit in textAvailableH
+      // No hard line-count limit — only the height budget matters
       let optimalSize = 44;
       let optimalLines = [];
-      let optimalLineHeight = 56;
+      let optimalLineHeight = 0;
 
-      for (let size = 44; size >= 24; size -= 2) {
+      for (let size = 44; size >= 18; size -= 2) {
         ctx.font = '700 ' + size + 'px "Plus Jakarta Sans", sans-serif';
         const lines = getWrappedLines(ctx, question, maxWidth);
-        const lHeight = size * 1.30;
+        const lHeight = size * 1.28;
         const totalH = lines.length * lHeight;
 
-        if (totalH <= textAvailableH && lines.length <= 4) {
-          optimalSize = size;
-          optimalLines = lines;
-          optimalLineHeight = lHeight;
-          break;
-        }
         optimalSize = size;
         optimalLines = lines;
         optimalLineHeight = lHeight;
+
+        if (totalH <= textAvailableH) break; // Found a size that fits — stop
       }
+
+      // Safety clip: if even 18px overflows, only show as many lines as fit
+      const maxLinesVisible = Math.floor(textAvailableH / optimalLineHeight);
+      const visibleLines = optimalLines.slice(0, maxLinesVisible);
 
       ctx.fillStyle = '#FFFFFF';
       ctx.font = '700 ' + optimalSize + 'px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'center';
 
-      const totalBlockHeight = (optimalLines.length - 1) * optimalLineHeight;
-      const startY = textCenterY - (totalBlockHeight / 2) + (optimalSize * 0.35);
+      const totalBlockHeight = (visibleLines.length - 1) * optimalLineHeight;
+      const startY = textCenterY - (totalBlockHeight / 2) + (optimalSize * 0.36);
 
-      for (let i = 0; i < optimalLines.length; i++) {
-        ctx.fillText(optimalLines[i], 540, startY + (i * optimalLineHeight));
+      for (let i = 0; i < visibleLines.length; i++) {
+        ctx.fillText(visibleLines[i], 540, startY + (i * optimalLineHeight));
       }
 
       ctx.restore();
     }
+
 
     function drawDynamicOptionsCards(options, revealed, correctKey, alpha, tpl) {
       tpl = tpl || getActiveTemplate();

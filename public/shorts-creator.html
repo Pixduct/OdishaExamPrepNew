@@ -2221,6 +2221,20 @@
       }
     }
 
+
+    // Helper to draw text that dynamically shrinks to fit perfectly within maxWidth
+    function drawAutoScaledText(ctx, text, x, y, maxFont, minFont, fontFace, maxWidth) {
+      let size = maxFont;
+      ctx.font = '900 ' + size + 'px ' + fontFace;
+      let width = ctx.measureText(text).width;
+      while (width > maxWidth && size > minFont) {
+        size -= 2;
+        ctx.font = '900 ' + size + 'px ' + fontFace;
+        width = ctx.measureText(text).width;
+      }
+      ctx.fillText(text, x, y);
+    }
+
     function getWrappedLines(ctx, text, maxWidth) {
       const words = (text || '').split(' ');
       let line = '';
@@ -3003,9 +3017,10 @@
       roundRect(ctx, 110, 405, 860, 60, 18, true, true);
 
       ctx.fillStyle = tpl.qBadgeText;
-      ctx.font = '800 26px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(questionBadge.toUpperCase(), 540, 444);
+      ctx.textBaseline = 'middle';
+      drawAutoScaledText(ctx, questionBadge.toUpperCase(), 540, 435, 26, 18, '"Plus Jakarta Sans", sans-serif', 800);
+      ctx.textBaseline = 'alphabetic';
 
       let coverQSize = 52;
       let coverQLines = [];
@@ -3045,9 +3060,10 @@
       roundRect(ctx, 140, 1045, 800, 90, 24, true, true);
 
       ctx.fillStyle = tpl.coverChallengeText;
-      ctx.font = '900 36px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(challengeText.toUpperCase(), 540, 1102);
+      ctx.textBaseline = 'middle';
+      drawAutoScaledText(ctx, challengeText.toUpperCase(), 540, 1090, 36, 22, '"Outfit", sans-serif', 740);
+      ctx.textBaseline = 'alphabetic';
       ctx.restore();
 
       // 5. MASSIVE 3D ACTION CTA BUTTON (Y: 1160 to 1320 - Height 160px)
@@ -3064,9 +3080,10 @@
       ctx.restore();
 
       ctx.fillStyle = tpl.name.includes('Gold') ? '#000000' : '#FFFFFF';
-      ctx.font = '900 44px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(actionBtnText, 540, 1256);
+      ctx.textBaseline = 'middle';
+      drawAutoScaledText(ctx, actionBtnText, 540, 1240, 44, 24, '"Outfit", sans-serif', 850);
+      ctx.textBaseline = 'alphabetic';
 
       // 6. PRO BRANDING FOOTER (Y: 1350 to 1470 - Height 120px)
       ctx.fillStyle = tpl.headerCardBg;
@@ -4366,9 +4383,10 @@
       ctx.lineWidth = 2;
       roundRect(ctx, 110, 405, 860, 60, 18, true, true);
       ctx.fillStyle = tpl.qBadgeText;
-      ctx.font = '800 26px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(questionBadge.toUpperCase(), 540, 444);
+      ctx.textBaseline = 'middle';
+      drawAutoScaledText(ctx, questionBadge.toUpperCase(), 540, 435, 26, 18, '"Plus Jakarta Sans", sans-serif', 800);
+      ctx.textBaseline = 'alphabetic';
 
       let coverQSize = 52;
       let coverQLines = [];
@@ -4404,9 +4422,10 @@
       ctx.lineWidth = 3.5;
       roundRect(ctx, 140, 1045, 800, 90, 24, true, true);
       ctx.fillStyle = tpl.coverChallengeText;
-      ctx.font = '900 36px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(challengeText.toUpperCase(), 540, 1102);
+      ctx.textBaseline = 'middle';
+      drawAutoScaledText(ctx, challengeText.toUpperCase(), 540, 1090, 36, 22, '"Outfit", sans-serif', 740);
+      ctx.textBaseline = 'alphabetic';
       ctx.restore();
 
       // CTA Button
@@ -4422,9 +4441,10 @@
       ctx.restore();
 
       ctx.fillStyle = tpl.name.includes('Gold') ? '#000000' : '#FFFFFF';
-      ctx.font = '900 44px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(actionBtnText, 540, 1256);
+      ctx.textBaseline = 'middle';
+      drawAutoScaledText(ctx, actionBtnText, 540, 1240, 44, 24, '"Outfit", sans-serif', 850);
+      ctx.textBaseline = 'alphabetic';
 
       // Footer
       ctx.fillStyle = tpl.headerCardBg;
@@ -4832,9 +4852,10 @@
       ctx.lineWidth = 2;
       roundRect(ctx, 110, 405, 860, 60, 18, true, true);
       ctx.fillStyle = tpl.qBadgeText;
-      ctx.font = '800 26px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(badgeText.toUpperCase(), 540, 444);
+      ctx.textBaseline = 'middle';
+      drawAutoScaledText(ctx, badgeText.toUpperCase(), 540, 435, 26, 18, '"Plus Jakarta Sans", sans-serif', 800);
+      ctx.textBaseline = 'alphabetic';
 
       let coverQSize = 52;
       let coverQLines = [];
@@ -4870,9 +4891,10 @@
       ctx.lineWidth = 3.5;
       roundRect(ctx, 140, 1045, 800, 90, 24, true, true);
       ctx.fillStyle = tpl.coverChallengeText;
-      ctx.font = '900 36px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(chalText.toUpperCase(), 540, 1102);
+      ctx.textBaseline = 'middle';
+      drawAutoScaledText(ctx, chalText.toUpperCase(), 540, 1090, 36, 22, '"Outfit", sans-serif', 740);
+      ctx.textBaseline = 'alphabetic';
       ctx.restore();
 
       // CTA Button
@@ -4888,9 +4910,10 @@
       ctx.restore();
 
       ctx.fillStyle = tpl.name.includes('Gold') ? '#000000' : '#FFFFFF';
-      ctx.font = '900 44px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(actionText, 540, 1256);
+      ctx.textBaseline = 'middle';
+      drawAutoScaledText(ctx, actionText, 540, 1240, 44, 24, '"Outfit", sans-serif', 850);
+      ctx.textBaseline = 'alphabetic';
 
       // Footer
       ctx.fillStyle = tpl.headerCardBg;

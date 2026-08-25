@@ -2707,34 +2707,54 @@
       const cardW = 960;
       const cardH = 345;
 
+      // 1. Question Card Container with soft drop shadow
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+      ctx.shadowBlur = 24;
+      ctx.shadowOffsetY = 10;
       ctx.fillStyle = tpl.qCardBg;
       ctx.strokeStyle = tpl.qCardBorder;
       ctx.lineWidth = 3.5;
       roundRect(ctx, cardX, cardY, cardW, cardH, 28, true, true);
+      ctx.restore();
 
-      const badgeText = totalQ > 1 ? '❓ QUESTION ' + qNum + '/' + totalQ : '❓ QUESTION';
-      const badgeW = totalQ > 1 ? 230 : 190;
+      // 2. Centered Question Counter Badge Header (Zero Collision Zone)
+      const badgeText = totalQ > 1 ? '❓ QUESTION ' + qNum + ' OF ' + totalQ : '❓ QUESTION';
+      const badgeW = totalQ > 1 ? 280 : 200;
+      const badgeX = 540 - (badgeW / 2);
+      const badgeY = cardY + 18;
+      const badgeH = 46;
+
       ctx.fillStyle = tpl.qBadgeBg;
-      roundRect(ctx, 100, 350, badgeW, 44, 14, true, false);
+      ctx.strokeStyle = tpl.qCardBorder;
+      ctx.lineWidth = 1.5;
+      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 14, true, true);
+
       ctx.fillStyle = tpl.qBadgeText;
       ctx.font = '800 22px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(badgeText, 100 + (badgeW / 2), 380);
+      ctx.textBaseline = 'middle';
+      ctx.fillText(badgeText.toUpperCase(), 540, badgeY + (badgeH / 2));
+      ctx.textBaseline = 'alphabetic';
 
-      const maxWidth = cardW - 100;
-      const maxAvailableHeight = cardH - 95;
+      // 3. Collision-Free Question Text Zone (Dedicated area strictly below badge)
+      const textTopY = badgeY + badgeH + 14; // ~403px
+      const textBottomY = cardY + cardH - 18; // ~652px
+      const textAvailableH = textBottomY - textTopY; // ~249px
+      const textCenterY = textTopY + (textAvailableH / 2); // ~527px
+      const maxWidth = cardW - 80; // 880px
       
       let optimalSize = 44;
       let optimalLines = [];
       let optimalLineHeight = 56;
 
-      for (let size = 46; size >= 28; size -= 2) {
+      for (let size = 44; size >= 24; size -= 2) {
         ctx.font = '700 ' + size + 'px "Plus Jakarta Sans", sans-serif';
         const lines = getWrappedLines(ctx, question, maxWidth);
-        const lHeight = size * 1.34;
+        const lHeight = size * 1.30;
         const totalH = lines.length * lHeight;
 
-        if (totalH <= maxAvailableHeight && lines.length <= 4) {
+        if (totalH <= textAvailableH && lines.length <= 4) {
           optimalSize = size;
           optimalLines = lines;
           optimalLineHeight = lHeight;
@@ -2750,8 +2770,7 @@
       ctx.textAlign = 'center';
 
       const totalBlockHeight = (optimalLines.length - 1) * optimalLineHeight;
-      const centerY = (cardY + 55) + (maxAvailableHeight / 2);
-      const startY = centerY - (totalBlockHeight / 2);
+      const startY = textCenterY - (totalBlockHeight / 2) + (optimalSize * 0.35);
 
       for (let i = 0; i < optimalLines.length; i++) {
         ctx.fillText(optimalLines[i], 540, startY + (i * optimalLineHeight));

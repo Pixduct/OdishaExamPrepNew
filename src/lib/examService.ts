@@ -835,13 +835,59 @@ export const examService = {
 
     if (banks && banks.length > 0) {
       try {
-        const queryTopics = banks.flatMap(b => [b.title, b.id]).filter(Boolean);
-        const countMap = await fetchTopicCounts(queryTopics);
+        const examIds = Array.from(new Set(banks.map(b => b.examId).filter(Boolean)));
+        const topicCounts: Record<string, number> = {};
+        const pageSize = 1000;
+
+        for (let i = 0; i < examIds.length; i += 10) {
+          const examChunk = examIds.slice(i, i + 10);
+          let page = 0;
+          let keepFetching = true;
+
+          while (keepFetching) {
+            const { data: qData, error: qErr } = await supabase
+              .from('questions')
+              .select('topic')
+              .in('examId', examChunk)
+              .range(page * pageSize, (page + 1) * pageSize - 1);
+
+            if (qErr || !qData || qData.length === 0) {
+              keepFetching = false;
+            } else {
+              qData.forEach(q => {
+                if (q.topic) {
+                  const raw = q.topic;
+                  topicCounts[raw] = (topicCounts[raw] || 0) + 1;
+                  const clean = raw.toLowerCase().replace(/(\s*-\s*practice session)+$/gi, '').trim();
+                  topicCounts[clean] = (topicCounts[clean] || 0) + 1;
+                }
+              });
+              if (qData.length < pageSize) {
+                keepFetching = false;
+              } else {
+                page++;
+              }
+            }
+          }
+        }
 
         banks.forEach(b => {
-          let actualCount = countMap[b.title] || (b.id ? countMap[b.id] : 0) || 0;
+          const rawTitle = b.title || '';
+          const cleanTitle = rawTitle.toLowerCase().replace(/(\s*-\s*practice session)+$/gi, '').trim();
 
-          // Also inspect embedded questionsData inside pdfUrl
+          let actualCount = topicCounts[rawTitle] || topicCounts[cleanTitle] || (b.id ? topicCounts[b.id] : 0) || 0;
+
+          // Fuzzy prefix/suffix matching
+          if (actualCount === 0 && cleanTitle) {
+            for (const [top, cnt] of Object.entries(topicCounts)) {
+              if (top && (top.startsWith(cleanTitle) || cleanTitle.startsWith(top))) {
+                actualCount = cnt;
+                break;
+              }
+            }
+          }
+
+          // Embedded questionsData in pdfUrl
           if (actualCount === 0 && b.pdfUrl && typeof b.pdfUrl === 'string' && b.pdfUrl.startsWith('{')) {
             try {
               const parsed = JSON.parse(b.pdfUrl);
@@ -854,11 +900,8 @@ export const examService = {
           }
 
           b.practiceQuestionCount = actualCount;
-          // When actual uploaded questions exist, reflect the true count
           if (actualCount > 0) {
             b.questionCount = actualCount;
-          } else if (!b.questionCount) {
-            b.questionCount = 0;
           }
         });
       } catch (err) {

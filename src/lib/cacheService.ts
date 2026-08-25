@@ -3,12 +3,6 @@
  * 
  * Caches high-frequency read queries (e.g. Current Affairs list, Exam catalog, Question Banks)
  * in browser sessionStorage with a configurable TTL (default 5 minutes).
- * 
- * Guarantees:
- * - 0 impact on UI or component behavior
- * - Automatic cache expiration after TTL
- * - Instant clearing when admin mutations occur
- * - Safe fallback if sessionStorage is unavailable or full
  */
 
 interface CacheEntry<T> {
@@ -17,6 +11,22 @@ interface CacheEntry<T> {
 }
 
 const DEFAULT_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const CACHE_VERSION = 'v2_true_counts_2026';
+
+// Auto-invalidate stale session storage on version upgrade
+try {
+  if (typeof sessionStorage !== 'undefined') {
+    const currentVer = sessionStorage.getItem('oep_cache_ver');
+    if (currentVer !== CACHE_VERSION) {
+      Object.keys(sessionStorage).forEach(k => {
+        if (k.startsWith('oep_')) {
+          sessionStorage.removeItem(k);
+        }
+      });
+      sessionStorage.setItem('oep_cache_ver', CACHE_VERSION);
+    }
+  }
+} catch (e) {}
 
 export const cacheService = {
   get<T>(key: string, ttlMs: number = DEFAULT_TTL_MS): T | null {

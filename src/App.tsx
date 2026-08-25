@@ -4066,10 +4066,10 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
       else if (Array.isArray(parsed) && parsed.length > 0 && (parsed[0].questionText || parsed[0].question)) parsedPdfQs = parsed.length;
     } catch(e) {}
   }
-  const actualQs = bank.practiceQuestionCount || bank.actualQuestionCount || 0;
+  const actualQs = bank.practiceQuestionCount || bank.actualQuestionCount || (typeof bank.questions === 'number' ? bank.questions : 0);
   const adminQs = bank.questionCount || bank.question_count || 0;
   const arrayQs = Array.isArray(bank.questions) ? bank.questions.length : (Array.isArray(bank.questionsData) ? bank.questionsData.length : 0);
-  const totalQs = actualQs > 0 ? actualQs : (parsedPdfQs > 0 ? parsedPdfQs : (arrayQs > 0 ? arrayQs : (adminQs > 0 ? adminQs : 0)));
+  const totalQs = actualQs > 0 ? actualQs : (adminQs > 0 ? adminQs : (parsedPdfQs > 0 ? parsedPdfQs : (arrayQs > 0 ? arrayQs : 0)));
 
   const currentQuestionIndex = incompleteAct ? ((incompleteAct.metadata?.currentQuestionIndex || 0) + 1) : 0;
   const progressPercent = totalQs > 0 ? Math.min(100, Math.round((currentQuestionIndex / totalQs) * 100)) : 0;
@@ -7276,8 +7276,10 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             } catch(e) {}
           }
 
-          const actualPracticeQs = bank.practiceQuestionCount || bank.questionCount || 0;
-          const adminQuestionCount = bank.questionCount || bank.question_count || bank.questioncount || bank.questions || actualPracticeQs;
+          const actualPracticeQs = (bank.practiceQuestionCount && bank.practiceQuestionCount > 0)
+            ? bank.practiceQuestionCount 
+            : (bank.questionCount || 0);
+          const adminQuestionCount = actualPracticeQs;
 
           groupedBanks[bank.type].push({
             id: bank.id,

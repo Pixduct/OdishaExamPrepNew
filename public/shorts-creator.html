@@ -2949,16 +2949,41 @@
         ctx.fillText(hookLines[h], 540, hookStartY + (h * hookLineH));
       }
 
-      // 2. FLOATING EXAM TARGET PILL (Y: 270 to 350 - Height 80px)
-      ctx.fillStyle = tpl.qBadgeBg;
-      ctx.strokeStyle = tpl.coverExamBorder;
-      ctx.lineWidth = 3;
-      roundRect(ctx, 130, 270, 820, 80, 22, true, true);
+      // 2. HIGH-IMPACT EXAM AUTHORITY BANNER (Y: 255 to 365 - Height 110px)
+      ctx.save();
+      ctx.shadowColor = (tpl.coverExamBorder || '#3B82F6') + '99';
+      ctx.shadowBlur = 26;
+      ctx.shadowOffsetY = 6;
+      
+      const examGrad = ctx.createLinearGradient(70, 255, 1010, 255);
+      examGrad.addColorStop(0, tpl.headerCardBg || 'rgba(15, 23, 42, 0.96)');
+      examGrad.addColorStop(0.5, (tpl.headerPillBg || '#2563EB') + '44');
+      examGrad.addColorStop(1, tpl.headerCardBg || 'rgba(15, 23, 42, 0.96)');
+      ctx.fillStyle = examGrad;
+      ctx.strokeStyle = tpl.coverExamBorder || '#3B82F6';
+      ctx.lineWidth = 4;
+      roundRect(ctx, 70, 255, 940, 110, 26, true, true);
+      ctx.restore();
 
-      ctx.fillStyle = tpl.coverExamText;
-      ctx.font = '900 32px "Outfit", sans-serif';
+      // Bold High-Contrast Text with dynamic auto-scaling
+      let examFontSize = 46;
+      ctx.font = '900 ' + examFontSize + 'px "Outfit", sans-serif';
+      let examText = '🎯 ' + exam.toUpperCase();
+      let examMetrics = ctx.measureText(examText);
+      while (examMetrics.width > 860 && examFontSize > 28) {
+        examFontSize -= 2;
+        ctx.font = '900 ' + examFontSize + 'px "Outfit", sans-serif';
+        examMetrics = ctx.measureText(examText);
+      }
+
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = '#FFFFFF';
       ctx.textAlign = 'center';
-      ctx.fillText('🎯 ' + exam.toUpperCase(), 540, 321);
+      ctx.textBaseline = 'middle';
+      ctx.fillText(examText, 540, 310);
+      ctx.restore();
 
       // 3. CENTERPIECE MYSTERY QUESTION CARD (Y: 375 to 1020 - Height 645px)
       ctx.save();
@@ -2968,7 +2993,7 @@
       ctx.fillStyle = tpl.qCardBg;
       ctx.strokeStyle = tpl.qCardBorder;
       ctx.lineWidth = 4;
-      roundRect(ctx, 70, 375, 940, 645, 36, true, true);
+      roundRect(ctx, 70, 380, 940, 640, 36, true, true);
       ctx.restore();
 
       // Question Badge Header Pill (Y: 405 to 465)
@@ -4290,15 +4315,40 @@
         ctx.fillText(hookLines[h], 540, hookStartY + (h * hookLineH));
       }
 
-      // Exam Target Pill
-      ctx.fillStyle = tpl.qBadgeBg;
-      ctx.strokeStyle = tpl.coverExamBorder;
-      ctx.lineWidth = 3;
-      roundRect(ctx, 130, 270, 820, 80, 22, true, true);
-      ctx.fillStyle = tpl.coverExamText;
-      ctx.font = '900 32px "Outfit", sans-serif';
+      // High-Impact Exam Authority Banner (Y: 255 to 365 - Height 110px)
+      ctx.save();
+      ctx.shadowColor = (tpl.coverExamBorder || '#3B82F6') + '99';
+      ctx.shadowBlur = 26;
+      ctx.shadowOffsetY = 6;
+      
+      const examGrad = ctx.createLinearGradient(70, 255, 1010, 255);
+      examGrad.addColorStop(0, tpl.headerCardBg || 'rgba(15, 23, 42, 0.96)');
+      examGrad.addColorStop(0.5, (tpl.headerPillBg || '#2563EB') + '44');
+      examGrad.addColorStop(1, tpl.headerCardBg || 'rgba(15, 23, 42, 0.96)');
+      ctx.fillStyle = examGrad;
+      ctx.strokeStyle = tpl.coverExamBorder || '#3B82F6';
+      ctx.lineWidth = 4;
+      roundRect(ctx, 70, 255, 940, 110, 26, true, true);
+      ctx.restore();
+
+      let examFontSize = 46;
+      ctx.font = '900 ' + examFontSize + 'px "Outfit", sans-serif';
+      let examText = '🎯 ' + exam.toUpperCase();
+      let examMetrics = ctx.measureText(examText);
+      while (examMetrics.width > 860 && examFontSize > 28) {
+        examFontSize -= 2;
+        ctx.font = '900 ' + examFontSize + 'px "Outfit", sans-serif';
+        examMetrics = ctx.measureText(examText);
+      }
+
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = '#FFFFFF';
       ctx.textAlign = 'center';
-      ctx.fillText('🎯 ' + exam.toUpperCase(), 540, 321);
+      ctx.textBaseline = 'middle';
+      ctx.fillText(examText, 540, 310);
+      ctx.restore();
 
       // Question Card
       ctx.save();
@@ -4731,15 +4781,40 @@
         ctx.fillText(hookLines[h], 540, hookStartY + (h * hookLineH));
       }
 
-      // Exam Target Pill
-      ctx.fillStyle = tpl.qBadgeBg;
-      ctx.strokeStyle = tpl.coverExamBorder;
-      ctx.lineWidth = 3;
-      roundRect(ctx, 130, 270, 820, 80, 22, true, true);
-      ctx.fillStyle = tpl.coverExamText;
-      ctx.font = '900 32px "Outfit", sans-serif';
+      // High-Impact Exam Authority Banner (Y: 255 to 365 - Height 110px)
+      ctx.save();
+      ctx.shadowColor = (tpl.coverExamBorder || '#3B82F6') + '99';
+      ctx.shadowBlur = 26;
+      ctx.shadowOffsetY = 6;
+      
+      const examGrad = ctx.createLinearGradient(70, 255, 1010, 255);
+      examGrad.addColorStop(0, tpl.headerCardBg || 'rgba(15, 23, 42, 0.96)');
+      examGrad.addColorStop(0.5, (tpl.headerPillBg || '#2563EB') + '44');
+      examGrad.addColorStop(1, tpl.headerCardBg || 'rgba(15, 23, 42, 0.96)');
+      ctx.fillStyle = examGrad;
+      ctx.strokeStyle = tpl.coverExamBorder || '#3B82F6';
+      ctx.lineWidth = 4;
+      roundRect(ctx, 70, 255, 940, 110, 26, true, true);
+      ctx.restore();
+
+      let examFontSize = 46;
+      ctx.font = '900 ' + examFontSize + 'px "Outfit", sans-serif';
+      let examText = '🎯 ' + exam.toUpperCase();
+      let examMetrics = ctx.measureText(examText);
+      while (examMetrics.width > 860 && examFontSize > 28) {
+        examFontSize -= 2;
+        ctx.font = '900 ' + examFontSize + 'px "Outfit", sans-serif';
+        examMetrics = ctx.measureText(examText);
+      }
+
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = '#FFFFFF';
       ctx.textAlign = 'center';
-      ctx.fillText('🎯 ' + exam.toUpperCase(), 540, 321);
+      ctx.textBaseline = 'middle';
+      ctx.fillText(examText, 540, 310);
+      ctx.restore();
 
       // Question Card
       ctx.save();

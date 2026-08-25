@@ -834,58 +834,60 @@ export const examService = {
     const banks = ((data || []) as QuestionBank[]).filter(b => !b.is_archived);
     if (banks && banks.length > 0) {
       try {
-        // Use SQL COUNT queries per bank — these are aggregate functions that bypass
-        // Supabase's anon-role max_rows=1000 cap (which silently broke the old paginated scan).
-        // Run up to 15 COUNT requests in parallel per batch for speed.
-        const BATCH = 15;
+        // Fast, RLS-bypassing aggregate topic counts via security definer RPC
+        const { data: topicData, error: rpcErr } = await supabase
+          .rpc('get_question_topic_counts');
 
-        for (let i = 0; i < banks.length; i += BATCH) {
-          const bankChunk = banks.slice(i, i + BATCH);
-
-          await Promise.all(
-            bankChunk.map(async (b) => {
-              const rawTitle = b.title || '';
-              if (!rawTitle) return;
-
-              // Primary: exact topic match COUNT
-              const { count: exactCount } = await supabase
-                .from('questions')
-                .select('*', { count: 'exact', head: true })
-                .eq('topic', rawTitle);
-
-              let resolvedCount = exactCount ?? 0;
-
-              // Fallback: try lowercase-stripped title (removes "- Practice Session" suffixes)
-              if (resolvedCount === 0) {
-                const cleanTitle = rawTitle.toLowerCase().replace(/(\s*-\s*practice session)+$/gi, '').trim();
-                if (cleanTitle && cleanTitle !== rawTitle.toLowerCase()) {
-                  const { count: cleanCount } = await supabase
-                    .from('questions')
-                    .select('*', { count: 'exact', head: true })
-                    .ilike('topic', cleanTitle);
-                  resolvedCount = cleanCount ?? 0;
-                }
-              }
-
-              // Fallback: embedded questionsData in pdfUrl column
-              if (resolvedCount === 0 && b.pdfUrl && typeof b.pdfUrl === 'string' && b.pdfUrl.startsWith('{')) {
-                try {
-                  const parsed = JSON.parse(b.pdfUrl);
-                  if (parsed && Array.isArray(parsed.questionsData) && parsed.questionsData.length > 0) {
-                    resolvedCount = parsed.questionsData.length;
-                  } else if (Array.isArray(parsed) && parsed.length > 0 && (parsed[0].questionText || parsed[0].question)) {
-                    resolvedCount = parsed.length;
-                  }
-                } catch (_e) {}
-              }
-
-              b.practiceQuestionCount = resolvedCount;
-              if (resolvedCount > 0) {
-                b.questionCount = resolvedCount;
-              }
-            })
-          );
+        const topicCounts: Record<string, number> = {};
+        if (!rpcErr && Array.isArray(topicData)) {
+          topicData.forEach((row: { topic: string; question_count: number | string }) => {
+            if (row.topic) {
+              const cnt = Number(row.question_count) || 0;
+              topicCounts[row.topic] = cnt;
+              const clean = row.topic.toLowerCase().replace(/(\s*-\s*practice session)+$/gi, '').trim();
+              topicCounts[clean] = cnt;
+            }
+          });
         }
+
+        banks.forEach((b) => {
+          const rawTitle = b.title || '';
+          const cleanTitle = rawTitle.toLowerCase().replace(/(\s*-\s*practice session)+$/gi, '').trim();
+
+          let resolvedCount = topicCounts[rawTitle] || topicCounts[cleanTitle] || 0;
+
+          // Fuzzy prefix match fallback from RPC data
+          if (resolvedCount === 0 && cleanTitle) {
+            for (const [top, cnt] of Object.entries(topicCounts)) {
+              if (top && (top.startsWith(cleanTitle) || cleanTitle.startsWith(top))) {
+                resolvedCount = cnt;
+                break;
+              }
+            }
+          }
+
+          // Fallback: embedded questionsData in pdfUrl column
+          if (resolvedCount === 0 && b.pdfUrl && typeof b.pdfUrl === 'string' && b.pdfUrl.startsWith('{')) {
+            try {
+              const parsed = JSON.parse(b.pdfUrl);
+              if (parsed && Array.isArray(parsed.questionsData) && parsed.questionsData.length > 0) {
+                resolvedCount = parsed.questionsData.length;
+              } else if (Array.isArray(parsed) && parsed.length > 0 && (parsed[0].questionText || parsed[0].question)) {
+                resolvedCount = parsed.length;
+              }
+            } catch (_e) {}
+          }
+
+          // Fallback: use database stored questionCount (now synced to actual question counts)
+          if (resolvedCount === 0 && typeof b.questionCount === 'number' && b.questionCount > 0) {
+            resolvedCount = b.questionCount;
+          }
+
+          b.practiceQuestionCount = resolvedCount;
+          if (resolvedCount > 0) {
+            b.questionCount = resolvedCount;
+          }
+        });
       } catch (err) {
         console.error('Failed to fetch actual question counts for question banks:', err);
       }

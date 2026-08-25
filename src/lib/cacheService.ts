@@ -11,7 +11,7 @@ interface CacheEntry<T> {
 }
 
 const DEFAULT_TTL_MS = 5 * 60 * 1000; // 5 minutes
-const CACHE_VERSION = 'v2_true_counts_2026';
+const CACHE_VERSION = 'v3_security_definer_counts_2026';
 
 // Auto-invalidate stale session storage on version upgrade
 try {

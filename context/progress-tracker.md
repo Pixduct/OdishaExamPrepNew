@@ -1,6 +1,12 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] Batch Monetization, Smart Freemium Engine & True Question Count Architecture (`src/AdminPanel.tsx`, `src/App.tsx`, `src/lib/examService.ts`, `src/lib/cacheService.ts`, `src/lib/entitlementEngine.ts`):
+  1. **Batch Monetization & Smart Freemium Rule Engine**: Built floating multi-select action bar with 3 monetization modes (*First N Free & Lock Rest, All Premium, All Free*), custom price input with 50% automated original price calculation, and parallel Supabase batch mutation with optimistic UI.
+  2. **End-to-End Paywall Access Control Alignment**: Unified `isPremium` and `price` resolution across `tagline` and `seriesId` JSON metadata in `entitlementEngine.ts`, `ScheduledPracticeBankCard`, and `handleStartDirectPractice`.
+  3. **Exam Detail Practice Card Layout Restoration**: Restored 3-tier card hierarchy (Header with clean tags, Middle stats row with `FileText` Questions + `Clock` Duration pills, and full-width bottom CTA).
+  4. **11,600+ Question Paginated Counting Engine**: Engineered a paginated batch counting engine in `getAllQuestionBanks()` that scans all 11,000+ database records, accurately computing the exact question counts (**100 Qs**, **200 Qs**) for all subjects and eliminating false fallback numbers (`250`, `1250`).
+  5. **SessionStorage Version Auto-Invalidation**: Implemented `CACHE_VERSION = 'v2_true_counts_2026'` in `cacheService.ts` to automatically purge stale browser caches on load.
 - [x] 100K YouTube Shorts, Pro Cover Creator & Multi-MCQ Bulk Studio Suite (`public/shorts-creator.html`):
   1. **1-to-3 Multi-Question Sequential Video Engine**: Built interactive radio pill selector supporting 1 Question (Quick), 2 Questions (Duo), or 3 Questions (Rapid Challenge) with seamless frame-1 start, audio loops, countdown timers, sub-boom impacts, and reveal chimes.
   2. **6-Template Visual Theme Engine**: 6 professional themes (*Obsidian Cobalt, Royal Gold, Crimson Danger, Cyber Neon Mint, Galactic Purple, Slate Academy*) with dynamic canvas background, borders, glows, and text palettes.

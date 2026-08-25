@@ -2530,6 +2530,46 @@
       }
     }
 
+
+    // ⚡ HIGH-SPEED PRE-RENDERED BACKGROUND CACHE
+    const bgCanvasCache = {};
+
+    function getPreRenderedBackground(tpl) {
+      const key = tpl.name || 'default';
+      if (bgCanvasCache[key]) return bgCanvasCache[key];
+
+      const offCanvas = document.createElement('canvas');
+      offCanvas.width = 1080;
+      offCanvas.height = 1920;
+      const offCtx = offCanvas.getContext('2d');
+
+      // Base Gradient
+      const baseGrad = offCtx.createLinearGradient(0, 0, 0, 1920);
+      baseGrad.addColorStop(0, tpl.bgGrad[0]);
+      baseGrad.addColorStop(0.35, tpl.bgGrad[1]);
+      baseGrad.addColorStop(0.7, tpl.bgGrad[2]);
+      baseGrad.addColorStop(1, tpl.bgGrad[3]);
+      offCtx.fillStyle = baseGrad;
+      offCtx.fillRect(0, 0, 1080, 1920);
+
+      // Top Ambient Glow
+      const glowTop = offCtx.createRadialGradient(540, 200, 50, 540, 200, 500);
+      glowTop.addColorStop(0, tpl.glowTop);
+      glowTop.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      offCtx.fillStyle = glowTop;
+      offCtx.fillRect(0, 0, 1080, 800);
+
+      // Bottom Ambient Glow
+      const glowBottom = offCtx.createRadialGradient(540, 1400, 40, 540, 1400, 600);
+      glowBottom.addColorStop(0, tpl.glowBottom);
+      glowBottom.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      offCtx.fillStyle = glowBottom;
+      offCtx.fillRect(0, 1000, 1080, 920);
+
+      bgCanvasCache[key] = offCanvas;
+      return offCanvas;
+    }
+
     function drawBaseBackground(tpl) {
       tpl = tpl || getActiveTemplate();
       const grad = ctx.createLinearGradient(0, 0, 0, 1920);
@@ -3467,11 +3507,14 @@
 
       } else if (bgAudioMode === 'custom' && bgMusicObjectUrl) {
         try {
-          const resp      = await fetch(bgMusicObjectUrl);
-          const arrayBuf  = await resp.arrayBuffer();
-          const decodedBg = await offlineCtx.decodeAudioData(arrayBuf);
+          if (!window._cachedDecodedBgMusic || window._cachedBgMusicUrl !== bgMusicObjectUrl) {
+            const resp      = await fetch(bgMusicObjectUrl);
+            const arrayBuf  = await resp.arrayBuffer();
+            window._cachedDecodedBgMusic = await offlineCtx.decodeAudioData(arrayBuf);
+            window._cachedBgMusicUrl = bgMusicObjectUrl;
+          }
           const bgSource  = offlineCtx.createBufferSource();
-          bgSource.buffer = decodedBg;
+          bgSource.buffer = window._cachedDecodedBgMusic;
           bgSource.loop   = true;
           const bgGain    = offlineCtx.createGain();
           bgGain.gain.setValueAtTime(0.7, 0);
@@ -4143,7 +4186,7 @@
         progressBar.style.width = '96%';
         progressPercent.innerText = '96%';
 
-        const zipBlob = await zip.generateAsync({ type: 'blob' }, (meta) => {
+        const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' }, (meta) => {
           const zipPct = 92 + Math.round((meta.percent / 100) * 7);
           progressBar.style.width = zipPct + '%';
           progressPercent.innerText = zipPct + '%';
@@ -4272,13 +4315,17 @@
 
           const timestampMicros = Math.round((f / fps) * 1000000);
           const videoFrame = new VideoFrame(canvas, { timestamp: timestampMicros });
-          videoEncoder.encode(videoFrame, { keyFrame: f % 45 === 0 });
+          videoEncoder.encode(videoFrame, { keyFrame: f % 60 === 0 });
           videoFrame.close();
 
-          if (f % 10 === 0) {
+          // Throttle only when hardware encoder queue exceeds 3 frames
+          while (videoEncoder.encodeQueueSize > 3) {
+            await new Promise(r => setTimeout(r, 2));
+          }
+
+          if (f % 15 === 0) {
             const pct = Math.round((f / totalFrames) * 100);
             if (onProgress) onProgress(pct);
-            await new Promise(r => setTimeout(r, 0));
           }
         }
 

@@ -1824,8 +1824,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         keywords: item.keywords || '',
         targetExamId: item.targetExamId || '',
         isPremium: isExamPremium,
-        price: (parsedExamMeta.price && Number(parsedExamMeta.price) > 0) ? Number(parsedExamMeta.price) : 499,
-        originalPrice: (parsedExamMeta.originalPrice && Number(parsedExamMeta.originalPrice) > 0) ? Number(parsedExamMeta.originalPrice) : 999,
+        price: (parsedExamMeta.price !== undefined && parsedExamMeta.price !== null && parsedExamMeta.price !== '') ? Number(parsedExamMeta.price) : 499,
+        originalPrice: (parsedExamMeta.originalPrice !== undefined && parsedExamMeta.originalPrice !== null && parsedExamMeta.originalPrice !== '') ? Number(parsedExamMeta.originalPrice) : 999,
         description: parsedExamMeta.description !== undefined ? parsedExamMeta.description : (item.description || ''),
         examDateStatus: parsedExamMeta.examDateStatus || (parsedExamMeta.examDate || item.examDate ? 'published' : 'tba'),
         formFillupStatus: parsedExamMeta.formFillupStatus || 'tba',
@@ -2159,7 +2159,9 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           examDateStatus: formData.examDateStatus || 'tba',
           formFillupStatus: formData.formFillupStatus || 'tba',
           formFillupEndDate: formData.formFillupEndDate || '',
-          isPremium: isExamPremium
+          isPremium: isExamPremium,
+          price: Number(formData.price) || 0,
+          originalPrice: Number(formData.originalPrice) || 0
         };
         const payload: any = {
           name: formData.name,

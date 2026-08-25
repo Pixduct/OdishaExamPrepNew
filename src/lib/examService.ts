@@ -835,13 +835,26 @@ export const examService = {
 
     if (banks && banks.length > 0) {
       try {
-        const bankTitles = banks.map(b => b.title).filter(Boolean);
-        const countMap = await fetchTopicCounts(bankTitles);
+        const queryTopics = banks.flatMap(b => [b.title, b.id]).filter(Boolean);
+        const countMap = await fetchTopicCounts(queryTopics);
 
         banks.forEach(b => {
-          const actualCount = countMap[b.title] || 0;
+          let actualCount = countMap[b.title] || (b.id ? countMap[b.id] : 0) || 0;
+
+          // Also inspect embedded questionsData inside pdfUrl
+          if (actualCount === 0 && b.pdfUrl && typeof b.pdfUrl === 'string' && b.pdfUrl.startsWith('{')) {
+            try {
+              const parsed = JSON.parse(b.pdfUrl);
+              if (parsed && Array.isArray(parsed.questionsData) && parsed.questionsData.length > 0) {
+                actualCount = parsed.questionsData.length;
+              } else if (Array.isArray(parsed) && parsed.length > 0 && (parsed[0].questionText || parsed[0].question)) {
+                actualCount = parsed.length;
+              }
+            } catch (e) {}
+          }
+
           b.practiceQuestionCount = actualCount;
-          // Set questionCount to actual uploaded question count if actualCount > 0
+          // When actual uploaded questions exist, reflect the true count
           if (actualCount > 0) {
             b.questionCount = actualCount;
           } else if (!b.questionCount) {

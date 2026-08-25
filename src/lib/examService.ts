@@ -832,80 +832,62 @@ export const examService = {
     if (error) throw error;
 
     const banks = ((data || []) as QuestionBank[]).filter(b => !b.is_archived);
-
     if (banks && banks.length > 0) {
       try {
-        const examIds = Array.from(new Set(banks.map(b => b.examId).filter(Boolean)));
-        const topicCounts: Record<string, number> = {};
-        const pageSize = 1000;
+        // Use SQL COUNT queries per bank — these are aggregate functions that bypass
+        // Supabase's anon-role max_rows=1000 cap (which silently broke the old paginated scan).
+        // Run up to 15 COUNT requests in parallel per batch for speed.
+        const BATCH = 15;
 
-        for (let i = 0; i < examIds.length; i += 10) {
-          const examChunk = examIds.slice(i, i + 10);
-          let page = 0;
-          let keepFetching = true;
+        for (let i = 0; i < banks.length; i += BATCH) {
+          const bankChunk = banks.slice(i, i + BATCH);
 
-          while (keepFetching) {
-            const { data: qData, error: qErr } = await supabase
-              .from('questions')
-              .select('topic')
-              .in('examId', examChunk)
-              .range(page * pageSize, (page + 1) * pageSize - 1);
+          await Promise.all(
+            bankChunk.map(async (b) => {
+              const rawTitle = b.title || '';
+              if (!rawTitle) return;
 
-            if (qErr || !qData || qData.length === 0) {
-              keepFetching = false;
-            } else {
-              qData.forEach(q => {
-                if (q.topic) {
-                  const raw = q.topic;
-                  topicCounts[raw] = (topicCounts[raw] || 0) + 1;
-                  const clean = raw.toLowerCase().replace(/(\s*-\s*practice session)+$/gi, '').trim();
-                  topicCounts[clean] = (topicCounts[clean] || 0) + 1;
+              // Primary: exact topic match COUNT
+              const { count: exactCount } = await supabase
+                .from('questions')
+                .select('*', { count: 'exact', head: true })
+                .eq('topic', rawTitle);
+
+              let resolvedCount = exactCount ?? 0;
+
+              // Fallback: try lowercase-stripped title (removes "- Practice Session" suffixes)
+              if (resolvedCount === 0) {
+                const cleanTitle = rawTitle.toLowerCase().replace(/(\s*-\s*practice session)+$/gi, '').trim();
+                if (cleanTitle && cleanTitle !== rawTitle.toLowerCase()) {
+                  const { count: cleanCount } = await supabase
+                    .from('questions')
+                    .select('*', { count: 'exact', head: true })
+                    .ilike('topic', cleanTitle);
+                  resolvedCount = cleanCount ?? 0;
                 }
-              });
-              if (qData.length < pageSize) {
-                keepFetching = false;
-              } else {
-                page++;
               }
-            }
-          }
+
+              // Fallback: embedded questionsData in pdfUrl column
+              if (resolvedCount === 0 && b.pdfUrl && typeof b.pdfUrl === 'string' && b.pdfUrl.startsWith('{')) {
+                try {
+                  const parsed = JSON.parse(b.pdfUrl);
+                  if (parsed && Array.isArray(parsed.questionsData) && parsed.questionsData.length > 0) {
+                    resolvedCount = parsed.questionsData.length;
+                  } else if (Array.isArray(parsed) && parsed.length > 0 && (parsed[0].questionText || parsed[0].question)) {
+                    resolvedCount = parsed.length;
+                  }
+                } catch (_e) {}
+              }
+
+              b.practiceQuestionCount = resolvedCount;
+              if (resolvedCount > 0) {
+                b.questionCount = resolvedCount;
+              }
+            })
+          );
         }
-
-        banks.forEach(b => {
-          const rawTitle = b.title || '';
-          const cleanTitle = rawTitle.toLowerCase().replace(/(\s*-\s*practice session)+$/gi, '').trim();
-
-          let actualCount = topicCounts[rawTitle] || topicCounts[cleanTitle] || (b.id ? topicCounts[b.id] : 0) || 0;
-
-          // Fuzzy prefix/suffix matching
-          if (actualCount === 0 && cleanTitle) {
-            for (const [top, cnt] of Object.entries(topicCounts)) {
-              if (top && (top.startsWith(cleanTitle) || cleanTitle.startsWith(top))) {
-                actualCount = cnt;
-                break;
-              }
-            }
-          }
-
-          // Embedded questionsData in pdfUrl
-          if (actualCount === 0 && b.pdfUrl && typeof b.pdfUrl === 'string' && b.pdfUrl.startsWith('{')) {
-            try {
-              const parsed = JSON.parse(b.pdfUrl);
-              if (parsed && Array.isArray(parsed.questionsData) && parsed.questionsData.length > 0) {
-                actualCount = parsed.questionsData.length;
-              } else if (Array.isArray(parsed) && parsed.length > 0 && (parsed[0].questionText || parsed[0].question)) {
-                actualCount = parsed.length;
-              }
-            } catch (e) {}
-          }
-
-          b.practiceQuestionCount = actualCount;
-          if (actualCount > 0) {
-            b.questionCount = actualCount;
-          }
-        });
       } catch (err) {
-        console.error("Failed to fetch actual question counts for question banks:", err);
+        console.error('Failed to fetch actual question counts for question banks:', err);
       }
     }
     cacheService.set('all_question_banks', banks as QuestionBank[]);

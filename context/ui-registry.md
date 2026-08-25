@@ -3314,4 +3314,53 @@ High-conversion 100K YouTube Shorts, Cover Thumbnail, and Multi-MCQ Bulk Studio 
 - **Dynamic Auto-Scaling Engine**: `drawAutoScaledText()` dynamically steps down font sizes on canvas buttons, pills, and badges to ensure 0 text overflow or boundary clipping.
 - **Smart Thumbnail Variation**: Automatically alternates across 6 universal high-CTR viral hooks, high-engagement action CTAs, and 6 visual themes (*Obsidian Cobalt, Royal Gold, Crimson Danger, Cyber Mint, Galactic Purple, Slate Academy*).
 - **Multi-Question Sequences**: Supports 1, 2, or 3 questions per Short with dynamic tension drone crossfade, sub-boom impacts, and ticking timer synchronization.
+---
 
+### 103. `ScheduledPracticeBankCard`
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
+Last updated: August 25, 2026
+
+Interactive 3-tier card component for chapter-wise practice sets and question banks on the Exam Detail page.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Container** | `p-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-200/80 dark:border-indigo-500/20 shadow-lg shadow-slate-200/30 dark:shadow-indigo-950/20 rounded-[1.5rem] flex flex-col justify-between gap-6` |
+| **Header Vector Icon Container** | `w-14 h-14 rounded-xl flex items-center justify-center shrink-0 shadow-md text-white` (`bg-gradient-to-br from-brand-500 to-indigo-600`, `bg-gradient-to-br from-amber-500 to-orange-600` when locked, `bg-gradient-to-br from-emerald-500 to-teal-600` when unlocked/completed) |
+| **Card Title** | `font-black text-base sm:text-lg text-slate-900 dark:text-white tracking-tight uppercase leading-snug line-clamp-2` |
+| **Free Demo Tag** | `text-[10px] font-black text-emerald-800 dark:text-emerald-300 uppercase tracking-widest bg-emerald-100 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800` |
+| **Locked Premium Tag** | `text-[10px] font-black text-amber-800 dark:text-amber-300 uppercase tracking-widest bg-amber-100 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800 flex items-center gap-1` |
+| **Unlocked Tag** | `text-[10px] font-black text-emerald-800 dark:text-emerald-300 uppercase tracking-widest bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800` |
+| **Set Suffix Tag** | `text-[10px] font-black text-brand-700 dark:text-indigo-300 uppercase tracking-widest bg-brand-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded border border-brand-100/60 dark:border-indigo-800 shadow-2xs` |
+| **Middle Stats Row Container** | `space-y-4 flex-1 relative z-10 pt-2 text-left` |
+| **Stat Badges (Questions / Duration)** | `flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60 text-xs font-bold text-slate-555 dark:text-slate-300` |
+| **Primary Action Button (Unlocked)** | `w-full h-[48px] rounded-xl font-black text-sm relative z-10 premium-gradient text-white shadow-lg shadow-brand-500/20 group-hover:premium-glow` |
+| **Unlock Action Button (Locked)** | `w-full h-[48px] rounded-xl font-black text-sm relative z-10 border-amber-200 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:border-amber-300` |
+| **Score / Retake Split Buttons** | Left Score: `w-1/3 h-[48px] rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/90`; Right Retake: `flex-1 h-[48px] rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-emerald-500/20` |
+
+**Pattern notes:**
+- **3-Tier Card Anatomy**: Must maintain Header (14x14 icon + title + badges), Middle Stats (Questions + Duration pills), and Action CTA (48px fixed height button) across desktop and mobile.
+- **Accurate Count Extraction**: Computes `practiceQuestionCount` dynamically through paginated query and never relies on static placeholder inputs.
+
+---
+
+### 104. `BatchMonetizationActionBar`
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep Website/src/AdminPanel.tsx)
+Last updated: August 25, 2026
+
+Floating bottom glassmorphic action bar for bulk locking, unlocking, and custom pricing across mock tests and practice sets.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Floating Container** | `fixed bottom-6 inset-x-0 mx-auto max-w-4xl z-50 bg-slate-900/95 text-white backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4` |
+| **Selection Counter Pill** | `px-3 py-1 bg-brand-500/20 border border-brand-400/40 rounded-xl text-xs font-black text-brand-300 uppercase tracking-wider flex items-center gap-1.5` |
+| **Mode Selector Pills** | Radio group of 3 modes: *First N Free*, *All Premium*, *All Free* with active `bg-brand-600 text-white shadow-md`, inactive `bg-slate-800/80 text-slate-400 hover:text-white` |
+| **Custom Price Input** | `w-24 px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-xl text-sm font-black text-center text-white focus:border-brand-400 focus:outline-none` |
+| **Apply Button** | `px-5 py-2 rounded-xl bg-gradient-to-r from-brand-500 to-indigo-600 hover:from-brand-600 hover:to-indigo-700 text-white font-black text-sm shadow-lg shadow-brand-500/25 flex items-center gap-2 cursor-pointer` |
+| **Cancel Button** | `px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs cursor-pointer` |
+
+**Pattern notes:**
+- **Automated Original Price**: Automatically sets `originalPrice = price * 2` (50% OFF deal presentation) unless custom values are provided.
+- **Optimistic Mutation**: Immediately updates in-memory React state and dispatches parallel Supabase transactions in batches of 50.
+- **Cache Purge Trigger**: Automatically calls `sessionStorage.removeItem('oep_admin_catalog_cache')` to ensure instant consistency across administrative and student viewports.

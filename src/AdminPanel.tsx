@@ -2332,6 +2332,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
               }
             } catch (e) {
               metaTaglineObj.text = item.tagline;
+              metaTaglineObj.isPremium = isPrem;
             }
           } else {
             metaTaglineObj.isPremium = isPrem;
@@ -2348,7 +2349,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
             } catch (e) {}
           }
           const updatedSeriesId = JSON.stringify(mockConfig);
-          updates.push(examService.updateMockTest(item.id, { seriesId: updatedSeriesId }));
+          updates.push(examService.updateMockTest(item.id, { seriesId: updatedSeriesId, isPremium: isPrem } as any));
         }
       });
 
@@ -2387,6 +2388,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       }
 
       setSelectedItemIds(new Set());
+      try {
+        sessionStorage.removeItem('oep_admin_catalog_cache');
+      } catch(e) {}
+
       alert(`🎉 Batch Monetization Applied Successfully!\n\nUpdated ${total} items:\n• ${freeCount} Free demo test(s)\n• ${premiumCount} Premium test(s) at ₹${batchOfferPrice} (MRP ₹${batchMrpPrice})`);
     } catch (err: any) {
       console.error('Batch monetization failed:', err);

@@ -40,20 +40,30 @@ export const hasAccessTo = (
     itemIsPremium = itemOrId.isPremium ?? true;
     itemExamId = itemOrId.examId || itemExamId;
 
-    // Handle seriesId mapping (uuid vs JSON string)
+    // Handle seriesId mapping (uuid vs JSON string for mock tests)
     if (typeof itemOrId.seriesId === 'string') {
       if (itemOrId.seriesId.startsWith('{')) {
         try {
           const parsed = JSON.parse(itemOrId.seriesId);
-          itemIsPremium = parsed.isPremium ?? itemIsPremium;
+          itemIsPremium = parsed.isPremium !== undefined ? Boolean(parsed.isPremium) : itemIsPremium;
           itemExamId = parsed.examId || itemExamId;
         } catch (e) {}
       } else {
         itemSeriesId = itemOrId.seriesId;
       }
     } else if (itemOrId.seriesId && typeof itemOrId.seriesId === 'object') {
-      itemIsPremium = itemOrId.seriesId.isPremium ?? itemIsPremium;
+      itemIsPremium = itemOrId.seriesId.isPremium !== undefined ? Boolean(itemOrId.seriesId.isPremium) : itemIsPremium;
       itemExamId = itemOrId.seriesId.examId || itemExamId;
+    }
+
+    // Handle tagline mapping (JSON string for question banks & practice sets)
+    if ((itemOrId as any).tagline && typeof (itemOrId as any).tagline === 'string' && (itemOrId as any).tagline.startsWith('{')) {
+      try {
+        const parsedTagline = JSON.parse((itemOrId as any).tagline);
+        if (parsedTagline.isPremium !== undefined) {
+          itemIsPremium = Boolean(parsedTagline.isPremium);
+        }
+      } catch (e) {}
     }
   }
 

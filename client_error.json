@@ -1,8 +1,8 @@
 {
   "type": "onerror",
-  "message": "Uncaught TypeError: Cannot read properties of undefined (reading 'contains')",
-  "source": "http://localhost:3000/src/App.tsx",
-  "lineno": 18544,
-  "colno": 28,
-  "stack": "TypeError: Cannot read properties of undefined (reading 'contains')\n    at findHorizontalContainer (http://localhost:3000/src/App.tsx:18544:28)\n    at onWheel (http://localhost:3000/src/App.tsx:18554:25)"
+  "message": "ResizeObserver loop completed with undelivered notifications.",
+  "source": "http://localhost:3000/",
+  "lineno": 0,
+  "colno": 0,
+  "stack": ""
 }

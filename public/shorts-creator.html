@@ -728,6 +728,11 @@
           <input type="text" id="ctaText" value="Visit website for 1,000+ Topic Tests & Mock Series!" oninput="handleFormUpdate()">
         </div>
 
+        <div class="form-group col-span-2">
+          <label style="color: #F87171;">🔔 YouTube Subscribe CTA Button</label>
+          <input type="text" id="subscribeCtaText" value="🔔 SUBSCRIBE FOR DAILY QUIZZES & MOCKS 🚀" oninput="handleFormUpdate()">
+        </div>
+
         <div class="form-group">
           <label>Website Name</label>
           <input type="text" id="websiteName" value="OdishaExamPrep.in" oninput="handleFormUpdate()">
@@ -1054,6 +1059,11 @@
           <div class="form-group" style="margin-bottom: 0.6rem;">
             <label>CTA Pitch Text</label>
             <input type="text" id="bulkCtaText" value="Visit website for 1,000+ Topic Tests & Mock Series!">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.6rem;">
+            <label style="color: #F87171;">🔔 YouTube Subscribe CTA Button</label>
+            <input type="text" id="bulkSubscribeCtaText" value="🔔 SUBSCRIBE FOR DAILY QUIZZES & MOCKS 🚀">
           </div>
 
           <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 0.5rem;">
@@ -2882,7 +2892,7 @@
       ctx.restore();
     }
 
-    function drawCtaScreen(brand, cta, websiteName, websiteUrl, alpha, tpl) {
+    function drawCtaScreen(brand, cta, websiteName, websiteUrl, subscribeCta, alpha, tpl) {
       tpl = tpl || getActiveTemplate();
       alpha = alpha !== undefined ? alpha : 1;
       ctx.save();
@@ -2890,33 +2900,46 @@
 
       drawBaseBackground(tpl);
 
+      // Main CTA Card Container
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+      ctx.shadowBlur = 40;
+      ctx.shadowOffsetY = 16;
       ctx.fillStyle = tpl.ctaCardBg;
       ctx.strokeStyle = tpl.ctaCardBorder;
       ctx.lineWidth = 4;
       roundRect(ctx, 60, 130, 960, 1370, 44, true, true);
+      ctx.restore();
 
+      // Brand Logo
       try {
         if (logoImg.complete && logoImg.naturalWidth !== 0) {
-          ctx.drawImage(logoImg, 460, 200, 160, 160);
+          ctx.drawImage(logoImg, 465, 180, 150, 150);
         }
       } catch (e) {}
 
+      // Brand Name
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = '900 64px "Outfit", sans-serif';
+      ctx.font = '900 62px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(brand || 'OdishaExamPrep', 540, 430);
+      ctx.fillText(brand || 'OdishaExamPrep', 540, 395);
 
+      // Trust Badge Pill
       ctx.fillStyle = tpl.ctaBadgeBg;
-      roundRect(ctx, 160, 470, 760, 64, 18, true, false);
+      roundRect(ctx, 160, 430, 760, 58, 16, true, false);
       ctx.fillStyle = tpl.ctaBadgeText;
-      ctx.font = '800 26px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText('⭐ 10,000+ Aspirants Trusted Platform', 540, 512);
+      ctx.font = '800 24px "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('⭐ 10,000+ Aspirants Trusted Platform', 540, 459);
+      ctx.textBaseline = 'alphabetic';
 
-      ctx.font = '800 44px "Plus Jakarta Sans", sans-serif';
-      const ctaLines = getWrappedLines(ctx, cta || 'Visit website for 1000+ Practice Tests & Chapter Notes!', 820);
-      const ctaLineH = 60;
+      // Value Pitch Text (Wrapped & Centered)
+      ctx.font = '800 42px "Plus Jakarta Sans", sans-serif';
+      const ctaLines = getWrappedLines(ctx, cta || 'Visit website for 1,000+ Topic Tests & Mock Series!', 820);
+      const ctaLineH = 56;
       const ctaTotalH = (ctaLines.length - 1) * ctaLineH;
-      const ctaStartY = 730 - (ctaTotalH / 2);
+      const ctaStartY = 620 - (ctaTotalH / 2);
 
       ctx.fillStyle = '#F8FAFC';
       ctx.textAlign = 'center';
@@ -2924,16 +2947,44 @@
         ctx.fillText(ctaLines[c], 540, ctaStartY + (c * ctaLineH));
       }
 
+      // 1. PRIMARY ACTION BUTTON (Website Portal)
+      ctx.save();
+      ctx.shadowColor = tpl.ctaBtnBg + '80';
+      ctx.shadowBlur = 28;
+      ctx.shadowOffsetY = 8;
       ctx.fillStyle = tpl.ctaBtnBg;
-      roundRect(ctx, 120, 1000, 840, 145, 36, true, false);
+      roundRect(ctx, 100, 755, 880, 135, 32, true, false);
+      ctx.restore();
 
       ctx.fillStyle = tpl.ctaBtnText;
-      ctx.font = '900 46px "Outfit", sans-serif';
-      ctx.fillText('🔗 ' + (websiteUrl || 'www.odishaexamprep.in'), 540, 1090);
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      drawAutoScaledText(ctx, '🔗 ' + (websiteUrl || 'www.odishaexamprep.in'), 540, 822, 44, 24, '"Outfit", sans-serif', 820);
 
+      // 2. HIGH-CTR YOUTUBE SUBSCRIBE BUTTON (YouTube Red Gradient)
+      ctx.save();
+      const subGrad = ctx.createLinearGradient(100, 915, 980, 915);
+      subGrad.addColorStop(0, '#EF4444');
+      subGrad.addColorStop(1, '#DC2626');
+      ctx.fillStyle = subGrad;
+      ctx.shadowColor = 'rgba(239, 68, 68, 0.45)';
+      ctx.shadowBlur = 30;
+      ctx.shadowOffsetY = 10;
+      roundRect(ctx, 100, 915, 880, 135, 32, true, false);
+      ctx.restore();
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const subText = (subscribeCta || (document.getElementById('subscribeCtaText') || {}).value || '🔔 SUBSCRIBE FOR DAILY QUIZZES & MOCKS 🚀').toUpperCase();
+      drawAutoScaledText(ctx, subText, 540, 982, 40, 22, '"Outfit", sans-serif', 820);
+      ctx.textBaseline = 'alphabetic';
+
+      // 3. BOTTOM PINNED COMMENT & ENGAGEMENT STRIP
       ctx.fillStyle = '#F59E0B';
-      ctx.font = '800 36px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText('👇 Check Pinned Comment & Bio Link 👇', 540, 1280);
+      ctx.font = '800 32px "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('👇 Link in Pinned Comment & Bio • Like & Share! 👇', 540, 1155);
 
       ctx.restore();
     }
@@ -3192,6 +3243,7 @@
       const examEl = document.getElementById('examName');
       const brandEl = document.getElementById('brandName');
       const ctaEl = document.getElementById('ctaText') || document.getElementById('ctaPitchText');
+      const subCtaEl = document.getElementById('subscribeCtaText');
       const websiteNameEl = document.getElementById('websiteName');
       const websiteUrlEl = document.getElementById('websiteUrl');
 
@@ -3199,6 +3251,7 @@
         exam: examEl ? examEl.value : 'OSSC CGL 2026',
         brand: brandEl ? brandEl.value : 'OdishaExamPrep',
         cta: ctaEl ? ctaEl.value : 'Visit website for 1000+ Practice Tests & Chapter Notes!',
+        subscribeCta: subCtaEl ? subCtaEl.value : '🔔 SUBSCRIBE FOR DAILY QUIZZES & MOCKS 🚀',
         websiteName: websiteNameEl ? websiteNameEl.value : 'OdishaExamPrep.in',
         websiteUrl: websiteUrlEl ? websiteUrlEl.value : 'www.odishaexamprep.in',
         template: getActiveTemplate(),
@@ -3239,7 +3292,7 @@
 
         renderYouTubeOverlayGuide();
       } else {
-        drawCtaScreen(config.brand, config.cta, config.websiteName, config.websiteUrl, 1, tpl);
+        drawCtaScreen(config.brand, config.cta, config.websiteName, config.websiteUrl, config.subscribeCta, 1, tpl);
         renderYouTubeOverlayGuide();
       }
     }
@@ -4122,10 +4175,12 @@
           const totalQuestionsDuration = cursor;
           const totalDuration = totalQuestionsDuration + tCtaDur;
 
+          const bulkSubCta = (document.getElementById('bulkSubscribeCtaText') || {}).value || '🔔 SUBSCRIBE FOR DAILY QUIZZES & MOCKS 🚀';
           const itemConfig = {
             exam: firstQ.exam || bulkExam,
             brand: bulkBrand,
             cta: bulkCta,
+            subscribeCta: bulkSubCta,
             websiteName: bulkSite,
             websiteUrl: bulkUrl,
             template: batchTemplate,
@@ -4722,6 +4777,7 @@
         exam: item.exam || (document.getElementById('bulkDefaultExam') ? document.getElementById('bulkDefaultExam').value : 'OSSC CGL 2026'),
         brand: (document.getElementById('bulkBrandName') || {}).value || 'OdishaExamPrep',
         cta: (document.getElementById('bulkCtaText') || {}).value || 'Visit website for 1,000+ Tests!',
+        subscribeCta: (document.getElementById('bulkSubscribeCtaText') || {}).value || '🔔 SUBSCRIBE FOR DAILY QUIZZES & MOCKS 🚀',
         websiteName: (document.getElementById('bulkWebsiteName') || {}).value || 'OdishaExamPrep.in',
         websiteUrl: (document.getElementById('bulkWebsiteUrl') || {}).value || 'www.odishaexamprep.in',
         template: tpl,

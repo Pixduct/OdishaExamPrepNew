@@ -3453,157 +3453,153 @@
       masterGainNode.gain.value = 0.88;
       masterGainNode.connect(offlineCtx.destination);
 
-      // Use intervals-based timing if available (multi-question config),
-      // otherwise fall back to legacy single-question fields
-      let tRevealStart, tCtaStart;
-      if (config.intervals && config.intervals.length > 0) {
-        const lastInterval = config.intervals[config.intervals.length - 1];
-        tRevealStart = lastInterval.timerEnd || 9.0;
-        tCtaStart    = config.ctaStart || (tRevealStart + 2.5);
-      } else {
-        const tIntro   = 1.5;
-        const tQCard   = 2.5;
-        const tOpts    = 2.0;
-        const tCd      = Math.max(1, Number(config.countdownSecs) || 5);
-        tRevealStart   = tIntro + tQCard + tOpts + tCd;
-        tCtaStart      = tRevealStart + 2.5;
+      // Build intervals array
+      let intervals = config.intervals;
+      if (!intervals || intervals.length === 0) {
+        const cdSecs = Math.max(1, Number(config.countdownSecs) || 5);
+        const tRead = 4.0;
+        const tTimer = tRead + cdSecs;
+        const tReveal = tTimer + 2.5;
+        intervals = [{ index: 0, start: 0, readEnd: tRead, timerEnd: tTimer, revealEnd: tReveal, q: { countdownSecs: cdSecs } }];
       }
 
-      // Guard all times
-      tRevealStart = isFinite(tRevealStart) ? Math.max(0, tRevealStart) : 9.0;
-      tCtaStart    = isFinite(tCtaStart)    ? Math.max(0, tCtaStart)    : 11.5;
+      const tCtaStart = config.ctaStart || (intervals[intervals.length - 1].revealEnd);
+      const XFADE = 1.2;
 
-      if (bgAudioMode === 'synth') {
-        // Layer 1: Suspense drone (0 → tRevealStart)
-        const droneGain = offlineCtx.createGain();
-        droneGain.gain.setValueAtTime(0, 0);
-        droneGain.gain.linearRampToValueAtTime(0.24, 0.8);
-        droneGain.gain.setValueAtTime(0.24, tRevealStart);
-        droneGain.gain.linearRampToValueAtTime(0.001, tRevealStart + 0.1);
+      // Helper for sub-boom impacts
+      function addSubBoom(time, intensity) {
+        intensity = isFinite(intensity) ? intensity : 1.0;
+        time = isFinite(time) && time >= 0 ? time : 0;
+        const osc = offlineCtx.createOscillator();
+        const oscGain = offlineCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(75, time);
+        osc.frequency.exponentialRampToValueAtTime(28, time + 0.35);
+        oscGain.gain.setValueAtTime(0, time);
+        oscGain.gain.linearRampToValueAtTime(0.5 * intensity, time + 0.02);
+        oscGain.gain.exponentialRampToValueAtTime(0.001, time + 0.38);
+        osc.connect(oscGain);
+        oscGain.connect(masterGainNode);
+        osc.start(time);
+        osc.stop(time + 0.4);
+      }
 
-        const filter = offlineCtx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(240, 0);
-
-        [73.42, 110.0, 146.83].forEach(function(f) {
-          const osc = offlineCtx.createOscillator();
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(f, 0);
-          osc.connect(filter);
-          osc.start(0);
-          osc.stop(tRevealStart + 0.15);
+      // Helper for reveal chime arpeggios
+      function addRevealChime(revealTime) {
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach(function(freq, idx) {
+          const osc       = offlineCtx.createOscillator();
+          const gain      = offlineCtx.createGain();
+          const startTime = revealTime + (idx * 0.06);
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, startTime);
+          gain.gain.setValueAtTime(0, startTime);
+          gain.gain.linearRampToValueAtTime(0.38, startTime + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.7);
+          osc.connect(gain);
+          gain.connect(masterGainNode);
+          osc.start(startTime);
+          osc.stop(startTime + 0.75);
         });
-        filter.connect(droneGain);
-        droneGain.connect(masterGainNode);
+      }
 
-        // Layer 2: Sub-booms
-        function addSubBoom(time, intensity) {
-          intensity = isFinite(intensity) ? intensity : 1.0;
-          time = isFinite(time) && time >= 0 ? time : 0;
-          const osc = offlineCtx.createOscillator();
-          const oscGain = offlineCtx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(75, time);
-          osc.frequency.exponentialRampToValueAtTime(28, time + 0.35);
-          oscGain.gain.setValueAtTime(0, time);
-          oscGain.gain.linearRampToValueAtTime(0.5 * intensity, time + 0.02);
-          oscGain.gain.exponentialRampToValueAtTime(0.001, time + 0.38);
-          osc.connect(oscGain);
-          oscGain.connect(masterGainNode);
-          osc.start(time);
-          osc.stop(time + 0.4);
-        }
-
-        addSubBoom(0.2, 1.0);
-
-        // Layer 3: Countdown ticks — derive tick positions from intervals or fallback
-        if (config.intervals && config.intervals.length > 0) {
-          config.intervals.forEach(function(iv) {
-            const cdSecs = Math.max(1, Math.round(iv.timerEnd - iv.readEnd));
-            for (let c = 0; c < cdSecs; c++) {
-              const tickTime = iv.readEnd + c;
-              const pitch    = 520 + (c + 1) * 95;
-              const osc      = offlineCtx.createOscillator();
-              const oscGain  = offlineCtx.createGain();
-              osc.type = 'triangle';
-              osc.frequency.setValueAtTime(pitch, tickTime);
-              osc.frequency.exponentialRampToValueAtTime(pitch * 0.4, tickTime + 0.06);
-              oscGain.gain.setValueAtTime(0.38, tickTime);
-              oscGain.gain.exponentialRampToValueAtTime(0.001, tickTime + 0.07);
-              osc.connect(oscGain);
-              oscGain.connect(masterGainNode);
-              osc.start(tickTime);
-              osc.stop(tickTime + 0.08);
-              addSubBoom(tickTime, 0.85);
-            }
-          });
-        } else {
-          const cdSecs  = Math.max(1, Number(config.countdownSecs) || 5);
-          const cdStart = tRevealStart - cdSecs;
-          for (let c = 0; c < cdSecs; c++) {
-            const tickTime = cdStart + c;
-            const pitch    = 520 + (c + 1) * 95;
-            const osc      = offlineCtx.createOscillator();
-            const oscGain  = offlineCtx.createGain();
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(pitch, tickTime);
-            osc.frequency.exponentialRampToValueAtTime(pitch * 0.4, tickTime + 0.06);
-            oscGain.gain.setValueAtTime(0.38, tickTime);
-            oscGain.gain.exponentialRampToValueAtTime(0.001, tickTime + 0.07);
-            osc.connect(oscGain);
-            oscGain.connect(masterGainNode);
-            osc.start(tickTime);
-            osc.stop(tickTime + 0.08);
-            addSubBoom(tickTime, 0.85);
-          }
-        }
-
-      } else if (bgAudioMode === 'custom' && bgMusicObjectUrl) {
+      // Load custom MP3 if custom mode is active
+      let customDecodedBuffer = null;
+      if (bgAudioMode === 'custom' && bgMusicObjectUrl) {
         try {
           if (!window._cachedDecodedBgMusic || window._cachedBgMusicUrl !== bgMusicObjectUrl) {
-            const resp      = await fetch(bgMusicObjectUrl);
-            const arrayBuf  = await resp.arrayBuffer();
+            const resp = await fetch(bgMusicObjectUrl);
+            const arrayBuf = await resp.arrayBuffer();
             window._cachedDecodedBgMusic = await offlineCtx.decodeAudioData(arrayBuf);
             window._cachedBgMusicUrl = bgMusicObjectUrl;
           }
-          const bgSource  = offlineCtx.createBufferSource();
-          bgSource.buffer = window._cachedDecodedBgMusic;
-          bgSource.loop   = true;
-          const bgGain    = offlineCtx.createGain();
-          bgGain.gain.setValueAtTime(0.7, 0);
-          bgGain.gain.setValueAtTime(0.7, tRevealStart);
-          bgGain.gain.linearRampToValueAtTime(0.001, tRevealStart + 0.1);
-          bgSource.connect(bgGain);
-          bgGain.connect(masterGainNode);
-          bgSource.start(0);
-          bgSource.stop(tRevealStart + 0.15);
-        } catch (e) {}
+          customDecodedBuffer = window._cachedDecodedBgMusic;
+        } catch (e) {
+          console.warn('Could not decode custom audio for offline rendering:', e);
+        }
       }
 
-      // Layer 4: Reveal chime arpeggio
-      const notes = [523.25, 659.25, 783.99, 1046.50];
-      notes.forEach(function(freq, idx) {
-        const osc       = offlineCtx.createOscillator();
-        const gain      = offlineCtx.createGain();
-        const startTime = tRevealStart + (idx * 0.06);
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(freq, startTime);
-        gain.gain.setValueAtTime(0, startTime);
-        gain.gain.linearRampToValueAtTime(0.38, startTime + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.7);
-        osc.connect(gain);
-        gain.connect(masterGainNode);
-        osc.start(startTime);
-        osc.stop(startTime + 0.75);
+      // PROCESS EACH QUESTION INTERVAL IN SEQUENCE
+      intervals.forEach(function(iv) {
+        const tStart = Math.max(0, iv.start);
+        const tReadEnd = Math.max(tStart + 0.5, iv.readEnd);
+        const tFadeStart = Math.max(tStart, tReadEnd - XFADE);
+        const tTimerEnd = Math.max(tReadEnd + 1.0, iv.timerEnd);
+        const cdSecs = Math.max(1, Math.round(tTimerEnd - tReadEnd));
+
+        // 1. BACKGROUND TENSION MUSIC (Synth or Custom MP3)
+        if (bgAudioMode === 'synth') {
+          const droneGain = offlineCtx.createGain();
+          droneGain.gain.setValueAtTime(0, tStart);
+          droneGain.gain.linearRampToValueAtTime(0.24, tStart + 0.8);
+          droneGain.gain.setValueAtTime(0.24, tFadeStart);
+          droneGain.gain.linearRampToValueAtTime(0.0001, tReadEnd);
+
+          const filter = offlineCtx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(240, tStart);
+
+          [73.42, 110.0, 146.83].forEach(function(f) {
+            const osc = offlineCtx.createOscillator();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(f, tStart);
+            osc.connect(filter);
+            osc.start(tStart);
+            osc.stop(tReadEnd + 0.1);
+          });
+          filter.connect(droneGain);
+          droneGain.connect(masterGainNode);
+
+        } else if (customDecodedBuffer) {
+          // Play custom music from tStart to tReadEnd with exact fade-out ending at tReadEnd
+          const bgSource = offlineCtx.createBufferSource();
+          bgSource.buffer = customDecodedBuffer;
+          bgSource.loop = true;
+
+          const bgGain = offlineCtx.createGain();
+          bgGain.gain.setValueAtTime(0, tStart);
+          bgGain.gain.linearRampToValueAtTime(0.7, tStart + 0.3);
+          bgGain.gain.setValueAtTime(0.7, tFadeStart);
+          bgGain.gain.linearRampToValueAtTime(0.0001, tReadEnd);
+
+          bgSource.connect(bgGain);
+          bgGain.connect(masterGainNode);
+          bgSource.start(tStart);
+          bgSource.stop(tReadEnd + 0.1);
+        }
+
+        // 2. ENTRANCE SUB-BOOM
+        addSubBoom(tStart + 0.2, 1.0);
+
+        // 3. COUNTDOWN TICKS (During Timer Phase)
+        for (let c = 0; c < cdSecs; c++) {
+          const tickTime = tReadEnd + c;
+          const pitch = 520 + (c + 1) * 95;
+          const osc = offlineCtx.createOscillator();
+          const oscGain = offlineCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(pitch, tickTime);
+          osc.frequency.exponentialRampToValueAtTime(pitch * 0.4, tickTime + 0.06);
+          oscGain.gain.setValueAtTime(0.38, tickTime);
+          oscGain.gain.exponentialRampToValueAtTime(0.001, tickTime + 0.07);
+          osc.connect(oscGain);
+          oscGain.connect(masterGainNode);
+          osc.start(tickTime);
+          osc.stop(tickTime + 0.08);
+          addSubBoom(tickTime, 0.85);
+        }
+
+        // 4. ANSWER REVEAL CHIME (At Timer End)
+        addRevealChime(tTimerEnd);
       });
 
-      // Layer 5: CTA Voiceover
+      // 5. CTA OUTRO VOICEOVER
       const ctaSrc = ctaAudioObjectUrl || (ctaAudio && ctaAudio.src ? ctaAudio.src : null);
       if (ctaSrc && tCtaStart < totalDuration) {
         try {
-          const resp     = await fetch(ctaSrc);
+          const resp = await fetch(ctaSrc);
           const arrayBuf = await resp.arrayBuffer();
-          const decoded  = await offlineCtx.decodeAudioData(arrayBuf);
+          const decoded = await offlineCtx.decodeAudioData(arrayBuf);
           const ctaSource = offlineCtx.createBufferSource();
           ctaSource.buffer = decoded;
           ctaSource.connect(masterGainNode);
@@ -3614,9 +3610,6 @@
       return await offlineCtx.startRendering();
     }
 
-    // ==============================================================
-    // ⚡ FAST-EXPORT OFFLINE MP4 / WEBM RENDERING ENGINE (2–3 SECONDS)
-    // ==============================================================
     async function fastExportShort(format) {
       format = format || 'mp4';
       if (isExporting || isPlaying) return;
@@ -4752,52 +4745,73 @@
     }
 
     function startBulkModalPlayback() {
-      const item = bulkQueue[bulkModalActiveIndex];
-      if (!item) return;
+      if (!bulkQueue || bulkQueue.length === 0) return;
       initBulkModalCanvas();
       stopBulkModalPlayback();
 
       bulkModalIsPlaying = true;
       document.getElementById('bulkModalPlayBtn').innerText = '⏸ Pause';
 
+      const qPerVid = getBulkQPerVideo();
+      const batchStartIdx = Math.floor(bulkModalActiveIndex / qPerVid) * qPerVid;
+      const batchQuestions = bulkQueue.slice(batchStartIdx, batchStartIdx + qPerVid);
+      if (batchQuestions.length === 0) return;
+
       const tplName = document.getElementById('bulkTemplateTheme') ? document.getElementById('bulkTemplateTheme').value : 'obsidian-cobalt';
-      const tpl = TEMPLATES[tplName] || TEMPLATES['obsidian-cobalt'];
+      const tpl = getTemplateForBatchIndex(Math.floor(bulkModalActiveIndex / qPerVid), tplName);
       const cdSecs = getBulkCountdownSecs();
 
       const tRead = 4.0;
-      const tTimer = tRead + cdSecs;
-      const tReveal = tTimer + 2.5;
+      const tReveal = 2.5;
       const tCta = bulkCtaAudioObjectUrl ? bulkCtaAudioDuration : 4.0;
-      const totalDur = tReveal + tCta;
 
-      const singleQ = Object.assign({}, item, { countdownSecs: cdSecs });
-      const intervals = [{ index: 0, start: 0, readEnd: tRead, timerEnd: tTimer, revealEnd: tReveal, q: singleQ }];
+      const batchQsWithCd = batchQuestions.map(function(q) {
+        return Object.assign({}, q, { countdownSecs: cdSecs });
+      });
 
+      const intervals = [];
+      let cursor = 0;
+      batchQsWithCd.forEach(function(q, idx) {
+        const readEnd = cursor + tRead;
+        const timerEnd = readEnd + cdSecs;
+        const revealEnd = timerEnd + tReveal;
+        intervals.push({ index: idx, start: cursor, readEnd, timerEnd, revealEnd, q });
+        cursor = revealEnd;
+      });
+
+      const totalQDur = cursor;
+      const totalDur = totalQDur + tCta;
+
+      const firstQ = batchQuestions[0];
       const config = {
-        exam: item.exam || (document.getElementById('bulkDefaultExam') ? document.getElementById('bulkDefaultExam').value : 'OSSC CGL 2026'),
+        exam: firstQ.exam || (document.getElementById('bulkDefaultExam') ? document.getElementById('bulkDefaultExam').value : 'OSSC CGL 2026'),
         brand: (document.getElementById('bulkBrandName') || {}).value || 'OdishaExamPrep',
         cta: (document.getElementById('bulkCtaText') || {}).value || 'Visit website for 1,000+ Tests!',
         subscribeCta: (document.getElementById('bulkSubscribeCtaText') || {}).value || '🔔 SUBSCRIBE FOR DAILY QUIZZES & MOCKS 🚀',
         websiteName: (document.getElementById('bulkWebsiteName') || {}).value || 'OdishaExamPrep.in',
         websiteUrl: (document.getElementById('bulkWebsiteUrl') || {}).value || 'www.odishaexamprep.in',
         template: tpl,
-        questions: [singleQ],
-        questionsCount: 1,
-        intervals,
-        totalQuestionsDuration: tReveal,
-        ctaStart: tReveal,
-        tCta,
+        questions: batchQsWithCd,
+        questionsCount: batchQsWithCd.length,
+        intervals: intervals,
+        totalQuestionsDuration: totalQDur,
+        ctaStart: totalQDur,
+        tCta: tCta,
         totalDuration: totalDur
       };
 
       const startTime = performance.now();
       const XFADE = 1.2;
-      let droneStarted = false, droneFaded = false, lastTick = null, chimePlayed = false, boomPlayed = false;
 
-      // Start audio
-      if (bulkBgAudioMode === 'synth') {
-        startAtmosphericDrone();
-      }
+      // Track per-question live audio state
+      const qAudioState = intervals.map(() => ({
+        droneStarted: false,
+        droneFaded: false,
+        lastTickSec: null,
+        revealChimePlayed: false,
+        subBoomPlayed: false
+      }));
+      let ctaVoiceStarted = false;
 
       function renderBulkFrame(now) {
         if (!bulkModalIsPlaying) return;
@@ -4808,34 +4822,87 @@
           return;
         }
 
-        // Draw directly to main canvas context then blit to bulk modal canvas
         renderShortsFrameAtTime(elapsed, totalDur, config);
         const modalCvs = document.getElementById('bulkPreviewCanvas');
         if (modalCvs && bulkModalCtx) {
           bulkModalCtx.drawImage(canvas, 0, 0, modalCvs.width, modalCvs.height);
         }
 
-        // Audio triggers
-        if (elapsed < tReveal) {
-          if (elapsed >= 0.2 && !boomPlayed) {
-            boomPlayed = true;
-            playCinematicSubBoom(1.0);
-          }
-          if (elapsed >= (tRead - XFADE) && !droneFaded) {
-            droneFaded = true;
-            stopAtmosphericDrone();
-          }
-          if (elapsed >= tRead && elapsed < tTimer) {
-            const cdElapsed = elapsed - tRead;
-            const curTick = Math.floor(cdElapsed);
-            if (curTick !== lastTick && curTick < cdSecs) {
-              lastTick = curTick;
-              playCountdownTick(curTick, cdSecs);
+        // Process per-question audio triggers
+        if (elapsed < totalQDur) {
+          const activeInterval = intervals.find(it => elapsed >= it.start && elapsed < it.revealEnd);
+          if (activeInterval) {
+            const idx = activeInterval.index;
+            const state = qAudioState[idx];
+            const qElapsed = elapsed - activeInterval.start;
+
+            // ① Start tension music
+            if (qElapsed < (4.0 - XFADE) && !state.droneStarted) {
+              state.droneStarted = true;
+              if (bulkBgAudioMode === 'synth') {
+                startAtmosphericDrone();
+              } else if (bulkBgAudioMode === 'custom' && bgMusicAudio && bulkBgMusicObjectUrl) {
+                bgMusicAudio.src = bulkBgMusicObjectUrl;
+                bgMusicAudio.currentTime = 0;
+                if (!isMuted) bgMusicAudio.play();
+              }
+            }
+
+            // ② Sub-boom impact
+            if (qElapsed >= 0.2 && !state.subBoomPlayed) {
+              state.subBoomPlayed = true;
+              playCinematicSubBoom(1.0);
+            }
+
+            // ③ Fade out tension music before timer starts
+            const fadeStart = activeInterval.readEnd - XFADE;
+            if (elapsed >= fadeStart && !state.droneFaded) {
+              state.droneFaded = true;
+              if (bulkBgAudioMode === 'synth') {
+                stopAtmosphericDrone();
+              } else if (bulkBgAudioMode === 'custom' && bgMusicAudio && !bgMusicAudio.paused) {
+                const startVol = bgMusicAudio.volume;
+                const steps = 24;
+                const stepTime = (XFADE * 1000) / steps;
+                let step = 0;
+                const fadeInterval = setInterval(() => {
+                  step++;
+                  bgMusicAudio.volume = Math.max(0, startVol * (1 - step / steps));
+                  if (step >= steps) {
+                    clearInterval(fadeInterval);
+                    bgMusicAudio.pause();
+                    bgMusicAudio.volume = startVol;
+                  }
+                }, stepTime);
+              }
+            }
+
+            // ④ Countdown ticks
+            if (elapsed >= activeInterval.readEnd && elapsed < activeInterval.timerEnd) {
+              const cdElapsed = elapsed - activeInterval.readEnd;
+              const remaining = Math.max(1, Math.ceil(activeInterval.q.countdownSecs - cdElapsed));
+              if (remaining !== state.lastTickSec) {
+                state.lastTickSec = remaining;
+                playCountdownTick(520 + (activeInterval.q.countdownSecs - remaining) * 95);
+              }
+            }
+
+            // ⑤ Reveal chime
+            if (elapsed >= activeInterval.timerEnd && !state.revealChimePlayed) {
+              state.revealChimePlayed = true;
+              stopAtmosphericDrone();
+              stopTimerTensionMusic(0.3);
+              if (bgMusicAudio) bgMusicAudio.pause();
+              playRevealChime();
             }
           }
-          if (elapsed >= tTimer && !chimePlayed) {
-            chimePlayed = true;
-            playRevealChime();
+        } else {
+          // CTA Outro Voice
+          if (!ctaVoiceStarted && bulkCtaAudioObjectUrl && ctaAudio) {
+            ctaVoiceStarted = true;
+            ctaAudio.src = bulkCtaAudioObjectUrl;
+            ctaAudio.currentTime = 0;
+            if (!isMuted) ctaAudio.play();
           }
         }
 
@@ -4850,6 +4917,8 @@
       if (bulkModalAnimId) cancelAnimationFrame(bulkModalAnimId);
       stopAtmosphericDrone();
       stopTimerTensionMusic(0.2);
+      if (bgMusicAudio) bgMusicAudio.pause();
+      if (ctaAudio) ctaAudio.pause();
       const playBtn = document.getElementById('bulkModalPlayBtn');
       if (playBtn) playBtn.innerText = '▶ Play Video';
     }

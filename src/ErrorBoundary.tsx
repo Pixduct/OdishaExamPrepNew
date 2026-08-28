@@ -22,6 +22,10 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   static getDerivedStateFromError(error: any): State {
+    const message = error?.message || '';
+    if (message.includes('WebSocket') || message.includes('ws://') || message.includes('wss://')) {
+      return { hasError: false, error: null };
+    }
     return { hasError: true, error };
   }
 

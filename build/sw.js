@@ -1,7 +1,7 @@
 // OdishaExamPrep Push Notification & Offline Service Worker
 // Handles push events, offline caching, and PWA WebAPK installability
 
-const CACHE_NAME = 'oep-pwa-v10';
+const CACHE_NAME = 'oep-pwa-v12';
 const STATIC_ASSETS = [
   '/',
   '/favicon.svg',
@@ -45,9 +45,15 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Bypass service worker for API endpoints and Supabase requests
+  // Bypass service worker for API endpoints, Supabase requests, and Shorts Creator studio tool
   const url = new URL(request.url);
-  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/app-api/') || url.hostname.includes('supabase.co')) {
+  if (
+    url.pathname.startsWith('/api/') || 
+    url.pathname.startsWith('/app-api/') || 
+    url.pathname.includes('shorts-creator') || 
+    url.pathname.includes('memory-shorts-creator') || 
+    url.hostname.includes('supabase.co')
+  ) {
     return;
   }
 

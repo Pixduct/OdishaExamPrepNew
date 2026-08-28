@@ -1,6 +1,29 @@
 import { supabase } from './supabase';
 import { cacheService } from './cacheService';
 
+const inFlightPromises = new Map<string, Promise<any>>();
+
+export function fetchWithInFlightDeduplication<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
+  const cached = cacheService.get<T>(key);
+  if (cached) return Promise.resolve(cached);
+
+  if (inFlightPromises.has(key)) {
+    return inFlightPromises.get(key) as Promise<T>;
+  }
+
+  const promise = fetcher()
+    .then((result) => {
+      cacheService.set(key, result);
+      return result;
+    })
+    .finally(() => {
+      inFlightPromises.delete(key);
+    });
+
+  inFlightPromises.set(key, promise);
+  return promise;
+}
+
 let schemaHasDiagram: boolean | null = null;
 
 async function checkSchemaHasDiagram(): Promise<boolean> {
@@ -320,17 +343,14 @@ export const examService = {
   },
 
   async getAllTestSeries() {
-    const cached = cacheService.get<TestSeries[]>('all_test_series');
-    if (cached) return cached;
-
-    const { data, error } = await supabase
-      .from('testSeries')
-      .select('*')
-      .order('sortOrder', { ascending: true });
-    if (error) throw error;
-    const series = ((data || []) as TestSeries[]).filter(s => !s.is_archived);
-    cacheService.set('all_test_series', series);
-    return series;
+    return fetchWithInFlightDeduplication('all_test_series', async () => {
+      const { data, error } = await supabase
+        .from('testSeries')
+        .select('*')
+        .order('sortOrder', { ascending: true });
+      if (error) throw error;
+      return ((data || []) as TestSeries[]).filter(s => !s.is_archived);
+    });
   },
 
   async deleteTestSeries(id: string) {
@@ -455,48 +475,46 @@ export const examService = {
    * Use this for listing tests; use getQuestionsForMockTest() when starting a test.
    */
   async getAllMockTestsLite() {
-    const cached = cacheService.get<MockTest[]>('all_mock_tests_lite');
-    if (cached) return cached;
+    return fetchWithInFlightDeduplication('all_mock_tests_lite', async () => {
+      const { data: tests, error } = await supabase
+        .from('mockTests')
+        .select('id, title, durationMinutes, totalMarks, negativeMarking, seriesId, sortOrder, is_archived, scheduled_at')
+        .order('sortOrder', { ascending: true });
+      if (error) throw error;
 
-    const { data: tests, error } = await supabase
-      .from('mockTests')
-      .select('id, title, durationMinutes, totalMarks, negativeMarking, seriesId, sortOrder, is_archived, scheduled_at')
-      .order('sortOrder', { ascending: true });
-    if (error) throw error;
+      const filteredTests = (tests ?? []).filter(t => !t.is_archived);
+      // Fast paginated query to get exact question counts for all mock tests
+      const testIds = filteredTests.map(t => `mockTest__${t.id}`).filter(Boolean);
+      const countMap = await fetchTopicCounts(testIds);
 
-    const filteredTests = (tests ?? []).filter(t => !t.is_archived);
-    // Fast paginated query to get exact question counts for all mock tests
-    const testIds = filteredTests.map(t => `mockTest__${t.id}`).filter(Boolean);
-    const countMap = await fetchTopicCounts(testIds);
+      // The `seriesId` column may contain either:
+      //   - A UUID string (for tests linked to a real testSeries row)
+      //   - A JSON/JSONB object like {examId, isPremium, category, price, ...}
+      //     (used by the admin panel to store exam metadata inline)
+      // Parse it to expose virtual `examId` and `isPremium` fields on each test.
+      const result = filteredTests.map((t: any) => {
+        let examId: string | null = t.examId || null;
+        let isPremium = t.isPremium ?? false;
+        let category: string | null = t.category || null;
 
-    // The `seriesId` column may contain either:
-    //   - A UUID string (for tests linked to a real testSeries row)
-    //   - A JSON/JSONB object like {examId, isPremium, category, price, ...}
-    //     (used by the admin panel to store exam metadata inline)
-    // Parse it to expose virtual `examId` and `isPremium` fields on each test.
-    const result = filteredTests.map((t: any) => {
-      let examId: string | null = t.examId || null;
-      let isPremium = t.isPremium ?? false;
-      let category: string | null = t.category || null;
+        let seriesData = t.seriesId;
+        if (typeof seriesData === 'string' && seriesData.startsWith('{')) {
+          try { seriesData = JSON.parse(seriesData); } catch(e) {}
+        }
 
-      let seriesData = t.seriesId;
-      if (typeof seriesData === 'string' && seriesData.startsWith('{')) {
-        try { seriesData = JSON.parse(seriesData); } catch(e) {}
-      }
+        if (seriesData && typeof seriesData === 'object') {
+          examId   = examId   || seriesData.examId   || null;
+          isPremium = seriesData.isPremium ?? isPremium;
+          category  = category  || seriesData.category  || null;
+        }
 
-      if (seriesData && typeof seriesData === 'object') {
-        examId   = examId   || seriesData.examId   || null;
-        isPremium = seriesData.isPremium ?? isPremium;
-        category  = category  || seriesData.category  || null;
-      }
+        const _questionCount = countMap[`mockTest__${t.id}`] || 0;
 
-      const _questionCount = countMap[`mockTest__${t.id}`] || 0;
+        return { ...t, examId, isPremium, category, _questionCount };
+      }) as MockTest[];
 
-      return { ...t, examId, isPremium, category, _questionCount };
-    }) as MockTest[];
-
-    cacheService.set('all_mock_tests_lite', result);
-    return result;
+      return result;
+    });
   },
 
   async deleteMockTest(id: string) {
@@ -597,17 +615,14 @@ export const examService = {
   },
 
   async getAllExams() {
-    const cached = cacheService.get<Exam[]>('all_exams');
-    if (cached) return cached;
-
-    const { data, error } = await supabase
-      .from('exams')
-      .select('*')
-      .order('sortOrder', { ascending: true });
-    if (error) throw error;
-    const exams = ((data || []) as Exam[]).filter(ex => !ex.is_archived);
-    cacheService.set('all_exams', exams);
-    return exams;
+    return fetchWithInFlightDeduplication('all_exams', async () => {
+      const { data, error } = await supabase
+        .from('exams')
+        .select('*')
+        .order('sortOrder', { ascending: true });
+      if (error) throw error;
+      return ((data || []) as Exam[]).filter(ex => !ex.is_archived);
+    });
   },
   async deleteExam(id: string) {
     // 1. Fetch the exam details to get the name
@@ -822,78 +837,76 @@ export const examService = {
   },
 
   async getAllQuestionBanks() {
-    const cached = cacheService.get<QuestionBank[]>('all_question_banks');
-    if (cached) return cached;
+    return fetchWithInFlightDeduplication('all_question_banks', async () => {
+      const { data, error } = await supabase
+        .from('questionBanks')
+        .select('id, examId, type, title, questionCount, tagline, image, isPremium, pdfUrl, hasPracticeMode, target_mode, sortOrder, createdAt, is_archived, scheduled_at')
+        .order('sortOrder', { ascending: true });
+      if (error) throw error;
 
-    const { data, error } = await supabase
-      .from('questionBanks')
-      .select('id, examId, type, title, questionCount, tagline, image, isPremium, pdfUrl, hasPracticeMode, target_mode, sortOrder, createdAt, is_archived, scheduled_at')
-      .order('sortOrder', { ascending: true });
-    if (error) throw error;
+      const banks = ((data || []) as QuestionBank[]).filter(b => !b.is_archived);
+      if (banks && banks.length > 0) {
+        try {
+          // Fast, RLS-bypassing aggregate topic counts via security definer RPC
+          const { data: topicData, error: rpcErr } = await supabase
+            .rpc('get_question_topic_counts');
 
-    const banks = ((data || []) as QuestionBank[]).filter(b => !b.is_archived);
-    if (banks && banks.length > 0) {
-      try {
-        // Fast, RLS-bypassing aggregate topic counts via security definer RPC
-        const { data: topicData, error: rpcErr } = await supabase
-          .rpc('get_question_topic_counts');
+          const topicCounts: Record<string, number> = {};
+          if (!rpcErr && Array.isArray(topicData)) {
+            topicData.forEach((row: { topic: string; question_count: number | string }) => {
+              if (row.topic) {
+                const cnt = Number(row.question_count) || 0;
+                topicCounts[row.topic] = cnt;
+                const clean = row.topic.toLowerCase().replace(/(\s*-\s*practice session)+$/gi, '').trim();
+                topicCounts[clean] = cnt;
+              }
+            });
+          }
 
-        const topicCounts: Record<string, number> = {};
-        if (!rpcErr && Array.isArray(topicData)) {
-          topicData.forEach((row: { topic: string; question_count: number | string }) => {
-            if (row.topic) {
-              const cnt = Number(row.question_count) || 0;
-              topicCounts[row.topic] = cnt;
-              const clean = row.topic.toLowerCase().replace(/(\s*-\s*practice session)+$/gi, '').trim();
-              topicCounts[clean] = cnt;
+          banks.forEach((b) => {
+            const rawTitle = b.title || '';
+            const cleanTitle = rawTitle.toLowerCase().replace(/(\s*-\s*practice session)+$/gi, '').trim();
+
+            let resolvedCount = topicCounts[rawTitle] || topicCounts[cleanTitle] || 0;
+
+            // Fuzzy prefix match fallback from RPC data
+            if (resolvedCount === 0 && cleanTitle) {
+              for (const [top, cnt] of Object.entries(topicCounts)) {
+                if (top && (top.startsWith(cleanTitle) || cleanTitle.startsWith(top))) {
+                  resolvedCount = cnt;
+                  break;
+                }
+              }
+            }
+
+            // Fallback: embedded questionsData in pdfUrl column
+            if (resolvedCount === 0 && b.pdfUrl && typeof b.pdfUrl === 'string' && b.pdfUrl.startsWith('{')) {
+              try {
+                const parsed = JSON.parse(b.pdfUrl);
+                if (parsed && Array.isArray(parsed.questionsData) && parsed.questionsData.length > 0) {
+                  resolvedCount = parsed.questionsData.length;
+                } else if (Array.isArray(parsed) && parsed.length > 0 && (parsed[0].questionText || parsed[0].question)) {
+                  resolvedCount = parsed.length;
+                }
+              } catch (_e) {}
+            }
+
+            // Fallback: use database stored questionCount (now synced to actual question counts)
+            if (resolvedCount === 0 && typeof b.questionCount === 'number' && b.questionCount > 0) {
+              resolvedCount = b.questionCount;
+            }
+
+            b.practiceQuestionCount = resolvedCount;
+            if (resolvedCount > 0) {
+              b.questionCount = resolvedCount;
             }
           });
+        } catch (err) {
+          console.error('Failed to fetch actual question counts for question banks:', err);
         }
-
-        banks.forEach((b) => {
-          const rawTitle = b.title || '';
-          const cleanTitle = rawTitle.toLowerCase().replace(/(\s*-\s*practice session)+$/gi, '').trim();
-
-          let resolvedCount = topicCounts[rawTitle] || topicCounts[cleanTitle] || 0;
-
-          // Fuzzy prefix match fallback from RPC data
-          if (resolvedCount === 0 && cleanTitle) {
-            for (const [top, cnt] of Object.entries(topicCounts)) {
-              if (top && (top.startsWith(cleanTitle) || cleanTitle.startsWith(top))) {
-                resolvedCount = cnt;
-                break;
-              }
-            }
-          }
-
-          // Fallback: embedded questionsData in pdfUrl column
-          if (resolvedCount === 0 && b.pdfUrl && typeof b.pdfUrl === 'string' && b.pdfUrl.startsWith('{')) {
-            try {
-              const parsed = JSON.parse(b.pdfUrl);
-              if (parsed && Array.isArray(parsed.questionsData) && parsed.questionsData.length > 0) {
-                resolvedCount = parsed.questionsData.length;
-              } else if (Array.isArray(parsed) && parsed.length > 0 && (parsed[0].questionText || parsed[0].question)) {
-                resolvedCount = parsed.length;
-              }
-            } catch (_e) {}
-          }
-
-          // Fallback: use database stored questionCount (now synced to actual question counts)
-          if (resolvedCount === 0 && typeof b.questionCount === 'number' && b.questionCount > 0) {
-            resolvedCount = b.questionCount;
-          }
-
-          b.practiceQuestionCount = resolvedCount;
-          if (resolvedCount > 0) {
-            b.questionCount = resolvedCount;
-          }
-        });
-      } catch (err) {
-        console.error('Failed to fetch actual question counts for question banks:', err);
       }
-    }
-    cacheService.set('all_question_banks', banks as QuestionBank[]);
-    return banks as QuestionBank[];
+      return banks as QuestionBank[];
+    });
   },
 
   async deleteQuestionBank(id: string) {

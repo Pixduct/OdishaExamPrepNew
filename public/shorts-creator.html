@@ -576,12 +576,12 @@
           <span style="font-size: 0.72rem; background: rgba(245,158,11,0.25); color: #FCD34D; padding: 2px 8px; border-radius: 6px; font-weight: 900;">100K YOUTUBER SUITE</span>
         </label>
         <select id="templateTheme" class="form-control" style="width: 100%; margin-top: 0.5rem; font-weight: 700; background: var(--bg-card); color: #FFF; border: 1.5px solid var(--border-color); border-radius: 8px; padding: 0.75rem 0.85rem; font-size: 0.95rem; cursor: pointer;" onchange="handleTemplateChange()">
-          <option value="obsidian-cobalt" selected>🌌 1. Obsidian Cobalt (Default • Pro Tech & GK)</option>
-          <option value="royal-gold">👑 2. Royal Gold & Onyx (Luxury • Top Rankers / OPSC ASO)</option>
-          <option value="crimson-danger">🔥 3. Crimson Danger (Adrenaline • 99% Fail Challenge)</option>
-          <option value="cyber-mint">⚡ 4. Cyber Neon Mint (Gamified • High-Energy Quiz)</option>
-          <option value="galactic-purple">🔮 5. Galactic Purple (Studio • Modern AI Academy)</option>
-          <option value="slate-academy">🏛️ 6. Slate Academy (Official • Prestigious Exam Authority)</option>
+          <option value="obsidian-cobalt" selected>🏛️ 1. Neo-Glass Studio (Clean Modern Glass • Cobalt)</option>
+          <option value="royal-gold">👑 2. Royal Diamond Spotlight (KBC TV Quiz • Gold Hexagons)</option>
+          <option value="cyber-mint">⚡ 3. 2x2 Quad Arena (Game-Show Battle • Dual-Column Grid)</option>
+          <option value="crimson-danger">🔥 4. Cyberpunk Neon HUD (High-Tension • Laser Chamfer Red)</option>
+          <option value="galactic-purple">🔮 5. Neon Hologram Arcade (Cyber Glow • Electric Violet)</option>
+          <option value="slate-academy">📜 6. Minimalist Gazette (Official UPSC • Double Border Slate)</option>
         </select>
       </div>
       
@@ -700,6 +700,15 @@
               <button type="button" class="btn" onclick="document.getElementById('bgAudioInput').click()">🔄 Replace</button>
               <button type="button" class="btn btn-danger" onclick="removeBgAudio()">🗑️ Remove</button>
             </div>
+
+            <!-- Volume Slider for Custom Suspense MP3 -->
+            <div style="margin-top: 0.75rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 0.55rem 0.8rem; display: flex; align-items: center; justify-content: space-between; gap: 0.8rem;">
+              <div style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.78rem; font-weight: 800; color: #93C5FD; white-space: nowrap;">
+                <span>🔊 Music Volume:</span>
+                <span id="bgMusicVolumeLabel" style="color: #38BDF8; font-weight: 900; min-width: 38px;">70%</span>
+              </div>
+              <input type="range" id="bgMusicVolumeSlider" min="0" max="100" value="70" style="flex: 1; accent-color: #3B82F6; cursor: pointer; height: 6px;" oninput="handleBgVolumeChange(this.value)">
+            </div>
           </div>
         </div>
 
@@ -761,6 +770,30 @@
             <span class="badge-info" id="audioDurationBadge">Duration: 0.0s</span>
           </div>
         </div>
+
+        <div class="form-group col-span-2" style="background: rgba(37,99,235,0.06); padding: 0.85rem; border-radius: 12px; border: 1.5px solid rgba(59,130,246,0.35); margin-top: 0.4rem;">
+          <div style="font-weight: 800; color: #93C5FD; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+            <span>🎬 Website Showcase Screen Recording (Optional)</span>
+            <span style="font-size: 0.68rem; background: rgba(16,185,129,0.2); color: #6EE7B7; padding: 2px 8px; border-radius: 6px; font-weight: 800;">2-PHASE OUTRO PRO</span>
+          </div>
+          <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+            Upload a mobile screen recording (.MP4 / .WEBM) of your real website. Phase 1 showcases your live platform in a giant 3D device frame before transitioning to the CTA buttons!
+          </div>
+          <div class="file-upload-box" style="padding: 0.65rem; cursor: pointer;" onclick="document.getElementById('showcaseVideoInput').click()">
+            <div style="text-align: left;">
+              <div id="showcaseVideoFileName" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">➕ Click to Upload Website Demo Video (.MP4)</div>
+            </div>
+            <button type="button" class="btn" style="pointer-events: none; padding: 0.25rem 0.6rem; font-size: 0.75rem;">Select Video</button>
+          </div>
+          <input type="file" id="showcaseVideoInput" accept="video/mp4,video/webm" style="display: none;" onchange="handleShowcaseVideoUpload(event)">
+
+          <div class="audio-controls-row" id="showcaseVideoControlsRow" style="display: none; margin-top: 0.5rem;">
+            <button type="button" class="btn" onclick="previewShowcaseVideo()"><span id="showcaseVideoPlayIcon">▶</span> Preview Video</button>
+            <button type="button" class="btn" onclick="document.getElementById('showcaseVideoInput').click()">🔄 Replace</button>
+            <button type="button" class="btn btn-danger" onclick="removeShowcaseVideo()">🗑️ Remove</button>
+            <span class="badge-info" id="showcaseVideoDurationBadge">Duration: 0.0s</span>
+          </div>
+        </div>
       </div>
 
       <!-- 100K CREATOR COVER CUSTOMIZATION SECTION (Visible in Cover Mode) -->
@@ -818,6 +851,37 @@
         <button class="btn" id="fastExportWebmBtn" onclick="fastExportShort('webm')" style="font-size: 0.75rem; color: var(--text-muted);">
           📥 Or Download as .WebM
         </button>
+      </div>
+
+      <!-- SINGLE CREATOR 3-PHASE TIMING INSPECTOR -->
+      <div id="singleTimingInspector" style="width: 100%; max-width: 320px; background: rgba(15, 23, 42, 0.75); border: 1.5px solid rgba(59, 130, 246, 0.35); border-radius: 12px; padding: 0.75rem; box-shadow: 0 4px 16px rgba(0,0,0,0.3);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+          <div style="font-weight: 800; font-size: 0.76rem; color: #93C5FD;">⏱️ TIMING & PHASE FLOW</div>
+          <div style="display: flex; align-items: center; gap: 0.35rem;">
+            <span id="singleTotalDurBadge" style="background: rgba(37,99,235,0.25); color: #93C5FD; border: 1px solid rgba(59,130,246,0.4); font-size: 0.68rem; font-weight: 800; padding: 1px 6px; border-radius: 5px;">Total: 0.0s</span>
+            <span id="singleCurrentTimeBadge" style="background: rgba(16,185,129,0.2); color: #6EE7B7; border: 1px solid rgba(16,185,129,0.4); font-size: 0.68rem; font-weight: 800; padding: 1px 6px; border-radius: 5px;">0.0s</span>
+          </div>
+        </div>
+
+        <!-- Live Progress Bar -->
+        <div style="width: 100%; height: 5px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; margin-bottom: 0.5rem;">
+          <div id="singleLiveProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #38BDF8 0%, #10B981 60%, #EF4444 100%); border-radius: 999px; transition: width 0.05s linear;"></div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+          <div id="singlePhasePill1" style="display: flex; align-items: center; justify-content: space-between; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 6px; padding: 0.3rem 0.5rem; font-size: 0.7rem;">
+            <span>🎯 <b>Phase 1: MCQ Quiz</b></span>
+            <span id="singlePhaseTime1" style="font-weight: 800; color: #38BDF8; font-family: monospace;">0.0s – 11.5s</span>
+          </div>
+          <div id="singlePhasePill2" style="display: flex; align-items: center; justify-content: space-between; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 6px; padding: 0.3rem 0.5rem; font-size: 0.7rem;">
+            <span>🎬 <b>Phase 2: Website Demo</b></span>
+            <span id="singlePhaseTime2" style="font-weight: 800; color: #34D399; font-family: monospace;">11.5s – 14.3s</span>
+          </div>
+          <div id="singlePhasePill3" style="display: flex; align-items: center; justify-content: space-between; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 6px; padding: 0.3rem 0.5rem; font-size: 0.7rem;">
+            <span>🔔 <b>Phase 3: Final CTA</b></span>
+            <span id="singlePhaseTime3" style="font-weight: 800; color: #F87171; font-family: monospace;">14.3s – 16.8s</span>
+          </div>
+        </div>
       </div>
 
       <!-- COVER PREVIEW CONTROLS -->
@@ -958,15 +1022,15 @@
             <label style="font-weight: 700;">🔢 Questions Per Video</label>
             <div class="correct-answer-selector" style="margin-top: 0.35rem;">
               <label class="radio-pill">
-                <input type="radio" name="bulkQPerVideo" value="1" checked onchange="updateBulkVideoEstimate()">
+                <input type="radio" name="bulkQPerVideo" value="1" checked onchange="handleBulkSettingsChange()">
                 <span>1 Question</span>
               </label>
               <label class="radio-pill">
-                <input type="radio" name="bulkQPerVideo" value="2" onchange="updateBulkVideoEstimate()">
+                <input type="radio" name="bulkQPerVideo" value="2" onchange="handleBulkSettingsChange()">
                 <span>2 Questions</span>
               </label>
               <label class="radio-pill">
-                <input type="radio" name="bulkQPerVideo" value="3" onchange="updateBulkVideoEstimate()">
+                <input type="radio" name="bulkQPerVideo" value="3" onchange="handleBulkSettingsChange()">
                 <span>3 Questions</span>
               </label>
             </div>
@@ -976,15 +1040,15 @@
             <label style="font-weight: 700;">⏱️ Countdown Timer</label>
             <div class="correct-answer-selector" style="margin-top: 0.35rem;">
               <label class="radio-pill">
-                <input type="radio" name="bulkCountdown" value="3">
+                <input type="radio" name="bulkCountdown" value="3" onchange="handleBulkSettingsChange()">
                 <span>3 Seconds</span>
               </label>
               <label class="radio-pill">
-                <input type="radio" name="bulkCountdown" value="5" checked>
+                <input type="radio" name="bulkCountdown" value="5" checked onchange="handleBulkSettingsChange()">
                 <span>5 Seconds</span>
               </label>
               <label class="radio-pill">
-                <input type="radio" name="bulkCountdown" value="7">
+                <input type="radio" name="bulkCountdown" value="7" onchange="handleBulkSettingsChange()">
                 <span>7 Seconds</span>
               </label>
             </div>
@@ -992,13 +1056,13 @@
 
           <div class="form-group" style="margin-bottom: 0;">
             <label style="font-weight: 700;">🎨 Visual Template Theme</label>
-            <select id="bulkTemplateTheme" style="background: var(--bg-card); color: #FFF; border: 1.5px solid var(--border-color); border-radius: 8px; padding: 0.55rem; width: 100%; margin-top: 0.35rem; font-weight: 600;">
-              <option value="obsidian-cobalt" selected>🌌 1. Obsidian Cobalt (Default • Pro Tech & GK)</option>
-              <option value="royal-gold">👑 2. Royal Gold & Onyx (Luxury)</option>
-              <option value="crimson-danger">🔥 3. Crimson Danger (99% Fail Warning)</option>
-              <option value="cyber-mint">⚡ 4. Cyber Neon Mint (Gamified)</option>
-              <option value="galactic-purple">🔮 5. Galactic Purple (Studio)</option>
-              <option value="slate-academy">🏛️ 6. Slate Academy (Official)</option>
+            <select id="bulkTemplateTheme" onchange="handleBulkSettingsChange()" style="background: var(--bg-card); color: #FFF; border: 1.5px solid var(--border-color); border-radius: 8px; padding: 0.55rem; width: 100%; margin-top: 0.35rem; font-weight: 600;">
+              <option value="obsidian-cobalt" selected>🏛️ 1. Neo-Glass Studio (Clean Modern Glass • Cobalt)</option>
+              <option value="royal-gold">👑 2. Royal Diamond Spotlight (KBC TV Quiz • Gold Hexagons)</option>
+              <option value="cyber-mint">⚡ 3. 2x2 Quad Arena (Game-Show Battle • Dual-Column Grid)</option>
+              <option value="crimson-danger">🔥 4. Cyberpunk Neon HUD (High-Tension • Laser Chamfer Red)</option>
+              <option value="galactic-purple">🔮 5. Neon Hologram Arcade (Cyber Glow • Electric Violet)</option>
+              <option value="slate-academy">📜 6. Minimalist Gazette (Official UPSC • Double Border Slate)</option>
             </select>
           </div>
         </div>
@@ -1013,35 +1077,52 @@
             <label style="font-weight: 700;">Background Tension Audio</label>
             <div class="correct-answer-selector" style="margin-top: 0.35rem;">
               <label class="radio-pill">
-                <input type="radio" name="bulkBgAudio" value="synth" checked onchange="handleBulkAudioModeChange(this.value)">
+                <input type="radio" name="bulkBgAudio" value="synth" checked onchange="handleBulkAudioModeChange(this.value); handleBulkSettingsChange();">
                 <span>🎛️ Synth Drone</span>
               </label>
               <label class="radio-pill">
-                <input type="radio" name="bulkBgAudio" value="custom" onchange="handleBulkAudioModeChange(this.value)">
+                <input type="radio" name="bulkBgAudio" value="custom" onchange="handleBulkAudioModeChange(this.value); handleBulkSettingsChange();">
                 <span>📁 Custom MP3</span>
               </label>
               <label class="radio-pill">
-                <input type="radio" name="bulkBgAudio" value="muted" onchange="handleBulkAudioModeChange(this.value)">
+                <input type="radio" name="bulkBgAudio" value="muted" onchange="handleBulkAudioModeChange(this.value); handleBulkSettingsChange();">
                 <span>🔇 Mute</span>
               </label>
             </div>
           </div>
 
           <div id="bulkCustomBgAudioBox" style="display: none; margin-bottom: 0.9rem;">
+            <!-- Multi-Track Suspense Music Playlist -->
+            <div style="font-size: 0.78rem; font-weight: 700; color: #93C5FD; margin-bottom: 0.35rem; letter-spacing: 0.03em;">
+              🎵 SUSPENSE MUSIC PLAYLIST <span style="color: var(--text-muted); font-weight: 600;">(Auto-Rotates per Video)</span>
+            </div>
             <div class="file-upload-box" style="padding: 0.65rem; cursor: pointer;" onclick="document.getElementById('bulkBgAudioInput').click()">
-              <div id="bulkBgAudioFileName" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-align: left;">Click to Select Suspense Music MP3</div>
+              <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-align: left;">➕ Add Suspense MP3 Track(s)</div>
               <button type="button" class="btn" style="pointer-events: none; padding: 0.25rem 0.6rem; font-size: 0.75rem;">Select MP3</button>
             </div>
-            <input type="file" id="bulkBgAudioInput" accept="audio/mp3,audio/wav,audio/mpeg" style="display: none;" onchange="handleBulkBgAudioUpload(event)">
+            <input type="file" id="bulkBgAudioInput" accept="audio/mp3,audio/wav,audio/mpeg" multiple style="display: none;" onchange="handleBulkBgAudioUpload(event)">
+            <div id="bulkBgMusicTrackList" style="margin-top: 0.4rem; display: flex; flex-direction: column; gap: 0.3rem;"></div>
+
+            <!-- Volume Slider for Custom Suspense MP3 -->
+            <div style="margin-top: 0.6rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 0.5rem 0.75rem; display: flex; align-items: center; justify-content: space-between; gap: 0.8rem;">
+              <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; font-weight: 800; color: #93C5FD; white-space: nowrap;">
+                <span>🔊 Music Volume:</span>
+                <span id="bulkBgMusicVolumeLabel" style="color: #38BDF8; font-weight: 900; min-width: 36px;">70%</span>
+              </div>
+              <input type="range" id="bulkBgMusicVolumeSlider" min="0" max="100" value="70" style="flex: 1; accent-color: #3B82F6; cursor: pointer; height: 6px;" oninput="handleBgVolumeChange(this.value)">
+            </div>
           </div>
 
           <div class="form-group" style="margin-bottom: 0;">
-            <label style="font-weight: 700;">🎙️ CTA Voice Audio (Optional)</label>
-            <div class="file-upload-box" style="padding: 0.65rem; cursor: pointer; margin-top: 0.35rem;" onclick="document.getElementById('bulkCtaAudioInput').click()">
-              <div id="bulkCtaAudioFileName" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-align: left;">Click to Select CTA Voice MP3</div>
+            <div style="font-size: 0.78rem; font-weight: 700; color: #86EFAC; margin-bottom: 0.35rem; letter-spacing: 0.03em;">
+              🎙️ CTA VOICE PLAYLIST <span style="color: var(--text-muted); font-weight: 600;">(Optional — Auto-Rotates per Video)</span>
+            </div>
+            <div class="file-upload-box" style="padding: 0.65rem; cursor: pointer; margin-top: 0.1rem;" onclick="document.getElementById('bulkCtaAudioInput').click()">
+              <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-align: left;">➕ Add CTA Voice MP3 Track(s)</div>
               <button type="button" class="btn" style="pointer-events: none; padding: 0.25rem 0.6rem; font-size: 0.75rem;">Select MP3</button>
             </div>
-            <input type="file" id="bulkCtaAudioInput" accept="audio/mp3,audio/wav,audio/mpeg" style="display: none;" onchange="handleBulkCtaAudioUpload(event)">
+            <input type="file" id="bulkCtaAudioInput" accept="audio/mp3,audio/wav,audio/mpeg" multiple style="display: none;" onchange="handleBulkCtaAudioUpload(event)">
+            <div id="bulkCtaVoiceTrackList" style="margin-top: 0.4rem; display: flex; flex-direction: column; gap: 0.3rem;"></div>
           </div>
         </div>
 
@@ -1053,27 +1134,45 @@
 
           <div class="form-group" style="margin-bottom: 0.6rem;">
             <label>Brand Name</label>
-            <input type="text" id="bulkBrandName" value="OdishaExamPrep">
+            <input type="text" id="bulkBrandName" value="OdishaExamPrep" oninput="handleBulkSettingsChange()">
           </div>
 
           <div class="form-group" style="margin-bottom: 0.6rem;">
             <label>CTA Pitch Text</label>
-            <input type="text" id="bulkCtaText" value="Visit website for 1,000+ Topic Tests & Mock Series!">
+            <input type="text" id="bulkCtaText" value="Visit website for 1,000+ Topic Tests & Mock Series!" oninput="handleBulkSettingsChange()">
           </div>
 
           <div class="form-group" style="margin-bottom: 0.6rem;">
             <label style="color: #F87171;">🔔 YouTube Subscribe CTA Button</label>
-            <input type="text" id="bulkSubscribeCtaText" value="🔔 SUBSCRIBE FOR DAILY QUIZZES & MOCKS 🚀">
+            <input type="text" id="bulkSubscribeCtaText" value="🔔 SUBSCRIBE FOR DAILY QUIZZES & MOCKS 🚀" oninput="handleBulkSettingsChange()">
           </div>
 
           <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 0.5rem;">
             <div class="form-group" style="margin-bottom: 0;">
               <label>Website Name</label>
-              <input type="text" id="bulkWebsiteName" value="OdishaExamPrep.in">
+              <input type="text" id="bulkWebsiteName" value="OdishaExamPrep.in" oninput="handleBulkSettingsChange()">
             </div>
             <div class="form-group" style="margin-bottom: 0;">
               <label>Website URL</label>
-              <input type="text" id="bulkWebsiteUrl" value="www.odishaexamprep.in">
+              <input type="text" id="bulkWebsiteUrl" value="www.odishaexamprep.in" oninput="handleBulkSettingsChange()">
+            </div>
+          </div>
+
+          <!-- Website Showcase Screen Recording Input for Bulk Studio -->
+          <div class="form-group" style="margin-top: 0.75rem; margin-bottom: 0; background: rgba(37,99,235,0.12); padding: 0.75rem; border-radius: 12px; border: 2px solid #3B82F6; box-shadow: 0 0 16px rgba(59,130,246,0.25);">
+            <div style="font-size: 0.82rem; font-weight: 800; color: #93C5FD; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+              <span>🎬 Website Showcase Video (Optional)</span>
+              <span style="font-size: 0.65rem; background: rgba(16,185,129,0.25); color: #6EE7B7; border: 1px solid #10B981; padding: 2px 8px; border-radius: 6px; font-weight: 800;">2-PHASE OUTRO</span>
+            </div>
+            <div class="file-upload-box" style="padding: 0.6rem; cursor: pointer; background: rgba(15,23,42,0.6);" onclick="document.getElementById('bulkShowcaseVideoInput').click()">
+              <div style="font-size: 0.78rem; font-weight: 700; color: #E2E8F0; text-align: left;" id="bulkShowcaseVideoFileName">➕ Upload Website Demo (.MP4)</div>
+              <button type="button" class="btn" style="pointer-events: none; padding: 0.25rem 0.6rem; font-size: 0.72rem;">Select MP4</button>
+            </div>
+            <input type="file" id="bulkShowcaseVideoInput" accept="video/mp4,video/webm" style="display: none;" onchange="handleBulkShowcaseVideoUpload(event)">
+            <div id="bulkShowcaseVideoControlsRow" style="display: none; margin-top: 0.4rem; align-items: center; gap: 0.4rem;">
+              <button type="button" class="btn" style="padding: 0.2rem 0.55rem; font-size: 0.72rem;" onclick="previewBulkShowcaseVideo()"><span id="bulkShowcaseVideoPlayIcon">▶</span> Preview</button>
+              <button type="button" class="btn btn-danger" style="padding: 0.2rem 0.55rem; font-size: 0.72rem;" onclick="removeBulkShowcaseVideo()">🗑️ Remove</button>
+              <span class="badge-info" id="bulkShowcaseVideoDurationBadge" style="font-size: 0.7rem;">0.0s</span>
             </div>
           </div>
         </div>
@@ -1090,15 +1189,15 @@
             <label style="font-weight: 700; color: #93C5FD;">🎲 Thumbnail Variation Strategy</label>
             <div class="correct-answer-selector" style="margin-top: 0.35rem;">
               <label class="radio-pill">
-                <input type="radio" name="bulkCoverVarMode" value="auto" checked onchange="handleCoverVarModeChange(this.value)">
+                <input type="radio" name="bulkCoverVarMode" value="auto" checked onchange="handleCoverVarModeChange(this.value); handleBulkSettingsChange();">
                 <span>🎲 Smart Auto-Variation</span>
               </label>
               <label class="radio-pill">
-                <input type="radio" name="bulkCoverVarMode" value="fixed" onchange="handleCoverVarModeChange(this.value)">
+                <input type="radio" name="bulkCoverVarMode" value="fixed" onchange="handleCoverVarModeChange(this.value); handleBulkSettingsChange();">
                 <span>🔒 Fixed Text</span>
               </label>
               <label class="radio-pill">
-                <input type="radio" name="bulkCoverVarMode" value="custom" onchange="handleCoverVarModeChange(this.value)">
+                <input type="radio" name="bulkCoverVarMode" value="custom" onchange="handleCoverVarModeChange(this.value); handleBulkSettingsChange();">
                 <span>✏️ Custom Pool</span>
               </label>
             </div>
@@ -1107,7 +1206,7 @@
           <!-- Theme Palette Rotation Toggle -->
           <div style="margin-bottom: 0.75rem; background: rgba(37,99,235,0.08); padding: 0.5rem 0.65rem; border-radius: 8px; border: 1px solid rgba(59,130,246,0.3);">
             <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: #FFF; font-weight: 700; font-size: 0.78rem;">
-              <input type="checkbox" id="bulkAutoRotateThemesCheckbox" checked style="width: 15px; height: 15px;">
+              <input type="checkbox" id="bulkAutoRotateThemesCheckbox" checked onchange="handleBulkSettingsChange()" style="width: 15px; height: 15px;">
               <span>🎨 Auto-Rotate Visual Themes Across Batch</span>
             </label>
             <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 2px; padding-left: 22px;">
@@ -1119,15 +1218,15 @@
           <div id="bulkCoverFixedBox" style="display: none;">
             <div class="form-group" style="margin-bottom: 0.5rem;">
               <label style="font-size: 0.75rem;">Top Viral Hook Banner</label>
-              <input type="text" id="bulkDefaultCoverHook" value="⚠️ 99% ASPIRANTS GET THIS WRONG!" style="font-size: 0.8rem; padding: 0.4rem;">
+              <input type="text" id="bulkDefaultCoverHook" value="⚠️ 99% ASPIRANTS GET THIS WRONG!" oninput="handleBulkSettingsChange()" style="font-size: 0.8rem; padding: 0.4rem;">
             </div>
             <div class="form-group" style="margin-bottom: 0.5rem;">
               <label style="font-size: 0.75rem;">Gamified Challenge Strip</label>
-              <input type="text" id="bulkDefaultCoverChallenge" value="⏱️ 5-SECOND RAPID CHALLENGE" style="font-size: 0.8rem; padding: 0.4rem;">
+              <input type="text" id="bulkDefaultCoverChallenge" value="⏱️ 5-SECOND RAPID CHALLENGE" oninput="handleBulkSettingsChange()" style="font-size: 0.8rem; padding: 0.4rem;">
             </div>
             <div class="form-group" style="margin-bottom: 0;">
               <label style="font-size: 0.75rem;">High-Click Action CTA Button</label>
-              <input type="text" id="bulkDefaultCoverAction" value="▶ TAP TO PLAY & TEST YOUR RANK 🏆" style="font-size: 0.8rem; padding: 0.4rem;">
+              <input type="text" id="bulkDefaultCoverAction" value="▶ TAP TO PLAY & TEST YOUR RANK 🏆" oninput="handleBulkSettingsChange()" style="font-size: 0.8rem; padding: 0.4rem;">
             </div>
           </div>
 
@@ -1144,11 +1243,11 @@
           <div id="bulkCoverCustomPoolBox" style="display: none;">
             <div class="form-group" style="margin-bottom: 0.5rem;">
               <label style="font-size: 0.75rem;">Custom Viral Hooks Pool (1 per line)</label>
-              <textarea id="bulkCustomHooksPool" style="height: 65px; font-size: 0.75rem; font-family: monospace;" placeholder="⚠️ 99% ASPIRANTS GET THIS WRONG!&#10;🔥 MOST REPEATED QUESTION IN COMPETITIVE EXAMS!&#10;🧠 CAN YOU SOLVE THIS IN 5 SECONDS?"></textarea>
+              <textarea id="bulkCustomHooksPool" oninput="handleBulkSettingsChange()" style="height: 65px; font-size: 0.75rem; font-family: monospace;" placeholder="⚠️ 99% ASPIRANTS GET THIS WRONG!&#10;🔥 MOST REPEATED QUESTION IN COMPETITIVE EXAMS!&#10;🧠 CAN YOU SOLVE THIS IN 5 SECONDS?"></textarea>
             </div>
             <div class="form-group" style="margin-bottom: 0;">
               <label style="font-size: 0.75rem;">Custom Action CTAs Pool (1 per line)</label>
-              <textarea id="bulkCustomCtasPool" style="height: 65px; font-size: 0.75rem; font-family: monospace;" placeholder="▶ TAP TO PLAY & TEST YOUR RANK 🏆&#10;💬 COMMENT YOUR ANSWER BEFORE TIMER ENDS ⏱️&#10;🔥 TEST YOUR PREPARATION LEVEL NOW 🎯"></textarea>
+              <textarea id="bulkCustomCtasPool" oninput="handleBulkSettingsChange()" style="height: 65px; font-size: 0.75rem; font-family: monospace;" placeholder="▶ TAP TO PLAY & TEST YOUR RANK 🏆&#10;💬 COMMENT YOUR ANSWER BEFORE TIMER ENDS ⏱️&#10;🔥 TEST YOUR PREPARATION LEVEL NOW 🎯"></textarea>
             </div>
           </div>
 
@@ -1676,6 +1775,15 @@
     let showSafeZoneGuide = false;
     let animationFrameId = null;
 
+    // 🎬 2-Phase Outro Website Showcase Video State
+    let singleShowcaseVideoElement = null;
+    let singleShowcaseVideoObjectUrl = null;
+    let singleShowcaseVideoDuration = 0;
+
+    let bulkShowcaseVideoElement = null;
+    let bulkShowcaseVideoObjectUrl = null;
+    let bulkShowcaseVideoDuration = 0;
+
     // 🔢 Multi-Question State (1 to 3 Questions)
     let questionsCount = 1;
     let activeQuestionIndex = 0;
@@ -1803,6 +1911,7 @@
     }
 
     let logoImg = new Image();
+    logoImg.onload = function() { if (typeof drawIdleFrame === 'function') drawIdleFrame(); };
     logoImg.src = '/favicon.svg';
     let logoObjectUrl = null;
 
@@ -1815,6 +1924,26 @@
     let bgAudioMode = 'synth';
     let bgMusicAudio = new Audio();
     let bgMusicObjectUrl = null;
+    let bgMusicVolume = 0.70; // 0.0 to 1.0 (default 70%)
+
+    function handleBgVolumeChange(val) {
+      const num = Math.max(0, Math.min(100, parseInt(val, 10) || 70));
+      bgMusicVolume = num / 100;
+      
+      const label1 = document.getElementById('bgMusicVolumeLabel');
+      if (label1) label1.innerText = num + '%';
+      const slider1 = document.getElementById('bgMusicVolumeSlider');
+      if (slider1 && slider1.value != num) slider1.value = num;
+
+      const label2 = document.getElementById('bulkBgMusicVolumeLabel');
+      if (label2) label2.innerText = num + '%';
+      const slider2 = document.getElementById('bulkBgMusicVolumeSlider');
+      if (slider2 && slider2.value != num) slider2.value = num;
+
+      if (bgMusicAudio && !bgMusicAudio.paused) {
+        bgMusicAudio.volume = bgMusicVolume;
+      }
+    }
 
     let audioCtx = null;
     let masterGain = null;
@@ -1869,6 +1998,7 @@
       bgMusicObjectUrl = URL.createObjectURL(file);
       bgMusicAudio.src = bgMusicObjectUrl;
       bgMusicAudio.loop = true;
+      bgMusicAudio.volume = bgMusicVolume;
       document.getElementById('bgAudioFileName').innerText = '🎵 ' + file.name;
       document.getElementById('bgAudioControlsRow').style.display = 'flex';
     }
@@ -1888,6 +2018,7 @@
       if (!bgMusicAudio.src) return;
       if (bgMusicAudio.paused) {
         bgMusicAudio.currentTime = 0;
+        bgMusicAudio.volume = bgMusicVolume;
         bgMusicAudio.play();
         document.getElementById('bgAudioPlayIcon').innerText = '⏸';
       } else {
@@ -2141,18 +2272,73 @@
       logoImg.src = logoObjectUrl;
     }
 
-    function handleAudioUpload(event) {
+    // ── WebAudio Exact Duration Extraction Helpers ────────────────
+    async function decodeAudioDurationFromFile(file) {
+      if (!file) return null;
+      try {
+        const arrayBuf = await file.arrayBuffer();
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return null;
+        const tempCtx = new AudioContextClass();
+        const decoded = await tempCtx.decodeAudioData(arrayBuf);
+        const dur = decoded.duration;
+        try { tempCtx.close(); } catch (e) {}
+        if (dur && !isNaN(dur) && isFinite(dur) && dur > 0) {
+          return dur;
+        }
+      } catch (e) {
+        console.warn('WebAudio decodeFromFile failed, fallback to Audio element:', e);
+      }
+      return null;
+    }
+
+    async function decodeAudioDurationFromUrl(url) {
+      if (!url) return null;
+      try {
+        const resp = await fetch(url);
+        const arrayBuf = await resp.arrayBuffer();
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return null;
+        const tempCtx = new AudioContextClass();
+        const decoded = await tempCtx.decodeAudioData(arrayBuf);
+        const dur = decoded.duration;
+        try { tempCtx.close(); } catch (e) {}
+        if (dur && !isNaN(dur) && isFinite(dur) && dur > 0) {
+          return dur;
+        }
+      } catch (e) {
+        console.warn('WebAudio decodeFromUrl failed:', e);
+      }
+      return null;
+    }
+
+    async function handleAudioUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
       if (ctaAudioObjectUrl) URL.revokeObjectURL(ctaAudioObjectUrl);
       ctaAudioObjectUrl = URL.createObjectURL(file);
       ctaAudio.src = ctaAudioObjectUrl;
+
+      // Extract accurate duration via WebAudio (no upper limit!)
+      const trueDuration = await decodeAudioDurationFromFile(file);
+
       ctaAudio.onloadedmetadata = function() {
-        ctaAudioDuration = Math.max(2.5, ctaAudio.duration || 4.0);
+        let dur = trueDuration;
+        if (!dur && ctaAudio.duration && isFinite(ctaAudio.duration)) {
+          dur = ctaAudio.duration;
+        }
+        ctaAudioDuration = (dur && dur > 0) ? dur : 4.0;
         document.getElementById('audioFileName').innerText = '🎵 ' + file.name;
-        document.getElementById('audioDurationBadge').innerText = 'Duration: ' + ctaAudioDuration.toFixed(1) + 's';
+        document.getElementById('audioDurationBadge').innerText = 'Duration: ' + ctaAudioDuration.toFixed(1) + 's (+0.8s Outro cushion)';
         document.getElementById('audioControlsRow').style.display = 'flex';
       };
+
+      if (trueDuration && trueDuration > 0) {
+        ctaAudioDuration = trueDuration;
+        document.getElementById('audioFileName').innerText = '🎵 ' + file.name;
+        document.getElementById('audioDurationBadge').innerText = 'Duration: ' + ctaAudioDuration.toFixed(1) + 's (+0.8s Outro cushion)';
+        document.getElementById('audioControlsRow').style.display = 'flex';
+      }
     }
 
     function removeAudio() {
@@ -2182,10 +2368,118 @@
       }
     }
 
+    function handleShowcaseVideoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (singleShowcaseVideoObjectUrl) URL.revokeObjectURL(singleShowcaseVideoObjectUrl);
+      singleShowcaseVideoObjectUrl = URL.createObjectURL(file);
+      if (!singleShowcaseVideoElement) {
+        singleShowcaseVideoElement = document.createElement('video');
+        singleShowcaseVideoElement.muted = true;
+        singleShowcaseVideoElement.playsInline = true;
+        singleShowcaseVideoElement.loop = true;
+        singleShowcaseVideoElement.preload = 'auto';
+      }
+      singleShowcaseVideoElement.src = singleShowcaseVideoObjectUrl;
+      singleShowcaseVideoElement.onloadedmetadata = function() {
+        singleShowcaseVideoDuration = singleShowcaseVideoElement.duration || 0;
+        document.getElementById('showcaseVideoFileName').innerText = '🎬 ' + file.name;
+        document.getElementById('showcaseVideoDurationBadge').innerText = 'Duration: ' + singleShowcaseVideoDuration.toFixed(1) + 's';
+        document.getElementById('showcaseVideoControlsRow').style.display = 'flex';
+      };
+      singleShowcaseVideoElement.load();
+    }
+
+    function removeShowcaseVideo() {
+      if (singleShowcaseVideoObjectUrl) {
+        URL.revokeObjectURL(singleShowcaseVideoObjectUrl);
+        singleShowcaseVideoObjectUrl = null;
+      }
+      if (singleShowcaseVideoElement) {
+        singleShowcaseVideoElement.src = '';
+        singleShowcaseVideoElement = null;
+      }
+      singleShowcaseVideoDuration = 0;
+      document.getElementById('showcaseVideoInput').value = '';
+      document.getElementById('showcaseVideoFileName').innerText = '➕ Click to Upload Website Demo Video (.MP4)';
+      document.getElementById('showcaseVideoControlsRow').style.display = 'none';
+    }
+
+    function previewShowcaseVideo() {
+      if (!singleShowcaseVideoElement || !singleShowcaseVideoElement.src) return;
+      if (singleShowcaseVideoElement.paused) {
+        singleShowcaseVideoElement.currentTime = 0;
+        singleShowcaseVideoElement.play();
+        document.getElementById('showcaseVideoPlayIcon').innerText = '⏸';
+        singleShowcaseVideoElement.onended = function() {
+          document.getElementById('showcaseVideoPlayIcon').innerText = '▶';
+        };
+      } else {
+        singleShowcaseVideoElement.pause();
+        document.getElementById('showcaseVideoPlayIcon').innerText = '▶';
+      }
+    }
+
+    function handleBulkShowcaseVideoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (bulkShowcaseVideoObjectUrl) URL.revokeObjectURL(bulkShowcaseVideoObjectUrl);
+      bulkShowcaseVideoObjectUrl = URL.createObjectURL(file);
+      if (!bulkShowcaseVideoElement) {
+        bulkShowcaseVideoElement = document.createElement('video');
+        bulkShowcaseVideoElement.muted = true;
+        bulkShowcaseVideoElement.playsInline = true;
+        bulkShowcaseVideoElement.loop = true;
+        bulkShowcaseVideoElement.preload = 'auto';
+      }
+      bulkShowcaseVideoElement.src = bulkShowcaseVideoObjectUrl;
+      bulkShowcaseVideoElement.onloadedmetadata = function() {
+        bulkShowcaseVideoDuration = bulkShowcaseVideoElement.duration || 0;
+        document.getElementById('bulkShowcaseVideoFileName').innerText = '🎬 ' + file.name;
+        document.getElementById('bulkShowcaseVideoDurationBadge').innerText = bulkShowcaseVideoDuration.toFixed(1) + 's';
+        document.getElementById('bulkShowcaseVideoControlsRow').style.display = 'flex';
+        handleBulkSettingsChange();
+      };
+      bulkShowcaseVideoElement.load();
+    }
+
+    function removeBulkShowcaseVideo() {
+      if (bulkShowcaseVideoObjectUrl) {
+        URL.revokeObjectURL(bulkShowcaseVideoObjectUrl);
+        bulkShowcaseVideoObjectUrl = null;
+      }
+      if (bulkShowcaseVideoElement) {
+        bulkShowcaseVideoElement.src = '';
+        bulkShowcaseVideoElement = null;
+      }
+      bulkShowcaseVideoDuration = 0;
+      document.getElementById('bulkShowcaseVideoInput').value = '';
+      document.getElementById('bulkShowcaseVideoFileName').innerText = '➕ Upload Website Demo (.MP4)';
+      document.getElementById('bulkShowcaseVideoControlsRow').style.display = 'none';
+      handleBulkSettingsChange();
+    }
+
+    function previewBulkShowcaseVideo() {
+      if (!bulkShowcaseVideoElement || !bulkShowcaseVideoElement.src) return;
+      if (bulkShowcaseVideoElement.paused) {
+        bulkShowcaseVideoElement.currentTime = 0;
+        bulkShowcaseVideoElement.play();
+        document.getElementById('bulkShowcaseVideoPlayIcon').innerText = '⏸';
+        bulkShowcaseVideoElement.onended = function() {
+          document.getElementById('bulkShowcaseVideoPlayIcon').innerText = '▶';
+        };
+      } else {
+        bulkShowcaseVideoElement.pause();
+        document.getElementById('bulkShowcaseVideoPlayIcon').innerText = '▶';
+      }
+    }
+
     window.addEventListener('beforeunload', function() {
       if (logoObjectUrl) URL.revokeObjectURL(logoObjectUrl);
       if (ctaAudioObjectUrl) URL.revokeObjectURL(ctaAudioObjectUrl);
       if (bgMusicObjectUrl) URL.revokeObjectURL(bgMusicObjectUrl);
+      if (singleShowcaseVideoObjectUrl) URL.revokeObjectURL(singleShowcaseVideoObjectUrl);
+      if (bulkShowcaseVideoObjectUrl) URL.revokeObjectURL(bulkShowcaseVideoObjectUrl);
     });
 
     function switchTab(mode) {
@@ -2234,15 +2528,25 @@
 
     // Helper to draw text that dynamically shrinks to fit perfectly within maxWidth
     function drawAutoScaledText(ctx, text, x, y, maxFont, minFont, fontFace, maxWidth) {
+      if (!text) return;
+      text = String(text).trim();
       let size = maxFont;
+      const minF = minFont || 12;
       ctx.font = '900 ' + size + 'px ' + fontFace;
       let width = ctx.measureText(text).width;
-      while (width > maxWidth && size > minFont) {
-        size -= 2;
+      while (width > maxWidth && size > minF) {
+        size -= 1;
         ctx.font = '900 ' + size + 'px ' + fontFace;
         width = ctx.measureText(text).width;
       }
-      ctx.fillText(text, x, y);
+      let finalText = text;
+      if (ctx.measureText(finalText).width > maxWidth) {
+        while (ctx.measureText(finalText + '...').width > maxWidth && finalText.length > 3) {
+          finalText = finalText.slice(0, -2).trim();
+        }
+        finalText += '...';
+      }
+      ctx.fillText(finalText, x, y);
     }
 
     function getWrappedLines(ctx, text, maxWidth) {
@@ -2285,13 +2589,47 @@
       if (stroke) ctx.stroke();
     }
 
-    
+    function drawChamferedRect(ctx, x, y, width, height, chamfer, fill, stroke) {
+      fill = fill !== undefined ? fill : true;
+      stroke = stroke !== undefined ? stroke : false;
+      chamfer = chamfer || 20;
+      ctx.beginPath();
+      ctx.moveTo(x + chamfer, y);
+      ctx.lineTo(x + width - chamfer, y);
+      ctx.lineTo(x + width, y + chamfer);
+      ctx.lineTo(x + width, y + height - chamfer);
+      ctx.lineTo(x + width - chamfer, y + height);
+      ctx.lineTo(x + chamfer, y + height);
+      ctx.lineTo(x, y + height - chamfer);
+      ctx.lineTo(x, y + chamfer);
+      ctx.closePath();
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+
+    function drawHexagonCard(ctx, x, y, width, height, fill, stroke) {
+      fill = fill !== undefined ? fill : true;
+      stroke = stroke !== undefined ? stroke : false;
+      const cut = 22;
+      ctx.beginPath();
+      ctx.moveTo(x + cut, y);
+      ctx.lineTo(x + width - cut, y);
+      ctx.lineTo(x + width, y + height / 2);
+      ctx.lineTo(x + width - cut, y + height);
+      ctx.lineTo(x + cut, y + height);
+      ctx.lineTo(x, y + height / 2);
+      ctx.closePath();
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+
     // ==============================================================
-    // 🎨 100K PRO YOUTUBER MULTI-TEMPLATE ENGINE DEFINITIONS
+    // 🎨 100K PRO YOUTUBER MULTI-TEMPLATE ENGINE DEFINITIONS (5 Layout Archetypes)
     // ==============================================================
     const TEMPLATES = {
       'obsidian-cobalt': {
         name: 'Obsidian Cobalt',
+        layout: 'neo-glass',
         bgGrad: ['#05070E', '#0B1120', '#070C18', '#020408'],
         glowTop: 'rgba(37, 99, 235, 0.28)',
         glowBottom: 'rgba(16, 185, 129, 0.12)',
@@ -2331,6 +2669,7 @@
       },
       'royal-gold': {
         name: 'Royal Gold & Onyx',
+        layout: 'royal-diamond',
         bgGrad: ['#0A0802', '#181205', '#0E0B03', '#050401'],
         glowTop: 'rgba(245, 158, 11, 0.35)',
         glowBottom: 'rgba(217, 119, 6, 0.22)',
@@ -2370,6 +2709,7 @@
       },
       'crimson-danger': {
         name: 'Crimson Danger',
+        layout: 'cyber-hud',
         bgGrad: ['#0D0303', '#1A0808', '#120505', '#060202'],
         glowTop: 'rgba(239, 68, 68, 0.38)',
         glowBottom: 'rgba(249, 115, 22, 0.22)',
@@ -2409,6 +2749,7 @@
       },
       'cyber-mint': {
         name: 'Cyber Neon Mint',
+        layout: 'quad-arena',
         bgGrad: ['#020A06', '#051810', '#030E09', '#010503'],
         glowTop: 'rgba(16, 185, 129, 0.35)',
         glowBottom: 'rgba(6, 182, 212, 0.22)',
@@ -2448,6 +2789,7 @@
       },
       'galactic-purple': {
         name: 'Galactic Purple',
+        layout: 'cyber-hud',
         bgGrad: ['#0A0412', '#160B24', '#0E0618', '#050209'],
         glowTop: 'rgba(168, 85, 247, 0.38)',
         glowBottom: 'rgba(236, 72, 153, 0.22)',
@@ -2487,6 +2829,7 @@
       },
       'slate-academy': {
         name: 'Slate Academy',
+        layout: 'slate-editorial',
         bgGrad: ['#0B111B', '#152132', '#0E1724', '#070B12'],
         glowTop: 'rgba(96, 165, 250, 0.28)',
         glowBottom: 'rgba(245, 158, 11, 0.15)',
@@ -2656,8 +2999,8 @@
       ctx.restore();
     }
 
-    // ==========================================
-    // 📐 9:16 SHORTS VIDEO RENDERER
+            // ==========================================
+    // 📐 9:16 SHORTS VIDEO RENDERER (Organic Full-Screen Balanced Layout)
     // ==========================================
 
     function drawHeaderBar(exam, brand, alpha, tpl) {
@@ -2666,32 +3009,66 @@
       ctx.save();
       ctx.globalAlpha = alpha;
 
+      const brandText = (brand || 'OdishaExamPrep') + ' ✔';
+
+      // 1. TOP BRANDING CARD (Y: 100 to 205, Height: 105px)
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+      ctx.shadowBlur = 20;
+      ctx.shadowOffsetY = 8;
       ctx.fillStyle = tpl.headerCardBg;
       ctx.strokeStyle = tpl.headerCardBorder;
       ctx.lineWidth = 2.5;
-      roundRect(ctx, 60, 120, 960, 100, 24, true, true);
+      roundRect(ctx, 70, 100, 940, 105, 22, true, true);
+      ctx.restore();
 
-      try {
-        if (logoImg.complete && logoImg.naturalWidth !== 0) {
-          ctx.drawImage(logoImg, 90, 135, 70, 70);
-        }
-      } catch (e) {}
+      // Symmetrically Centered Logo + Brand Text Group
+      const cardCenterY = 152.5;
+      ctx.font = '800 36px "Plus Jakarta Sans", sans-serif';
+      const textMetrics = ctx.measureText(brandText);
+      const textWidth = textMetrics.width;
 
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = '800 38px "Plus Jakarta Sans", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText((brand || 'OdishaExamPrep') + ' ✔', 180, 184);
+      const hasLogo = (typeof logoImg !== 'undefined' && logoImg.complete && logoImg.naturalWidth !== 0);
+      const logoSize = 46;
+      const logoGap = 14;
+      const totalBrandWidth = hasLogo ? (logoSize + logoGap + textWidth) : textWidth;
+      const startX = 540 - (totalBrandWidth / 2);
 
+      if (hasLogo) {
+        try {
+          ctx.drawImage(logoImg, startX, cardCenterY - (logoSize / 2), logoSize, logoSize);
+        } catch (e) {}
+        ctx.fillStyle = '#FFFFFF';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(brandText, startX + logoSize + logoGap, cardCenterY);
+      } else {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(brandText, 540, cardCenterY);
+      }
+      ctx.textBaseline = 'alphabetic';
+
+      // 2. EXAM AUTHORITY PILL (Y: 218 to 288, Height: 70px) — full-width blue pill below
+      ctx.save();
+      ctx.shadowColor = tpl.headerPillBg + '88';
+      ctx.shadowBlur = 16;
+      ctx.shadowOffsetY = 6;
       ctx.fillStyle = tpl.headerPillBg;
-      roundRect(ctx, 60, 235, 960, 75, 20, true, false);
+      roundRect(ctx, 70, 218, 940, 70, 18, true, false);
+      ctx.restore();
 
       ctx.fillStyle = tpl.headerPillText;
-      ctx.font = '900 32px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('🎯 ' + (exam || 'EXAM TARGET 2026').toUpperCase(), 540, 284);
+      ctx.textBaseline = 'middle';
+      const examTitle = '🎯 ' + (exam || 'EXAM TARGET 2026').toUpperCase();
+      drawAutoScaledText(ctx, examTitle, 540, 253, 30, 18, '"Outfit", sans-serif', 880);
+      ctx.textBaseline = 'alphabetic';
 
       ctx.restore();
     }
+
 
     function drawDynamicQuestionCard(question, alpha, tpl, qNum, totalQ) {
       tpl = tpl || getActiveTemplate();
@@ -2702,12 +3079,12 @@
       ctx.save();
       ctx.globalAlpha = alpha;
 
-      const cardX = 60;
-      const cardY = 325;
-      const cardW = 960;
-      const cardH = 345;
+      const cardX = 70;
+      const cardY = 302;
+      const cardW = 940;
+      const cardH = 320;
 
-      // 1. Question Card Container with soft drop shadow
+      // 1. Question Card Container with Layout-Specific Geometry
       ctx.save();
       ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
       ctx.shadowBlur = 24;
@@ -2715,93 +3092,341 @@
       ctx.fillStyle = tpl.qCardBg;
       ctx.strokeStyle = tpl.qCardBorder;
       ctx.lineWidth = 3.5;
-      roundRect(ctx, cardX, cardY, cardW, cardH, 28, true, true);
+
+      if (tpl.layout === 'cyber-hud') {
+        // Chamfered Sci-Fi Cut with glowing laser frame
+        ctx.shadowColor = tpl.qCardBorder || '#38BDF8';
+        ctx.shadowBlur = 18;
+        drawChamferedRect(ctx, cardX, cardY, cardW, cardH, 24, true, true);
+        // Tech Corner Accents
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(cardX + 24, cardY + 6);
+        ctx.lineTo(cardX + 6, cardY + 24);
+        ctx.moveTo(cardX + cardW - 24, cardY + 6);
+        ctx.lineTo(cardX + cardW - 6, cardY + 24);
+        ctx.stroke();
+      } else if (tpl.layout === 'royal-diamond') {
+        // Luxury Double Gold Frame with Corner Diamond Pips
+        roundRect(ctx, cardX, cardY, cardW, cardH, 24, true, true);
+        ctx.strokeStyle = tpl.qBadgeText || '#FDE68A';
+        ctx.lineWidth = 1.5;
+        roundRect(ctx, cardX + 6, cardY + 6, cardW - 12, cardH - 12, 18, false, true);
+      } else if (tpl.layout === 'slate-editorial') {
+        // Razor-sharp Double Line Official Gazette Frame
+        roundRect(ctx, cardX, cardY, cardW, cardH, 14, true, true);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 1.5;
+        roundRect(ctx, cardX + 5, cardY + 5, cardW - 10, cardH - 10, 10, false, true);
+      } else if (tpl.layout === 'quad-arena') {
+        // High-Energy Game Show Frame
+        roundRect(ctx, cardX, cardY, cardW, cardH, 28, true, true);
+      } else {
+        // Classic Neo-Glass Rounded Container
+        roundRect(ctx, cardX, cardY, cardW, cardH, 26, true, true);
+      }
       ctx.restore();
 
-      // 2. Centered Question Counter Badge Header (Zero Collision Zone)
-      const badgeText = totalQ > 1 ? '❓ QUESTION ' + qNum + ' OF ' + totalQ : '❓ QUESTION';
-      const badgeW = totalQ > 1 ? 280 : 200;
+      // 2. Question Header Badge (Layout Specific)
+      let badgeText = totalQ > 1 ? 'QUESTION ' + qNum + ' OF ' + totalQ : 'QUESTION';
+      let badgeIcon = '❓ ';
+      if (tpl.layout === 'cyber-hud') {
+        badgeIcon = '⚡ ';
+        badgeText = 'SPEED CHALLENGE • Q' + qNum;
+      } else if (tpl.layout === 'royal-diamond') {
+        badgeIcon = '👑 ';
+        badgeText = 'GRAND MOCK • Q' + qNum;
+      } else if (tpl.layout === 'quad-arena') {
+        badgeIcon = '🔥 ';
+        badgeText = 'RAPID ARENA • Q' + qNum;
+      } else if (tpl.layout === 'slate-editorial') {
+        badgeIcon = '🏛️ ';
+        badgeText = 'OFFICIAL TEST • Q' + qNum;
+      }
+
+      const fullBadgeStr = badgeIcon + badgeText;
+      const badgeW = 320;
       const badgeX = 540 - (badgeW / 2);
-      const badgeY = cardY + 18;
-      const badgeH = 46;
+      const badgeY = cardY + 16;
+      const badgeH = 44;
 
       ctx.fillStyle = tpl.qBadgeBg;
       ctx.strokeStyle = tpl.qCardBorder;
       ctx.lineWidth = 1.5;
-      roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 14, true, true);
+
+      if (tpl.layout === 'cyber-hud') {
+        drawChamferedRect(ctx, badgeX, badgeY, badgeW, badgeH, 12, true, true);
+      } else if (tpl.layout === 'royal-diamond') {
+        drawHexagonCard(ctx, badgeX, badgeY, badgeW, badgeH, true, true);
+      } else {
+        roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 14, true, true);
+      }
 
       ctx.fillStyle = tpl.qBadgeText;
-      ctx.font = '800 22px "Plus Jakarta Sans", sans-serif';
+      ctx.font = '900 22px "Outfit", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(badgeText.toUpperCase(), 540, badgeY + (badgeH / 2));
+      ctx.fillText(fullBadgeStr.toUpperCase(), 540, badgeY + (badgeH / 2));
       ctx.textBaseline = 'alphabetic';
 
-      // 3. Collision-Free Question Text Zone (Dedicated area strictly below badge)
-      const textTopY = badgeY + badgeH + 14; // ~403px — strictly below badge
-      const textBottomY = cardY + cardH - 16; // ~654px — card bottom padding
-      const textAvailableH = textBottomY - textTopY; // ~251px available
+      // 3. Collision-Free Question Text Zone
+      const textTopY = badgeY + badgeH + 14;
+      const textBottomY = cardY + cardH - 16;
+      const textAvailableH = textBottomY - textTopY;
       const textCenterY = textTopY + (textAvailableH / 2);
-      const maxWidth = cardW - 80; // 880px horizontal text zone
+      const maxWidth = cardW - 90;
 
-      // Adaptive font sizing: scale DOWN until ALL lines fit in textAvailableH
-      // No hard line-count limit — only the height budget matters
       let optimalSize = 44;
       let optimalLines = [];
       let optimalLineHeight = 0;
 
-      for (let size = 44; size >= 18; size -= 2) {
-        ctx.font = '700 ' + size + 'px "Plus Jakarta Sans", sans-serif';
+      for (let size = 44; size >= 14; size -= 2) {
+        ctx.font = (tpl.layout === 'royal-diamond' ? '800 ' : '700 ') + size + 'px "Plus Jakarta Sans", sans-serif';
         const lines = getWrappedLines(ctx, question, maxWidth);
-        const lHeight = size * 1.28;
+        const lhRatio = size >= 34 ? 1.30 : size >= 24 ? 1.25 : 1.20;
+        const lHeight = size * lhRatio;
         const totalH = lines.length * lHeight;
 
         optimalSize = size;
         optimalLines = lines;
         optimalLineHeight = lHeight;
 
-        if (totalH <= textAvailableH) break; // Found a size that fits — stop
+        if (totalH <= textAvailableH) break;
       }
 
-      // Safety clip: if even 18px overflows, only show as many lines as fit
       const maxLinesVisible = Math.floor(textAvailableH / optimalLineHeight);
       const visibleLines = optimalLines.slice(0, maxLinesVisible);
 
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = '700 ' + optimalSize + 'px "Plus Jakarta Sans", sans-serif';
+      ctx.font = (tpl.layout === 'royal-diamond' ? '800 ' : '700 ') + optimalSize + 'px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
 
-      const totalBlockHeight = (visibleLines.length - 1) * optimalLineHeight;
-      const startY = textCenterY - (totalBlockHeight / 2) + (optimalSize * 0.36);
+      const totalBlockH = (visibleLines.length - 1) * optimalLineHeight;
+      const blockStartY = textCenterY - totalBlockH / 2;
 
       for (let i = 0; i < visibleLines.length; i++) {
-        ctx.fillText(visibleLines[i], 540, startY + (i * optimalLineHeight));
+        ctx.fillText(visibleLines[i], 540, blockStartY + (i * optimalLineHeight));
       }
+      ctx.textBaseline = 'alphabetic';
 
       ctx.restore();
     }
 
-
-    function drawDynamicOptionsCards(options, revealed, correctKey, alpha, tpl) {
+    function drawDynamicOptionsCards(options, revealed, correctKey, alpha, tpl, qElapsed, revealElapsed) {
       tpl = tpl || getActiveTemplate();
       revealed = revealed || false;
       correctKey = correctKey || 'A';
       alpha = alpha !== undefined ? alpha : 1;
+      qElapsed = (typeof qElapsed === 'number') ? qElapsed : 999;
+      revealElapsed = (typeof revealElapsed === 'number') ? revealElapsed : (revealed ? 999 : 0);
+
       ctx.save();
       ctx.globalAlpha = alpha;
 
+      // ==============================================================
+      // ⚡ ARCHETYPE 3: 2x2 QUAD-BUZZER ARENA GRID LAYOUT
+      // ==============================================================
+      if (tpl.layout === 'quad-arena') {
+        const arenaKeys = ['A', 'B', 'C', 'D'];
+        const quadW = 455;
+        const quadH = 230;
+        const col1X = 70;
+        const col2X = 555;
+        const row1Y = 640;
+        const row2Y = 890;
+        const quadPositions = [
+          { x: col1X, y: row1Y, tStart: 0.08 },
+          { x: col2X, y: row1Y, tStart: 0.28 },
+          { x: col1X, y: row2Y, tStart: 0.48 },
+          { x: col2X, y: row2Y, tStart: 0.68 }
+        ];
+
+        arenaKeys.forEach((key, index) => {
+          const pos = quadPositions[index];
+          const isCorrect = key === correctKey;
+          let enterProgress = 1.0;
+          if (qElapsed < 1.1) {
+            enterProgress = Math.max(0, Math.min(1, (qElapsed - pos.tStart) / 0.26));
+          }
+          if (enterProgress <= 0) return;
+
+          const easeEnter = 1 - Math.pow(1 - enterProgress, 3);
+          const slideOffsetY = (1 - easeEnter) * 20;
+          const curY = pos.y + slideOffsetY;
+
+          let itemAlpha = alpha * easeEnter;
+          let itemScale = 0.94 + (0.06 * easeEnter);
+
+          if (revealed) {
+            if (isCorrect) {
+              if (revealElapsed < 0.35) {
+                const p = revealElapsed / 0.35;
+                itemScale = 1.0 + (0.06 * Math.sin(p * Math.PI));
+              }
+            } else {
+              const dimProgress = Math.min(1, revealElapsed / 0.25);
+              itemAlpha = itemAlpha * (1.0 - (dimProgress * 0.68));
+            }
+          }
+
+          ctx.save();
+          ctx.globalAlpha = itemAlpha;
+          const centerX = pos.x + (quadW / 2);
+          const centerY = curY + (quadH / 2);
+
+          if (itemScale !== 1.0) {
+            ctx.translate(centerX, centerY);
+            ctx.scale(itemScale, itemScale);
+            ctx.translate(-centerX, -centerY);
+          }
+
+          if (revealed && isCorrect) {
+            ctx.shadowColor = '#10B981';
+            ctx.shadowBlur = 28;
+            ctx.fillStyle = tpl.optCorrectBg;
+            ctx.strokeStyle = tpl.optCorrectBorder;
+            ctx.lineWidth = 4.5;
+          } else {
+            ctx.fillStyle = tpl.optCardBg;
+            ctx.strokeStyle = tpl.optCardBorder;
+            ctx.lineWidth = 2.5;
+          }
+
+          roundRect(ctx, pos.x, curY, quadW, quadH, 24, true, true);
+
+          // Giant 3D Circular Buzzer Badge (Top Center of Quad Card)
+          const buzzerX = centerX;
+          const buzzerY = curY + 48;
+          const buzzerR = 34;
+
+          ctx.save();
+          if (revealed && isCorrect) {
+            ctx.fillStyle = tpl.optCorrectKeyBg;
+            ctx.beginPath();
+            ctx.arc(buzzerX, buzzerY, buzzerR, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = tpl.optCorrectKeyText;
+            ctx.font = '900 36px "Outfit", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('✓', buzzerX, buzzerY);
+          } else {
+            ctx.fillStyle = tpl.optKeyBg;
+            ctx.beginPath();
+            ctx.arc(buzzerX, buzzerY, buzzerR, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = revealed && !isCorrect ? '#64748B' : tpl.optKeyText;
+            ctx.font = '900 34px "Outfit", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(key, buzzerX, buzzerY);
+          }
+          ctx.restore();
+
+          // Option Text (Centered below Buzzer, multi-line)
+          const optionText = options[key] || '';
+          const maxQuadTextW = quadW - 40;
+          let qOptSize = 30;
+          let qOptLines = [];
+          let qOptLineHeight = 38;
+
+          for (let s = 30; s >= 20; s -= 2) {
+            ctx.font = (isCorrect && revealed ? '800 ' : '700 ') + s + 'px "Plus Jakarta Sans", sans-serif';
+            const lines = getWrappedLines(ctx, optionText, maxQuadTextW);
+            if (lines.length <= 3) {
+              qOptSize = s;
+              qOptLines = lines;
+              qOptLineHeight = s * 1.25;
+              break;
+            }
+            qOptSize = s;
+            qOptLines = lines.slice(0, 3);
+            qOptLineHeight = s * 1.25;
+          }
+
+          ctx.fillStyle = revealed && !isCorrect ? '#64748B' : '#FFFFFF';
+          ctx.font = (isCorrect && revealed ? '800 ' : '700 ') + qOptSize + 'px "Plus Jakarta Sans", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+
+          const textBlockH = (qOptLines.length - 1) * qOptLineHeight;
+          const textCenterY = curY + 145;
+          const startTextY = textCenterY - (textBlockH / 2);
+
+          for (let m = 0; m < qOptLines.length; m++) {
+            ctx.fillText(qOptLines[m], centerX, startTextY + (m * qOptLineHeight));
+          }
+          ctx.textBaseline = 'alphabetic';
+          ctx.restore();
+        });
+        ctx.restore();
+        return;
+      }
+
+      // ==============================================================
+      // 🏛️ STANDARD / CHAMFERED / DIAMOND / EDITORIAL STACKED OPTIONS
+      // ==============================================================
       const keys = ['A', 'B', 'C', 'D'];
-      const startY = 690;
-      const cardH = 135;
-      const gap = 16;
-      const cardW = 960;
+      const startY = 638;
+      const cardH = 125;
+      const gap = 14;
+      const cardW = 940;
+      const cardX = 70;
+
+      const staggerStarts = [0.08, 0.30, 0.52, 0.74];
 
       keys.forEach(function(key, index) {
-        const y = startY + (index * (cardH + gap));
+        const baseY = startY + (index * (cardH + gap));
         const isCorrect = key === correctKey;
+
+        // 1. Entrance animation
+        let enterProgress = 1.0;
+        if (qElapsed < 1.2) {
+          const tStart = staggerStarts[index];
+          const dur = 0.26;
+          enterProgress = Math.max(0, Math.min(1, (qElapsed - tStart) / dur));
+        }
+        if (enterProgress <= 0) return;
+
+        const easeEnter = 1 - Math.pow(1 - enterProgress, 3);
+        const slideOffsetY = (1 - easeEnter) * 22;
+        const currentY = baseY + slideOffsetY;
+
+        // 2. Reveal animations
+        let itemAlpha = alpha * easeEnter;
+        let itemScale = 0.96 + (0.04 * easeEnter);
 
         if (revealed) {
           if (isCorrect) {
+            if (revealElapsed < 0.35) {
+              const p = revealElapsed / 0.35;
+              itemScale = 1.0 + (0.05 * Math.sin(p * Math.PI));
+            }
+          } else {
+            const dimProgress = Math.min(1, revealElapsed / 0.25);
+            const targetDimAlpha = 0.32;
+            itemAlpha = itemAlpha * (1.0 - (dimProgress * (1.0 - targetDimAlpha)));
+          }
+        }
+
+        ctx.save();
+        ctx.globalAlpha = itemAlpha;
+
+        const optCenterX = cardX + (cardW / 2);
+        const optCenterY = currentY + (cardH / 2);
+
+        if (itemScale !== 1.0) {
+          ctx.translate(optCenterX, optCenterY);
+          ctx.scale(itemScale, itemScale);
+          ctx.translate(-optCenterX, -optCenterY);
+        }
+
+        if (revealed) {
+          if (isCorrect) {
+            ctx.shadowColor = 'rgba(16, 185, 129, 0.65)';
+            ctx.shadowBlur = 24;
             ctx.fillStyle = tpl.optCorrectBg;
             ctx.strokeStyle = tpl.optCorrectBorder;
             ctx.lineWidth = 5;
@@ -2816,39 +3441,51 @@
           ctx.lineWidth = 2;
         }
 
-        roundRect(ctx, 60, y, cardW, cardH, 24, true, true);
+        // Shape rendering by layout archetype
+        if (tpl.layout === 'cyber-hud') {
+          drawChamferedRect(ctx, cardX, currentY, cardW, cardH, 18, true, true);
+        } else if (tpl.layout === 'royal-diamond') {
+          drawHexagonCard(ctx, cardX, currentY, cardW, cardH, true, true);
+        } else if (tpl.layout === 'slate-editorial') {
+          roundRect(ctx, cardX, currentY, cardW, cardH, 12, true, true);
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+          ctx.lineWidth = 1;
+          roundRect(ctx, cardX + 4, currentY + 4, cardW - 8, cardH - 8, 8, false, true);
+        } else {
+          roundRect(ctx, cardX, currentY, cardW, cardH, 22, true, true);
+        }
 
-        const circleCenterX = 130;
-        const circleCenterY = y + cardH / 2;
+        const circleCenterX = cardX + 68;
+        const circleCenterY = currentY + cardH / 2;
 
         if (revealed && isCorrect) {
           ctx.fillStyle = tpl.optCorrectKeyBg;
           ctx.beginPath();
-          ctx.arc(circleCenterX, circleCenterY, 38, 0, Math.PI * 2);
+          ctx.arc(circleCenterX, circleCenterY, 36, 0, Math.PI * 2);
           ctx.fill();
           ctx.fillStyle = tpl.optCorrectKeyText;
-          ctx.font = '900 36px "Outfit", sans-serif';
+          ctx.font = '900 34px "Outfit", sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText('✓', circleCenterX, circleCenterY + 13);
+          ctx.fillText('✓', circleCenterX, circleCenterY + 12);
         } else {
           ctx.fillStyle = tpl.optKeyBg;
           ctx.beginPath();
-          ctx.arc(circleCenterX, circleCenterY, 38, 0, Math.PI * 2);
+          ctx.arc(circleCenterX, circleCenterY, 36, 0, Math.PI * 2);
           ctx.fill();
           ctx.fillStyle = revealed && !isCorrect ? '#64748B' : tpl.optKeyText;
-          ctx.font = '800 34px "Outfit", sans-serif';
+          ctx.font = '800 32px "Outfit", sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText(key, circleCenterX, circleCenterY + 12);
+          ctx.fillText(key, circleCenterX, circleCenterY + 11);
         }
 
         const optionText = options[key] || '';
-        const maxOptWidth = 750;
+        const maxOptWidth = 720;
         
-        let optSize = 36;
+        let optSize = 34;
         let optLines = [];
-        let optLineHeight = 44;
+        let optLineHeight = 42;
 
-        for (let s = 36; s >= 24; s -= 2) {
+        for (let s = 34; s >= 22; s -= 2) {
           ctx.font = (isCorrect && revealed ? '800 ' : '700 ') + s + 'px "Plus Jakarta Sans", sans-serif';
           const lines = getWrappedLines(ctx, optionText, maxOptWidth);
           if (lines.length <= 2) {
@@ -2867,146 +3504,561 @@
         ctx.textAlign = 'left';
 
         if (optLines.length === 1) {
-          ctx.fillText(optLines[0], 195, circleCenterY + (optSize * 0.35));
+          ctx.fillText(optLines[0], circleCenterX + 56, circleCenterY + (optSize * 0.35));
         } else {
           const totalTextH = (optLines.length - 1) * optLineHeight;
           const textStartY = circleCenterY - (totalTextH / 2);
           for (let m = 0; m < optLines.length; m++) {
-            ctx.fillText(optLines[m], 195, textStartY + (m * optLineHeight) + (optSize * 0.28));
+            ctx.fillText(optLines[m], circleCenterX + 56, textStartY + (m * optLineHeight) + (optSize * 0.28));
           }
+        }
+
+        ctx.restore();
+
+        // 3. Answer Reveal Sparkle Particles (Decision 3 - Golden starburst for 0.75s)
+        if (revealed && isCorrect && revealElapsed < 0.75) {
+          ctx.save();
+          const pProgress = revealElapsed / 0.75;
+          const pRadius = Math.min(220, pProgress * 320);
+          const pAlpha = (1 - pProgress) * alpha;
+          ctx.globalAlpha = pAlpha;
+
+          const numParticles = 16;
+          const particleColors = ['#FBBF24', '#34D399', '#38BDF8', '#F43F5E'];
+
+          for (let p = 0; p < numParticles; p++) {
+            const angle = (p * (Math.PI * 2 / numParticles)) + (pProgress * 0.4);
+            const dist = pRadius * (0.6 + 0.4 * ((p % 3) / 2));
+            const px = optCenterX + Math.cos(angle) * (cardW * 0.42 * (dist / 220));
+            const py = optCenterY + Math.sin(angle) * (cardH * 0.85 * (dist / 220));
+            const pSize = (4.5 + ((p % 4) * 1.5)) * (1 - pProgress * 0.5);
+
+            ctx.fillStyle = particleColors[p % particleColors.length];
+            ctx.beginPath();
+            ctx.arc(px, py, pSize, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
         }
       });
 
       ctx.restore();
     }
 
-    function drawCountdownOverlay(secondsLeft, totalSeconds, tpl) {
+    function drawCountdownOverlay(secondsLeft, totalSeconds, tpl, cdElapsed) {
       tpl = tpl || getActiveTemplate();
       ctx.save();
-      const centerY = 1385;
+      const centerY = 1285;
+      cdElapsed = (typeof cdElapsed === 'number') ? cdElapsed : (totalSeconds - secondsLeft);
 
+      const fractionalSecond = ((totalSeconds - cdElapsed) % 1.0 + 1.0) % 1.0;
+      const tickAge = 1.0 - fractionalSecond; // 0.0 at tick start, 1.0 at next tick
+
+      // 1. Dynamic Tension Theme Colors
+      let borderColor = tpl.timerBorder || '#F59E0B';
+      let textColor = tpl.timerText || '#F59E0B';
+      let glowColor = 'rgba(245, 158, 11, 0.45)';
+      let shadowBlur = 18;
+
+      if (secondsLeft === 2) {
+        borderColor = '#F97316';
+        textColor = '#FB923C';
+        glowColor = 'rgba(249, 115, 22, 0.65)';
+        shadowBlur = 24;
+      } else if (secondsLeft <= 1) {
+        borderColor = '#EF4444';
+        textColor = '#F87171';
+      }
+      
+      // 2. Elastic Tick Scale Punch (Punches out by 6.5% on each second change)
+      let scale = 1.0;
+      if (tickAge < 0.22) {
+        const p = tickAge / 0.22;
+        scale = 1.0 + (0.065 * Math.sin(p * Math.PI));
+      } else {
+        // Subtle resting breathing pulse
+        scale = 1.0 + (0.012 * Math.sin(cdElapsed * 5.0));
+      }
+
+      // 3. Pulsing Timer Container with Glow (Layout Specific)
+      ctx.save();
+      ctx.shadowColor = glowColor;
+      ctx.shadowBlur = shadowBlur;
       ctx.fillStyle = tpl.timerBg;
-      ctx.strokeStyle = tpl.timerBorder;
-      ctx.lineWidth = 4;
-      roundRect(ctx, 320, centerY - 65, 440, 130, 30, true, true);
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = 3.5;
 
-      ctx.fillStyle = tpl.timerText;
-      ctx.font = '900 72px "Outfit", sans-serif';
+      const timerW = 360;
+      const timerH = 96;
+      const timerX = 540 - (timerW / 2);
+      const timerY = centerY - (timerH / 2);
+
+      if (scale !== 1.0) {
+        ctx.translate(540, centerY);
+        ctx.scale(scale, scale);
+        ctx.translate(-540, -centerY);
+      }
+
+      if (tpl.layout === 'cyber-hud') {
+        drawChamferedRect(ctx, timerX, timerY, timerW, timerH, 16, true, true);
+      } else if (tpl.layout === 'royal-diamond') {
+        drawHexagonCard(ctx, timerX, timerY, timerW, timerH, true, true);
+      } else if (tpl.layout === 'slate-editorial') {
+        roundRect(ctx, timerX, timerY, timerW, timerH, 10, true, true);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 1.5;
+        roundRect(ctx, timerX + 4, timerY + 4, timerW - 8, timerH - 8, 6, false, true);
+      } else {
+        roundRect(ctx, timerX, timerY, timerW, timerH, 24, true, true);
+      }
+
+      // 4. Timer Typography with Centered Alignment
+      ctx.fillStyle = textColor;
+      ctx.font = '900 64px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('⏳ ' + secondsLeft + 's', 540, centerY + 24);
+      ctx.textBaseline = 'middle';
+      ctx.fillText('⏳ ' + secondsLeft + 's', 540, centerY);
+      ctx.textBaseline = 'alphabetic';
 
+      ctx.restore();
+
+      // 5. Engagement Ticker
+      ctx.save();
+      ctx.fillStyle = tpl.qBadgeBg;
+      ctx.strokeStyle = tpl.qCardBorder;
+      ctx.lineWidth = 1.5;
+      if (tpl.layout === 'cyber-hud') {
+        drawChamferedRect(ctx, 110, 1360, 860, 56, 12, true, true);
+      } else {
+        roundRect(ctx, 110, 1360, 860, 56, 16, true, true);
+      }
+      ctx.fillStyle = (secondsLeft <= 1) ? '#EF4444' : '#F59E0B';
+      ctx.font = '800 24px "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('💬 Comment your answer below • 🔔 Subscribe for Daily Mocks', 540, 1396);
       ctx.restore();
     }
 
     function drawAnswerRevealedBanner(correctKey, tpl) {
       tpl = tpl || getActiveTemplate();
       ctx.save();
-      const centerY = 1385;
+      const centerY = 1285;
 
       ctx.fillStyle = tpl.revealBg;
-      roundRect(ctx, 160, centerY - 60, 760, 120, 28, true, false);
+      ctx.shadowColor = 'rgba(16, 185, 129, 0.6)';
+      ctx.shadowBlur = 24;
+
+      if (tpl.layout === 'cyber-hud') {
+        drawChamferedRect(ctx, 100, centerY - 55, 880, 110, 20, true, false);
+      } else if (tpl.layout === 'royal-diamond') {
+        drawHexagonCard(ctx, 100, centerY - 55, 880, 110, true, false);
+      } else {
+        roundRect(ctx, 100, centerY - 55, 880, 110, 26, true, false);
+      }
 
       ctx.fillStyle = tpl.revealText;
-      ctx.font = '900 46px "Outfit", sans-serif';
+      ctx.font = '900 44px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('CORRECT ANSWER: (' + correctKey + ') 🎉', 540, centerY + 16);
+      ctx.fillText('CORRECT ANSWER: (' + correctKey + ') 🎉', 540, centerY + 15);
+
+      // Engagement Ticker
+      ctx.fillStyle = tpl.qBadgeBg;
+      ctx.strokeStyle = tpl.qCardBorder;
+      ctx.lineWidth = 1.5;
+      if (tpl.layout === 'cyber-hud') {
+        drawChamferedRect(ctx, 110, 1360, 860, 56, 12, true, true);
+      } else {
+        roundRect(ctx, 110, 1360, 860, 56, 16, true, true);
+      }
+      ctx.fillStyle = '#10B981';
+      ctx.font = '800 24px "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🏆 Share your score • Like & Subscribe for Tomorrow\'s Test! 🚀', 540, 1396);
 
       ctx.restore();
     }
 
-    function drawCtaScreen(brand, cta, websiteName, websiteUrl, subscribeCta, alpha, tpl) {
+    function drawCtaScreen(brand, cta, websiteName, websiteUrl, subscribeCta, alpha, tpl, ctaElapsed, totalCtaDuration, showcaseVideo) {
+      const W = 1080, H = 1920;
       tpl = tpl || getActiveTemplate();
       alpha = alpha !== undefined ? alpha : 1;
+      ctaElapsed = (typeof ctaElapsed === 'number') ? ctaElapsed : 999;
+      totalCtaDuration = (typeof totalCtaDuration === 'number' && totalCtaDuration > 0) ? totalCtaDuration : 4.0;
+      showcaseVideo = showcaseVideo || singleShowcaseVideoElement || bulkShowcaseVideoElement || null;
+
       ctx.save();
       ctx.globalAlpha = alpha;
 
       drawBaseBackground(tpl);
 
-      // Main CTA Card Container
+      // Check if 2-Phase Showcase is active (requires showcase video)
+      const hasShowcaseVideo = showcaseVideo && ((showcaseVideo.readyState >= 1) || showcaseVideo.videoWidth > 0 || (showcaseVideo.src && showcaseVideo.src.length > 0));
+      const phase3ActionDuration = Math.min(2.8, Math.max(2.2, totalCtaDuration * 0.28));
+      const phase1Duration = hasShowcaseVideo ? Math.max(0, totalCtaDuration - phase3ActionDuration) : 0;
+
+      if (hasShowcaseVideo && ctaElapsed < phase1Duration) {
+        // ==============================================================
+        // 🎬 PHASE 1: GIANT HERO WEBSITE SHOWCASE (3D Glass Mobile Device)
+        // ==============================================================
+        const easeOut = (p) => 1 - Math.pow(1 - Math.max(0, Math.min(1, p)), 3);
+        const p1Progress = easeOut(ctaElapsed / 0.35);
+
+        // 1. Floating Top Header Pill (Pro YouTuber Announcement Style)
+        ctx.save();
+        const headerY = 82;
+        ctx.shadowColor = (tpl.coverExamBorder || '#3B82F6') + '99';
+        ctx.shadowBlur = 20;
+        ctx.shadowOffsetY = 4;
+        const headerGrad = ctx.createLinearGradient(90, headerY - 32, 990, headerY + 32);
+        headerGrad.addColorStop(0, '#0B132B');
+        headerGrad.addColorStop(0.5, '#1E293B');
+        headerGrad.addColorStop(1, '#0B132B');
+        ctx.fillStyle = headerGrad;
+        ctx.strokeStyle = tpl.coverExamBorder || '#38BDF8';
+        ctx.lineWidth = 3;
+        roundRect(ctx, 90, headerY - 32, 900, 64, 20, true, true);
+
+        // Live Pulsing Dot Pill
+        const pulse = (Math.sin(ctaElapsed * 6) + 1) / 2;
+        ctx.fillStyle = 'rgba(239, 68, 68, ' + (0.2 + pulse * 0.25).toFixed(2) + ')';
+        ctx.strokeStyle = '#EF4444';
+        ctx.lineWidth = 1.5;
+        roundRect(ctx, 115, headerY - 20, 145, 40, 12, true, true);
+        
+        ctx.fillStyle = '#EF4444';
+        ctx.beginPath();
+        ctx.arc(135, headerY, 5 + pulse * 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '900 18px "Outfit", sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('LIVE NOW', 149, headerY);
+
+        // Header Title
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '900 26px "Outfit", sans-serif';
+        ctx.textAlign = 'center';
+        drawAutoScaledText(ctx, '✨ 1,000+ TOPIC TESTS & MOCK EXAMS', 625, headerY, 26, 18, '"Outfit", sans-serif', 630);
+        ctx.textBaseline = 'alphabetic';
+        ctx.restore();
+
+        // 2. Realistic Titanium Pro Flagship Smartphone (Tall Aspect-Ratio: 860x1530px)
+        const frameW = 860, frameH = 1530, frameR = 52;
+        const frameX = (W - frameW) / 2; // 110px
+        const frameY = 125;
+
+        ctx.save();
+        // Physical Hardware Side Buttons (Titanium Metallic)
+        const btnGrad = ctx.createLinearGradient(0, frameY, 0, frameY + frameH);
+        btnGrad.addColorStop(0, '#64748B');
+        btnGrad.addColorStop(0.5, '#94A3B8');
+        btnGrad.addColorStop(1, '#334155');
+        ctx.fillStyle = btnGrad;
+
+        // Left Side: Action / Volume Up & Volume Down Buttons
+        roundRect(ctx, frameX - 5, frameY + 240, 5, 80, 2.5, true, false);
+        roundRect(ctx, frameX - 5, frameY + 340, 5, 90, 2.5, true, false);
+        roundRect(ctx, frameX - 5, frameY + 450, 5, 90, 2.5, true, false);
+        // Right Side: Power Button
+        roundRect(ctx, frameX + frameW, frameY + 320, 5, 140, 2.5, true, false);
+
+        // Flagship Outer Titanium Chassis Rim with Deep Realistic Shadow
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+        ctx.shadowBlur = 45;
+        ctx.shadowOffsetY = 20;
+
+        const rimGrad = ctx.createLinearGradient(frameX, frameY, frameX + frameW, frameY + frameH);
+        rimGrad.addColorStop(0, '#64748B');
+        rimGrad.addColorStop(0.15, '#94A3B8');
+        rimGrad.addColorStop(0.35, '#1E293B');
+        rimGrad.addColorStop(0.65, '#0F172A');
+        rimGrad.addColorStop(0.85, '#475569');
+        rimGrad.addColorStop(1, '#64748B');
+
+        ctx.fillStyle = '#090D16';
+        ctx.strokeStyle = rimGrad;
+        ctx.lineWidth = 7;
+        roundRect(ctx, frameX, frameY, frameW, frameH, frameR, true, true);
+        ctx.shadowBlur = 0;
+
+        // Inner Matte Glass Edge Inset
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+        ctx.lineWidth = 1.5;
+        roundRect(ctx, frameX + 4, frameY + 4, frameW - 8, frameH - 8, frameR - 4, false, true);
+        ctx.restore();
+
+        // Screen Canvas (Tall 836x1506px Display Area)
+        const screenX = frameX + 12;
+        const screenY = frameY + 12;
+        const screenW = frameW - 24;  // 836px
+        const screenH = frameH - 24;  // 1506px
+        const screenR = 40;
+
+        ctx.save();
+        ctx.beginPath();
+        roundRect(ctx, screenX, screenY, screenW, screenH, screenR, false, false);
+        ctx.clip();
+
+        // Draw Video Frame (Cover Fit anchored from Top)
+        try {
+          const vw = showcaseVideo.videoWidth || 1080;
+          const vh = showcaseVideo.videoHeight || 1920;
+          const scale = Math.max(screenW / vw, screenH / vh);
+          const drawW = vw * scale;
+          const drawH = vh * scale;
+          const drawX = screenX + (screenW - drawW) / 2;
+          const drawY = screenY;
+          ctx.drawImage(showcaseVideo, drawX, drawY, drawW, drawH);
+        } catch (e) {
+          ctx.fillStyle = '#0F172A';
+          ctx.fillRect(screenX, screenY, screenW, screenH);
+        }
+
+        // Slim Non-Intrusive Dynamic Island & Hardware Sensors
+        const islandW = 150, islandH = 22, islandR = 11;
+        const islandY = frameY + 20;
+        ctx.fillStyle = '#000000';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+        ctx.lineWidth = 1;
+        roundRect(ctx, 540 - islandW / 2, islandY - islandH / 2, islandW, islandH, islandR, true, true);
+
+        // Front Camera Lens with Sapphire Reflection
+        ctx.fillStyle = '#090D16';
+        ctx.beginPath();
+        ctx.arc(540 + 40, islandY, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#38BDF8';
+        ctx.beginPath();
+        ctx.arc(540 + 41.5, islandY - 1.5, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // FaceID Sensor Dot
+        ctx.fillStyle = '#1E1B4B';
+        ctx.beginPath();
+        ctx.arc(540 - 40, islandY, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Speaker Micro-Slit above Screen
+        ctx.fillStyle = '#1E293B';
+        roundRect(ctx, 540 - 35, frameY + 5, 70, 2.5, 1.5, true, false);
+
+        // Bottom Home Indicator Bar (iOS / Android Style)
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+        ctx.shadowBlur = 6;
+        roundRect(ctx, 540 - 100, frameY + frameH - 18, 200, 5, 3, true, false);
+        ctx.shadowBlur = 0;
+
+        // Keynote Diagonal Glass Reflection Sheen
+        const sheenGrad = ctx.createLinearGradient(screenX, screenY, screenX + screenW * 0.6, screenY + screenH * 0.5);
+        sheenGrad.addColorStop(0, 'rgba(255, 255, 255, 0.12)');
+        sheenGrad.addColorStop(0.35, 'rgba(255, 255, 255, 0.03)');
+        sheenGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = sheenGrad;
+        ctx.beginPath();
+        ctx.moveTo(screenX, screenY);
+        ctx.lineTo(screenX + screenW * 0.5, screenY);
+        ctx.lineTo(screenX, screenY + screenH * 0.45);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.restore();
+
+        // 3. Floating Bottom High-Impact Authority Link Bar (Y: 1720, Height: 72px)
+        ctx.save();
+        const linkY = 1720;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+        ctx.shadowBlur = 18;
+        ctx.shadowOffsetY = 6;
+        
+        const linkGrad = ctx.createLinearGradient(90, linkY - 36, 990, linkY + 36);
+        linkGrad.addColorStop(0, '#0F172A');
+        linkGrad.addColorStop(0.5, 'rgba(30, 58, 138, 0.95)');
+        linkGrad.addColorStop(1, '#0F172A');
+        ctx.fillStyle = linkGrad;
+        ctx.strokeStyle = tpl.ctaBadgeText ? (tpl.ctaBadgeText + 'AA') : '#F59E0B';
+        ctx.lineWidth = 3;
+        roundRect(ctx, 90, linkY - 36, 900, 72, 22, true, true);
+
+        // Authority Icon & High-Conversion URL Text
+        ctx.fillStyle = '#FDE047';
+        ctx.font = '900 28px "Outfit", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const displayUrl = websiteUrl || 'www.odishaexamprep.in';
+        drawAutoScaledText(ctx, '🌐 ' + displayUrl + ' • Free Tests Available 👉', 540, linkY, 28, 19, '"Outfit", sans-serif', 860);
+        ctx.textBaseline = 'alphabetic';
+        ctx.restore();
+
+        ctx.restore();
+        return;
+      }
+
+      // ==============================================================
+      // 🎯 PHASE 2 / DEFAULT: HIGH-CONVERSION ACTION SLAM CTA CARD
+      // ==============================================================
+      const p2Elapsed = hasShowcaseVideo ? (ctaElapsed - phase1Duration) : ctaElapsed;
+      const easeOut = (p) => 1 - Math.pow(1 - Math.max(0, Math.min(1, p)), 3);
+      const logoP = easeOut(p2Elapsed / 0.28);
+      const textP = easeOut((p2Elapsed - 0.10) / 0.28);
+      const btn1P = easeOut((p2Elapsed - 0.20) / 0.28);
+      const btn2P = easeOut((p2Elapsed - 0.30) / 0.28);
+      const pinP  = easeOut((p2Elapsed - 0.40) / 0.28);
+
+      // Main CTA Card Container (Snug 1050px Height: Y: 140 to 1190)
       ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
       ctx.shadowBlur = 40;
       ctx.shadowOffsetY = 16;
-      ctx.fillStyle = tpl.ctaCardBg;
-      ctx.strokeStyle = tpl.ctaCardBorder;
+      ctx.fillStyle = tpl.ctaCardBg || 'rgba(15, 23, 42, 0.96)';
+      ctx.strokeStyle = tpl.ctaCardBorder || 'rgba(255, 255, 255, 0.16)';
       ctx.lineWidth = 4;
-      roundRect(ctx, 60, 130, 960, 1370, 44, true, true);
+      roundRect(ctx, 70, 140, 940, 1050, 38, true, true);
       ctx.restore();
 
-      // Brand Logo
+      // 1. BRAND LOGO & NAME (with bounce entrance)
+      ctx.save();
+      ctx.globalAlpha = alpha * logoP;
+      const logoScale = 0.85 + (0.15 * logoP);
+      ctx.translate(540, 240);
+      ctx.scale(logoScale, logoScale);
+      ctx.translate(-540, -240);
+
       try {
         if (logoImg.complete && logoImg.naturalWidth !== 0) {
-          ctx.drawImage(logoImg, 465, 180, 150, 150);
+          ctx.drawImage(logoImg, 470, 165, 140, 140);
         }
       } catch (e) {}
 
       // Brand Name
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = '900 62px "Outfit", sans-serif';
+      ctx.font = '900 58px "Outfit", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(brand || 'OdishaExamPrep', 540, 395);
+      ctx.fillText(brand || 'OdishaExamPrep', 540, 360);
+      ctx.restore();
 
-      // Trust Badge Pill
-      ctx.fillStyle = tpl.ctaBadgeBg;
-      roundRect(ctx, 160, 430, 760, 58, 16, true, false);
-      ctx.fillStyle = tpl.ctaBadgeText;
+      // 2. TRUST BADGE PILL
+      ctx.save();
+      ctx.globalAlpha = alpha * logoP;
+      ctx.fillStyle = tpl.ctaBadgeBg || 'rgba(37, 99, 235, 0.2)';
+      ctx.strokeStyle = tpl.ctaBadgeText ? (tpl.ctaBadgeText + '66') : 'rgba(245, 158, 11, 0.5)';
+      ctx.lineWidth = 2;
+      roundRect(ctx, 170, 395, 740, 54, 16, true, true);
+
+      ctx.fillStyle = tpl.ctaBadgeText || '#FDE047';
       ctx.font = '800 24px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('⭐ 10,000+ Aspirants Trusted Platform', 540, 459);
+      ctx.fillText('⭐ 10,000+ Aspirants Trusted Platform', 540, 422);
       ctx.textBaseline = 'alphabetic';
+      ctx.restore();
 
-      // Value Pitch Text (Wrapped & Centered)
-      ctx.font = '800 42px "Plus Jakarta Sans", sans-serif';
+      // 3. VALUE PITCH TEXT (Wrapped & Centered with smooth fade)
+      ctx.save();
+      ctx.globalAlpha = alpha * textP;
+      const textSlideY = (1 - textP) * 14;
+      ctx.font = '800 38px "Plus Jakarta Sans", sans-serif';
       const ctaLines = getWrappedLines(ctx, cta || 'Visit website for 1,000+ Topic Tests & Mock Series!', 820);
-      const ctaLineH = 56;
+      const ctaLineH = 52;
       const ctaTotalH = (ctaLines.length - 1) * ctaLineH;
-      const ctaStartY = 620 - (ctaTotalH / 2);
+      const ctaStartY = 540 + textSlideY - (ctaTotalH / 2);
 
       ctx.fillStyle = '#F8FAFC';
       ctx.textAlign = 'center';
       for (let c = 0; c < ctaLines.length; c++) {
         ctx.fillText(ctaLines[c], 540, ctaStartY + (c * ctaLineH));
       }
-
-      // 1. PRIMARY ACTION BUTTON (Website Portal)
-      ctx.save();
-      ctx.shadowColor = tpl.ctaBtnBg + '80';
-      ctx.shadowBlur = 28;
-      ctx.shadowOffsetY = 8;
-      ctx.fillStyle = tpl.ctaBtnBg;
-      roundRect(ctx, 100, 755, 880, 135, 32, true, false);
       ctx.restore();
 
-      ctx.fillStyle = tpl.ctaBtnText;
+      // 4. PRIMARY ACTION BUTTON (Website Portal with Shimmer Sweep)
+      ctx.save();
+      const btn1SlideY = (1 - btn1P) * 20;
+      const btn1Y = 665 + btn1SlideY;
+
+      ctx.shadowColor = tpl.ctaBtnBg + '80';
+      ctx.shadowBlur = 26;
+      ctx.shadowOffsetY = 8;
+      ctx.fillStyle = tpl.ctaBtnBg;
+      roundRect(ctx, 110, btn1Y, 860, 125, 30, true, false);
+      ctx.restore();
+
+      // Shimmer sweep across primary button
+      if (p2Elapsed > 0.2) {
+        ctx.save();
+        ctx.globalAlpha = alpha * btn1P;
+        ctx.beginPath();
+        roundRect(ctx, 110, btn1Y, 860, 125, 30, false, false);
+        ctx.clip();
+        const sweepProgress = ((p2Elapsed * 0.60) % 1.6) / 1.6;
+        const beamX = 110 - 200 + (sweepProgress * 1260);
+        const beamGrad = ctx.createLinearGradient(beamX - 100, btn1Y, beamX + 100, btn1Y + 125);
+        beamGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
+        beamGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.32)');
+        beamGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = beamGrad;
+        ctx.fillRect(110, btn1Y, 860, 125);
+        ctx.restore();
+      }
+
+      ctx.save();
+      ctx.globalAlpha = alpha * btn1P;
+      ctx.fillStyle = tpl.ctaBtnText || '#FFFFFF';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      drawAutoScaledText(ctx, '🔗 ' + (websiteUrl || 'www.odishaexamprep.in'), 540, 822, 44, 24, '"Outfit", sans-serif', 820);
+      drawAutoScaledText(ctx, '🔗 ' + (websiteUrl || 'www.odishaexamprep.in'), 540, btn1Y + 62.5, 42, 22, '"Outfit", sans-serif', 800);
+      ctx.textBaseline = 'alphabetic';
+      ctx.restore();
 
-      // 2. HIGH-CTR YOUTUBE SUBSCRIBE BUTTON (YouTube Red Gradient)
+      // 5. HIGH-CTR YOUTUBE SUBSCRIBE BUTTON (with Rhythmic Heartbeat Pulse)
       ctx.save();
-      const subGrad = ctx.createLinearGradient(100, 915, 980, 915);
+      ctx.globalAlpha = alpha * btn2P;
+      const btn2SlideY = (1 - btn2P) * 20;
+      const btn2BaseY = 815 + btn2SlideY;
+      const subCenterX = 540;
+      const subCenterY = btn2BaseY + 62.5;
+
+      const pulseScale = (p2Elapsed > 0.4) ? (1.0 + 0.022 * Math.sin((p2Elapsed - 0.4) * 5.5)) : 1.0;
+      ctx.translate(subCenterX, subCenterY);
+      ctx.scale(pulseScale, pulseScale);
+      ctx.translate(-subCenterX, -subCenterY);
+
+      const subGrad = ctx.createLinearGradient(110, btn2BaseY, 970, btn2BaseY);
       subGrad.addColorStop(0, '#EF4444');
       subGrad.addColorStop(1, '#DC2626');
       ctx.fillStyle = subGrad;
-      ctx.shadowColor = 'rgba(239, 68, 68, 0.45)';
-      ctx.shadowBlur = 30;
+      ctx.shadowColor = 'rgba(239, 68, 68, 0.6)';
+      ctx.shadowBlur = 32;
       ctx.shadowOffsetY = 10;
-      roundRect(ctx, 100, 915, 880, 135, 32, true, false);
-      ctx.restore();
+      roundRect(ctx, 110, btn2BaseY, 860, 125, 30, true, false);
 
       ctx.fillStyle = '#FFFFFF';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const subText = (subscribeCta || (document.getElementById('subscribeCtaText') || {}).value || '🔔 SUBSCRIBE FOR DAILY QUIZZES & MOCKS 🚀').toUpperCase();
-      drawAutoScaledText(ctx, subText, 540, 982, 40, 22, '"Outfit", sans-serif', 820);
+      drawAutoScaledText(ctx, subText, 540, subCenterY, 38, 22, '"Outfit", sans-serif', 800);
       ctx.textBaseline = 'alphabetic';
+      ctx.restore();
 
-      // 3. BOTTOM PINNED COMMENT & ENGAGEMENT STRIP
-      ctx.fillStyle = '#F59E0B';
-      ctx.font = '800 32px "Plus Jakarta Sans", sans-serif';
+      // 6. BOTTOM PINNED COMMENT & ENGAGEMENT PILL
+      ctx.save();
+      ctx.globalAlpha = alpha * pinP;
+      const pinSlideY = (1 - pinP) * 16;
+      const pinY = 965 + pinSlideY;
+
+      ctx.fillStyle = 'rgba(245, 158, 11, 0.14)';
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.4)';
+      ctx.lineWidth = 2;
+      roundRect(ctx, 110, pinY, 860, 68, 20, true, true);
+
+      ctx.fillStyle = '#FBBF24';
+      ctx.font = '800 26px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('👇 Link in Pinned Comment & Bio • Like & Share! 👇', 540, 1155);
+      ctx.textBaseline = 'middle';
+      ctx.fillText('👇 Link in Pinned Comment & Bio • Like & Share! 👇', 540, pinY + 34);
+      ctx.textBaseline = 'alphabetic';
+      ctx.restore();
 
       ctx.restore();
     }
@@ -3026,124 +4078,131 @@
       drawDynamicOptionsCards(currentQ.options, false, currentQ.correct, 1, tpl);
       drawAnswerRevealedBanner(currentQ.correct, tpl);
       renderYouTubeOverlayGuide();
+
+      updateSingleTimingInspector(0, null, getCurrentShortConfig());
     }
 
     // ==========================================
-    // 🌟 100K PRO YOUTUBER EXPANDED COVER GENERATOR
+    // 🌟 100K PRO YOUTUBER SYMMETRIC FULL-SCREEN COVER RENDERER
+    // (Certified for YouTube Shorts 9:16 Feed, Search & Channel Safe Zones)
     // ==========================================
-    function drawCoverCanvas() {
-      const tpl = getActiveTemplate();
-      const exam = document.getElementById('examName').value || 'OSSC CGL & OPSC ASO 2026';
-      const question = document.getElementById('questionText').value || 'Who was the first Chief Minister of Odisha?';
-      const brand = document.getElementById('brandName').value || 'OdishaExamPrep';
-      const websiteUrl = document.getElementById('websiteUrl').value || 'www.odishaexamprep.in';
+    function renderSymmetric100kCover(targetCtx, opts) {
+      opts = opts || {};
+      const tpl = opts.tpl || getActiveTemplate();
+      const exam = (opts.exam || (document.getElementById('examName') ? document.getElementById('examName').value : 'OSSC CGL 2026') || 'OSSC CGL 2026').trim();
+      const question = (opts.question || (document.getElementById('questionText') ? document.getElementById('questionText').value : 'Who was the first Chief Minister of Odisha?') || 'Who was the first Chief Minister of Odisha?').trim();
       
-      const hookText = document.getElementById('coverHookText') ? document.getElementById('coverHookText').value : '⚠️ 99% ASPIRANTS GET THIS WRONG!';
-      const questionBadge = document.getElementById('coverQuestionBadge') ? document.getElementById('coverQuestionBadge').value : '❓ QUESTION #01 • IMPORTANT GK';
-      const challengeText = document.getElementById('coverChallengeText') ? document.getElementById('coverChallengeText').value : '⏱️ 5-SECOND RAPID CHALLENGE';
-      const actionBtnText = document.getElementById('coverActionBtnText') ? document.getElementById('coverActionBtnText').value : '▶ TAP TO PLAY & TEST YOUR RANK 🏆';
+      const defaultOptions = {
+        A: (document.getElementById('optionA') ? document.getElementById('optionA').value : 'Option A') || 'Option A',
+        B: (document.getElementById('optionB') ? document.getElementById('optionB').value : 'Option B') || 'Option B',
+        C: (document.getElementById('optionC') ? document.getElementById('optionC').value : 'Option C') || 'Option C',
+        D: (document.getElementById('optionD') ? document.getElementById('optionD').value : 'Option D') || 'Option D'
+      };
+      const options = opts.options || (questions[activeQuestionIndex] ? questions[activeQuestionIndex].options : defaultOptions) || defaultOptions;
 
+      const hookText = (opts.hookText || (document.getElementById('coverHookText') ? document.getElementById('coverHookText').value : '⚠️ 99% ASPIRANTS GET THIS WRONG!') || '⚠️ 99% ASPIRANTS GET THIS WRONG!').trim();
+      const questionBadge = (opts.questionBadge || (document.getElementById('coverQuestionBadge') ? document.getElementById('coverQuestionBadge').value : '❓ QUESTION #01 • IMPORTANT GK') || '❓ QUESTION #01 • IMPORTANT GK').trim();
+      const challengeText = (opts.challengeText || (document.getElementById('coverChallengeText') ? document.getElementById('coverChallengeText').value : '⏱️ 5-SECOND RAPID CHALLENGE') || '⏱️ 5-SECOND RAPID CHALLENGE').trim();
+      const actionBtnText = (opts.actionBtnText || (document.getElementById('coverActionBtnText') ? document.getElementById('coverActionBtnText').value : '▶ TAP TO PLAY & TEST YOUR RANK 🏆') || '▶ TAP TO PLAY & TEST YOUR RANK 🏆').trim();
+
+      // 0. Base Background with Multi-Tier Glows
       drawBaseBackground(tpl);
 
-      // 1. TOP VIRAL HOOK BANNER (Y: 110 to 245 - Height 135px)
-      ctx.save();
-      ctx.shadowColor = tpl.coverHookGrad[0] + '80';
-      ctx.shadowBlur = 28;
-      ctx.shadowOffsetY = 10;
-      const hookGrad = ctx.createLinearGradient(70, 110, 1010, 110);
+      // 1. TOP VIRAL HOOK BANNER (Y: 235 to 340 - Height: 105px | Inset safe from New badge & 3-dots menu)
+      targetCtx.save();
+      targetCtx.shadowColor = tpl.coverHookGrad[0] + '99';
+      targetCtx.shadowBlur = 28;
+      targetCtx.shadowOffsetY = 8;
+      const hookGrad = targetCtx.createLinearGradient(80, 235, 1000, 235);
       hookGrad.addColorStop(0, tpl.coverHookGrad[0]);
       hookGrad.addColorStop(1, tpl.coverHookGrad[1]);
-      ctx.fillStyle = hookGrad;
-      roundRect(ctx, 70, 110, 940, 135, 28, true, false);
-      ctx.restore();
+      targetCtx.fillStyle = hookGrad;
+      roundRect(targetCtx, 80, 235, 920, 105, 26, true, false);
+      targetCtx.restore();
 
-      let hookSize = 44;
-      ctx.font = '900 ' + hookSize + 'px "Outfit", sans-serif';
-      let hookLines = getWrappedLines(ctx, hookText.toUpperCase(), 880);
+      let hookSize = 40;
+      targetCtx.font = '900 ' + hookSize + 'px "Outfit", sans-serif';
+      let hookLines = getWrappedLines(targetCtx, hookText.toUpperCase(), 780);
       if (hookLines.length > 2) {
-        hookSize = 36;
-        ctx.font = '900 ' + hookSize + 'px "Outfit", sans-serif';
-        hookLines = getWrappedLines(ctx, hookText.toUpperCase(), 880);
+        hookSize = 32;
+        targetCtx.font = '900 ' + hookSize + 'px "Outfit", sans-serif';
+        hookLines = getWrappedLines(targetCtx, hookText.toUpperCase(), 780);
       }
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.textAlign = 'center';
-      const hookLineH = hookSize * 1.25;
-      const hookTotalH = (hookLines.length - 1) * hookLineH;
-      const hookStartY = 177 - (hookTotalH / 2);
-
+      targetCtx.fillStyle = '#FFFFFF';
+      targetCtx.textAlign = 'center';
+      targetCtx.textBaseline = 'middle';
+      const hookLineH = hookSize * 1.18;
+      const hookPillCenterY = 287.5;
+      const hookTotalBlockH = (hookLines.length - 1) * hookLineH;
+      const hookStartY = hookPillCenterY - hookTotalBlockH / 2;
       for (let h = 0; h < hookLines.length; h++) {
-        ctx.fillText(hookLines[h], 540, hookStartY + (h * hookLineH));
+        targetCtx.fillText(hookLines[h], 540, hookStartY + (h * hookLineH));
       }
+      targetCtx.textBaseline = 'alphabetic';
 
-      // 2. HIGH-IMPACT EXAM AUTHORITY BANNER (Y: 255 to 365 - Height 110px)
-      ctx.save();
-      ctx.shadowColor = (tpl.coverExamBorder || '#3B82F6') + '99';
-      ctx.shadowBlur = 26;
-      ctx.shadowOffsetY = 6;
-      
-      const examGrad = ctx.createLinearGradient(70, 255, 1010, 255);
+      // 2. HIGH-IMPACT EXAM AUTHORITY BANNER (Y: 350 to 438 - Height: 88px)
+      targetCtx.save();
+      targetCtx.shadowColor = (tpl.coverExamBorder || '#3B82F6') + '88';
+      targetCtx.shadowBlur = 22;
+      targetCtx.shadowOffsetY = 6;
+      const examGrad = targetCtx.createLinearGradient(80, 350, 1000, 350);
       examGrad.addColorStop(0, tpl.headerCardBg || 'rgba(15, 23, 42, 0.96)');
-      examGrad.addColorStop(0.5, (tpl.headerPillBg || '#2563EB') + '44');
+      examGrad.addColorStop(0.5, (tpl.headerPillBg || '#2563EB') + '55');
       examGrad.addColorStop(1, tpl.headerCardBg || 'rgba(15, 23, 42, 0.96)');
-      ctx.fillStyle = examGrad;
-      ctx.strokeStyle = tpl.coverExamBorder || '#3B82F6';
-      ctx.lineWidth = 4;
-      roundRect(ctx, 70, 255, 940, 110, 26, true, true);
-      ctx.restore();
+      targetCtx.fillStyle = examGrad;
+      targetCtx.strokeStyle = tpl.coverExamBorder || '#3B82F6';
+      targetCtx.lineWidth = 3.5;
+      roundRect(targetCtx, 80, 350, 920, 88, 22, true, true);
+      targetCtx.restore();
 
-      // Bold High-Contrast Text with dynamic auto-scaling
-      let examFontSize = 46;
-      ctx.font = '900 ' + examFontSize + 'px "Outfit", sans-serif';
       let examText = '🎯 ' + exam.toUpperCase();
-      let examMetrics = ctx.measureText(examText);
-      while (examMetrics.width > 860 && examFontSize > 28) {
-        examFontSize -= 2;
-        ctx.font = '900 ' + examFontSize + 'px "Outfit", sans-serif';
-        examMetrics = ctx.measureText(examText);
-      }
+      targetCtx.save();
+      targetCtx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+      targetCtx.shadowBlur = 10;
+      targetCtx.fillStyle = '#FFFFFF';
+      targetCtx.textAlign = 'center';
+      targetCtx.textBaseline = 'middle';
+      drawAutoScaledText(targetCtx, examText, 540, 394, 42, 18, '"Outfit", sans-serif', 840);
+      targetCtx.restore();
 
-      ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
-      ctx.shadowBlur = 12;
-      ctx.fillStyle = '#FFFFFF';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(examText, 540, 310);
-      ctx.restore();
+      // 3. SNUG CENTERPIECE QUESTION CARD (Y: 448 to 818 - Height: 370px)
+      targetCtx.save();
+      targetCtx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+      targetCtx.shadowBlur = 32;
+      targetCtx.shadowOffsetY = 12;
+      targetCtx.fillStyle = tpl.qCardBg;
+      targetCtx.strokeStyle = tpl.qCardBorder;
+      targetCtx.lineWidth = 3.5;
+      roundRect(targetCtx, 80, 448, 920, 370, 28, true, true);
+      targetCtx.restore();
 
-      // 3. CENTERPIECE MYSTERY QUESTION CARD (Y: 375 to 1020 - Height 645px)
-      ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
-      ctx.shadowBlur = 40;
-      ctx.shadowOffsetY = 16;
-      ctx.fillStyle = tpl.qCardBg;
-      ctx.strokeStyle = tpl.qCardBorder;
-      ctx.lineWidth = 4;
-      roundRect(ctx, 70, 380, 940, 640, 36, true, true);
-      ctx.restore();
+      // Question Badge Header Pill (Y: 466 to 512 - Height: 46px)
+      const badgeW = 430;
+      const badgeX = 540 - (badgeW / 2);
+      targetCtx.fillStyle = tpl.qBadgeBg;
+      targetCtx.strokeStyle = tpl.qCardBorder;
+      targetCtx.lineWidth = 2;
+      roundRect(targetCtx, badgeX, 466, badgeW, 46, 16, true, true);
 
-      // Question Badge Header Pill (Y: 405 to 465)
-      ctx.fillStyle = tpl.qBadgeBg;
-      ctx.strokeStyle = tpl.qCardBorder;
-      ctx.lineWidth = 2;
-      roundRect(ctx, 110, 405, 860, 60, 18, true, true);
+      targetCtx.fillStyle = tpl.qBadgeText;
+      targetCtx.textAlign = 'center';
+      targetCtx.textBaseline = 'middle';
+      drawAutoScaledText(targetCtx, questionBadge.toUpperCase(), 540, 489, 23, 15, '"Plus Jakarta Sans", sans-serif', badgeW - 30);
+      targetCtx.textBaseline = 'alphabetic';
 
-      ctx.fillStyle = tpl.qBadgeText;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      drawAutoScaledText(ctx, questionBadge.toUpperCase(), 540, 435, 26, 18, '"Plus Jakarta Sans", sans-serif', 800);
-      ctx.textBaseline = 'alphabetic';
-
-      let coverQSize = 52;
+      // Question Body Text in the 370px Card (Text Zone: Y: 525 to 805 - Center: 665px)
+      let coverQSize = 54;
       let coverQLines = [];
-      let coverQLineH = 70;
+      let coverQLineH = 68;
+      const coverTextMaxWidth = 870;
 
       for (let qs = 54; qs >= 32; qs -= 2) {
-        ctx.font = '800 ' + qs + 'px "Plus Jakarta Sans", sans-serif';
-        const qLines = getWrappedLines(ctx, question, 840);
-        const lH = qs * 1.34;
-        if (qLines.length * lH <= 480) {
+        targetCtx.font = '800 ' + qs + 'px "Plus Jakarta Sans", sans-serif';
+        const qLines = getWrappedLines(targetCtx, question, coverTextMaxWidth);
+        const lH = qs * 1.26;
+        const totalH = qLines.length * lH;
+
+        if (totalH <= 265) {
           coverQSize = qs;
           coverQLines = qLines;
           coverQLineH = lH;
@@ -3154,78 +4213,141 @@
         coverQLineH = lH;
       }
 
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = '800 ' + coverQSize + 'px "Plus Jakarta Sans", sans-serif';
-      ctx.textAlign = 'center';
+      targetCtx.fillStyle = '#FFFFFF';
+      targetCtx.font = '800 ' + coverQSize + 'px "Plus Jakarta Sans", sans-serif';
+      targetCtx.textAlign = 'center';
+      targetCtx.textBaseline = 'middle';
 
       const qTotalH = (coverQLines.length - 1) * coverQLineH;
-      const qStartY = 740 - (qTotalH / 2);
+      const qStartY = 665 - (qTotalH / 2);
 
       for (let q = 0; q < coverQLines.length; q++) {
-        ctx.fillText(coverQLines[q], 540, qStartY + (q * coverQLineH));
+        targetCtx.fillText(coverQLines[q], 540, qStartY + (q * coverQLineH));
+      }
+      targetCtx.textBaseline = 'alphabetic';
+
+      // 4. INTERACTIVE 4-OPTIONS PREVIEW GRID (Y: 828 to 1172 - 4 Rows: Height 80px, Gap 8px)
+      const optKeys = ['A', 'B', 'C', 'D'];
+      const optStartY = 828;
+      const optCardH = 80;
+      const optGap = 8;
+      const optCardW = 920;
+      const optCardX = 80;
+      const maxOptW = 780;
+
+      // Micro-polish: Compute unified option font size across all 4 options
+      let unifiedOptSize = 30;
+      for (let s = 30; s >= 24; s -= 2) {
+        targetCtx.font = '700 ' + s + 'px "Plus Jakarta Sans", sans-serif';
+        let fitsAll = true;
+        for (const key of optKeys) {
+          const text = options[key] || ('Option ' + key);
+          const lines = getWrappedLines(targetCtx, text, maxOptW);
+          if (lines.length > 2) { fitsAll = false; break; }
+        }
+        if (fitsAll) {
+          unifiedOptSize = s;
+          break;
+        }
       }
 
-      // 4. GAMIFIED CHALLENGE STRIP (Y: 1045 to 1135 - Height 90px)
-      ctx.save();
-      ctx.fillStyle = tpl.qBadgeBg;
-      ctx.strokeStyle = tpl.coverChallengeBorder;
-      ctx.lineWidth = 3.5;
-      roundRect(ctx, 140, 1045, 800, 90, 24, true, true);
+      optKeys.forEach((key, oIdx) => {
+        const rowY = optStartY + (oIdx * (optCardH + optGap));
+        const rowCenterY = rowY + (optCardH / 2);
 
-      ctx.fillStyle = tpl.coverChallengeText;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      drawAutoScaledText(ctx, challengeText.toUpperCase(), 540, 1090, 36, 22, '"Outfit", sans-serif', 740);
-      ctx.textBaseline = 'alphabetic';
-      ctx.restore();
+        targetCtx.save();
+        targetCtx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+        targetCtx.shadowBlur = 14;
+        targetCtx.shadowOffsetY = 4;
+        targetCtx.fillStyle = tpl.optCardBg || 'rgba(30, 41, 59, 0.9)';
+        targetCtx.strokeStyle = tpl.optCardBorder || 'rgba(255, 255, 255, 0.12)';
+        targetCtx.lineWidth = 2.5;
+        roundRect(targetCtx, optCardX, rowY, optCardW, optCardH, 18, true, true);
+        targetCtx.restore();
 
-      // 5. MASSIVE 3D ACTION CTA BUTTON (Y: 1160 to 1320 - Height 160px)
-      ctx.save();
-      ctx.shadowColor = tpl.coverBtnGrad[0] + '99';
-      ctx.shadowBlur = 35;
-      ctx.shadowOffsetY = 12;
+        // High-Contrast Tactile Key Badge Pill (Circle at X: 135, Y: rowCenterY, R: 26)
+        const circleCenterX = optCardX + 55;
+        targetCtx.save();
+        targetCtx.shadowColor = (tpl.headerPillBg || '#3B82F6') + '88';
+        targetCtx.shadowBlur = 10;
+        const keyGrad = targetCtx.createLinearGradient(circleCenterX - 26, rowCenterY - 26, circleCenterX + 26, rowCenterY + 26);
+        keyGrad.addColorStop(0, tpl.headerPillBg || '#2563EB');
+        keyGrad.addColorStop(1, (tpl.coverBtnGrad ? tpl.coverBtnGrad[0] : '#3B82F6'));
+        targetCtx.fillStyle = keyGrad;
+        targetCtx.beginPath();
+        targetCtx.arc(circleCenterX, rowCenterY, 26, 0, Math.PI * 2);
+        targetCtx.fill();
+        targetCtx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        targetCtx.lineWidth = 2;
+        targetCtx.stroke();
+        targetCtx.restore();
+
+        // High-Contrast Key Letter
+        targetCtx.fillStyle = '#FFFFFF';
+        targetCtx.font = '900 26px "Outfit", sans-serif';
+        targetCtx.textAlign = 'center';
+        targetCtx.textBaseline = 'middle';
+        targetCtx.fillText(key, circleCenterX, rowCenterY);
+        targetCtx.textBaseline = 'alphabetic';
+
+        // Option Text (Unified Typography)
+        const optText = options[key] || ('Option ' + key);
+        targetCtx.font = '700 ' + unifiedOptSize + 'px "Plus Jakarta Sans", sans-serif';
+        let oLines = getWrappedLines(targetCtx, optText, maxOptW);
+        if (oLines.length > 2) oLines = oLines.slice(0, 2);
+
+        targetCtx.fillStyle = '#FFFFFF';
+        targetCtx.textAlign = 'left';
+        targetCtx.textBaseline = 'middle';
+        const oLineH = unifiedOptSize * 1.20;
+        const oTotalH = (oLines.length - 1) * oLineH;
+        const oStartY = rowCenterY - (oTotalH / 2);
+
+        for (let l = 0; l < oLines.length; l++) {
+          targetCtx.fillText(oLines[l], optCardX + 100, oStartY + (l * oLineH));
+        }
+        targetCtx.textBaseline = 'alphabetic';
+      });
+
+      // 5. GAMIFIED CHALLENGE STRIP (Y: 1184 to 1258 - Height: 74px)
+      targetCtx.save();
+      targetCtx.fillStyle = tpl.qBadgeBg;
+      targetCtx.strokeStyle = tpl.coverChallengeBorder;
+      targetCtx.lineWidth = 3;
+      roundRect(targetCtx, 110, 1184, 860, 74, 20, true, true);
+
+      targetCtx.fillStyle = tpl.coverChallengeText;
+      targetCtx.textAlign = 'center';
+      targetCtx.textBaseline = 'middle';
+      drawAutoScaledText(targetCtx, challengeText.toUpperCase(), 540, 1221, 32, 18, '"Outfit", sans-serif', 800);
+      targetCtx.textBaseline = 'alphabetic';
+      targetCtx.restore();
+
+      // 6. MASSIVE 3D ACTION CTA BUTTON (Y: 1270 to 1410 - Height: 140px | Ending at Y: 1410 to protect YouTube Title Safe Zone)
+      targetCtx.save();
+      targetCtx.shadowColor = tpl.coverBtnGrad[0] + 'B3';
+      targetCtx.shadowBlur = 36;
+      targetCtx.shadowOffsetY = 12;
       
-      const btnGrad = ctx.createLinearGradient(70, 1160, 1010, 1160);
+      const btnGrad = targetCtx.createLinearGradient(80, 1270, 1000, 1270);
       btnGrad.addColorStop(0, tpl.coverBtnGrad[0]);
       btnGrad.addColorStop(1, tpl.coverBtnGrad[1]);
-      ctx.fillStyle = btnGrad;
-      roundRect(ctx, 70, 1160, 940, 160, 36, true, false);
-      ctx.restore();
+      targetCtx.fillStyle = btnGrad;
+      roundRect(targetCtx, 80, 1270, 920, 140, 32, true, false);
+      targetCtx.restore();
 
-      ctx.fillStyle = tpl.name.includes('Gold') ? '#000000' : '#FFFFFF';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      drawAutoScaledText(ctx, actionBtnText, 540, 1240, 44, 24, '"Outfit", sans-serif', 850);
-      ctx.textBaseline = 'alphabetic';
+      targetCtx.fillStyle = (tpl.name && tpl.name.includes('Gold')) ? '#000000' : '#FFFFFF';
+      targetCtx.textAlign = 'center';
+      targetCtx.textBaseline = 'middle';
+      drawAutoScaledText(targetCtx, actionBtnText, 540, 1340, 44, 24, '"Outfit", sans-serif', 840);
+      targetCtx.textBaseline = 'alphabetic';
+    }
 
-      // 6. PRO BRANDING FOOTER (Y: 1350 to 1470 - Height 120px)
-      ctx.fillStyle = tpl.headerCardBg;
-      ctx.strokeStyle = tpl.headerCardBorder;
-      ctx.lineWidth = 2.5;
-      roundRect(ctx, 120, 1350, 840, 120, 28, true, true);
-
-      try {
-        if (logoImg.complete && logoImg.naturalWidth !== 0) {
-          ctx.drawImage(logoImg, 160, 1370, 80, 80);
-        }
-      } catch (e) {}
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = '800 38px "Plus Jakarta Sans", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText(brand + ' ✔', 265, 1412);
-
-      ctx.fillStyle = tpl.qBadgeText;
-      ctx.font = '700 24px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText(websiteUrl, 265, 1445);
-
-      // 7. BOTTOM FEED SCRIM ZONE (Y: 1540 to 1920)
-      const bottomScrim = ctx.createLinearGradient(0, 1540, 0, 1920);
-      bottomScrim.addColorStop(0, 'rgba(6, 9, 17, 0.2)');
-      bottomScrim.addColorStop(1, 'rgba(2, 4, 8, 0.95)');
-      ctx.fillStyle = bottomScrim;
-      ctx.fillRect(0, 1540, 1080, 380);
-
+    function drawCoverCanvas() {
+      const curQ = questions[activeQuestionIndex];
+      renderSymmetric100kCover(ctx, {
+        options: curQ ? curQ.options : null
+      });
       renderYouTubeOverlayGuide();
     }
 
@@ -3259,7 +4381,8 @@
       saveCurrentQuestionForm();
       const activeQuestions = questionsData.slice(0, questionsCount);
       const { intervals, totalQuestionsDuration } = computeQuestionIntervals(activeQuestions);
-      const tCta = ctaAudioObjectUrl ? ctaAudioDuration : 4.0;
+      // Unbounded: Voice duration + 0.8s natural cushion (min 4.0s)
+      const tCta = ctaAudioObjectUrl ? Math.max(4.0, (ctaAudioDuration || 4.0) + 0.8) : 4.0;
       const totalDuration = totalQuestionsDuration + tCta;
 
       const examEl = document.getElementById('examName');
@@ -3283,29 +4406,33 @@
         totalQuestionsDuration,
         ctaStart: totalQuestionsDuration,
         tCta,
-        totalDuration
+        totalDuration,
+        showcaseVideo: singleShowcaseVideoElement
       };
     }
 
-    function renderShortsFrameAtTime(elapsed, totalDuration, config) {
+        function renderShortsFrameAtTime(elapsed, totalDuration, config) {
       const tpl = config.template || getActiveTemplate();
       const intervals = config.intervals;
       const ctaStart = config.ctaStart;
 
       if (elapsed < ctaStart) {
         const activeInterval = intervals.find(it => elapsed >= it.start && elapsed < it.revealEnd) || intervals[intervals.length - 1];
+        const qElapsed = elapsed - activeInterval.start;
+        const isRevealed = elapsed >= activeInterval.timerEnd;
+        const revealElapsed = isRevealed ? (elapsed - activeInterval.timerEnd) : 0;
         
         drawBaseBackground(tpl);
         drawHeaderBar(config.exam, config.brand, 1, tpl);
         drawDynamicQuestionCard(activeInterval.q.question, 1, tpl, activeInterval.index + 1, config.questionsCount);
 
-        const isRevealed = elapsed >= activeInterval.timerEnd;
-        drawDynamicOptionsCards(activeInterval.q.options, isRevealed, activeInterval.q.correct, 1, tpl);
+        drawDynamicOptionsCards(activeInterval.q.options, isRevealed, activeInterval.q.correct, 1, tpl, qElapsed, revealElapsed);
 
         if (elapsed >= activeInterval.readEnd && !isRevealed) {
           const cdElapsed = elapsed - activeInterval.readEnd;
-          const remaining = Math.max(1, Math.ceil(activeInterval.q.countdownSecs - cdElapsed));
-          drawCountdownOverlay(remaining, activeInterval.q.countdownSecs, tpl);
+          const totalSecs = activeInterval.q.countdownSecs || 5;
+          const remaining = Math.max(1, Math.ceil(totalSecs - cdElapsed));
+          drawCountdownOverlay(remaining, totalSecs, tpl, cdElapsed);
         }
 
         if (isRevealed) {
@@ -3314,7 +4441,8 @@
 
         renderYouTubeOverlayGuide();
       } else {
-        drawCtaScreen(config.brand, config.cta, config.websiteName, config.websiteUrl, config.subscribeCta, 1, tpl);
+        const ctaElapsed = elapsed - ctaStart;
+        drawCtaScreen(config.brand, config.cta, config.websiteName, config.websiteUrl, config.subscribeCta, 1, tpl, ctaElapsed, config.tCta, config.showcaseVideo);
         renderYouTubeOverlayGuide();
       }
     }
@@ -3353,6 +4481,7 @@
 
         const elapsed = (now - startTime) / 1000;
         renderShortsFrameAtTime(elapsed, totalDuration, config);
+        updateSingleTimingInspector(elapsed, totalDuration, config);
 
         // Process audio triggers for the active question
         if (elapsed < ctaStart) {
@@ -3369,6 +4498,7 @@
                 startAtmosphericDrone();
               } else if (bgAudioMode === 'custom' && bgMusicAudio && bgMusicObjectUrl) {
                 bgMusicAudio.currentTime = 0;
+                bgMusicAudio.volume = bgMusicVolume;
                 if (!isMuted) bgMusicAudio.play();
               }
             }
@@ -3395,7 +4525,7 @@
                   droneGainNode = null;
                 }, (XFADE * 1000) + 100);
               } else if (bgAudioMode === 'custom' && bgMusicAudio && !bgMusicAudio.paused) {
-                const startVol = bgMusicAudio.volume;
+                const startVol = bgMusicVolume;
                 const steps = 24;
                 const stepTime = (XFADE * 1000) / steps;
                 let step = 0;
@@ -3405,7 +4535,7 @@
                   if (step >= steps) {
                     clearInterval(fadeInterval);
                     bgMusicAudio.pause();
-                    bgMusicAudio.volume = startVol;
+                    bgMusicAudio.volume = bgMusicVolume;
                   }
                 }, stepTime);
               }
@@ -3426,20 +4556,44 @@
               state.revealChimePlayed = true;
               stopAtmosphericDrone();
               stopTimerTensionMusic(0.3);
-              if (bgMusicAudio) bgMusicAudio.pause();
+              if (bgMusicAudio) {
+                bgMusicAudio.pause();
+                bgMusicAudio.volume = bgMusicVolume;
+              }
               playRevealChime();
             }
           }
         } else {
-          // CTA Outro Voiceover
-          if (!ctaVoiceStarted && ctaAudioObjectUrl) {
+          // Strictly disable background suspense music when CTA announces
+          if (bgMusicAudio && !bgMusicAudio.paused) {
+            bgMusicAudio.pause();
+            bgMusicAudio.volume = bgMusicVolume;
+          }
+          stopAtmosphericDrone();
+          stopTimerTensionMusic(0.1);
+
+          // CTA Outro Voiceover & Showcase Video
+          if (!ctaVoiceStarted) {
             ctaVoiceStarted = true;
-            ctaAudio.currentTime = 0;
-            if (!isMuted) ctaAudio.play();
+            if (ctaAudioObjectUrl) {
+              ctaAudio.currentTime = 0;
+              if (!isMuted) ctaAudio.play();
+            }
+            if (config.showcaseVideo && config.showcaseVideo.paused) {
+              config.showcaseVideo.currentTime = 0;
+              config.showcaseVideo.play().catch(e => {});
+            }
           }
         }
 
+        // Never end before totalDuration, and NEVER end while CTA audio is still actively playing!
         if (elapsed >= totalDuration) {
+          const isVoiceStillPlaying = ctaAudio && ctaAudioObjectUrl && !ctaAudio.paused && !ctaAudio.ended && ctaAudio.currentTime < Math.max(0, (ctaAudioDuration - 0.05));
+          if (isVoiceStillPlaying) {
+            // Keep playing frame until voice finishes + 0.8s
+            animationFrameId = requestAnimationFrame(renderFrame);
+            return;
+          }
           stopSequence();
           if (onComplete) onComplete();
           return;
@@ -3457,6 +4611,14 @@
       stopTimerTensionMusic(0.2);
       if (bgMusicAudio) bgMusicAudio.pause();
       if (ctaAudio) ctaAudio.pause();
+      if (singleShowcaseVideoElement) {
+        singleShowcaseVideoElement.pause();
+        singleShowcaseVideoElement.currentTime = 0;
+      }
+      if (bulkShowcaseVideoElement) {
+        bulkShowcaseVideoElement.pause();
+        bulkShowcaseVideoElement.currentTime = 0;
+      }
       document.getElementById('playPreviewBtn').style.display = 'inline-flex';
       document.getElementById('stopPreviewBtn').style.display = 'none';
       if (currentMode === 'shorts') drawIdleFrame();
@@ -3579,9 +4741,10 @@
           bgSource.loop = true;
 
           const bgGain = offlineCtx.createGain();
+          const targetVol = (typeof bgMusicVolume === 'number' ? bgMusicVolume : 0.70);
           bgGain.gain.setValueAtTime(0, tStart);
-          bgGain.gain.linearRampToValueAtTime(0.7, tStart + 0.3);
-          bgGain.gain.setValueAtTime(0.7, tFadeStart);
+          bgGain.gain.linearRampToValueAtTime(targetVol, tStart + 0.3);
+          bgGain.gain.setValueAtTime(targetVol, tFadeStart);
           bgGain.gain.linearRampToValueAtTime(0.0001, tReadEnd);
 
           bgSource.connect(bgGain);
@@ -4059,34 +5222,81 @@
 
       if (!tbody) return;
       if (bulkQueue.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 3rem 1rem; color: var(--text-dim);"><div style="font-size: 2rem; margin-bottom: 0.5rem;">📦</div><div>No questions in queue yet.</div><div style="font-size: 0.75rem; margin-top: 0.25rem;">Upload a CSV file or paste questions on the left to start.</div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 3rem 1rem; color: var(--text-dim);"><div style="font-size: 2rem; margin-bottom: 0.5rem;">📦</div><div>No questions in queue yet.</div><div style="font-size: 0.75rem; margin-top: 0.25rem;">Upload a CSV file or paste questions on the left to start.</div></td></tr>';
         return;
       }
 
+      const qpv = getBulkQPerVideo();
+      const cdSecs = getBulkCountdownSecs();
       let html = '';
-      bulkQueue.forEach((item, index) => {
-        const qSnippet = item.question.length > 55 ? item.question.substring(0, 52) + '...' : item.question;
-        const optSummary = 'A: ' + (item.options.A || '') + ' | B: ' + (item.options.B || '');
-        html += '<tr>' +
-          '<td style="font-weight: 800; color: #94A3B8;">' + (index + 1) + '</td>' +
-          '<td style="font-weight: 700; color: #93C5FD; font-size: 0.78rem;">' + (item.exam || 'OSSC CGL') + '</td>' +
-          '<td>' +
-            '<div style="font-weight: 700; color: #FFF;">' + qSnippet + '</div>' +
-            '<div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 2px;">' + optSummary + '</div>' +
-          '</td>' +
-          '<td><span class="correct-pill-tag">' + item.correct + '</span></td>' +
-          '<td>' +
-            '<div style="display: flex; gap: 0.35rem;">' +
-              '<button type="button" class="btn btn-primary" style="padding: 0.25rem 0.55rem; font-size: 0.72rem; font-weight: 800;" onclick="openBulkVideoPreview(' + index + ')">▶ Play</button>' +
-              '<button type="button" class="btn btn-gold" style="padding: 0.25rem 0.55rem; font-size: 0.72rem; font-weight: 800;" onclick="openBulkCoverPreview(' + index + ')">🖼️ Cover</button>' +
-            '</div>' +
-          '</td>' +
-          '<td><button type="button" style="background: none; border: none; color: #EF4444; font-size: 1.1rem; cursor: pointer;" title="Remove" onclick="removeBulkItem(' + index + ')">🗑️</button></td>' +
-        '</tr>';
-      });
+
+      if (qpv === 1) {
+        bulkQueue.forEach((item, index) => {
+          const qSnippet = item.question.length > 55 ? item.question.substring(0, 52) + '...' : item.question;
+          const optSummary = 'A: ' + (item.options.A || '') + ' | B: ' + (item.options.B || '');
+          html += '<tr>' +
+            '<td style="font-weight: 800; color: #94A3B8;">#' + (index + 1) + '</td>' +
+            '<td style="font-weight: 700; color: #93C5FD; font-size: 0.78rem;">' + (item.exam || 'OSSC CGL') + '</td>' +
+            '<td>' +
+              '<div style="font-weight: 700; color: #FFF;">' + qSnippet + '</div>' +
+              '<div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 2px;">' + optSummary + '</div>' +
+            '</td>' +
+            '<td><span class="correct-pill-tag">' + item.correct + '</span></td>' +
+            '<td>' +
+              '<div style="display: flex; gap: 0.35rem;">' +
+                '<button type="button" class="btn btn-primary" style="padding: 0.25rem 0.55rem; font-size: 0.72rem; font-weight: 800;" onclick="openBulkVideoPreview(' + index + ')">▶ Play</button>' +
+                '<button type="button" class="btn btn-gold" style="padding: 0.25rem 0.55rem; font-size: 0.72rem; font-weight: 800;" onclick="openBulkCoverPreview(' + index + ')">🖼️ Cover</button>' +
+              '</div>' +
+            '</td>' +
+            '<td><button type="button" style="background: none; border: none; color: #EF4444; font-size: 1.1rem; cursor: pointer;" title="Remove" onclick="removeBulkItem(' + index + ')">🗑️</button></td>' +
+          '</tr>';
+        });
+      } else {
+        // Multi-question video grouping (2 or 3 questions per Short)
+        const totalBatches = Math.ceil(bulkQueue.length / qpv);
+        for (let b = 0; b < totalBatches; b++) {
+          const startIdx = b * qpv;
+          const batchItems = bulkQueue.slice(startIdx, startIdx + qpv);
+          const endIdx = startIdx + batchItems.length - 1;
+          const videoNum = b + 1;
+          const estDur = Math.round(batchItems.length * (4.0 + cdSecs + 2.5) + (bulkCtaVoiceTracks.length ? (bulkCtaVoiceTracks[b % bulkCtaVoiceTracks.length].duration || 4.0) + 0.8 : 4.0));
+
+          html += '<tr style="background: rgba(59, 130, 246, 0.12); border-top: 2px solid rgba(59, 130, 246, 0.4);">' +
+            '<td colspan="6" style="padding: 0.55rem 0.85rem;">' +
+              '<div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">' +
+                '<div style="display: flex; align-items: center; gap: 0.5rem;">' +
+                  '<span style="background: #2563EB; color: #FFF; font-weight: 900; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 6px;">🎬 VIDEO #' + videoNum + '</span>' +
+                  '<span style="font-weight: 800; color: #93C5FD; font-size: 0.8rem;">' + batchItems.length + ' Questions (Q' + (startIdx + 1) + ' to Q' + (endIdx + 1) + ')</span>' +
+                  '<span style="font-size: 0.72rem; color: var(--text-muted);">⏱️ ~' + estDur + 's</span>' +
+                '</div>' +
+                '<div style="display: flex; gap: 0.35rem;">' +
+                  '<button type="button" class="btn btn-primary" style="padding: 0.25rem 0.6rem; font-size: 0.72rem; font-weight: 800;" onclick="openBulkVideoPreview(' + startIdx + ')">▶ Play Video #' + videoNum + ' (' + batchItems.length + ' Qs)</button>' +
+                  '<button type="button" class="btn btn-gold" style="padding: 0.25rem 0.6rem; font-size: 0.72rem; font-weight: 800;" onclick="openBulkCoverPreview(' + startIdx + ')">🖼️ Cover #' + videoNum + '</button>' +
+                '</div>' +
+              '</div>' +
+            '</td>' +
+          '</tr>';
+
+          batchItems.forEach((item, subIdx) => {
+            const actualIdx = startIdx + subIdx;
+            const qSnippet = item.question.length > 55 ? item.question.substring(0, 52) + '...' : item.question;
+            const optSummary = 'A: ' + (item.options.A || '') + ' | B: ' + (item.options.B || '');
+            html += '<tr>' +
+              '<td style="font-weight: 700; color: #64748B; padding-left: 1.2rem;">Q' + (actualIdx + 1) + ' <span style="font-size: 0.7rem; color: #3B82F6;">(' + (subIdx + 1) + '/' + batchItems.length + ')</span></td>' +
+              '<td style="font-weight: 700; color: #93C5FD; font-size: 0.78rem;">' + (item.exam || 'OSSC CGL') + '</td>' +
+              '<td>' +
+                '<div style="font-weight: 700; color: #FFF;">' + qSnippet + '</div>' +
+                '<div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 2px;">' + optSummary + '</div>' +
+              '</td>' +
+              '<td><span class="correct-pill-tag">' + item.correct + '</span></td>' +
+              '<td style="color: var(--text-dim); font-size: 0.72rem; font-style: italic;">(Part of Video #' + videoNum + ')</td>' +
+              '<td><button type="button" style="background: none; border: none; color: #EF4444; font-size: 1.1rem; cursor: pointer;" title="Remove" onclick="removeBulkItem(' + actualIdx + ')">🗑️</button></td>' +
+            '</tr>';
+          });
+        }
+      }
 
       tbody.innerHTML = html;
-      updateBulkVideoEstimate();
     }
 
     function removeBulkItem(index) {
@@ -4135,7 +5345,6 @@
       const zip = new JSZip();
       const includeCover = document.getElementById('bulkIncludeCoverCheckbox') ? document.getElementById('bulkIncludeCoverCheckbox').checked : true;
       const tplName = document.getElementById('bulkTemplateTheme') ? document.getElementById('bulkTemplateTheme').value : 'obsidian-cobalt';
-      const batchTemplate = TEMPLATES[tplName] || TEMPLATES['obsidian-cobalt'];
       const qPerVideo = getBulkQPerVideo();
       const bulkCdSecs = getBulkCountdownSecs();
 
@@ -4164,12 +5373,14 @@
           const baseName = itemNum + '_' + safeTitle;
 
           modalTitle.innerText = '⚡ Generating Video ' + (i + 1) + ' of ' + totalItems + ' (' + batchQuestions.length + 'Q each)';
-          modalSubtitle.innerText = firstQ.question;
+          // 🔄 Multi-track auto-rotation: pick tracks by video index
+          const rotatedBgUrl  = getBulkBgMusicUrlForIndex(i);
+          const rotatedCta    = getBulkCtaTrackForIndex(i);
+          const tCtaDur = (rotatedCta && rotatedCta.url) ? Math.max(4.0, (rotatedCta.duration || 4.0) + 0.8) : 4.0;
 
           // Build config for this batch of 1-3 questions
           const tRead = 4.0;
           const tReveal = 2.5;
-          const tCtaDur = bulkCtaAudioObjectUrl ? bulkCtaAudioDuration : 4.0;
 
           // Apply bulk countdown and assign it to each question
           const batchQsWithCd = batchQuestions.map(function(q) {
@@ -4191,6 +5402,10 @@
           const totalDuration = totalQuestionsDuration + tCtaDur;
 
           const bulkSubCta = (document.getElementById('bulkSubscribeCtaText') || {}).value || '🔔 SUBSCRIBE FOR DAILY QUIZZES & MOCKS 🚀';
+
+          // 🎨 Visual Theme Rotation: strictly resolve theme for this video batch
+          const itemTemplate = getTemplateForBatchIndex(i, tplName);
+
           const itemConfig = {
             exam: firstQ.exam || bulkExam,
             brand: bulkBrand,
@@ -4198,7 +5413,7 @@
             subscribeCta: bulkSubCta,
             websiteName: bulkSite,
             websiteUrl: bulkUrl,
-            template: batchTemplate,
+            template: itemTemplate,
             questions: batchQsWithCd,
             questionsCount: batchQsWithCd.length,
             intervals: batchIntervals,
@@ -4206,13 +5421,17 @@
             ctaStart: totalQuestionsDuration,
             tCta: tCtaDur,
             totalDuration,
-            // Override audio context for bulk engine
+            // Showcase Video Demo
+            showcaseVideo: bulkShowcaseVideoElement || singleShowcaseVideoElement || null,
+            // Per-video rotated audio tracks
             _bulkBgAudioMode: bulkBgAudioMode,
-            _bulkBgMusicUrl: bulkBgMusicObjectUrl,
-            _bulkCtaUrl: bulkCtaAudioObjectUrl
+            _bulkBgMusicUrl: rotatedBgUrl,
+            _bulkCtaUrl: rotatedCta.url,
+            _bulkCtaDuration: rotatedCta.duration
           };
 
-          // 1. Render Video Blob
+
+          // 1. Render Video Blob (with matching rotated theme)
           const videoBlob = await renderSingleShortBlob(itemConfig, (itemPct) => {
             const overallPct = Math.round(((i + (itemPct / 100)) / totalItems) * 92);
             progressBar.style.width = overallPct + '%';
@@ -4224,14 +5443,13 @@
             zip.file(baseName + '.mp4', videoBlob);
           }
 
-          // 2. Render Matching Cover PNG (if enabled)
-          // Apply dynamic theme rotation if enabled
-          const itemTemplate = getTemplateForBatchIndex(i, tplName);
-          itemConfig.template = itemTemplate;
-
+          // 2. Render Matching Cover PNG (with exact same rotated theme)
           if (includeCover) {
             const variation = getCoverVariationForIndex(i);
-            const defBadge = '❓ QUESTION #' + String(i + 1).padStart(2, '0') + ' • IMPORTANT GK';
+            let defBadge = '❓ QUESTION #' + itemNum + ' • IMPORTANT GK';
+            if (batchQuestions.length > 1) {
+              defBadge = '🔥 ' + batchQuestions.length + '-QUESTION SPEED RUN • SET #' + itemNum;
+            }
 
             const itemHook = firstQ.customCoverHook || variation.hook;
             const itemBadge = firstQ.customCoverBadge || defBadge;
@@ -4292,12 +5510,10 @@
 
         if (config._bulkBgAudioMode !== undefined) {
           bgAudioMode = config._bulkBgAudioMode === 'muted' ? 'synth' : config._bulkBgAudioMode;
-          if (config._bulkBgAudioMode === 'muted') {
-            // Will render silence by using no audio source
-          }
           bgMusicObjectUrl = config._bulkBgMusicUrl || bgMusicObjectUrl;
           ctaAudioObjectUrl = config._bulkCtaUrl || null;
-          ctaAudioDuration  = config.tCta || 4.0;
+          // Use per-video CTA duration if available, else fall back to tCta
+          ctaAudioDuration  = config._bulkCtaDuration || config.tCta || 4.0;
         }
 
         const renderedAudio = (config._bulkBgAudioMode === 'muted') ? null : await renderOfflineAudioBuffer(config, config.totalDuration);
@@ -4381,6 +5597,13 @@
 
         for (let f = 0; f < totalFrames; f++) {
           const elapsed = f / fps;
+          if (elapsed >= config.ctaStart && config.showcaseVideo && config.showcaseVideo.duration) {
+            const vid = config.showcaseVideo;
+            const ctaRel = elapsed - config.ctaStart;
+            try {
+              vid.currentTime = ctaRel % vid.duration;
+            } catch (e) {}
+          }
           renderShortsFrameAtTime(elapsed, config.totalDuration, config);
 
           const timestampMicros = Math.round((f / fps) * 1000000);
@@ -4413,180 +5636,23 @@
       const prevGuideState = showSafeZoneGuide;
       showSafeZoneGuide = false;
 
-      // Draw custom cover for this item (use bulk branding and custom hooks if provided)
       const exam = item.exam || 'OSSC CGL 2026';
       const question = item.question;
-      const brand = overrideBrand || ((document.getElementById('bulkBrandName') || {}).value) || ((document.getElementById('brandName') || {}).value) || 'OdishaExamPrep';
-      const websiteUrl = overrideUrl || ((document.getElementById('bulkWebsiteUrl') || {}).value) || ((document.getElementById('websiteUrl') || {}).value) || 'www.odishaexamprep.in';
       const hookText = customHook || item.customCoverHook || (document.getElementById('bulkDefaultCoverHook') || {}).value || '⚠️ 99% ASPIRANTS GET THIS WRONG!';
       const questionBadge = customBadge || item.customCoverBadge || (document.getElementById('bulkDefaultCoverBadge') || {}).value || '❓ QUESTION #01 • IMPORTANT GK';
       const challengeText = customChallenge || item.customCoverChallenge || (document.getElementById('bulkDefaultCoverChallenge') || {}).value || '⏱️ 5-SECOND RAPID CHALLENGE';
       const actionBtnText = customAction || (document.getElementById('bulkDefaultCoverAction') || {}).value || '▶ TAP TO PLAY & TEST YOUR RANK 🏆';
 
-      drawBaseBackground(tpl);
-
-      // Top Viral Hook Banner
-      ctx.save();
-      ctx.shadowColor = tpl.coverHookGrad[0] + '80';
-      ctx.shadowBlur = 28;
-      ctx.shadowOffsetY = 10;
-      const hookGrad = ctx.createLinearGradient(70, 110, 1010, 110);
-      hookGrad.addColorStop(0, tpl.coverHookGrad[0]);
-      hookGrad.addColorStop(1, tpl.coverHookGrad[1]);
-      ctx.fillStyle = hookGrad;
-      roundRect(ctx, 70, 110, 940, 135, 28, true, false);
-      ctx.restore();
-
-      let hookSize = 44;
-      ctx.font = '900 ' + hookSize + 'px "Outfit", sans-serif';
-      let hookLines = getWrappedLines(ctx, hookText.toUpperCase(), 880);
-      ctx.fillStyle = '#FFFFFF';
-      ctx.textAlign = 'center';
-      const hookLineH = hookSize * 1.25;
-      const hookTotalH = (hookLines.length - 1) * hookLineH;
-      const hookStartY = 177 - (hookTotalH / 2);
-      for (let h = 0; h < hookLines.length; h++) {
-        ctx.fillText(hookLines[h], 540, hookStartY + (h * hookLineH));
-      }
-
-      // High-Impact Exam Authority Banner (Y: 255 to 365 - Height 110px)
-      ctx.save();
-      ctx.shadowColor = (tpl.coverExamBorder || '#3B82F6') + '99';
-      ctx.shadowBlur = 26;
-      ctx.shadowOffsetY = 6;
-      
-      const examGrad = ctx.createLinearGradient(70, 255, 1010, 255);
-      examGrad.addColorStop(0, tpl.headerCardBg || 'rgba(15, 23, 42, 0.96)');
-      examGrad.addColorStop(0.5, (tpl.headerPillBg || '#2563EB') + '44');
-      examGrad.addColorStop(1, tpl.headerCardBg || 'rgba(15, 23, 42, 0.96)');
-      ctx.fillStyle = examGrad;
-      ctx.strokeStyle = tpl.coverExamBorder || '#3B82F6';
-      ctx.lineWidth = 4;
-      roundRect(ctx, 70, 255, 940, 110, 26, true, true);
-      ctx.restore();
-
-      let examFontSize = 46;
-      ctx.font = '900 ' + examFontSize + 'px "Outfit", sans-serif';
-      let examText = '🎯 ' + exam.toUpperCase();
-      let examMetrics = ctx.measureText(examText);
-      while (examMetrics.width > 860 && examFontSize > 28) {
-        examFontSize -= 2;
-        ctx.font = '900 ' + examFontSize + 'px "Outfit", sans-serif';
-        examMetrics = ctx.measureText(examText);
-      }
-
-      ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
-      ctx.shadowBlur = 12;
-      ctx.fillStyle = '#FFFFFF';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(examText, 540, 310);
-      ctx.restore();
-
-      // Question Card
-      ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
-      ctx.shadowBlur = 40;
-      ctx.shadowOffsetY = 16;
-      ctx.fillStyle = tpl.qCardBg;
-      ctx.strokeStyle = tpl.qCardBorder;
-      ctx.lineWidth = 4;
-      roundRect(ctx, 70, 375, 940, 645, 36, true, true);
-      ctx.restore();
-
-      ctx.fillStyle = tpl.qBadgeBg;
-      ctx.strokeStyle = tpl.qCardBorder;
-      ctx.lineWidth = 2;
-      roundRect(ctx, 110, 405, 860, 60, 18, true, true);
-      ctx.fillStyle = tpl.qBadgeText;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      drawAutoScaledText(ctx, questionBadge.toUpperCase(), 540, 435, 26, 18, '"Plus Jakarta Sans", sans-serif', 800);
-      ctx.textBaseline = 'alphabetic';
-
-      let coverQSize = 52;
-      let coverQLines = [];
-      let coverQLineH = 70;
-      for (let qs = 54; qs >= 32; qs -= 2) {
-        ctx.font = '800 ' + qs + 'px "Plus Jakarta Sans", sans-serif';
-        const qLines = getWrappedLines(ctx, question, 840);
-        const lH = qs * 1.34;
-        if (qLines.length * lH <= 480) {
-          coverQSize = qs;
-          coverQLines = qLines;
-          coverQLineH = lH;
-          break;
-        }
-        coverQSize = qs;
-        coverQLines = qLines;
-        coverQLineH = lH;
-      }
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = '800 ' + coverQSize + 'px "Plus Jakarta Sans", sans-serif';
-      ctx.textAlign = 'center';
-      const qTotalH = (coverQLines.length - 1) * coverQLineH;
-      const qStartY = 740 - (qTotalH / 2);
-      for (let q = 0; q < coverQLines.length; q++) {
-        ctx.fillText(coverQLines[q], 540, qStartY + (q * coverQLineH));
-      }
-
-      // Challenge Strip
-      ctx.save();
-      ctx.fillStyle = tpl.qBadgeBg;
-      ctx.strokeStyle = tpl.coverChallengeBorder;
-      ctx.lineWidth = 3.5;
-      roundRect(ctx, 140, 1045, 800, 90, 24, true, true);
-      ctx.fillStyle = tpl.coverChallengeText;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      drawAutoScaledText(ctx, challengeText.toUpperCase(), 540, 1090, 36, 22, '"Outfit", sans-serif', 740);
-      ctx.textBaseline = 'alphabetic';
-      ctx.restore();
-
-      // CTA Button
-      ctx.save();
-      ctx.shadowColor = tpl.coverBtnGrad[0] + '99';
-      ctx.shadowBlur = 35;
-      ctx.shadowOffsetY = 12;
-      const btnGrad = ctx.createLinearGradient(70, 1160, 1010, 1160);
-      btnGrad.addColorStop(0, tpl.coverBtnGrad[0]);
-      btnGrad.addColorStop(1, tpl.coverBtnGrad[1]);
-      ctx.fillStyle = btnGrad;
-      roundRect(ctx, 70, 1160, 940, 160, 36, true, false);
-      ctx.restore();
-
-      ctx.fillStyle = tpl.name.includes('Gold') ? '#000000' : '#FFFFFF';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      drawAutoScaledText(ctx, actionBtnText, 540, 1240, 44, 24, '"Outfit", sans-serif', 850);
-      ctx.textBaseline = 'alphabetic';
-
-      // Footer
-      ctx.fillStyle = tpl.headerCardBg;
-      ctx.strokeStyle = tpl.headerCardBorder;
-      ctx.lineWidth = 2.5;
-      roundRect(ctx, 120, 1350, 840, 120, 28, true, true);
-      try {
-        if (logoImg.complete && logoImg.naturalWidth !== 0) {
-          ctx.drawImage(logoImg, 160, 1370, 80, 80);
-        }
-      } catch (e) {}
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = '800 38px "Plus Jakarta Sans", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText(brand + ' ✔', 265, 1412);
-      ctx.fillStyle = tpl.qBadgeText;
-      ctx.font = '700 24px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText(websiteUrl, 265, 1445);
-
-      // Scrim
-      const bottomScrim = ctx.createLinearGradient(0, 1540, 0, 1920);
-      bottomScrim.addColorStop(0, 'rgba(6, 9, 17, 0.2)');
-      bottomScrim.addColorStop(1, 'rgba(2, 4, 8, 0.95)');
-      ctx.fillStyle = bottomScrim;
-      ctx.fillRect(0, 1540, 1080, 380);
+      renderSymmetric100kCover(ctx, {
+        tpl: tpl,
+        exam: exam,
+        question: question,
+        options: item.options,
+        hookText: hookText,
+        questionBadge: questionBadge,
+        challengeText: challengeText,
+        actionBtnText: actionBtnText
+      });
 
       showSafeZoneGuide = prevGuideState;
 
@@ -4599,11 +5665,16 @@
 
     // ==============================================================
     // ⚙️ BULK STUDIO SETTINGS — Audio, Video estimate, Branding
+    // 🎵 MULTI-TRACK AUDIO PLAYLIST ENGINE (Auto-Rotation per Video)
     // ==============================================================
     let bulkBgAudioMode = 'synth';
-    let bulkBgMusicObjectUrl = null;
-    let bulkCtaAudioObjectUrl = null;
+    let bulkBgMusicObjectUrl = null;   // Legacy compat alias (first track)
+    let bulkCtaAudioObjectUrl = null;  // Legacy compat alias
     let bulkCtaAudioDuration = 4.0;
+
+    // Multi-track playlists:
+    let bulkBgMusicTracks  = [];  // [{ url, name }]
+    let bulkCtaVoiceTracks = [];  // [{ url, name, duration }]
 
     function handleBulkAudioModeChange(mode) {
       bulkBgAudioMode = mode;
@@ -4611,28 +5682,106 @@
       if (box) box.style.display = (mode === 'custom') ? 'block' : 'none';
     }
 
-    function handleBulkBgAudioUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      if (bulkBgMusicObjectUrl) URL.revokeObjectURL(bulkBgMusicObjectUrl);
-      bulkBgMusicObjectUrl = URL.createObjectURL(file);
-      const nameEl = document.getElementById('bulkBgAudioFileName');
-      if (nameEl) nameEl.innerText = '🎵 ' + file.name;
+    // ── Renders track pill rows for a list container ──────────────────────────
+    // ── Named global remove functions (safe for inline onclick in innerHTML) ──
+    function removeBulkBgMusicTrack(idx) {
+      if (idx < 0 || idx >= bulkBgMusicTracks.length) return;
+      URL.revokeObjectURL(bulkBgMusicTracks[idx].url);
+      bulkBgMusicTracks.splice(idx, 1);
+      bulkBgMusicObjectUrl = bulkBgMusicTracks[0] ? bulkBgMusicTracks[0].url : null;
+      renderBulkBgMusicTrackList();
     }
 
-    function handleBulkCtaAudioUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      if (bulkCtaAudioObjectUrl) URL.revokeObjectURL(bulkCtaAudioObjectUrl);
-      bulkCtaAudioObjectUrl = URL.createObjectURL(file);
-      const nameEl = document.getElementById('bulkCtaAudioFileName');
-      if (nameEl) nameEl.innerText = '🎙️ ' + file.name;
+    function removeBulkCtaVoiceTrack(idx) {
+      if (idx < 0 || idx >= bulkCtaVoiceTracks.length) return;
+      URL.revokeObjectURL(bulkCtaVoiceTracks[idx].url);
+      bulkCtaVoiceTracks.splice(idx, 1);
+      bulkCtaAudioObjectUrl = bulkCtaVoiceTracks[0] ? bulkCtaVoiceTracks[0].url : null;
+      bulkCtaAudioDuration   = bulkCtaVoiceTracks[0] ? bulkCtaVoiceTracks[0].duration : 4.0;
+      renderBulkCtaVoiceTrackList();
+    }
 
-      // Measure CTA audio duration
-      const tempAudio = new Audio(bulkCtaAudioObjectUrl);
-      tempAudio.addEventListener('loadedmetadata', function() {
-        bulkCtaAudioDuration = tempAudio.duration || 4.0;
+    // ── Shared track pill renderer ─────────────────────────────────────────────
+    function renderTrackPills(tracks, containerId, removeFnName) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+      el.innerHTML = '';
+      tracks.forEach(function(t, idx) {
+        const pill = document.createElement('div');
+        pill.style.cssText = 'display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);border-radius:10px;padding:0.3rem 0.55rem;gap:0.4rem;';
+        const safeName = t.name.replace(/"/g, '&quot;');
+        const durLabel = t.duration ? (' (' + t.duration.toFixed(1) + 's)') : '';
+        pill.innerHTML =
+          '<span style="font-size:0.73rem;font-weight:700;color:rgba(255,255,255,0.55);min-width:28px;">T' + (idx + 1) + '</span>' +
+          '<span style="font-size:0.78rem;font-weight:700;color:#F8FAFC;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + safeName + durLabel + '">' + t.name + '<span style="color:#38BDF8;font-size:0.7rem;margin-left:4px;font-weight:700;">' + durLabel + '</span></span>' +
+          '<button type="button" onclick="' + removeFnName + '(' + idx + ')" style="background:rgba(239,68,68,0.18);border:1px solid rgba(239,68,68,0.4);color:#FCA5A5;border-radius:6px;padding:0.1rem 0.45rem;font-size:0.72rem;font-weight:800;cursor:pointer;">✕</button>';
+        el.appendChild(pill);
       });
+      if (tracks.length > 1) {
+        const badge = document.createElement('div');
+        badge.style.cssText = 'font-size:0.72rem;font-weight:700;color:rgba(99,179,237,0.85);margin-top:0.25rem;padding-left:0.1rem;';
+        badge.innerText = '🔄 Rotates across ' + tracks.length + ' tracks — each video gets a unique combination!';
+        el.appendChild(badge);
+      }
+    }
+
+    function renderBulkBgMusicTrackList() {
+      renderTrackPills(bulkBgMusicTracks, 'bulkBgMusicTrackList', 'removeBulkBgMusicTrack');
+    }
+
+    function renderBulkCtaVoiceTrackList() {
+      renderTrackPills(bulkCtaVoiceTracks, 'bulkCtaVoiceTrackList', 'removeBulkCtaVoiceTrack');
+    }
+
+    function handleBulkBgAudioUpload(event) {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+      files.forEach(function(file) {
+        const url = URL.createObjectURL(file);
+        bulkBgMusicTracks.push({ url: url, name: file.name });
+      });
+      bulkBgMusicObjectUrl = bulkBgMusicTracks[0] ? bulkBgMusicTracks[0].url : null;
+      renderBulkBgMusicTrackList();
+      event.target.value = '';
+    }
+
+    async function handleBulkCtaAudioUpload(event) {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+      for (const file of files) {
+        const url = URL.createObjectURL(file);
+        const trackObj = { url: url, name: file.name, duration: 4.0 };
+        // Asynchronously decode accurate duration via WebAudio (no upper limit!)
+        const trueDur = await decodeAudioDurationFromFile(file);
+        if (trueDur && trueDur > 0) {
+          trackObj.duration = trueDur;
+        } else {
+          const tempAudio = new Audio(url);
+          tempAudio.addEventListener('loadedmetadata', function() {
+            if (tempAudio.duration && isFinite(tempAudio.duration)) {
+              trackObj.duration = tempAudio.duration;
+              renderBulkCtaVoiceTrackList();
+            }
+          });
+        }
+        bulkCtaVoiceTracks.push(trackObj);
+      }
+      bulkCtaAudioObjectUrl = bulkCtaVoiceTracks[0] ? bulkCtaVoiceTracks[0].url : null;
+      bulkCtaAudioDuration   = bulkCtaVoiceTracks[0] ? bulkCtaVoiceTracks[0].duration : 4.0;
+      renderBulkCtaVoiceTrackList();
+      event.target.value = '';
+    }
+
+    // ── Get the rotated track URL for a given video index ─────────────────────
+    function getBulkBgMusicUrlForIndex(videoIndex) {
+      if (!bulkBgMusicTracks.length) return bulkBgMusicObjectUrl;
+      return bulkBgMusicTracks[videoIndex % bulkBgMusicTracks.length].url;
+    }
+
+    function getBulkCtaTrackForIndex(videoIndex) {
+      if (!bulkCtaVoiceTracks.length) return { url: bulkCtaAudioObjectUrl, duration: bulkCtaAudioDuration };
+      const t = bulkCtaVoiceTracks[videoIndex % bulkCtaVoiceTracks.length];
+      return { url: t.url, duration: t.duration || 4.0 };
     }
 
     function getBulkQPerVideo() {
@@ -4668,6 +5817,165 @@
 
 
 
+    // ⏱️ TIMING INSPECTOR SYNCHRONIZERS
+    function updateSingleTimingInspector(elapsed, totalDuration, config) {
+      config = config || getCurrentShortConfig();
+      const totalDur = (typeof totalDuration === 'number' && totalDuration > 0) ? totalDuration : (config ? config.totalDuration : 16.0);
+      const qDur = (config && config.totalQuestionsDuration) ? config.totalQuestionsDuration : 11.5;
+      const tCta = (config && config.tCta) ? config.tCta : 4.5;
+      const showcaseVideo = (config && config.showcaseVideo) || singleShowcaseVideoElement;
+      const hasShowcase = Boolean(showcaseVideo && ((showcaseVideo.readyState >= 1) || showcaseVideo.videoWidth > 0 || (showcaseVideo.src && showcaseVideo.src.length > 0)));
+      const p3ActionDur = Math.min(2.8, Math.max(2.2, tCta * 0.28));
+      const p1CtaDur = hasShowcase ? Math.max(0, tCta - p3ActionDur) : 0;
+      
+      const phase1End = qDur;
+      const phase2End = qDur + p1CtaDur;
+      const phase3End = totalDur;
+
+      const totalBadge = document.getElementById('singleTotalDurBadge');
+      if (totalBadge) totalBadge.innerText = 'Total: ' + totalDur.toFixed(1) + 's';
+
+      const timeBadge = document.getElementById('singleCurrentTimeBadge');
+      if (timeBadge) timeBadge.innerText = (elapsed || 0).toFixed(1) + 's / ' + totalDur.toFixed(1) + 's';
+
+      const progressBar = document.getElementById('singleLiveProgressBar');
+      if (progressBar) {
+        const pct = Math.min(100, Math.max(0, ((elapsed || 0) / totalDur) * 100));
+        progressBar.style.width = pct.toFixed(1) + '%';
+      }
+
+      // Update Phase 1 Time
+      const p1Time = document.getElementById('singlePhaseTime1');
+      if (p1Time) p1Time.innerText = '0.0s – ' + phase1End.toFixed(1) + 's (' + phase1End.toFixed(1) + 's)';
+
+      // Update Phase 2 Time
+      const p2Pill = document.getElementById('singlePhasePill2');
+      const p2Time = document.getElementById('singlePhaseTime2');
+      if (p2Time) {
+        if (hasShowcase) {
+          if (p2Pill) p2Pill.style.opacity = '1';
+          p2Time.innerText = phase1End.toFixed(1) + 's – ' + phase2End.toFixed(1) + 's (' + p1CtaDur.toFixed(1) + 's)';
+        } else {
+          if (p2Pill) p2Pill.style.opacity = '0.45';
+          p2Time.innerText = 'Skipped (No Video)';
+        }
+      }
+
+      // Update Phase 3 Time
+      const p3Time = document.getElementById('singlePhaseTime3');
+      if (p3Time) {
+        const p3Dur = totalDur - phase2End;
+        p3Time.innerText = phase2End.toFixed(1) + 's – ' + phase3End.toFixed(1) + 's (' + p3Dur.toFixed(1) + 's)';
+      }
+
+      // Active Phase Glow Highlighting
+      const cur = elapsed || 0;
+      const isP1 = cur < phase1End;
+      const isP2 = hasShowcase && cur >= phase1End && cur < phase2End;
+      const isP3 = cur >= phase2End;
+
+      const pill1 = document.getElementById('singlePhasePill1');
+      const pill2 = document.getElementById('singlePhasePill2');
+      const pill3 = document.getElementById('singlePhasePill3');
+
+      if (pill1) {
+        pill1.style.background = isP1 ? 'rgba(56, 189, 248, 0.25)' : 'rgba(56, 189, 248, 0.08)';
+        pill1.style.borderColor = isP1 ? '#38BDF8' : 'rgba(56, 189, 248, 0.25)';
+        pill1.style.boxShadow = isP1 ? '0 0 10px rgba(56, 189, 248, 0.35)' : 'none';
+      }
+      if (pill2 && hasShowcase) {
+        pill2.style.background = isP2 ? 'rgba(16, 185, 129, 0.25)' : 'rgba(16, 185, 129, 0.08)';
+        pill2.style.borderColor = isP2 ? '#10B981' : 'rgba(16, 185, 129, 0.25)';
+        pill2.style.boxShadow = isP2 ? '0 0 10px rgba(16, 185, 129, 0.35)' : 'none';
+      }
+      if (pill3) {
+        pill3.style.background = isP3 ? 'rgba(239, 68, 68, 0.25)' : 'rgba(239, 68, 68, 0.08)';
+        pill3.style.borderColor = isP3 ? '#EF4444' : 'rgba(239, 68, 68, 0.25)';
+        pill3.style.boxShadow = isP3 ? '0 0 10px rgba(239, 68, 68, 0.35)' : 'none';
+      }
+    }
+
+    function updateBulkModalTimingInspector(elapsed, totalDuration, config) {
+      if (!config) return;
+      const totalDur = (typeof totalDuration === 'number' && totalDuration > 0) ? totalDuration : (config.totalDuration || 16.0);
+      const qDur = config.totalQuestionsDuration || 11.5;
+      const tCta = config.tCta || 4.5;
+      const showcaseVideo = config.showcaseVideo || bulkShowcaseVideoElement || singleShowcaseVideoElement;
+      const hasShowcase = Boolean(showcaseVideo && ((showcaseVideo.readyState >= 1) || showcaseVideo.videoWidth > 0 || (showcaseVideo.src && showcaseVideo.src.length > 0)));
+      const p3ActionDur = Math.min(2.8, Math.max(2.2, tCta * 0.28));
+      const p1CtaDur = hasShowcase ? Math.max(0, tCta - p3ActionDur) : 0;
+      
+      const phase1End = qDur;
+      const phase2End = qDur + p1CtaDur;
+      const phase3End = totalDur;
+
+      const totalBadge = document.getElementById('bulkModalTotalDurBadge');
+      if (totalBadge) totalBadge.innerText = 'Total: ' + totalDur.toFixed(1) + 's';
+
+      const timeBadge = document.getElementById('bulkModalCurrentTimeBadge');
+      if (timeBadge) timeBadge.innerText = (elapsed || 0).toFixed(1) + 's / ' + totalDur.toFixed(1) + 's';
+
+      const progressBar = document.getElementById('bulkModalLiveProgressBar');
+      if (progressBar) {
+        const pct = Math.min(100, Math.max(0, ((elapsed || 0) / totalDur) * 100));
+        progressBar.style.width = pct.toFixed(1) + '%';
+      }
+
+      // Update Phase 1 Time
+      const p1Time = document.getElementById('bulkPhaseTime1');
+      if (p1Time) p1Time.innerText = '0.0s – ' + phase1End.toFixed(1) + 's (' + phase1End.toFixed(1) + 's)';
+
+      // Update Phase 2 Time
+      const p2Pill = document.getElementById('bulkPhasePill2');
+      const p2Time = document.getElementById('bulkPhaseTime2');
+      const p2Sub = document.getElementById('bulkPhaseSub2');
+      if (p2Time && p2Sub) {
+        if (hasShowcase) {
+          if (p2Pill) p2Pill.style.opacity = '1';
+          p2Time.innerText = phase1End.toFixed(1) + 's – ' + phase2End.toFixed(1) + 's (' + p1CtaDur.toFixed(1) + 's)';
+          p2Sub.innerText = '(3D Mobile Demo)';
+        } else {
+          if (p2Pill) p2Pill.style.opacity = '0.45';
+          p2Time.innerText = 'Skipped';
+          p2Sub.innerText = '(No Showcase MP4)';
+        }
+      }
+
+      // Update Phase 3 Time
+      const p3Time = document.getElementById('bulkPhaseTime3');
+      const p3Sub = document.getElementById('bulkPhaseSub3');
+      if (p3Time && p3Sub) {
+        const p3Dur = totalDur - phase2End;
+        p3Time.innerText = phase2End.toFixed(1) + 's – ' + phase3End.toFixed(1) + 's (' + p3Dur.toFixed(1) + 's)';
+      }
+
+      // Active Phase Glow Highlighting
+      const cur = elapsed || 0;
+      const isP1 = cur < phase1End;
+      const isP2 = hasShowcase && cur >= phase1End && cur < phase2End;
+      const isP3 = cur >= phase2End;
+
+      const pill1 = document.getElementById('bulkPhasePill1');
+      const pill2 = document.getElementById('bulkPhasePill2');
+      const pill3 = document.getElementById('bulkPhasePill3');
+
+      if (pill1) {
+        pill1.style.background = isP1 ? 'rgba(56, 189, 248, 0.25)' : 'rgba(56, 189, 248, 0.08)';
+        pill1.style.borderColor = isP1 ? '#38BDF8' : 'rgba(56, 189, 248, 0.3)';
+        pill1.style.boxShadow = isP1 ? '0 0 12px rgba(56, 189, 248, 0.35)' : 'none';
+      }
+      if (pill2 && hasShowcase) {
+        pill2.style.background = isP2 ? 'rgba(16, 185, 129, 0.25)' : 'rgba(16, 185, 129, 0.08)';
+        pill2.style.borderColor = isP2 ? '#10B981' : 'rgba(16, 185, 129, 0.3)';
+        pill2.style.boxShadow = isP2 ? '0 0 12px rgba(16, 185, 129, 0.35)' : 'none';
+      }
+      if (pill3) {
+        pill3.style.background = isP3 ? 'rgba(239, 68, 68, 0.25)' : 'rgba(239, 68, 68, 0.08)';
+        pill3.style.borderColor = isP3 ? '#EF4444' : 'rgba(239, 68, 68, 0.3)';
+        pill3.style.boxShadow = isP3 ? '0 0 12px rgba(239, 68, 68, 0.35)' : 'none';
+      }
+    }
+
     // ==============================================================
     // 👁️ BULK MODAL PREVIEW & COVER GENERATION ENGINE
     // ==============================================================
@@ -4676,6 +5984,22 @@
     let bulkModalIsPlaying = false;
     let bulkModalAnimId = null;
     let bulkModalCtx = null;
+
+    function handleBulkSettingsChange() {
+      updateBulkVideoEstimate();
+      renderBulkQueueTable();
+
+      const modal = document.getElementById('bulkPreviewModal');
+      if (modal && modal.style.display !== 'none') {
+        if (bulkModalMode === 'video') {
+          startBulkModalPlayback();
+        } else if (bulkModalMode === 'cover') {
+          if (bulkQueue[bulkModalActiveIndex]) {
+            drawBulkModalCover(bulkQueue[bulkModalActiveIndex], bulkModalActiveIndex);
+          }
+        }
+      }
+    }
 
     function initBulkModalCanvas() {
       const cvs = document.getElementById('bulkPreviewCanvas');
@@ -4690,45 +6014,68 @@
       bulkModalActiveIndex = index;
       bulkModalMode = 'video';
       
-      const item = bulkQueue[index];
       const modal = document.getElementById('bulkPreviewModal');
       modal.style.display = 'flex';
 
+      const qPerVid = getBulkQPerVideo();
+      const batchIndex = Math.floor(index / qPerVid);
+      const videoNum = batchIndex + 1;
+      const totalVideos = Math.ceil(bulkQueue.length / qPerVid);
+      const batchStartIdx = batchIndex * qPerVid;
+      const batchQuestions = bulkQueue.slice(batchStartIdx, batchStartIdx + qPerVid);
+
       document.getElementById('bulkPreviewModalIcon').innerText = '🎬';
-      document.getElementById('bulkPreviewModalTitle').innerText = 'Test Video #' + (index + 1);
-      document.getElementById('bulkPreviewModalSub').innerText = 'Live animation preview with countdown & tension audio';
+      document.getElementById('bulkPreviewModalTitle').innerText = 'Video #' + videoNum + ' of ' + totalVideos + ' (' + batchQuestions.length + ' Question' + (batchQuestions.length > 1 ? 's' : '') + ')';
+      document.getElementById('bulkPreviewModalSub').innerText = 'Live animation preview with synchronized tension audio & countdown';
       document.getElementById('bulkModalVideoControls').style.display = 'flex';
       document.getElementById('bulkModalCoverControls').style.display = 'none';
 
-      populateBulkModalInfo(item, index);
+      populateBulkModalInfo(bulkQueue[index], index, 0, batchQuestions.length, videoNum);
       startBulkModalPlayback();
     }
 
     function openBulkCoverPreview(index) {
-      if (!bulkQueue[index]) return;
+      const qPerVid = getBulkQPerVideo();
+      const batchIndex = Math.floor(index / qPerVid);
+      const startIdx = batchIndex * qPerVid;
+      if (!bulkQueue[startIdx]) return;
       initBulkModalCanvas();
       stopBulkModalPlayback();
 
-      bulkModalActiveIndex = index;
+      bulkModalActiveIndex = startIdx;
       bulkModalMode = 'cover';
 
-      const item = bulkQueue[index];
+      const item = bulkQueue[startIdx];
       const modal = document.getElementById('bulkPreviewModal');
       modal.style.display = 'flex';
 
+      const videoNum = batchIndex + 1;
+      const totalVideos = Math.ceil(bulkQueue.length / qPerVid);
+      const batchQuestions = bulkQueue.slice(startIdx, startIdx + qPerVid);
+
       document.getElementById('bulkPreviewModalIcon').innerText = '🖼️';
-      document.getElementById('bulkPreviewModalTitle').innerText = 'Test 100k Pro Cover #' + (index + 1);
-      document.getElementById('bulkPreviewModalSub').innerText = 'High-CTR thumbnail preview with viral hooks';
+      if (batchQuestions.length > 1) {
+        document.getElementById('bulkPreviewModalTitle').innerText = '100k Pro Cover — Video #' + videoNum + ' (' + batchQuestions.length + ' Questions)';
+        document.getElementById('bulkPreviewModalSub').innerText = 'High-CTR YouTube thumbnail representing Video #' + videoNum;
+      } else {
+        document.getElementById('bulkPreviewModalTitle').innerText = '100k Pro Cover — Video #' + videoNum;
+        document.getElementById('bulkPreviewModalSub').innerText = 'High-CTR thumbnail preview with viral hooks & 4-options grid';
+      }
       document.getElementById('bulkModalVideoControls').style.display = 'none';
       document.getElementById('bulkModalCoverControls').style.display = 'block';
 
-      populateBulkModalInfo(item, index);
-      drawBulkModalCover(item, index);
+      populateBulkModalInfo(item, startIdx, 0, batchQuestions.length, videoNum);
+      drawBulkModalCover(item, startIdx);
     }
 
-    function populateBulkModalInfo(item, index) {
-      document.getElementById('bulkModalBadge').innerText = 'Short #' + (index + 1) + ' of ' + bulkQueue.length;
-      document.getElementById('bulkModalExamText').innerText = item.exam || 'OSSC CGL 2026';
+    function populateBulkModalInfo(item, index, qIndexInBatch = 0, totalInBatch = 1, videoNum = 1) {
+      if (!item) return;
+      if (totalInBatch > 1) {
+        document.getElementById('bulkModalBadge').innerText = 'Video #' + videoNum + ' • Question ' + (qIndexInBatch + 1) + ' of ' + totalInBatch;
+      } else {
+        document.getElementById('bulkModalBadge').innerText = 'Video #' + videoNum + ' (Question #' + (index + 1) + ' of ' + bulkQueue.length + ')';
+      }
+      document.getElementById('bulkModalExamText').innerText = item.exam || (document.getElementById('bulkDefaultExam') ? document.getElementById('bulkDefaultExam').value : 'OSSC CGL 2026');
       document.getElementById('bulkModalQText').innerText = item.question;
       
       const opts = item.options || {};
@@ -4739,12 +6086,31 @@
         '<b>D:</b> ' + (opts.D || '-') + '<br>' +
         '<span style="color: #10B981; font-weight: 800;">Correct Answer: (' + (item.correct || 'A') + ')</span>';
 
-      const variation = getCoverVariationForIndex(index);
-      const defBadge = '❓ QUESTION #' + String(index + 1).padStart(2, '0') + ' • IMPORTANT GK';
+      const qPerVid = getBulkQPerVideo();
+      const batchIndex = Math.floor(index / qPerVid);
+      const variation = getCoverVariationForIndex(batchIndex);
+      const batchQuestions = bulkQueue.slice(batchIndex * qPerVid, (batchIndex + 1) * qPerVid);
+      let defBadge = '❓ QUESTION #' + String(videoNum).padStart(2, '0') + ' • IMPORTANT GK';
+      if (batchQuestions.length > 1) {
+        defBadge = '🔥 ' + batchQuestions.length + '-QUESTION SPEED RUN • SET #' + String(videoNum).padStart(2, '0');
+      }
 
-      document.getElementById('bulkItemCustomHook').value = item.customCoverHook || variation.hook;
-      document.getElementById('bulkItemCustomBadge').value = item.customCoverBadge || defBadge;
-      document.getElementById('bulkItemCustomChallenge').value = item.customCoverChallenge || variation.chal;
+      if (document.getElementById('bulkItemCustomHook')) document.getElementById('bulkItemCustomHook').value = item.customCoverHook || variation.hook;
+      if (document.getElementById('bulkItemCustomBadge')) document.getElementById('bulkItemCustomBadge').value = item.customCoverBadge || defBadge;
+      if (document.getElementById('bulkItemCustomChallenge')) document.getElementById('bulkItemCustomChallenge').value = item.customCoverChallenge || variation.chal;
+
+      // Update timing inspector on modal open
+      const cdSecs = getBulkCountdownSecs();
+      const rotatedCta = getBulkCtaTrackForIndex(batchIndex);
+      const tCta = (rotatedCta && rotatedCta.url) ? Math.max(4.0, (rotatedCta.duration || 4.0) + 0.8) : 4.0;
+      const totalQDur = batchQuestions.length * (4.0 + cdSecs + 2.5);
+      const totalDur = totalQDur + tCta;
+      updateBulkModalTimingInspector(0, totalDur, {
+        totalQuestionsDuration: totalQDur,
+        tCta: tCta,
+        totalDuration: totalDur,
+        showcaseVideo: bulkShowcaseVideoElement || singleShowcaseVideoElement || null
+      });
     }
 
     function closeBulkPreviewModal() {
@@ -4775,17 +6141,26 @@
       document.getElementById('bulkModalPlayBtn').innerText = '⏸ Pause';
 
       const qPerVid = getBulkQPerVideo();
-      const batchStartIdx = Math.floor(bulkModalActiveIndex / qPerVid) * qPerVid;
+      const batchIndex = Math.floor(bulkModalActiveIndex / qPerVid);
+      const batchStartIdx = batchIndex * qPerVid;
       const batchQuestions = bulkQueue.slice(batchStartIdx, batchStartIdx + qPerVid);
       if (batchQuestions.length === 0) return;
 
+      const totalVideos = Math.ceil(bulkQueue.length / qPerVid);
+      const videoNum = batchIndex + 1;
+      document.getElementById('bulkPreviewModalTitle').innerText = 'Video #' + videoNum + ' of ' + totalVideos + ' (' + batchQuestions.length + ' Question' + (batchQuestions.length > 1 ? 's' : '') + ')';
+
       const tplName = document.getElementById('bulkTemplateTheme') ? document.getElementById('bulkTemplateTheme').value : 'obsidian-cobalt';
-      const tpl = getTemplateForBatchIndex(Math.floor(bulkModalActiveIndex / qPerVid), tplName);
+      const tpl = getTemplateForBatchIndex(batchIndex, tplName);
       const cdSecs = getBulkCountdownSecs();
+
+      // Pick rotated audio tracks for this video batch
+      const rotatedBgUrl = getBulkBgMusicUrlForIndex(batchIndex);
+      const rotatedCta   = getBulkCtaTrackForIndex(batchIndex);
+      const tCta = (rotatedCta && rotatedCta.url) ? Math.max(4.0, (rotatedCta.duration || 4.0) + 0.8) : 4.0;
 
       const tRead = 4.0;
       const tReveal = 2.5;
-      const tCta = bulkCtaAudioObjectUrl ? bulkCtaAudioDuration : 4.0;
 
       const batchQsWithCd = batchQuestions.map(function(q) {
         return Object.assign({}, q, { countdownSecs: cdSecs });
@@ -4819,7 +6194,8 @@
         totalQuestionsDuration: totalQDur,
         ctaStart: totalQDur,
         tCta: tCta,
-        totalDuration: totalDur
+        totalDuration: totalDur,
+        showcaseVideo: bulkShowcaseVideoElement || singleShowcaseVideoElement || null
       };
 
       const startTime = performance.now();
@@ -4834,38 +6210,54 @@
         subBoomPlayed: false
       }));
       let ctaVoiceStarted = false;
+      let activeQStepOnDisplay = -1;
 
       function renderBulkFrame(now) {
         if (!bulkModalIsPlaying) return;
         const elapsed = (now - startTime) / 1000;
 
+        // Never end before totalDur, and NEVER end while CTA audio is still actively playing!
         if (elapsed >= totalDur) {
+          const isVoiceStillPlaying = ctaAudio && rotatedCta && rotatedCta.url && !ctaAudio.paused && !ctaAudio.ended && ctaAudio.currentTime < Math.max(0, ((rotatedCta.duration || 4.0) - 0.05));
+          if (isVoiceStillPlaying) {
+            bulkModalAnimId = requestAnimationFrame(renderBulkFrame);
+            return;
+          }
           stopBulkModalPlayback();
           return;
         }
 
         renderShortsFrameAtTime(elapsed, totalDur, config);
+        updateBulkModalTimingInspector(elapsed, totalDur, config);
         const modalCvs = document.getElementById('bulkPreviewCanvas');
         if (modalCvs && bulkModalCtx) {
           bulkModalCtx.drawImage(canvas, 0, 0, modalCvs.width, modalCvs.height);
         }
 
-        // Process per-question audio triggers
+        // Process per-question audio triggers & dynamic UI sync
         if (elapsed < totalQDur) {
           const activeInterval = intervals.find(it => elapsed >= it.start && elapsed < it.revealEnd);
           if (activeInterval) {
             const idx = activeInterval.index;
             const state = qAudioState[idx];
             const qElapsed = elapsed - activeInterval.start;
+            const currentQ = activeInterval.q;
+
+            // Dynamically sync right-hand sidebar to current playing question
+            if (activeQStepOnDisplay !== idx) {
+              activeQStepOnDisplay = idx;
+              populateBulkModalInfo(currentQ, batchStartIdx + idx, idx, batchQuestions.length, videoNum);
+            }
 
             // ① Start tension music
             if (qElapsed < (4.0 - XFADE) && !state.droneStarted) {
               state.droneStarted = true;
               if (bulkBgAudioMode === 'synth') {
                 startAtmosphericDrone();
-              } else if (bulkBgAudioMode === 'custom' && bgMusicAudio && bulkBgMusicObjectUrl) {
-                bgMusicAudio.src = bulkBgMusicObjectUrl;
+              } else if (bulkBgAudioMode === 'custom' && bgMusicAudio && rotatedBgUrl) {
+                bgMusicAudio.src = rotatedBgUrl;
                 bgMusicAudio.currentTime = 0;
+                bgMusicAudio.volume = bgMusicVolume;
                 if (!isMuted) bgMusicAudio.play();
               }
             }
@@ -4883,7 +6275,7 @@
               if (bulkBgAudioMode === 'synth') {
                 stopAtmosphericDrone();
               } else if (bulkBgAudioMode === 'custom' && bgMusicAudio && !bgMusicAudio.paused) {
-                const startVol = bgMusicAudio.volume;
+                const startVol = bgMusicVolume;
                 const steps = 24;
                 const stepTime = (XFADE * 1000) / steps;
                 let step = 0;
@@ -4893,7 +6285,7 @@
                   if (step >= steps) {
                     clearInterval(fadeInterval);
                     bgMusicAudio.pause();
-                    bgMusicAudio.volume = startVol;
+                    bgMusicAudio.volume = bgMusicVolume;
                   }
                 }, stepTime);
               }
@@ -4914,17 +6306,45 @@
               state.revealChimePlayed = true;
               stopAtmosphericDrone();
               stopTimerTensionMusic(0.3);
-              if (bgMusicAudio) bgMusicAudio.pause();
+              if (bgMusicAudio) {
+                bgMusicAudio.pause();
+                bgMusicAudio.volume = bgMusicVolume;
+              }
               playRevealChime();
             }
           }
         } else {
-          // CTA Outro Voice
-          if (!ctaVoiceStarted && bulkCtaAudioObjectUrl && ctaAudio) {
+          // Update modal panel to show CTA Outro
+          if (activeQStepOnDisplay !== 'cta') {
+            activeQStepOnDisplay = 'cta';
+            document.getElementById('bulkModalBadge').innerText = 'Video #' + videoNum + ' • 🔔 Outro & CTA Screen';
+            document.getElementById('bulkModalExamText').innerText = config.exam;
+            document.getElementById('bulkModalQText').innerText = config.cta;
+            document.getElementById('bulkModalOptsText').innerHTML = 
+              '<span style="color: #F87171; font-weight: 800;">🔔 Subscribe CTA:</span> ' + config.subscribeCta + '<br>' +
+              '<span style="color: #38BDF8; font-weight: 800;">🌐 Website:</span> ' + config.websiteName + ' (' + config.websiteUrl + ')';
+          }
+
+          // Strictly disable background suspense music when CTA announces
+          if (bgMusicAudio && !bgMusicAudio.paused) {
+            bgMusicAudio.pause();
+            bgMusicAudio.volume = bgMusicVolume;
+          }
+          stopAtmosphericDrone();
+          stopTimerTensionMusic(0.1);
+
+          // CTA Outro Voice & Showcase Video
+          if (!ctaVoiceStarted) {
             ctaVoiceStarted = true;
-            ctaAudio.src = bulkCtaAudioObjectUrl;
-            ctaAudio.currentTime = 0;
-            if (!isMuted) ctaAudio.play();
+            if (rotatedCta && rotatedCta.url && ctaAudio) {
+              ctaAudio.src = rotatedCta.url;
+              ctaAudio.currentTime = 0;
+              if (!isMuted) ctaAudio.play();
+            }
+            if (config.showcaseVideo && config.showcaseVideo.paused) {
+              config.showcaseVideo.currentTime = 0;
+              config.showcaseVideo.play().catch(e => {});
+            }
           }
         }
 
@@ -4941,6 +6361,14 @@
       stopTimerTensionMusic(0.2);
       if (bgMusicAudio) bgMusicAudio.pause();
       if (ctaAudio) ctaAudio.pause();
+      if (bulkShowcaseVideoElement) {
+        bulkShowcaseVideoElement.pause();
+        bulkShowcaseVideoElement.currentTime = 0;
+      }
+      if (singleShowcaseVideoElement) {
+        singleShowcaseVideoElement.pause();
+        singleShowcaseVideoElement.currentTime = 0;
+      }
       const playBtn = document.getElementById('bulkModalPlayBtn');
       if (playBtn) playBtn.innerText = '▶ Play Video';
     }
@@ -4954,185 +6382,30 @@
       drawBulkModalCover(item, bulkModalActiveIndex);
     }
 
-        function drawBulkModalCover(item, index) {
+    function drawBulkModalCover(item, index) {
       initBulkModalCanvas();
-      const variation = getCoverVariationForIndex(index);
+      const qPerVid = getBulkQPerVideo();
+      const batchIndex = Math.floor(index / qPerVid);
+      const variation = getCoverVariationForIndex(batchIndex);
       const baseTplName = document.getElementById('bulkTemplateTheme') ? document.getElementById('bulkTemplateTheme').value : 'obsidian-cobalt';
-      const tpl = getTemplateForBatchIndex(index, baseTplName);
+      const tpl = getTemplateForBatchIndex(batchIndex, baseTplName);
 
+      const defaultBadge = '❓ QUESTION #' + String(index + 1).padStart(2, '0') + ' • IMPORTANT GK';
       const hookText = (document.getElementById('bulkItemCustomHook') && document.getElementById('bulkItemCustomHook').value) ? document.getElementById('bulkItemCustomHook').value : variation.hook;
-      const badgeText = (document.getElementById('bulkItemCustomBadge') && document.getElementById('bulkItemCustomBadge').value) ? document.getElementById('bulkItemCustomBadge').value : ('❓ QUESTION #' + String(index + 1).padStart(2, '0') + ' • IMPORTANT GK');
+      const badgeText = (document.getElementById('bulkItemCustomBadge') && document.getElementById('bulkItemCustomBadge').value) ? document.getElementById('bulkItemCustomBadge').value : defaultBadge;
       const chalText = (document.getElementById('bulkItemCustomChallenge') && document.getElementById('bulkItemCustomChallenge').value) ? document.getElementById('bulkItemCustomChallenge').value : variation.chal;
       const actionText = variation.act;
-      const brand = (document.getElementById('bulkBrandName') || {}).value || 'OdishaExamPrep';
-      const websiteUrl = (document.getElementById('bulkWebsiteUrl') || {}).value || 'www.odishaexamprep.in';
-      const exam = item.exam || 'OSSC CGL 2026';
 
-      // Draw onto main canvas then copy to preview canvas
-      drawBaseBackground(tpl);
-
-      // Top Viral Hook Banner
-      ctx.save();
-      ctx.shadowColor = tpl.coverHookGrad[0] + '80';
-      ctx.shadowBlur = 28;
-      ctx.shadowOffsetY = 10;
-      const hookGrad = ctx.createLinearGradient(70, 110, 1010, 110);
-      hookGrad.addColorStop(0, tpl.coverHookGrad[0]);
-      hookGrad.addColorStop(1, tpl.coverHookGrad[1]);
-      ctx.fillStyle = hookGrad;
-      roundRect(ctx, 70, 110, 940, 135, 28, true, false);
-      ctx.restore();
-
-      let hookSize = 44;
-      ctx.font = '900 ' + hookSize + 'px "Outfit", sans-serif';
-      let hookLines = getWrappedLines(ctx, hookText.toUpperCase(), 880);
-      ctx.fillStyle = '#FFFFFF';
-      ctx.textAlign = 'center';
-      const hookLineH = hookSize * 1.25;
-      const hookTotalH = (hookLines.length - 1) * hookLineH;
-      const hookStartY = 177 - (hookTotalH / 2);
-      for (let h = 0; h < hookLines.length; h++) {
-        ctx.fillText(hookLines[h], 540, hookStartY + (h * hookLineH));
-      }
-
-      // High-Impact Exam Authority Banner (Y: 255 to 365 - Height 110px)
-      ctx.save();
-      ctx.shadowColor = (tpl.coverExamBorder || '#3B82F6') + '99';
-      ctx.shadowBlur = 26;
-      ctx.shadowOffsetY = 6;
-      
-      const examGrad = ctx.createLinearGradient(70, 255, 1010, 255);
-      examGrad.addColorStop(0, tpl.headerCardBg || 'rgba(15, 23, 42, 0.96)');
-      examGrad.addColorStop(0.5, (tpl.headerPillBg || '#2563EB') + '44');
-      examGrad.addColorStop(1, tpl.headerCardBg || 'rgba(15, 23, 42, 0.96)');
-      ctx.fillStyle = examGrad;
-      ctx.strokeStyle = tpl.coverExamBorder || '#3B82F6';
-      ctx.lineWidth = 4;
-      roundRect(ctx, 70, 255, 940, 110, 26, true, true);
-      ctx.restore();
-
-      let examFontSize = 46;
-      ctx.font = '900 ' + examFontSize + 'px "Outfit", sans-serif';
-      let examText = '🎯 ' + exam.toUpperCase();
-      let examMetrics = ctx.measureText(examText);
-      while (examMetrics.width > 860 && examFontSize > 28) {
-        examFontSize -= 2;
-        ctx.font = '900 ' + examFontSize + 'px "Outfit", sans-serif';
-        examMetrics = ctx.measureText(examText);
-      }
-
-      ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
-      ctx.shadowBlur = 12;
-      ctx.fillStyle = '#FFFFFF';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(examText, 540, 310);
-      ctx.restore();
-
-      // Question Card
-      ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
-      ctx.shadowBlur = 40;
-      ctx.shadowOffsetY = 16;
-      ctx.fillStyle = tpl.qCardBg;
-      ctx.strokeStyle = tpl.qCardBorder;
-      ctx.lineWidth = 4;
-      roundRect(ctx, 70, 375, 940, 645, 36, true, true);
-      ctx.restore();
-
-      ctx.fillStyle = tpl.qBadgeBg;
-      ctx.strokeStyle = tpl.qCardBorder;
-      ctx.lineWidth = 2;
-      roundRect(ctx, 110, 405, 860, 60, 18, true, true);
-      ctx.fillStyle = tpl.qBadgeText;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      drawAutoScaledText(ctx, badgeText.toUpperCase(), 540, 435, 26, 18, '"Plus Jakarta Sans", sans-serif', 800);
-      ctx.textBaseline = 'alphabetic';
-
-      let coverQSize = 52;
-      let coverQLines = [];
-      let coverQLineH = 70;
-      for (let qs = 54; qs >= 32; qs -= 2) {
-        ctx.font = '800 ' + qs + 'px "Plus Jakarta Sans", sans-serif';
-        const qLines = getWrappedLines(ctx, item.question, 840);
-        const lH = qs * 1.34;
-        if (qLines.length * lH <= 480) {
-          coverQSize = qs;
-          coverQLines = qLines;
-          coverQLineH = lH;
-          break;
-        }
-        coverQSize = qs;
-        coverQLines = qLines;
-        coverQLineH = lH;
-      }
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = '800 ' + coverQSize + 'px "Plus Jakarta Sans", sans-serif';
-      ctx.textAlign = 'center';
-      const qTotalH = (coverQLines.length - 1) * coverQLineH;
-      const qStartY = 740 - (qTotalH / 2);
-      for (let q = 0; q < coverQLines.length; q++) {
-        ctx.fillText(coverQLines[q], 540, qStartY + (q * coverQLineH));
-      }
-
-      // Challenge Strip
-      ctx.save();
-      ctx.fillStyle = tpl.qBadgeBg;
-      ctx.strokeStyle = tpl.coverChallengeBorder;
-      ctx.lineWidth = 3.5;
-      roundRect(ctx, 140, 1045, 800, 90, 24, true, true);
-      ctx.fillStyle = tpl.coverChallengeText;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      drawAutoScaledText(ctx, chalText.toUpperCase(), 540, 1090, 36, 22, '"Outfit", sans-serif', 740);
-      ctx.textBaseline = 'alphabetic';
-      ctx.restore();
-
-      // CTA Button
-      ctx.save();
-      ctx.shadowColor = tpl.coverBtnGrad[0] + '99';
-      ctx.shadowBlur = 35;
-      ctx.shadowOffsetY = 12;
-      const btnGrad = ctx.createLinearGradient(70, 1160, 1010, 1160);
-      btnGrad.addColorStop(0, tpl.coverBtnGrad[0]);
-      btnGrad.addColorStop(1, tpl.coverBtnGrad[1]);
-      ctx.fillStyle = btnGrad;
-      roundRect(ctx, 70, 1160, 940, 160, 36, true, false);
-      ctx.restore();
-
-      ctx.fillStyle = tpl.name.includes('Gold') ? '#000000' : '#FFFFFF';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      drawAutoScaledText(ctx, actionText, 540, 1240, 44, 24, '"Outfit", sans-serif', 850);
-      ctx.textBaseline = 'alphabetic';
-
-      // Footer
-      ctx.fillStyle = tpl.headerCardBg;
-      ctx.strokeStyle = tpl.headerCardBorder;
-      ctx.lineWidth = 2.5;
-      roundRect(ctx, 120, 1350, 840, 120, 28, true, true);
-      try {
-        if (logoImg.complete && logoImg.naturalWidth !== 0) {
-          ctx.drawImage(logoImg, 160, 1370, 80, 80);
-        }
-      } catch (e) {}
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = '800 38px "Plus Jakarta Sans", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText(brand + ' ✔', 265, 1412);
-      ctx.fillStyle = tpl.qBadgeText;
-      ctx.font = '700 24px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText(websiteUrl, 265, 1445);
-
-      // Scrim
-      const bottomScrim = ctx.createLinearGradient(0, 1540, 0, 1920);
-      bottomScrim.addColorStop(0, 'rgba(6, 9, 17, 0.2)');
-      bottomScrim.addColorStop(1, 'rgba(2, 4, 8, 0.95)');
-      ctx.fillStyle = bottomScrim;
-      ctx.fillRect(0, 1540, 1080, 380);
+      renderSymmetric100kCover(ctx, {
+        tpl: tpl,
+        exam: item.exam,
+        question: item.question,
+        options: item.options,
+        hookText: hookText,
+        questionBadge: badgeText,
+        challengeText: chalText,
+        actionBtnText: actionText
+      });
 
       // Copy to modal canvas
       const modalCvs = document.getElementById('bulkPreviewCanvas');
@@ -5142,10 +6415,13 @@
     }
 
     function downloadBulkModalCoverPNG() {
-      const item = bulkQueue[bulkModalActiveIndex];
+      const qPerVid = getBulkQPerVideo();
+      const batchIndex = Math.floor(bulkModalActiveIndex / qPerVid);
+      const videoNum = batchIndex + 1;
+      const item = bulkQueue[batchIndex * qPerVid] || bulkQueue[bulkModalActiveIndex];
       const examName = (item ? item.exam : 'OSSC_CGL').replace(/[^a-zA-Z0-9]/g, '_');
       const link = document.createElement('a');
-      link.download = '100k_Cover_' + examName + '_Short_' + (bulkModalActiveIndex + 1) + '.png';
+      link.download = '100k_Cover_' + examName + '_Video_' + String(videoNum).padStart(2, '0') + '.png';
       link.href = canvas.toDataURL('image/png');
       link.click();
     }
@@ -5292,9 +6568,61 @@
         </div>
 
         <!-- Details & Per-Item Cover Customizer -->
-        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 14px; padding: 1.25rem;">
-          <div style="font-weight: 800; color: #93C5FD; font-size: 0.9rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: space-between;">
-            <span>📝 Video Details & Cover Customizer</span>
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 14px; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.85rem;">
+          
+          <!-- ⏱️ VIDEO TIMING & 3-PHASE FLOW INSPECTOR -->
+          <div id="bulkModalTimingInspector" style="background: rgba(15, 23, 42, 0.8); border: 1.5px solid rgba(59, 130, 246, 0.4); border-radius: 12px; padding: 0.85rem; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.45rem;">
+              <div style="font-weight: 800; font-size: 0.82rem; color: #93C5FD; display: flex; align-items: center; gap: 0.35rem;">
+                <span>⏱️ VIDEO TIMING & PHASE FLOW</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <span id="bulkModalTotalDurBadge" style="background: rgba(37,99,235,0.25); color: #93C5FD; border: 1px solid rgba(59,130,246,0.4); font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">Total: 0.0s</span>
+                <span id="bulkModalCurrentTimeBadge" style="background: rgba(16,185,129,0.2); color: #6EE7B7; border: 1px solid rgba(16,185,129,0.4); font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">0.0s</span>
+              </div>
+            </div>
+
+            <!-- Multi-segment Live Scrubber Progress Bar -->
+            <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; position: relative; margin-bottom: 0.65rem;">
+              <div id="bulkModalLiveProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #38BDF8 0%, #10B981 60%, #EF4444 100%); transition: width 0.05s linear; border-radius: 999px;"></div>
+            </div>
+
+            <!-- 3-Phase Interactive Flow Step Pills -->
+            <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+              <!-- Phase 1: MCQ Question -->
+              <div id="bulkPhasePill1" style="display: flex; align-items: center; justify-content: space-between; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 0.4rem 0.6rem; font-size: 0.74rem;">
+                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                  <span id="bulkPhaseIcon1" style="font-size: 0.8rem;">🎯</span>
+                  <span style="font-weight: 800; color: #E0F2FE;">Phase 1: MCQ Quiz</span>
+                  <span id="bulkPhaseSub1" style="font-size: 0.68rem; color: var(--text-muted);">(Read 4s + Timer + Reveal)</span>
+                </div>
+                <span id="bulkPhaseTime1" style="font-weight: 800; color: #38BDF8; font-family: monospace;">0.0s – 11.5s</span>
+              </div>
+
+              <!-- Phase 2: Website Showcase Demo -->
+              <div id="bulkPhasePill2" style="display: flex; align-items: center; justify-content: space-between; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 0.4rem 0.6rem; font-size: 0.74rem;">
+                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                  <span id="bulkPhaseIcon2" style="font-size: 0.8rem;">🎬</span>
+                  <span style="font-weight: 800; color: #DCFCE7;">Phase 2: Website Showcase</span>
+                  <span id="bulkPhaseSub2" style="font-size: 0.68rem; color: var(--text-muted);">(3D Mobile Demo)</span>
+                </div>
+                <span id="bulkPhaseTime2" style="font-weight: 800; color: #34D399; font-family: monospace;">11.5s – 14.3s</span>
+              </div>
+
+              <!-- Phase 3: High-Impact Action CTA -->
+              <div id="bulkPhasePill3" style="display: flex; align-items: center; justify-content: space-between; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 0.4rem 0.6rem; font-size: 0.74rem;">
+                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                  <span id="bulkPhaseIcon3" style="font-size: 0.8rem;">🔔</span>
+                  <span style="font-weight: 800; color: #FEE2E2;">Phase 3: Action & Subscribe CTA</span>
+                  <span id="bulkPhaseSub3" style="font-size: 0.68rem; color: var(--text-muted);">(Buttons Slam)</span>
+                </div>
+                <span id="bulkPhaseTime3" style="font-weight: 800; color: #F87171; font-family: monospace;">14.3s – 16.8s</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-weight: 800; color: #93C5FD; font-size: 0.9rem; margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+            <span>📝 Active Step Data</span>
             <span id="bulkModalBadge" class="badge-info">Question 1 of 6</span>
           </div>
 

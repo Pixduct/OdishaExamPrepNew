@@ -31,31 +31,8 @@ import { fadeSlideUp, modalContent } from './lib/animations';
 import { recordQuestionSolved, completeDailyGoalDirectly } from './lib/streakManager';
 import { destroyLenis, initLenis } from './lib/lenisScroll';
 
-export const requestUniversalFullscreen = () => {
-  if (typeof document === 'undefined' || typeof window === 'undefined') return;
-  // On mobile screens (< 1024px), do NOT call OS fullscreen API to avoid intrusive Android Chrome notification overlay
-  if (window.innerWidth < 1024) return;
-  const doc = document as any;
-  const fsElement = doc.fullscreenElement || 
-                    doc.webkitFullscreenElement || 
-                    doc.mozFullScreenElement || 
-                    doc.msFullscreenElement;
-
-  if (!fsElement) {
-    const el = (document.documentElement || document.body) as any;
-    if (el.requestFullscreen) {
-      el.requestFullscreen().catch((err: any) => {
-        console.warn("Auto-fullscreen failed:", err);
-      });
-    } else if (el.webkitRequestFullscreen) {
-      el.webkitRequestFullscreen();
-    } else if (el.mozRequestFullScreen) {
-      el.mozRequestFullScreen();
-    } else if (el.msRequestFullscreen) {
-      el.msRequestFullscreen();
-    }
-  }
-};
+export { requestUniversalFullscreen } from './lib/fullscreenHelper';
+import { requestUniversalFullscreen } from './lib/fullscreenHelper';
 
 // ─────────────────────────────────────────────────────────────
 // Layout Detection Helpers

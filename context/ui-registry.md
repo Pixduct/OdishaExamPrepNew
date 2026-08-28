@@ -98,6 +98,7 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`AdminBulkImportModal`** | Admin / Bulk Creation | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7935-L8240) | Multi-entity bulk JSON uploader with auto-sequential sortOrder, dynamic premium pricing controls, and real-time sessionStorage sticky memory | AdminPanel.tsx (Banks / Practice / Tests tabs) | Active |
 | **`AdminAutoIntervalScheduler`** | Admin / Schedule | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx) | Staggered auto-interval rolling unlock scheduler with live preview & zero-interval guard | AdminPanel.tsx (Bulk Import Modal) | Active |
 | **`YouTubeShortsAndBulkStudioSuite`** | Media / Studio | [`public/shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/shorts-creator.html) | High-conversion 100K YouTube Shorts, Cover Thumbnail, and Multi-MCQ Bulk Studio Suite | Standalone Studio Tool | Active |
+| **`MemoryShortCreatorSuite`** | Media / Studio | [`public/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/memory-shorts-creator.html) | Active-recall 6-Phase Memory Shorts, 3-Question Memory Checks, Automated Bulk Ingestion, and Hierarchical ZIP Exporter | Standalone Studio Tool | Active |
 | **`ScheduledPracticeBankCard`** | Data Display / Card | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L3986-L4315) | 3-tier card hierarchy with live stats row (Questions & Duration pills), status tags, and fixed 48px CTA | App.tsx (Exam Detail Step 1) | Active |
 | **`BatchMonetizationActionBar`** | Admin / Monetization | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L500-L550) | Floating action bar for multi-select bulk locking, custom pricing, and smart freemium rule application | AdminPanel.tsx (Tests & Practice tabs) | Active |
 
@@ -3296,8 +3297,8 @@ Sub-component of `AdminBulkImportModal`. Appears in the Schedule Settings sectio
 
 ### 102. `YouTubeShortsAndBulkStudioSuite`
 
-File: [`public/shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/shorts-creator.html)
-Last updated: August 25, 2026
+File: [`public/shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/shorts-creator.html) & [`build/shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/build/shorts-creator.html)
+Last updated: August 27, 2026
 
 High-conversion 100K YouTube Shorts, Cover Thumbnail, and Multi-MCQ Bulk Studio Suite.
 
@@ -3305,17 +3306,44 @@ High-conversion 100K YouTube Shorts, Cover Thumbnail, and Multi-MCQ Bulk Studio 
 | :--- | :--- |
 | **Workspace Background** | Radial Obsidian: `radial-gradient(circle at 50% 0%, #0D1527 0%, #060911 100%)` |
 | **Card Containers** | Dark Glass: `rgba(15, 23, 42, 0.94)`, `border: 1px solid rgba(255, 255, 255, 0.1)`, `border-radius: 20px` |
-| **Navigation Tabs** | Glass Pill: `padding: 0.5rem 1.1rem`, active: `bg-brand-600` / `gradient`, badge: `pro-badge` |
-| **Pills & Selectors** | Radio Pill: `border-radius: 10px`, active: `bg-emerald-500` / `#042F2E`, `box-shadow: 0 0 14px rgba(16,185,129,0.4)` |
-| **Typography** | Headlines: `Outfit` (`900` / `800`), Body/Questions: `Plus Jakarta Sans` (`700` / `800`) |
+| **Cover Question Card** | Snug 370px: `roundRect(80, 448, 920, 370, 28)`, `coverQSize: 34px–54px` bold 800 Plus Jakarta Sans |
+| **Cover 4-Options Grid** | 4 Rows of 80px (`Y: 828 to 1172`, Gap 8px): Unified `28px–32px` typography across [A], [B], [C], [D] |
+| **Cover Tactile Key Badges** | 3D Circular Buzzer Pills: `radius 26px`, gradient fill (`tpl.headerPillBg`), bold 900 Outfit |
+| **Cover Action CTA Button** | High-Impact 140px (`Y: 1270 to 1410`): Concludes at $Y: 1410\text{px}$ to preserve title safe zone |
+| **YouTube Title Safe-Zone** | Bottom $510\text{px}$ (`Y: 1410 to 1920`): Clean dark background dedicated for YouTube title overlay |
+| **Top Hook Safe Inset** | Top $105\text{px}$ (`Y: 235 to 340`): $780\text{px}$ max width with $70\text{px}$ side insets for `New` & `⋮` |
+| **2-Phase Showcase Outro** | Phase 1: 3D Metallic Phone Frame ($840\text{px} \times 1070\text{px}$) with `🔴 LIVE NOW` pulse & glass reflection; Phase 2: 1050px Action CTA |
+| **Timing & Phase Flow Inspector** | Multi-segment scrubber bar (Cyan $\rightarrow$ Mint $\rightarrow$ Red) + 3-Phase timestamps with real-time active glow |
+| **Outro CTA Card** | Snug 1050px Container: `roundRect(70, 140, 940, 1050, 38)`, zero dead space below Y: 1190 |
+| **Outro Micro-Animations** | Staggered Entrance (`logoP ➔ textP ➔ btn1P ➔ btn2P ➔ pinP`), Shimmer sweep on website, Heartbeat pulse on Subscribe |
+| **Audio Playlist Pills** | Multi-track `T1, T2, T3...`: `rgba(255,255,255,0.06)`, `border-radius: 10px`, individual remove `[✕]` |
+| **Auto-Rotation Engine** | Round-robin rotation (`getBulkBgMusicUrlForIndex`, `getBulkCtaTrackForIndex`) across bulk queue |
 | **Action Buttons** | Primary: `bg-gradient(#2563EB, #1D4ED8)`, Emerald: `bg-gradient(#10B981, #059669)`, Gold: `bg-gradient(#F59E0B, #D97706)` |
-| **Batch Queue Table** | Glass Wrap: `border: 1px solid rgba(255, 255, 255, 0.08)`, rows: `border-bottom: rgba(255,255,255,0.06)` |
-| **Modal Overlays** | Ultra-Dark Blur: `rgba(0,0,0,0.88)`, `backdrop-filter: blur(12px)`, `border-radius: 20px` |
+| **Layout Archetypes** | 5 Structural Layouts: `neo-glass` (Frosted Stack), `royal-diamond` (Hexagon Gold), `quad-arena` (2x2 Grid Buzzers), `cyber-hud` (Chamfered Neon), `slate-editorial` (Double Border) |
+| **Safe-Zone Compliance** | 100% Certified for YouTube Shorts 9:16 Feed & Search Grids ($Y: 235\text{px}$ to $Y: 1410\text{px}$ interactive, $Y: 1410\text{px}+$ title safe) |
 
 **Pattern notes:**
 - **In-Memory Zero-Server Processing**: 100% client-side hardware-accelerated video (`VideoEncoder` + `Mp4Muxer`), audio (`OfflineAudioContext`), and ZIP packaging (`JSZip`).
+- **2-Phase Dynamic Website Showcase Outro Engine**: Right after question reveal, if a website screen-recording `.mp4` is uploaded, Phase 1 renders a massive 3D curved mobile device mockup ($820\text{px} \times 1060\text{px}$) playing the real website demonstration with a glowing top live badge pill (`✨ 1,000+ TOPIC TESTS & MOCK EXAMS LIVE`). Phase 2 dynamically transitions to the high-converting Action CTA Card (Brand logo, shimmering website portal, pulsing YouTube subscribe button) as the voiceover completes.
+- **100% Backward-Compatible Outro Fallback**: If no showcase video is provided, `drawCtaScreen` renders the single continuous high-conversion action card without any layout shift or breakage.
+- **Dynamic CTA Voice Outro Stretching (No Cap)**: Accurately decodes uploaded voiceover length via WebAudio `AudioContext.decodeAudioData()`. The Outro screen dynamically stretches to `voiceDuration + 0.8s` with zero upper limit (supports 5s, 20s, 30s+), ensuring the video never cuts off before the voiceover completes.
+- **Interactive 4-Options Cover Engine**: Replaced empty cover space with an authentic 4-options preview grid, eliminating dead space while creating a psychological curiosity gap on YouTube feeds.
+- **Unified Option Typography**: Computes a single optimal font size (`28px–30px`) across all 4 options simultaneously so long prompts (e.g. Option D) never appear inconsistently shrunken compared to short options.
+- **Snug 1050px Outro Geometry**: Outro card ends tightly at `Y: 1190px`, allowing YouTube's native bottom overlays (Channel Avatar, Description marquee, Subscribe button) to render freely without blocking website URLs.
+- **Multi-Track Audio Playlists**: Supports uploading multiple suspense music and CTA voiceover MP3s simultaneously. Tracks automatically rotate across videos in bulk export mode so no two videos in a batch sound identical.
+- **Custom Suspense Music Volume Control & Strict CTA Silence**: Dedicated 0%–100% volume slider (`handleBgVolumeChange`) controlling custom suspense MP3 playback intensity and offline export gain. Background suspense music is 100% silenced/paused upon CTA Outro transition so the CTA announcement is pristine.
+- **Real-Time Batch Settings Reactivity & Video Grouping**: `handleBulkSettingsChange()` synchronizes all Batch Video Settings (Questions per video, Countdown, Theme, Brand, CTA text, Website, Audio mode, Volume, Hooks) across the table groupings (`🎬 VIDEO #1 (Q1–Q3)`) and restarts live modal preview playback in real time without lag.
+- **Unified Video-Level Theme Rotation & Cover Alignment**: `getTemplateForBatchIndex` and `getCoverVariationForIndex` are strictly indexed by `batchIndex = Math.floor(index / qPerVid)` so that multi-question videos (e.g. 2 or 3 Qs per Short) and their covers strictly use a single matching theme palette and hook strategy per video.
+- **Streamlined 1-Video-1-Cover Architecture**: In multi-question mode, sub-question rows suppress duplicate `Q Cover` buttons in favor of a single high-impact cover thumbnail per video (`Cover #X`), perfectly mirroring YouTube's 1-cover-per-video requirement and producing clean 1-to-1 ZIP packages.
+- **Batch Video MP4 & PNG Theme Rotation Lock**: `runBulkExportToZip` passes `itemTemplate = getTemplateForBatchIndex(i, tplName)` directly to `itemConfig.template` before `.mp4` video rendering and cover generation, guaranteeing 100% color harmony between the exported video and its matching thumbnail.
+- **YouTube Title Safe-Zone & High-CTR Cover Geometry**: Cover CTA button concludes tightly at $Y: 1410\text{px}$, leaving a $510\text{px}$ dedicated lower third zone so YouTube's white title overlay in mobile search feeds never overlaps with quiz buttons, while top hooks include $70\text{px}$ side insets for `New` badge and `⋮` 3-dots clearance.
+- **5 Distinct Visual Layout Archetypes (Layout DNA)**:
+  - `neo-glass`: 26px rounded glass card, centered question pill, balanced stacked options.
+  - `royal-diamond`: KBC / TV Quiz Show aesthetic with double gold line frames, hexagon-capped option bars (`drawHexagonCard`), diamond key badges `⟨ A ⟩`, luxury authority.
+  - `quad-arena`: Game-show rapid battle with a 2x2 dual-column buzzer grid ($[A][B]$ top, $[C][D]$ bottom), giant 3D circular buzzers ($68\text{px}$), and energetic multi-line typography.
+  - `cyber-hud`: High-tension sci-fi arcade challenge with angular 45-degree chamfered cuts (`drawChamferedRect`), glowing laser wireframe borders, tech corner brackets, and chamfered timer.
+  - `slate-editorial`: Official UPSC / Judicial Masterclass with razor-sharp double line borders, official mock exam seal stamps, and clean high-contrast styling.
 - **Dynamic Auto-Scaling Engine**: `drawAutoScaledText()` dynamically steps down font sizes on canvas buttons, pills, and badges to ensure 0 text overflow or boundary clipping.
-- **Smart Thumbnail Variation**: Automatically alternates across 6 universal high-CTR viral hooks, high-engagement action CTAs, and 6 visual themes (*Obsidian Cobalt, Royal Gold, Crimson Danger, Cyber Mint, Galactic Purple, Slate Academy*).
 - **Multi-Question Sequences**: Supports 1, 2, or 3 questions per Short with dynamic tension drone crossfade, sub-boom impacts, and ticking timer synchronization.
 ---
 
@@ -3367,3 +3395,104 @@ Floating bottom glassmorphic action bar for bulk locking, unlocking, and custom 
 - **Automated Original Price**: Automatically sets `originalPrice = price * 2` (50% OFF deal presentation) unless custom values are provided.
 - **Optimistic Mutation**: Immediately updates in-memory React state and dispatches parallel Supabase transactions in batches of 50.
 - **Cache Purge Trigger**: Automatically calls `sessionStorage.removeItem('oep_admin_catalog_cache')` to ensure instant consistency across administrative and student viewports.
+
+---
+
+### 105. `MemoryCard3DFlipStudio`
+
+File: [`public/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/memory-shorts-creator.html) & [`build/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/build/memory-shorts-creator.html)
+Last updated: August 27, 2026
+
+High-engagement vertical 9:16 Active Recall Studio suite featuring 3D single-body card flip reveals, 3-Fact Memory Check speed runs, high-CTR 100k channel covers, 4-style synthesized audio engine, custom audio file uploader, broadcast-grade sidechain ducking, symmetrical 3-zone memory bridges, and dynamic re-wrapping typography engine.
+
+| Property | Class / Token / Value |
+| :--- | :--- |
+| **Studio Background** | `--bg-main: #060911` with radial neural ambient mesh |
+| **Panel Surface** | `background: var(--bg-card) (#0c1220)`, `border: 1px solid rgba(255,255,255,0.1)`, `border-radius: 1.25rem`, `box-shadow: 0 8px 32px rgba(0,0,0,0.4)` |
+| **Theme Selector Cards** | `background: rgba(255,255,255,0.02)`, `border: 1.5px solid rgba(255,255,255,0.08)`, `border-radius: 0.85rem`, active `background: rgba(99,102,241,0.12); border-color: #6366f1; box-shadow: 0 0 18px rgba(99,102,241,0.25)` |
+| **Exam Authority Badge (Top)** | $W: 860\text{px}, H: 74\text{px}$, `border: #F59E0B (3px)`, `text: #FDE047 (30px Bold)`, shadow glow `rgba(245, 158, 11, 0.4)` |
+| **Hook Pill (Top)** | $W: 540\text{px} - 560\text{px}, H: 74\text{px}$, gradient fill with $26\text{px}$ glow, $30\text{px}$ bold typography |
+| **3D Card Body (Canvas)** | $W: 940\text{px}, H: 540\text{px}, \text{radius}: 34\text{px}$ centered at $(540, 705)$ |
+| **Front Card Surface** | `cardFrontBg: rgba(15, 23, 42, 0.95)`, `cardBorder: theme.cardBorder`, shadow blur $35\text{px}` |
+| **Back Card Surface** | `cardBackBg: rgba(6, 40, 30, 0.98)` / theme back, `cardBackBorder: #10B981 (3.5px)`, un-mirrored typography `ctx.scale(-1, 1)` |
+| **Dynamic Re-wrapping Typography** | Multi-tier font scaling ($64\text{px} \rightarrow 20\text{px}$) with iterative sentence re-wrapping on each step and proportional line heights ($1.28\times \rightarrow 1.20\times$) |
+| **Symmetrical Memory Bridge** | Fixed centerline vector arrow ($X = 500\text{px} \rightarrow 580\text{px}$) with right-aligned concept slot ($X = 480\text{px}$) and left-aligned fact slot ($X = 600\text{px}$) with `textBaseline: middle` |
+| **Countdown Ring** | $48\text{px}$ radius glowing radial progress arc + $42\text{px}$ bold numeral |
+| **Bottom Curiosity Teaser Card** | $W: 920\text{px}, H: 190\text{px}$ at $Y: 1130\text{px}$ with `🌙 [Concept Trigger] ➔ [ ??? ]` and theme-synced accent border |
+| **7-Phase Active Recall Flashcard Architecture** | 1. `0.0s - 1.5s`: Hook Pill (`🧠 REMEMBER THIS`) • 2. `1.5s - 5.0s`: Front Question Card • 3. `5.0s - 8.2s`: 3-2-1 Countdown Ring • 4. `8.2s - 10.5s`: 3D Flip & Revealed Answer (`✓ Answer`) • 5. `10.5s - 12.5s`: Memory Connection Bridge Card (`🌙 Concept ➔ Fact`) • 6. `12.5s - 14.5s`: 3rd Card Reveal (`⚡ FACT LOCKED IN MEMORY?`) • 7. `14.5s+`: 2-Phase Website Showcase Demo & Action CTA Outro |
+| **2-Phase High-Converting Outro Engine** | Dual-phase outro workflow with dynamic time allocation starting at $14.5\text{s}$: **Phase 2 Website Showcase** (~75% screen time) renders uploaded `.mp4` demo inside a 3D curved metallic phone mockup ($W: 840\text{px}, H: 1070\text{px}$) with specular diagonal reflection, top live pill (`🔴 LIVE NOW • ✨ 1,000+ TOPIC TESTS & MOCK EXAMS`), and bottom URL authority bar (`🌐 www.odishaexamprep.in • Free Tests Available 👉`); **Phase 3 Action CTA Slam** (2.4s punchy finish) transitions to full 2-button CTA with pulsing red subscribe button |
+| **Multi-CTA Voiceover Pool & Auto-Rotation** | Ingestion of multiple `.mp3`, `.wav`, `.m4a` CTA voiceover files into an interactive chip pool with audition previews, individual removal, and automatic cyclic rotation ($i \pmod N$) across batch queues with independent per-short video duration calculation ($14.5\text{s} + t_{\text{CTA}, i}$) |
+| **Website Screen-Recording Uploader** | Ingestion of `.mp4`, `.webm` screen-recording files in Bulk Studio & Single Creator; drives frame-by-frame hardware-synchronized WebCodecs video encoding for 1080x1920 exports |
+| **Outro Score Card & Summary** | 3-Badge Gamified Score Assessment Card ($W: 920\text{px}, H: 250\text{px}$ at $Y: 370\text{px}$) featuring horizontal badges: `🥇 3/3 MEMORY MASTER` (Gold), `⚡ 2/3 ALMOST LOCKED` (Emerald), `🔄 1/3 NEEDS REVISION` (Amber) + Primary Shimmering Website Portal ($Y: 540\text{px}$) + Heartbeat-Pulsing Red Subscribe Button ($Y: 720\text{px}$) + Frosted Amber Comment Callout ($Y: 895\text{px}$) |
+| **Multi-Track Audio Engine** | 4 WebAudio styles: `⚡ Cyber Suspense (128 BPM Pulse)`, `☕ Lo-Fi Study Focus (Warm Neo-Soul)`, `🎬 Cinematic Mystery (Sub-Bass & Piano Arp)`, `🌌 Deep Ambient Space (Neural Drone)` + `🔄 Auto-Rotation` ($i \pmod 4$) |
+| **Custom Audio Uploader** | Ingestion of user-uploaded `.mp3`, `.wav`, `.m4a`, `.aac` with `AudioBuffer` decoding, seamless looping, and automatic table badge synchronization (`🎵 Custom Music`) |
+| **Musical Sidechain Compression** | Dips background music to $18\% - 35\%$ over a smooth $60\text{ms}$ curve during active SFX, 3rd card lock-in cue, CTA voiceover, and action CTA transitions |
+| **Live Dynamic Customization** | `onBulkCustomizationChange` triggers 0ms instant UI, table badge, and preview re-indexing upon theme card clicks, CTA audio/video uploads, or dropdown/slider mutations |
+
+**Pattern notes:**
+- **Cyclic Multi-CTA Voice Auto-Rotation**: Uploaded voiceover tracks cycle deterministically across the batch table queue ($i \pmod N$). Short #1 receives Voice 1, Short #2 receives Voice 2, etc., with dedicated table badges and inline audio audition buttons.
+- **Dynamic Per-Short Video Durations**: Each video in the queue independently calculates its total duration based on its specific assigned voice ($14.5\text{s} + t_{\text{voice}}$ for Individual Shorts, $16.0\text{s} + t_{\text{voice}}$ for Checks), which is rendered with zero drift in WebCodecs batch MP4 exports.
+- **100k Viral Memory Check Cover Engine**: Renders 3 floating physical question cards with distinct color themes (`#8B5CF6` Q1, `#06B6D4` Q2, `#10B981` Q3), large auto-scaled question typography ($28\text{px}$), glowing mystery boxes (`🔒 ANSWER ➔ [ ? ? ? ]`), and an electric amber challenge box (`⚡ CAN YOU SCORE 3/3? • 🧠 95% Aspirants Fail Q3!`), terminating strictly above $Y: 1115\text{px}$ for 100% mobile safe-zone compliance.
+- **Synchronized 3-Question Memory Check SFX Engine**: Explicit `modalPreviewType = 'check'` routing triggers precision countdown ticks (at 3.0s, 3.5s, 4.0s for Q1; 8.0s, 8.5s, 9.0s for Q2; 13.0s, 13.5s, 14.0s for Q3), 3D card flips (at 4.68s, 9.68s, 14.68s), and reveal chimes (at 5.05s, 10.05s, 15.05s), culminating in smooth zero-fadeout and CTA voice at 16.0s.
+- **Full 3-Card Stacking Geometry**: Card 1 (Question/Answer flip, $Y = 580\text{px}$), Card 2 (Memory Connection, $Y = 970\text{px}$), and Card 3 (⚡ Locked In Reveal, $Y = 1175\text{px}$) display simultaneously on screen from $12.5\text{s} - 14.5\text{s}$ so viewers lock all relationships in permanent memory before transitioning to the CTA outro at $14.5\text{s}$.
+- **Single Physical Card Geometry**: The front (question) and back (answer) maintain identical position, width, height, and border radius throughout the 3D $180^\circ$ rotation without spawning secondary answer containers.
+- **Unified 3D Flip Across Individual & Checks**: Both Individual Shorts and 3-Fact Memory Checks ($Q1 \rightarrow Q2 \rightarrow Q3$) share the identical single-body card flip reveal mechanism.
+- **Mobile Safe-Zone Protection**: All visual cards terminate strictly above $Y: 1380\text{px}$, leaving the bottom $540\text{px}$ completely clear of native YouTube Shorts mobile overlays.
+- **Zero-Bleedthrough Opaque Outro Background**: `renderMemoryShortFrame` branches immediately to `drawMemoryCtaScreen` when $t \ge 14.5\text{s}$ and paints an opaque background with radial gradient and grid, completely preventing any flashcard borders or header pills from bleeding through behind the 3D phone mockup.
+- **Professional CTA Voice Audio Isolation**: `fadeSuspenseMusicToZero(0.25)` smoothly ramps the background suspense synth/music volume down to complete silence ($0$) the moment the CTA voiceover / showcase starts, allowing user voice tracks to ring out with broadcast clarity.
+- **High-Converting 2-Phase Outro Engine**: Prioritizes website screen-recording demo time (~75% of outro) inside a 3D smartphone frame, followed by a crisp, punchy 2.4s Action CTA slam with pulsing crimson subscribe button.
+- **Zero-Video Fallback Safety**: If no website recording is uploaded, seamlessly falls back to the full static 2-button CTA outro without errors or empty black frames.
+- **Broadcast Audio Sidechaining**: Ticks cut naturally above the low-pass drone, while reveals, sub drops, and CTA voiceovers smoothly dip the background music bed, ensuring broadcast-grade clarity.
+- **Custom Audio Loop Safety**: Custom uploaded audio buffers are routed through the identical master gain and sidechain ducking nodes as synthetic tracks, ensuring unified loudness and ducking curves.
+- **Future-Proof Dynamic Re-Wrapping**: Long or complex questions dynamically re-wrap and re-measure across iterative font sizes, eliminating sparse broken lines and preventing card collisions.
+- **Symmetric Anchor Geometry**: Phase 5 connector arrows are anchored strictly at $X = 540\text{px}$ with mirrored left/right typography anchors for permanent geometric symmetry.
+
+---
+
+### 106. `TitaniumProPhoneShowcaseMockup`
+
+File: [`public/shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/shorts-creator.html) & [`public/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/memory-shorts-creator.html)
+Last updated: August 28, 2026
+
+Ultra-realistic 2026 Titanium Pro Flagship Smartphone hardware mockup designed for 9:16 vertical Shorts video demos, featuring hardware side buttons, thin bezels, Dynamic Island with optical lens sheen, floating Home Bar, and tall $836 \times 1506\text{px}$ display area.
+
+| Property | Class / Canvas Value |
+| :--- | :--- |
+| **Phone Chassis Dimensions** | $W: 860\text{px}, H: 1530\text{px}, \text{radius}: 52\text{px}$ ($X: 110\text{px}, Y: 125\text{px} \rightarrow 1655\text{px}$) |
+| **Titanium Rim Gradient** | 6-stop brushed metallic gradient (`#64748B` $\rightarrow$ `#94A3B8` $\rightarrow$ `#1E293B` $\rightarrow$ `#0F172A` $\rightarrow$ `#475569` $\rightarrow$ `#64748B`), $\text{lineWidth}: 7\text{px}$ |
+| **Physical Hardware Buttons** | Left: Action ($80\text{px}$), Vol Up ($90\text{px}$), Vol Down ($90\text{px}$); Right: Power ($140\text{px}$) with metallic gradient |
+| **Active Display Canvas** | $W: 836\text{px}, H: 1506\text{px}, \text{radius}: 40\text{px}$ ($12\text{px}$ ultra-thin flagship bezel, $1:1.80$ modern phone aspect ratio) |
+| **Dynamic Island & Sensors** | $W: 150\text{px}, H: 22\text{px}, \text{radius}: 11\text{px}$ with sapphire camera reflection dot (`#38BDF8`), FaceID emitter, and speaker micro-slit |
+| **Home Indicator Bar** | Floating iOS/Android rounded bar ($200 \times 5\text{px}$) with drop shadow at $Y: \text{frameY} + \text{frameH} - 18\text{px}$ |
+| **Studio Glass Reflection** | Keynote diagonal glass sheen triangle across top corner (`rgba(255, 255, 255, 0.12)` $\rightarrow$ `transparent`) |
+| **Top Live Announcement** | $W: 900\text{px}, H: 64\text{px}$ at $Y: 82\text{px}$ with pulsing red live dot (`🔴 LIVE NOW • ✨ 1,000+ TOPIC TESTS & MOCK EXAMS`) |
+| **Bottom Authority Bar** | $W: 900\text{px}, H: 72\text{px}$ at $Y: 1720\text{px}$ (`🌐 www.odishaexamprep.in • Free Tests Available 👉`) |
+
+**Pattern notes:**
+- **Full Video Vertical Clearance**: The tall $1506\text{px}$ screen height and top-anchored video positioning guarantee that 100% of website content (top headers, practice cards, and "Start ->" buttons) remains visible without vertical clipping.
+- **Hardware Realism**: Side buttons, brushed titanium gradient rim, and sapphire camera lens deliver genuine keynote-level studio realism that elevates viewer trust and CTR.
+
+---
+
+### 107. `YouTubeMobileSafeZoneCoverEngine`
+
+File: [`public/shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/shorts-creator.html) & [`public/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/memory-shorts-creator.html)
+Last updated: August 28, 2026
+
+High-conversion 100k YouTube Shorts Cover Thumbnail generator adhering strictly to 2026 YouTube Mobile Safe-Zone geometry and psychological curiosity-gap retention mechanics.
+
+| Property | Class / Canvas Value |
+| :--- | :--- |
+| **Canvas Dimensions** | $1080 \times 1920\text{px}$ (Vertical 9:16) |
+| **Top System Buffer** | $Y = 0\text{px} \rightarrow 330\text{px}$ (Zero overlap for YouTube `[New]` tag and `[⋮]` 3-dots icon) |
+| **Top Exam Authority Badge** | $W: 920\text{px}, H: 90\text{px}$ at $Y: 380\text{px}$ (Top edge at $Y: 335\text{px}$), `900 40px` Plus Jakarta Sans, Gold/Cyan border & glow |
+| **Viral Hook Pill** | $W: 560\text{px} - 600\text{px}, H: 74\text{px}$ at $Y: 485\text{px}$ (`🧠 REMEMBER THIS` / `🔥 30-SEC ACTIVE RECALL DRILL`) |
+| **Question Card (Individual)** | $W: 960\text{px}, H: 560\text{px}$ at $Y: 860\text{px}$ with **Bold 900 72px auto-scaled typography** and amber CTA button |
+| **3-Fact Cards (Checks)** | 3 floating cards ($W: 940\text{px}, H: 220\text{px}$) at $Y = 625\text{px}, 865\text{px}, 1105\text{px}$ with $86\times 42\text{px}$ Q-badges and **Bold 900 36px font** |
+| **Curiosity Gap Teaser** | Active recall trigger (`🌙 Concept ➔ ❓ [ TAP TO REVEAL ]` / `🔒 ANSWER ➔ [ ? ? ? ]`), guaranteeing 0% answer spoilers |
+| **Challenge Hook Box** | $W: 940\text{px} - 960\text{px}, H: 160\text{px} - 220\text{px}$ at $Y: 1290\text{px} - 1345\text{px}$ (`⚡ CAN YOU SCORE 3 / 3? • 🧠 95% Aspirants Fail Q3!`) |
+| **Bottom Watermark & Buffer** | Watermark at $Y: 1450\text{px} - 1485\text{px}$, leaving $Y \ge 1520\text{px}$ clear for YouTube mobile player title & avatar |
+
+**Pattern notes:**
+- **100% Below `[New]` Tag**: The Exam Authority Badge top boundary is anchored at $Y = 335\text{px}$, ensuring that the YouTube `[New]` tag and `[⋮]` menu float freely over the dark background without overlapping any badge borders or text.
+- **Curiosity Gap Enforcement**: Answers are never displayed on covers to preserve open cognitive loops and maximize click-through rate.

@@ -1,8 +1,6 @@
 {
-  "type": "onerror",
-  "message": "ResizeObserver loop completed with undelivered notifications.",
-  "source": "http://localhost:3000/",
-  "lineno": 0,
-  "colno": 0,
-  "stack": ""
+  "type": "unhandledrejection",
+  "message": "Unhandled Promise Rejection",
+  "reason": "WebSocket closed without opened.",
+  "stack": "Error: WebSocket closed without opened.\n    at WebSocket.<anonymous> (http://localhost:3000/@vite/client:454:22)"
 }

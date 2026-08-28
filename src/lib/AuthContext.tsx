@@ -114,6 +114,29 @@ const AuthContext = createContext<AuthContextType>({
 
 const ADMIN_EMAILS = ['odishaexamprep365@gmail.com'];
 
+const buildInstantProfile = (activeUser: User) => {
+  const adminEmails = ADMIN_EMAILS;
+  const userEmail = (activeUser.email || '').toLowerCase().trim();
+  const isAuthorizedAdmin = adminEmails.includes(userEmail);
+  const meta = activeUser.user_metadata || {};
+  const isFullAccess = isAuthorizedAdmin || !!meta.hasFullAccess || (meta.purchasedSeries || []).includes('full_access');
+
+  // Check if there is an existing offline vault on device
+  const offlineVault = loadOfflineAccess(activeUser.id);
+  const basePurchased = offlineVault?.purchasedSeries || meta.purchasedSeries || [];
+
+  return {
+    uid: activeUser.id,
+    email: activeUser.email,
+    displayName: meta.full_name || meta.displayName || meta.name || activeUser.email?.split('@')[0],
+    photoURL: meta.avatar_url || meta.picture || meta.photoURL,
+    role: isAuthorizedAdmin ? 'admin' : (offlineVault?.role || 'user'),
+    hasFullAccess: isFullAccess || offlineVault?.hasFullAccess === true,
+    purchasedSeries: basePurchased,
+    isOfflineFallback: !navigator.onLine && !!offlineVault
+  };
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
@@ -128,37 +151,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [guestUsage, setGuestUsage] = useState({ questions: 0, tests: 0 });
 
-
   const fetchProfile = async (sessionUser: User, forceRefresh = false) => {
     try {
       let freshUser = null;
-      if (forceRefresh) {
-        // Wrap fresh user fetch with timeout
+      if (forceRefresh && navigator.onLine) {
         const userPromise = supabase.auth.getUser();
-        const userResult = await withTimeout(userPromise, 3000, { data: { user: null }, error: { name: 'AuthError', message: 'timeout', status: 408, code: 'request_timeout', __isAuthError: true } as any });
+        const userResult = await withTimeout(userPromise, 2500, { data: { user: null }, error: { name: 'AuthError', message: 'timeout', status: 408, code: 'request_timeout', __isAuthError: true } as any });
         freshUser = userResult.data?.user;
-
-        if (!freshUser || !navigator.onLine) {
-          const offlineVault = loadOfflineAccess(sessionUser.id);
-          if (offlineVault) {
-            setProfile({
-              uid: sessionUser.id,
-              email: sessionUser.email,
-              displayName: sessionUser.user_metadata?.full_name || sessionUser.user_metadata?.displayName || sessionUser.email?.split('@')[0],
-              photoURL: sessionUser.user_metadata?.avatar_url || sessionUser.user_metadata?.photoURL,
-              role: offlineVault.role,
-              hasFullAccess: offlineVault.hasFullAccess,
-              purchasedSeries: offlineVault.purchasedSeries,
-              isOfflineFallback: true
-            });
-            toast.error("Offline Mode: Using cached entitlements from your device.", { id: 'offline-fallback' });
-            return;
-          }
-        }
       }
 
       const activeUser = freshUser || sessionUser;
-      const adminEmails = ['odishaexamprep365@gmail.com'];
+      const adminEmails = ADMIN_EMAILS;
       const userEmail = (activeUser.email || '').toLowerCase().trim();
       const isAuthorizedAdmin = adminEmails.includes(userEmail);
 
@@ -171,10 +174,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const meta = activeUser.user_metadata || {};
       let currentRole = isAuthorizedAdmin ? 'admin' : 'user';
       let currentFullAccess = isAuthorizedAdmin || !!meta.hasFullAccess;
-
       const metaPurchased = meta.purchasedSeries || [];
 
-      // Fetch active purchases from database ledger directly if online to ensure instant unlock
+      // Fetch active purchases from database ledger directly in parallel if online
       let dbPurchasedIds: string[] = [];
       if (navigator.onLine) {
         try {
@@ -185,7 +187,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               .eq('user_id', activeUser.id)
               .eq('status', 'active')
           );
-          const dbResult = await withTimeout(dbPromise, 3000, { data: null, error: null } as any);
+          const dbResult = await withTimeout(dbPromise, 2500, { data: null, error: null } as any);
           if (dbResult && dbResult.data) {
             dbPurchasedIds = dbResult.data.map((p: any) => p.product_id);
           }
@@ -198,7 +200,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const mergedPurchased = Array.from(new Set([...metaPurchased, ...dbPurchasedIds]));
       const isFullAccess = currentFullAccess || mergedPurchased.includes('full_access');
 
-      // Run proactive entitlement audit and self-healing
       const tempProfile = {
         role: currentRole,
         hasFullAccess: isFullAccess,
@@ -208,7 +209,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       let finalPurchased = mergedPurchased;
       if (navigator.onLine) {
         if (forceRefresh && freshUser) {
-          const auditResult = await withTimeout(runEntitlementAudit(supabase, activeUser.id, tempProfile), 3000, null);
+          const auditResult = await withTimeout(runEntitlementAudit(supabase, activeUser.id, tempProfile), 2500, null);
           if (auditResult && auditResult.finalList) {
             finalPurchased = auditResult.finalList;
           }
@@ -218,10 +219,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const userId = activeUser.id;
           if (hasMissingMetadata && !auditedUsers.has(userId)) {
             auditedUsers.add(userId);
-            console.log('[AuthContext] Discrepancy detected between DB ledger and auth metadata. Triggering background self-healing...');
             runEntitlementAudit(supabase, userId, tempProfile).catch(e => {
               console.error('[Background Entitlement Audit] Failed:', e);
-              auditedUsers.delete(userId); // Allow retry on failure
+              auditedUsers.delete(userId);
             });
           }
         }
@@ -257,7 +257,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             isOfflineFallback: true
           };
           setProfile(fallbackProfile);
-          toast.error("Offline Mode: Using cached entitlements from your device.", { id: 'offline-fallback' });
           return fallbackProfile;
         }
       }
@@ -277,58 +276,65 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setManualAdmin(JSON.parse(storedAdmin));
     }
 
-    // Load the existing session.
-    // Avoid forcing a full token refresh on every single app launch if the current
-    // token is still valid. This prevents network handshake errors on mobile PWA startup
-    // from clearing the session and logging the user out.
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    // Instant session resolution
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        // Check if the current token is close to expiry (e.g. less than 15 minutes left)
-        const expiresAt = session.expires_at; // unix timestamp in seconds
+        // 1. Instant optimistic profile setup (0ms UI unblock)
+        const instantProfile = buildInstantProfile(session.user);
+        setUser(session.user);
+        setProfile(instantProfile);
+        setLoading(false);
+
+        // 2. Non-blocking token expiry check & background profile sync
+        const expiresAt = session.expires_at;
         const currentTime = Math.floor(Date.now() / 1000);
-        const buffer = 15 * 60; // 15 minutes buffer
+        const buffer = 15 * 60; // 15 min buffer
         const shouldRefresh = expiresAt && (expiresAt - currentTime < buffer);
 
         if (shouldRefresh) {
-          try {
-            console.log('[AuthContext] Session token is close to expiry. Refreshing...');
-            const { data: refreshed, error: refreshErr } = await supabase.auth.refreshSession();
-            if (!refreshErr && refreshed?.session) {
-              setLoading(false);
-              return;
-            }
-          } catch (e) {
-            console.warn('Token refresh failed, falling back to cached session:', e);
-          }
+          supabase.auth.refreshSession().catch((e) => {
+            console.warn('[AuthContext] Background token refresh failed, continuing with cached session:', e);
+          });
         }
-        
-        // Fallback/Default: use cached session if refresh is skipped or fails
-        setUser(session.user);
-        await fetchProfile(session.user, true);
+
+        // Background entitlement reconciliation (non-blocking)
+        fetchProfile(session.user, false).catch((err) => {
+          console.warn('[AuthContext] Background profile sync failed:', err);
+        });
       } else {
         setUser(null);
         setProfile(null);
+        setLoading(false);
       }
+    }).catch((err) => {
+      console.warn('[AuthContext] getSession error:', err);
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUser(session?.user ?? null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
+        const instantProfile = buildInstantProfile(session.user);
+        setUser(session.user);
+        setProfile(instantProfile);
+        setLoading(false);
+
         const userEmail = (session.user.email || '').toLowerCase().trim();
         if (!ADMIN_EMAILS.includes(userEmail)) {
           setManualAdmin(null);
           localStorage.removeItem('admin_session');
           localStorage.removeItem('oep_offline_vault');
         }
-        await fetchProfile(session.user, false);
+
+        // Reconcile in background
+        fetchProfile(session.user, false).catch(() => {});
       } else {
+        setUser(null);
         setProfile(null);
         setManualAdmin(null);
         localStorage.removeItem('admin_session');
         localStorage.removeItem('oep_offline_vault');
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();

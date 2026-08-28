@@ -2368,6 +2368,24 @@ Sitemap: ${sitemapUrl}
     res.send(txt);
   });
 
+  // Dedicated routes for standalone HTML tools (Shorts & Memory Shorts Creators)
+  app.get(['/shorts-creator.html', '/shorts-creator', '/memory-shorts-creator.html', '/memory-shorts-creator'], (req, res) => {
+    let clean = req.path.replace(/^\//, '');
+    if (!clean.endsWith('.html')) clean += '.html';
+    const publicPath = path.join(process.cwd(), 'public', clean);
+    const buildPath = path.join(distPath, clean);
+    const targetPath = fs.existsSync(publicPath) ? publicPath : (fs.existsSync(buildPath) ? buildPath : null);
+
+    if (targetPath) {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      return res.sendFile(targetPath);
+    }
+    res.status(404).send('Studio tool not found');
+  });
+
   // Vite middleware for development
   if (!isProduction) {
     const vite = await createViteServer({

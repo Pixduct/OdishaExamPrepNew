@@ -77,7 +77,7 @@ import { useAuth } from './lib/AuthContext';
 import { supabase } from './lib/supabase';
 import { cn, getDirectImageUrl } from './lib/utils';
 import { getStreakState, recordQuestionSolved, completeDailyGoalDirectly, StreakState } from './lib/streakManager';
-import { StreakDetailModal } from './components/StreakDetailModal';
+const StreakDetailModal = React.lazy(() => import('./components/StreakDetailModal').then(m => ({ default: m.StreakDetailModal })));
 import { ExamReadinessCard } from './components/ExamReadinessCard';
 import { SmartRecommendationCard } from './components/SmartRecommendationCard';
 import { AIStudyPlanCard } from './components/AIStudyPlanCard';
@@ -89,16 +89,16 @@ import { StudyPlanView } from './StudyPlanView';
 import { useActiveExamContext } from './lib/activeExamStore';
 import { ActiveExamContextBar } from './components/ActiveExamContextBar';
 import { useTheme } from './lib/themeStore';
-import { getInstantQuestionsForTopic } from './lib/instantQuestionCompiler';
+// instantQuestionCompiler loaded dynamically
 import { examService } from './lib/examService';
 import { ThemeToggle } from './components/ThemeToggle';
 import { LanguageToggle } from './components/LanguageToggle';
 import { useLanguage, toOdiaDigits } from './lib/LanguageContext';
 import { translatePhrase } from './lib/i18n/phraseDictionary';
 import { initLenis, destroyLenis } from './lib/lenisScroll';
-import { QuestionBankReaderModal } from './components/QuestionBankReaderModal';
-import { exportQuestionBankToPdf } from './lib/pdfExportEngine';
-import { PdfExportGuideModal } from './components/PdfExportGuideModal';
+const QuestionBankReaderModal = React.lazy(() => import('./components/QuestionBankReaderModal').then(m => ({ default: m.QuestionBankReaderModal })));
+// pdfExportEngine loaded dynamically
+const PdfExportGuideModal = React.lazy(() => import('./components/PdfExportGuideModal').then(m => ({ default: m.PdfExportGuideModal })));
 import { 
   getQuestionBankVectorTheme, 
   getBankDisplayTagline, 
@@ -342,9 +342,10 @@ import { activityMatchesExam } from './lib/examMatcher';
 import { MathTextRenderer, DiagramRenderer } from './components/MathTextRenderer';
 
 const AdminPanel = React.lazy(() => import('./AdminPanel'));
-import MockTestSystem, { requestUniversalFullscreen } from './MockTestSystem';
+import { requestUniversalFullscreen } from './lib/fullscreenHelper';
+const MockTestSystem = React.lazy(() => import('./MockTestSystem'));
 const TestResultsView = React.lazy(() => import('./TestResultsView'));
-import AnalyticsView from './AnalyticsView';
+const AnalyticsView = React.lazy(() => import('./AnalyticsView'));
 const AdminLoginPage = React.lazy(() => import('./pages/AdminLoginPage'));
 const AdminDashboardPage = React.lazy(() => import('./pages/AdminDashboardPage'));
 const PrivacyPolicy = React.lazy(() => import('./PrivacyPolicy'));
@@ -362,8 +363,8 @@ import StickyAICompanion from './components/StickyAICompanion';
 import LoadingPortal from './components/LoadingPortal';
 import PushPermissionPrompt from './components/PushPermissionPrompt';
 import { registerServiceWorker } from './lib/pushNotifications';
-import { WelcomeVideoModal } from './components/WelcomeVideoModal';
-import { OnboardingTour } from './components/OnboardingTour';
+const WelcomeVideoModal = React.lazy(() => import('./components/WelcomeVideoModal').then(m => ({ default: m.WelcomeVideoModal })));
+const OnboardingTour = React.lazy(() => import('./components/OnboardingTour').then(m => ({ default: m.OnboardingTour })));
 import { GlobalSearchModal } from './components/GlobalSearchModal';
 import { NotificationCenter } from './components/NotificationCenter';
 
@@ -2289,18 +2290,20 @@ export const Navbar = ({
             )}
 
             {user && (
-              <StreakDetailModal
-                isOpen={isStreakModalOpen}
-                onClose={() => setIsStreakModalOpen(false)}
-                streakState={streakState}
-                onSolveMoreClick={() => {
-                  if (window.location.pathname === '/') {
-                    scrollToElement('exams', { block: 'start', delay: 50 });
-                  } else {
-                    navigate('/');
-                  }
-                }}
-              />
+              <React.Suspense fallback={null}>
+                <StreakDetailModal
+                  isOpen={isStreakModalOpen}
+                  onClose={() => setIsStreakModalOpen(false)}
+                  streakState={streakState}
+                  onSolveMoreClick={() => {
+                    if (window.location.pathname === '/') {
+                      scrollToElement('exams', { block: 'start', delay: 50 });
+                    } else {
+                      navigate('/');
+                    }
+                  }}
+                />
+              </React.Suspense>
             )}
 
             {user ? (
@@ -5679,6 +5682,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       }
 
       const currentExamName = exams.find((e: any) => e.id === (bankItem.examId || selectedExam))?.name || 'Odisha Exam Prep';
+      const { exportQuestionBankToPdf } = await import('./lib/pdfExportEngine');
       await exportQuestionBankToPdf({
         title: bankItem.title,
         subtitle: bankItem.tagline || 'Comprehensive Topic Practice Book',
@@ -6936,35 +6940,37 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         </AnimatePresence>
 
         {/* Question Bank Web Reader Modal */}
-        <QuestionBankReaderModal
-          isOpen={!!activeReadingBank}
-          bank={activeReadingBank}
-          examName={exams.find((e: any) => e.id === (activeReadingBank?.examId || selectedExam))?.name || 'Odisha Exam Prep'}
-          onClose={() => setActiveReadingBank(null)}
-          hasAccess={!activeReadingBank?.isPremium || hasAccessTo(activeReadingBank)}
-          onUnlockRequired={() => {
-            if (activeReadingBank) {
-              setPaywallPrice(activeReadingBank?.price || 499);
-              setPaywallOriginalPrice(activeReadingBank?.originalPrice || ((activeReadingBank?.price || 499) * 2));
-              setPaywallItemTitle(activeReadingBank?.title || 'Premium Content');
-              setPaywallItemId(activeReadingBank?.id);
-              setPaywallProductType('question_bank');
-              setShowPaywall(true);
-            }
-          }}
-        />
+        <React.Suspense fallback={null}>
+          <QuestionBankReaderModal
+            isOpen={!!activeReadingBank}
+            bank={activeReadingBank}
+            examName={exams.find((e: any) => e.id === (activeReadingBank?.examId || selectedExam))?.name || 'Odisha Exam Prep'}
+            onClose={() => setActiveReadingBank(null)}
+            hasAccess={!activeReadingBank?.isPremium || hasAccessTo(activeReadingBank)}
+            onUnlockRequired={() => {
+              if (activeReadingBank) {
+                setPaywallPrice(activeReadingBank?.price || 499);
+                setPaywallOriginalPrice(activeReadingBank?.originalPrice || ((activeReadingBank?.price || 499) * 2));
+                setPaywallItemTitle(activeReadingBank?.title || 'Premium Content');
+                setPaywallItemId(activeReadingBank?.id);
+                setPaywallProductType('question_bank');
+                setShowPaywall(true);
+              }
+            }}
+          />
 
-        {/* Global Student PDF Export Quick Guide Modal */}
-        <PdfExportGuideModal
-          isOpen={!!pdfGuideItem}
-          onClose={() => setPdfGuideItem(null)}
-          onConfirm={() => {
-            const item = pdfGuideItem;
-            setPdfGuideItem(null);
-            if (item) executeExportPdf(item);
-          }}
-          title={pdfGuideItem?.title}
-        />
+          {/* Global Student PDF Export Quick Guide Modal */}
+          <PdfExportGuideModal
+            isOpen={!!pdfGuideItem}
+            onClose={() => setPdfGuideItem(null)}
+            onConfirm={() => {
+              const item = pdfGuideItem;
+              setPdfGuideItem(null);
+              if (item) executeExportPdf(item);
+            }}
+            title={pdfGuideItem?.title}
+          />
+        </React.Suspense>
       </>,
       document.body
     );
@@ -7623,6 +7629,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           if (topicBank && Array.isArray(topicBank.questions) && topicBank.questions.length > 0) {
             finalTest.questions = topicBank.questions.slice(0, targetCount);
           } else {
+            const { getInstantQuestionsForTopic } = await import('./lib/instantQuestionCompiler');
             const instantQs = getInstantQuestionsForTopic(cleanTopic, targetCount);
             finalTest.questions = instantQs.map(q => ({
               id: q.id,
@@ -7858,6 +7865,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         finalQuestions = topicBank.questions.slice(0, targetCount);
       } else {
         // Fast instant question retrieval (<10ms) with exact target question count
+        const { getInstantQuestionsForTopic } = await import('./lib/instantQuestionCompiler');
         const instantQs = getInstantQuestionsForTopic(bankTopicName, targetCount);
         finalQuestions = instantQs.map(q => ({
           id: q.id,
@@ -12306,7 +12314,7 @@ function AppContent() {
       </AnimatePresence>
 
       {user && (
-        <>
+        <React.Suspense fallback={null}>
           <WelcomeVideoModal 
             isOpen={showWelcomeVideoModal} 
             onClose={handleCloseWelcomeVideo} 
@@ -12322,8 +12330,8 @@ function AppContent() {
             isOpenManual={showOnboardingTourModal} 
             onCloseManual={() => setShowOnboardingTourModal(false)} 
           />
-        </>
+        </React.Suspense>
       )}
     </div>
   );
-}
+}

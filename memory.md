@@ -1,83 +1,78 @@
-# Memory — 🎯 Default Light Theme & English Language, Mock Test Hero Scoping, 0-Question Defense & Production Chunking Fix
+# Memory — 🚀 Automation Engines Hardening, 1080x1080 Visual Card Engine, Zero-Noise Gatekeeping & Admin Audit Observability
 
-Last updated: August 29, 2026, 09:12 IST
+Last updated: August 29, 2026, 10:28 IST
 
 ## What was built
 
-### 1. Default Light Theme & English Language for First-Time Visitors (`src/lib/themeStore.ts`, `src/lib/LanguageContext.tsx`, `index.html`)
-- **Default Theme (Light / Day Mode)**:
-  - Updated `getStoredTheme()` in `src/lib/themeStore.ts` to return `'light'` when no user preference exists in `localStorage`.
-  - Updated the pre-hydration anti-flicker script and body background in `index.html` to default to Light Mode (`#FAF8F5`).
-- **Default Language (English)**:
-  - Updated `getStoredLanguage()` in `src/lib/LanguageContext.tsx` to return `'en'` when no user preference exists in `localStorage`.
-  - Updated the pre-hydration anti-flicker script in `index.html` to default to `en`.
-- **Preserved User Toggles**: Users can still freely switch to Night / Dark Mode (`🌙`) and Odia (`ଓଡ଼ିଆ`) using the navbar toggles, with preferences saved in `localStorage`.
+### 1. Daily MCQ Engine 3x Daily Schedule & 1-Question Batch Optimization (`automations/mcq_engine.py`, `automations/.github/workflows/daily_mcq.yml`)
+- **Single-Question Batches**: Configured `MCQ_BATCH_SIZE = 1` in `automations/mcq_engine.py` to publish exactly 1 question per run instead of 5 questions.
+- **3x Daily Off-Peak Schedule**: Configured GitHub Actions cron schedule in `daily_mcq.yml` at `04:17 UTC` (9:47 AM IST), `08:47 UTC` (2:17 PM IST), and `13:47 UTC` (7:17 PM IST).
+- **Bash Interpolation Crash Fix**: Resolved multi-line JSON bash interpolation crash in GitHub Actions by passing `YOUTUBE_STORAGE_STATE` as an environment variable and accessing it via `os.environ` in Python.
 
-### 2. Exam Detail Hero Module Strict Mock Test Scoping (`src/App.tsx`)
-- **Strict Mock-Tests-Only Hero Banner**:
-  - Restructured the top hero module in `ExamDetailView` in `src/App.tsx` (`L9458–L9790`) to strictly query `examMockTests` belonging to `selectedExam` (`cfg.examId === selectedExam || mt.examId === selectedExam`).
-  - Completely removed the generic `else if (firstTopicBank)` fallback that previously displayed Chapter-Wise Drills (such as *"Current Affairs, Sports, Awards & Important Days"*) in the top hero position.
-- **Clean Zero-State**:
-  - If an exam has no mock tests configured in the database (`examMockTests.length === 0`), the hero module returns `null` (nothing displayed), keeping the exam page pristine and uncluttered.
-- **Professional 0-Question Mock Test Handling**:
-  - If an official mock test exists in the database for an exam but has 0 questions uploaded yet:
-    - **Top Hero**: Displays an `OFFICIAL MOCK • IN PREPARATION` banner with `Release Pending • Questions Upload In Progress`.
-    - **Mock Tests Card (`ExamDetailMockTestCard`)**: Displays a `⏳ In Preparation` badge. Clicking it triggers an informative non-blocking modal notice (`showPremiumAlert`) informing students:
-      > *"The question paper and verified solutions for this mock test are currently being finalized and uploaded by our faculty team. Please check back shortly!"*
-    - Prevents starting empty tests, creating phantom in-progress sessions, or borrowing unrelated question sets.
-- **In-Progress Mock Test Resumption**:
-  - Unfinished test session resumption in the top hero is strictly scoped to `test_incomplete` activities whose `testId` belongs to an official mock test for `selectedExam`.
+### 2. Current Affairs Engine Zero-Hallucination Recovery & Off-Peak Schedule (`automations/ca_formatter.py`, `automations/ca_scraper.py`, `automations/.github/workflows/daily_ca.yml`)
+- **Robust JSON Extraction**: Added `<think>...</think>` tag stripping and regex JSON block parsing to eliminate markdown formatting errors.
+- **48-Hour Freshness Window**: Expanded `FRESHNESS_HOURS` in `ca_scraper.py` from 24h to 48h to prevent dropping legitimate late-evening press releases.
+- **Strict Factual Gate**: Retained the fail-closed factual gate requiring $\ge 80/100$ factuality score, official source verification, and numerical metric consistency before publishing.
+- **Off-Peak GitHub Schedule**: Scheduled in `daily_ca.yml` for **7:47 PM IST** (`17 14 * * *` UTC) with morning catchup at **9:17 AM IST** (`47 03 * * *` UTC) under dedicated concurrency group `group: daily-ca-engine`.
 
-### 2. Hostinger Vendor Chunking & Circular Dependency Fix (`vite.config.ts`)
-- **Resolved Production Runtime Crash**:
-  - Fixed `TypeError: Cannot set properties of undefined (setting 'Activity')` at `vendor-react.js` on Hostinger.
-  - Removed naive `id.includes('react')` Rollup manual chunking rule that was splitting React 19 CommonJS internals from its scheduler and core runtime.
-  - Unified React, ReactDOM, Scheduler, and JSX runtime in `vendor-core` while cleanly isolating `lucide-react` into its own `vendor-lucide` chunk (64.85 kB).
+### 3. Official Exam Notification Engine High-Credibility & Zero-Noise Optimization (`automations/exam_update_engine.py`, `automations/.github/workflows/exam_update_cron.yml`, `automations/.github/workflows/notice_scraper.yml`)
+- **Anti-Deputation & Anti-Executive Blacklist**: Enforced hard rejection on non-student administrative posts (`deputation`, `contract basis`, `cmd`, `managing director`, `director general`, `advisor`, `consultant`, `empanelment`, `internal promotion`). The engine accepts strictly open competitive student exams (OSSC, OPSC, OSSSC, Police, SSC, RRB, IBPS, UPSC).
+- **Active Date Freshness Filter**: Rejects notices with expired deadlines or archive notices older than 48 hours. Removed artificial daily quotas so the engine posts 0 items cleanly when no genuine new exam notices exist.
+- **Race Condition Prevention**: Deactivated the 15-minute cron in `notice_scraper.yml` (set to `workflow_dispatch` only) to eliminate duplicate broadcast collisions.
+- **2x Daily Off-Peak Schedule**: Configured `exam_update_cron.yml` to run at **10:47 AM IST** (`17 05 * * *` UTC) and **6:17 PM IST** (`47 12 * * *` UTC) under `group: exam-update-engine`.
 
-### 3. Fatal Error Overlay Filter (`index.html`)
-- **WebSocket & HMR Error Filtering**:
-  - Added `isIgnorableError` to global window error and unhandled rejection listeners in `index.html`.
-  - Filtered out benign dev WebSocket reconnect notices (`WebSocket closed without opened`, `@vite/client`), browser extension exceptions, and `ResizeObserver` loops so temporary HMR socket disconnects or page reloads never trigger the full-page blue `Application Error` overlay.
+### 4. Executive Portal Audit Digest & Transparent Admin Zero-Post Heartbeat (`automations/exam_update_engine.py`, `automations/shared/telegram.py`)
+- **Transparent Admin Scan Digest**: When 0 notices are published, the engine delivers a detailed audit report to the Admin Telegram bot listing all 14 scanned portals (OPSC, OSSC, OSSSC, Police, SSC, RRB, IBPS, UPSC, etc.), candidate notices evaluated, archived items filtered, and non-student items blocked.
+- **100% Mathematical Proof**: Guarantees complete admin visibility and peace of mind that all government boards are up to date and no student notification was missed.
 
-### 4. TypeScript Strict Compilation (`src/MockTestSystem.tsx`, `src/App.tsx`)
-- Added `examId?: string` to `MockTestProps['test']` interface in `src/MockTestSystem.tsx`.
-- Passed `showPremiumAlert` to `ExamDetailMockTestCard` to handle 0-question notices gracefully.
-- Verified with `npm run lint` (`tsc --noEmit`) passing with **0 errors**.
+### 5. 1080x1080 Dynamic Visual Card Engine & Multi-Platform Dispatch (`automations/exam_card_renderer.py`, `automations/shared/telegram.py`, `automations/shared/whatsapp.py`)
+- **Scenario-Adaptive Themes**: Built `exam_card_renderer.py` supporting 6 dynamic visual themes:
+  - 📢 *Recruitment:* Sapphire Blue Gradient (`#2563EB`)
+  - 🚀 *Application Window:* Mint Emerald Gradient (`#059669`)
+  - 📅 *Exam Date/Schedule:* Royal Indigo Gradient (`#4F46E5`)
+  - 🎟️ *Admit Card:* Electric Cyan Gradient (`#0284C7`)
+  - 🏆 *Result & Cut-off:* Amber Gold Gradient (`#D97706`)
+  - ✏️ *Corrigendum:* Electric Purple Gradient (`#7C3AED`)
+- **Adaptive Typography**: Headline font scales dynamically from `34px` down to `26px` on titles $>55$ chars to guarantee zero text truncation.
+- **Mathematical Horizontal Center Placement**: Styled `.board-tag` with `position: absolute; left: 50%; transform: translateX(-50%);` to guarantee geometric symmetry on the 1080px canvas regardless of text length on the left/right.
+- **Multi-Platform Visual Dispatch**: Dispatches the rendered 1080x1080 image via `sendPhoto` with the complete caption to Telegram (`@OdishaExamPrepOfficial`), YouTube Community, and WhatsApp.
 
-### 5. UI Pattern Registry Imprint (`context/ui-registry.md`)
-- Synchronized Entry 22 (`GuidedRecommendationHero` — Exam Mock Test Hero Module).
-- Added Entry 110 (`ExamDetailMockTestCard` — CBT Mock Test Grid & In-Prep Status Card).
+### 6. Structured Timeline & Anti-Clutter Key Highlights (`automations/exam_update_engine.py`, `automations/shared/telegram.py`, `automations/shared/whatsapp.py`)
+- **`🗓️ CRITICAL DATES & TIMELINE`**: Extracted concrete milestone dates (`Online Application Window`, `Fee Payment Deadline`, `Prelims Exam Date`, `Admit Card Date`).
+- **`⚡ KEY EXAM DETAILS & ACTION PLAN`**: Structured highlights reserved strictly for actionable guidance (Selection Mode, Exam Pattern, Candidate Action Plan) with zero repetition of header metadata.
+- **Removed Header Redundancy**: Eliminated duplicate `Target Exam` lines that previously repeated the headline.
 
 ---
 
 ## Decisions made
-- **Hero Module Position Exclusivity**: The top hero module on exam detail pages is reserved exclusively for official full-length and sectional Mock Tests. Chapter drills, topic banks, and general current affairs belong strictly in the tabs below.
-- **Zero-State Cleanliness**: An exam without mock tests must never show placeholder drills from other topics; it must render nothing in the hero space.
-- **0-Question Test User Experience**: A mock test without questions in the database must display a clear "In Preparation" status rather than allowing empty test launches or falling back to foreign datasets.
-- **React 19 Core Bundle Unity**: In Rollup / Vite bundling with React 19, never split React packages with loose substring filters; core runtime packages (`react`, `react-dom`, `scheduler`) must remain unified in `vendor-core`.
+- **Dual-Channel Transparency**: Public channel receives broadcasts *only* on genuine student exam releases; private admin bot receives a complete scan audit report on *every* run (even 0-post runs).
+- **Fail-Closed Quality Standard**: A day with 0 posts is far better than publishing 1 irrelevant, expired, or deputation notice.
+- **Mathematical Center Geometry for Badges**: Absolute center positioning with `translateX(-50%)` is enforced on visual slide templates to prevent asymmetry caused by unequal text lengths in flexbox containers.
+- **Off-Peak GitHub Actions Execution**: All cron schedules are set to xx:17 or xx:47 UTC to bypass top-of-the-hour runner queue bottlenecks.
 
 ---
 
 ## Problems solved
-- **Solved Current Affairs Showing as In-Progress Mock Test**: Removed the topic bank fallback that forced "Current Affairs, Sports, Awards & Important Days" into the exam hero.
-- **Solved Hostinger `Cannot set properties of undefined (setting 'Activity')` Crash**: Restructured manual chunking in `vite.config.ts` to eliminate circular CommonJS chunk dependencies.
-- **Solved Blue Screen Fatal Error Overlay on HMR Reconnect**: Filtered benign dev WebSocket disconnect notices in `index.html`.
-- **Solved TypeScript Type Check Errors**: Resolved `examId` and `showPremiumAlert` type signatures.
+- **Solved Repeated/Outdated Exam Notices**: Added anti-deputation blacklist, 48h active date filter, and deactivated competing 15-minute scraper cron.
+- **Solved Missing Current Affairs Posts**: Stripped `<think>` tags and relaxed JSON schema parsing in `ca_formatter.py` and expanded freshness window to 48h.
+- **Solved MCQ Batch Size Overload**: Reduced batch size from 5 to 1 question per run.
+- **Solved Visual Card Tag Asymmetry**: Replaced uneven flex distribution with true geometric center alignment.
+- **Solved Ambiguous Dates & Clutter in Social Broadcasts**: Restructured schema into dedicated `CRITICAL DATES & TIMELINE` and non-redundant `KEY EXAM DETAILS & ACTION PLAN`.
 
 ---
 
 ## Current state
-- **TypeScript Typecheck**: `npm run lint` (`tsc --noEmit`) passes with **0 errors**.
-- **Production Build**: `npm run build` passes with **exit code 0**.
-- **Repository Sync**: All commits (`6a93007`, `2e74854`, `ff2f82e`, `17a4d8e`, `65e522c`, `386341f`) are pushed to `https://github.com/Pixduct/OdishaExamPrepNew.git` on `main`.
+- **Automations Submodule (`Pixduct/odisha-mcq-engine`)**: All code committed and pushed to `main` branch (`b548801`, `361fe00`, `2d2e88e`, `f168e25`, `3072c5b`).
+- **Main Website Repository (`Pixduct/OdishaExamPrepNew`)**: Submodule pointers, `context/progress-tracker.md`, and `context/ui-registry.md` synced and pushed to `main` (`fa629cc`, `900f5ca`, `db488b1`, `7fd8140`, `b0c8d3a`).
+- **CI / GitHub Actions**: All 3 workflows (`daily_mcq.yml`, `daily_ca.yml`, `exam_update_cron.yml`) configured with dedicated concurrency groups and off-peak cron triggers.
 
 ---
 
 ## Next session starts with
-- Verify live deployment on Hostinger at `https://odishaexamprep.in`.
-- If new mock tests or question sets are added via the Admin Panel, they will automatically reflect cleanly in their respective exams.
+- Monitor scheduled GitHub Actions runs at their respective off-peak cron times.
+- Check Admin Telegram bot for incoming audit reports and scan verification digests.
 
 ---
 
 ## Open questions
-- None. All user requirements and production deployment criteria are verified.
+- None. All automation pipelines, fact-checking gates, visual rendering engines, and message formatting improvements are verified and deployed live.

@@ -108,6 +108,7 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`AdminUsersManagerTable`** | Admin / Data Table | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L4464-L4535) | 4-Column Table, Avatar Badges, Global Master Access Controls, Manual Content Grant & Revocation, Dynamic Loading Spinner | AdminPanel.tsx (Users tab) | Active |
 | **`HighConversionDualTierPaywallModal`** | Monetization / Checkout | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L6440-L6700) | 2-Tier Interactive Plan Selector, Anchor Savings Callout, Glowing Recommended Badge, Dynamic Razorpay Payload Routing | App.tsx (Single Item & Bundle Unlock) | Active |
 | **`AdminBankQuestionLiveCounter`** | Admin / Question Counters | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7040-L7055) | Dynamic Topic Match Evaluator, Live State Synchronization, Zero-Stale Fallback Hierarchy | AdminPanel.tsx (Questions, Banks, Practice tabs) | Active |
+| **`AdminItemEditStatePreservation`** | Admin / Modal Form State | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L1795-L1955) | Auto-Fill Sequence Fallback Hierarchy, JSON Question & Key Hydration, Zero-Blank Validation | AdminPanel.tsx (Edit Modals) | Active |
 
 ---
 
@@ -3678,6 +3679,25 @@ Last updated: August 29, 2026
 **Pattern notes:**
 - **Topic Match Resilience:** Matches question topic by direct equality (`q.topic === bank.title`), ID (`q.topic === bank.id`), and trimmed/lowercase prefix/containment comparisons.
 - **Context-Aware Exam Fetch:** Automatically passes `selectedExamIdForQuestions` to `fetchQuestions` to pre-populate live question records without waiting for an individual item to be clicked.
+
+---
+
+### `AdminItemEditStatePreservation`
+
+File: `src/AdminPanel.tsx` (`L1795–L1955`)
+Last updated: August 29, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Order Sequence Input** | `input` (`type="number"`, `min="1"`, `required`) with tokenized label `Order Sequence (Category-Scoped) *` |
+| **Sequence Auto-Fill Chain** | `item.sortOrder` ➔ `item.sort_order` ➔ `parsedTagline.sortOrder` / `parsedMockConfig.sortOrder` ➔ `getNextAvailableOrder()` |
+| **JSON State Hydration** | Extracts existing `questionsData` and `answerKey` objects from `item.pdfUrl` directly into modal code editors upon opening |
+| **Validation Guarantee** | Never initializes to empty `''` on edit; pre-satisfies required input constraint so admin can immediately save or upload questions |
+
+**Pattern notes:**
+- **Zero-Friction Re-saving:** Admins opening an already added item (test, question bank, or practice set) to add or edit questions can click Save without re-typing their category sequence order.
+- **Universal Tab Coverage:** Preserves state consistently across `banks`, `practice`, `tests`, `questions`, `series`, and `exams`.
+
 
 
 

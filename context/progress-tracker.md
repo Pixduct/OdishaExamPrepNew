@@ -1,6 +1,13 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] 🎯 Exam Detail Hero Banner Strict Mock Tests Scoping & Zero-Fallback Recovery (`src/App.tsx`):
+  1. **Strict Mock-Test-Only Hero Banner**: Restricted the top hero banner in `ExamDetailView` strictly to official mock tests (`examMockTests`). Eliminated all fallbacks that previously showed Topic Question Banks or General Current Affairs in the hero section.
+  2. **Clean Zero-State Display**: If no mock tests have been added for an exam (`examMockTests.length === 0`), the hero section returns `null` (nothing displayed), keeping the exam page pristine.
+  3. **Professional 0-Question Mock Test Handling**: If a mock test exists in the database for an exam but has 0 questions uploaded yet:
+     - The top hero displays an `OFFICIAL MOCK • IN PREPARATION` banner with `Release Pending • Questions Upload In Progress`.
+     - On the Mock Tests tab, the card displays a clean `⏳ In Preparation` status badge with an informative modal notice informing candidates that questions and expert solutions are currently being finalized.
+     - Prevents starting empty tests or borrowing foreign datasets.
 - [x] 📦 Vendor Chunking & Circular Dependency Fix for Hostinger (`vite.config.ts`):
   1. **Resolved `TypeError: Cannot set properties of undefined (setting 'Activity')`**: Removed the naive `id.includes('react')` rule in `vite.config.ts` which split React 19 CommonJS internals from its scheduler and core runtime.
   2. **Unified Core Vendor Bundle**: Unified React, ReactDOM, and core runtime in `vendor-core` while cleanly splitting `vendor-lucide`, `vendor-katex`, `vendor-recharts`, `vendor-motion`, and `vendor-supabase`, ensuring zero circular chunk references in production.

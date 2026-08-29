@@ -104,8 +104,8 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`TitaniumProPhoneShowcaseMockup`** | Media / Studio | [`public/shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/shorts-creator.html) | Flagship 2026 Titanium Pro smartphone chassis, tall 1506px screen, dynamic island | Shorts & Memory Creators | Active |
 | **`YouTubeMobileSafeZoneCoverEngine`**| Media / Studio | [`public/shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/shorts-creator.html) | 2026 YouTube safe-zone 100k covers, below [New] tag geometry, curiosity gap teasers | Shorts & Memory Creators | Active |
 | **`MultiTrackCustomMusicPool`** | Media / Audio | [`public/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/memory-shorts-creator.html) | Multi-track custom audio pool, live audition player chips, cyclic batch rotation | Memory Shorts Creator | Active |
-| **`StrictBoundaryAutoScaledTextEngine`**| Media / Typography | [`public/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/memory-shorts-creator.html) | Iterative font scaling down to 12px, token chunking, safety ellipsis truncation | Shorts & Memory Creators | Active |
 | **`ExamNotificationVisualCard`** | Graphic / Social Card | [`automations/exam_card_renderer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/exam_card_renderer.py) | 6 Scenario Themes, 1080x1080 High-DPI, Symmetrical Centered Board Badges, Stat Pills & Action Highlights | Telegram, YouTube Community, WhatsApp | Active |
+| **`EditorialMasterclassCoverBanner`** | Graphic / Cover Engine | [`automations/shared/drive_image_sanitizer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/drive_image_sanitizer.py) | Google Drive Auto-Stream Sanitizer, Supabase Storage CDN Cache, 1200x630 Branded Vector Fallback | Strategy Blogs, Telegram, Social Shares | Active |
 
 ---
 
@@ -3596,4 +3596,24 @@ Last updated: August 29, 2026
 - **Mathematical Horizontal Center:** The exam board badge (`.board-tag`) is locked to the exact horizontal center of the 1080px canvas using `position: absolute; left: 50%; transform: translateX(-50%);`, ensuring symmetry regardless of left/right text widths.
 - **Adaptive Headline Engine:** Automatically scales font size down to `26px` on long titles to prevent text clipping or overflow.
 - **6 Dynamic Scenario Themes:** Recruitment (`#2563EB`), Application Window (`#059669`), Exam Date/Schedule (`#4F46E5`), Admit Card (`#0284C7`), Result/Cut-off (`#D97706`), Corrigendum (`#7C3AED`).
+
+---
+
+### `EditorialMasterclassCoverBanner`
+
+File: `automations/shared/drive_image_sanitizer.py` & `automations/shared/exam_logo_registry.py`
+Last updated: August 29, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Canvas Dimensions** | `1200px × 630px` (High-DPI 1.91:1 Landscape Aspect Ratio optimized for OpenGraph, Twitter/X, Telegram, and Google Discover) |
+| **Custom Upload Resolution** | Google Drive share link auto-converter (`/file/d/<id>` ➔ `export=download`) with binary validation |
+| **Zero-Chopsticks Rule** | Strictly prohibits unverified stock fallbacks. If no user image is provided, dynamically renders official vector graphic banner |
+| **Vector Banner Layout** | Board-matched deep gradient background, procedural dot grid mesh, 3D official board crest emblem, high-contrast typography |
+| **Branding & Authenticity** | Official verified seal (`✓ OFFICIAL EXAM GUIDE`), board tag pill, and `www.odishaexamprep.in` footer signature |
+
+**Pattern notes:**
+- **Google Drive Stream Converter:** Solves the common broken preview bug where Google Drive share URLs return HTML preview wrappers instead of raw image binaries.
+- **Dynamic Board Themes:** Vector fallback maps automatically across 10 official boards: OPSC, OSSC, OSSSC, Odisha Police, SSB Odisha, SSC, RRB, IBPS, UPSC, and State Selection Exams.
+
 

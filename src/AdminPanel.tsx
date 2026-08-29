@@ -7189,7 +7189,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                 if (parsed && Array.isArray(parsed.questionsData)) embeddedCount = parsed.questionsData.length;
                               } catch(e) {}
                             }
-                            const count = liveCount > 0 ? liveCount : (embeddedCount > 0 ? embeddedCount : (bank.questionCount || bank.question_count || bank.practiceQuestionCount || 0));
+                            const authoritativeCount = (typeof bank.practiceQuestionCount === 'number' && bank.practiceQuestionCount > 0)
+                              ? bank.practiceQuestionCount
+                              : ((typeof bank.questionCount === 'number' && bank.questionCount > 0) ? bank.questionCount : embeddedCount);
+                            const count = authoritativeCount > 0 ? authoritativeCount : liveCount;
                             const categoryBadges: Record<string, { label: string; style: string }> = {
                               'topic-wise': { label: 'Chapter-Wise', style: 'bg-blue-50 text-blue-700 border-blue-200/60' },
                               'exam-focused': { label: 'High-Yield', style: 'bg-amber-50 text-amber-700 border-amber-200/60' },
@@ -8524,7 +8527,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                   (q.topic && bank.title && q.topic.trim().toLowerCase() === bank.title.trim().toLowerCase())
                                 )
                               ).length;
-                              const count = liveCount > 0 ? liveCount : (bank.questionCount || bank.question_count || bank.practiceQuestionCount || (Array.isArray(bank.questions) ? bank.questions.length : 0));
+                              const authoritativeCount = (typeof bank.practiceQuestionCount === 'number' && bank.practiceQuestionCount > 0)
+                                ? bank.practiceQuestionCount
+                                : ((typeof bank.questionCount === 'number' && bank.questionCount > 0) ? bank.questionCount : liveCount);
+                              const count = authoritativeCount > 0 ? authoritativeCount : liveCount;
                               return (
                                 <option key={bank.id} value={bank.title}>
                                   [{catName}] {bank.title} ({count} Qs)

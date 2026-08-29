@@ -1,6 +1,17 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] 📊 Universal Question Data Table Engine & Mobile Touch Optimization (`src/components/MathTextRenderer.tsx`, `context/ui-registry.md`):
+  1. **Separator-Less Markdown Table Support**: Intelligently parses raw pipe-delimited data tables (common in DI questions) without requiring explicit `---|---|---` markdown separator lines.
+  2. **Device-Specific Adaptive Architecture**:
+     - **Desktop/Laptop**: Preserves full-width proportional column distribution (`md:table-fixed`, `md:px-6 md:py-3.5`).
+     - **Mobile**: Eliminates vertical letter breaking (`VILL AGE`, `M E N %`) and vertical digit stacking (`4 0 %`) via `whitespace-nowrap` on mobile screens with native touch horizontal swipe (`overflow-x-auto rounded-2xl`).
+  3. **KaTeX Cell Recursion**: Recursively evaluates math expressions, formulas, and units in each individual cell via `MathTextRenderer`.
+- [x] 📂 Questions Manager Subject Hierarchy Mirror & Authoritative Count Architecture (`src/AdminPanel.tsx`, `server.ts`, `src/lib/examService.ts`, `context/ui-registry.md`):
+  1. **Subject Hierarchy & Filter Bar Parity**: Mirrored the Practice Sets Subject Hierarchy directly inside the Questions tab Content Selector (`🌟 All Subjects`, `📘 Arithmetic`, `📘 Data Interpretation`, `📘 General English`, `📘 GK & Current Affairs`, `📘 Reasoning`).
+  2. **Grouped Subject Banners & Order Badges**: Grouped question bank cards under clean Subject Section headers (`🟦 ARITHMETIC (4 Sets)` with `Focus on Arithmetic →`) and sorted cards strictly by sequence order (`#1`, `#2`, `#3`...).
+  3. **Permanent Elimination of `liveCount` Pagination Slice Bugs**: Removed partial client-side 50-item `questions.filter(...)` counting logic from bank cards and modal selectors. All components now exclusively read authoritative totals (`bank.practiceQuestionCount || bank.questionCount || embeddedCount`).
+  4. **Automated Postgres Sync on Bulk Upload**: `/api/admin/questions/bulk` endpoint now automatically runs `COUNT(*)` and synchronizes `questionBanks.questionCount` in Postgres upon upload, invalidating client cache memory and `sessionStorage` with 0ms delay.
 - [x] 💎 High-Conversion Dual-Tier Upsell Architecture for Single Product Checkout (`src/App.tsx`, `context/ui-registry.md`):
   1. **Dual-Tier Interactive Plan Selector**: When an aspirant opens the unlock modal from an individual test or bank (e.g. *Master Practice Test 06* at ₹29), the modal showcases a high-conversion 2-tier plan selector:
      - **🌟 Complete Exam All-Access Pass (Recommended / Default)**: Glowing border (`ring-brand-400/40`), `🔥 BEST VALUE` badge, unlocking all 40+ mock tests, banks, PDF booklets, and updates for ₹199 (Save 90%).

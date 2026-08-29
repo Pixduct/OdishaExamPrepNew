@@ -3698,8 +3698,48 @@ Last updated: August 29, 2026
 - **Zero-Friction Re-saving:** Admins opening an already added item (test, question bank, or practice set) to add or edit questions can click Save without re-typing their category sequence order.
 - **Universal Tab Coverage:** Preserves state consistently across `banks`, `practice`, `tests`, `questions`, `series`, and `exams`.
 
+---
 
+### `AdminQuestionsBankHierarchyGrid`
 
+File: `src/AdminPanel.tsx` (`L7165–L7410`)
+Last updated: August 29, 2026
 
+| Property | Class / Token |
+| :--- | :--- |
+| **Subject Filter Bar** | `flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin` |
+| **All Subjects Pill (Active)** | `flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-black bg-brand-600 text-white shadow-md shadow-brand-500/20` |
+| **Subject Pill (Inactive)** | `flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-black bg-white text-slate-600 hover:text-slate-900 border border-slate-200 hover:bg-slate-50` |
+| **Subject Section Banner** | `flex items-center justify-between bg-slate-100/70 border border-slate-200/60 px-5 py-3 rounded-2xl` |
+| **Subject Dot Indicator** | `w-2.5 h-2.5 rounded-full bg-brand-500` |
+| **Subject Title** | `font-black text-sm text-slate-800 tracking-tight uppercase` |
+| **Subject Count Chip** | `px-2.5 py-0.5 rounded-full text-[11px] font-black bg-brand-50 text-brand-700 border border-brand-200/60` |
+| **Focus Button** | `px-3 py-1 bg-white hover:bg-brand-50 text-slate-600 hover:text-brand-600 rounded-lg text-xs font-black border border-slate-200 shadow-2xs` |
+| **Card Order Badge** | `px-2 py-1 rounded-lg text-xs font-black bg-slate-100 text-slate-700 border border-slate-200` (`#{sortOrder}`) |
+| **Authoritative Count Pill** | `inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-slate-50 text-slate-500 group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors border border-slate-100` |
 
+- **Exact Hierarchy Parity:** Mirrors the Subject Hierarchy grouping and sort ordering (`1, 2, 3, 4...`) of the Practice Sets screen directly inside the Questions Tab content selector.
+- **Authoritative Count Enforcement:** Eliminates client-side 50-item paginated slice dependencies and exclusively displays the true database total (`bank.practiceQuestionCount || bank.questionCount || embeddedCount`).
 
+---
+
+### `QuestionDataTableResponsiveRenderer`
+
+File: `src/components/MathTextRenderer.tsx` (`L1495–L1610`)
+Last updated: August 29, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Outer Scroll Container** | `overflow-x-auto rounded-2xl border border-brand-500/20 dark:border-brand-400/20 shadow-sm bg-white dark:bg-slate-900 scrollbar-thin` |
+| **Table Element** | `w-full md:table-fixed border-collapse text-left text-slate-800 dark:text-slate-100 text-xs sm:text-sm md:text-[15px]` with dynamic `minWidth: Math.max(380, headers.length * 90)px` |
+| **Header Row** | `bg-brand-600 dark:bg-brand-700 text-white border-b border-brand-700 dark:border-brand-800` |
+| **Header Cell** | `px-3.5 py-2.5 sm:px-4 sm:py-3 md:px-6 md:py-3.5 font-black border-r border-white/20 last:border-r-0 text-xs md:text-sm uppercase tracking-wider whitespace-nowrap md:whitespace-normal md:break-words` |
+| **Table Body** | `divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900/90` |
+| **Alternating Rows** | `hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors odd:bg-white dark:odd:bg-slate-900 even:bg-slate-50/40 dark:even:bg-slate-800/30` |
+| **Data Cell** | `px-3.5 py-2.5 sm:px-4 sm:py-3 md:px-6 md:py-3.5 border-r border-slate-200 dark:border-slate-800 last:border-r-0 font-medium text-slate-700 dark:text-slate-200 whitespace-nowrap md:whitespace-normal md:break-words` |
+| **Mobile Swipe Cue** | `flex items-center justify-end gap-1 mt-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 md:hidden` (`⇄ Scroll table horizontally`) |
+
+**Pattern notes:**
+- **Zero Vertical Stacking on Mobile:** Employs `whitespace-nowrap` on mobile screens to prevent letter-by-letter breaking (e.g. `VILL AGE`, `M E N %`) and vertical digit stacking (e.g. `4 0 %`), allowing clean horizontal touch swiping.
+- **Laptop Proportionality:** Retains `md:table-fixed` and calculated column widths on desktop screens for balanced aesthetics.
+- **Universal Markdown Ingestion:** Parses both standard Markdown (`|---|---|`) and separator-less pipe tables (`Year | Production | Export`) with embedded KaTeX rendering per cell.

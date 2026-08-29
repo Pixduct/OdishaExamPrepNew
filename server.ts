@@ -1435,13 +1435,53 @@ async function startServer() {
       const { data, error, count } = await query;
       if (error) throw error;
 
-      safeAppendLog("api_requests.log", `[SUCCESS] returned ${data?.length} rows, totalCount=${count}\n`);
+      let finalData = data || [];
+      let finalCount = count || 0;
+
+      // Fallback: If topic query returned 0 rows from questions table, check if questionBanks has embedded questionsData in pdfUrl
+      if (finalData.length === 0 && topic !== 'all' && !topic.startsWith('mockTest__')) {
+        try {
+          let bQuery = supabaseAdmin.from('questionBanks').select('id, title, examId, pdfUrl');
+          if (examId !== 'all') bQuery = bQuery.eq('examId', examId);
+          bQuery = bQuery.or(`title.eq."${topic}",id.eq."${topic}"`);
+          const { data: bData } = await bQuery.limit(1);
+          if (bData && bData.length > 0 && bData[0].pdfUrl) {
+            const parsed = JSON.parse(bData[0].pdfUrl);
+            const rawQs = Array.isArray(parsed) ? parsed : (parsed.questionsData || []);
+            if (Array.isArray(rawQs) && rawQs.length > 0) {
+              let filtered = rawQs;
+              if (search) {
+                const sLower = search.toLowerCase();
+                filtered = filtered.filter((q: any) => 
+                  (q.questionText || q.question || '').toLowerCase().includes(sLower)
+                );
+              }
+              finalCount = filtered.length;
+              finalData = filtered.slice(offset, offset + limit).map((q: any, idx: number) => ({
+                id: q.id || `bank_${bData[0].id}_${offset + idx}`,
+                examId: bData[0].examId,
+                topic: bData[0].title,
+                questionText: q.questionText || q.question || '',
+                options: q.options || ['', '', '', ''],
+                correctAnswerIndex: q.correctAnswerIndex ?? (q.correctIndex ?? 0),
+                explanation: q.explanation || '',
+                diagram: q.diagram || null,
+                difficulty: q.difficulty || 'medium',
+                sortOrder: q.sortOrder || offset + idx + 1,
+                createdAt: new Date().toISOString()
+              }));
+            }
+          }
+        } catch(_e) {}
+      }
+
+      safeAppendLog("api_requests.log", `[SUCCESS] returned ${finalData.length} rows, totalCount=${finalCount}\n`);
 
       res.json({
         success: true,
-        data,
-        count: data?.length || 0,
-        totalCount: count || 0
+        data: finalData,
+        count: finalData.length,
+        totalCount: finalCount
       });
     } catch (err: any) {
       safeAppendLog("api_requests.log", `[ERROR] ${err.message}\n`);

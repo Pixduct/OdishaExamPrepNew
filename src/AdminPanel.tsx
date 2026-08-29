@@ -1050,8 +1050,54 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       const result = await examService.getQuestionsPaginated(page, questionsLimit, search, examId, qFilter, topicVal, abortController.signal);
       if (abortController.signal.aborted) return; // Superseded — ignore result
       if (result.success) {
-        setQuestions(result.data || []);
-        setQuestionsTotalCount(result.totalCount || 0);
+        let fetchedQs = result.data || [];
+        let total = result.totalCount || 0;
+
+        // Fallback: If server returned 0 rows for a bank topic, check local bank embedded questionsData
+        if (fetchedQs.length === 0 && selectedTypeForQuestions === 'bank' && selectedTargetIdForQuestions) {
+          const matchingBank = banks.find(b => 
+            (b.examId === selectedExamIdForQuestions || !b.examId) && 
+            (
+              b.title === selectedTargetIdForQuestions || 
+              b.id === selectedTargetIdForQuestions || 
+              (b.title && selectedTargetIdForQuestions && b.title.trim().toLowerCase() === selectedTargetIdForQuestions.trim().toLowerCase())
+            )
+          );
+          if (matchingBank?.pdfUrl && typeof matchingBank.pdfUrl === 'string' && matchingBank.pdfUrl.startsWith('{')) {
+            try {
+              const parsed = JSON.parse(matchingBank.pdfUrl);
+              const rawQs = Array.isArray(parsed) ? parsed : (parsed.questionsData || []);
+              if (Array.isArray(rawQs) && rawQs.length > 0) {
+                let filteredRaw = rawQs;
+                if (search.trim()) {
+                  const sLower = search.toLowerCase();
+                  filteredRaw = filteredRaw.filter((q: any) => 
+                    (q.questionText || q.question || '').toLowerCase().includes(sLower)
+                  );
+                }
+                total = filteredRaw.length;
+                const offset = (page - 1) * questionsLimit;
+                fetchedQs = filteredRaw.slice(offset, offset + questionsLimit).map((q: any, idx: number) => ({
+                  id: q.id || `bank_${matchingBank.id}_${offset + idx}`,
+                  examId: matchingBank.examId,
+                  topic: matchingBank.title,
+                  questionText: q.questionText || q.question || '',
+                  options: q.options || ['', '', '', ''],
+                  correctAnswerIndex: q.correctAnswerIndex ?? (q.correctIndex ?? 0),
+                  explanation: q.explanation || '',
+                  diagram: q.diagram || null,
+                  difficulty: q.difficulty || 'medium',
+                  sortOrder: q.sortOrder || offset + idx + 1,
+                  _isEmbedded: true,
+                  _bankId: matchingBank.id
+                }));
+              }
+            } catch(_e) {}
+          }
+        }
+
+        setQuestions(fetchedQs);
+        setQuestionsTotalCount(total);
       }
     } catch (err: any) {
       if (err?.name === 'AbortError') return; // Gracefully ignore cancelled request
@@ -1371,6 +1417,38 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         if (selectedTargetIdForQuestions) {
           const targetLower = selectedTargetIdForQuestions.trim().toLowerCase();
           filtered = filtered.filter(q => q.topic === selectedTargetIdForQuestions || (q.topic && q.topic.trim().toLowerCase() === targetLower));
+          if (filtered.length === 0) {
+            const matchingBank = banks.find(b => 
+              (b.examId === selectedExamIdForQuestions || !b.examId) && 
+              (
+                b.title === selectedTargetIdForQuestions || 
+                b.id === selectedTargetIdForQuestions || 
+                (b.title && selectedTargetIdForQuestions && b.title.trim().toLowerCase() === targetLower)
+              )
+            );
+            if (matchingBank?.pdfUrl && typeof matchingBank.pdfUrl === 'string' && matchingBank.pdfUrl.startsWith('{')) {
+              try {
+                const parsed = JSON.parse(matchingBank.pdfUrl);
+                const rawQs = Array.isArray(parsed) ? parsed : (parsed.questionsData || []);
+                if (Array.isArray(rawQs) && rawQs.length > 0) {
+                  filtered = rawQs.map((q: any, idx: number) => ({
+                    id: q.id || `bank_${matchingBank.id}_${idx}`,
+                    examId: matchingBank.examId,
+                    topic: matchingBank.title,
+                    questionText: q.questionText || q.question || '',
+                    options: q.options || ['', '', '', ''],
+                    correctAnswerIndex: q.correctAnswerIndex ?? (q.correctIndex ?? 0),
+                    explanation: q.explanation || '',
+                    diagram: q.diagram || null,
+                    difficulty: q.difficulty || 'medium',
+                    sortOrder: q.sortOrder || idx + 1,
+                    _isEmbedded: true,
+                    _bankId: matchingBank.id
+                  }));
+                }
+              } catch(_e) {}
+            }
+          }
         }
       }
       if (searchQuery.trim()) {

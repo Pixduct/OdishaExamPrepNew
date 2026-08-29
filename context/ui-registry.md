@@ -107,6 +107,7 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`EditorialMasterclassCoverBanner`** | Graphic / Cover Engine | [`automations/shared/drive_image_sanitizer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/drive_image_sanitizer.py) | Google Drive Auto-Stream Sanitizer, Supabase Storage CDN Cache, 1200x630 Branded Vector Fallback | Strategy Blogs, Telegram, Social Shares | Active |
 | **`AdminUsersManagerTable`** | Admin / Data Table | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L4464-L4535) | 4-Column Table, Avatar Badges, Global Master Access Controls, Manual Content Grant & Revocation, Dynamic Loading Spinner | AdminPanel.tsx (Users tab) | Active |
 | **`HighConversionDualTierPaywallModal`** | Monetization / Checkout | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L6440-L6700) | 2-Tier Interactive Plan Selector, Anchor Savings Callout, Glowing Recommended Badge, Dynamic Razorpay Payload Routing | App.tsx (Single Item & Bundle Unlock) | Active |
+| **`AdminBankQuestionLiveCounter`** | Admin / Question Counters | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7040-L7055) | Dynamic Topic Match Evaluator, Live State Synchronization, Zero-Stale Fallback Hierarchy | AdminPanel.tsx (Questions, Banks, Practice tabs) | Active |
 
 ---
 
@@ -3659,6 +3660,25 @@ Last updated: August 29, 2026
 **Pattern notes:**
 - **Psychological Value Anchoring:** When opening from an individual item, presents the single test (e.g. ₹29) alongside the complete exam pass (e.g. ₹199), emphasizing that the complete pass is only ₹170 more and unlocks all 40+ tests and banks.
 - **Dynamic Order Routing:** Switches Razorpay order creation and payment verification payloads between `exam_bundle_${examId}` and `single_item_id` in real time with zero friction.
+
+---
+
+### `AdminBankQuestionLiveCounter`
+
+File: `src/AdminPanel.tsx` (`L7040–L7055`, `L8105–L8185`, `L8370–L8390`), `src/lib/examService.ts` (`L870–L925`)
+Last updated: August 29, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Counter Pill** | `inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-slate-50 text-slate-500 group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors border border-slate-100` |
+| **Table Column Stat** | `text-sm font-bold text-slate-600` (`{Count} Qs • {Premium/Free}`) |
+| **Bulk Upload Option Pill** | `[{Category}] {Bank Title} ({Count} Qs)` |
+| **Evaluation Strategy** | Multi-tier Fallback Engine: `Live matching questions array` ➔ `Stored database questionCount` ➔ `practiceQuestionCount` ➔ `Embedded JSON questionsData array length` ➔ `0` |
+
+**Pattern notes:**
+- **Topic Match Resilience:** Matches question topic by direct equality (`q.topic === bank.title`), ID (`q.topic === bank.id`), and trimmed/lowercase prefix/containment comparisons.
+- **Context-Aware Exam Fetch:** Automatically passes `selectedExamIdForQuestions` to `fetchQuestions` to pre-populate live question records without waiting for an individual item to be clicked.
+
 
 
 

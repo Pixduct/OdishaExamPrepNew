@@ -2512,20 +2512,20 @@ Last updated: August 20, 2026
 ### 63. `DefaultDarkModeEngine` (Default Dark Mode Boot & Pre-Hydration Anti-Flicker Engine)
 
 Files: [`src/lib/themeStore.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/themeStore.ts), [`index.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/index.html)
-Last updated: August 20, 2026
+Last updated: August 29, 2026
 
 | Property | Class / Token |
 | :--- | :--- |
-| **Default Fallback** | `'dark'` (when `localStorage.getItem('oep-theme-preference')` is `null` or uninitialized) |
-| **Pre-Hydration Anti-Flicker Script** | Inline IIFE script in `<head>` applying `dark` class, `data-theme="dark"`, and `#0b0f19` `backgroundColor` before DOM render |
-| **HTML Root Class** | `<html class="dark" data-theme="dark">` |
-| **Document Base Background** | `bg-[#0b0f19]` (Dark Mode default) / `#FAF8F5` (Light Mode) |
+| **Default Fallback** | `'light'` (when `localStorage.getItem('oep-theme-preference')` is `null` or uninitialized) |
+| **Pre-Hydration Anti-Flicker Script** | Inline IIFE script in `<head>` applying `data-theme="light"` and `#FAF8F5` `backgroundColor` before DOM render |
+| **HTML Root Class** | `<html lang="en" data-language="en" data-theme="light">` |
+| **Document Base Background** | `#FAF8F5` (Light Mode default) / `bg-[#0b0f19]` (Dark Mode) |
 | **Theme Toggle Button** | [`src/components/ThemeToggle.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/ThemeToggle.tsx) — toggles `'light'` or `'dark'`, updating `localStorage` (`oep-theme-preference`) & firing `oep-theme-changed` window event |
 
 ### 64. `LanguageToggle` (Header, Utility & Mobile Drawer Language Switch Component)
 
 File: [`src/components/LanguageToggle.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/LanguageToggle.tsx)
-Last updated: August 20, 2026
+Last updated: August 29, 2026
 
 | Property | Class / Token |
 | :--- | :--- |
@@ -2542,22 +2542,23 @@ Last updated: August 20, 2026
 
 ---
 
-### 65. `DefaultOdiaLocalizationEngine` (Default Odia Boot & Universal Translation Layer)
+### 65. `DefaultLocalizationEngine` (Universal English Default & Odia Translation Layer)
 
 Files: [`src/lib/LanguageContext.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/LanguageContext.tsx), [`index.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/index.html), [`src/lib/i18n/phraseDictionary.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/i18n/phraseDictionary.ts)
-Last updated: August 20, 2026
+Last updated: August 29, 2026
 
 | Property | Class / Token |
 | :--- | :--- |
-| **Default Fallback** | `'or'` (Odia default for all new/organic visitors without stored preference) |
-| **HTML Root Tag** | `<html lang="or" data-language="or">` |
+| **Default Fallback** | `'en'` (English default for all new visitors without stored preference) |
+| **HTML Root Tag** | `<html lang="en" data-language="en">` |
 | **Storage Key** | `localStorage.getItem('oep-language-preference')` |
 | **Event Broadcast** | `window.dispatchEvent(new CustomEvent('oep-language-changed', { detail: lang }))` |
-| **Numeral Conversion** | `toOdiaDigits(num)` converts ASCII digits (`0-9`) to native Odia glyphs (`୦-୯`) |
+| **Numeral Conversion** | `toOdiaDigits(num)` converts ASCII digits (`0-9`) to native Odia glyphs (`୦-୯`) when in Odia mode |
 | **Content Guard** | Dynamic questions, options, PDF titles, and explanations remain in original input language |
 
 **Pattern notes:**
-- **Organic Landing in Odia**: New visitors arriving via search engines receive Odia UI by default.
+- **First-Time Visitor English Landing**: New visitors arriving on the website receive standard English UI by default.
+- **Instant Odia Toggle**: Clicking `🌐 ଓଡ଼ିଆ` translates the full interface into Odia and persists preference in `localStorage`.
 - **User Selection Persistence**: Explicit language choices are preserved across sessions and tabs.
 
 ---

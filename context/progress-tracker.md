@@ -1,6 +1,9 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] 📦 Vendor Chunking & Circular Dependency Fix for Hostinger (`vite.config.ts`):
+  1. **Resolved `TypeError: Cannot set properties of undefined (setting 'Activity')`**: Removed the naive `id.includes('react')` rule in `vite.config.ts` which split React 19 CommonJS internals from its scheduler and core runtime.
+  2. **Unified Core Vendor Bundle**: Unified React, ReactDOM, and core runtime in `vendor-core` while cleanly splitting `vendor-lucide`, `vendor-katex`, `vendor-recharts`, `vendor-motion`, and `vendor-supabase`, ensuring zero circular chunk references in production.
 - [x] 🛡️ Fatal Error Overlay Non-Fatal Error Filter (`index.html`):
   1. **WebSocket & HMR Error Filtering**: Added `isIgnorableError` to global window error and unhandled rejection listeners in `index.html`. Filtered out benign dev WebSocket reconnect notices (`WebSocket closed without opened`, `@vite/client`), browser extension exceptions, and `ResizeObserver` loops so that temporary HMR socket disconnects or page reloads never trigger the full-page blue `Application Error` overlay.
 - [x] 🎯 Exam "In Progress Session" Banner Isolation & Dynamic Question Fallback Fix (`src/App.tsx`, `src/lib/instantQuestionCompiler.ts`):

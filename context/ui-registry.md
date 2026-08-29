@@ -3801,4 +3801,23 @@ Last updated: August 29, 2026
 - **Automated Mathematical Set Solver:** Automatically parses raw survey text bullets (e.g. `200 own car`, `150 bike`, `50 both`, `20 all three`, `total 500`) and computes all 8 disjoint regions with zero manual configuration.
 - **Interactive Highlighting:** Hovering over breakdown cards highlights the corresponding circle in real-time.
 
+---
+
+### `QuestionBankAuthoritativeCountArchitecture`
+
+File: `src/lib/examService.ts` (`L860–L925`), `server.ts` (`L1390–L1460`), Supabase Trigger `trg_sync_question_bank_counts`
+Last updated: August 29, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Database Engine Trigger** | `trg_sync_question_bank_counts` on `public.questions` (recalculates `questionBanks.questionCount` on INSERT/UPDATE/DELETE inside PostgreSQL memory with 0 KB egress) |
+| **Catalog Count Resolution** | `topicCounts[b.id] || topicCounts[rawTitle] || embeddedCount || 0` |
+| **Card Count Pill** | `px-2.5 py-1 rounded-lg text-xs font-black bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300` |
+| **Bulk Count Sync Route** | `POST /api/admin/questions/sync-counts` |
+
+**Pattern notes:**
+- **Single Source of Truth:** Authoritative row counts are computed at the database engine level and cached via SWR in client memory.
+- **Zero Phantom Counts:** Unuploaded sets strictly display `0 Questions`. No static unverified presets are trusted when real row count is 0.
+
+
 

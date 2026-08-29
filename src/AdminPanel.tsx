@@ -1662,16 +1662,19 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   }, [activeTab, questions, series, mockTests, exams, banks, users, filterExamId, searchQuery, examFilter, questionFilter, testFilter, bankFilter, bankTargetModeFilter, bankSubTab, bankSortDirection, testSortDirection, selectedAdminBankSubject, selectedExamIdForTests, selectedCategoryForTests, selectedExamIdForBanks, selectedExamIdForSeries, selectedExamIdForQuestions, selectedTypeForQuestions, selectedCategoryForQuestions, selectedTargetIdForQuestions]);
 
   const availableAdminSubjects = useMemo(() => {
-    if (activeTab === 'banks' || activeTab === 'practice') {
+    if (activeTab === 'banks' || activeTab === 'practice' || (activeTab === 'questions' && selectedTypeForQuestions === 'bank')) {
       let scoped = banks;
-      if (selectedExamIdForBanks) {
-        scoped = scoped.filter(b => b.examId === selectedExamIdForBanks);
+      const targetExam = (activeTab === 'questions') ? selectedExamIdForQuestions : selectedExamIdForBanks;
+      if (targetExam) {
+        scoped = scoped.filter(b => b.examId === targetExam);
       }
       if (activeTab === 'banks') {
         if (bankSubTab === 'banks') scoped = scoped.filter(b => (b.target_mode || 'both') !== 'practice');
         else if (bankSubTab === 'practice') scoped = scoped.filter(b => (b.target_mode || 'both') !== 'bank');
-      } else if (activeTab === 'practice') {
+      } else if (activeTab === 'practice' || (activeTab === 'questions' && bankSubTab === 'practice')) {
         scoped = scoped.filter(b => (b.target_mode || 'both') !== 'bank');
+      } else if (activeTab === 'questions' && bankSubTab === 'banks') {
+        scoped = scoped.filter(b => (b.target_mode || 'both') !== 'practice');
       }
       if (bankFilter !== 'all') {
         scoped = scoped.filter(b => b.type === bankFilter);
@@ -1704,7 +1707,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       return Array.from(subjectsMap.entries()).map(([name, count]) => ({ name, count }));
     }
     return [];
-  }, [activeTab, banks, mockTests, selectedExamIdForBanks, selectedExamIdForTests, bankSubTab, bankFilter, selectedCategoryForTests]);
+  }, [activeTab, banks, mockTests, selectedExamIdForBanks, selectedExamIdForTests, selectedExamIdForQuestions, selectedTypeForQuestions, bankSubTab, bankFilter, selectedCategoryForTests]);
 
   useEffect(() => {
     if (selectedAdminBankSubject !== 'all') {
@@ -7164,8 +7167,60 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {banks
+                      {/* Subject Hierarchy Filters Bar */}
+                      {availableAdminSubjects.length > 0 && (
+                        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
+                          <span className="text-xs font-black text-slate-400 uppercase tracking-wider shrink-0 mr-1 flex items-center gap-1">
+                            <span>📂 Subject:</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedAdminBankSubject('all')}
+                            className={cn(
+                              "flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer shrink-0",
+                              selectedAdminBankSubject === 'all'
+                                ? "bg-brand-600 text-white shadow-md shadow-brand-500/20"
+                                : "bg-white text-slate-600 hover:text-slate-900 border border-slate-200 hover:bg-slate-50"
+                            )}
+                          >
+                            <span>🌟 All Subjects</span>
+                            <span className={cn(
+                              "px-2 py-0.5 rounded-md text-[10px] font-black",
+                              selectedAdminBankSubject === 'all' ? "bg-white/20 text-white" : "bg-slate-100 text-slate-700"
+                            )}>
+                              {availableAdminSubjects.reduce((acc, s) => acc + s.count, 0)}
+                            </span>
+                          </button>
+
+                          {availableAdminSubjects.map(subj => {
+                            const isActive = selectedAdminBankSubject === subj.name;
+                            return (
+                              <button
+                                key={subj.name}
+                                type="button"
+                                onClick={() => setSelectedAdminBankSubject(subj.name)}
+                                className={cn(
+                                  "flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer shrink-0",
+                                  isActive
+                                    ? "bg-slate-900 text-white shadow-md shadow-slate-900/10"
+                                    : "bg-white text-slate-600 hover:text-slate-900 border border-slate-200 hover:bg-slate-50"
+                                )}
+                              >
+                                <span>📘 {subj.name}</span>
+                                <span className={cn(
+                                  "px-2 py-0.5 rounded-md text-[10px] font-black",
+                                  isActive ? "bg-white/20 text-white" : "bg-slate-100 text-slate-700"
+                                )}>
+                                  {subj.count}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {(() => {
+                        const questionFilteredBanks = banks
                           .filter(b => b.examId === selectedExamIdForQuestions)
                           .filter(b => bankFilter === 'all' || b.type === bankFilter)
                           .filter(b => {
@@ -7173,122 +7228,177 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                             if (bankSubTab === 'practice') return (b.target_mode || 'both') !== 'bank';
                             return true;
                           })
-                          .map(bank => {
-                            const liveCount = questions.filter((q: any) => 
-                              (q.examId === bank.examId || !q.examId || q.examId === selectedExamIdForQuestions) && 
-                              (
-                                q.topic === bank.title || 
-                                q.topic === bank.id || 
-                                (q.topic && bank.title && q.topic.trim().toLowerCase() === bank.title.trim().toLowerCase())
-                              )
-                            ).length;
-                            let embeddedCount = 0;
-                            if (bank.pdfUrl && typeof bank.pdfUrl === 'string' && bank.pdfUrl.startsWith('{')) {
-                              try {
-                                const parsed = JSON.parse(bank.pdfUrl);
-                                if (parsed && Array.isArray(parsed.questionsData)) embeddedCount = parsed.questionsData.length;
-                              } catch(e) {}
+                          .filter(b => selectedAdminBankSubject === 'all' || getBankSubject(b) === selectedAdminBankSubject)
+                          .sort((a, b) => {
+                            const subjA = getBankSubject(a);
+                            const subjB = getBankSubject(b);
+                            if (selectedAdminBankSubject === 'all') {
+                              if (subjA && !subjB) return -1;
+                              if (!subjA && subjB) return 1;
+                              if (subjA !== subjB) return subjA.localeCompare(subjB);
                             }
-                            const authoritativeCount = (typeof bank.practiceQuestionCount === 'number' && bank.practiceQuestionCount > 0)
-                              ? bank.practiceQuestionCount
-                              : ((typeof bank.questionCount === 'number' && bank.questionCount > 0) ? bank.questionCount : embeddedCount);
-                            const count = authoritativeCount > 0 ? authoritativeCount : liveCount;
-                            const categoryBadges: Record<string, { label: string; style: string }> = {
-                              'topic-wise': { label: 'Chapter-Wise', style: 'bg-blue-50 text-blue-700 border-blue-200/60' },
-                              'exam-focused': { label: 'High-Yield', style: 'bg-amber-50 text-amber-700 border-amber-200/60' },
-                              'revision-sets': { label: 'Daily Quizzes', style: 'bg-emerald-50 text-emerald-700 border-emerald-200/60' },
-                              'pyq-collections': { label: 'Topic PYQ', style: 'bg-purple-50 text-purple-700 border-purple-200/60' }
-                            };
-                            const badge = categoryBadges[bank.type] || { label: bank.type, style: 'bg-slate-100 text-slate-600 border-slate-200' };
+                            const orderA = a.sortOrder ?? 9999;
+                            const orderB = b.sortOrder ?? 9999;
+                            return orderA - orderB;
+                          });
 
-                            return (
-                              <motion.div
-                                key={bank.id}
-                                whileHover={{ y: -4, scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                onClick={() => setSelectedTargetIdForQuestions(bank.title)}
-                                className="bg-white rounded-[2rem] border border-slate-200/60 p-6 flex flex-col justify-between hover:border-brand-500/50 hover:shadow-xl hover:shadow-brand-500/5 transition-all duration-300 cursor-pointer premium-shadow group relative overflow-hidden"
+                        if (questionFilteredBanks.length === 0) {
+                          return (
+                            <div className="bg-white rounded-[2rem] border border-slate-200/50 p-12 text-center text-slate-400 font-extrabold shadow-sm flex flex-col items-center gap-4">
+                              <p className="text-slate-500 font-bold text-base">
+                                No {bankFilter === 'all' ? '' : ({
+                                  'topic-wise': 'Chapter-Wise Practice',
+                                  'exam-focused': 'High-Yield',
+                                  'revision-sets': 'Daily Quizzes',
+                                  'pyq-collections': 'Topic PYQs'
+                                }[bankFilter] || '')} content banks found for this filter.
+                              </p>
+                              <button
+                                onClick={() => { setBankFilter('all'); setSelectedAdminBankSubject('all'); }}
+                                className="px-4 py-2 bg-brand-50 text-brand-600 rounded-xl text-xs font-black hover:bg-brand-100 transition-colors"
                               >
-                                <div className="absolute inset-0 bg-gradient-to-br from-brand-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                <div className="space-y-4 relative z-10">
-                                  <div className="flex justify-between items-start flex-wrap gap-2">
-                                    <div className="w-12 h-12 rounded-xl bg-slate-50 border flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300 shadow-2xs">
-                                      📚
-                                    </div>
-                                    <div className="flex items-center gap-1.5 flex-wrap">
-                                      <span className={cn("px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border", badge.style)}>
-                                        {badge.label}
-                                      </span>
-                                      <span className={cn(
-                                        "px-2 py-1 rounded-lg text-[9.5px] font-black uppercase tracking-wider border",
-                                        (bank.target_mode || 'both') === 'practice'
-                                          ? "bg-brand-50 text-brand-700 border-brand-200"
-                                          : (bank.target_mode || 'both') === 'bank'
-                                            ? "bg-amber-50 text-amber-800 border-amber-200"
-                                            : "bg-emerald-50 text-emerald-800 border-emerald-200"
-                                      )}>
-                                        {(bank.target_mode || 'both') === 'practice' ? '🎯 Practice Only' : (bank.target_mode || 'both') === 'bank' ? '📦 Bank Only' : '🌟 Both'}
-                                      </span>
-                                    </div>
+                                Clear Filters
+                              </button>
+                            </div>
+                          );
+                        }
+
+                        // Group by subject when viewing all subjects or single subject
+                        const groupedBySubject = new Map<string, any[]>();
+                        questionFilteredBanks.forEach(bank => {
+                          const subj = getBankSubject(bank) || 'Other / General';
+                          if (!groupedBySubject.has(subj)) {
+                            groupedBySubject.set(subj, []);
+                          }
+                          groupedBySubject.get(subj)!.push(bank);
+                        });
+
+                        return (
+                          <div className="space-y-10">
+                            {Array.from(groupedBySubject.entries()).map(([subjName, bankList]) => (
+                              <div key={subjName} className="space-y-4">
+                                <div className="flex items-center justify-between bg-slate-100/70 border border-slate-200/60 px-5 py-3 rounded-2xl">
+                                  <div className="flex items-center gap-2.5">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-brand-500" />
+                                    <span className="font-black text-sm text-slate-800 tracking-tight uppercase">
+                                      {subjName}
+                                    </span>
+                                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-brand-50 text-brand-700 border border-brand-200/60">
+                                      {bankList.length} Sets
+                                    </span>
                                   </div>
-                                  <div>
-                                    <h4 className="text-lg font-black text-slate-900 group-hover:text-brand-600 transition-colors line-clamp-2 tracking-tight leading-snug">{bank.title}</h4>
-                                  </div>
+                                  {selectedAdminBankSubject === 'all' && subjName !== 'Other / General' && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setSelectedAdminBankSubject(subjName)}
+                                      className="px-3 py-1 bg-white hover:bg-brand-50 text-slate-600 hover:text-brand-600 rounded-lg text-xs font-black border border-slate-200 shadow-2xs transition-all flex items-center gap-1 cursor-pointer"
+                                    >
+                                      <span>Focus on {subjName} →</span>
+                                    </button>
+                                  )}
                                 </div>
-                                
-                                <div className="flex justify-between items-center pt-6 mt-6 border-t border-slate-100 relative z-10 gap-2">
-                                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-slate-50 text-slate-500 group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors border border-slate-100">
-                                    {count} Questions
-                                  </span>
-                                  
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setBulkExamId(bank.examId);
-                                      setBulkTopic(bank.title);
-                                      setShowBulkUploadModal(true);
-                                    }}
-                                    className="px-3 py-1.5 rounded-xl text-xs font-black bg-brand-50 text-brand-600 hover:bg-brand-600 hover:text-white border border-brand-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
-                                    title="Upload questions directly to this bank"
-                                  >
-                                    <Upload className="w-3.5 h-3.5" />
-                                    <span>Upload Qs</span>
-                                  </button>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                  {bankList.map(bank => {
+                                    const liveCount = questions.filter((q: any) => 
+                                      (q.examId === bank.examId || !q.examId || q.examId === selectedExamIdForQuestions) && 
+                                      (
+                                        q.topic === bank.title || 
+                                        q.topic === bank.id || 
+                                        (q.topic && bank.title && q.topic.trim().toLowerCase() === bank.title.trim().toLowerCase())
+                                      )
+                                    ).length;
+                                    let embeddedCount = 0;
+                                    if (bank.pdfUrl && typeof bank.pdfUrl === 'string' && bank.pdfUrl.startsWith('{')) {
+                                      try {
+                                        const parsed = JSON.parse(bank.pdfUrl);
+                                        if (parsed && Array.isArray(parsed.questionsData)) embeddedCount = parsed.questionsData.length;
+                                      } catch(e) {}
+                                    }
+                                    const authoritativeCount = (typeof bank.practiceQuestionCount === 'number' && bank.practiceQuestionCount > 0)
+                                      ? bank.practiceQuestionCount
+                                      : ((typeof bank.questionCount === 'number' && bank.questionCount > 0) ? bank.questionCount : embeddedCount);
+                                    const count = authoritativeCount > 0 ? authoritativeCount : liveCount;
+                                    const categoryBadges: Record<string, { label: string; style: string }> = {
+                                      'topic-wise': { label: 'Chapter-Wise', style: 'bg-blue-50 text-blue-700 border-blue-200/60' },
+                                      'exam-focused': { label: 'High-Yield', style: 'bg-amber-50 text-amber-700 border-amber-200/60' },
+                                      'revision-sets': { label: 'Daily Quizzes', style: 'bg-emerald-50 text-emerald-700 border-emerald-200/60' },
+                                      'pyq-collections': { label: 'Topic PYQ', style: 'bg-purple-50 text-purple-700 border-purple-200/60' }
+                                    };
+                                    const badge = categoryBadges[bank.type] || { label: bank.type, style: 'bg-slate-100 text-slate-600 border-slate-200' };
+
+                                    return (
+                                      <motion.div
+                                        key={bank.id}
+                                        whileHover={{ y: -4, scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => setSelectedTargetIdForQuestions(bank.title)}
+                                        className="bg-white rounded-[2rem] border border-slate-200/60 p-6 flex flex-col justify-between hover:border-brand-500/50 hover:shadow-xl hover:shadow-brand-500/5 transition-all duration-300 cursor-pointer premium-shadow group relative overflow-hidden"
+                                      >
+                                        <div className="absolute inset-0 bg-gradient-to-br from-brand-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <div className="space-y-4 relative z-10">
+                                          <div className="flex justify-between items-start flex-wrap gap-2">
+                                            <div className="flex items-center gap-2">
+                                              <div className="w-10 h-10 rounded-xl bg-slate-50 border flex items-center justify-center text-xl group-hover:scale-110 transition-transform duration-300 shadow-2xs">
+                                                📚
+                                              </div>
+                                              {typeof bank.sortOrder === 'number' && (
+                                                <span className="px-2 py-1 rounded-lg text-xs font-black bg-slate-100 text-slate-700 border border-slate-200">
+                                                  #{bank.sortOrder}
+                                                </span>
+                                              )}
+                                            </div>
+                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                              <span className={cn("px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border", badge.style)}>
+                                                {badge.label}
+                                              </span>
+                                              <span className={cn(
+                                                "px-2 py-1 rounded-lg text-[9.5px] font-black uppercase tracking-wider border",
+                                                (bank.target_mode || 'both') === 'practice'
+                                                  ? "bg-brand-50 text-brand-700 border-brand-200"
+                                                  : (bank.target_mode || 'both') === 'bank'
+                                                    ? "bg-amber-50 text-amber-800 border-amber-200"
+                                                    : "bg-emerald-50 text-emerald-800 border-emerald-200"
+                                              )}>
+                                                {(bank.target_mode || 'both') === 'practice' ? '🎯 Practice Only' : (bank.target_mode || 'both') === 'bank' ? '📦 Bank Only' : '🌟 Both'}
+                                              </span>
+                                            </div>
+                                          </div>
+                                          <div>
+                                            <h4 className="text-lg font-black text-slate-900 group-hover:text-brand-600 transition-colors line-clamp-2 tracking-tight leading-snug">{bank.title}</h4>
+                                          </div>
+                                        </div>
+                                        
+                                        <div className="flex justify-between items-center pt-6 mt-6 border-t border-slate-100 relative z-10 gap-2">
+                                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-slate-50 text-slate-500 group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors border border-slate-100">
+                                            {count} Questions
+                                          </span>
+                                          
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setBulkExamId(bank.examId);
+                                              setBulkTopic(bank.title);
+                                              setShowBulkUploadModal(true);
+                                            }}
+                                            className="px-3 py-1.5 rounded-xl text-xs font-black bg-brand-50 text-brand-600 hover:bg-brand-600 hover:text-white border border-brand-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
+                                            title="Upload questions directly to this bank"
+                                          >
+                                            <Upload className="w-3.5 h-3.5" />
+                                            <span>Upload Qs</span>
+                                          </button>
+                                        </div>
+                                      </motion.div>
+                                    );
+                                  })}
                                 </div>
-                              </motion.div>
-                            );
-                          })}
-{banks
-                          .filter(b => b.examId === selectedExamIdForQuestions)
-                          .filter(b => bankFilter === 'all' || b.type === bankFilter)
-                          .filter(b => {
-                            if (bankSubTab === 'banks') return (b.target_mode || 'both') !== 'practice';
-                            if (bankSubTab === 'practice') return (b.target_mode || 'both') !== 'bank';
-                            return true;
-                          }).length === 0 && (
-                          <div className="col-span-full bg-white rounded-[2rem] border border-slate-200/50 p-12 text-center text-slate-400 font-extrabold shadow-sm flex flex-col items-center gap-4">
-                            <p className="text-slate-500 font-bold text-base">
-                              No {bankFilter === 'all' ? '' : ({
-                                'topic-wise': 'Chapter-Wise Practice',
-                                'exam-focused': 'High-Yield Topic',
-                                'revision-sets': 'Daily Speed Quiz',
-                                'pyq-collections': 'Topic-Wise PYQ'
-                              }[bankFilter] || bankFilter)} content banks found for this exam.
-                            </p>
-                            <button
-                              onClick={() => {
-                                setActiveTab('banks');
-                                openAddModal('banks');
-                              }}
-                              className="px-6 py-3 bg-brand-600 text-white font-black text-xs uppercase tracking-wider rounded-xl hover:bg-brand-700 transition-all shadow-md shadow-brand-500/20 flex items-center gap-2 cursor-pointer"
-                            >
-                              <Plus className="w-4 h-4" /> Create New Content Bank
-                            </button>
+                              </div>
+                            ))}
                           </div>
-                        )}
-                      </div>
+                        );
+                      })()}
                     </div>
-                 ) : (
+                  ) : (
                    selectedCategoryForQuestions === null ? (
                      <div className="space-y-6">
                        <div className="flex items-center justify-between">

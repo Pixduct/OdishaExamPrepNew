@@ -1514,39 +1514,44 @@ export interface PieSlice {
   color: string;
 }
 
-export function tryExtractPieChart(tableData: TableData): { slices: PieSlice[]; isDegree: boolean; total: number } | null {
-  if (tableData.headers.length !== 2 || tableData.rows.length < 2 || tableData.rows.length > 12) {
+export function tryExtractPieChart(tableData: TableData): { slices: PieSlice[]; isDegree: boolean; total: number; isMultiColumn: boolean } | null {
+  if (tableData.headers.length < 2 || tableData.headers.length > 5 || tableData.rows.length < 2 || tableData.rows.length > 15) {
     return null;
   }
 
   let valueColIdx = -1;
-  let labelColIdx = -1;
-
-  const h0 = (tableData.headers[0] || '').toLowerCase();
-  const h1 = (tableData.headers[1] || '').toLowerCase();
+  let labelColIdx = 0;
 
   const isPercentHeader = (h: string) => h.includes('%') || h.includes('percent') || h.includes('share') || h.includes('distribution');
   const isDegreeHeader = (h: string) => h.includes('degree') || h.includes('angle') || h.includes('°');
 
-  if (isPercentHeader(h1) || isDegreeHeader(h1)) {
-    valueColIdx = 1;
-    labelColIdx = 0;
-  } else if (isPercentHeader(h0) || isDegreeHeader(h0)) {
-    valueColIdx = 0;
-    labelColIdx = 1;
-  } else {
-    const col0Nums = tableData.rows.every(r => /^[0-9]+(\.[0-9]+)?%?°?$/.test((r[0] || '').trim().replace(/\s+/g, '')));
-    const col1Nums = tableData.rows.every(r => /^[0-9]+(\.[0-9]+)?%?°?$/.test((r[1] || '').trim().replace(/\s+/g, '')));
-    if (col1Nums && !col0Nums) {
-      valueColIdx = 1;
-      labelColIdx = 0;
-    } else if (col0Nums && !col1Nums) {
-      valueColIdx = 0;
-      labelColIdx = 1;
-    } else {
-      return null;
+  // Step 1: Try matching by header keywords
+  for (let c = 0; c < tableData.headers.length; c++) {
+    const header = (tableData.headers[c] || '').toLowerCase();
+    if (isPercentHeader(header) || isDegreeHeader(header)) {
+      valueColIdx = c;
+      if (c === 0) labelColIdx = 1;
+      break;
     }
   }
+
+  // Step 2: If no explicit keyword, inspect column values
+  if (valueColIdx === -1) {
+    for (let c = 0; c < tableData.headers.length; c++) {
+      const colHasPercentages = tableData.rows.every(r => /^[0-9]+(\.[0-9]+)?%?°?$/.test((r[c] || '').trim().replace(/\s+/g, '')));
+      if (colHasPercentages) {
+        const nums = tableData.rows.map(r => parseFloat((r[c] || '').replace(/[^0-9.]/g, ''))).filter(n => !isNaN(n));
+        const colSum = nums.reduce((acc, v) => acc + v, 0);
+        if (Math.abs(colSum - 100) <= 3 || Math.abs(colSum - 360) <= 5) {
+          valueColIdx = c;
+          labelColIdx = c === 0 ? 1 : 0;
+          break;
+        }
+      }
+    }
+  }
+
+  if (valueColIdx === -1) return null;
 
   const rawValues: { label: string; num: number; raw: string }[] = [];
   let isDegree = false;
@@ -1564,10 +1569,11 @@ export function tryExtractPieChart(tableData: TableData): { slices: PieSlice[]; 
   }
 
   const sum = rawValues.reduce((acc, v) => acc + v.num, 0);
-  const isPercent = Math.abs(sum - 100) <= 2;
+  const isPercent = Math.abs(sum - 100) <= 3;
   const is360 = Math.abs(sum - 360) <= 5;
 
-  if (!isPercent && !is360 && !isPercentHeader(h0) && !isPercentHeader(h1) && !isDegreeHeader(h0) && !isDegreeHeader(h1)) {
+  const hVal = (tableData.headers[valueColIdx] || '').toLowerCase();
+  if (!isPercent && !is360 && !isPercentHeader(hVal) && !isDegreeHeader(hVal)) {
     return null;
   }
 
@@ -1582,7 +1588,12 @@ export function tryExtractPieChart(tableData: TableData): { slices: PieSlice[]; 
     };
   });
 
-  return { slices, isDegree: is360 || isDegree, total: sum };
+  return {
+    slices,
+    isDegree: is360 || isDegree,
+    total: sum,
+    isMultiColumn: tableData.headers.length > 2
+  };
 }
 
 export const PieChartGraphic: React.FC<{
@@ -1793,9 +1804,66 @@ export const TableRenderer: React.FC<{ tableData: TableData; isOption?: boolean 
 
   const minTableWidth = Math.max(380, tableData.headers.length * 90);
 
+  const renderDataTable = () => (
+    <>
+      <div className="overflow-x-auto rounded-2xl border border-brand-500/20 dark:border-brand-400/20 shadow-sm bg-white dark:bg-slate-900 scrollbar-thin">
+        <table 
+          style={{ minWidth: `${minTableWidth}px` }}
+          className="w-full md:table-fixed border-collapse text-left text-slate-800 dark:text-slate-100 text-xs sm:text-sm md:text-[15px]"
+        >
+          {colWidths.length > 0 && (
+            <colgroup className="hidden md:table-column-group">
+              {colWidths.map((width, idx) => (
+                <col key={idx} style={{ width: `${width}%` }} />
+              ))}
+            </colgroup>
+          )}
+          <thead>
+            <tr className="bg-brand-600 dark:bg-brand-700 text-white border-b border-brand-700 dark:border-brand-800">
+              {tableData.headers.map((h, i) => (
+                <th 
+                  key={i} 
+                  className={cn(
+                    "px-3.5 py-2.5 sm:px-4 sm:py-3 md:px-6 md:py-3.5 font-black border-r border-white/20 last:border-r-0 text-xs md:text-sm uppercase tracking-wider whitespace-nowrap md:whitespace-normal md:break-words",
+                    tableData.alignments[i] === 'center' && 'text-center',
+                    tableData.alignments[i] === 'right' && 'text-right'
+                  )}
+                >
+                  <MathTextRenderer text={h} isOption={isOption} />
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900/90">
+            {tableData.rows.map((row, rIdx) => (
+              <tr key={rIdx} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors odd:bg-white dark:odd:bg-slate-900 even:bg-slate-50/40 dark:even:bg-slate-800/30">
+                {row.map((cell, cIdx) => (
+                  <td 
+                    key={cIdx} 
+                    className={cn(
+                      "px-3.5 py-2.5 sm:px-4 sm:py-3 md:px-6 md:py-3.5 border-r border-slate-200 dark:border-slate-800 last:border-r-0 font-medium text-slate-700 dark:text-slate-200 whitespace-nowrap md:whitespace-normal md:break-words",
+                      tableData.alignments[cIdx] === 'center' && 'text-center',
+                      tableData.alignments[cIdx] === 'right' && 'text-right'
+                    )}
+                  >
+                    <MathTextRenderer text={cell} isOption={isOption} />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {/* Mobile Scroll Indicator */}
+      <div className="flex items-center justify-end gap-1 mt-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 md:hidden">
+        <span>⇄ Scroll table horizontally</span>
+      </div>
+    </>
+  );
+
   return (
     <div className="my-4 max-w-full">
-      {/* If detected as Pie Chart, show Pie Graphic & View Selector */}
+      {/* If detected as Pie Chart or Mixed Graph, show Graphic & View Selector */}
       {pieChartData && (
         <div className="mb-3">
           <div className="flex items-center justify-between mb-2">
@@ -1810,7 +1878,7 @@ export const TableRenderer: React.FC<{ tableData: TableData; isOption?: boolean 
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                 )}
               >
-                🥧 Pie Chart View
+                {pieChartData.isMultiColumn ? "📊 Mixed Graph View (Chart + Table)" : "🥧 Pie Chart View"}
               </button>
               <button
                 type="button"
@@ -1828,68 +1896,24 @@ export const TableRenderer: React.FC<{ tableData: TableData; isOption?: boolean 
           </div>
 
           {activeView === 'chart' && (
-            <PieChartGraphic slices={pieChartData.slices} isDegree={pieChartData.isDegree} />
+            <div className="space-y-3">
+              <PieChartGraphic slices={pieChartData.slices} isDegree={pieChartData.isDegree} />
+              {/* For multi-column mixed graphs, also show the full table with the additional ratio/data columns */}
+              {pieChartData.isMultiColumn && (
+                <div className="mt-2">
+                  <div className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
+                    Companion Data & Ratio Table:
+                  </div>
+                  {renderDataTable()}
+                </div>
+              )}
+            </div>
           )}
         </div>
       )}
 
       {/* Table view (shown if not a pie chart OR if candidate selected table view) */}
-      {(!pieChartData || activeView === 'table') && (
-        <>
-          <div className="overflow-x-auto rounded-2xl border border-brand-500/20 dark:border-brand-400/20 shadow-sm bg-white dark:bg-slate-900 scrollbar-thin">
-            <table 
-              style={{ minWidth: `${minTableWidth}px` }}
-              className="w-full md:table-fixed border-collapse text-left text-slate-800 dark:text-slate-100 text-xs sm:text-sm md:text-[15px]"
-            >
-              {colWidths.length > 0 && (
-                <colgroup className="hidden md:table-column-group">
-                  {colWidths.map((width, idx) => (
-                    <col key={idx} style={{ width: `${width}%` }} />
-                  ))}
-                </colgroup>
-              )}
-              <thead>
-                <tr className="bg-brand-600 dark:bg-brand-700 text-white border-b border-brand-700 dark:border-brand-800">
-                  {tableData.headers.map((h, i) => (
-                    <th 
-                      key={i} 
-                      className={cn(
-                        "px-3.5 py-2.5 sm:px-4 sm:py-3 md:px-6 md:py-3.5 font-black border-r border-white/20 last:border-r-0 text-xs md:text-sm uppercase tracking-wider whitespace-nowrap md:whitespace-normal md:break-words",
-                        tableData.alignments[i] === 'center' && 'text-center',
-                        tableData.alignments[i] === 'right' && 'text-right'
-                      )}
-                    >
-                      <MathTextRenderer text={h} isOption={isOption} />
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900/90">
-                {tableData.rows.map((row, rIdx) => (
-                  <tr key={rIdx} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors odd:bg-white dark:odd:bg-slate-900 even:bg-slate-50/40 dark:even:bg-slate-800/30">
-                    {row.map((cell, cIdx) => (
-                      <td 
-                        key={cIdx} 
-                        className={cn(
-                          "px-3.5 py-2.5 sm:px-4 sm:py-3 md:px-6 md:py-3.5 border-r border-slate-200 dark:border-slate-800 last:border-r-0 font-medium text-slate-700 dark:text-slate-200 whitespace-nowrap md:whitespace-normal md:break-words",
-                          tableData.alignments[cIdx] === 'center' && 'text-center',
-                          tableData.alignments[cIdx] === 'right' && 'text-right'
-                        )}
-                      >
-                        <MathTextRenderer text={cell} isOption={isOption} />
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {/* Mobile Scroll Indicator */}
-          <div className="flex items-center justify-end gap-1 mt-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 md:hidden">
-            <span>⇄ Scroll table horizontally</span>
-          </div>
-        </>
-      )}
+      {(!pieChartData || activeView === 'table') && renderDataTable()}
     </div>
   );
 };

@@ -2530,13 +2530,15 @@ Last updated: August 29, 2026
 | Property | Class / Token |
 | :--- | :--- |
 | **Container (Compact)** | `flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all text-xs font-black cursor-pointer shadow-xs border select-none group shrink-0` |
-| **Active Target English** | `bg-white dark:bg-slate-900 border-transparent hover:border-slate-200 dark:hover:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-[#2563EB] dark:hover:text-white` |
-| **Active Target Odia** | `bg-brand-50/90 dark:bg-brand-950/60 border-brand-300/80 dark:border-brand-700/60 text-[#2563EB] dark:text-brand-300 hover:bg-brand-100/80` |
+| **Active Target English (in Odia Mode)** | `bg-brand-50/90 dark:bg-brand-950/60 border-brand-300/80 dark:border-brand-700/60 text-[#2563EB] dark:text-brand-300 hover:bg-brand-100/80` |
+| **Active Target Odia (in English Mode)** | `bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-[#2563EB] dark:hover:text-white hover:border-brand-300` |
 | **Container (Default Pill)** | `relative inline-flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300 cursor-pointer select-none shadow-2xs` |
-| **Icon** | `Globe` icon (`w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-45`) |
-| **Target Switch Label** | When English mode: displays `🌐 ଓଡ଼ିଆ`; when Odia mode: displays `🌐 English` |
+| **Icon** | `Globe` icon (`w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-45 text-[#2563EB] dark:text-brand-400`) |
+| **Label Prefix (Desktop)** | `hidden sm:inline font-bold text-slate-600 dark:text-slate-400` (`Language:` / `ଭାଷା:`) |
+| **Target Switch Label** | When English mode: displays `🌐 Language: ଓଡ଼ିଆ`; when Odia mode: displays `🌐 ଭାଷା: English` |
 
 **Pattern notes:**
+- **Explicit Purpose Prefix**: Renders `Language:` in English mode and `ଭାଷା:` in Odia mode before the target language so candidates instantly understand the button purpose.
 - **Target Labeling**: The button clearly shows the language the user will switch into upon clicking (`'ଓଡ଼ିଆ'` when currently viewing English; `'English'` when viewing Odia).
 - **Zero Layout Shift**: Fixed font size (`text-[11px] font-extrabold tracking-wide`) and compact padding prevent navbar jumping.
 

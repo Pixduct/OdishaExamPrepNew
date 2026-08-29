@@ -1,6 +1,10 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] ☀️ First-Time Visitor Defaults: Light Theme & English Language (`src/lib/themeStore.ts`, `src/lib/LanguageContext.tsx`, `index.html`):
+  1. **Default Theme to Light (Day Mode)**: Updated `getStoredTheme()` in `themeStore.ts` and the anti-flicker pre-hydration script in `index.html` to default to `light` mode for all first-time visitors without stored preferences.
+  2. **Default Language to English**: Updated `getStoredLanguage()` in `LanguageContext.tsx` and the anti-flicker pre-hydration script in `index.html` to default to `en` for all first-time visitors.
+  3. **Preserved Manual Toggles**: Users can still seamlessly toggle to Dark (Night) mode or Odia (`ଓଡ଼ିଆ`) at any time, with their preferences persisted in `localStorage`.
 - [x] 🎯 Exam Detail Hero Banner Strict Mock Tests Scoping & Zero-Fallback Recovery (`src/App.tsx`):
   1. **Strict Mock-Test-Only Hero Banner**: Restricted the top hero banner in `ExamDetailView` strictly to official mock tests (`examMockTests`). Eliminated all fallbacks that previously showed Topic Question Banks or General Current Affairs in the hero section.
   2. **Clean Zero-State Display**: If no mock tests have been added for an exam (`examMockTests.length === 0`), the hero section returns `null` (nothing displayed), keeping the exam page pristine.

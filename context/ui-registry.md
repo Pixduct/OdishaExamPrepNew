@@ -104,8 +104,8 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`TitaniumProPhoneShowcaseMockup`** | Media / Studio | [`public/shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/shorts-creator.html) | Flagship 2026 Titanium Pro smartphone chassis, tall 1506px screen, dynamic island | Shorts & Memory Creators | Active |
 | **`YouTubeMobileSafeZoneCoverEngine`**| Media / Studio | [`public/shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/shorts-creator.html) | 2026 YouTube safe-zone 100k covers, below [New] tag geometry, curiosity gap teasers | Shorts & Memory Creators | Active |
 | **`MultiTrackCustomMusicPool`** | Media / Audio | [`public/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/memory-shorts-creator.html) | Multi-track custom audio pool, live audition player chips, cyclic batch rotation | Memory Shorts Creator | Active |
-| **`ExamNotificationVisualCard`** | Graphic / Social Card | [`automations/exam_card_renderer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/exam_card_renderer.py) | 6 Scenario Themes, 1080x1080 High-DPI, Symmetrical Centered Board Badges, Stat Pills & Action Highlights | Telegram, YouTube Community, WhatsApp | Active |
 | **`EditorialMasterclassCoverBanner`** | Graphic / Cover Engine | [`automations/shared/drive_image_sanitizer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/drive_image_sanitizer.py) | Google Drive Auto-Stream Sanitizer, Supabase Storage CDN Cache, 1200x630 Branded Vector Fallback | Strategy Blogs, Telegram, Social Shares | Active |
+| **`AdminUsersManagerTable`** | Admin / Data Table | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L4464-L4535) | 4-Column Table, Avatar Badges, Global Master Access Controls, Manual Content Grant & Revocation, Dynamic Loading Spinner | AdminPanel.tsx (Users tab) | Active |
 
 ---
 
@@ -3615,5 +3615,28 @@ Last updated: August 29, 2026
 **Pattern notes:**
 - **Google Drive Stream Converter:** Solves the common broken preview bug where Google Drive share URLs return HTML preview wrappers instead of raw image binaries.
 - **Dynamic Board Themes:** Vector fallback maps automatically across 10 official boards: OPSC, OSSC, OSSSC, Odisha Police, SSB Odisha, SSC, RRB, IBPS, UPSC, and State Selection Exams.
+
+---
+
+### `AdminUsersManagerTable`
+
+File: `src/AdminPanel.tsx` (`L4464–L4535`, `L6728–L6755`)
+Last updated: August 29, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Container Shell** | `glass rounded-[2rem] border border-slate-200/50 shadow-xl overflow-hidden bg-white/70` |
+| **Table Head (`thead`)** | `bg-slate-100/50 border-b border-slate-200/60 font-black text-xs uppercase text-slate-500 tracking-widest` |
+| **Column Structure** | 4-Col Grid: `User` (Left, Avatar + Name + Email), `Status` (Role Pill + Global Access Badge), `Purchases` (Active Series/Bank Chips + Revoke Action), `Actions` (Right, Multi-Action Button Stack) |
+| **Avatar Representation** | Rounded avatar photo (`w-10 h-10 rounded-full object-cover shadow-sm border border-slate-100`) or initials fallback with `premium-gradient` |
+| **Role Badges** | Admin: `bg-purple-100 text-purple-700 border border-purple-200` / Student: `bg-slate-100 text-slate-600 border border-slate-200` |
+| **Purchases Chips** | `flex flex-col bg-brand-50 border border-brand-200 text-brand-700 px-2 py-1 rounded-md text-xs font-bold shadow-sm` with inline 1-click `Revoke` trigger |
+| **Action Button Stack** | 3-Tier Vertical Action Stack: `Grant Content` (`bg-brand-100 text-brand-700`), `Force Set Password` (`bg-brand-50 text-brand-600`), and `Master Access` toggle (`bg-slate-50 text-slate-600`) |
+| **Loading State** | Concentric animated brand spinner (`w-8 h-8 border-3 border-brand-200 border-t-brand-600 rounded-full animate-spin`) centered at `colSpan={4}` |
+
+**Pattern notes:**
+- **Dual Identifier Compatibility:** Deduplication and lookups safely evaluate `item?.id || item?.uid` to guarantee seamless compatibility between Supabase Auth and public profiles.
+- **On-Demand Background Sync:** Triggers automatic user synchronization if the local cache is empty upon switching to the `users` tab.
+
 
 

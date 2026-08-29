@@ -1,6 +1,9 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] 🚨 Exam Update Engine (Engine 1) Syntax Error & Workflow Runner Recovery (`automations/exam_update_engine.py`):
+  1. **SyntaxError Elimination**: Resolved missing `except Exception` block in candidate evaluation loop (`try:` at line 778 had no closing `except` block before line 913), restoring clean Python parsing.
+  2. **Automated Error Dispatch**: Added logging and admin Telegram notification for any candidate processing exceptions.
 - [x] 📝 Enterprise Google Sheet Editorial Queue Auto-Discovery & Vector Banner Recovery (`automations/seo_blog_engine.py`, `automations/shared/drive_image_sanitizer.py`, `automations/shared/google_sheet_queue.py`):
   1. **Spreadsheet Title & Tab Auto-Discovery**: Added fuzzy & exact title matching for `Odisha_Editorial_Queue .xlsx` (and variants) and automatic detection of the `Blog Content` worksheet tab.
   2. **Drive Image High-Res Direct Streamer**: Re-engineered `download_and_sanitize_image` to stream full-resolution PNG images from Google Drive sharing URLs (`https://lh3.googleusercontent.com/d/{id}=w1200`).

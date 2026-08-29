@@ -3743,3 +3743,22 @@ Last updated: August 29, 2026
 - **Zero Vertical Stacking on Mobile:** Employs `whitespace-nowrap` on mobile screens to prevent letter-by-letter breaking (e.g. `VILL AGE`, `M E N %`) and vertical digit stacking (e.g. `4 0 %`), allowing clean horizontal touch swiping.
 - **Laptop Proportionality:** Retains `md:table-fixed` and calculated column widths on desktop screens for balanced aesthetics.
 - **Universal Markdown Ingestion:** Parses both standard Markdown (`|---|---|`) and separator-less pipe tables (`Year | Production | Export`) with embedded KaTeX rendering per cell.
+
+---
+
+### `SvgPieChartRenderer`
+
+File: `src/components/MathTextRenderer.tsx` (`L1500–L1650`)
+Last updated: August 29, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Container** | `flex flex-col md:flex-row items-center justify-center gap-6 p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-brand-50/30 dark:from-slate-900 dark:to-slate-800/60 border border-brand-500/20 dark:border-brand-400/20 shadow-sm max-w-full` |
+| **SVG Vector Graphic** | `w-[240px] h-[240px] sm:w-[260px] sm:h-[260px] drop-shadow-md` with donut inner radius and interactive hover slice expansion |
+| **Slice Colors** | `['#2563EB', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#F97316', '#14B8A6', '#6366F1', '#84CC16']` |
+| **View Switcher** | `flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700` (`🥧 Pie Chart View` vs `📋 Data Table View`) |
+| **Interactive Legend Grid** | `grid grid-cols-2 gap-2` with color badge indicator and sync'd hover states |
+
+**Pattern notes:**
+- **Automated Detection:** Analyzes 2-column tabular data and automatically constructs an SVG vector pie chart if values represent shares/percentages summing to ~100% or degree angles summing to ~360°.
+- **Dual-View Toggle:** Enables candidates to switch seamlessly between graphical chart representation and structured data tables.

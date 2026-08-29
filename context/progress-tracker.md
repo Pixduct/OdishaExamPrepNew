@@ -1,6 +1,10 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] 🥧 Automated Visual SVG Pie Chart Generator & Dual-View Engine (`src/components/MathTextRenderer.tsx`, `context/ui-registry.md`):
+  1. **Intelligent Distribution Detection**: Automatically detects 2-column tabular data with shares/percentages summing to ~100% or degree angles summing to ~360°.
+  2. **Interactive Vector Pie/Donut Graphics**: Renders high-resolution vector SVG pie charts with 10 harmonious colors, hover slice expansion, center donut hub, and centered percentage labels.
+  3. **Dual-View Switcher**: Provides candidates with a 1-click toggle between `🥧 Pie Chart View` and `📋 Data Table View` with synchronized legend highlights.
 - [x] 📊 Universal Question Data Table Engine & Mobile Touch Optimization (`src/components/MathTextRenderer.tsx`, `context/ui-registry.md`):
   1. **Separator-Less Markdown Table Support**: Intelligently parses raw pipe-delimited data tables (common in DI questions) without requiring explicit `---|---|---` markdown separator lines.
   2. **Device-Specific Adaptive Architecture**:

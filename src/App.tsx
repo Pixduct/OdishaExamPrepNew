@@ -4395,7 +4395,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
   );
 });
 
-const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activities, handleStartTest }: any) => {
+const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activities, handleStartTest, showPremiumAlert }: any) => {
   const { t } = useLanguage();
   const [showAttemptModal, setShowAttemptModal] = useState(false);
   let isPremium = test.isPremium;
@@ -4468,21 +4468,31 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
       {isMobile ? (
         <div
           onClick={() => {
-            if (!isScheduledUpcoming) handleStartTest({ ...test, isPremium, price });
+            if (isScheduledUpcoming) return;
+            if (totalQs === 0) {
+              showPremiumAlert(
+                "Question Paper in Preparation",
+                "The question paper and verified solutions for this mock test are currently being finalized and uploaded by our faculty team. Please check back shortly!"
+              );
+              return;
+            }
+            handleStartTest({ ...test, isPremium, price });
           }}
           className={cn(
             "px-3 py-2.5 sm:p-4 bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-xl sm:rounded-2xl flex items-center justify-between gap-3 group relative overflow-hidden transition-all duration-300 text-slate-900 dark:text-white",
             isScheduledUpcoming
               ? "border-amber-200 dark:border-amber-800 bg-amber-50/20 dark:bg-amber-950/20 cursor-not-allowed opacity-90"
-              : isCompleted
-                ? "border-emerald-250 dark:border-emerald-800 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.04)] active:border-emerald-350 cursor-pointer"
-                : isInProgress
-                  ? "border-amber-250 dark:border-amber-800 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.04)] active:border-amber-355 cursor-pointer"
-                  : isLocked 
-                    ? "border-slate-100 dark:border-slate-800 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.03),0_1px_2px_rgba(245,158,11,0.01)] active:border-amber-300 cursor-pointer"
-                    : isPremiumUnlocked
-                      ? "border-slate-100 dark:border-slate-800 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.03),0_1px_2px_rgba(16,185,129,0.01)] active:border-emerald-300 cursor-pointer"
-                      : "border-slate-100 dark:border-slate-800 shadow-[0_4px_16px_-4px_rgba(79,70,229,0.03),0_1px_2px_rgba(79,70,229,0.01)] active:border-brand-300 cursor-pointer"
+              : totalQs === 0
+                ? "border-amber-200/60 dark:border-amber-800/60 bg-amber-50/10 dark:bg-amber-950/10 cursor-pointer"
+                : isCompleted
+                  ? "border-emerald-250 dark:border-emerald-800 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.04)] active:border-emerald-350 cursor-pointer"
+                  : isInProgress
+                    ? "border-amber-250 dark:border-amber-800 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.04)] active:border-amber-355 cursor-pointer"
+                    : isLocked 
+                      ? "border-slate-100 dark:border-slate-800 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.03),0_1px_2px_rgba(245,158,11,0.01)] active:border-amber-300 cursor-pointer"
+                      : isPremiumUnlocked
+                        ? "border-slate-100 dark:border-slate-800 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.03),0_1px_2px_rgba(16,185,129,0.01)] active:border-emerald-300 cursor-pointer"
+                        : "border-slate-100 dark:border-slate-800 shadow-[0_4px_16px_-4px_rgba(79,70,229,0.03),0_1px_2px_rgba(79,70,229,0.01)] active:border-brand-300 cursor-pointer"
           )}
         >
           <div className={cn(
@@ -4544,6 +4554,8 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
                 )}
                 {isScheduledUpcoming ? (
                   <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[8.5px] font-black rounded border border-amber-200 dark:border-amber-800 uppercase tracking-wider shrink-0">📅 UPCOMING</span>
+                ) : totalQs === 0 ? (
+                  <span className="px-1.5 py-0.5 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-[8.5px] font-black rounded border border-amber-200 dark:border-amber-800 uppercase tracking-wider shrink-0">⏳ IN PREP</span>
                 ) : isCompleted ? (
                   <span className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[8.5px] font-black rounded border border-emerald-100/60 dark:border-emerald-800 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400" /> COMPLETED</span>
                 ) : isInProgress ? (
@@ -4558,92 +4570,126 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
               </div>
               
               {isScheduledUpcoming ? (
-                <div className="mt-1 text-[10px] font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
-                  <span>Starts in <strong className="font-mono text-amber-900 dark:text-amber-200">{countdown.formattedCountdown}</strong></span>
+                <div className="flex items-center gap-2 mt-1 text-[11px] font-bold text-amber-800 dark:text-amber-300">
+                  <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-amber-600 dark:text-amber-400" /> {countdown.formattedCountdown}</span>
+                  <span>•</span>
+                  <span>{countdown.formattedScheduledDate}</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1.5 mt-1.5 sm:mt-2 text-[9.5px] sm:text-[10px] font-extrabold text-slate-500 dark:text-slate-300 flex-nowrap overflow-hidden">
-                  <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-[#060B16] px-1.5 py-0.5 rounded-md border border-slate-100/60 dark:border-slate-800 text-slate-600 dark:text-slate-300 shrink-0"><Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400 dark:text-blue-400" /> {t('exams.details.duration', `${test.durationMinutes}m`, { mins: test.durationMinutes })}</span>
-                  <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-[#060B16] px-1.5 py-0.5 rounded-md border border-slate-100/60 dark:border-slate-800 text-slate-600 dark:text-slate-300 shrink-0"><Award className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400 dark:text-amber-400" /> {t('exams.details.totalMarks', `${test.totalMarks}M`, { marks: test.totalMarks })}</span>
-                  <span className="flex items-center gap-0.5 bg-slate-50 dark:bg-[#060B16] px-1.5 py-0.5 rounded-md border border-slate-100/60 dark:border-slate-800 text-slate-600 dark:text-slate-300 shrink-0"><FileText className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400 dark:text-emerald-400" /> {t('exams.details.questions', `${totalQs}Q`, { count: totalQs })}</span>
-                  {isCompleted && completedAct && (
-                    <span className="flex items-center gap-0.5 bg-emerald-50/50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 rounded-md border border-emerald-100/30 dark:border-emerald-800 shrink-0">
-                      Score: {completedAct.score}/{completedAct.totalMarks || test.totalMarks}
-                    </span>
-                  )}
+                <div className="flex items-center gap-2 mt-1 text-[11px] font-bold text-slate-500 dark:text-slate-300">
+                  <span>{test.durationMinutes} Mins</span>
+                  <span>•</span>
+                  <span>{test.totalMarks} Marks</span>
+                  <span>•</span>
+                  <span>{totalQs} Qs</span>
                 </div>
               )}
             </div>
           </div>
 
-          <div className={cn(
-            "w-7 h-7 sm:w-8 sm:h-8 rounded-full border flex items-center justify-center shrink-0 shadow-2xs group-active:translate-x-0.5 transition-all duration-300",
-            isScheduledUpcoming
-              ? "bg-amber-50 dark:bg-amber-950/60 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300"
-              : isCompleted 
-                ? "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-100 dark:border-emerald-800 text-emerald-600 dark:text-emerald-300 group-active:bg-emerald-500 group-active:text-white"
-                : isInProgress
-                  ? "bg-amber-50 dark:bg-amber-950/60 border-amber-100 dark:border-amber-800 text-amber-600 dark:text-amber-300 group-active:bg-amber-500 group-active:text-white animate-pulse"
-                  : isLocked
-                    ? "bg-amber-50 dark:bg-amber-950/60 border-amber-100 dark:border-amber-800 text-amber-600 dark:text-amber-300 group-active:bg-amber-500 group-active:text-white"
-                    : isPremiumUnlocked
-                      ? "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-100 dark:border-emerald-800 text-emerald-600 dark:text-emerald-300 group-active:bg-emerald-500 group-active:text-white"
-                      : "bg-slate-50 dark:bg-[#060B16] border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-300 group-active:bg-blue-600 dark:group-active:bg-blue-600 group-active:text-white"
-          )}>
+          <div className="shrink-0 pl-1">
             {isScheduledUpcoming ? (
-              <Lock className="w-3.5 h-3.5 text-amber-700" />
+              <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 flex items-center justify-center text-amber-800 dark:text-amber-300 shadow-xs">
+                <Lock className="w-3.5 h-3.5" />
+              </div>
+            ) : totalQs === 0 ? (
+              <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 flex items-center justify-center text-amber-700 dark:text-amber-300 shadow-xs">
+                <Clock className="w-3.5 h-3.5" />
+              </div>
             ) : isCompleted ? (
-              <CheckCircle2 className="w-3.5 h-3.5" />
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-300 shadow-xs">
+                <RotateCw className="w-3.5 h-3.5" />
+              </div>
             ) : isInProgress ? (
-              <Play className="w-3 h-3 fill-amber-500/10" />
-            ) : isLocked ? (
-              <Lock className="w-3 h-3" />
+              <div className="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center shadow-xs">
+                <Play className="w-3.5 h-3.5 fill-white" />
+              </div>
             ) : (
-              <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <div className={cn(
+                "w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-xs transition-all group-active:scale-95",
+                isLocked ? "bg-amber-500" : "bg-gradient-to-r from-brand-600 to-indigo-600"
+              )}>
+                {isLocked ? (
+                  <Lock className="w-3.5 h-3.5 text-white" />
+                ) : (
+                  <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white group-active:translate-x-0.5 transition-transform" />
+                )}
+              </div>
             )}
           </div>
         </div>
       ) : (
         <Card 
           key={test.id} 
-          className={cn(
-            "p-6 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 border border-slate-200/80 dark:border-indigo-500/20 shadow-lg shadow-slate-200/30 dark:shadow-indigo-950/20 group transition-all duration-500 flex flex-col justify-between gap-6 relative overflow-hidden premium-shine-container h-full text-slate-900 dark:text-white", 
-            isScheduledUpcoming
-              ? "border-amber-200 dark:border-amber-800 bg-amber-50/10 dark:bg-amber-950/20 cursor-not-allowed"
-              : isCompleted
-                ? "border-emerald-200 dark:border-emerald-800 shadow-emerald-500/5 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10 hover:border-emerald-300 cursor-pointer"
-                : isInProgress
-                  ? "border-amber-250 dark:border-amber-800 shadow-amber-500/5 hover:-translate-y-2 hover:shadow-2xl hover:shadow-amber-500/10 hover:border-amber-300 cursor-pointer"
-                  : isLocked 
-                    ? "border-slate-200 dark:border-indigo-500/20 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 hover:-translate-y-2 hover:border-slate-400 hover:bg-slate-50/50 hover:shadow-md cursor-pointer"
-                    : isPremiumUnlocked 
-                      ? "border-slate-200 dark:border-indigo-500/20 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 hover:-translate-y-2 hover:border-slate-400 hover:bg-slate-50/50 hover:shadow-md cursor-pointer"
-                      : "border-slate-200 dark:border-indigo-500/20 bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950/40 dark:to-slate-900 hover:-translate-y-2 hover:border-slate-400 hover:bg-slate-50/50 hover:shadow-2xl hover:shadow-brand-500/10 hover:border-brand-200 cursor-pointer"
-          )}
           onClick={() => {
-            if (!isScheduledUpcoming) handleStartTest({ ...test, isPremium, price });
+            if (!isScheduledUpcoming) {
+              if (totalQs === 0) {
+                showPremiumAlert(
+                  "Question Paper in Preparation",
+                  "The question paper and verified solutions for this mock test are currently being finalized and uploaded by our faculty team. Please check back shortly!"
+                );
+                return;
+              }
+              handleStartTest({ ...test, isPremium, price });
+            }
           }}
+          className={cn(
+            "p-6 rounded-2xl sm:rounded-3xl border transition-all duration-300 flex flex-col justify-between group relative overflow-hidden h-full text-slate-900 dark:text-white cursor-pointer bg-white dark:bg-[#0B1528] dark:border-slate-800", 
+            isScheduledUpcoming
+              ? "border-amber-200 dark:border-amber-800 bg-amber-50/20 dark:bg-amber-950/20 cursor-not-allowed opacity-90 shadow-sm"
+              : totalQs === 0
+                ? "border-amber-200/60 dark:border-amber-800/60 bg-amber-50/10 dark:bg-amber-950/10 shadow-sm hover:border-amber-300"
+                : isCompleted
+                  ? "border-emerald-200 dark:border-emerald-800/60 shadow-[0_4px_20px_-4px_rgba(16,185,129,0.05)] hover:border-emerald-400 hover:shadow-emerald-500/10"
+                  : isInProgress
+                    ? "border-amber-200 dark:border-amber-800/60 shadow-[0_4px_20px_-4px_rgba(245,158,11,0.05)] hover:border-amber-400 hover:shadow-amber-500/10"
+                    : isLocked 
+                      ? "border-slate-100 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(245,158,11,0.04),0_1px_2px_rgba(245,158,11,0.02)] hover:border-amber-200 hover:shadow-amber-500/10" 
+                      : isPremiumUnlocked 
+                        ? "border-slate-100 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(16,185,129,0.04),0_1px_2px_rgba(16,185,129,0.02)] hover:border-emerald-200 hover:shadow-emerald-500/10" 
+                        : "border-slate-100 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(79,70,229,0.04),0_1px_2px_rgba(79,70,229,0.02)] hover:border-brand-200 hover:shadow-brand-500/10"
+          )}
         >
-          {isCompleted && <div className="absolute inset-0 bg-emerald-550/2 pointer-events-none" />}
-          {isInProgress && <div className="absolute inset-0 bg-amber-550/2 pointer-events-none" />}
-          {isPremiumUnlocked && !isCompleted && !isInProgress && <div className="absolute inset-0 bg-emerald-500/5 pointer-events-none" />}
+          <div className={cn(
+            "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none",
+            isScheduledUpcoming
+              ? "bg-amber-500/0"
+              : isLocked 
+                ? "bg-gradient-to-br from-amber-500/[0.01] to-amber-500/0" 
+                : isPremiumUnlocked 
+                  ? "bg-gradient-to-br from-emerald-500/[0.01] to-emerald-500/0" 
+                  : "bg-gradient-to-br from-brand-500/[0.01] to-brand-500/0"
+          )} />
+          <div className={cn(
+            "absolute left-0 top-0 bottom-0 w-[4px] rounded-r-md opacity-90",
+            isScheduledUpcoming
+              ? "bg-gradient-to-b from-amber-400 to-orange-500"
+              : isCompleted
+                ? "bg-gradient-to-b from-emerald-400 to-teal-500"
+                : isInProgress
+                  ? "bg-gradient-to-b from-amber-400 to-orange-500"
+                  : isLocked 
+                    ? "bg-gradient-to-b from-amber-400 to-orange-500" 
+                    : isPremiumUnlocked 
+                      ? "bg-gradient-to-b from-emerald-400 to-teal-500" 
+                      : "bg-gradient-to-b from-indigo-500 to-purple-600"
+          )} />
           
-          <div className="flex items-start justify-between relative z-10 w-full">
+          <div className="flex items-start justify-between gap-4 relative z-10">
             <div className="flex items-start gap-4 min-w-0 flex-1">
               <div className={cn(
-                "w-14 h-14 rounded-xl flex items-center justify-center shrink-0 shadow-md text-white transition-transform group-hover:scale-110 relative mt-0.5", 
+                "w-12 h-12 rounded-2xl flex items-center justify-center text-white shrink-0 relative overflow-hidden shadow-sm",
                 isScheduledUpcoming
-                  ? "bg-gradient-to-br from-amber-400 to-orange-500"
+                  ? "bg-amber-600 dark:bg-amber-700"
                   : isCompleted
-                    ? "bg-gradient-to-br from-emerald-500 to-teal-600"
+                    ? "bg-emerald-600 dark:bg-emerald-700"
                     : isInProgress
-                      ? "bg-gradient-to-br from-amber-400 to-orange-500 animate-pulse"
+                      ? "bg-amber-500 dark:bg-amber-600"
                       : isLocked 
-                        ? "bg-gradient-to-br from-amber-400 to-orange-500" 
+                        ? "bg-amber-500 dark:bg-amber-600" 
                         : isPremiumUnlocked 
-                          ? "bg-gradient-to-br from-emerald-500 to-teal-600" 
-                          : "bg-gradient-to-br from-indigo-500 to-purple-650"
+                          ? "bg-emerald-600 dark:bg-emerald-700" 
+                          : "bg-gradient-to-br from-brand-600 to-indigo-600 dark:from-blue-600 dark:to-indigo-700"
               )}>
                 {isScheduledUpcoming ? (
                   <Calendar className="w-6 h-6 text-white" />
@@ -4654,14 +4700,17 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
                 ) : (
                   <Target className="w-6 h-6" />
                 )}
-                <div className="absolute inset-0 border-2 border-white/20 rounded-xl" />
               </div>
               <div className="text-left min-w-0 flex-1">
-                <h4 className="font-black text-base sm:text-lg text-slate-955 dark:text-white tracking-tight group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors uppercase leading-snug line-clamp-2" title={test.title}>{mainTitle}</h4>
+                <h4 className="font-black text-lg text-slate-955 dark:text-white tracking-tight group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors uppercase leading-snug line-clamp-2" title={test.title}>{mainTitle}</h4>
                 <div className="flex items-center flex-wrap gap-1.5 mt-1">
                   {isScheduledUpcoming ? (
                     <span className="text-[10px] font-black text-amber-800 dark:text-amber-300 uppercase tracking-widest bg-amber-100 dark:bg-amber-950/60 px-2.5 py-0.5 rounded border border-amber-200 dark:border-amber-800 flex items-center gap-1">
                       📅 UPCOMING
+                    </span>
+                  ) : totalQs === 0 ? (
+                    <span className="text-[10px] font-black text-amber-700 dark:text-amber-300 uppercase tracking-widest bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800 whitespace-nowrap">
+                      ⏳ In Preparation
                     </span>
                   ) : (
                     <span className="text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase tracking-widest bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-100 dark:border-slate-700 whitespace-nowrap">Official Mock</span>
@@ -4669,29 +4718,9 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
                   {suffix && (
                     <span className="text-[10px] font-black text-brand-700 dark:text-indigo-300 uppercase tracking-widest bg-brand-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded border border-brand-100/60 dark:border-indigo-800 shadow-2xs whitespace-nowrap">Set {suffix}</span>
                   )}
-                  {!isScheduledUpcoming && isCompleted && (
-                    <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-300 uppercase tracking-widest bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded border border-emerald-100/60 dark:border-emerald-800 flex items-center gap-0.5 whitespace-nowrap"><CheckCircle2 className="w-3.5 h-3.5" /> Completed</span>
-                  )}
-                  {!isScheduledUpcoming && isInProgress && (
-                    <span className="text-[10px] font-black text-amber-600 dark:text-amber-300 uppercase tracking-widest bg-amber-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded border border-amber-100/60 dark:border-amber-800 flex items-center gap-0.5 whitespace-nowrap"><Clock className="w-3.5 h-3.5 animate-pulse" /> In Progress ({progressPercent}%)</span>
-                  )}
                 </div>
               </div>
             </div>
-            {!isScheduledUpcoming && isPremium && !isCompleted && !isInProgress && (
-              <div className="flex shrink-0">
-                {isLocked ? (
-                  <div className="bg-amber-50 text-amber-600 p-2.5 rounded-xl border border-amber-100 flex items-center justify-center shadow-sm" aria-label="Premium Locked">
-                    <Lock className="w-5 h-5 fill-amber-500/20" />
-                  </div>
-                ) : (
-                  <div className="bg-emerald-50 text-emerald-600 px-2.5 py-1 flex items-center gap-1.5 rounded-lg border border-emerald-100 text-[10px] font-black uppercase tracking-widest shadow-sm" aria-label="Premium Unlocked">
-                    <CheckCircle2 className="w-3 h-3" />
-                    Premium Active
-                  </div>
-                )}
-              </div>
-            )}
           </div>
           
           {isScheduledUpcoming ? (
@@ -4723,7 +4752,7 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
               <Lock className="w-4 h-4 text-amber-800 shrink-0" />
               <span className="text-amber-950 font-black tracking-tight">Unlocks {countdown.formattedScheduledDate}</span>
             </button>
-          ) : isCompleted ? (
+          ) : isCompleted && totalQs > 0 ? (
             <div className="flex items-center gap-2 w-full mt-auto relative z-10">
               <button
                 type="button"
@@ -4749,7 +4778,7 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
                 </span>
               </Button>
             </div>
-          ) : isInProgress ? (
+          ) : isInProgress && totalQs > 0 ? (
             <div className="flex items-center gap-2 w-full mt-auto relative z-10">
               <button
                 type="button"
@@ -4779,19 +4808,33 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
               variant={isLocked ? "outline" : "primary"}
               onClick={(e) => {
                 e.stopPropagation();
+                if (totalQs === 0) {
+                  showPremiumAlert(
+                    "Question Paper in Preparation",
+                    "The question paper and verified solutions for this mock test are currently being finalized and uploaded by our faculty team. Please check back shortly!"
+                  );
+                  return;
+                }
                 handleStartTest({ ...test, isPremium, price });
               }}
               className={cn(
                 "w-full h-[48px] rounded-xl font-black text-sm relative z-10 transition-all overflow-hidden group/btn mt-auto", 
-                !isLocked 
-                  ? "premium-gradient text-white shadow-lg shadow-brand-500/20 group-hover:premium-glow" 
-                  : "border-amber-200 text-amber-600 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700"
+                totalQs === 0
+                  ? "bg-slate-100 dark:bg-slate-800/80 text-amber-700 dark:text-amber-300 border border-amber-300/40 hover:bg-slate-200 dark:hover:bg-slate-700/80 shadow-none cursor-pointer"
+                  : !isLocked 
+                    ? "premium-gradient text-white shadow-lg shadow-brand-500/20 group-hover:premium-glow" 
+                    : "border-amber-200 text-amber-600 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700"
               )}
             >
               <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 z-10" />
 
               <span className="relative z-10 flex items-center justify-center gap-2">
-                {isLocked ? (
+                {totalQs === 0 ? (
+                  <>
+                    <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                    <span>In Preparation</span>
+                  </>
+                ) : isLocked ? (
                   <>
                     <Lock className="w-4 h-4 mr-2" />
                     {t('exams.cardActions.unlockTest', 'Unlock to Access')}
@@ -9455,179 +9498,95 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             </div>
           )}
 
-      {/* Tier 1: Guided Next Step Hero Module */}
+      {/* Tier 1: Exam Mock Test Hero Module (Strictly Mock Tests Only - Zero Practice/Current Affairs Fallback) */}
       {(!isMobile || mobileExamTab === 'practice') && (() => {
-        const incompleteActivity = activities?.find((act: any) => {
+        // 1. Get all mock tests configured for selectedExam
+        const examMockTests = (mockTests || []).filter((mt: any) => {
+          if (mt.is_archived && !hasAccessTo(mt.id, selectedExam)) return false;
+          try {
+            const cfg = typeof mt.seriesId === 'string' ? JSON.parse(mt.seriesId) : (mt.seriesId || {});
+            return cfg.examId === selectedExam || mt.examId === selectedExam;
+          } catch(e) { return mt.examId === selectedExam; }
+        });
+
+        // If no mock tests have been added for this exam at all -> Return null (nothing displayed there)
+        if (!examMockTests || examMockTests.length === 0) {
+          return null;
+        }
+
+        // 2. Find any incomplete mock test activity that belongs to this exam
+        const incompleteMockActivity = (activities || []).find((act: any) => {
           if (act.type !== 'test_incomplete') return false;
+          const testId = act.metadata?.test?.id || act.metadata?.testId;
+          if (!testId || testId.startsWith('practice-') || testId.startsWith('bank-')) return false;
 
-          // Check if a completed test activity already exists for this same session/topic/bank
-          const sessionId = act.metadata?.resumeSessionId || act.metadata?.test?.id;
-          const actTitle = (act.title || act.metadata?.test?.title || '').replace(/(\s*-\s*Practice Session)+$/gi, '').trim().toLowerCase();
-          const actBankId = act.metadata?.test?.bankId || act.metadata?.bankId;
+          const matchingMock = examMockTests.find((mt: any) => mt.id === testId);
+          if (!matchingMock) return false;
 
+          // Check if already completed
           const isAlreadyCompleted = activities.some((comp: any) => {
             if (comp.type !== 'mock_test_completed' && comp.type !== 'practice_test_completed') return false;
-            
-            if (sessionId && comp.metadata?.resumeSessionId === sessionId) return true;
-            if (actBankId && (comp.metadata?.bankId === actBankId || comp.metadata?.test?.bankId === actBankId)) return true;
-            
-            if (actTitle && comp.title) {
-              const compTitle = comp.title.replace(/(\s*-\s*Practice Session)+$/gi, '').trim().toLowerCase();
-              if (compTitle && (compTitle === actTitle || compTitle.includes(actTitle) || actTitle.includes(compTitle))) return true;
-            }
-            return false;
+            return comp.metadata?.test?.id === testId || comp.metadata?.resumeSessionId === (act.metadata?.resumeSessionId || testId);
           });
-
           if (isAlreadyCompleted) return false;
 
-          // 1. Direct examId match on metadata or test object
-          const actExamId = act.metadata?.test?.examId || act.metadata?.examId;
-          if (actExamId) {
-            return selectedExam ? actExamId === selectedExam : false;
-          }
-
-          // 2. Match bankId against question banks of current exam
-          const bankId = act.metadata?.test?.bankId || act.metadata?.bankId;
-          if (bankId) {
-            const allExamBanks = (dynamicQuestionBanks['topic-wise'] || [])
-              .concat(dynamicQuestionBanks['exam-focused'] || [])
-              .concat(dynamicQuestionBanks['revision-sets'] || [])
-              .concat(dynamicQuestionBanks['pyq-collections'] || []);
-            const matchingBank = allExamBanks.find((b: any) => b.id === bankId);
-            return matchingBank ? matchingBank.examId === selectedExam : false;
-          }
-
-          // 3. Match testId against mock tests of current exam
-          const testId = act.metadata?.test?.id || act.metadata?.testId;
-          if (testId && mockTests && mockTests.length > 0) {
-            const matchingMock = mockTests.find((mt: any) => mt.id === testId);
-            if (matchingMock) {
-              let isExam = matchingMock.examId === selectedExam;
-              if (!isExam && matchingMock.seriesId) {
-                try { isExam = JSON.parse(matchingMock.seriesId).examId === selectedExam; } catch(e){}
-              }
-              return isExam;
-            }
-            return false;
-          }
-
-          // Never match by title alone across different exams
-          return false;
+          return true;
         });
-        
-        const firstTopicBank = (dynamicQuestionBanks['topic-wise'] || []).find((b: any) => b.examId === selectedExam && !b.is_archived);
-        
-        // Calculate user performance stats for selectedExam
-        const completedExamActs = (activities || []).filter((act: any) => 
-          (act.type === 'mock_test_completed' || act.type === 'practice_test_completed') &&
-          (act.metadata?.test?.examId === selectedExam || act.metadata?.examId === selectedExam || act.metadata?.test?.id?.includes(selectedExam))
-        );
-        const totalCompleted = completedExamActs.length;
-        const avgAcc = totalCompleted > 0
-          ? Math.round(completedExamActs.reduce((acc: number, act: any) => acc + (act.accuracy || act.score || 0), 0) / totalCompleted)
-          : 0;
 
-        let recTitle = "Start Chapter 1 Practice Drill";
-        let recDesc = "Begin with core fundamental questions to assess your base score and build topic accuracy.";
-        let recBadge = "RECOMMENDED STARTING POINT";
-        let recButtonText = "Start Diagnostic Practice";
-        let recTargetScore = avgAcc > 0 ? `Your Avg: ${avgAcc}% | Goal: 85%+` : "85% Qualifying Target";
-        let recDurationText = "~15 Mins Drill";
-        let recCategoryPill = "Step-by-Step Guidance";
-        let recAction = () => {
-          setSelectedPracticeCategory('topic-wise');
-          scrollToElement('practice-mode-section', { block: 'start', delay: 50 });
-        };
-
-        if (incompleteActivity) {
-          const rawTitle = incompleteActivity.title || incompleteActivity.metadata?.test?.title || 'In-Progress Session';
+        // 3. Render In-Progress Resume Banner IF an incomplete mock test exists
+        if (incompleteMockActivity) {
+          const rawTestId = incompleteMockActivity.metadata?.test?.id || incompleteMockActivity.metadata?.testId;
+          const matchingMock = examMockTests.find((mt: any) => mt.id === rawTestId);
+          const rawTitle = matchingMock?.title || incompleteMockActivity.title || incompleteMockActivity.metadata?.test?.title || 'Mock Test';
           const testTitle = rawTitle.replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
-          const solvedCount = incompleteActivity.metadata?.answers 
-            ? Object.keys(incompleteActivity.metadata.answers).length 
-            : (incompleteActivity.metadata?.currentQuestionIndex || 0);
+
+          const solvedCount = incompleteMockActivity.metadata?.answers 
+            ? Object.keys(incompleteMockActivity.metadata.answers).length 
+            : (incompleteMockActivity.metadata?.currentQuestionIndex || 0);
           
-          const actualQsCount = Array.isArray(incompleteActivity.metadata?.test?.questions)
-            ? incompleteActivity.metadata.test.questions.length
-            : 0;
+          const actualQsCount = Array.isArray(incompleteMockActivity.metadata?.test?.questions)
+            ? incompleteMockActivity.metadata.test.questions.length
+            : (matchingMock?.practiceQuestionCount || matchingMock?.actualQuestionCount || matchingMock?.questionCount || 0);
 
           const totalCount = actualQsCount > 0 
             ? actualQsCount 
-            : (incompleteActivity.metadata?.totalQuestions || 0);
+            : (incompleteMockActivity.metadata?.totalQuestions || 100);
 
-          // Calculate exact remaining time for in-progress session (minutes & seconds)
+          // Calculate exact remaining time
           let leftSeconds = 0;
-          if (incompleteActivity.metadata?.timeLeft !== undefined && incompleteActivity.metadata.timeLeft > 0) {
-            leftSeconds = Math.max(0, Math.floor(incompleteActivity.metadata.timeLeft));
-          } else if (incompleteActivity.metadata?.timeSpentSeconds !== undefined && totalCount > 0) {
-            const totalSecs = (incompleteActivity.metadata?.test?.durationMinutes || totalCount) * 60;
-            leftSeconds = Math.max(0, totalSecs - Math.floor(incompleteActivity.metadata.timeSpentSeconds));
+          if (incompleteMockActivity.metadata?.timeLeft !== undefined && incompleteMockActivity.metadata.timeLeft > 0) {
+            leftSeconds = Math.max(0, Math.floor(incompleteMockActivity.metadata.timeLeft));
+          } else if (incompleteMockActivity.metadata?.timeSpentSeconds !== undefined && totalCount > 0) {
+            const totalSecs = (matchingMock?.durationMinutes || incompleteMockActivity.metadata?.test?.durationMinutes || 100) * 60;
+            leftSeconds = Math.max(0, totalSecs - Math.floor(incompleteMockActivity.metadata.timeSpentSeconds));
           } else {
-            leftSeconds = (incompleteActivity.metadata?.test?.durationMinutes || totalCount || 10) * 60;
+            leftSeconds = (matchingMock?.durationMinutes || 100) * 60;
           }
 
           const remMins = Math.floor(leftSeconds / 60);
           const remSecs = leftSeconds % 60;
-          const exactTimeStr = remSecs > 0 
-            ? `${remMins}m ${remSecs}s`
-            : `${remMins} Mins`;
+          const exactTimeStr = remSecs > 0 ? `${remMins}m ${remSecs}s` : `${remMins} Mins`;
 
-          // Calculate real-time session accuracy if answers exist
-          let sessionAcc: number | null = null;
-          if (incompleteActivity.metadata?.answers && typeof incompleteActivity.metadata.answers === 'object') {
-            const answersMap = incompleteActivity.metadata.answers;
-            const testQuestions = incompleteActivity.metadata.test?.questions || [];
-            const answeredIds = Object.keys(answersMap);
-            if (answeredIds.length > 0 && testQuestions.length > 0) {
-              let correctCnt = 0;
-              answeredIds.forEach((qId) => {
-                const qObj = testQuestions.find((item: any) => String(item.id) === String(qId));
-                if (qObj && qObj.correctAnswerIndex !== undefined && Number(answersMap[qId]) === Number(qObj.correctAnswerIndex)) {
-                  correctCnt++;
-                }
-              });
-              sessionAcc = Math.round((correctCnt / answeredIds.length) * 100);
-            }
-          }
+          const recTitle = `${t('exams.cardActions.resume', 'Resume')}: ${testTitle}`;
+          const recDesc = t('exams.resumeHero.unfinishedNotice', `You have an unfinished mock test session for "${testTitle}" (${solvedCount}${totalCount ? ` / ${totalCount}` : ''} questions solved). Jump back in to finish!`, { title: testTitle, solved: solvedCount, total: totalCount || solvedCount });
+          const recBadge = t('exams.resumeHero.inProgress', 'IN PROGRESS SESSION');
+          const recButtonText = t('exams.resumeHero.resumeBtn', 'Resume Mock Test Now');
+          const recDurationText = t('exams.resumeHero.timeRemaining', `${exactTimeStr} Remaining`, { time: exactTimeStr });
+          const recCategoryPill = matchingMock?.category ? `${matchingMock.category.toUpperCase()} MOCK TEST` : 'FULL-LENGTH MOCK';
 
-          recTitle = `${t('exams.cardActions.resume', 'Resume')}: ${testTitle}`;
-          recDesc = t('exams.resumeHero.unfinishedNotice', `You have an unfinished practice session for "${testTitle}" (${solvedCount}${totalCount ? ` / ${totalCount}` : ''} questions solved). Jump back in to finish!`, { title: testTitle, solved: solvedCount, total: totalCount || solvedCount });
-          recBadge = t('exams.resumeHero.inProgress', 'IN PROGRESS SESSION');
-          recButtonText = t('exams.resumeHero.resumeBtn', 'Resume Practice Now');
-          recTargetScore = sessionAcc !== null
-            ? t('exams.resumeHero.sessionAccuracy', `${sessionAcc}% Session Accuracy (${solvedCount}/${totalCount} Solved)`, { acc: sessionAcc, solved: solvedCount, total: totalCount || solvedCount })
-            : (avgAcc > 0 ? t('exams.resumeHero.targetScoreAvg', `Your Avg: ${avgAcc}% | Goal: 85%+`, { avg: avgAcc }) : t('exams.resumeHero.targetScore', '85% Target Goal'));
-          recDurationText = t('exams.resumeHero.timeRemaining', `${exactTimeStr} Remaining`, { time: exactTimeStr });
-          recCategoryPill = incompleteActivity.metadata?.testCategory || t('exams.step1.chapterWise', 'In-Progress Practice');
+          const recMobileDesc = t('exams.resumeHero.unfinishedNoticeMobile', `${solvedCount}${totalCount ? ` of ${totalCount}` : ''} questions completed. Tap to continue session.`, { solved: solvedCount, total: totalCount || solvedCount });
+          const recMobileDurationText = t('exams.resumeHero.timeRemainingLeft', `${exactTimeStr} Left`, { time: exactTimeStr });
 
-          let recMobileDesc = t('exams.resumeHero.unfinishedNoticeMobile', `${solvedCount}${totalCount ? ` of ${totalCount}` : ''} questions completed. Tap to continue session.`, { solved: solvedCount, total: totalCount || solvedCount });
-          let recMobileTargetScore = sessionAcc !== null
-            ? t('exams.resumeHero.accuracy', `${sessionAcc}% Accuracy`, { acc: sessionAcc })
-            : (avgAcc > 0 ? `Avg: ${avgAcc}%` : t('exams.resumeHero.targetScore', '85% Goal'));
-          let recMobileDurationText = t('exams.resumeHero.timeRemainingLeft', `${exactTimeStr} Left`, { time: exactTimeStr });
-          
-          recAction = () => {
-            const rawTestId = incompleteActivity.metadata?.test?.id || incompleteActivity.metadata?.testId;
-            const isMockTest = (rawTestId && !rawTestId.startsWith('practice-') && !rawTestId.startsWith('bank-topic-')) ||
-              (incompleteActivity.metadata?.testCategory && incompleteActivity.metadata.testCategory.toLowerCase().includes('mock'));
-
-            if (isMockTest) {
-              const targetTest = incompleteActivity.metadata?.test || {
-                id: rawTestId,
-                title: testTitle,
-                examId: selectedExam
-              };
-              handleStartTest({ ...targetTest, examId: selectedExam }, incompleteActivity);
-            } else {
-              const targetTest = incompleteActivity.metadata?.test || {
-                id: rawTestId || `practice-${Date.now()}`,
-                title: `${testTitle} - Practice Session`,
-                examId: selectedExam
-              };
-              handleStartDirectPractice({ ...targetTest, examId: selectedExam }, incompleteActivity);
-            }
+          const recAction = () => {
+            const targetTest = matchingMock || incompleteMockActivity.metadata?.test || {
+              id: rawTestId,
+              title: testTitle,
+              examId: selectedExam
+            };
+            handleStartTest({ ...targetTest, examId: selectedExam }, incompleteMockActivity);
           };
 
-          const recVecTheme = getQuestionBankVectorTheme(incompleteActivity?.metadata?.test || testTitle || recTitle, currentExam?.name || recCategoryPill);
+          const recVecTheme = getQuestionBankVectorTheme(matchingMock || testTitle, currentExam?.name || recCategoryPill);
           const RecWatermarkIcon = recVecTheme.WatermarkIcon;
 
           return (
@@ -9669,100 +9628,6 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   </div>
 
                   <div className="flex items-center gap-2 sm:gap-6 pt-1 sm:pt-0.5 text-[11px] sm:text-xs font-bold text-white/90 flex-wrap">
-                    <div className="flex items-center gap-1.5 bg-black/20 sm:bg-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-white/15 backdrop-blur-xs">
-                      <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-300 shrink-0" />
-                      <span className="sm:hidden">{recMobileTargetScore}</span>
-                      <span className="hidden sm:inline">{recTargetScore}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-black/20 sm:bg-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-white/15 backdrop-blur-xs">
-                      <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 shrink-0" />
-                      <span className="sm:hidden">{recMobileDurationText}</span>
-                      <span className="hidden sm:inline">{recDurationText}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row lg:flex-col shrink-0 items-stretch sm:items-center lg:items-end gap-3 pt-1 sm:pt-0">
-                  <Button
-                    onClick={recAction}
-                    className="h-11 sm:h-16 px-5 sm:px-8 rounded-xl sm:rounded-2xl bg-gradient-to-r from-brand-500 via-indigo-600 to-brand-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-xs sm:text-base shadow-lg shadow-brand-500/25 hover:shadow-brand-500/50 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 sm:gap-3 group/btn relative overflow-hidden cursor-pointer w-full sm:w-auto"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 z-10" />
-                    <span className="relative z-10">{recButtonText}</span>
-                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover/btn:translate-x-1.5 transition-transform relative z-10" />
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          );
-        } else if (firstTopicBank) {
-          const cleanBankTitle = (firstTopicBank.title || '').replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
-          const qsCount = firstTopicBank.practiceQuestionCount || firstTopicBank.actualQuestionCount || firstTopicBank.questionCount || 20;
-          const durMins = firstTopicBank.durationMinutes || firstTopicBank.duration || qsCount;
-
-          recTitle = `Recommended Drill: ${cleanBankTitle}`;
-          recDesc = `Master high-yield questions for "${cleanBankTitle}" (${qsCount} questions). Complete instant practice drills with step-by-step explanations.`;
-          recBadge = "WHAT TO STUDY NEXT";
-          recButtonText = "Begin Practice Set";
-          recTargetScore = avgAcc > 0 ? `Your Avg: ${avgAcc}% | Goal: 85%+` : "85% Pass Benchmark";
-          recDurationText = `~${durMins} Mins Drill`;
-          recCategoryPill = "Chapter-Wise Practice";
-
-          let recMobileDesc = `Practice ${qsCount} core questions for "${cleanBankTitle}" with step-by-step explanations.`;
-          let recMobileTargetScore = avgAcc > 0 ? `Avg: ${avgAcc}%` : "85% Target";
-          let recMobileDurationText = `~${durMins}m Drill`;
-
-          recAction = () => {
-            handleStartDirectPractice(firstTopicBank);
-          };
-
-          const recVecTheme = getQuestionBankVectorTheme(firstTopicBank || cleanBankTitle, currentExam?.name || recCategoryPill);
-          const RecWatermarkIcon = recVecTheme.WatermarkIcon;
-
-          return (
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={cn(
-                "relative rounded-2xl sm:rounded-[2.2rem] text-white p-4 sm:p-8 md:p-10 shadow-2xl border-none transition-all duration-500 card-3d-deep group mb-6 sm:mb-10",
-                recVecTheme.gradient,
-                "shadow-slate-950/30"
-              )}
-            >
-              {/* Inner Watermark & Grid Background Wrapper */}
-              <div className="absolute inset-0 overflow-hidden rounded-2xl sm:rounded-[2.2rem] pointer-events-none z-0">
-                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
-                <RecWatermarkIcon className="absolute -right-6 -bottom-6 w-48 h-48 sm:w-64 sm:h-64 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
-              </div>
-
-              <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-8">
-                <div className="space-y-2 sm:space-y-4 max-w-2xl">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="badge-recommended flex items-center gap-1.5 shadow-sm text-[9px] sm:text-xs py-0.5 sm:py-1 px-2.5 sm:px-3">
-                      <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-300 animate-pulse shrink-0" />
-                      {recBadge}
-                    </span>
-                    <span className={cn("px-2.5 py-0.5 sm:px-3 sm:py-1 text-[8.5px] sm:text-[10px] font-black uppercase tracking-widest rounded-full border backdrop-blur-md shadow-xs", recVecTheme.badgeBg)}>
-                      {recCategoryPill}
-                    </span>
-                  </div>
-
-                  <div>
-                    <h2 className="text-base sm:text-2xl md:text-3xl font-black tracking-tight text-white leading-snug">
-                      {recTitle}
-                    </h2>
-                    <p className="text-white/80 font-medium text-xs sm:text-sm md:text-base leading-relaxed mt-1 sm:mt-2">
-                      <span className="sm:hidden">{recMobileDesc}</span>
-                      <span className="hidden sm:inline">{recDesc}</span>
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2 sm:gap-6 pt-1 sm:pt-0.5 text-[11px] sm:text-xs font-bold text-white/90 flex-wrap">
-                    <div className="flex items-center gap-1.5 bg-black/20 sm:bg-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-white/15 backdrop-blur-xs">
-                      <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-300 shrink-0" />
-                      <span className="sm:hidden">{recMobileTargetScore}</span>
-                      <span className="hidden sm:inline">{recTargetScore}</span>
-                    </div>
                     <div className="flex items-center gap-1.5 bg-black/20 sm:bg-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-white/15 backdrop-blur-xs">
                       <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 shrink-0" />
                       <span className="sm:hidden">{recMobileDurationText}</span>
@@ -9786,7 +9651,117 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           );
         }
 
-        return null;
+        // 4. If no incomplete mock test exists, check if there is a featured mock test for this exam
+        const featuredMock = examMockTests[0];
+        if (!featuredMock) return null;
+
+        const qCount = featuredMock.practiceQuestionCount || featuredMock.actualQuestionCount || featuredMock.questionCount || featuredMock.question_count || featuredMock.totalQuestions || (featuredMock.questions?.length || 0);
+        const hasQuestions = qCount > 0;
+        const durMins = featuredMock.durationMinutes || 120;
+        const totalMarks = featuredMock.totalMarks || 100;
+
+        const recTitle = featuredMock.title;
+        const recDesc = hasQuestions
+          ? (featuredMock.tagline || `Official examination pattern full-length mock test (${qCount} Questions, ${durMins} Mins). Experience the real CBT interface with All India Ranking.`)
+          : (featuredMock.tagline || `Official full-length mock test for ${currentExam?.name || 'this exam'}. Test paper is currently in preparation and will go live shortly.`);
+        const recBadge = hasQuestions ? "FEATURED MOCK TEST" : "OFFICIAL MOCK • IN PREPARATION";
+        const recButtonText = hasQuestions ? "Start Mock Test" : "Questions In Preparation";
+        const recCategoryPill = hasQuestions ? "Full-Length Mock" : "Coming Soon";
+
+        const recAction = () => {
+          if (hasQuestions) {
+            handleStartTest({ ...featuredMock, examId: selectedExam });
+          } else {
+            showPremiumAlert(
+              "Question Paper in Preparation",
+              "The question paper and verified solutions for this mock test are currently being finalized and uploaded by our faculty team. Please check back shortly!"
+            );
+          }
+        };
+
+        const recVecTheme = getQuestionBankVectorTheme(featuredMock || recTitle, currentExam?.name || recCategoryPill);
+        const RecWatermarkIcon = recVecTheme.WatermarkIcon;
+
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={cn(
+              "relative rounded-2xl sm:rounded-[2.2rem] text-white p-4 sm:p-8 md:p-10 shadow-2xl border-none transition-all duration-500 card-3d-deep group mb-6 sm:mb-10",
+              recVecTheme.gradient,
+              "shadow-slate-950/30"
+            )}
+          >
+            {/* Inner Watermark & Grid Background Wrapper */}
+            <div className="absolute inset-0 overflow-hidden rounded-2xl sm:rounded-[2.2rem] pointer-events-none z-0">
+              <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
+              <RecWatermarkIcon className="absolute -right-6 -bottom-6 w-48 h-48 sm:w-64 sm:h-64 opacity-15 stroke-[1.2] text-white transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
+            </div>
+
+            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-8">
+              <div className="space-y-2 sm:space-y-4 max-w-2xl">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="badge-recommended flex items-center gap-1.5 shadow-sm text-[9px] sm:text-xs py-0.5 sm:py-1 px-2.5 sm:px-3">
+                    <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-300 animate-pulse shrink-0" />
+                    {recBadge}
+                  </span>
+                  <span className={cn("px-2.5 py-0.5 sm:px-3 sm:py-1 text-[8.5px] sm:text-[10px] font-black uppercase tracking-widest rounded-full border backdrop-blur-md shadow-xs", recVecTheme.badgeBg)}>
+                    {recCategoryPill}
+                  </span>
+                </div>
+
+                <div>
+                  <h2 className="text-base sm:text-2xl md:text-3xl font-black tracking-tight text-white leading-snug">
+                    {recTitle}
+                  </h2>
+                  <p className="text-white/80 font-medium text-xs sm:text-sm md:text-base leading-relaxed mt-1 sm:mt-2">
+                    {recDesc}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 sm:gap-6 pt-1 sm:pt-0.5 text-[11px] sm:text-xs font-bold text-white/90 flex-wrap">
+                  {hasQuestions ? (
+                    <>
+                      <div className="flex items-center gap-1.5 bg-black/20 sm:bg-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-white/15 backdrop-blur-xs">
+                        <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-300 shrink-0" />
+                        <span>{qCount} Questions ({totalMarks} Marks)</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 bg-black/20 sm:bg-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-white/15 backdrop-blur-xs">
+                        <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 shrink-0" />
+                        <span>{durMins} Mins Full Test</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex items-center gap-1.5 bg-amber-500/20 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-amber-300/30 backdrop-blur-xs text-amber-200">
+                      <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 shrink-0 animate-pulse" />
+                      <span>Release Pending • Questions Upload In Progress</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row lg:flex-col shrink-0 items-stretch sm:items-center lg:items-end gap-3 pt-1 sm:pt-0">
+                <Button
+                  onClick={recAction}
+                  className={cn(
+                    "h-11 sm:h-16 px-5 sm:px-8 rounded-xl sm:rounded-2xl font-black text-xs sm:text-base shadow-lg transition-all flex items-center justify-center gap-2 sm:gap-3 group/btn relative overflow-hidden cursor-pointer w-full sm:w-auto",
+                    hasQuestions
+                      ? "bg-gradient-to-r from-brand-500 via-indigo-600 to-brand-600 hover:from-brand-400 hover:to-indigo-500 text-white shadow-brand-500/25 hover:shadow-brand-500/50 hover:scale-[1.02] active:scale-95"
+                      : "bg-slate-800/80 hover:bg-slate-700/80 text-amber-200 border border-amber-400/30"
+                  )}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 z-10" />
+                  <span className="relative z-10">{recButtonText}</span>
+                  {hasQuestions ? (
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover/btn:translate-x-1.5 transition-transform relative z-10" />
+                  ) : (
+                    <Info className="w-4 h-4 sm:w-5 sm:h-5 text-amber-300 relative z-10" />
+                  )}
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        );
       })()}
 
       {/* Mobile Premium Unlock Modal Popup */}
@@ -10715,6 +10690,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                   hasAccessTo={hasAccessTo}
                                   activities={activities}
                                   handleStartTest={handleStartTest}
+                                  showPremiumAlert={showPremiumAlert}
                                 />
                               ))}
                             </div>
@@ -10735,6 +10711,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         hasAccessTo={hasAccessTo}
                         activities={activities}
                         handleStartTest={handleStartTest}
+                        showPremiumAlert={showPremiumAlert}
                       />
                     ))}
                   </div>

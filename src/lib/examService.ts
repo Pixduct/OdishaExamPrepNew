@@ -240,6 +240,9 @@ export const examService = {
       throw new Error("Admin authorization token is missing. Please log in again.");
     }
 
+    cacheService.clear('all_question_banks');
+    cacheService.clear('topic_counts');
+
     const res = await fetch('/api/admin/questions/bulk', {
       method: 'POST',
       headers: {
@@ -253,6 +256,9 @@ export const examService = {
     if (!res.ok) {
       throw new Error(data.error || 'Failed to bulk upload questions');
     }
+
+    cacheService.clear('all_question_banks');
+    cacheService.clear('topic_counts');
     return data.data;
   },
 

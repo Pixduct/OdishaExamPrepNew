@@ -3119,6 +3119,17 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       }
       setFilterExamId(bulkExamId);
 
+      // Invalidate admin catalog cache so fresh counts are loaded
+      sessionStorage.removeItem('oep_admin_catalog_cache_v2');
+      // Optimistically update banks state in memory
+      setBanks(prev => prev.map(b => {
+        if (b.examId === bulkExamId && (b.title === bulkTopic || b.id === bulkTopic)) {
+          const newCnt = (b.practiceQuestionCount || b.questionCount || 0) + formatted.length;
+          return { ...b, questionCount: newCnt, practiceQuestionCount: newCnt };
+        }
+        return b;
+      }));
+
       setShowBulkUploadModal(false);
       setBulkFileContent('');
       setBulkFileNames([]);
@@ -7300,14 +7311,6 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                   {bankList.map(bank => {
-                                    const liveCount = questions.filter((q: any) => 
-                                      (q.examId === bank.examId || !q.examId || q.examId === selectedExamIdForQuestions) && 
-                                      (
-                                        q.topic === bank.title || 
-                                        q.topic === bank.id || 
-                                        (q.topic && bank.title && q.topic.trim().toLowerCase() === bank.title.trim().toLowerCase())
-                                      )
-                                    ).length;
                                     let embeddedCount = 0;
                                     if (bank.pdfUrl && typeof bank.pdfUrl === 'string' && bank.pdfUrl.startsWith('{')) {
                                       try {
@@ -7315,10 +7318,9 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                         if (parsed && Array.isArray(parsed.questionsData)) embeddedCount = parsed.questionsData.length;
                                       } catch(e) {}
                                     }
-                                    const authoritativeCount = (typeof bank.practiceQuestionCount === 'number' && bank.practiceQuestionCount > 0)
+                                    const count = (typeof bank.practiceQuestionCount === 'number' && bank.practiceQuestionCount > 0)
                                       ? bank.practiceQuestionCount
                                       : ((typeof bank.questionCount === 'number' && bank.questionCount > 0) ? bank.questionCount : embeddedCount);
-                                    const count = authoritativeCount > 0 ? authoritativeCount : liveCount;
                                     const categoryBadges: Record<string, { label: string; style: string }> = {
                                       'topic-wise': { label: 'Chapter-Wise', style: 'bg-blue-50 text-blue-700 border-blue-200/60' },
                                       'exam-focused': { label: 'High-Yield', style: 'bg-amber-50 text-amber-700 border-amber-200/60' },
@@ -8629,18 +8631,16 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                 'pyq-collections': 'Topic PYQ'
                               };
                               const catName = categoryLabels[bank.type] || bank.type;
-                              const liveCount = questions.filter((q: any) => 
-                                (q.examId === bank.examId || !q.examId || q.examId === bulkExamId) && 
-                                (
-                                  q.topic === bank.title || 
-                                  q.topic === bank.id || 
-                                  (q.topic && bank.title && q.topic.trim().toLowerCase() === bank.title.trim().toLowerCase())
-                                )
-                              ).length;
-                              const authoritativeCount = (typeof bank.practiceQuestionCount === 'number' && bank.practiceQuestionCount > 0)
+                              let embeddedCount = 0;
+                              if (bank.pdfUrl && typeof bank.pdfUrl === 'string' && bank.pdfUrl.startsWith('{')) {
+                                try {
+                                  const parsed = JSON.parse(bank.pdfUrl);
+                                  if (parsed && Array.isArray(parsed.questionsData)) embeddedCount = parsed.questionsData.length;
+                                } catch(e) {}
+                              }
+                              const count = (typeof bank.practiceQuestionCount === 'number' && bank.practiceQuestionCount > 0)
                                 ? bank.practiceQuestionCount
-                                : ((typeof bank.questionCount === 'number' && bank.questionCount > 0) ? bank.questionCount : liveCount);
-                              const count = authoritativeCount > 0 ? authoritativeCount : liveCount;
+                                : ((typeof bank.questionCount === 'number' && bank.questionCount > 0) ? bank.questionCount : embeddedCount);
                               return (
                                 <option key={bank.id} value={bank.title}>
                                   [{catName}] {bank.title} ({count} Qs)

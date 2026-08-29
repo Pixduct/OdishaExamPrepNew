@@ -1379,6 +1379,32 @@ async function startServer() {
         .select();
 
       if (error) throw error;
+
+      // Update questionCount in questionBanks if matching topic and examId
+      try {
+        const topicsUpdated = new Set<string>();
+        for (const q of payloads) {
+          if (q.topic && q.examId && !topicsUpdated.has(`${q.examId}:::${q.topic}`)) {
+            topicsUpdated.add(`${q.examId}:::${q.topic}`);
+            const { count: totalQuestionsForTopic } = await supabaseAdmin
+              .from('questions')
+              .select('id', { count: 'exact', head: true })
+              .eq('examId', q.examId)
+              .eq('topic', q.topic);
+
+            if (typeof totalQuestionsForTopic === 'number') {
+              await supabaseAdmin
+                .from('questionBanks')
+                .update({ questionCount: totalQuestionsForTopic })
+                .eq('examId', q.examId)
+                .eq('title', q.topic);
+            }
+          }
+        }
+      } catch (countErr) {
+        console.warn("[Admin Questions Bulk Count Sync Error]", countErr);
+      }
+
       res.json({ success: true, count: data?.length || 0, data });
     } catch (err: any) {
       console.error("[Admin Questions Bulk Error]", err);

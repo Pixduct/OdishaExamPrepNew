@@ -1,6 +1,12 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] 📝 Enterprise Google Sheet Editorial Queue & Custom Content Engine (`automations/shared/google_sheet_queue.py`, `automations/shared/drive_image_sanitizer.py`, `automations/seo_blog_engine.py`):
+  1. **Google Sheet Editorial Ingestion**: Connects to `Odisha_Editorial_Queue` (or `Odisha_Blog_Queue` / `Odisha_MCQ_Engine` tab) to fetch `Pending` custom articles with target exam, title, custom image link, and focus notes.
+  2. **Enterprise Image Sanitizer & Drive Resolver**: Automatically converts Google Drive share links (`/file/d/<id>/view`) to raw image binary streams, caching them into Supabase Storage CDN for 100% reliable OpenGraph and Telegram previews.
+  3. **Zero-Chopsticks Fallback**: Completely replaced hardcoded stock fallback photos with official high-resolution 1200x630 branded vector banners.
+  4. **6 Intent-Adaptive Editorial Archetypes**: Dynamic intent classifier generates custom structures for Salary & Hierarchy, Career Lifestyle & Duties, Preparation Roadmaps & Timetables, Recommended Booklists, Cut-off Trends, and Subject Shortcuts.
+  5. **Bi-Directional Status Tracking**: Automatically updates Google Sheet row status to `Published`, records published timestamp, and populates the live article URL.
 - [x] 🎨 Official Exam Notification 1080x1080 Dynamic Visual Card Engine (`automations/exam_card_renderer.py`, `automations/exam_update_engine.py`, `automations/shared/telegram.py`):
   1. **Scenario-Adaptive Visual Themes**: Dynamically classifies exam notifications into distinct visual layouts: Recruitment (Sapphire Blue), Application Window (Mint Emerald), Exam Date/Schedule (Royal Indigo), Admit Card (Electric Cyan), and Result/Cutoff (Amber Gold).
   2. **Adaptive Typography & Metric Stat Pills**: Automatically calculates headline length and scales font size (`26px` - `34px`) to guarantee zero text truncation. Dynamically renders high-visibility stat boxes for Total Vacancies, Schedule/Dates, Eligibility, and Official Portal URL.

@@ -1800,6 +1800,12 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         }
       } catch(e) {}
 
+      const resolvedSortOrder = (item.sortOrder !== undefined && item.sortOrder !== null && item.sortOrder !== '') 
+        ? item.sortOrder 
+        : (item.sort_order !== undefined && item.sort_order !== null && item.sort_order !== '' 
+          ? item.sort_order 
+          : (parsedTagline.sortOrder || parsedTagline.order || getNextAvailableOrder(activeTab, item.examId, item.type, item.target_mode, undefined, parsedTagline.subject || (item as any).subject)));
+
       newData = {
         ...newData,
         examId: item.examId || '',
@@ -1808,6 +1814,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         target_mode: (item.target_mode || 'both') as 'bank' | 'practice' | 'both',
         title: item.title || '',
         questionCount: item.questionCount || 0,
+        sortOrder: resolvedSortOrder,
         tagline: parsedTagline.text,
         price: parsedTagline.price || 499,
         originalPrice: parsedTagline.originalPrice || ((parsedTagline.price || 499) * 2),
@@ -1846,6 +1853,32 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
         })() : ''
       };
+
+      // Also pre-populate questions JSON / Answer key JSON if present on bank
+      let loadedQuestionsJson = '';
+      let loadedAnswerKeyJson = '';
+      if (item.pdfUrl && typeof item.pdfUrl === 'string' && item.pdfUrl.startsWith('{')) {
+        try {
+          const parsed = JSON.parse(item.pdfUrl);
+          if (parsed.questionsData && Array.isArray(parsed.questionsData) && parsed.questionsData.length > 0) {
+            loadedQuestionsJson = JSON.stringify(parsed.questionsData, null, 2);
+          }
+          if (parsed.answerKey && typeof parsed.answerKey === 'object') {
+            loadedAnswerKeyJson = JSON.stringify(parsed.answerKey, null, 2);
+          }
+        } catch(e) {}
+      } else if (item.pdfUrl && typeof item.pdfUrl === 'string' && item.pdfUrl.startsWith('[')) {
+        try {
+          const parsed = JSON.parse(item.pdfUrl);
+          if (Array.isArray(parsed) && parsed.length > 0 && (parsed[0].questionText || parsed[0].question)) {
+            loadedQuestionsJson = JSON.stringify(parsed, null, 2);
+          }
+        } catch(e) {}
+      }
+      setBankQuestionsJson(loadedQuestionsJson);
+      setBankAnswerKeyJson(loadedAnswerKeyJson);
+      setBankQuestionsFileName(loadedQuestionsJson ? 'existing-questions.json' : '');
+      setBankAnswerKeyFileName(loadedAnswerKeyJson ? 'existing-keys.json' : '');
     } else if (activeTab === 'exams') {
       let parsedExamMeta: any = {};
       if (item.description && typeof item.description === 'string' && item.description.startsWith('JSON_METADATA_')) {
@@ -1872,6 +1905,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         price: (parsedExamMeta.price !== undefined && parsedExamMeta.price !== null && parsedExamMeta.price !== '') ? Number(parsedExamMeta.price) : 499,
         originalPrice: (parsedExamMeta.originalPrice !== undefined && parsedExamMeta.originalPrice !== null && parsedExamMeta.originalPrice !== '') ? Number(parsedExamMeta.originalPrice) : 999,
         description: parsedExamMeta.description !== undefined ? parsedExamMeta.description : (item.description || ''),
+        sortOrder: (item.sortOrder !== undefined && item.sortOrder !== null && item.sortOrder !== '') ? item.sortOrder : (item.sort_order || parsedExamMeta.sortOrder || 1),
         examDateStatus: parsedExamMeta.examDateStatus || (parsedExamMeta.examDate || item.examDate ? 'published' : 'tba'),
         formFillupStatus: parsedExamMeta.formFillupStatus || 'tba',
         formFillupEndDate: parsedExamMeta.formFillupEndDate || ''
@@ -1886,7 +1920,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         metaTitle: item.metaTitle || '',
         metaDescription: item.metaDescription || '',
         keywords: item.keywords || '',
-        targetExamId: item.targetExamId || ''
+        targetExamId: item.targetExamId || '',
+        sortOrder: (item.sortOrder !== undefined && item.sortOrder !== null && item.sortOrder !== '') ? item.sortOrder : (item.sort_order || 1)
       };
     } else if (activeTab === 'questions') {
       let mockCategory = 'full-length';
@@ -1908,7 +1943,12 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         options: item.options || ['', '', '', ''],
         correctAnswerIndex: item.correctAnswerIndex || 0,
         explanation: item.explanation || '',
-        diagram: item.diagram || null
+        diagram: item.diagram || null,
+        sortOrder: (item.sortOrder !== undefined && item.sortOrder !== null && item.sortOrder !== '') 
+          ? item.sortOrder 
+          : (item.sort_order !== undefined && item.sort_order !== null && item.sort_order !== '' 
+            ? item.sort_order 
+            : getNextAvailableOrder('questions', item.examId, undefined, undefined, item.topic))
       };
     } else if (activeTab === 'series') {
       newData = {
@@ -1917,7 +1957,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         title: item.title || '',
         description: item.description || '',
         price: item.price || 499,
-        durationDays: item.durationDays || 30
+        durationDays: item.durationDays || 30,
+        sortOrder: (item.sortOrder !== undefined && item.sortOrder !== null && item.sortOrder !== '') ? item.sortOrder : (item.sort_order || 1)
       };
     } else if (activeTab === 'tests') {
       let parsedMockConfig: any = { examId: '', category: 'full-length', subject: '', isPremium: false, price: 499, originalPrice: 999, scheduled_at: null };
@@ -1925,6 +1966,12 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         if (item.seriesId) parsedMockConfig = JSON.parse(item.seriesId);
       } catch(e) {}
       
+      const resolvedSortOrder = (item.sortOrder !== undefined && item.sortOrder !== null && item.sortOrder !== '') 
+        ? item.sortOrder 
+        : (item.sort_order !== undefined && item.sort_order !== null && item.sort_order !== '' 
+          ? item.sort_order 
+          : (parsedMockConfig.sortOrder || parsedMockConfig.order || getNextAvailableOrder('tests', parsedMockConfig.examId || item.examId, parsedMockConfig.category, undefined, undefined, parsedMockConfig.subject)));
+
       newData = {
         ...newData,
         examId: parsedMockConfig.examId || '',
@@ -1938,7 +1985,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         durationMinutes: item.durationMinutes || 60,
         totalMarks: item.totalMarks || 100,
         negativeMarking: item.negativeMarking || 0,
-        sortOrder: item.sortOrder || '',
+        sortOrder: resolvedSortOrder,
         scheduled_at: (item.scheduled_at || parsedMockConfig.scheduled_at) ? (() => {
           const raw = item.scheduled_at || parsedMockConfig.scheduled_at;
           const d = new Date(raw);

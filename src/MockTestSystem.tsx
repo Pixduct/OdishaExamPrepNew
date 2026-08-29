@@ -389,11 +389,13 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
         test: {
           id: test.id,
           title: test.title,
+          examId: test.examId,
           durationMinutes: test.durationMinutes,
           totalMarks: test.totalMarks,
           negativeMarking: test.negativeMarking,
           questions: test.questions
         },
+        examId: test.examId,
         currentQuestionIndex,
         currentQuestionId,
         answers,

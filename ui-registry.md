@@ -101,6 +101,10 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`MemoryShortCreatorSuite`** | Media / Studio | [`public/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/memory-shorts-creator.html) | Active-recall 6-Phase Memory Shorts, 3-Question Memory Checks, Automated Bulk Ingestion, and Hierarchical ZIP Exporter | Standalone Studio Tool | Active |
 | **`ScheduledPracticeBankCard`** | Data Display / Card | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L3986-L4315) | 3-tier card hierarchy with live stats row (Questions & Duration pills), status tags, and fixed 48px CTA | App.tsx (Exam Detail Step 1) | Active |
 | **`BatchMonetizationActionBar`** | Admin / Monetization | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L500-L550) | Floating action bar for multi-select bulk locking, custom pricing, and smart freemium rule application | AdminPanel.tsx (Tests & Practice tabs) | Active |
+| **`TitaniumProPhoneShowcaseMockup`** | Media / Studio | [`public/shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/shorts-creator.html) | Flagship 2026 Titanium Pro smartphone chassis, tall 1506px screen, dynamic island | Shorts & Memory Creators | Active |
+| **`YouTubeMobileSafeZoneCoverEngine`**| Media / Studio | [`public/shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/shorts-creator.html) | 2026 YouTube safe-zone 100k covers, below [New] tag geometry, curiosity gap teasers | Shorts & Memory Creators | Active |
+| **`MultiTrackCustomMusicPool`** | Media / Audio | [`public/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/memory-shorts-creator.html) | Multi-track custom audio pool, live audition player chips, cyclic batch rotation | Memory Shorts Creator | Active |
+| **`StrictBoundaryAutoScaledTextEngine`**| Media / Typography | [`public/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/memory-shorts-creator.html) | Iterative font scaling down to 12px, token chunking, safety ellipsis truncation | Shorts & Memory Creators | Active |
 
 ---
 
@@ -3493,6 +3497,44 @@ High-conversion 100k YouTube Shorts Cover Thumbnail generator adhering strictly 
 | **Challenge Hook Box** | $W: 940\text{px} - 960\text{px}, H: 160\text{px} - 220\text{px}$ at $Y: 1290\text{px} - 1345\text{px}$ (`⚡ CAN YOU SCORE 3 / 3? • 🧠 95% Aspirants Fail Q3!`) |
 | **Bottom Watermark & Buffer** | Watermark at $Y: 1450\text{px} - 1485\text{px}$, leaving $Y \ge 1520\text{px}$ clear for YouTube mobile player title & avatar |
 
+---
+
+### 108. `MultiTrackCustomMusicPool`
+
+File: [`public/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/memory-shorts-creator.html)
+Last updated: August 28, 2026
+
+Interactive multi-track background music pool manager for batch video generation with multi-file drag/drop, inline audition players, cyclic batch rotation, and WebAudio logarithmic sidechain ducking.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Container** | `p-4 rounded-xl bg-slate-900/60 border border-slate-700/60 shadow-inner` |
+| **Track Counter Badge** | `px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40` |
+| **Track Item Chip** | `flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-slate-800/90 border border-slate-700/80 hover:border-amber-500/50` |
+| **Play/Pause Audition Button** | `w-7 h-7 rounded-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 text-xs` |
+| **Remove Track Button** | `w-6 h-6 rounded-md hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 text-xs` |
+| **Clear All Button** | `px-2.5 py-1 rounded-md bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold` |
+
 **Pattern notes:**
-- **100% Below `[New]` Tag**: The Exam Authority Badge top boundary is anchored at $Y = 335\text{px}$, ensuring that the YouTube `[New]` tag and `[⋮]` menu float freely over the dark background without overlapping any badge borders or text.
-- **Curiosity Gap Enforcement**: Answers are never displayed on covers to preserve open cognitive loops and maximize click-through rate.
+- **Auto-Rotation Across Batch Queues**: Multiple tracks cyclically rotate ($i \pmod M$) across shorts so students listening to batch videos experience acoustic variety.
+- **AudioContext Sidechain Ducking**: WebAudio gain dynamically ducks music by ~70% during active voiceover / sound FX cues for optimal speech intelligibility.
+
+---
+
+### 109. `StrictBoundaryAutoScaledTextEngine`
+
+File: [`public/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/memory-shorts-creator.html) & [`public/shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/shorts-creator.html)
+Last updated: August 28, 2026
+
+Ultra-robust canvas text measurement and multi-tier word re-wrapping engine guaranteeing 0% text bleed outside pills, badges, question cards, and mystery boxes.
+
+| Property | Class / Canvas Value |
+| :--- | :--- |
+| **Iterative Font Scaling** | Dynamic reduction from `baseFontSize` (up to `72px`) down to `minFontSize = 12px` |
+| **Proportional Line Heights** | Adaptive ratio: `1.26x` for $>52\text{px}$, `1.22x` for $>32\text{px}$, `1.18x` for small text |
+| **Unbreakable Word Chunking** | Character splitting for ultra-long continuous strings/emojis exceeding `maxW` |
+| **Safety Ellipsis Clamping** | Tail-end truncation with `...` when text reaches `maxAllowedLines` |
+| **Applied Containers** | Mystery Concept Box ($W: 880\text{px}$), Exam Badge ($W: 920\text{px}$), Hook Pill ($W: 560\text{px}$), Challenge Pill ($W: 680\text{px}$), Outro CTA Cards ($W: 920\text{px}$) |
+
+**Pattern notes:**
+- **Zero Pill Overflow**: Every canvas text rendering strictly calculates line widths against `maxW - padding` to guarantee no text spills out of any container regardless of question length.

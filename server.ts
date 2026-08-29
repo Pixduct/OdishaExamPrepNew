@@ -1460,16 +1460,26 @@ async function startServer() {
         return res.status(400).json({ error: `Table ${table} is not allowed` });
       }
 
+      let cleanPayload = payload;
+      if (table === 'mockTests' && payload) {
+        const sanitizeMockTestObj = (obj: any) => {
+          if (!obj || typeof obj !== 'object') return obj;
+          const { examId, questions, questionIds, isPremium, category, _questionCount, ...rest } = obj;
+          return rest;
+        };
+        cleanPayload = Array.isArray(payload) ? payload.map(sanitizeMockTestObj) : sanitizeMockTestObj(payload);
+      }
+
       let result: any;
       if (action === 'insert') {
-        const { data, error } = await supabaseAdmin.from(table).insert(Array.isArray(payload) ? payload : [payload]).select();
+        const { data, error } = await supabaseAdmin.from(table).insert(Array.isArray(cleanPayload) ? cleanPayload : [cleanPayload]).select();
         if (error) throw error;
         result = data;
       } else {
         // Build base query for UPDATE or DELETE
         let query: any;
         if (action === 'update') {
-          query = supabaseAdmin.from(table).update(payload);
+          query = supabaseAdmin.from(table).update(cleanPayload);
         } else if (action === 'delete') {
           query = supabaseAdmin.from(table).delete();
         } else {

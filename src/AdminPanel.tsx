@@ -2010,15 +2010,13 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
             scheduled_at: itemScheduledAt
           });
           const payload = {
-            examId: bulkGlobalExamId,
             seriesId: mockConfig,
             title: item.title.trim(),
             durationMinutes: Number(item.durationMinutes) || bulkGlobalDurationMinutes,
             totalMarks: Number(item.totalMarks) || bulkGlobalTotalMarks,
             negativeMarking: Number(item.negativeMarking) ?? bulkGlobalNegativeMarking,
             sortOrder: itemSortOrder,
-            scheduled_at: itemScheduledAt,
-            questionIds: []
+            scheduled_at: itemScheduledAt
           };
           await examService.createMockTest(payload as any);
         }
@@ -2133,14 +2131,12 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         const targetOrder = Number(formData.sortOrder) || getNextAvailableOrder('tests', formData.examId, targetCategory);
 
         const payload = {
-          examId: formData.examId,
           seriesId: mockConfig,
           title: formData.title,
           durationMinutes: Number(formData.durationMinutes),
           totalMarks: Number(formData.totalMarks),
           negativeMarking: Number(formData.negativeMarking) || 0,
-          sortOrder: targetOrder,
-          questionIds: []
+          sortOrder: targetOrder
         };
         if (!validateChangeBeforePublish('test', payload, !!editingId)) return;
         

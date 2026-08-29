@@ -5559,7 +5559,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     return () => document.body.removeAttribute('data-test-mode');
   }, [activeTest]);
 
-  // Recovery Effect: Automatically restore active test state on page reload
+  // Recovery Effect: Automatically restore active test state on page reload (strictly scoped to current exam)
   useEffect(() => {
     try {
       const rawState = sessionStorage.getItem('oep_activeTestState');
@@ -5567,6 +5567,12 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         const parsed = JSON.parse(rawState);
         const currentUserId = user?.id || null;
         if (currentUserId && parsed.userId === currentUserId && parsed.test) {
+          const testExamId = parsed.test?.examId || parsed.examId;
+          // If viewing a specific exam page and the saved test belongs to a different exam, clear it and do not restore
+          if (selectedExam && testExamId && testExamId !== selectedExam) {
+            sessionStorage.removeItem('oep_activeTestState');
+            return;
+          }
           console.log('[Recovery] Restoring active test session:', parsed.resumeSessionId);
           setActiveTest(parsed.test);
           setActiveTestState(parsed);
@@ -5575,7 +5581,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     } catch (e) {
       console.error('[Recovery] Failed to restore active test state:', e);
     }
-  }, [user]);
+  }, [user, selectedExam]);
   const [testResults, setTestResults] = useState<any | null>(() => {
     const saved = sessionStorage.getItem('oep_testResults');
     if (saved) {
@@ -7614,6 +7620,18 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           } catch (e) {
             console.error("Failed to load questions for mock test:", e);
           }
+
+          if (!finalTest.questions || finalTest.questions.length === 0) {
+            if (actMeta?.id) {
+              activityTracker.deleteActivity(user?.id, actMeta.id);
+              if (onActivityLogged) onActivityLogged();
+            }
+            showPremiumAlert(
+              "No Questions Configured",
+              "No questions have been added to this mock test yet. If you are an administrator, please upload questions in the Admin Panel."
+            );
+            return;
+          }
         }
 
         // If still no questions (or if it's a practice session):
@@ -7622,9 +7640,9 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           const cleanTopic = rawTitle.replace(/(\s*-\s*Practice Session)+$/gi, '').trim() || 'General';
           const targetCount = finalTest.totalQuestions || finalTest.practiceQuestionCount || finalTest._questionCount || actMeta?.totalQuestions || 20;
 
-          // Check if matching topic bank exists in dynamicQuestionBanks
+          // Check if matching topic bank exists in dynamicQuestionBanks for this exam
           const flatBanks = Object.values(dynamicQuestionBanks || {}).flat() as any[];
-          const topicBank = flatBanks.find(b => b.id === finalTest.bankId || (b.title && b.title.toLowerCase().includes(cleanTopic.toLowerCase())) || (b.name && b.name.toLowerCase().includes(cleanTopic.toLowerCase())));
+          const topicBank = flatBanks.find(b => (b.examId === testExamId || b.examId === selectedExam) && (b.id === finalTest.bankId || (b.title && b.title.toLowerCase().includes(cleanTopic.toLowerCase())) || (b.name && b.name.toLowerCase().includes(cleanTopic.toLowerCase()))));
 
           if (topicBank && Array.isArray(topicBank.questions) && topicBank.questions.length > 0) {
             finalTest.questions = topicBank.questions.slice(0, targetCount);
@@ -7816,7 +7834,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
     setLoadingPractice(true);
     try {
-      const effectiveExamId = selectedExam || topicBank?.examId || (exams && exams.length > 0 ? exams[0].id : 'osssc-nursing-2026') || 'default-exam';
+      const effectiveExamId = selectedExam || topicBank?.examId || (exams && exams.length > 0 ? exams[0].id : '') || '';
 
       let isPrem = topicBank?.isPremium ?? false;
       let bPrice = topicBank?.price || 499;
@@ -7863,7 +7881,18 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
       if (Array.isArray(topicBank?.questions) && topicBank.questions.length >= targetCount) {
         finalQuestions = topicBank.questions.slice(0, targetCount);
-      } else {
+      } else if (topicBank?.id && !topicBank.id.startsWith('practice-') && !topicBank.id.startsWith('bank-topic-')) {
+        try {
+          const dbQuestions = await examService.getQuestionsForQuestionBank(topicBank.id, bankTopicName, effectiveExamId);
+          if (dbQuestions && dbQuestions.length > 0) {
+            finalQuestions = dbQuestions.slice(0, targetCount);
+          }
+        } catch (e) {
+          console.warn("Failed to fetch questions from DB for bank:", e);
+        }
+      }
+
+      if (finalQuestions.length === 0) {
         // Fast instant question retrieval (<10ms) with exact target question count
         const { getInstantQuestionsForTopic } = await import('./lib/instantQuestionCompiler');
         const instantQs = getInstantQuestionsForTopic(bankTopicName, targetCount);
@@ -8045,7 +8074,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     const onLaunchTopicDrillEvent = (e: Event) => {
       const customEvent = e as CustomEvent;
       const topicName = customEvent.detail || 'Practice Session';
-      const effectiveExamId = selectedExam || exams[0]?.id || 'osssc-nursing-2026';
+      const effectiveExamId = selectedExam || (exams && exams.length > 0 ? exams[0]?.id : '') || '';
 
       // Check for saved incomplete session for this topic
       const userActivities = activityTracker.getActivities(user?.id);
@@ -9453,7 +9482,9 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
           // 1. Direct examId match on metadata or test object
           const actExamId = act.metadata?.test?.examId || act.metadata?.examId;
-          if (actExamId && selectedExam && actExamId === selectedExam) return true;
+          if (actExamId) {
+            return selectedExam ? actExamId === selectedExam : false;
+          }
 
           // 2. Match bankId against question banks of current exam
           const bankId = act.metadata?.test?.bankId || act.metadata?.bankId;
@@ -9463,23 +9494,24 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               .concat(dynamicQuestionBanks['revision-sets'] || [])
               .concat(dynamicQuestionBanks['pyq-collections'] || []);
             const matchingBank = allExamBanks.find((b: any) => b.id === bankId);
-            if (matchingBank && matchingBank.examId === selectedExam) return true;
+            return matchingBank ? matchingBank.examId === selectedExam : false;
           }
 
-          // 3. Match title against topic banks of current exam
-          if (act.title) {
-            const cleanActTitle = act.title.replace(/(\s*-\s*Practice Session)+$/gi, '').trim().toLowerCase();
-            const allExamBanks = (dynamicQuestionBanks['topic-wise'] || [])
-              .concat(dynamicQuestionBanks['exam-focused'] || [])
-              .concat(dynamicQuestionBanks['revision-sets'] || [])
-              .concat(dynamicQuestionBanks['pyq-collections'] || []);
-            const matchesTitle = allExamBanks.some((b: any) => b.examId === selectedExam && b.title.toLowerCase().includes(cleanActTitle));
-            if (matchesTitle) return true;
+          // 3. Match testId against mock tests of current exam
+          const testId = act.metadata?.test?.id || act.metadata?.testId;
+          if (testId && mockTests && mockTests.length > 0) {
+            const matchingMock = mockTests.find((mt: any) => mt.id === testId);
+            if (matchingMock) {
+              let isExam = matchingMock.examId === selectedExam;
+              if (!isExam && matchingMock.seriesId) {
+                try { isExam = JSON.parse(matchingMock.seriesId).examId === selectedExam; } catch(e){}
+              }
+              return isExam;
+            }
+            return false;
           }
 
-          // 4. Fallback if no explicit examId is set: match if selectedExam is active
-          if (!actExamId && selectedExam) return true;
-
+          // Never match by title alone across different exams
           return false;
         });
         
@@ -9574,11 +9606,25 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           let recMobileDurationText = t('exams.resumeHero.timeRemainingLeft', `${exactTimeStr} Left`, { time: exactTimeStr });
           
           recAction = () => {
-            const targetTest = incompleteActivity.metadata?.test || {
-              id: incompleteActivity.metadata?.testId || `practice-${Date.now()}`,
-              title: `${testTitle} - Practice Session`
-            };
-            handleStartDirectPractice(targetTest, incompleteActivity);
+            const rawTestId = incompleteActivity.metadata?.test?.id || incompleteActivity.metadata?.testId;
+            const isMockTest = (rawTestId && !rawTestId.startsWith('practice-') && !rawTestId.startsWith('bank-topic-')) ||
+              (incompleteActivity.metadata?.testCategory && incompleteActivity.metadata.testCategory.toLowerCase().includes('mock'));
+
+            if (isMockTest) {
+              const targetTest = incompleteActivity.metadata?.test || {
+                id: rawTestId,
+                title: testTitle,
+                examId: selectedExam
+              };
+              handleStartTest({ ...targetTest, examId: selectedExam }, incompleteActivity);
+            } else {
+              const targetTest = incompleteActivity.metadata?.test || {
+                id: rawTestId || `practice-${Date.now()}`,
+                title: `${testTitle} - Practice Session`,
+                examId: selectedExam
+              };
+              handleStartDirectPractice({ ...targetTest, examId: selectedExam }, incompleteActivity);
+            }
           };
 
           const recVecTheme = getQuestionBankVectorTheme(incompleteActivity?.metadata?.test || testTitle || recTitle, currentExam?.name || recCategoryPill);

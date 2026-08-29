@@ -1,6 +1,19 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] 🛡️ Fatal Error Overlay Non-Fatal Error Filter (`index.html`):
+  1. **WebSocket & HMR Error Filtering**: Added `isIgnorableError` to global window error and unhandled rejection listeners in `index.html`. Filtered out benign dev WebSocket reconnect notices (`WebSocket closed without opened`, `@vite/client`), browser extension exceptions, and `ResizeObserver` loops so that temporary HMR socket disconnects or page reloads never trigger the full-page blue `Application Error` overlay.
+- [x] 🎯 Exam "In Progress Session" Banner Isolation & Dynamic Question Fallback Fix (`src/App.tsx`, `src/lib/instantQuestionCompiler.ts`):
+  1. **Strict Exam Activity Isolation (Zero Cross-Exam Leakage)**: Eliminated title-based cross-exam matching in `GuidedRecommendationHero`. Incomplete test session banners now strictly require matching `selectedExam` by `metadata.examId`, unique `bankId`, or unique `testId` belonging to `selectedExam`. Generic titles like "Full-Length Mock Test 01" from other exams (e.g. Nursing Officer) can never match or render on OPSC AFO.
+  2. **0-Question Mock Test Defense**: In `handleStartTest`, if a mock test has 0 questions configured in the database, it immediately displays the "No questions have been added to this mock test yet" alert, purges any phantom incomplete session, and NEVER borrows foreign question banks or compiles unrelated drills.
+  3. **Mock vs Practice Resumption Routing**: Enhanced `recAction` to distinguish between real Mock Tests (via `handleStartTest` with `examId`) and Question Bank drills (via `handleStartDirectPractice` with `examId`).
+  4. **Database-First Question Retrieval**: Updated `handleStartDirectPractice` to fetch real questions from Supabase DB (`examService.getQuestionsForQuestionBank`) for the specific exam before falling back to local compilers.
+  5. **State-Relevant Question Fallback Engine**: Expanded `instantQuestionCompiler.ts` with General Studies, Odisha GK, Quantitative Aptitude, and Reasoning datasets, and replaced the hardcoded medical nursing fallback with General Studies & Odisha GK.
+  6. **Removed Hardcoded Fallback IDs**: Replaced legacy `'osssc-nursing-2026'` fallbacks across `handleStartDirectPractice` and event listeners.
+- [x] 🛠️ Mock Test Creation & Bulk Import Schema Sanitization (`src/AdminPanel.tsx`, `src/lib/examService.ts`, `server.ts`):
+  1. **Schema-Compliant Payloads**: Removed non-column properties (`examId`, `questionIds`) from mock test creation payloads in both `handleBulkImport` and `handleAdd` in `AdminPanel.tsx`. Mock test exam associations are stored within the `seriesId` JSON configuration object.
+  2. **Multi-Layer Defensive Sanitization**: Updated `createMockTest` and `updateMockTest` in `examService.ts` and `/api/admin/db/:table` proxy in `server.ts` to automatically strip client-side virtual properties (`examId`, `questions`, `questionIds`, `isPremium`, `category`, `_questionCount`) before sending payloads to Supabase PostgREST, preventing schema cache mismatch errors.
+  3. **Build & Type Verification**: Verified clean compilation across Vite and Node.js server bundle with `npm run build` exiting 0.
 - [x] 🧠 Memory Short Creator & Bulk Active Recall Studio Suite (`public/memory-shorts-creator.html`, `build/memory-shorts-creator.html`):
   1. **Standalone Architecture (Zero Regression)**: Built completely independent studio tool leaving existing `public/shorts-creator.html` 100% untouched and functioning.
   2. **Automated Dual-Generation Bulk Workflow**: Single CSV or copy/paste upload of $N$ questions automatically compiles both $N$ 6-phase Individual Memory Shorts (*REMEMBER THIS → Question → Think → Reveal → Memory Association → LOCKED IN?*) AND $\lceil N/3 \rceil$ 3-question Memory Check speed runs (*Q1 → Q2 → Q3 → HOW MANY DID YOU REMEMBER?*).

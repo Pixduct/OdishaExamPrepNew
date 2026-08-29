@@ -101,6 +101,10 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`MemoryShortCreatorSuite`** | Media / Studio | [`public/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/memory-shorts-creator.html) | Active-recall 6-Phase Memory Shorts, 3-Question Memory Checks, Automated Bulk Ingestion, and Hierarchical ZIP Exporter | Standalone Studio Tool | Active |
 | **`ScheduledPracticeBankCard`** | Data Display / Card | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L3986-L4315) | 3-tier card hierarchy with live stats row (Questions & Duration pills), status tags, and fixed 48px CTA | App.tsx (Exam Detail Step 1) | Active |
 | **`BatchMonetizationActionBar`** | Admin / Monetization | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L500-L550) | Floating action bar for multi-select bulk locking, custom pricing, and smart freemium rule application | AdminPanel.tsx (Tests & Practice tabs) | Active |
+| **`TitaniumProPhoneShowcaseMockup`** | Media / Studio | [`public/shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/shorts-creator.html) | Flagship 2026 Titanium Pro smartphone chassis, tall 1506px screen, dynamic island | Shorts & Memory Creators | Active |
+| **`YouTubeMobileSafeZoneCoverEngine`**| Media / Studio | [`public/shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/shorts-creator.html) | 2026 YouTube safe-zone 100k covers, below [New] tag geometry, curiosity gap teasers | Shorts & Memory Creators | Active |
+| **`MultiTrackCustomMusicPool`** | Media / Audio | [`public/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/memory-shorts-creator.html) | Multi-track custom audio pool, live audition player chips, cyclic batch rotation | Memory Shorts Creator | Active |
+| **`StrictBoundaryAutoScaledTextEngine`**| Media / Typography | [`public/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/memory-shorts-creator.html) | Iterative font scaling down to 12px, token chunking, safety ellipsis truncation | Shorts & Memory Creators | Active |
 
 ---
 
@@ -883,7 +887,7 @@ Last updated: 2026-07-27
 ### 22. `GuidedRecommendationHero` (Guided Learning Path "What to Study Next" Recommendation Banner)
 
 File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
-Last updated: 2026-08-07
+Last updated: August 29, 2026
 
 | Property | Class |
 | :--- | :--- |
@@ -898,14 +902,16 @@ Last updated: 2026-08-07
 | Action Button | `h-11 sm:h-16 px-5 sm:px-8 rounded-xl sm:rounded-2xl bg-gradient-to-r from-brand-500 via-indigo-600 to-brand-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-xs sm:text-base shadow-lg shadow-brand-500/25 hover:shadow-brand-500/50 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 sm:gap-3 group/btn relative overflow-hidden cursor-pointer w-full sm:w-auto` |
 
 **Pattern notes:**
-- **4-Tier Incomplete Activity Matching**: Searches `activities` for `test_incomplete` using a 4-tier fallback (`examId` match ➔ `bankId` match ➔ `title` match ➔ `selectedExam` active fallback), ensuring in-progress sessions are consistently surfaced.
+- **Strict Exam-Scoped Incomplete Matching**: Searches `activities` for `test_incomplete` strictly scoped to `selectedExam` (via `metadata.examId`, unique `bankId`, or unique `testId` belonging exclusively to `selectedExam`). Title-only cross-exam matching is removed to guarantee zero session leakage between different exams.
+- **Dual-Path Resumption Engine**:
+  - *Mock Tests*: Routes to `handleStartTest({ ...targetTest, examId: selectedExam })` and validates questions exist in DB before launching. If 0 questions exist, displays a prompt and purges stale sessions instead of borrowing foreign questions.
+  - *Practice Drills*: Routes to `handleStartDirectPractice` with database-first retrieval and state-relevant fallback datasets (General Studies & Odisha GK).
 - **Dynamic 3-Tier Metric Engine**:
   1. *Active Session*: Displays real-time session accuracy e.g. `🎯 75% Session Accuracy (3/4 Solved)`.
   2. *Returning Student*: Displays personal average accuracy vs goal e.g. `🎯 Your Avg: 78% | Goal: 85%+`.
   3. *New Student*: Displays qualifying benchmark e.g. `🎯 85% Pass Benchmark`.
 - **Exact Unrounded Duration Display**: Computes remaining time as exact minutes and seconds (`remMins = Math.floor(leftSeconds / 60)`, `remSecs = leftSeconds % 60`) e.g. `17m 49s Left`.
 - **Mobile Responsive Text Sizing & Glass Pills**: Uses `sm:hidden` concise descriptions (`3 of 20 questions completed. Tap to continue session.`) and semi-transparent pill badges (`[ 🎯 0% Accuracy ]` `[ ⏱️ 17m 49s Left ]`) to eliminate text repetition and visual line wrapping bloat on mobile screens.
-- **Direct Resumed Test Launch**: Invokes `handleStartDirectPractice(targetTest, incompleteActivity)` with full `resumeState`, directly restoring saved questions, answered state, and timer.
 
 ---
 
@@ -3206,10 +3212,9 @@ Last updated: August 22, 2026
 - **Out-of-form Submission via HTML5 `form` attribute**: The button lives in the modal header (`px-8 py-5` header strip) but submits the `<form id="add-new-form">` body below it. This is standard HTML5 — no `onClick` handler, no ref, no duplicated logic. The same `handleAdd` `onSubmit` fires regardless of which Save button is clicked.
 - **Always Visible**: Unlike the bottom Save button which requires scrolling, this button is always visible at the top of the modal. It renders for both Add New and Edit modes — unlike `Reset Form` which is hidden on `editingId`.
 - **Visual differentiation from Reset Form**: `bg-brand-600 text-white` (solid blue) is intentionally distinct from the `Reset Form` pill (`bg-white text-slate-500 border-slate-200/60`) sitting to its left. This makes the two actions impossible to confuse at a glance.
-- **Icon sizing match**: `w-3.5 h-3.5` matches exactly the `RotateCcw` icon used in the adjacent `Reset Form` button — maintains visual rhythm in the header pill row.
-- **Form ID invariant**: The `id="add-new-form"` on the `<form>` element MUST remain unique on the page. Since `showAddModal` is a single boolean, the modal renders at most once — the duplicate-ID risk is architecturally impossible in the current design.
-- **Future extension rule**: If any future admin modal needs a quick-save header button, follow this exact pattern: add `id="[modal-name]-form"` to the form, add a compact `bg-brand-600 rounded-xl px-3 py-1.5 text-xs font-black` pill button with `form="[modal-name]-form" type="submit"` in the header. Do NOT use `onClick` to re-call the submit handler directly.
+- **Icon sizing match**: `w-3.5 h-3.5` matches exactly the `RotateCcw` icon used in the adjacent `Reset Form` button.
 
+---
 
 ### 100. `PracticeSubjectFilterPillBar`
 File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L10184-L10230)
@@ -3224,9 +3229,13 @@ Last updated: August 23, 2026
 | **Active pill � Scale** | `scale-[1.02] shadow-md shadow-blue-600/25` |
 | **Inactive pill � Background** | `bg-white dark:bg-[#0B1528]` |
 | **Inactive pill � Border** | `border-slate-200/80 dark:border-slate-800` |
-| **Inactive### 101. `AdminBulkImportModal`
-File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7935-L8240)
-Last updated: August 24, 2026
+| **Inactive pill — Text** | `text-slate-600 dark:text-slate-300 font-bold` |
+
+---
+
+### 101. `AdminBulkImportModal`
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L8500-L8990)
+Last updated: August 28, 2026
 
 | Property | Class / Token |
 | :--- | :--- |
@@ -3493,6 +3502,44 @@ High-conversion 100k YouTube Shorts Cover Thumbnail generator adhering strictly 
 | **Challenge Hook Box** | $W: 940\text{px} - 960\text{px}, H: 160\text{px} - 220\text{px}$ at $Y: 1290\text{px} - 1345\text{px}$ (`⚡ CAN YOU SCORE 3 / 3? • 🧠 95% Aspirants Fail Q3!`) |
 | **Bottom Watermark & Buffer** | Watermark at $Y: 1450\text{px} - 1485\text{px}$, leaving $Y \ge 1520\text{px}$ clear for YouTube mobile player title & avatar |
 
+---
+
+### 108. `MultiTrackCustomMusicPool`
+
+File: [`public/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/memory-shorts-creator.html)
+Last updated: August 28, 2026
+
+Interactive multi-track background music pool manager for batch video generation with multi-file drag/drop, inline audition players, cyclic batch rotation, and WebAudio logarithmic sidechain ducking.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Container** | `p-4 rounded-xl bg-slate-900/60 border border-slate-700/60 shadow-inner` |
+| **Track Counter Badge** | `px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40` |
+| **Track Item Chip** | `flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-slate-800/90 border border-slate-700/80 hover:border-amber-500/50` |
+| **Play/Pause Audition Button** | `w-7 h-7 rounded-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 text-xs` |
+| **Remove Track Button** | `w-6 h-6 rounded-md hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 text-xs` |
+| **Clear All Button** | `px-2.5 py-1 rounded-md bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold` |
+
 **Pattern notes:**
-- **100% Below `[New]` Tag**: The Exam Authority Badge top boundary is anchored at $Y = 335\text{px}$, ensuring that the YouTube `[New]` tag and `[⋮]` menu float freely over the dark background without overlapping any badge borders or text.
-- **Curiosity Gap Enforcement**: Answers are never displayed on covers to preserve open cognitive loops and maximize click-through rate.
+- **Auto-Rotation Across Batch Queues**: Multiple tracks cyclically rotate ($i \pmod M$) across shorts so students listening to batch videos experience acoustic variety.
+- **AudioContext Sidechain Ducking**: WebAudio gain dynamically ducks music by ~70% during active voiceover / sound FX cues for optimal speech intelligibility.
+
+---
+
+### 109. `StrictBoundaryAutoScaledTextEngine`
+
+File: [`public/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/memory-shorts-creator.html) & [`public/shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/shorts-creator.html)
+Last updated: August 28, 2026
+
+Ultra-robust canvas text measurement and multi-tier word re-wrapping engine guaranteeing 0% text bleed outside pills, badges, question cards, and mystery boxes.
+
+| Property | Class / Canvas Value |
+| :--- | :--- |
+| **Iterative Font Scaling** | Dynamic reduction from `baseFontSize` (up to `72px`) down to `minFontSize = 12px` |
+| **Proportional Line Heights** | Adaptive ratio: `1.26x` for $>52\text{px}$, `1.22x` for $>32\text{px}$, `1.18x` for small text |
+| **Unbreakable Word Chunking** | Character splitting for ultra-long continuous strings/emojis exceeding `maxW` |
+| **Safety Ellipsis Clamping** | Tail-end truncation with `...` when text reaches `maxAllowedLines` |
+| **Applied Containers** | Mystery Concept Box ($W: 880\text{px}$), Exam Badge ($W: 920\text{px}$), Hook Pill ($W: 560\text{px}$), Challenge Pill ($W: 680\text{px}$), Outro CTA Cards ($W: 920\text{px}$) |
+
+**Pattern notes:**
+- **Zero Pill Overflow**: Every canvas text rendering strictly calculates line widths against `maxW - padding` to guarantee no text spills out of any container regardless of question length.

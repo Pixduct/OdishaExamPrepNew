@@ -418,9 +418,26 @@ export const examService = {
 
   // Mock Tests
   async createMockTest(test: MockTest) {
-    const { questions, ...testData } = test;
+    cacheService.clear('all_mock_tests_lite');
+    cacheService.clear('topic_counts');
+    const { questions, examId, questionIds, isPremium, category, _questionCount, ...testData } = test as any;
     const data = await callAdminDbProxy('mockTests', 'insert', testData);
-    return data?.[0] || data;
+    cacheService.clear('all_mock_tests_lite');
+    cacheService.clear('topic_counts');
+    const item = data?.[0] || data;
+    if (item && item.seriesId && typeof item.seriesId === 'string' && item.seriesId.startsWith('{')) {
+      try {
+        const meta = JSON.parse(item.seriesId);
+        return {
+          ...item,
+          examId: meta.examId || examId || null,
+          isPremium: meta.isPremium ?? isPremium ?? false,
+          category: meta.category || category || null,
+          _questionCount: 0
+        };
+      } catch (e) {}
+    }
+    return item ? { ...item, examId: examId || null, isPremium: isPremium ?? false, category: category || null, _questionCount: 0 } : item;
   },
 
   async getAllMockTests() {
@@ -542,7 +559,7 @@ export const examService = {
   async updateMockTest(id: string, updates: Partial<MockTest>) {
     cacheService.clear('all_mock_tests_lite');
     cacheService.clear('topic_counts');
-    const { questions, ...updateData } = updates;
+    const { questions, examId, questionIds, isPremium, category, _questionCount, ...updateData } = updates as any;
     const data = await callAdminDbProxy('mockTests', 'update', updateData, id);
     cacheService.clear('all_mock_tests_lite');
     cacheService.clear('topic_counts');

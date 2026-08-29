@@ -375,6 +375,141 @@ const INSTANT_TOPIC_QUESTIONS: Record<string, CompiledQuestion[]> = {
       correctAnswerIndex: 0,
       explanation: 'CTPA visualizes intraluminal pulmonary arterial thrombi with high sensitivity and specificity.'
     }
+  ],
+
+  'General Studies & Odisha GK': [
+    {
+      id: 'ogk-1',
+      questionText: 'Who was the first Chief Minister of Odisha after Indian Independence?',
+      options: ['Harekrushna Mahatab', 'Biju Patnaik', 'Nabakrushna Choudhury', 'Gopabandhu Das'],
+      correctAnswerIndex: 0,
+      explanation: 'Dr. Harekrushna Mahatab served as the first Chief Minister of independent Odisha from 1946 to 1950 and again from 1956 to 1961.'
+    },
+    {
+      id: 'ogk-2',
+      questionText: 'The famous Sun Temple at Konark was built during the reign of which Ganga dynasty ruler?',
+      options: ['Anantavarman Chodaganga', 'Narasimhadeva I', 'Kapilendradeva', 'Purushottamadeva'],
+      correctAnswerIndex: 1,
+      explanation: 'The Konark Sun Temple was constructed in the 13th century (circa 1250 CE) by King Narasimhadeva I of the Eastern Ganga Dynasty.'
+    },
+    {
+      id: 'ogk-3',
+      questionText: 'Hirakud Dam, one of the longest earthen dams in the world, is built across which river?',
+      options: ['Brahmani River', 'Baitarani River', 'Mahanadi River', 'Subarnarekha River'],
+      correctAnswerIndex: 2,
+      explanation: 'Hirakud Dam is built across the Mahanadi River near Sambalpur in Odisha and began operations in 1957.'
+    },
+    {
+      id: 'ogk-4',
+      questionText: 'Which wetland in Odisha is designated as the first Ramsar site in India?',
+      options: ['Chilika Lake', 'Ansupa Lake', 'Tampara Lake', 'Kanjia Lake'],
+      correctAnswerIndex: 0,
+      explanation: 'Chilika Lake was designated as the first Indian wetland of international importance under the Ramsar Convention in 1981.'
+    },
+    {
+      id: 'ogk-5',
+      questionText: 'In which year did the historic Paika Rebellion (Paika Bidroha) against British colonial rule take place in Odisha?',
+      options: ['1804', '1817', '1857', '1866'],
+      correctAnswerIndex: 1,
+      explanation: 'The Paika Rebellion of 1817, led by Bakshi Jagabandhu Bidyadhar in Khordha, was a major armed uprising against British rule in Odisha.'
+    },
+    {
+      id: 'ogk-6',
+      questionText: 'Which national park in Odisha is renowned worldwide for the mass nesting of Olive Ridley sea turtles (Arribada)?',
+      options: ['Similipal National Park', 'Bhitarkanika National Park (Gahirmatha)', 'Karlapat Wildlife Sanctuary', 'Debrigarh Sanctuary'],
+      correctAnswerIndex: 1,
+      explanation: 'Gahirmatha Marine Sanctuary adjacent to Bhitarkanika National Park is the world\'s largest nesting beach for Olive Ridley turtles.'
+    },
+    {
+      id: 'ogk-7',
+      questionText: 'The capital of Odisha was officially shifted from Cuttack to Bhubaneswar in which year?',
+      options: ['1936', '1947', '1949', '1956'],
+      correctAnswerIndex: 2,
+      explanation: 'Odisha\'s capital was officially shifted from the historic city of Cuttack to the newly planned city of Bhubaneswar on 19 August 1949.'
+    },
+    {
+      id: 'ogk-8',
+      questionText: 'Which article of the Indian Constitution guarantees the Right to Constitutional Remedies?',
+      options: ['Article 19', 'Article 21', 'Article 32', 'Article 44'],
+      correctAnswerIndex: 2,
+      explanation: 'Article 32 provides the Right to Constitutional Remedies, famously described by Dr. B.R. Ambedkar as the "Heart and Soul of the Constitution".'
+    },
+    {
+      id: 'ogk-9',
+      questionText: 'Which mountain peak is the highest point in the state of Odisha?',
+      options: ['Mahendragiri', 'Deomali', 'Malayagiri', 'Gandhamardan'],
+      correctAnswerIndex: 1,
+      explanation: 'Deomali Peak in the Koraput district is the highest mountain peak in Odisha, standing at an elevation of 1,672 meters.'
+    },
+    {
+      id: 'ogk-10',
+      questionText: 'Who founded the weekly newspaper "The Samaja" in Odisha in 1919?',
+      options: ['Utkalmani Gopabandhu Das', 'Gourishankar Ray', 'Madhusudan Das', 'Fakir Mohan Senapati'],
+      correctAnswerIndex: 0,
+      explanation: 'Utkalmani Pandit Gopabandhu Das founded "The Samaja" at Satyabadi in Puri district on 4 October 1919.'
+    }
+  ],
+
+  'Quantitative Aptitude': [
+    {
+      id: 'qa-1',
+      questionText: 'A train 240 m long passes a pole in 24 seconds. How long will it take to pass a platform 650 m long?',
+      options: ['65 seconds', '89 seconds', '100 seconds', '75 seconds'],
+      correctAnswerIndex: 1,
+      explanation: 'Speed = 240/24 = 10 m/s. Total distance for platform = 240 + 650 = 890 m. Time = 890 / 10 = 89 seconds.'
+    },
+    {
+      id: 'qa-2',
+      questionText: 'If the selling price of 12 articles is equal to the cost price of 15 articles, find the profit percentage.',
+      options: ['20%', '25%', '30%', '15%'],
+      correctAnswerIndex: 1,
+      explanation: 'Profit = (15 - 12) / 12 * 100 = 3/12 * 100 = 25% profit.'
+    },
+    {
+      id: 'qa-3',
+      questionText: 'A and B can do a work in 12 days and 18 days respectively. In how many days can they complete the work together?',
+      options: ['7.2 days', '6.5 days', '8 days', '10 days'],
+      correctAnswerIndex: 0,
+      explanation: '1/12 + 1/18 = (3 + 2)/36 = 5/36. Combined time = 36/5 = 7.2 days.'
+    },
+    {
+      id: 'qa-4',
+      questionText: 'Find the compound interest on ₹10,000 at 10% per annum for 2 years compounded annually.',
+      options: ['₹2,000', '₹2,100', '₹2,200', '₹1,900'],
+      correctAnswerIndex: 1,
+      explanation: 'Amount = 10,000 * (1 + 10/100)^2 = 10,000 * 1.21 = ₹12,100. CI = ₹12,100 - ₹10,000 = ₹2,100.'
+    },
+    {
+      id: 'qa-5',
+      questionText: 'The average of 5 consecutive odd numbers is 27. What is the product of the first and fifth numbers?',
+      options: ['705', '713', '675', '725'],
+      correctAnswerIndex: 1,
+      explanation: 'The 5 numbers centered at 27 are: 23, 25, 27, 29, 31. Product of 1st and 5th = 23 * 31 = 713.'
+    }
+  ],
+
+  'Reasoning & Mental Ability': [
+    {
+      id: 'rs-1',
+      questionText: 'In a certain code, TEACHER is written as VGCEJGT. How is CHILDREN written in that code?',
+      options: ['EJKNFTGP', 'EJKNFITP', 'EJKNFGTO', 'EJKNFTPO'],
+      correctAnswerIndex: 0,
+      explanation: 'Each letter is shifted forward by +2 positions in alphabetical order: C+2=E, H+2=J, I+2=K, L+2=N, D+2=F, R+2=T, E+2=G, N+2=P.'
+    },
+    {
+      id: 'rs-2',
+      questionText: 'Find the next number in the series: 4, 9, 19, 39, 79, ?',
+      options: ['119', '139', '159', '149'],
+      correctAnswerIndex: 2,
+      explanation: 'Pattern: (previous * 2) + 1. 79 * 2 + 1 = 158 + 1 = 159.'
+    },
+    {
+      id: 'rs-3',
+      questionText: 'Pointing to a photograph, a woman says: "He is the only son of the wife of my brother\'s father." How is the person in the photograph related to the woman?',
+      options: ['Father', 'Brother', 'Uncle', 'Cousin'],
+      correctAnswerIndex: 1,
+      explanation: 'Brother\'s father = woman\'s father. Wife of father = woman\'s mother. Only son of mother = woman\'s brother.'
+    }
   ]
 };
 
@@ -391,8 +526,9 @@ export const getInstantQuestionsForTopic = (topicName: string, targetCount: numb
     }
   }
 
+  // Fallback to General Studies & Odisha GK instead of medical nursing
   if (matchedQuestions.length === 0) {
-    matchedQuestions = INSTANT_TOPIC_QUESTIONS['Fundamentals of Nursing'];
+    matchedQuestions = INSTANT_TOPIC_QUESTIONS['General Studies & Odisha GK'] || INSTANT_TOPIC_QUESTIONS['Fundamentals of Nursing'];
   }
 
   // Ensure EXACT targetCount questions are returned without clipping or shortage

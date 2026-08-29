@@ -1282,6 +1282,28 @@ export interface TableData {
   rows: string[][];
 }
 
+export const splitRow = (rowStr: string): string[] => {
+  let str = rowStr.trim();
+  if (str.startsWith('|')) str = str.slice(1);
+  if (str.endsWith('|')) str = str.slice(0, -1);
+  
+  const cells: string[] = [];
+  let currentCell = '';
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === '\\' && str[i + 1] === '|') {
+      currentCell += '|';
+      i++;
+    } else if (str[i] === '|') {
+      cells.push(currentCell.trim());
+      currentCell = '';
+    } else {
+      currentCell += str[i];
+    }
+  }
+  cells.push(currentCell.trim());
+  return cells;
+};
+
 export function parseMarkdownTable(text: string): TableData | null {
   const lines = text.split('\n').map(l => l.trim());
   if (lines.length < 2) return null;
@@ -1297,28 +1319,6 @@ export function parseMarkdownTable(text: string): TableData | null {
 
   const headerLine = lines[separatorIndex - 1];
   if (!headerLine.includes('|')) return null;
-
-  const splitRow = (rowStr: string): string[] => {
-    let str = rowStr.trim();
-    if (str.startsWith('|')) str = str.slice(1);
-    if (str.endsWith('|')) str = str.slice(0, -1);
-    
-    const cells: string[] = [];
-    let currentCell = '';
-    for (let i = 0; i < str.length; i++) {
-      if (str[i] === '\\' && str[i + 1] === '|') {
-        currentCell += '|';
-        i++;
-      } else if (str[i] === '|') {
-        cells.push(currentCell.trim());
-        currentCell = '';
-      } else {
-        currentCell += str[i];
-      }
-    }
-    cells.push(currentCell.trim());
-    return cells;
-  };
 
   const headers = splitRow(headerLine);
   const separatorCells = splitRow(lines[separatorIndex]);
@@ -1351,6 +1351,28 @@ export function parseMarkdownTable(text: string): TableData | null {
   return { headers, alignments, rows };
 }
 
+export function parsePipeTableWithoutSeparator(lines: string[]): TableData | null {
+  if (lines.length < 2) return null;
+
+  const headerLine = lines[0];
+  const headers = splitRow(headerLine);
+  if (headers.length < 2) return null;
+
+  const alignments: ('left' | 'center' | 'right')[] = headers.map(() => 'center');
+
+  const rows: string[][] = [];
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line.trim()) continue;
+    const cells = splitRow(line);
+    while (cells.length < headers.length) cells.push('');
+    rows.push(cells.slice(0, headers.length));
+  }
+
+  if (rows.length === 0) return null;
+  return { headers, alignments, rows };
+}
+
 export interface TextBlock {
   type: 'text' | 'table';
   content: string;
@@ -1362,18 +1384,26 @@ export function splitTextIntoBlocks(text: string): TextBlock[] {
   const blocks: TextBlock[] = [];
   let currentTextLines: string[] = [];
   
-  for (let i = 0; i < lines.length; i++) {
+  const isSeparatorLine = (l: string) => {
+    const cleaned = l.trim().replace(/\s+/g, '');
+    return /^\|?(:?-+:?\|?)+$/.test(cleaned) && cleaned.includes('-');
+  };
+
+  const isPipeLine = (l: string) => {
+    const trimmed = l.trim();
+    if (!trimmed.includes('|')) return false;
+    const cells = splitRow(trimmed);
+    return cells.length >= 2;
+  };
+
+  let i = 0;
+  while (i < lines.length) {
     const line = lines[i];
-    
-    const isSeparator = (l: string) => {
-      const cleaned = l.trim().replace(/\s+/g, '');
-      return /^\|?(:?-+:?\|?)+$/.test(cleaned) && cleaned.includes('-');
-    };
-    
-    const looksLikeTableHeader = line.includes('|');
-    const nextLineIsSeparator = i + 1 < lines.length && isSeparator(lines[i + 1]);
-    
-    if (looksLikeTableHeader && nextLineIsSeparator) {
+    const trimmed = line.trim();
+
+    // Check Case 1: Standard Markdown Table with separator line
+    const nextLineIsSeparator = (i + 1 < lines.length) && isSeparatorLine(lines[i + 1]);
+    if (trimmed.includes('|') && nextLineIsSeparator) {
       if (currentTextLines.length > 0) {
         blocks.push({
           type: 'text',
@@ -1388,7 +1418,6 @@ export function splitTextIntoBlocks(text: string): TextBlock[] {
       while (i < lines.length) {
         const nextLine = lines[i];
         if (nextLine.trim() === '' || !nextLine.includes('|')) {
-          i--;
           break;
         }
         tableLines.push(nextLine);
@@ -1406,9 +1435,52 @@ export function splitTextIntoBlocks(text: string): TextBlock[] {
       } else {
         currentTextLines.push(...tableLines);
       }
-    } else {
-      currentTextLines.push(line);
+      continue;
     }
+
+    // Check Case 2: Separator-less Pipe Table (e.g. Data Interpretation: "Year | Production | Export\n2021 | 120 | 70...")
+    if (isPipeLine(trimmed) && (i + 1 < lines.length) && isPipeLine(lines[i + 1]) && !isSeparatorLine(lines[i + 1])) {
+      const headerCells = splitRow(trimmed);
+      const firstRowCells = splitRow(lines[i + 1]);
+
+      if (headerCells.length >= 2 && firstRowCells.length >= 2) {
+        if (currentTextLines.length > 0) {
+          blocks.push({
+            type: 'text',
+            content: currentTextLines.join('\n')
+          });
+          currentTextLines = [];
+        }
+
+        const tableLines = [line];
+        i++;
+        while (i < lines.length) {
+          const nextLine = lines[i];
+          const nextTrimmed = nextLine.trim();
+          if (nextTrimmed === '' || !isPipeLine(nextTrimmed)) {
+            break;
+          }
+          tableLines.push(nextLine);
+          i++;
+        }
+
+        const tableRawText = tableLines.join('\n');
+        const parsedTable = parsePipeTableWithoutSeparator(tableLines);
+        if (parsedTable) {
+          blocks.push({
+            type: 'table',
+            content: tableRawText,
+            tableData: parsedTable
+          });
+        } else {
+          currentTextLines.push(...tableLines);
+        }
+        continue;
+      }
+    }
+
+    currentTextLines.push(line);
+    i++;
   }
   
   if (currentTextLines.length > 0) {
@@ -1477,8 +1549,8 @@ export const TableRenderer: React.FC<{ tableData: TableData; isOption?: boolean 
   }, [tableData]);
 
   return (
-    <div className="overflow-x-auto my-4 rounded-2xl border border-[#2563EB]/15 shadow-sm max-w-full">
-      <table className="w-full table-fixed border-collapse text-left text-slate-800 text-sm md:text-[15px]">
+    <div className="overflow-x-auto my-4 rounded-2xl border border-brand-500/20 dark:border-brand-400/20 shadow-sm max-w-full bg-white dark:bg-slate-900">
+      <table className="w-full table-fixed border-collapse text-left text-slate-800 dark:text-slate-100 text-sm md:text-[15px]">
         {colWidths.length > 0 && (
           <colgroup>
             {colWidths.map((width, idx) => (
@@ -1487,12 +1559,12 @@ export const TableRenderer: React.FC<{ tableData: TableData; isOption?: boolean 
           </colgroup>
         )}
         <thead>
-          <tr className="bg-[#2563EB] text-white border-b border-[#2563EB]">
+          <tr className="bg-brand-600 dark:bg-brand-700 text-white border-b border-brand-700 dark:border-brand-800">
             {tableData.headers.map((h, i) => (
               <th 
                 key={i} 
                 className={cn(
-                  "px-3 py-2.5 sm:px-4 md:px-6 md:py-3 font-extrabold border-r border-white/20 last:border-r-0 text-xs md:text-sm uppercase tracking-wider break-words",
+                  "px-4 py-3 sm:px-5 md:px-6 md:py-3.5 font-black border-r border-white/20 last:border-r-0 text-xs md:text-sm uppercase tracking-wider break-words",
                   tableData.alignments[i] === 'center' && 'text-center',
                   tableData.alignments[i] === 'right' && 'text-right'
                 )}
@@ -1502,14 +1574,14 @@ export const TableRenderer: React.FC<{ tableData: TableData; isOption?: boolean 
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-200 bg-white">
+        <tbody className="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900/90">
           {tableData.rows.map((row, rIdx) => (
-            <tr key={rIdx} className="hover:bg-slate-50/50 transition-colors">
+            <tr key={rIdx} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors odd:bg-white dark:odd:bg-slate-900 even:bg-slate-50/40 dark:even:bg-slate-800/30">
               {row.map((cell, cIdx) => (
                 <td 
                   key={cIdx} 
                   className={cn(
-                    "px-3 py-3 sm:px-4 md:px-6 md:py-3.5 border-r border-slate-200 last:border-r-0 font-medium text-slate-700 break-words",
+                    "px-4 py-3 sm:px-5 md:px-6 md:py-3.5 border-r border-slate-200 dark:border-slate-800 last:border-r-0 font-medium text-slate-700 dark:text-slate-200 break-words",
                     tableData.alignments[cIdx] === 'center' && 'text-center',
                     tableData.alignments[cIdx] === 'right' && 'text-right'
                   )}

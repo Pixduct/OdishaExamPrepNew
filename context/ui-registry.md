@@ -105,6 +105,7 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`YouTubeMobileSafeZoneCoverEngine`**| Media / Studio | [`public/shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/shorts-creator.html) | 2026 YouTube safe-zone 100k covers, below [New] tag geometry, curiosity gap teasers | Shorts & Memory Creators | Active |
 | **`MultiTrackCustomMusicPool`** | Media / Audio | [`public/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/memory-shorts-creator.html) | Multi-track custom audio pool, live audition player chips, cyclic batch rotation | Memory Shorts Creator | Active |
 | **`StrictBoundaryAutoScaledTextEngine`**| Media / Typography | [`public/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/memory-shorts-creator.html) | Iterative font scaling down to 12px, token chunking, safety ellipsis truncation | Shorts & Memory Creators | Active |
+| **`ExamNotificationVisualCard`** | Graphic / Social Card | [`automations/exam_card_renderer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/exam_card_renderer.py) | 6 Scenario Themes, 1080x1080 High-DPI, Symmetrical Centered Board Badges, Stat Pills & Action Highlights | Telegram, YouTube Community, WhatsApp | Active |
 
 ---
 
@@ -3568,3 +3569,31 @@ Last updated: August 29, 2026
   3. *Completed*: Dual button `[Score]` + `[Retake]`.
   4. *In Progress*: Dual button `[Progress]` + `[Resume (X%)]`.
   5. *Default*: `[Start Test Now →]` or `[Unlock to Access]`.
+
+---
+
+### `ExamNotificationVisualCard`
+
+File: `automations/exam_card_renderer.py`
+Last updated: August 29, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Canvas Dimensions** | `width: 1080px`, `height: 1080px` (Square high-DPI canvas rendered at 2x scale) |
+| **Background / Dot Matrix** | Scenario theme deep base (`#0B1120`, `#061A14`, `#0D0E25`, `#071422`, `#1C1103`) with radial mesh overlay (`radial-gradient(rgba(255, 255, 255, 0.08) 1.2px, transparent 1.2px)`) |
+| **Top Bar Structure** | `position: relative`, `display: flex`, `justify-content: space-between`, `align-items: center` |
+| **Scenario Badge** | `padding: 11px 22px`, `border-radius: 14px`, `font-weight: 900`, `font-size: 17px`, `box-shadow: 0 6px 25px [theme-glow]` |
+| **Board Tag (Symmetric Centered)** | `position: absolute; left: 50%; transform: translateX(-50%);` `padding: 10px 24px`, `border-radius: 14px`, `backdrop-filter: blur(16px)`, `border: 1.5px solid rgba(255,255,255,0.32)` |
+| **Date Badge** | `background: rgba(255, 255, 255, 0.08)`, `border: 1px solid rgba(255, 255, 255, 0.16)`, `border-radius: 12px`, `font-size: 16px font-weight: 800` |
+| **Main Card Container** | `background: [theme-card-bg]`, `border: 2px solid [theme-border]`, `border-radius: 26px`, `padding: 38px 44px`, `box-shadow: 0 0 60px [theme-glow]` |
+| **Headline Typography** | Font: `Outfit, sans-serif`, `font-weight: 900`, Adaptive sizing (`34px` for $\le 50$ chars, `30px` for $51-75$ chars, `26px` for $>75$ chars) |
+| **Stat Grid Pills** | `grid-template-columns: 1fr 1fr`, `gap: 14px`, `background: rgba(255, 255, 255, 0.07)`, `border-radius: 14px` |
+| **Key Highlights Bullets** | `font-size: 20px`, `line-height: 1.42`, `font-weight: 500`, dynamic accent bold prefix (`<b>Label:</b>`) |
+| **Official Portal Strip** | `background: rgba(0, 0, 0, 0.45)`, `border-radius: 14px`, `border: 1px solid rgba(255, 255, 255, 0.15)` |
+| **Footer Branding** | Gradient brand icon, `www.odishaexamprep.in` (`20px font-weight: 800`), `✓ OFFICIAL SOURCE VERIFIED` seal |
+
+**Pattern notes:**
+- **Mathematical Horizontal Center:** The exam board badge (`.board-tag`) is locked to the exact horizontal center of the 1080px canvas using `position: absolute; left: 50%; transform: translateX(-50%);`, ensuring symmetry regardless of left/right text widths.
+- **Adaptive Headline Engine:** Automatically scales font size down to `26px` on long titles to prevent text clipping or overflow.
+- **6 Dynamic Scenario Themes:** Recruitment (`#2563EB`), Application Window (`#059669`), Exam Date/Schedule (`#4F46E5`), Admit Card (`#0284C7`), Result/Cut-off (`#D97706`), Corrigendum (`#7C3AED`).
+

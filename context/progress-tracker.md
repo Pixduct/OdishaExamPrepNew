@@ -1,6 +1,11 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] 📰 Daily Current Affairs Engine Zero-Hallucination Recovery & Off-Peak Green Zone Schedule (`automations/ca_scraper.py`, `automations/ca_formatter.py`, `automations/ca_publisher.py`, `automations/.github/workflows/daily_ca.yml`):
+  1. **Eliminated JSON Parsing Crash**: Stripped `<think>` reasoning tags and removed the rigid "Today-only" prompt constraint that caused LLMs to output conversational chat preambles instead of raw JSON.
+  2. **48-Hour Authentic News Window**: Expanded `FRESHNESS_HOURS` from 24h to 48h to capture late-evening cabinet announcements and morning press releases across timezones without dropping valid articles.
+  3. **Strict Zero-Fake / Zero-Filler Standard**: Preserved the fail-closed factual integrity gate ($\ge 80/100$ score, metric fact-checks, sovereign entity verification). If on any holiday or quiet day no genuine news meets the exam threshold, the engine cleanly skips and notifies Admin without posting outdated filler or unverified content.
+  4. **Off-Peak Green-Zone Schedule**: Configured a prime evening execution at **7:47 PM IST** (`17 14 * * *` UTC) and morning catch-up at **9:17 AM IST** (`47 03 * * *` UTC) with dedicated concurrency group `daily-ca-engine`, avoiding GitHub Actions `:00`/`:30` queue jams.
 - [x] 🎯 Daily MCQ Engine 3x Daily Schedule & 1-Question Batch Optimization with 2s Bash Runner Fix (`automations/.github/workflows/daily_mcq.yml`, `automations/mcq_engine.py`, `automations/post_to_youtube.py`):
   1. **Root Cause Analysis & Bash Crash Elimination**: Resolved the 2-second runner failure (`Annotations: 1`) caused by inline expansion of multi-line secret variables in the bash step (`Restore YouTube Session`). Replaced with pure Python environment variable resolution and automatic base64/JSON decoding in `post_to_youtube.py`.
   2. **Dedicated Concurrency Group**: Isolated `daily_mcq.yml` to `group: daily-mcq-engine` preventing collisions and queue deadlocks with the bi-hourly Current Affairs and Blog engines.

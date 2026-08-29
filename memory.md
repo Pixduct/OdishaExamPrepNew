@@ -1,59 +1,55 @@
-# Memory — 📝 Enterprise Google Sheet Editorial Queue, Drive Image Sanitizer & 6-Archetype Dynamic Masterclass Engine
+# Memory — Questions Manager Hierarchy, Count Sync & Universal Responsive Data Table Engine
 
-Last updated: August 29, 2026, 15:25 IST
+Last updated: August 29, 2026, 18:10 IST
 
 ## What was built
 
-### 1. Google Sheet Editorial Queue Ingestion (`automations/shared/google_sheet_queue.py`)
-- **Automated Queue Polling**: Connects via `gspread` and service account credentials to `Odisha_Editorial_Queue`, `Odisha_Blog_Queue`, or `Blog_Queue` tab to fetch pending custom articles.
-- **Expected Columns**: `Target_Exam`, `Title`, `Image_URL`, `Focus_Notes`, `Status`, `Published_URL`, `Published_At`.
-- **Bi-Directional Status Tracking**: On successful publication, automatically transitions row status from `Pending` to `Published` and writes back the live article URL (`https://www.odishaexamprep.in/blog/<id>`) and timestamp with exponential backoff retries.
+### 1. Questions Manager Subject Hierarchy & Filter Navigation (`src/AdminPanel.tsx`)
+- **Subject Filter Bar**: Added horizontal subject pills (`🌟 All Subjects`, `📘 Arithmetic`, `📘 Data Interpretation`, `📘 General English`, `📘 GK & Current Affairs`, `📘 Reasoning`) mirroring the Practice Sets tab.
+- **Grouped Subject Banners**: Question banks are organized under subject section banners (`🟦 ARITHMETIC (4 Sets)` with `Focus on Arithmetic →`).
+- **Ascending Sort Ordering & Badges**: Cards are sorted strictly by `sortOrder` (`1, 2, 3, 4...`) with clean `#1`, `#2` order badges.
 
-### 2. Enterprise Image Sanitizer & Drive Resolver (`automations/shared/drive_image_sanitizer.py`)
-- **Google Drive Stream Conversion**: Converts Google Drive share URLs (`/file/d/<id>/view` or `id=<id>`) to direct raw image binary streams (`export=download&id=<id>`), handling Google confirmation cookies and downloading valid image binaries.
-- **Zero-Chopsticks Fallback**: Completely removed the hardcoded stock photo fallback (`pexels-photo-5905712`). If no image link is provided in a sheet row, the engine dynamically generates an official high-resolution 1200x630 branded vector banner via `shared/exam_logo_registry.py`.
+### 2. Elimination of Paginated Slice Bug & Real-Time Count Synchronization (`src/AdminPanel.tsx`, `server.ts`, `src/lib/examService.ts`)
+- **Deleted `liveCount` Fallback**: Bank cards and modal selectors now exclusively evaluate `practiceQuestionCount`, `questionCount`, or embedded `questionsData` JSON lengths. They never truncate to client-side 50-item paginated question slices.
+- **Server-Side Trigger on Bulk Upload**: `/api/admin/questions/bulk` endpoint runs `COUNT(*)` in Postgres and updates `questionBanks.questionCount` in the same transaction.
+- **0ms Optimistic Updates & Cache Clearing**: Invalidation across memory cache (`all_question_banks`, `topic_counts`), `sessionStorage` (`oep_admin_catalog_cache_v2`), and optimistic React state incrementation.
 
-### 3. Intent-Adaptive 6-Archetype Content Engine (`automations/seo_blog_engine.py`)
-- **Dynamic Content Classifier**: Analyzes incoming custom titles and focus notes, matching them into one of 6 specialized editorial archetypes:
-  1. 💰 **Salary, Perks & Hierarchy** (`SALARY_PROFILE`): 7th Pay Commission pay matrix, itemized in-hand salary table (Basic, DA, HRA, NPS, Net Pay), government allowances, and 10-year promotion ladder.
-  2. 👮 **Job Profile & Lifestyle** (`LIFESTYLE_ROUTINE`): Role prestige, typical daily morning-to-evening routine, field vs. office district postings, operational powers, and work-life balance.
-  3. 🗺️ **Preparation Strategy & Roadmap** (`STRATEGY_ROADMAP`): 4-phase preparation blueprint, high-yield topic weightage matrix, daily 6-hour timetable, revision routine, and error-logging framework.
-  4. 📚 **Best Books & Study Material** (`BOOKLIST_RESOURCES`): Subject-by-subject standard reference books table, syllabus mapping, textbook vs. PYQ balance, and 1-page revision note methods.
-  5. 📊 **Cut-Off Trends & Safe Scores** (`CUTOFF_ANALYSIS`): Previous year category-wise cut-off tables (UR, SEBC, SC, ST), driving factors, safe score blueprints, and normalization formulas.
-  6. ⚡ **Subject Shortcuts & Masterclasses** (`SUBJECT_SHORTCUTS`): Speed formulas in clean LaTeX, worked problem comparisons (Standard 90s vs. Topper 20s shortcut), calculation traps, and practice MCQs.
-- **Autonomous Fallback**: If the Google Sheet queue is empty or offline, the engine falls back to curated curriculum rotation with official vector banners without crashing.
+### 3. Universal Question Data Table Engine & Mobile Touch Optimization (`src/components/MathTextRenderer.tsx`)
+- **Separator-Less Markdown Parser**: Intelligently parses raw pipe-delimited data tables (e.g. `Year | Production | Export` / `Zone | Appeared | Passed`) even when questions omit explicit `---|---|---` separator lines.
+- **Laptop / Desktop Layout**: Preserved full-width proportional column distribution (`md:table-fixed`, `md:px-6 md:py-3.5`).
+- **Mobile Screen Optimization**: Eliminates vertical text/digit breaking (`VILL AGE`, `4 0 %`) using `whitespace-nowrap` on mobile viewports with native horizontal touch swiping (`overflow-x-auto rounded-2xl scrollbar-thin`) and a subtle `⇄ Scroll table horizontally` indicator.
+- **KaTeX Cell Recursion**: Every individual cell is evaluated through `MathTextRenderer` for formulas and mathematical symbols.
 
-### 4. UI Pattern Registry & Progress Tracker Updates
-- Imprinted `EditorialMasterclassCoverBanner` into `context/ui-registry.md`.
-- Updated `context/progress-tracker.md` with all editorial queue milestones.
+### 4. UI Registries & Documentation
+- Imprinted `AdminQuestionsBankHierarchyGrid` and `QuestionDataTableResponsiveRenderer` into `context/ui-registry.md`.
+- Updated `context/progress-tracker.md` with all completed milestones.
 
 ---
 
 ## Decisions made
-- **Intent-Driven Flexibility**: The blog engine dynamically structures articles based on topic intent rather than forcing a rigid math formula template onto job profiles or salary breakdowns.
-- **Drive Image Sanitization**: All Google Drive share links are sanitized and validated to guarantee 100% reliable OpenGraph previews and Telegram photo cards.
-- **Zero-Chopsticks Guarantee**: Prohibited arbitrary stock photo fallbacks across the platform; vector graphics or user-provided images are mandatory.
+- **Server Aggregation Over Client Slices**: Never calculate aggregate catalog counts from client-side paginated tables in React; rely exclusively on database-level RPCs and synchronized table columns to guarantee Supabase egress efficiency (< 1.5 KB payload).
+- **Responsive Table Hybrid Strategy**: Use `md:table-fixed` for proportional desktop layouts while using `whitespace-nowrap` with horizontal swipe on mobile viewports to prevent awkward word and number splitting.
 
 ---
 
 ## Problems solved
-- **Solved Repetitive Irrelevant Blog Photos**: Replaced the hardcoded woman-with-chopsticks fallback with custom Google Sheet image inputs and official 1200x630 vector banners.
-- **Solved Academic / Rigid AI Titles**: Allowed full manual editorial control via Google Sheets, supported by dynamic 6-archetype content generation.
+- **Solved 10-Question Display on 20-Question Banks**: Root cause was the 50-item pagination slice in React filtering questions from Page 1 only. Permanently fixed by removing `liveCount` and auto-syncing `questionBanks.questionCount` in Postgres.
+- **Solved Missing Data Tables in Test Mode**: Raw pipe-separated DI questions now parse into styled HTML data tables with sapphire headers and alternating rows.
+- **Solved Mobile Word Stacking**: Numbers and single-word headers no longer wrap vertically on small smartphone screens.
 
 ---
 
 ## Current state
-- **Automations Submodule (`Pixduct/odisha-mcq-engine`)**: All code committed and pushed to `main` (`3f75056`, `b548801`, `361fe00`, `2d2e88e`).
-- **Main Website Repository (`Pixduct/OdishaExamPrepNew`)**: Submodule pointers, `context/ui-registry.md`, `context/progress-tracker.md`, and `memory.md` synced and pushed to `main` (`060f216`, `e7ec1b0`, `ca31dfa`).
-- **CI / GitHub Actions**: All workflows (`daily_mcq.yml`, `daily_ca.yml`, `exam_update_cron.yml`) operational.
+- **Production Build**: Verified with `tsc --noEmit` (**0 errors**) and built with Vite + esbuild.
+- **Git Repository**: All source code, build assets, and documentation pushed to `origin/main` (`ae66736`, `b354d9a`, `3621189`).
+- **Admin Panel & Test Engine**: 100% operational, fast, and verified on desktop and mobile viewports.
 
 ---
 
 ## Next session starts with
-- Add custom article topics and image links to the Google Sheet (`Odisha_Editorial_Queue` or `Blog_Queue` tab in `Odisha_MCQ_Engine`).
-- Monitor automated blog generation and verify published articles on `https://www.odishaexamprep.in/blog`.
+- Ready for any new feature requests, administrative enhancements, or question content updates.
 
 ---
 
 ## Open questions
-- None. All requirements for the editorial queue, image sanitizer, and dynamic content synthesis are completed and verified.
+- None. All requested bug fixes, visual improvements, and mobile touch optimizations are completed and validated.

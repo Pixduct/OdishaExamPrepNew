@@ -3803,6 +3803,25 @@ Last updated: August 29, 2026
 
 ---
 
+### `GoogleSheetEditorialQueueAndSanitizer`
+
+File: `automations/shared/google_sheet_queue.py`, `automations/shared/drive_image_sanitizer.py`, `automations/seo_blog_engine.py`
+Last updated: August 29, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Sheet Resolution Matrix** | Auto-discovers `Odisha_Editorial_Queue .xlsx`, `Odisha_Editorial_Queue.xlsx`, and `Blog Content` worksheet tab |
+| **Image Resolution Priority** | 1. Custom Google Drive high-resolution direct stream (`https://lh3.googleusercontent.com/d/{id}=w1200`), 2. Direct HTTP binary, 3. Deterministic 1200x630 official vector board banner fallback |
+| **Vector Fallback Banners** | `1200x630px` high-density procedural gradient + vector grid (`60px x 60px`) + 10 official board palettes (`OPSC`, `OSSC`, `OSSSC`, `ODISHA POLICE`, etc.) |
+| **Google Drive Downloader** | Multi-endpoint resolver (`lh3.googleusercontent.com`, `drive.usercontent.google.com`, `thumbnail?sz=w1200`) with binary inspection |
+| **Publishing Write-Back** | Auto-creates `Status`, `Published_URL`, `Published_At` (Columns E, F, G) and updates published rows with live URL and timestamp |
+
+**Pattern notes:**
+- **Zero-Chopstick / Zero-Stock Guarantee**: Every published article is backed either by a human-curated custom uploaded image or an official 1200x630 vector authority banner. Random stock imagery is prohibited.
+- **Bi-Directional Synchronization**: Tracks Google Sheet rows with retry backoffs and updates row status directly to `Published` upon Supabase insertion.
+
+---
+
 ### `QuestionBankAuthoritativeCountArchitecture`
 
 File: `src/lib/examService.ts` (`L860–L925`), `server.ts` (`L1390–L1460`), Supabase Trigger `trg_sync_question_bank_counts`

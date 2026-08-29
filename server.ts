@@ -308,6 +308,7 @@ async function startServer() {
       if (error) throw error;
       
       const mapped = users.map(au => ({
+        id: au.id,
         uid: au.id,
         email: au.email,
         displayName: au.user_metadata?.displayName || au.user_metadata?.full_name || au.user_metadata?.name || au.email?.split('@')[0],

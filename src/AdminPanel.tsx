@@ -486,6 +486,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const [exams, setExams] = useState<Exam[]>(() => initialAdminCache?.ex || []);
   const [banks, setBanks] = useState<any[]>(() => initialAdminCache?.bks || []);
   const [users, setUsers] = useState<any[]>(() => initialAdminCache?.fetchedUsers || []);
+  const [isUsersLoading, setIsUsersLoading] = useState(false);
   
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordTargetUser, setPasswordTargetUser] = useState<any>(null);
@@ -1062,6 +1063,60 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     }
   };
 
+  const fetchAdminUsers = async (): Promise<any[]> => {
+    setIsUsersLoading(true);
+    try {
+      let token: string | undefined;
+      try {
+        const session = (await supabase.auth.getSession()).data.session;
+        token = session?.access_token;
+      } catch (e) {}
+
+      if (!token) {
+        const rawAdmin = localStorage.getItem('admin_session');
+        if (rawAdmin) {
+          try {
+            const parsed = JSON.parse(rawAdmin);
+            token = parsed.token || parsed.access_token;
+          } catch (e) {}
+        }
+      }
+
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const endpoints = ['/app-api/admin/users', '/api/admin/users'];
+      let userList: any[] = [];
+
+      for (const endpoint of endpoints) {
+        try {
+          const res = await fetch(endpoint, { headers });
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) {
+              userList = data;
+              break;
+            }
+          }
+        } catch (e) {
+          console.warn(`[AdminPanel] Failed to fetch users from ${endpoint}:`, e);
+        }
+      }
+
+      if (userList && userList.length > 0) {
+        setUsers(userList);
+        return userList;
+      }
+    } catch (e) {
+      console.error("[AdminPanel] Error in fetchAdminUsers:", e);
+    } finally {
+      setIsUsersLoading(false);
+    }
+    return [];
+  };
+
   const fetchData = async () => {
     // Only show global loading state if there is zero cached data in memory/state
     if (!exams.length && !mockTests.length && !banks.length && !series.length) {
@@ -1077,21 +1132,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       ]);
 
       // 2. Kick off user fetch in parallel
-      const usersPromise = (async () => {
-        try {
-          const session = (await supabase.auth.getSession()).data.session;
-          const token = session?.access_token;
-          if (token) {
-            const res = await fetch('/api/admin/users', {
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) return await res.json();
-          }
-        } catch(e) {
-          console.error("Error fetching admin users:", e);
-        }
-        return [] as any[];
-      })();
+      const usersPromise = fetchAdminUsers();
 
       // 3. Await all promises simultaneously for minimum network latency
       const [[ss, ts, ex, bks], fetchedUsers] = await Promise.all([
@@ -1287,8 +1328,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   useEffect(() => {
     if (activeTab === 'questions') {
       fetchQuestions(questionsPage, searchQuery, filterExamId, questionFilter);
+    } else if (activeTab === 'users' && (!users || users.length === 0)) {
+      fetchAdminUsers();
     }
-  }, [activeTab, questionsPage, searchQuery, filterExamId, questionFilter, selectedTargetIdForQuestions, selectedTypeForQuestions]);
+  }, [activeTab, questionsPage, searchQuery, filterExamId, questionFilter, selectedTargetIdForQuestions, selectedTypeForQuestions, users?.length]);
 
   useEffect(() => {
     setQuestionsPage(1);
@@ -1476,7 +1519,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     // Strict ID deduplication across any active tab
     const uniqueMap = new Map();
     list.forEach(item => {
-      if (item && item.id) uniqueMap.set(item.id, item);
+      const key = item?.id || item?.uid;
+      if (key) uniqueMap.set(key, item);
     });
     list = Array.from(uniqueMap.values());
 
@@ -6687,12 +6731,22 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                       <tr>
                          <th className="px-8 py-5">User</th>
                          <th className="px-8 py-5">Status</th>
+                         <th className="px-8 py-5">Purchases</th>
                          <th className="px-8 py-5 text-right pr-12">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 font-bold text-slate-700">
-                      {items.length === 0 ? (
-                         <tr><td colSpan={3} className="px-8 py-20 text-center text-slate-400">No users found.</td></tr>
+                      {isUsersLoading ? (
+                         <tr>
+                           <td colSpan={4} className="px-8 py-20 text-center">
+                             <div className="flex flex-col items-center justify-center gap-3">
+                               <div className="w-8 h-8 border-3 border-brand-200 border-t-brand-600 rounded-full animate-spin" />
+                               <span className="text-slate-500 font-bold text-sm">Loading users data...</span>
+                             </div>
+                           </td>
+                         </tr>
+                      ) : items.length === 0 ? (
+                         <tr><td colSpan={4} className="px-8 py-20 text-center text-slate-400">No users found.</td></tr>
                       ) : (
                          items.map(renderTableRow)
                       )}

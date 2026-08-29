@@ -1548,51 +1548,62 @@ export const TableRenderer: React.FC<{ tableData: TableData; isOption?: boolean 
     return clampedPcts;
   }, [tableData]);
 
+  const minTableWidth = Math.max(380, tableData.headers.length * 90);
+
   return (
-    <div className="overflow-x-auto my-4 rounded-2xl border border-brand-500/20 dark:border-brand-400/20 shadow-sm max-w-full bg-white dark:bg-slate-900">
-      <table className="w-full table-fixed border-collapse text-left text-slate-800 dark:text-slate-100 text-sm md:text-[15px]">
-        {colWidths.length > 0 && (
-          <colgroup>
-            {colWidths.map((width, idx) => (
-              <col key={idx} style={{ width: `${width}%` }} />
-            ))}
-          </colgroup>
-        )}
-        <thead>
-          <tr className="bg-brand-600 dark:bg-brand-700 text-white border-b border-brand-700 dark:border-brand-800">
-            {tableData.headers.map((h, i) => (
-              <th 
-                key={i} 
-                className={cn(
-                  "px-4 py-3 sm:px-5 md:px-6 md:py-3.5 font-black border-r border-white/20 last:border-r-0 text-xs md:text-sm uppercase tracking-wider break-words",
-                  tableData.alignments[i] === 'center' && 'text-center',
-                  tableData.alignments[i] === 'right' && 'text-right'
-                )}
-              >
-                <MathTextRenderer text={h} isOption={isOption} />
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900/90">
-          {tableData.rows.map((row, rIdx) => (
-            <tr key={rIdx} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors odd:bg-white dark:odd:bg-slate-900 even:bg-slate-50/40 dark:even:bg-slate-800/30">
-              {row.map((cell, cIdx) => (
-                <td 
-                  key={cIdx} 
+    <div className="my-4 max-w-full">
+      <div className="overflow-x-auto rounded-2xl border border-brand-500/20 dark:border-brand-400/20 shadow-sm bg-white dark:bg-slate-900 scrollbar-thin">
+        <table 
+          style={{ minWidth: `${minTableWidth}px` }}
+          className="w-full md:table-fixed border-collapse text-left text-slate-800 dark:text-slate-100 text-xs sm:text-sm md:text-[15px]"
+        >
+          {colWidths.length > 0 && (
+            <colgroup className="hidden md:table-column-group">
+              {colWidths.map((width, idx) => (
+                <col key={idx} style={{ width: `${width}%` }} />
+              ))}
+            </colgroup>
+          )}
+          <thead>
+            <tr className="bg-brand-600 dark:bg-brand-700 text-white border-b border-brand-700 dark:border-brand-800">
+              {tableData.headers.map((h, i) => (
+                <th 
+                  key={i} 
                   className={cn(
-                    "px-4 py-3 sm:px-5 md:px-6 md:py-3.5 border-r border-slate-200 dark:border-slate-800 last:border-r-0 font-medium text-slate-700 dark:text-slate-200 break-words",
-                    tableData.alignments[cIdx] === 'center' && 'text-center',
-                    tableData.alignments[cIdx] === 'right' && 'text-right'
+                    "px-3.5 py-2.5 sm:px-4 sm:py-3 md:px-6 md:py-3.5 font-black border-r border-white/20 last:border-r-0 text-xs md:text-sm uppercase tracking-wider whitespace-nowrap md:whitespace-normal md:break-words",
+                    tableData.alignments[i] === 'center' && 'text-center',
+                    tableData.alignments[i] === 'right' && 'text-right'
                   )}
                 >
-                  <MathTextRenderer text={cell} isOption={isOption} />
-                </td>
+                  <MathTextRenderer text={h} isOption={isOption} />
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900/90">
+            {tableData.rows.map((row, rIdx) => (
+              <tr key={rIdx} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors odd:bg-white dark:odd:bg-slate-900 even:bg-slate-50/40 dark:even:bg-slate-800/30">
+                {row.map((cell, cIdx) => (
+                  <td 
+                    key={cIdx} 
+                    className={cn(
+                      "px-3.5 py-2.5 sm:px-4 sm:py-3 md:px-6 md:py-3.5 border-r border-slate-200 dark:border-slate-800 last:border-r-0 font-medium text-slate-700 dark:text-slate-200 whitespace-nowrap md:whitespace-normal md:break-words",
+                      tableData.alignments[cIdx] === 'center' && 'text-center',
+                      tableData.alignments[cIdx] === 'right' && 'text-right'
+                    )}
+                  >
+                    <MathTextRenderer text={cell} isOption={isOption} />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {/* Mobile Scroll Indicator */}
+      <div className="flex items-center justify-end gap-1 mt-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 md:hidden">
+        <span>⇄ Scroll table horizontally</span>
+      </div>
     </div>
   );
 };

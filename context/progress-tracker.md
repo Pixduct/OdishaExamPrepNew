@@ -1,6 +1,11 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] 🚨 Official Exam Notification Engine High-Credibility & Zero-Noise Optimization (`automations/exam_update_engine.py`, `automations/.github/workflows/exam_update_cron.yml`, `automations/.github/workflows/notice_scraper.yml`):
+  1. **Strict Anti-Deputation & Anti-Executive Filter**: Banned all non-student administrative vacancies (`deputation`, `contract executive`, `cmd`, `managing director`, `advisor`, `consultant`, `empanelment`, `internal promotion`). The engine now accepts exclusively open competitive examinations for students (CGL, CHSL, SI, Constable, ASO, Banking PO/Clerk, Railway NTPC, UPSC).
+  2. **Strict Active Date Freshness Gate**: Enforced hard rejection on any notices with expired deadlines or archive notices published more than 48 hours ago. Removed artificial daily quotas so the engine posts ONLY when genuine new student exam notices exist (otherwise outputs 0 posts cleanly).
+  3. **Eliminated 15-Minute Workflow Collisions**: Deactivated the redundant 15-minute `notice_scraper.yml` cron that was causing duplicate broadcasts. Standardized on a dedicated 2x daily off-peak scan (**10:47 AM IST** and **6:17 PM IST**) with isolated concurrency group `exam-update-engine`.
+  4. **Unified Permanent Deduplication**: Enforced multi-ledger fingerprinting across Supabase DB, `telegram_sent_history.json`, and `exam_updates_history.json`, guaranteeing zero repeat broadcasts.
 - [x] 📰 Daily Current Affairs Engine Zero-Hallucination Recovery & Off-Peak Green Zone Schedule (`automations/ca_scraper.py`, `automations/ca_formatter.py`, `automations/ca_publisher.py`, `automations/.github/workflows/daily_ca.yml`):
   1. **Eliminated JSON Parsing Crash**: Stripped `<think>` reasoning tags and removed the rigid "Today-only" prompt constraint that caused LLMs to output conversational chat preambles instead of raw JSON.
   2. **48-Hour Authentic News Window**: Expanded `FRESHNESS_HOURS` from 24h to 48h to capture late-evening cabinet announcements and morning press releases across timezones without dropping valid articles.

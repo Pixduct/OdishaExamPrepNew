@@ -1032,7 +1032,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const fetchQuestions = async (
     page = questionsPage, 
     search = searchQuery, 
-    examId = filterExamId, 
+    examId = filterExamId || selectedExamIdForQuestions, 
     qFilter = questionFilter,
     topicVal = selectedTypeForQuestions === 'mock' 
       ? (selectedTargetIdForQuestions ? `mockTest__${selectedTargetIdForQuestions}` : 'all')
@@ -1327,15 +1327,15 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   // Fetch questions whenever the active tab, page, filters, or selection changes
   useEffect(() => {
     if (activeTab === 'questions') {
-      fetchQuestions(questionsPage, searchQuery, filterExamId, questionFilter);
+      fetchQuestions(questionsPage, searchQuery, filterExamId || selectedExamIdForQuestions, questionFilter);
     } else if (activeTab === 'users' && (!users || users.length === 0)) {
       fetchAdminUsers();
     }
-  }, [activeTab, questionsPage, searchQuery, filterExamId, questionFilter, selectedTargetIdForQuestions, selectedTypeForQuestions, users?.length]);
+  }, [activeTab, questionsPage, searchQuery, filterExamId, selectedExamIdForQuestions, questionFilter, selectedTargetIdForQuestions, selectedTypeForQuestions, users?.length]);
 
   useEffect(() => {
     setQuestionsPage(1);
-  }, [searchQuery, filterExamId, questionFilter, selectedTargetIdForQuestions, selectedTypeForQuestions]);
+  }, [searchQuery, filterExamId, selectedExamIdForQuestions, questionFilter, selectedTargetIdForQuestions, selectedTypeForQuestions]);
 
   useEffect(() => {
     setSelectedItemIds(new Set());
@@ -1369,7 +1369,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       } else if (selectedTypeForQuestions === 'bank') {
         filtered = filtered.filter(q => !(q.topic || '').startsWith('mockTest__'));
         if (selectedTargetIdForQuestions) {
-          filtered = filtered.filter(q => q.topic === selectedTargetIdForQuestions);
+          const targetLower = selectedTargetIdForQuestions.trim().toLowerCase();
+          filtered = filtered.filter(q => q.topic === selectedTargetIdForQuestions || (q.topic && q.topic.trim().toLowerCase() === targetLower));
         }
       }
       if (searchQuery.trim()) {
@@ -7041,7 +7042,16 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                             return true;
                           })
                           .map(bank => {
-                            const count = bank.questionCount || 0;
+                            const liveCount = questions.filter((q: any) => 
+                              (q.examId === bank.examId || !q.examId || q.examId === selectedExamIdForQuestions) && 
+                              (
+                                q.topic === bank.title || 
+                                q.topic === bank.id || 
+                                (q.topic && bank.title && q.topic.trim().toLowerCase() === bank.title.trim().toLowerCase()) ||
+                                (q.topic && bank.title && (q.topic.trim().toLowerCase().startsWith(bank.title.trim().toLowerCase()) || bank.title.trim().toLowerCase().startsWith(q.topic.trim().toLowerCase())))
+                              )
+                            ).length;
+                            const count = liveCount > 0 ? liveCount : (bank.questionCount || bank.question_count || bank.practiceQuestionCount || (Array.isArray(bank.questions) ? bank.questions.length : 0));
                             const categoryBadges: Record<string, { label: string; style: string }> = {
                               'topic-wise': { label: 'Chapter-Wise', style: 'bg-blue-50 text-blue-700 border-blue-200/60' },
                               'exam-focused': { label: 'High-Yield', style: 'bg-amber-50 text-amber-700 border-amber-200/60' },
@@ -8368,9 +8378,18 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                 'pyq-collections': 'Topic PYQ'
                               };
                               const catName = categoryLabels[bank.type] || bank.type;
+                              const liveCount = questions.filter((q: any) => 
+                                (q.examId === bank.examId || !q.examId || q.examId === bulkExamId) && 
+                                (
+                                  q.topic === bank.title || 
+                                  q.topic === bank.id || 
+                                  (q.topic && bank.title && q.topic.trim().toLowerCase() === bank.title.trim().toLowerCase())
+                                )
+                              ).length;
+                              const count = liveCount > 0 ? liveCount : (bank.questionCount || bank.question_count || bank.practiceQuestionCount || (Array.isArray(bank.questions) ? bank.questions.length : 0));
                               return (
                                 <option key={bank.id} value={bank.title}>
-                                  [{catName}] {bank.title} ({bank.questionCount || 0} Qs)
+                                  [{catName}] {bank.title} ({count} Qs)
                                 </option>
                               );
                             })}

@@ -874,6 +874,8 @@ export const examService = {
               if (row.topic) {
                 const cnt = Number(row.question_count) || 0;
                 topicCounts[row.topic] = cnt;
+                topicCounts[row.topic.trim()] = cnt;
+                topicCounts[row.topic.trim().toLowerCase()] = cnt;
                 const clean = row.topic.toLowerCase().replace(/(\s*-\s*practice session)+$/gi, '').trim();
                 topicCounts[clean] = cnt;
               }
@@ -884,12 +886,12 @@ export const examService = {
             const rawTitle = b.title || '';
             const cleanTitle = rawTitle.toLowerCase().replace(/(\s*-\s*practice session)+$/gi, '').trim();
 
-            let resolvedCount = topicCounts[rawTitle] || topicCounts[cleanTitle] || 0;
+            let resolvedCount = topicCounts[b.id] || topicCounts[rawTitle] || topicCounts[rawTitle.trim()] || topicCounts[rawTitle.trim().toLowerCase()] || topicCounts[cleanTitle] || 0;
 
             // Fuzzy prefix match fallback from RPC data
             if (resolvedCount === 0 && cleanTitle) {
               for (const [top, cnt] of Object.entries(topicCounts)) {
-                if (top && (top.startsWith(cleanTitle) || cleanTitle.startsWith(top))) {
+                if (top && (top.startsWith(cleanTitle) || cleanTitle.startsWith(top) || top.includes(cleanTitle) || cleanTitle.includes(top))) {
                   resolvedCount = cnt;
                   break;
                 }

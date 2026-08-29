@@ -1,6 +1,10 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] 🎯 Daily MCQ Engine Google Sheet Auto-Discovery, Dynamic Status Column & Runner Resilience (`automations/mcq_engine.py`, `automations/.github/workflows/daily_mcq.yml`, `automations/.github/workflows/daily_ca.yml`, `automations/.github/workflows/engagement_engine.yml`, `automations/.github/workflows/notice_scraper.yml`):
+  1. **Google Sheet Discovery & Tab Resolution**: Upgraded `mcq_engine.py` to auto-discover `Odisha_MCQ_Engine.xlsx`, `Odisha_MCQ_Engine .xlsx`, and `Odisha_MCQ_Engine` with fallback keyword search across all accessible sheets and candidate tab names (`mcq`, `mcqs`, `questions`, `quiz`, `sheet1`).
+  2. **Dynamic Status Column Resolution**: Eliminated hardcoded column index 10; dynamically reads header row 1 to detect and update the `Status` column index.
+  3. **Universal Full-Depth Checkout**: Enforced `fetch-depth: 0` across all remaining GitHub Actions CI/CD workflows for atomic rebase and commit synchronization.
 - [x] 🌐 Daily Current Affairs Website Publisher Fix & Shallow Rebase Immunity (`automations/ca_website_publisher.py`, `automations/shared/supabase_client.py`, `automations/.github/workflows/daily_ca_website.yml`):
   1. **Supabase Icon Payload Type Sanitization**: Fixed type mismatch where `fetch_pexels_featured_image` returned a dictionary object that was passed directly to the `icon` (string text) column in Postgres, triggering HTTP 400 rejection on insertion.
   2. **Shallow Clone Rebase Immunity**: Added `fetch-depth: 0` to all GitHub Actions workflows (`daily_ca_website.yml`, `exam_update_cron.yml`, `blog_cron.yml`) to prevent rebase/merge conflicts during automated history commits.

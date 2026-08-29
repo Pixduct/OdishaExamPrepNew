@@ -888,16 +888,6 @@ export const examService = {
 
             let resolvedCount = topicCounts[b.id] || topicCounts[rawTitle] || topicCounts[rawTitle.trim()] || topicCounts[rawTitle.trim().toLowerCase()] || topicCounts[cleanTitle] || 0;
 
-            // Fuzzy prefix match fallback from RPC data
-            if (resolvedCount === 0 && cleanTitle) {
-              for (const [top, cnt] of Object.entries(topicCounts)) {
-                if (top && (top.startsWith(cleanTitle) || cleanTitle.startsWith(top) || top.includes(cleanTitle) || cleanTitle.includes(top))) {
-                  resolvedCount = cnt;
-                  break;
-                }
-              }
-            }
-
             // Fallback: embedded questionsData in pdfUrl column
             if (resolvedCount === 0 && b.pdfUrl && typeof b.pdfUrl === 'string' && b.pdfUrl.startsWith('{')) {
               try {

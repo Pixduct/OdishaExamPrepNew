@@ -433,11 +433,14 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const [bulkTopic, setBulkTopic] = useState('');
   const [bulkFileContent, setBulkFileContent] = useState('');
   const [bulkFileNames, setBulkFileNames] = useState<string[]>([]);
-  // SWR Admin Catalog Cache Helper
+  // SWR Admin Catalog Cache Helper with Cache Versioning
+  const ADMIN_CACHE_KEY = 'oep_admin_catalog_cache_v2';
   const getAdminCatalogCache = () => {
     if (typeof window === 'undefined') return null;
     try {
-      const raw = sessionStorage.getItem('oep_admin_catalog_cache');
+      // Clear legacy unversioned cache if present
+      try { sessionStorage.removeItem('oep_admin_catalog_cache'); } catch(e) {}
+      const raw = sessionStorage.getItem(ADMIN_CACHE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed === 'object') return parsed;
@@ -458,7 +461,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         fetchedUsers: data.fetchedUsers || existing.fetchedUsers || [],
         timestamp: Date.now()
       };
-      sessionStorage.setItem('oep_admin_catalog_cache', JSON.stringify(updated));
+      sessionStorage.setItem(ADMIN_CACHE_KEY, JSON.stringify(updated));
     } catch(e) {}
   };
 
@@ -2348,7 +2351,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           const res = await examService.addExam(payload);
           if (res) setExams(prev => [...prev.filter(e => e.id !== res.id), res]);
         }
-        try { sessionStorage.removeItem('oep_admin_catalog_cache'); } catch(e) {}
+        try { 
+          sessionStorage.removeItem('oep_admin_catalog_cache');
+          sessionStorage.removeItem(ADMIN_CACHE_KEY); 
+        } catch(e) {}
       } else if (activeTab === 'banks' || activeTab === 'practice') {
         if (!formData.examId) { alert("Please select an exam."); return; }
         
@@ -2556,6 +2562,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       setSelectedItemIds(new Set());
       try {
         sessionStorage.removeItem('oep_admin_catalog_cache');
+        sessionStorage.removeItem(ADMIN_CACHE_KEY);
       } catch(e) {}
 
       alert(`🎉 Batch Monetization Applied Successfully!\n\nUpdated ${total} items:\n• ${freeCount} Free demo test(s)\n• ${premiumCount} Premium test(s) at ₹${batchOfferPrice} (MRP ₹${batchMrpPrice})`);

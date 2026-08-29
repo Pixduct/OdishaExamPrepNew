@@ -1,10 +1,19 @@
-# Memory — 🎯 Exam Detail Mock Test Hero Strict Scoping, 0-Question Defense & Hostinger Vendor Chunking Fix
+# Memory — 🎯 Default Light Theme & English Language, Mock Test Hero Scoping, 0-Question Defense & Production Chunking Fix
 
-Last updated: August 29, 2026, 09:07 IST
+Last updated: August 29, 2026, 09:12 IST
 
 ## What was built
 
-### 1. Exam Detail Hero Module Strict Mock Test Scoping (`src/App.tsx`)
+### 1. Default Light Theme & English Language for First-Time Visitors (`src/lib/themeStore.ts`, `src/lib/LanguageContext.tsx`, `index.html`)
+- **Default Theme (Light / Day Mode)**:
+  - Updated `getStoredTheme()` in `src/lib/themeStore.ts` to return `'light'` when no user preference exists in `localStorage`.
+  - Updated the pre-hydration anti-flicker script and body background in `index.html` to default to Light Mode (`#FAF8F5`).
+- **Default Language (English)**:
+  - Updated `getStoredLanguage()` in `src/lib/LanguageContext.tsx` to return `'en'` when no user preference exists in `localStorage`.
+  - Updated the pre-hydration anti-flicker script in `index.html` to default to `en`.
+- **Preserved User Toggles**: Users can still freely switch to Night / Dark Mode (`🌙`) and Odia (`ଓଡ଼ିଆ`) using the navbar toggles, with preferences saved in `localStorage`.
+
+### 2. Exam Detail Hero Module Strict Mock Test Scoping (`src/App.tsx`)
 - **Strict Mock-Tests-Only Hero Banner**:
   - Restructured the top hero module in `ExamDetailView` in `src/App.tsx` (`L9458–L9790`) to strictly query `examMockTests` belonging to `selectedExam` (`cfg.examId === selectedExam || mt.examId === selectedExam`).
   - Completely removed the generic `else if (firstTopicBank)` fallback that previously displayed Chapter-Wise Drills (such as *"Current Affairs, Sports, Awards & Important Days"*) in the top hero position.

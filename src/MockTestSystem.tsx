@@ -141,6 +141,7 @@ interface MockTestProps {
   test: {
     id: string;
     title: string;
+    examId?: string;
     durationMinutes: number;
     totalMarks?: number;
     negativeMarking?: number;

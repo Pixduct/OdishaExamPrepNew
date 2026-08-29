@@ -464,7 +464,7 @@ const KNOWN_DIAGRAM_TYPES = new Set([
   'matrix', 'grid', 'distance', 'cone', 'probability', 'sequence', 'equation',
   'quadratic', 'sphereDivision', 'boatStream', 'ratio', 'statistics', 'profitLoss',
   'cylinder', 'numberTheory', 'square', 'rightTriangle', 'parallelogram', 'cube',
-  'trapezium', 'semicircle', 'cuboid', 'equilateralTriangle', 'vector', 'universal'
+  'trapezium', 'semicircle', 'cuboid', 'equilateralTriangle', 'vector', 'universal', 'venn'
 ]);
 
 /**
@@ -1968,6 +1968,363 @@ function renderMathBlock(
   );
 }
 
+export interface VennSet {
+  name: string;
+  count: number;
+}
+
+export interface VennModel {
+  total?: number;
+  setA: VennSet;
+  setB: VennSet;
+  setC?: VennSet;
+  interAB: number;
+  interBC?: number;
+  interAC?: number;
+  interABC?: number;
+  onlyA: number;
+  onlyB: number;
+  onlyC?: number;
+  onlyAB?: number;
+  onlyBC?: number;
+  onlyAC?: number;
+  centerABC?: number;
+  union: number;
+  none?: number;
+}
+
+export function tryExtractVennData(text: string): VennModel | null {
+  if (!text || text.length < 30) return null;
+
+  const hasVennClues = /survey\s*of|own\s*(?:both|all)|like\s*(?:both|all)|play\s*(?:both|all)|speak\s*(?:both|all)|passed\s*in\s*both|all\s*three|venn\s*diagram|do\s*not\s*own/i.test(text);
+  if (!hasVennClues) return null;
+
+  const lines = text.split(/[\n•\-]+/).map(l => l.trim()).filter(Boolean);
+
+  let total: number | undefined;
+  let setA: VennSet | null = null;
+  let setB: VennSet | null = null;
+  let setC: VennSet | null = null;
+  let interAB = 0;
+  let interBC = 0;
+  let interAC = 0;
+  let interABC = 0;
+
+  const totalMatch = text.match(/(?:survey\s*of|group\s*of|total\s*(?:of|population|people|students|employees)?\s*[=:]?\s*)(\d[\d,]*)/i);
+  if (totalMatch) {
+    total = parseInt(totalMatch[1].replace(/,/g, ''), 10);
+  }
+
+  for (const line of lines) {
+    const allThreeMatch = line.match(/(\d+)\s*(?:own|like|play|speak|study|have|passed\s*in)?\s*all\s*three/i);
+    if (allThreeMatch) {
+      interABC = parseInt(allThreeMatch[1], 10);
+      break;
+    }
+  }
+
+  const singleSetRegex = /^(\d+)\s*(?:own|like|play|speak|study|have|passed\s*in)?\s*(?:a|an|the)?\s*([a-zA-Z\s]{2,20})$/i;
+  const bothRegex = /^(\d+)\s*(?:own|like|play|speak|study|have|passed\s*in)?\s*(?:both)?\s*(?:a|an|the)?\s*([a-zA-Z\s]{2,15})\s+and\s+(?:a|an|the)?\s*([a-zA-Z\s]{2,15})$/i;
+
+  const singles: { count: number; name: string }[] = [];
+  const doubles: { count: number; name1: string; name2: string }[] = [];
+
+  for (const line of lines) {
+    if (/all\s*three/i.test(line) || /survey\s*of|how\s*many|do\s*not\s*own/i.test(line)) continue;
+
+    const bothMatch = line.match(bothRegex);
+    if (bothMatch) {
+      doubles.push({
+        count: parseInt(bothMatch[1], 10),
+        name1: bothMatch[2].trim().toLowerCase(),
+        name2: bothMatch[3].trim().toLowerCase()
+      });
+      continue;
+    }
+
+    const singleMatch = line.match(singleSetRegex);
+    if (singleMatch) {
+      const name = singleMatch[2].trim();
+      if (!name.toLowerCase().includes('both') && !name.toLowerCase().includes('all') && !name.toLowerCase().includes('people') && !name.toLowerCase().includes('total')) {
+        singles.push({
+          count: parseInt(singleMatch[1], 10),
+          name: name.charAt(0).toUpperCase() + name.slice(1)
+        });
+      }
+    }
+  }
+
+  if (singles.length < 2) return null;
+
+  setA = singles[0];
+  setB = singles[1];
+  if (singles.length >= 3) {
+    setC = singles[2];
+  }
+
+  const matchSet = (str: string, setObj: VennSet | null) => {
+    if (!setObj) return false;
+    return str.includes(setObj.name.toLowerCase()) || setObj.name.toLowerCase().includes(str);
+  };
+
+  for (const d of doubles) {
+    if (matchSet(d.name1, setA) && matchSet(d.name2, setB) || matchSet(d.name1, setB) && matchSet(d.name2, setA)) {
+      interAB = d.count;
+    } else if (setC && (matchSet(d.name1, setB) && matchSet(d.name2, setC) || matchSet(d.name1, setC) && matchSet(d.name2, setB))) {
+      interBC = d.count;
+    } else if (setC && (matchSet(d.name1, setA) && matchSet(d.name2, setC) || matchSet(d.name1, setC) && matchSet(d.name2, setA))) {
+      interAC = d.count;
+    }
+  }
+
+  if (setC) {
+    const onlyAB = Math.max(0, interAB - interABC);
+    const onlyBC = Math.max(0, interBC - interABC);
+    const onlyAC = Math.max(0, interAC - interABC);
+
+    const onlyA = Math.max(0, setA.count - onlyAB - onlyAC - interABC);
+    const onlyB = Math.max(0, setB.count - onlyAB - onlyBC - interABC);
+    const onlyC = Math.max(0, setC.count - onlyAC - onlyBC - interABC);
+
+    const union = onlyA + onlyB + onlyC + onlyAB + onlyBC + onlyAC + interABC;
+    const none = total !== undefined ? Math.max(0, total - union) : undefined;
+
+    return {
+      total,
+      setA,
+      setB,
+      setC,
+      interAB,
+      interBC,
+      interAC,
+      interABC,
+      onlyA,
+      onlyB,
+      onlyC,
+      onlyAB,
+      onlyBC,
+      onlyAC,
+      centerABC: interABC,
+      union,
+      none
+    };
+  } else {
+    const onlyA = Math.max(0, setA.count - interAB);
+    const onlyB = Math.max(0, setB.count - interAB);
+    const union = onlyA + onlyB + interAB;
+    const none = total !== undefined ? Math.max(0, total - union) : undefined;
+
+    return {
+      total,
+      setA,
+      setB,
+      interAB,
+      onlyA,
+      onlyB,
+      union,
+      none
+    };
+  }
+}
+
+export const VennDiagramGraphic: React.FC<{ venn: VennModel }> = ({ venn }) => {
+  const [highlightRegion, setHighlightRegion] = React.useState<string | null>(null);
+
+  const is3Set = !!venn.setC;
+
+  return (
+    <div className="my-4 p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-blue-50/30 dark:from-slate-900 dark:to-slate-800/60 border border-blue-500/20 dark:border-blue-400/20 shadow-sm max-w-full">
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+          <span>⭕ Solved Venn Diagram</span>
+          {venn.total && (
+            <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/40 px-2 py-0.5 rounded-full border border-blue-200/50">
+              Total: {venn.total}
+            </span>
+          )}
+        </div>
+        {venn.none !== undefined && (
+          <span className="text-[11px] font-black text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-800">
+            None (Outside) = {venn.none}
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+        {/* SVG Venn Diagram Graphic */}
+        <div className="relative w-[280px] h-[260px] sm:w-[320px] sm:h-[280px] shrink-0">
+          <svg viewBox="0 0 380 320" className="w-full h-full drop-shadow-md">
+            {is3Set ? (
+              <>
+                {/* Circle A (Top Left) */}
+                <circle 
+                  cx={150} 
+                  cy={130} 
+                  r={75} 
+                  fill="#2563EB" 
+                  fillOpacity={highlightRegion === 'A' ? 0.35 : 0.18} 
+                  stroke="#2563EB" 
+                  strokeWidth={highlightRegion === 'A' ? 3.5 : 2.5} 
+                  className="transition-all duration-200"
+                />
+                {/* Circle B (Top Right) */}
+                <circle 
+                  cx={230} 
+                  cy={130} 
+                  r={75} 
+                  fill="#10B981" 
+                  fillOpacity={highlightRegion === 'B' ? 0.35 : 0.18} 
+                  stroke="#10B981" 
+                  strokeWidth={highlightRegion === 'B' ? 3.5 : 2.5} 
+                  className="transition-all duration-200"
+                />
+                {/* Circle C (Bottom Center) */}
+                <circle 
+                  cx={190} 
+                  cy={195} 
+                  r={75} 
+                  fill="#F59E0B" 
+                  fillOpacity={highlightRegion === 'C' ? 0.35 : 0.18} 
+                  stroke="#F59E0B" 
+                  strokeWidth={highlightRegion === 'C' ? 3.5 : 2.5} 
+                  className="transition-all duration-200"
+                />
+
+                {/* Region Text Labels */}
+                {/* Only A */}
+                <text x={110} y={120} textAnchor="middle" className="text-sm font-black fill-blue-700 dark:fill-blue-300 select-none">
+                  {venn.onlyA}
+                </text>
+                {/* Only B */}
+                <text x={270} y={120} textAnchor="middle" className="text-sm font-black fill-emerald-700 dark:fill-emerald-300 select-none">
+                  {venn.onlyB}
+                </text>
+                {/* Only C */}
+                <text x={190} y={245} textAnchor="middle" className="text-sm font-black fill-amber-700 dark:fill-amber-300 select-none">
+                  {venn.onlyC}
+                </text>
+
+                {/* Overlap AB */}
+                <text x={190} y={95} textAnchor="middle" className="text-xs font-black fill-purple-700 dark:fill-purple-300 select-none">
+                  {venn.onlyAB}
+                </text>
+                {/* Overlap AC */}
+                <text x={145} y={165} textAnchor="middle" className="text-xs font-black fill-indigo-700 dark:fill-indigo-300 select-none">
+                  {venn.onlyAC}
+                </text>
+                {/* Overlap BC */}
+                <text x={235} y={165} textAnchor="middle" className="text-xs font-black fill-teal-700 dark:fill-teal-300 select-none">
+                  {venn.onlyBC}
+                </text>
+                {/* Center All 3 */}
+                <text x={190} y={145} textAnchor="middle" className="text-sm font-black fill-rose-600 dark:fill-rose-400 select-none drop-shadow-sm">
+                  {venn.centerABC}
+                </text>
+
+                {/* Outer Circle Badges */}
+                <text x={95} y={45} className="text-xs font-extrabold fill-blue-700 dark:fill-blue-400 select-none">
+                  {venn.setA.name} ({venn.setA.count})
+                </text>
+                <text x={285} y={45} textAnchor="end" className="text-xs font-extrabold fill-emerald-700 dark:fill-emerald-400 select-none">
+                  {venn.setB.name} ({venn.setB.count})
+                </text>
+                <text x={190} y={295} textAnchor="middle" className="text-xs font-extrabold fill-amber-700 dark:fill-amber-400 select-none">
+                  {venn.setC?.name} ({venn.setC?.count})
+                </text>
+              </>
+            ) : (
+              <>
+                {/* 2-Set Circles */}
+                <circle 
+                  cx={140} 
+                  cy={140} 
+                  r={75} 
+                  fill="#2563EB" 
+                  fillOpacity={0.2} 
+                  stroke="#2563EB" 
+                  strokeWidth={2.5} 
+                />
+                <circle 
+                  cx={240} 
+                  cy={140} 
+                  r={75} 
+                  fill="#10B981" 
+                  fillOpacity={0.2} 
+                  stroke="#10B981" 
+                  strokeWidth={2.5} 
+                />
+                <text x={95} y={145} textAnchor="middle" className="text-sm font-black fill-blue-700 dark:fill-blue-300 select-none">
+                  {venn.onlyA}
+                </text>
+                <text x={285} y={145} textAnchor="middle" className="text-sm font-black fill-emerald-700 dark:fill-emerald-300 select-none">
+                  {venn.onlyB}
+                </text>
+                <text x={190} y={145} textAnchor="middle" className="text-sm font-black fill-purple-700 dark:fill-purple-300 select-none">
+                  {venn.interAB}
+                </text>
+
+                <text x={95} y={55} className="text-xs font-extrabold fill-blue-700 dark:fill-blue-400 select-none">
+                  {venn.setA.name} ({venn.setA.count})
+                </text>
+                <text x={285} y={55} textAnchor="end" className="text-xs font-extrabold fill-emerald-700 dark:fill-emerald-400 select-none">
+                  {venn.setB.name} ({venn.setB.count})
+                </text>
+              </>
+            )}
+          </svg>
+        </div>
+
+        {/* Region Breakdown Cards */}
+        <div className="flex-1 w-full max-w-md">
+          <div className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+            Disjoint Region Breakdown
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div 
+              onMouseEnter={() => setHighlightRegion('A')}
+              onMouseLeave={() => setHighlightRegion(null)}
+              className="p-2 rounded-xl bg-white/80 dark:bg-slate-800/80 border border-blue-200 dark:border-blue-800 flex justify-between items-center"
+            >
+              <span className="text-blue-700 dark:text-blue-300 font-bold truncate">Only {venn.setA.name}</span>
+              <span className="font-black text-slate-900 dark:text-white">{venn.onlyA}</span>
+            </div>
+            <div 
+              onMouseEnter={() => setHighlightRegion('B')}
+              onMouseLeave={() => setHighlightRegion(null)}
+              className="p-2 rounded-xl bg-white/80 dark:bg-slate-800/80 border border-emerald-200 dark:border-emerald-800 flex justify-between items-center"
+            >
+              <span className="text-emerald-700 dark:text-emerald-300 font-bold truncate">Only {venn.setB.name}</span>
+              <span className="font-black text-slate-900 dark:text-white">{venn.onlyB}</span>
+            </div>
+            {venn.setC && (
+              <div 
+                onMouseEnter={() => setHighlightRegion('C')}
+                onMouseLeave={() => setHighlightRegion(null)}
+                className="p-2 rounded-xl bg-white/80 dark:bg-slate-800/80 border border-amber-200 dark:border-amber-800 flex justify-between items-center"
+              >
+                <span className="text-amber-700 dark:text-amber-300 font-bold truncate">Only {venn.setC.name}</span>
+                <span className="font-black text-slate-900 dark:text-white">{venn.onlyC}</span>
+              </div>
+            )}
+            {venn.centerABC !== undefined && (
+              <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 flex justify-between items-center">
+                <span className="text-rose-700 dark:text-rose-300 font-black">All Three</span>
+                <span className="font-black text-rose-800 dark:text-rose-200">{venn.centerABC}</span>
+              </div>
+            )}
+            {venn.none !== undefined && (
+              <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 flex justify-between items-center col-span-2">
+                <span className="text-amber-800 dark:text-amber-200 font-black">None of these (Outside)</span>
+                <span className="font-black text-amber-900 dark:text-amber-100 text-sm">{venn.none}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const MathTextRenderer: React.FC<MathTextRendererProps> = React.memo(({
   text,
   isUser = false,
@@ -1977,30 +2334,74 @@ export const MathTextRenderer: React.FC<MathTextRendererProps> = React.memo(({
 }: MathTextRendererProps) => {
   const rawContent = text || '';
 
-  // Normalize literal escape sequences (e.g. "\\n" stored as two chars in DB)
-  // to their real control character equivalents before block splitting.
-  // This fixes questions where \n was stored literally instead of as a real newline.
   const content = rawContent
     .replace(/\\n/g, '\n')
     .replace(/\\t/g, '\t')
     .replace(/\\r/g, '');
 
+  const vennData = React.useMemo(() => {
+    return isOption ? null : tryExtractVennData(content);
+  }, [content, isOption]);
+
+  const [activeVennView, setActiveVennView] = React.useState<'diagram' | 'text'>('diagram');
+
   const blocks = content ? splitTextIntoBlocks(content) : [];
 
   return (
-    <span className={cn('math-text-container break-words', className)}>
-      {blocks.map((block, bIdx) => {
-        if (block.type === 'table' && block.tableData) {
-          return (
-            <TableRenderer
-              key={`table-${bIdx}`}
-              tableData={block.tableData}
-              isOption={isOption}
-            />
-          );
-        }
-        return renderMathBlock(block.content, isUser, isOption, blockSize, `block-${bIdx}`);
-      })}
+    <span className={cn('math-text-container break-words block', className)}>
+      {vennData && (
+        <div className="mb-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700">
+              <button
+                type="button"
+                onClick={() => setActiveVennView('diagram')}
+                className={cn(
+                  "px-3 py-1 rounded-lg text-xs font-black transition-all",
+                  activeVennView === 'diagram'
+                    ? "bg-brand-600 text-white shadow-xs"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                )}
+              >
+                ⭕ Venn Diagram View
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveVennView('text')}
+                className={cn(
+                  "px-3 py-1 rounded-lg text-xs font-black transition-all",
+                  activeVennView === 'text'
+                    ? "bg-brand-600 text-white shadow-xs"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                )}
+              >
+                📋 Text Only View
+              </button>
+            </div>
+          </div>
+
+          {activeVennView === 'diagram' && (
+            <VennDiagramGraphic venn={vennData} />
+          )}
+        </div>
+      )}
+
+      {(!vennData || activeVennView === 'text' || activeVennView === 'diagram') && (
+        <>
+          {blocks.map((block, bIdx) => {
+            if (block.type === 'table' && block.tableData) {
+              return (
+                <TableRenderer
+                  key={`table-${bIdx}`}
+                  tableData={block.tableData}
+                  isOption={isOption}
+                />
+              );
+            }
+            return renderMathBlock(block.content, isUser, isOption, blockSize, `block-${bIdx}`);
+          })}
+        </>
+      )}
     </span>
   );
 });

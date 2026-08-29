@@ -106,6 +106,7 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`MultiTrackCustomMusicPool`** | Media / Audio | [`public/memory-shorts-creator.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/memory-shorts-creator.html) | Multi-track custom audio pool, live audition player chips, cyclic batch rotation | Memory Shorts Creator | Active |
 | **`EditorialMasterclassCoverBanner`** | Graphic / Cover Engine | [`automations/shared/drive_image_sanitizer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/drive_image_sanitizer.py) | Google Drive Auto-Stream Sanitizer, Supabase Storage CDN Cache, 1200x630 Branded Vector Fallback | Strategy Blogs, Telegram, Social Shares | Active |
 | **`AdminUsersManagerTable`** | Admin / Data Table | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L4464-L4535) | 4-Column Table, Avatar Badges, Global Master Access Controls, Manual Content Grant & Revocation, Dynamic Loading Spinner | AdminPanel.tsx (Users tab) | Active |
+| **`HighConversionDualTierPaywallModal`** | Monetization / Checkout | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L6440-L6700) | 2-Tier Interactive Plan Selector, Anchor Savings Callout, Glowing Recommended Badge, Dynamic Razorpay Payload Routing | App.tsx (Single Item & Bundle Unlock) | Active |
 
 ---
 
@@ -3637,6 +3638,28 @@ Last updated: August 29, 2026
 **Pattern notes:**
 - **Dual Identifier Compatibility:** Deduplication and lookups safely evaluate `item?.id || item?.uid` to guarantee seamless compatibility between Supabase Auth and public profiles.
 - **On-Demand Background Sync:** Triggers automatic user synchronization if the local cache is empty upon switching to the `users` tab.
+
+---
+
+### `HighConversionDualTierPaywallModal`
+
+File: `src/App.tsx` (`L6440–L6700`)
+Last updated: August 29, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Modal Chassis** | `bg-[#0B0F19] rounded-t-[2.45rem] sm:rounded-[2.45rem] p-4 sm:p-6 pb-5 sm:pb-7 relative overflow-hidden` with ambient radial backlights (`bg-brand-500/10`, `bg-indigo-500/10`) |
+| **Recommended Bundle Tier** | `bg-gradient-to-r from-brand-950/95 via-slate-900/95 to-indigo-950/95 border-brand-500/90 shadow-[0_0_25px_rgba(37,99,235,0.25)] ring-1 ring-brand-400/40` |
+| **Single Item Tier** | `bg-slate-900/95 border-slate-400/60 shadow-md ring-1 ring-slate-400/30` when active / `bg-white/[0.02] border-white/10 opacity-65` when inactive |
+| **Value Anchor Callout** | `bg-gradient-to-r from-emerald-500/10 via-brand-500/10 to-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-1.5` (*"Only ₹X more to unlock ENTIRE exam vault"*) |
+| **Dynamic Checklist** | Glass card (`bg-white/[0.02] border border-white/[0.06] rounded-[1.25rem]`) with staggered green checkmarks (`CheckCircle2`) comparing master pass vs single test |
+| **Primary Action Button** | `bg-gradient-to-r from-brand-600 via-brand-500 to-indigo-600 shadow-[0_6px_20px_rgba(37,99,235,0.25)] hover:shadow-[0_12px_35px_rgba(37,99,235,0.4)] text-white font-black` |
+| **Trust Footer** | 3-Badge row: Razorpay 256-bit SSL (`Lock`), Instant Activation (`Zap`), and 100% Verified (`ShieldCheck`) |
+
+**Pattern notes:**
+- **Psychological Value Anchoring:** When opening from an individual item, presents the single test (e.g. ₹29) alongside the complete exam pass (e.g. ₹199), emphasizing that the complete pass is only ₹170 more and unlocks all 40+ tests and banks.
+- **Dynamic Order Routing:** Switches Razorpay order creation and payment verification payloads between `exam_bundle_${examId}` and `single_item_id` in real time with zero friction.
+
 
 
 

@@ -1,6 +1,13 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] 💎 High-Conversion Dual-Tier Upsell Architecture for Single Product Checkout (`src/App.tsx`, `context/ui-registry.md`):
+  1. **Dual-Tier Interactive Plan Selector**: When an aspirant opens the unlock modal from an individual test or bank (e.g. *Master Practice Test 06* at ₹29), the modal showcases a high-conversion 2-tier plan selector:
+     - **🌟 Complete Exam All-Access Pass (Recommended / Default)**: Glowing border (`ring-brand-400/40`), `🔥 BEST VALUE` badge, unlocking all 40+ mock tests, banks, PDF booklets, and updates for ₹199 (Save 90%).
+     - **📄 Single Item Only**: Clean secondary card unlocking only that specific test for ₹29.
+  2. **Anchor Pricing Math & Value Callout**: Dynamically displays *"Only ₹170 more than a single test to unlock the ENTIRE exam vault!"*, anchoring candidate perception to the massive value jump.
+  3. **Fluid 1-Click Toggle & Dynamic Routing**: Seamlessly switches features, pricing, and Razorpay checkout payloads (`exam_bundle_${examId}` vs `single_item_id`) in real time.
+  4. **Trust & Security Badges**: Added Razorpay 256-bit SSL, instant activation, and 4,200+ enrolled social proof indicators.
 - [x] 📝 Enterprise Google Sheet Editorial Queue & Custom Content Engine (`automations/shared/google_sheet_queue.py`, `automations/shared/drive_image_sanitizer.py`, `automations/seo_blog_engine.py`):
   1. **Google Sheet Editorial Ingestion**: Connects to `Odisha_Editorial_Queue` (or `Odisha_Blog_Queue` / `Odisha_MCQ_Engine` tab) to fetch `Pending` custom articles with target exam, title, custom image link, and focus notes.
   2. **Enterprise Image Sanitizer & Drive Resolver**: Automatically converts Google Drive share links (`/file/d/<id>/view`) to raw image binary streams, caching them into Supabase Storage CDN for 100% reliable OpenGraph and Telegram previews.

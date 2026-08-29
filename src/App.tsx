@@ -70,7 +70,8 @@ import {
   Cpu,
   Sprout,
   Youtube,
-  Send
+  Send,
+  Crown
 } from 'lucide-react';
 import { Toaster, toast, useToasterStore } from 'react-hot-toast';
 import { useAuth } from './lib/AuthContext';
@@ -6455,243 +6456,403 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   )}
 
                   <AnimatePresence mode="wait">
-                    {paymentState === 'idle' && (
-                      <motion.div 
-                        key="idle"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.25 }}
-                        className="text-center space-y-3 sm:space-y-5 flex flex-col flex-1 py-1 mt-1 sm:mt-2.5 overflow-visible"
-                      >
-                        {/* Pulsing visual badge */}
+                    {paymentState === 'idle' && (() => {
+                      const isSingleItemPaywall = Boolean(
+                        paywallProductType !== 'exam_bundle' && 
+                        paywallProductType !== 'full_access' && 
+                        paywallItemId && 
+                        !paywallItemId.startsWith('exam_bundle_')
+                      );
+
+                      const allFlatBanks = Object.values(dynamicQuestionBanks || {}).flat() as any[];
+                      const activeExamForBundle = exams.find(e => e.id === selectedExam) || 
+                        exams.find(e => {
+                          const foundTest = mockTests.find(t => t.id === paywallItemId);
+                          const foundBank = allFlatBanks.find((b: any) => b.id === paywallItemId);
+                          return e.id === (foundTest?.examId || foundBank?.examId);
+                        }) || exams[0];
+
+                      let activeExamBundlePrice = 199;
+                      let activeExamBundleOriginalPrice = 1999;
+                      let activeExamBundleName = activeExamForBundle?.name || 'Complete Exam';
+
+                      if (activeExamForBundle?.description && typeof activeExamForBundle.description === 'string' && activeExamForBundle.description.startsWith('JSON_METADATA_')) {
+                        try {
+                          const meta = JSON.parse(activeExamForBundle.description.replace('JSON_METADATA_', ''));
+                          if (meta.price && Number(meta.price) > 0) activeExamBundlePrice = Number(meta.price);
+                          if (meta.originalPrice && Number(meta.originalPrice) > 0) activeExamBundleOriginalPrice = Number(meta.originalPrice);
+                        } catch (e) {}
+                      }
+
+                      const isBundleSelected = !isSingleItemPaywall || checkoutTier === 'bundle';
+                      const effectivePrice = isBundleSelected ? (isSingleItemPaywall ? activeExamBundlePrice : paywallPrice) : paywallPrice;
+                      const effectiveOriginalPrice = isBundleSelected ? (isSingleItemPaywall ? activeExamBundleOriginalPrice : paywallOriginalPrice) : paywallOriginalPrice;
+                      const effectiveProductId = isBundleSelected ? (isSingleItemPaywall ? `exam_bundle_${activeExamForBundle?.id || selectedExam}` : (paywallItemId || 'full_access')) : (paywallItemId || 'full_access');
+                      const effectiveProductType = isBundleSelected ? 'exam_bundle' : paywallProductType;
+                      const effectiveTitle = isBundleSelected ? (isSingleItemPaywall ? `${activeExamBundleName} Full Access Pass` : paywallItemTitle) : paywallItemTitle;
+                      const priceDiff = Math.max(0, activeExamBundlePrice - paywallPrice);
+                      const bundleDiscountPercent = Math.round(((activeExamBundleOriginalPrice - activeExamBundlePrice) / activeExamBundleOriginalPrice) * 100) || 90;
+                      const singleDiscountPercent = Math.round(((paywallOriginalPrice - paywallPrice) / paywallOriginalPrice) * 100) || 97;
+
+                      const activeFeatures = isBundleSelected ? [
+                        `Unlocks ALL ${mockTests.filter(t => t.examId === activeExamForBundle?.id).length || 30}+ Mock Tests & Live Mocks`,
+                        'Unlocks ALL Question Banks & Practice Sets',
+                        'All Chapter-Wise PDF Booklets & Notes',
+                        'Detailed Step-by-Step AI Solutions & Analytics',
+                        'Lifetime Access & Free Future Updates'
+                      ] : [
+                        `Full Access to ${paywallItemTitle}`,
+                        'Detailed Step-by-Step Solutions',
+                        'Unlimited Practice Mode & Retakes',
+                        'Performance & Accuracy Breakdown'
+                      ];
+
+                      return (
                         <motion.div 
-                          animate={{ y: [0, -4, 0] }}
-                          transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-                          className="w-11 h-11 sm:w-14 sm:h-14 bg-gradient-to-tr from-brand-600 via-brand-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto shadow-[0_6px_20px_rgba(37,99,235,0.25)] border border-white/10 relative group shrink-0"
+                          key="idle"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.25 }}
+                          className="text-center space-y-3 sm:space-y-4 flex flex-col flex-1 py-1 mt-0.5 sm:mt-1.5 overflow-visible"
                         >
-                          <Award className="text-white w-5.5 h-5.5 sm:w-7 sm:h-7 filter drop-shadow-[0_2px_6px_rgba(255,255,255,0.2)]" />
-                          <div className="absolute inset-0 border border-brand-400/25 rounded-2xl animate-ping opacity-25 pointer-events-none" />
-                        </motion.div>
-                        
-                        <div className="space-y-1 sm:space-y-1.5 shrink-0">
-                          <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight leading-tight px-1 font-sans">
-                            {paywallItemTitle.includes('Full Access') ? (
-                              <>Unlock <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-brand-300 via-pink-200 to-indigo-300">Full Access</span></>
+                          {/* Pulsing visual badge */}
+                          <motion.div 
+                            animate={{ y: [0, -3, 0] }}
+                            transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+                            className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-tr from-brand-600 via-brand-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto shadow-[0_6px_20px_rgba(37,99,235,0.25)] border border-white/10 relative group shrink-0"
+                          >
+                            {isBundleSelected ? (
+                              <Crown className="text-white w-5 h-5 sm:w-6 sm:h-6 filter drop-shadow-[0_2px_6px_rgba(255,255,255,0.2)]" />
                             ) : (
-                              <>Unlock <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-brand-300 via-pink-200 to-indigo-300">{paywallItemTitle}</span></>
+                              <Award className="text-white w-5 h-5 sm:w-6 sm:h-6 filter drop-shadow-[0_2px_6px_rgba(255,255,255,0.2)]" />
                             )}
-                          </h2>
-                          <p className="text-slate-400 text-[11px] sm:text-xs font-medium leading-relaxed max-w-sm mx-auto">
-                            {paywallItemTitle.includes('Full Access') 
-                              ? 'Unlock full lifetime access to all Question Banks, Practice Mode, Premium Mock Tests, PDF notes, and any future content added to this exam.' 
-                              : `Unlock full lifetime access to this specific premium content, including detailed solutions and any future updates.`
-                            }
-                          </p>
-                        </div>
+                            <div className="absolute inset-0 border border-brand-400/25 rounded-2xl animate-ping opacity-25 pointer-events-none" />
+                          </motion.div>
+                          
+                          <div className="space-y-1 shrink-0">
+                            <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight leading-tight px-1 font-sans">
+                              {isSingleItemPaywall ? (
+                                <>Choose Your <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-brand-300 via-pink-200 to-indigo-300">Access Pass</span></>
+                              ) : paywallItemTitle.includes('Full Access') ? (
+                                <>Unlock <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-brand-300 via-pink-200 to-indigo-300">Full Access</span></>
+                              ) : (
+                                <>Unlock <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-brand-300 via-pink-200 to-indigo-300">{paywallItemTitle}</span></>
+                              )}
+                            </h2>
+                            <p className="text-slate-400 text-[11px] sm:text-xs font-medium leading-relaxed max-w-sm mx-auto">
+                              {isSingleItemPaywall 
+                                ? 'Get the complete exam vault for maximum savings, or unlock this single test.'
+                                : paywallItemTitle.includes('Full Access')
+                                ? 'Unlock full lifetime access to all Question Banks, Practice Mode, Premium Mock Tests, PDF notes, and any future content added to this exam.'
+                                : `Unlock full lifetime access to this specific premium content, including detailed solutions and any future updates.`
+                              }
+                            </p>
+                          </div>
 
-                        {/* Features Panel */}
-                        <motion.div 
-                          initial="hidden"
-                          animate="show"
-                          variants={{
-                            hidden: { opacity: 0 },
-                            show: {
-                              opacity: 1,
-                              transition: { staggerChildren: 0.06 }
-                            }
-                          }}
-                          className="space-y-1.5 sm:space-y-2 text-left bg-white/[0.02] border border-white/[0.06] p-3 sm:p-4 rounded-[1.25rem] backdrop-blur-md shrink-0"
-                        >
-                          {paywallFeatures.map((benefit, i) => (
-                            <motion.div 
-                              key={i} 
-                              variants={{
-                                hidden: { opacity: 0, x: -8 },
-                                show: { opacity: 1, x: 0 }
-                              }}
-                              className="flex items-center gap-2 sm:gap-2.5 text-slate-200 font-bold"
-                            >
-                              <div className="w-4.5 h-4.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
-                                <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                          {/* Dual-Tier Interactive Selector for Single Item Checkout */}
+                          {isSingleItemPaywall && (
+                            <div className="space-y-2 text-left my-1">
+                              {/* Option A: Complete Exam All-Access Pass (Highlighted Recommended Tier) */}
+                              <div 
+                                onClick={() => setCheckoutTier('bundle')}
+                                className={cn(
+                                  "p-3 sm:p-3.5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex items-center justify-between gap-3 group select-none",
+                                  checkoutTier === 'bundle'
+                                    ? "bg-gradient-to-r from-brand-950/95 via-slate-900/95 to-indigo-950/95 border-brand-500/90 shadow-[0_0_25px_rgba(37,99,235,0.25)] ring-1 ring-brand-400/40"
+                                    : "bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20 opacity-75"
+                                )}
+                              >
+                                <div className="flex items-start gap-2.5">
+                                  <div className={cn(
+                                    "w-4.5 h-4.5 rounded-full mt-0.5 flex items-center justify-center border transition-all shrink-0",
+                                    checkoutTier === 'bundle'
+                                      ? "border-brand-400 bg-brand-500 text-white shadow-sm"
+                                      : "border-slate-600 bg-white/5"
+                                  )}>
+                                    {checkoutTier === 'bundle' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                  </div>
+
+                                  <div className="space-y-0.5">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <span className="font-extrabold text-white text-xs sm:text-sm tracking-tight flex items-center gap-1">
+                                        🌟 Complete Exam Pass
+                                      </span>
+                                      <span className="text-[8.5px] font-black text-amber-300 uppercase tracking-wider bg-amber-500/20 border border-amber-400/30 px-1.5 py-0.5 rounded-full">
+                                        🔥 BEST VALUE
+                                      </span>
+                                    </div>
+                                    <p className="text-[10.5px] text-slate-300 font-medium leading-snug">
+                                      Unlocks <strong className="text-brand-300">ALL</strong> mock tests, banks, PDF notes & updates
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="text-right shrink-0">
+                                  <div className="text-sm sm:text-base font-black text-white font-mono">₹{activeExamBundlePrice}</div>
+                                  <div className="text-[10px] text-slate-500 line-through font-mono">₹{activeExamBundleOriginalPrice}</div>
+                                </div>
                               </div>
-                              <span className="text-[10.5px] sm:text-xs tracking-wide">{benefit}</span>
-                            </motion.div>
-                          ))}
-                        </motion.div>
 
-                        {/* Pricing Block */}
-                        <div className="space-y-2 sm:space-y-3 pt-0.5 shrink-0">
-                          <div className="flex flex-col items-center justify-center gap-1 sm:gap-0">
-                            <div className="flex items-center justify-center gap-2">
-                              <span className="text-sm sm:text-lg font-bold text-slate-500 line-through font-mono">₹{paywallOriginalPrice}</span>
-                              <span className="text-2xl sm:text-4xl font-black text-white font-mono tracking-tighter">₹{paywallPrice}</span>
-                              <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 sm:hidden">
-                                {Math.round(((paywallOriginalPrice - paywallPrice) / paywallOriginalPrice) * 100)}% OFF
+                              {/* Option B: Single Item Only */}
+                              <div 
+                                onClick={() => setCheckoutTier('single')}
+                                className={cn(
+                                  "p-2.5 sm:p-3 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex items-center justify-between gap-3 group select-none",
+                                  checkoutTier === 'single'
+                                    ? "bg-slate-900/95 border-slate-400/60 shadow-md ring-1 ring-slate-400/30"
+                                    : "bg-white/[0.02] border-white/10 hover:bg-white/[0.05] opacity-65"
+                                )}
+                              >
+                                <div className="flex items-start gap-2.5">
+                                  <div className={cn(
+                                    "w-4.5 h-4.5 rounded-full mt-0.5 flex items-center justify-center border transition-all shrink-0",
+                                    checkoutTier === 'single'
+                                      ? "border-slate-300 bg-slate-200 text-slate-900 shadow-sm"
+                                      : "border-slate-600 bg-white/5"
+                                  )}>
+                                    {checkoutTier === 'single' && <div className="w-1.5 h-1.5 rounded-full bg-slate-900" />}
+                                  </div>
+
+                                  <div className="space-y-0.5">
+                                    <span className="font-bold text-slate-200 text-xs tracking-tight block line-clamp-1">
+                                      📄 {paywallItemTitle} Only
+                                    </span>
+                                    <p className="text-[10px] text-slate-400 font-medium">
+                                      Unlocks only this 1 specific test / bank
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="text-right shrink-0">
+                                  <div className="text-xs sm:text-sm font-black text-slate-300 font-mono">₹{paywallPrice}</div>
+                                  <div className="text-[9.5px] text-slate-500 line-through font-mono">₹{paywallOriginalPrice}</div>
+                                </div>
+                              </div>
+
+                              {/* Dynamic Upsell Value Anchor Callout */}
+                              {checkoutTier === 'bundle' && (
+                                <div className="bg-gradient-to-r from-emerald-500/10 via-brand-500/10 to-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-1.5 flex items-center justify-between text-[10.5px] font-bold text-emerald-300">
+                                  <span className="flex items-center gap-1.5">
+                                    <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                                    Only ₹{priceDiff} more to unlock the ENTIRE exam vault!
+                                  </span>
+                                  <span className="text-[9.5px] font-black text-white bg-emerald-500/20 px-2 py-0.5 rounded-md border border-emerald-500/30 shrink-0">
+                                    Save {bundleDiscountPercent}%
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Features Panel */}
+                          <motion.div 
+                            initial="hidden"
+                            animate="show"
+                            variants={{
+                              hidden: { opacity: 0 },
+                              show: {
+                                opacity: 1,
+                                transition: { staggerChildren: 0.05 }
+                              }
+                            }}
+                            className="space-y-1.5 text-left bg-white/[0.02] border border-white/[0.06] p-3 sm:p-3.5 rounded-[1.25rem] backdrop-blur-md shrink-0"
+                          >
+                            {activeFeatures.map((benefit, i) => (
+                              <motion.div 
+                                key={i} 
+                                variants={{
+                                  hidden: { opacity: 0, x: -6 },
+                                  show: { opacity: 1, x: 0 }
+                                }}
+                                className="flex items-center gap-2 text-slate-200 font-bold"
+                              >
+                                <div className="w-4 h-4 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                                  <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
+                                </div>
+                                <span className="text-[10px] sm:text-[11px] tracking-wide">{benefit}</span>
+                              </motion.div>
+                            ))}
+                          </motion.div>
+
+                          {/* Pricing Block */}
+                          <div className="space-y-2 sm:space-y-2.5 pt-0.5 shrink-0">
+                            <div className="flex flex-col items-center justify-center gap-0.5">
+                              <div className="flex items-center justify-center gap-2">
+                                <span className="text-xs sm:text-base font-bold text-slate-500 line-through font-mono">₹{effectiveOriginalPrice}</span>
+                                <span className="text-2xl sm:text-4xl font-black text-white font-mono tracking-tighter">₹{effectivePrice}</span>
+                                <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                                  {Math.round(((effectiveOriginalPrice - effectivePrice) / effectiveOriginalPrice) * 100)}% OFF
+                                </span>
+                              </div>
+                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                Lifetime Access • Instant Unlock
                               </span>
                             </div>
-                            <span className="hidden sm:inline-block text-[9px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 mt-1">
-                              {Math.round(((paywallOriginalPrice - paywallPrice) / paywallOriginalPrice) * 100)}% OFF • Lifetime Access
-                            </span>
-                            <span className="sm:hidden text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                              Lifetime Access Included
-                            </span>
-                          </div>
 
-                          {/* CTA Button */}
-                          <Button 
-                            className="w-full h-11 sm:h-12 rounded-xl text-sm sm:text-base font-black bg-gradient-to-r from-brand-600 via-brand-500 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white shadow-[0_6px_20px_rgba(37,99,235,0.25)] hover:shadow-[0_12px_35px_rgba(37,99,235,0.4)] group/btn relative overflow-hidden transition-all duration-300 active:scale-[0.98] border border-white/10"
-                            onClick={async () => {
-                            try {
-                              const res = await loadRazorpay();
-                              if (!res) {
-                                alert('Failed to load payment gateway SDK. Please check your internet connection.');
-                                // Reset paymentState just in case
-                                setPaymentState('idle');
-                                return;
-                              }
-
-                              // 1. Create order on the server
-                              const orderRes = await fetch('/api/payment/order', {
-                                method: 'POST',
-                                headers: {
-                                  'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({
-                                  productId: paywallItemId || 'full_access',
-                                  productType: paywallProductType,
-                                  userId: profile?.uid || user?.id || 'unknown',
-                                  currency: 'INR'
-                                })
-                              });
-
-                              let orderData;
-                              const orderText = await orderRes.text();
+                            {/* CTA Button */}
+                            <Button 
+                              className="w-full h-11 sm:h-12 rounded-xl text-sm sm:text-base font-black bg-gradient-to-r from-brand-600 via-brand-500 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white shadow-[0_6px_20px_rgba(37,99,235,0.25)] hover:shadow-[0_12px_35px_rgba(37,99,235,0.4)] group/btn relative overflow-hidden transition-all duration-300 active:scale-[0.98] border border-white/10"
+                              onClick={async () => {
                               try {
-                                orderData = orderText ? JSON.parse(orderText) : {};
-                              } catch (e) {
-                                throw new Error(`Invalid response from server. Status: ${orderRes.status}. If you just updated the server, please restart the dev server (npm run dev).`);
-                              }
-
-                              if (!orderRes.ok) {
-                                throw new Error(orderData.message || `Failed to create payment order (status ${orderRes.status}).`);
-                              }
-
-                              if (!orderData.orderId) {
-                                throw new Error('Server did not return a valid order ID. Please verify your Razorpay API key configurations in .env and restart your dev server.');
-                              }
-
-                              // Track pending payment state in localStorage (essential for auto-recovery on page reloads/switches)
-                              localStorage.setItem('oep_pending_payment', JSON.stringify({
-                                orderId: orderData.orderId,
-                                productId: paywallItemId || 'full_access',
-                                timestamp: Date.now()
-                              }));
-
-                              // 2. Open Razorpay checkout with the orderId
-                              const options = {
-                                key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_StcJAJY1MgRGmJ',
-                                amount: orderData.amount,
-                                currency: orderData.currency,
-                                name: 'OdishaExamPrep Premium',
-                                description: paywallItemTitle === 'Full Access' ? 'Unlock Full Access' : `Unlock ${paywallItemTitle}`,
-                                order_id: orderData.orderId,
-                                handler: async function (response: any) {
-                                  try {
-                                    setPaymentState('processing');
-                                    setPaymentError(null);
-                                    // 3. Verify payment signature on the server and record secure entitlement
-                                    const verifyRes = await fetch('/api/payment/verify', {
-                                      method: 'POST',
-                                      headers: {
-                                        'Content-Type': 'application/json'
-                                      },
-                                      body: JSON.stringify({
-                                        razorpay_order_id: response.razorpay_order_id,
-                                        razorpay_payment_id: response.razorpay_payment_id,
-                                        razorpay_signature: response.razorpay_signature,
-                                        userId: profile?.uid || user?.id,
-                                        productId: paywallItemId || 'full_access',
-                                        productType: paywallProductType,
-                                        pricePaid: paywallPrice,
-                                        snapshot: {
-                                          id: paywallItemId || 'full_access',
-                                          title: paywallItemTitle,
-                                          price: paywallPrice
-                                        }
-                                      })
-                                    });
-
-                                    let verifyData;
-                                    const verifyText = await verifyRes.text();
-                                    try {
-                                      verifyData = verifyText ? JSON.parse(verifyText) : {};
-                                    } catch (e) {
-                                      throw new Error(`Invalid verification response from server. Status: ${verifyRes.status}`);
-                                    }
-
-                                    if (!verifyRes.ok) {
-                                      throw new Error(verifyData.message || 'Payment verification failed.');
-                                    }
-                                    if (verifyData.success) {
-                                      setPaymentState('success');
-                                      if (paywallItemId) {
-                                        await unlockItem(paywallItemId);
-                                      } else {
-                                        await grantFullAccess();
-                                      }
-                                      setTimeout(() => {
-                                        setShowPaywall(false);
-                                        setPaywallItemId(null);
-                                        setPaymentState('idle');
-                                      }, 2000);
-                                    } else {
-                                      throw new Error(verifyData.message || 'Payment verification failed.');
-                                    }
-                                  } catch (err: any) {
-                                    console.error('Verification error:', err);
-                                    setPaymentState('error');
-                                    setPaymentError(err.message || 'Payment verification failed.');
-                                  }
-                                },
-                                prefill: {
-                                  name: profile?.displayName || '',
-                                  email: profile?.email || ''
-                                },
-                                theme: { color: '#4f46e5' },
-                                modal: {
-                                  ondismiss: function () {
-                                    console.log('Payment checkout closed');
-                                    localStorage.removeItem('oep_pending_payment');
-                                  }
+                                const res = await loadRazorpay();
+                                if (!res) {
+                                  alert('Failed to load payment gateway SDK. Please check your internet connection.');
+                                  setPaymentState('idle');
+                                  return;
                                 }
-                              };
 
-                              const rzp = new (window as any).Razorpay(options);
-                              rzp.open();
-                            } catch (err: any) {
-                              console.error('Payment initialization failed:', err);
-                              alert('Payment initialization failed: ' + err.message);
-                            }
-                          }}
-                          >
-                            {/* Button Shine Effect */}
-                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 z-10" />
+                                // 1. Create order on the server
+                                const orderRes = await fetch('/api/payment/order', {
+                                  method: 'POST',
+                                  headers: {
+                                    'Content-Type': 'application/json'
+                                  },
+                                  body: JSON.stringify({
+                                    productId: effectiveProductId,
+                                    productType: effectiveProductType,
+                                    userId: profile?.uid || user?.id || 'unknown',
+                                    currency: 'INR'
+                                  })
+                                });
 
-                            <span className="relative z-10 flex items-center justify-center gap-2">
-                              Unlock Now
-                              <ChevronRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
-                            </span>
-                          </Button>
+                                let orderData;
+                                const orderText = await orderRes.text();
+                                try {
+                                  orderData = orderText ? JSON.parse(orderText) : {};
+                                } catch (e) {
+                                  throw new Error(`Invalid response from server. Status: ${orderRes.status}. If you just updated the server, please restart the dev server (npm run dev).`);
+                                }
 
-                          {/* Secure Info Footer */}
-                          <div className="flex items-center justify-center gap-1.2 text-[9px] text-slate-400 font-semibold pt-0.5">
-                            <Lock className="w-3 h-3 text-slate-500" />
-                            <span>Secure payment via Razorpay • Instant Activation</span>
+                                if (!orderRes.ok) {
+                                  throw new Error(orderData.message || `Failed to create payment order (status ${orderRes.status}).`);
+                                }
+
+                                if (!orderData.orderId) {
+                                  throw new Error('Server did not return a valid order ID. Please verify your Razorpay API key configurations in .env and restart your dev server.');
+                                }
+
+                                // Track pending payment state in localStorage (essential for auto-recovery on page reloads/switches)
+                                localStorage.setItem('oep_pending_payment', JSON.stringify({
+                                  orderId: orderData.orderId,
+                                  productId: effectiveProductId,
+                                  timestamp: Date.now()
+                                }));
+
+                                // 2. Open Razorpay checkout with the orderId
+                                const options = {
+                                  key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_StcJAJY1MgRGmJ',
+                                  amount: orderData.amount,
+                                  currency: orderData.currency,
+                                  name: 'OdishaExamPrep Premium',
+                                  description: effectiveTitle === 'Full Access' ? 'Unlock Full Access' : `Unlock ${effectiveTitle}`,
+                                  order_id: orderData.orderId,
+                                  handler: async function (response: any) {
+                                    try {
+                                      setPaymentState('processing');
+                                      setPaymentError(null);
+                                      // 3. Verify payment signature on the server and record secure entitlement
+                                      const verifyRes = await fetch('/api/payment/verify', {
+                                        method: 'POST',
+                                        headers: {
+                                          'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                          razorpay_order_id: response.razorpay_order_id,
+                                          razorpay_payment_id: response.razorpay_payment_id,
+                                          razorpay_signature: response.razorpay_signature,
+                                          userId: profile?.uid || user?.id,
+                                          productId: effectiveProductId,
+                                          productType: effectiveProductType,
+                                          pricePaid: effectivePrice,
+                                          snapshot: {
+                                            id: effectiveProductId,
+                                            title: effectiveTitle,
+                                            price: effectivePrice
+                                          }
+                                        })
+                                      });
+
+                                      let verifyData;
+                                      const verifyText = await verifyRes.text();
+                                      try {
+                                        verifyData = verifyText ? JSON.parse(verifyText) : {};
+                                      } catch (e) {
+                                        throw new Error(`Invalid verification response from server. Status: ${verifyRes.status}`);
+                                      }
+
+                                      if (!verifyRes.ok) {
+                                        throw new Error(verifyData.message || 'Payment verification failed.');
+                                      }
+                                      if (verifyData.success) {
+                                        setPaymentState('success');
+                                        if (effectiveProductId) {
+                                          await unlockItem(effectiveProductId);
+                                        } else {
+                                          await grantFullAccess();
+                                        }
+                                        setTimeout(() => {
+                                          setShowPaywall(false);
+                                          setPaywallItemId(null);
+                                          setPaymentState('idle');
+                                        }, 2000);
+                                      } else {
+                                        throw new Error(verifyData.message || 'Payment verification failed.');
+                                      }
+                                    } catch (err: any) {
+                                      console.error('Verification error:', err);
+                                      setPaymentState('error');
+                                      setPaymentError(err.message || 'Payment verification failed.');
+                                    }
+                                  },
+                                  prefill: {
+                                    name: profile?.displayName || '',
+                                    email: profile?.email || ''
+                                  },
+                                  theme: { color: '#4f46e5' },
+                                  modal: {
+                                    ondismiss: function () {
+                                      console.log('Payment checkout closed');
+                                      localStorage.removeItem('oep_pending_payment');
+                                    }
+                                  }
+                                };
+
+                                const rzp = new (window as any).Razorpay(options);
+                                rzp.open();
+                              } catch (err: any) {
+                                console.error('Payment initialization failed:', err);
+                                alert('Payment initialization failed: ' + err.message);
+                              }
+                            }}
+                            >
+                              {/* Button Shine Effect */}
+                              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 z-10" />
+
+                              <span className="relative z-10 flex items-center justify-center gap-2">
+                                {isBundleSelected ? `🚀 Unlock Complete Exam Pass (₹${effectivePrice})` : `Unlock ${paywallItemTitle} (₹${effectivePrice})`}
+                                <ChevronRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+                              </span>
+                            </Button>
+
+                            {/* Secure Info Footer */}
+                            <div className="flex items-center justify-center gap-2.5 text-[9.5px] text-slate-400 font-medium pt-0.5 flex-wrap">
+                              <span className="flex items-center gap-1">
+                                <Lock className="w-3 h-3 text-emerald-400" /> Razorpay 256-Bit SSL
+                              </span>
+                              <span>•</span>
+                              <span className="flex items-center gap-1">
+                                <Zap className="w-3 h-3 text-amber-400" /> Instant Activation
+                              </span>
+                              <span>•</span>
+                              <span className="flex items-center gap-1">
+                                <ShieldCheck className="w-3 h-3 text-brand-400" /> 100% Verified
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      </motion.div>
-                    )}
+                        </motion.div>
+                      );
+                    })()}
 
                     {paymentState === 'processing' && (
                       <motion.div
@@ -7134,7 +7295,14 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
   ]);
   const [paywallItemId, setPaywallItemId] = useState<string | null>(null);
   const [paywallProductType, setPaywallProductType] = useState<string>('full_access');
+  const [checkoutTier, setCheckoutTier] = useState<'bundle' | 'single'>('bundle');
   const [loadingPractice, setLoadingPractice] = useState(false);
+
+  useEffect(() => {
+    if (showPaywall) {
+      setCheckoutTier('bundle');
+    }
+  }, [showPaywall]);
 
   // Hide WhatsApp button on mobile when any dashboard modal is open, lock body scroll, and apply background blur
   useEffect(() => {

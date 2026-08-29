@@ -3746,9 +3746,9 @@ Last updated: August 29, 2026
 
 ---
 
-### `SvgPieChartRenderer`
+### `SvgPieChartAndMixedGraphRenderer`
 
-File: `src/components/MathTextRenderer.tsx` (`L1500–L1650`)
+File: `src/components/MathTextRenderer.tsx` (`L1500–L1860`)
 Last updated: August 29, 2026
 
 | Property | Class / Token |
@@ -3756,9 +3756,29 @@ Last updated: August 29, 2026
 | **Card Container** | `flex flex-col md:flex-row items-center justify-center gap-6 p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-brand-50/30 dark:from-slate-900 dark:to-slate-800/60 border border-brand-500/20 dark:border-brand-400/20 shadow-sm max-w-full` |
 | **SVG Vector Graphic** | `w-[240px] h-[240px] sm:w-[260px] sm:h-[260px] drop-shadow-md` with donut inner radius and interactive hover slice expansion |
 | **Slice Colors** | `['#2563EB', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#F97316', '#14B8A6', '#6366F1', '#84CC16']` |
-| **View Switcher** | `flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700` (`🥧 Pie Chart View` vs `📋 Data Table View`) |
+| **View Switcher** | `flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700` (`📊 Mixed Graph View (Chart + Table)` vs `📋 Data Table View`) |
 | **Interactive Legend Grid** | `grid grid-cols-2 gap-2` with color badge indicator and sync'd hover states |
+| **Companion Data Table** | Embedded responsive HTML data table below the SVG chart when multi-column data (e.g. Ratio, Salaries, Units) is present |
 
 **Pattern notes:**
-- **Automated Detection:** Analyzes 2-column tabular data and automatically constructs an SVG vector pie chart if values represent shares/percentages summing to ~100% or degree angles summing to ~360°.
+- **Automated Multi-Column Detection:** Analyzes multi-column tables (e.g. `Department | Total Share % | Ratio`) and extracts percentage shares into an SVG Pie Chart while preserving other columns in a companion table.
 - **Dual-View Toggle:** Enables candidates to switch seamlessly between graphical chart representation and structured data tables.
+
+---
+
+### `TestEngineMobileScrollableContainer`
+
+File: `src/MockTestSystem.tsx` (`L1260–L1360`)
+Last updated: August 29, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Main Viewport Container** | `flex-1 px-3 py-3 sm:p-5 lg:p-6 pb-28 sm:pb-32 lg:pb-6 relative bg-[#FBF9F6] dark:bg-[#060B16] flex flex-col overscroll-contain overflow-y-auto no-scrollbar` |
+| **Desktop 2-Column Split** | `(!mathHeavy && !showExplanation) && "lg:overflow-hidden lg:h-full"` |
+| **Question Panel** | `bg-white dark:bg-[#0B1528] rounded-xl sm:rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm` |
+| **Safe Bottom Inset** | `pb-28 sm:pb-32` ensures fixed action bars never overlap options or solution breakdowns on mobile devices |
+
+**Pattern notes:**
+- **Mobile Unconditional Scrolling:** Mobile screens (`< lg`) are always vertically scrollable (`overflow-y-auto`) to guarantee zero clipping on tall diagrams, charts, and long questions.
+- **Desktop Proportionality:** Retains split 2-column view on desktop monitors for compact text questions.
+

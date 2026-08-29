@@ -1,6 +1,11 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] 📝 Enterprise Google Sheet Editorial Queue Auto-Discovery & Vector Banner Recovery (`automations/seo_blog_engine.py`, `automations/shared/drive_image_sanitizer.py`, `automations/shared/google_sheet_queue.py`):
+  1. **Spreadsheet Title & Tab Auto-Discovery**: Added fuzzy & exact title matching for `Odisha_Editorial_Queue .xlsx` (and variants) and automatic detection of the `Blog Content` worksheet tab.
+  2. **Drive Image High-Res Direct Streamer**: Re-engineered `download_and_sanitize_image` to stream full-resolution PNG images from Google Drive sharing URLs (`https://lh3.googleusercontent.com/d/{id}=w1200`).
+  3. **Vector Banner Argument Fix**: Resolved `TypeError` keyword argument mismatch in `generate_exam_vector_banner` call and dictionary unpacking.
+  4. **Automated Publishing Column Management**: Automatic column mapping and creation for `Status`, `Published_URL`, and `Published_At` upon publishing.
 - [x] ⭕ Universal Automated SVG Venn Diagram Engine & Set-Theory Solver (`src/components/MathTextRenderer.tsx`, `context/ui-registry.md`):
   1. **Automated Mathematical Set Solver**: Parses natural language survey bullets (`200 own car`, `150 bike`, `50 both`, `20 all three`, `total 500`) and computes all 8 disjoint regions (`Only A = 110`, `Only B = 50`, `Only C = 140`, `None = 50`).
   2. **Interactive Overlapping SVG Vector Circles**: Renders 2-set and 3-set translucent overlapping circles with centroid values, outer set labels, and dynamic region highlighting.

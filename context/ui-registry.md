@@ -3838,9 +3838,24 @@ Last updated: August 29, 2026
 | **Card Count Pill** | `px-2.5 py-1 rounded-lg text-xs font-black bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300` |
 | **Bulk Count Sync Route** | `POST /api/admin/questions/sync-counts` |
 
-**Pattern notes:**
-- **Single Source of Truth:** Authoritative row counts are computed at the database engine level and cached via SWR in client memory.
-- **Zero Phantom Counts:** Unuploaded sets strictly display `0 Questions`. No static unverified presets are trusted when real row count is 0.
+---
 
+### `DailyMcqGraphicCardAndPollEngine`
+
+File: [`automations/mcq_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/mcq_engine.py), [`automations/templates/template_mcq.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/templates/template_mcq.html)
+Last updated: August 29, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Canvas** | `1080px x 1080px` High-Density Square Canvas with `#0F172A` Deep Slate base, radial indigo/blue ambient glow spheres |
+| **Header Badge** | Brand emblem (`linear-gradient(135deg, #6366F1 0%, #3B82F6 100%)`) + Target Exam pill (`rgba(99, 102, 241, 0.15)`, `#818CF8`) |
+| **Question Shell** | `rgba(30, 41, 59, 0.75)` with `backdrop-filter: blur(16px)`, `border: 1px solid rgba(255, 255, 255, 0.12)`, `border-radius: 24px`, `font-size: 34px` bold |
+| **Option Cards** | `rgba(30, 41, 59, 0.5)` with `border-radius: 18px`, `option-letter` circular pill (`rgba(255, 255, 255, 0.06)`), `font-size: 24px` |
+| **Footer Strip** | Official URL banner (`https://www.odishaexamprep.in/`), Live Test & PDF badges |
+| **Telegram Native Quiz Poll** | Type: `quiz`, `is_anonymous: True`, with embedded solution breakdown and multi-tier conversion CTA |
+
+**Pattern notes:**
+- **Dynamic Status Auto-Discovery**: Dynamically scans row 1 header values to detect and update the `Status` column index rather than relying on static positions.
+- **Fail-Safe Dispatch Architecture**: Telegram Native Quiz Polls and image generation execute independently of third-party platforms with automated retries.
 
 

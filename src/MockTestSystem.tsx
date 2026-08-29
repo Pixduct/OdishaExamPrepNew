@@ -105,27 +105,23 @@ const isAsciiDiagram = (para: string): boolean => {
   return lineIsDiagram(para);
 };
 
-/** True when text contains a markdown pipe table */
+/** True when text contains a markdown or pipe-delimited data table */
 const hasMarkdownTable = (text: string): boolean => {
   if (!text) return false;
-  // A markdown table must have at least one line with | ... | pattern
-  // AND a separator row like |---|---|
   const lines = text.split('\n');
-  const pipeLines = lines.filter(l => l.trim().startsWith('|') && l.trim().endsWith('|'));
-  if (pipeLines.length < 2) return false;
-  // Check for at least one separator row (|---|---| pattern)
-  return pipeLines.some(l => /^\|[-:\s|]+\|$/.test(l.trim()));
+  const pipeLines = lines.filter(l => l.includes('|'));
+  return pipeLines.length >= 2;
 };
 
 /** True when a question needs the full-width stacked layout */
 const isMathHeavyQuestion = (text: string): boolean => {
   if (!text) return false;
   const blocks = countMathBlocks(text);
-  // Also trigger stacked layout if question contains a diagram
+  // Trigger stacked scrollable layout if question contains a diagram or chart
   const hasDiagram = text.split('\n\n').some(p => isAsciiDiagram(p));
-  // Tables need the stacked scrollable layout too — without it, options are clipped
   const table = hasMarkdownTable(text);
-  return blocks >= 2 || text.length > 320 || hasDiagram || table;
+  const mentionsChart = /pie[\s-]?chart|bar[\s-]?graph|caselet/i.test(text);
+  return blocks >= 2 || text.length > 250 || hasDiagram || table || mentionsChart;
 };
 
 interface Question {
@@ -1266,13 +1262,13 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
 
             return (
               <main className={cn(
-                "flex-1 px-3 py-3 sm:p-5 lg:p-6 relative bg-[#FBF9F6] dark:bg-[#060B16] flex flex-col overscroll-contain",
-                (mathHeavy || showExplanation) ? "overflow-y-auto no-scrollbar" : "overflow-hidden"
+                "flex-1 px-3 py-3 sm:p-5 lg:p-6 pb-28 sm:pb-32 lg:pb-6 relative bg-[#FBF9F6] dark:bg-[#060B16] flex flex-col overscroll-contain overflow-y-auto no-scrollbar",
+                (!mathHeavy && !showExplanation) && "lg:overflow-hidden"
               )} data-lenis-prevent>
                 <div className={cn(
                   "w-full flex flex-col space-y-2.5 sm:space-y-3 lg:space-y-4 mx-auto transition-all duration-300",
                   isPaletteCollapsed ? "max-w-[96%] lg:max-w-[94%]" : "max-w-4xl lg:max-w-6xl",
-                  !mathHeavy && "h-full overflow-hidden"
+                  (!mathHeavy && !showExplanation) && "lg:h-full lg:overflow-hidden"
                 )}>
                   <AnimatePresence mode="wait">
                     <motion.div
@@ -1291,9 +1287,9 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                       {/* ── Question Panel ── */}
                       <div className={cn(
                         "bg-white dark:bg-[#0B1528] rounded-xl sm:rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow flex flex-col space-y-2.5 sm:space-y-3",
-                        mathHeavy
+                        (mathHeavy || showExplanation)
                           ? "px-3 py-4 sm:p-6"
-                          : "px-2.5 py-3 sm:p-5 flex-shrink-0 lg:flex-1 lg:h-full lg:max-h-none overflow-hidden"
+                          : "px-3 py-4 sm:p-5 flex-shrink-0 lg:flex-1 lg:h-full lg:max-h-none lg:overflow-hidden"
                       )}>
                         {/* Question label + Math badge */}
                         <div className="flex items-center justify-between flex-shrink-0 gap-2">

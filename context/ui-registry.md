@@ -3782,3 +3782,23 @@ Last updated: August 29, 2026
 - **Mobile Unconditional Scrolling:** Mobile screens (`< lg`) are always vertically scrollable (`overflow-y-auto`) to guarantee zero clipping on tall diagrams, charts, and long questions.
 - **Desktop Proportionality:** Retains split 2-column view on desktop monitors for compact text questions.
 
+---
+
+### `SvgVennDiagramRenderer`
+
+File: `src/components/MathTextRenderer.tsx` (`L1970–L2070`)
+Last updated: August 29, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Container** | `my-4 p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-blue-50/30 dark:from-slate-900 dark:to-slate-800/60 border border-blue-500/20 dark:border-blue-400/20 shadow-sm max-w-full` |
+| **SVG Vector Canvas** | `w-[280px] h-[260px] sm:w-[320px] sm:h-[280px] drop-shadow-md` with 2-set or 3-set overlapping translucent circles (`#2563EB`, `#10B981`, `#F59E0B`) |
+| **Region Centroids** | Exact mathematical sub-regions (`Only A`, `Only B`, `Only C`, `Only AB`, `Only BC`, `Only AC`, `All 3 (Center)`, `None (Outside)`) |
+| **View Switcher** | `flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700` (`⭕ Venn Diagram View` vs `📋 Text Only View`) |
+| **Disjoint Breakdown Grid** | `grid grid-cols-2 gap-2 text-xs` with color-coded region badges and sync'd circle hover states |
+
+**Pattern notes:**
+- **Automated Mathematical Set Solver:** Automatically parses raw survey text bullets (e.g. `200 own car`, `150 bike`, `50 both`, `20 all three`, `total 500`) and computes all 8 disjoint regions with zero manual configuration.
+- **Interactive Highlighting:** Hovering over breakdown cards highlights the corresponding circle in real-time.
+
+

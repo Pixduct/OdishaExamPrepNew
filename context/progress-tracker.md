@@ -1,6 +1,10 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] ⭕ Universal Automated SVG Venn Diagram Engine & Set-Theory Solver (`src/components/MathTextRenderer.tsx`, `context/ui-registry.md`):
+  1. **Automated Mathematical Set Solver**: Parses natural language survey bullets (`200 own car`, `150 bike`, `50 both`, `20 all three`, `total 500`) and computes all 8 disjoint regions (`Only A = 110`, `Only B = 50`, `Only C = 140`, `None = 50`).
+  2. **Interactive Overlapping SVG Vector Circles**: Renders 2-set and 3-set translucent overlapping circles with centroid values, outer set labels, and dynamic region highlighting.
+  3. **Disjoint Breakdown Grid & View Toggle**: Displays color-coded breakdown pills alongside a 1-click toggle between `⭕ Venn Diagram View` and `📋 Text Only View`.
 - [x] 🥧 Automated Visual SVG Pie Chart Generator & Dual-View Engine (`src/components/MathTextRenderer.tsx`, `context/ui-registry.md`):
   1. **Intelligent Distribution Detection**: Automatically detects 2-column tabular data with shares/percentages summing to ~100% or degree angles summing to ~360°.
   2. **Interactive Vector Pie/Donut Graphics**: Renders high-resolution vector SVG pie charts with 10 harmonious colors, hover slice expansion, center donut hub, and centered percentage labels.

@@ -1493,7 +1493,7 @@ Last updated: 2026-08-14
 ### 46. `CurrentAffairsPortal` & `CurrentAffairsReaderModal` (Daily 360° Current Affairs Website Portal & Student Community Hub)
 
 Files: [`src/pages/CurrentAffairs.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/CurrentAffairs.tsx), [`src/components/CurrentAffairsReaderModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/CurrentAffairsReaderModal.tsx), [`src/services/currentAffairsService.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/services/currentAffairsService.ts), [`automations/ca_website_publisher.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/ca_website_publisher.py), [`automations/.github/workflows/daily_ca_website.yml`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/.github/workflows/daily_ca_website.yml)
-Last updated: 2026-08-14
+Last updated: August 29, 2026
 
 | Property | Standard Pattern / Token |
 | :--- | :--- |
@@ -1509,8 +1509,12 @@ Last updated: 2026-08-14
 | **Summary Callout Box** | `bg-gradient-to-br from-brand-50/80 to-indigo-50/50 border border-brand-200/80 rounded-2xl p-5 sm:p-6 shadow-xs` |
 | **Static GK Callout Card** | `background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-left: 4px solid #2563eb; rounded-2xl` |
 | **Practice MCQ Cards** | `bg-slate-50/80 border border-slate-200/80 rounded-2xl p-5` with instant option highlight & explanation |
+| **Image Resolution & Type Safety** | Multi-tier Pexels → Wikimedia → Verified Academic Stock → Safe Fallback with strict `str` type coercion on `exams.icon` payload |
 
-- **360° Exam Digest Structure**: Every article contains Headline, 3-Bullet Executive Summary, Full Background Context, Static GK Exam Pointer Box, Key Data Table, and 2 Interactive Practice MCQs.
+**Pattern notes:**
+- **360° Exam Digest Structure**: Every article contains Headline, 3-Bullet Executive Summary, Full Background Context, Static GK Exam Pointer Box, Key Data Table, and 2-5 Interactive Practice MCQs encoded in `<!--MCQ_JSON:[...]-->`.
+- **Database Type Safety Guarantee**: Cover images stored in `exams.icon` must strictly be string URLs. If an API returns a dictionary, it is unpacked via `img_res.get('image_url')` before passing to Supabase.
+
 
 ---
 

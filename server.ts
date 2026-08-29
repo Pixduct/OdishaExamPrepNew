@@ -1398,6 +1398,11 @@ async function startServer() {
                 .update({ questionCount: totalQuestionsForTopic })
                 .eq('examId', q.examId)
                 .eq('title', q.topic);
+
+              await supabaseAdmin
+                .from('questionBanks')
+                .update({ questionCount: totalQuestionsForTopic })
+                .eq('id', q.topic);
             }
           }
         }
@@ -1409,6 +1414,55 @@ async function startServer() {
     } catch (err: any) {
       console.error("[Admin Questions Bulk Error]", err);
       res.status(500).json({ error: err.message || "Failed to bulk upload questions" });
+    }
+  });
+
+  // Admin Questions Full Recount Sync Endpoint
+  app.post("/api/admin/questions/sync-counts", requireAdmin, async (req, res) => {
+    try {
+      // 1. Fetch all question banks
+      const { data: banks, error: bErr } = await supabaseAdmin
+        .from('questionBanks')
+        .select('id, title, examId, pdfUrl');
+      if (bErr) throw bErr;
+
+      // 2. Fetch aggregate counts per topic from questions table
+      const { data: topicData, error: rpcErr } = await supabaseAdmin
+        .rpc('get_question_topic_counts');
+
+      const topicCounts: Record<string, number> = {};
+      if (!rpcErr && Array.isArray(topicData)) {
+        topicData.forEach((row: any) => {
+          if (row.topic) {
+            topicCounts[row.topic.trim().toLowerCase()] = Number(row.question_count) || 0;
+          }
+        });
+      }
+
+      let updatedCount = 0;
+      for (const b of (banks || [])) {
+        let embeddedCount = 0;
+        if (b.pdfUrl && typeof b.pdfUrl === 'string' && b.pdfUrl.startsWith('{')) {
+          try {
+            const parsed = JSON.parse(b.pdfUrl);
+            if (parsed && Array.isArray(parsed.questionsData)) embeddedCount = parsed.questionsData.length;
+          } catch(e) {}
+        }
+
+        const rawTitle = (b.title || '').trim().toLowerCase();
+        const actualCount = topicCounts[b.id.toLowerCase()] || topicCounts[rawTitle] || embeddedCount || 0;
+
+        await supabaseAdmin
+          .from('questionBanks')
+          .update({ questionCount: actualCount })
+          .eq('id', b.id);
+        updatedCount++;
+      }
+
+      res.json({ success: true, message: `Synchronized ${updatedCount} question banks with exact database counts.` });
+    } catch (err: any) {
+      console.error("[Sync Counts Error]", err);
+      res.status(500).json({ error: err.message || "Failed to sync counts" });
     }
   });
 

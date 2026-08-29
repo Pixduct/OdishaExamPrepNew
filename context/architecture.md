@@ -404,12 +404,11 @@ CREATE TABLE public.push_notifications (
 
 Repository: `https://github.com/Pixduct/odisha-mcq-engine.git` (`automations/`)
 
-### 1. Daily 5-MCQ Quiz Set Engine (`automations/mcq_engine.py`)
-- **Execution Schedule:** Twice-Daily Green Zone at `04:27 UTC` (9:57 AM IST) and `12:37 UTC` (6:07 PM IST) on GitHub Actions (`daily_mcq.yml`).
-- **Poll Indexing:** Poll questions indexed `[1/5]`, `[2/5]`, `[3/5]`, `[4/5]`, `[5/5]`.
+### 1. Daily Live MCQ Practice Engine (`automations/mcq_engine.py`)
+- **Execution Schedule:** 3 Times Daily Green Zone at `04:17 UTC` (9:47 AM IST - Morning), `08:47 UTC` (2:17 PM IST - Afternoon), and `13:47 UTC` (7:17 PM IST - Evening) on GitHub Actions (`daily_mcq.yml`).
+- **Batch Size:** 1 Target MCQ question per automation run (3 questions daily).
 - **Conversion CTA:** Includes explanation CTA bubble driving traffic to `https://www.odishaexamprep.in/`.
-- **Student Promotion Banner:** Sends Daily Completion Banner attached with **7-Day Rotational Student Promotion Photos** (`student 1.png` - `student 7.png`).
-- **Sheet Sync:** Fetches unposted rows from Google Sheet (`Form Responses 1`) and marks published rows as `Published`.
+- **Sheet Sync:** Fetches unposted rows from Google Sheet (`Odisha_MCQ_Engine`) and marks published rows as `Published`.
 
 ### 2. Daily Current Affairs Engine (`automations/ca_publisher.py`)
 - **Execution Schedule:** Off-Peak Green Zone `14:17 UTC` (7:47 PM IST) on GitHub Actions (`daily_ca.yml`). Announced at **8:00 PM IST**.

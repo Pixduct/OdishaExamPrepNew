@@ -1,6 +1,13 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] 🎯 Daily MCQ Engine 3x Daily Schedule & 1-Question Batch Optimization with 2s Bash Runner Fix (`automations/.github/workflows/daily_mcq.yml`, `automations/mcq_engine.py`, `automations/post_to_youtube.py`):
+  1. **Root Cause Analysis & Bash Crash Elimination**: Resolved the 2-second runner failure (`Annotations: 1`) caused by inline expansion of multi-line secret variables in the bash step (`Restore YouTube Session`). Replaced with pure Python environment variable resolution and automatic base64/JSON decoding in `post_to_youtube.py`.
+  2. **Dedicated Concurrency Group**: Isolated `daily_mcq.yml` to `group: daily-mcq-engine` preventing collisions and queue deadlocks with the bi-hourly Current Affairs and Blog engines.
+  3. **3x Daily Green Zone Schedule**: Configured 3 daily green-zone execution times: Morning at **9:47 AM IST** (`17 04 * * *`), Afternoon at **2:17 PM IST** (`47 08 * * *`), and Evening at **7:17 PM IST** (`47 13 * * *`).
+  4. **Single-Question Batch Mode**: Reduced batch size from 5 to **1 MCQ per run** (`MCQ_BATCH_SIZE: 1`), distributing 3 high-impact practice questions evenly across the day.
+  5. **Non-Blocking Multi-Platform Dispatch**: Wrapped YouTube posting in exception guards so that Telegram native Quiz polls and Google Sheet status updates to 'Published' complete reliably even if YouTube credentials need re-authentication.
+  6. **Updated Social Copy & CTA**: Polished question formatting and CTA copy to highlight the 3x daily schedule while driving candidate traffic to mock tests on `https://www.odishaexamprep.in/`.
 - [x] 🌐 Senior UX: Explicit "Language / ଭାଷା" Labels in Language Selector (`src/components/LanguageToggle.tsx`):
   1. **Clear Language Purpose Indicator**: Instead of only displaying the target language name in isolation, the toggle button now renders `Language: ଓଡ଼ିଆ` (in English mode) and `ଭାଷା: English` (in Odia mode).
   2. **High-Readability Typography**: Styled with high-contrast label indicators (`font-bold text-slate-600 dark:text-slate-400`) and clear action target text, ensuring all candidates instantly recognize where to switch language.

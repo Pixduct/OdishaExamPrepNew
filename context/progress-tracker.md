@@ -1,6 +1,9 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] 🌐 Senior UX: Explicit "Language / ଭାଷା" Labels in Language Selector (`src/components/LanguageToggle.tsx`):
+  1. **Clear Language Purpose Indicator**: Instead of only displaying the target language name in isolation, the toggle button now renders `Language: ଓଡ଼ିଆ` (in English mode) and `ଭାଷା: English` (in Odia mode).
+  2. **High-Readability Typography**: Styled with high-contrast label indicators (`font-bold text-slate-600 dark:text-slate-400`) and clear action target text, ensuring all candidates instantly recognize where to switch language.
 - [x] ☀️ First-Time Visitor Defaults: Light Theme & English Language (`src/lib/themeStore.ts`, `src/lib/LanguageContext.tsx`, `index.html`):
   1. **Default Theme to Light (Day Mode)**: Updated `getStoredTheme()` in `themeStore.ts` and the anti-flicker pre-hydration script in `index.html` to default to `light` mode for all first-time visitors without stored preferences.
   2. **Default Language to English**: Updated `getStoredLanguage()` in `LanguageContext.tsx` and the anti-flicker pre-hydration script in `index.html` to default to `en` for all first-time visitors.

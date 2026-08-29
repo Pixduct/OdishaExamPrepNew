@@ -6,15 +6,15 @@ import { translatePhrase } from './i18n/phraseDictionary';
 const LANGUAGE_STORAGE_KEY = 'oep-language-preference';
 
 export const getStoredLanguage = (): Language => {
-  if (typeof window === 'undefined') return 'or';
+  if (typeof window === 'undefined') return 'en';
   try {
     const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY);
     if (saved === 'en' || saved === 'or') return saved;
   } catch {
     // fallback
   }
-  // Default to Odia for all first-time visitors / organic Google search landing
-  return 'or';
+  // Default to English for all first-time visitors
+  return 'en';
 };
 
 export const setStoredLanguage = (lang: Language): void => {

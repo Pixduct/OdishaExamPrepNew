@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="or" data-language="or">
+<html lang="en" data-language="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -45,42 +45,42 @@
     <meta property="twitter:description" content="Prepare for OPSC, OSSC, OSSSC and other Odisha government competitive exams. Practice with expert-crafted mock tests, syllabus roadmaps, and real-time rank analytics." />
     <style>
       html, body {
-        background-color: #0b0f19;
-        color: #f8fafc;
-      }
-      html:not(.dark), html[data-theme="light"], html[data-theme="light"] body {
-        background-color: #FAF8F5 !important;
+        background-color: #FAF8F5;
         color: #0f172a;
+      }
+      html.dark, html[data-theme="dark"], html[data-theme="dark"] body {
+        background-color: #0b0f19 !important;
+        color: #f8fafc;
       }
     </style>
     <script>
       // Anti-flicker initial theme & language setup
       (function() {
         try {
-          // Theme setup: Default to Dark Mode unless explicitly saved as 'light'
+          // Theme setup: Default to Light Mode unless explicitly saved as 'dark'
           var savedTheme = localStorage.getItem('oep-theme-preference');
-          if (savedTheme === 'light') {
-            document.documentElement.classList.remove('dark');
-            document.documentElement.setAttribute('data-theme', 'light');
-            document.documentElement.style.backgroundColor = '#FAF8F5';
-            var metaThemeLight = document.querySelector('meta[name="theme-color"]');
-            if (metaThemeLight) metaThemeLight.setAttribute('content', '#2563eb');
-          } else {
+          if (savedTheme === 'dark') {
             document.documentElement.classList.add('dark');
             document.documentElement.setAttribute('data-theme', 'dark');
             document.documentElement.style.backgroundColor = '#0b0f19';
             var metaThemeDark = document.querySelector('meta[name="theme-color"]');
             if (metaThemeDark) metaThemeDark.setAttribute('content', '#0b0f19');
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.setAttribute('data-theme', 'light');
+            document.documentElement.style.backgroundColor = '#FAF8F5';
+            var metaThemeLight = document.querySelector('meta[name="theme-color"]');
+            if (metaThemeLight) metaThemeLight.setAttribute('content', '#2563eb');
           }
 
-          // Language setup: Default to Odia ('or') unless explicitly saved as 'en'
+          // Language setup: Default to English ('en') unless explicitly saved as 'or'
           var savedLang = localStorage.getItem('oep-language-preference');
-          if (savedLang === 'en') {
-            document.documentElement.lang = 'en';
-            document.documentElement.setAttribute('data-language', 'en');
-          } else {
+          if (savedLang === 'or') {
             document.documentElement.lang = 'or';
             document.documentElement.setAttribute('data-language', 'or');
+          } else {
+            document.documentElement.lang = 'en';
+            document.documentElement.setAttribute('data-language', 'en');
           }
         } catch (e) {}
       })();
@@ -204,14 +204,14 @@
       }
     ]
     </script>
-    <script type="module" crossorigin src="/assets/index-B2VU4kXX.js"></script>
+    <script type="module" crossorigin src="/assets/index-BIDXxr-B.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-core-DwVPQc1P.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-supabase-BdjHczpr.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-motion-Drd0HiS8.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-lucide-qqPzWSrE.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-katex-BkGmXwAI.js">
     <link rel="stylesheet" crossorigin href="/assets/vendor-katex-Cp579UoJ.css">
-    <link rel="stylesheet" crossorigin href="/assets/index-CkXYWQ4x.css">
+    <link rel="stylesheet" crossorigin href="/assets/index-BEUxA4Eo.css">
   </head>
   <body>
     <div id="root"></div>

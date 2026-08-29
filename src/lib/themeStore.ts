@@ -3,14 +3,14 @@ export type ThemeMode = 'light' | 'dark';
 const THEME_STORAGE_KEY = 'oep-theme-preference';
 
 export const getStoredTheme = (): ThemeMode => {
-  if (typeof window === 'undefined') return 'dark';
+  if (typeof window === 'undefined') return 'light';
   try {
     const saved = localStorage.getItem(THEME_STORAGE_KEY);
     if (saved === 'light' || saved === 'dark') return saved;
   } catch {
     // fallback
   }
-  return 'dark';
+  return 'light';
 };
 
 export const setStoredTheme = (theme: ThemeMode): void => {

@@ -1,6 +1,9 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] 🌐 Daily Current Affairs Website Publisher Fix & Shallow Rebase Immunity (`automations/ca_website_publisher.py`, `automations/shared/supabase_client.py`, `automations/.github/workflows/daily_ca_website.yml`):
+  1. **Supabase Icon Payload Type Sanitization**: Fixed type mismatch where `fetch_pexels_featured_image` returned a dictionary object that was passed directly to the `icon` (string text) column in Postgres, triggering HTTP 400 rejection on insertion.
+  2. **Shallow Clone Rebase Immunity**: Added `fetch-depth: 0` to all GitHub Actions workflows (`daily_ca_website.yml`, `exam_update_cron.yml`, `blog_cron.yml`) to prevent rebase/merge conflicts during automated history commits.
 - [x] 🚨 Exam Update Engine (Engine 1) Syntax Error & Workflow Runner Recovery (`automations/exam_update_engine.py`):
   1. **SyntaxError Elimination**: Resolved missing `except Exception` block in candidate evaluation loop (`try:` at line 778 had no closing `except` block before line 913), restoring clean Python parsing.
   2. **Automated Error Dispatch**: Added logging and admin Telegram notification for any candidate processing exceptions.

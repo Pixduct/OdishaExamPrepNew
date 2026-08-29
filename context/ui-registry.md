@@ -884,7 +884,7 @@ Last updated: 2026-07-27
 
 ---
 
-### 22. `GuidedRecommendationHero` (Guided Learning Path "What to Study Next" Recommendation Banner)
+### 22. `GuidedRecommendationHero` (Exam Mock Test Hero Module)
 
 File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
 Last updated: August 29, 2026
@@ -897,21 +897,16 @@ Last updated: August 29, 2026
 | Category Pill | `px-2.5 py-0.5 sm:px-3 sm:py-1 bg-white/10 text-white/80 text-[8.5px] sm:text-[10px] font-black uppercase tracking-widest rounded-full border border-white/10 backdrop-blur-md` |
 | Text — Primary Title | `text-base sm:text-2xl md:text-3xl font-black tracking-tight text-white leading-snug` |
 | Text — Description | `text-slate-300 font-medium text-xs sm:text-sm md:text-base leading-relaxed mt-1 sm:mt-2` |
-| Text — Stat Chips (Desktop) | `text-xs font-bold text-slate-300 flex items-center gap-1.5` |
-| Text — Stat Chips (Mobile) | `text-[11px] font-bold text-slate-300 bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-1 rounded-lg` |
-| Action Button | `h-11 sm:h-16 px-5 sm:px-8 rounded-xl sm:rounded-2xl bg-gradient-to-r from-brand-500 via-indigo-600 to-brand-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-xs sm:text-base shadow-lg shadow-brand-500/25 hover:shadow-brand-500/50 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 sm:gap-3 group/btn relative overflow-hidden cursor-pointer w-full sm:w-auto` |
+| In-Prep Indicator | `flex items-center gap-1.5 bg-amber-500/20 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-amber-300/30 backdrop-blur-xs text-amber-200` |
+| Action Button (Live) | `h-11 sm:h-16 px-5 sm:px-8 rounded-xl sm:rounded-2xl bg-gradient-to-r from-brand-500 via-indigo-600 to-brand-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-xs sm:text-base shadow-lg shadow-brand-500/25 hover:shadow-brand-500/50 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 sm:gap-3 group/btn relative overflow-hidden cursor-pointer w-full sm:w-auto` |
+| Action Button (In Prep) | `h-11 sm:h-16 px-5 sm:px-8 rounded-xl sm:rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 text-amber-200 border border-amber-400/30 font-black text-xs sm:text-base transition-all flex items-center justify-center gap-2 sm:gap-3 group/btn relative overflow-hidden cursor-pointer w-full sm:w-auto` |
 
 **Pattern notes:**
-- **Strict Exam-Scoped Incomplete Matching**: Searches `activities` for `test_incomplete` strictly scoped to `selectedExam` (via `metadata.examId`, unique `bankId`, or unique `testId` belonging exclusively to `selectedExam`). Title-only cross-exam matching is removed to guarantee zero session leakage between different exams.
-- **Dual-Path Resumption Engine**:
-  - *Mock Tests*: Routes to `handleStartTest({ ...targetTest, examId: selectedExam })` and validates questions exist in DB before launching. If 0 questions exist, displays a prompt and purges stale sessions instead of borrowing foreign questions.
-  - *Practice Drills*: Routes to `handleStartDirectPractice` with database-first retrieval and state-relevant fallback datasets (General Studies & Odisha GK).
-- **Dynamic 3-Tier Metric Engine**:
-  1. *Active Session*: Displays real-time session accuracy e.g. `🎯 75% Session Accuracy (3/4 Solved)`.
-  2. *Returning Student*: Displays personal average accuracy vs goal e.g. `🎯 Your Avg: 78% | Goal: 85%+`.
-  3. *New Student*: Displays qualifying benchmark e.g. `🎯 85% Pass Benchmark`.
-- **Exact Unrounded Duration Display**: Computes remaining time as exact minutes and seconds (`remMins = Math.floor(leftSeconds / 60)`, `remSecs = leftSeconds % 60`) e.g. `17m 49s Left`.
-- **Mobile Responsive Text Sizing & Glass Pills**: Uses `sm:hidden` concise descriptions (`3 of 20 questions completed. Tap to continue session.`) and semi-transparent pill badges (`[ 🎯 0% Accuracy ]` `[ ⏱️ 17m 49s Left ]`) to eliminate text repetition and visual line wrapping bloat on mobile screens.
+- **Strict Mock-Tests-Only Scoping**: Restricts the top hero banner strictly to official mock tests (`examMockTests`). Eliminated all topic bank / practice drill fallbacks so generic Chapter Drills or Current Affairs never usurp the hero position on exam pages.
+- **Clean Zero State**: When an exam has 0 mock tests configured (`examMockTests.length === 0`), returns `null` for a clean, distraction-free page layout.
+- **In-Progress Mock Test Resumption**: Searches `activities` exclusively for `test_incomplete` sessions matching an official mock test ID for `selectedExam`.
+- **Professional 0-Question Handling**: When a mock test exists but has 0 questions uploaded, renders an `OFFICIAL MOCK • IN PREPARATION` banner with informative non-blocking modal notice (`showPremiumAlert`) on click.
+- **Exact Duration & Accurate Solved Counts**: Computes remaining time as exact minutes and seconds (`remMins = Math.floor(leftSeconds / 60)`, `remSecs = leftSeconds % 60`) e.g. `19m 15s Remaining`.
 
 ---
 
@@ -3543,3 +3538,30 @@ Ultra-robust canvas text measurement and multi-tier word re-wrapping engine guar
 
 **Pattern notes:**
 - **Zero Pill Overflow**: Every canvas text rendering strictly calculates line widths against `maxW - padding` to guarantee no text spills out of any container regardless of question length.
+
+---
+
+### 110. `ExamDetailMockTestCard` (CBT Mock Test Grid & In-Prep Status Card)
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L4398-L4808)
+Last updated: August 29, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Container (Desktop)** | `p-6 rounded-2xl sm:rounded-3xl border transition-all duration-300 flex flex-col justify-between group relative overflow-hidden h-full text-slate-900 dark:text-white cursor-pointer bg-white dark:bg-[#0B1528] dark:border-slate-800` |
+| **Card Container (Mobile)** | `px-3 py-2.5 sm:p-4 bg-white dark:bg-[#0B1528] border border-slate-200/80 dark:border-slate-800 rounded-xl sm:rounded-2xl flex items-center justify-between gap-3 group relative overflow-hidden transition-all duration-300 text-slate-900 dark:text-white` |
+| **Status Badge — In Prep (Desktop)** | `text-[10px] font-black text-amber-700 dark:text-amber-300 uppercase tracking-widest bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800 whitespace-nowrap` |
+| **Status Badge — In Prep (Mobile)** | `px-1.5 py-0.5 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-[8.5px] font-black rounded border border-amber-200 dark:border-amber-800 uppercase tracking-wider shrink-0` |
+| **Status Badge — Official Mock** | `text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase tracking-widest bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-100 dark:border-slate-700 whitespace-nowrap` |
+| **Status Badge — Upcoming** | `text-[10px] font-black text-amber-800 dark:text-amber-300 uppercase tracking-widest bg-amber-100 dark:bg-amber-950/60 px-2.5 py-0.5 rounded border border-amber-200 dark:border-amber-800 flex items-center gap-1` |
+| **Action Button — In Prep** | `w-full h-[48px] rounded-xl font-black text-sm relative z-10 transition-all overflow-hidden group/btn mt-auto bg-slate-100 dark:bg-slate-800/80 text-amber-700 dark:text-amber-300 border border-amber-300/40 hover:bg-slate-200 dark:hover:bg-slate-700/80 shadow-none cursor-pointer` |
+| **Action Button — Live** | `w-full h-[48px] rounded-xl font-black text-sm relative z-10 transition-all overflow-hidden group/btn mt-auto premium-gradient text-white shadow-lg shadow-brand-500/20 group-hover:premium-glow` |
+
+**Pattern notes:**
+- **0-Question Safe Guard**: If `totalQs === 0`, disables test launch and displays an informative notification modal (`showPremiumAlert`) informing students that faculty is preparing the question paper.
+- **Dynamic 4-State Button Switcher**:
+  1. *Upcoming*: Countdown lock banner with release date.
+  2. *In Preparation* (`totalQs === 0`): `⏳ In Preparation` button with modal alert.
+  3. *Completed*: Dual button `[Score]` + `[Retake]`.
+  4. *In Progress*: Dual button `[Progress]` + `[Resume (X%)]`.
+  5. *Default*: `[Start Test Now →]` or `[Unlock to Access]`.

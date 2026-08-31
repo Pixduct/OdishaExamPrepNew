@@ -1,6 +1,10 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] 🚀 NVIDIA NIM Model Deprecation Migration & Zero-Downtime Multi-Tier AI Failover (`automations/ca_formatter.py`, `automations/ca_website_publisher.py`, `automations/exam_update_engine.py`, `automations/seo_blog_engine.py`, `automations/engagement_engine.py`, `automations/breaking_engine.py`, `automations/.github/workflows/daily_mcq.yml`, `automations/.github/workflows/daily_ca.yml`):
+  1. **Root Cause Diagnosis**: NVIDIA NIM decommissioned `meta/llama-3.1-8b-instruct` and `meta/llama-3.3-70b-instruct` (returning HTTP 410 Gone), and `deepseek-ai/deepseek-r1` / `nvidia/nemotron-3-super-120b-a12b` (503/404/timeouts), causing cascading runner failure across all 6 engines.
+  2. **Active Fast Model Fleet**: Migrated all engines to live active models with verified 200 responses: `meta/llama-3.2-11b-vision-instruct`, `nvidia/nemotron-3-nano-30b-a3b`, `nvidia/nemotron-3.5-lightning-30b-a3b`, `openai/gpt-oss-20b`, and `deepseek-chat`.
+  3. **Playwright Runner Fail-Safe**: Added `|| true` to system dependency install steps to prevent cached environment aborts.
 - [x] 🎯 Daily MCQ Engine Google Sheet Auto-Discovery, Dynamic Status Column & Runner Resilience (`automations/mcq_engine.py`, `automations/.github/workflows/daily_mcq.yml`, `automations/.github/workflows/daily_ca.yml`, `automations/.github/workflows/engagement_engine.yml`, `automations/.github/workflows/notice_scraper.yml`):
   1. **Google Sheet Discovery & Tab Resolution**: Upgraded `mcq_engine.py` to auto-discover `Odisha_MCQ_Engine.xlsx`, `Odisha_MCQ_Engine .xlsx`, and `Odisha_MCQ_Engine` with fallback keyword search across all accessible sheets and candidate tab names (`mcq`, `mcqs`, `questions`, `quiz`, `sheet1`).
   2. **Dynamic Status Column Resolution**: Eliminated hardcoded column index 10; dynamically reads header row 1 to detect and update the `Status` column index.

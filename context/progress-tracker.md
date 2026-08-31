@@ -1,6 +1,10 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] 🔔 Universal Telegram Notification Delivery & HTML Fallback Resilience (`automations/shared/telegram.py`, `automations/ca_publisher.py`, `automations/mcq_engine.py`, all 7 GitHub Actions workflows):
+  1. **Root Cause of Missing Notifications**: Python error tracebacks containing unescaped angle brackets (`<module>`, `<string>`, `<stdin>`) caused Telegram API to return `HTTP 400 Bad Request: can't parse entities`, resulting in silent notification drop.
+  2. **Bulletproof Plain-Text Fallback**: If Telegram API returns HTTP 400 on HTML parsing, every script now automatically strips HTML tags and re-dispatches the notification in plain text, guaranteeing 100% delivery.
+  3. **Universal `if: always()` Execution Status**: Upgraded all 7 GitHub Actions workflows (`daily_ca.yml`, `daily_ca_website.yml`, `daily_mcq.yml`, `engagement_engine.yml`, `exam_update_cron.yml`, `blog_cron.yml`, `notice_scraper.yml`) with an `if: always()` execution step that sends a Telegram status notification directly to Admin on every scheduled run (both Success and Failure).
 - [x] 🚀 NVIDIA NIM Model Deprecation Migration & Zero-Downtime Multi-Tier AI Failover (`automations/ca_formatter.py`, `automations/ca_website_publisher.py`, `automations/exam_update_engine.py`, `automations/seo_blog_engine.py`, `automations/engagement_engine.py`, `automations/breaking_engine.py`, `automations/.github/workflows/daily_mcq.yml`, `automations/.github/workflows/daily_ca.yml`):
   1. **Root Cause Diagnosis**: NVIDIA NIM decommissioned `meta/llama-3.1-8b-instruct` and `meta/llama-3.3-70b-instruct` (returning HTTP 410 Gone), and `deepseek-ai/deepseek-r1` / `nvidia/nemotron-3-super-120b-a12b` (503/404/timeouts), causing cascading runner failure across all 6 engines.
   2. **Active Fast Model Fleet**: Migrated all engines to live active models with verified 200 responses: `meta/llama-3.2-11b-vision-instruct`, `nvidia/nemotron-3-nano-30b-a3b`, `nvidia/nemotron-3.5-lightning-30b-a3b`, `openai/gpt-oss-20b`, and `deepseek-chat`.

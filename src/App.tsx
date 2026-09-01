@@ -6651,23 +6651,23 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       const discountPercent = Math.round(((effectiveOriginalPrice - effectivePrice) / effectiveOriginalPrice) * 100) || 80;
 
                       const activeMobileFeatures = checkoutTier === 'mega' ? [
-                        'UNLIMITED Access to ALL OPSC, OSSC, OSSSC & Police Exams',
-                        'Unlocks ALL 500+ Mock Tests, Question Banks & Practice Modules',
-                        'All Chapter-Wise PDF Booklets & Full Solution Keys',
-                        'Unlimited 24/7 AI Mentor Doubt Solving & LaTeX Math',
-                        'Valid for 1 Full Year • All Future Test Updates Included'
+                        'All Odisha Exams (OPSC, OSSC, OSSSC & Police)',
+                        '500+ Tests across the entire platform',
+                        'Unlimited 24/7 AI Mentor Doubt Solver',
+                        'All Test PDFs & Solution Keys',
+                        '1 Full Year VIP Access (All Updates Included)'
                       ] : checkoutTier === 'starter' ? [
-                        `Unlocks First ${starterTestCount} Full-Length Mock Tests for ${activeExamBundleName}`,
-                        'Access to 500+ Target Subject PYQs & Practice Sets',
-                        'Downloadable Test PDF with Step-by-Step Solutions',
-                        'Instant State Rank & Accuracy Diagnostics',
-                        'Valid for 3 Months • One-Time Payment'
+                        `First ${starterTestCount} Full-Length Mock Tests`,
+                        '500+ Subject-Wise Practice PYQs',
+                        'Downloadable Test PDFs with Solutions',
+                        'State Rank & Accuracy Analytics',
+                        '3 Months Exam Season Access'
                       ] : [
-                        `Unlocks ALL ${examMockCount}+ Mock Tests for ${activeExamBundleName}`,
-                        'Unlocks ALL Question Banks & Chapter Notes for this Exam',
-                        'Downloadable Test PDFs with Answer Keys & Explanations',
-                        '24/7 AI Mentor Step-by-Step Doubt Resolution',
-                        'Valid for 6 Months • Full Exam Season Access'
+                        `All ${examMockCount}+ Mock Tests & Live Mocks`,
+                        'All Question Banks & Practice Sets',
+                        '24/7 AI Mentor Instant Doubt Resolution',
+                        'Complete PDF Answer Keys & Explanations',
+                        '6 Months Full Season Access'
                       ];
 
                       return (
@@ -6680,63 +6680,65 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           className="flex flex-col flex-1 overflow-visible"
                         >
                           {/* ========================================================================= */}
-                          {/* DESKTOP/LAPTOP VIEW (3-Column SaaS Grid - Claude & ChatGPT Style)         */}
+                          {/* DESKTOP/LAPTOP VIEW (Minimalist SaaS Grid - Claude & ChatGPT Style)        */}
                           {/* ========================================================================= */}
-                          <div className="hidden lg:flex flex-col space-y-6">
-                            {/* Header */}
-                            <div className="text-center space-y-2">
-                              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-400/20 text-brand-300 text-xs font-black uppercase tracking-wider">
-                                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                                🏆 Odisha's #1 Exam Preparation Platform
+                          <div className="hidden lg:flex flex-col space-y-7 py-2">
+                            {/* Clean Header */}
+                            <div className="text-center space-y-1.5">
+                              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-brand-500/10 border border-brand-400/20 text-brand-300 text-[11px] font-black uppercase tracking-wider">
+                                <Sparkles className="w-3 h-3 text-amber-400" />
+                                Odisha's #1 Exam Prep Platform
                               </div>
-                              <h2 className="text-3xl font-black text-white tracking-tight font-sans">
-                                Choose Your <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-brand-300 via-pink-200 to-indigo-300">Access Pass</span>
+                              <h2 className="text-3xl font-black text-white tracking-tight">
+                                Simple, Transparent <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-brand-300 via-pink-200 to-indigo-300">Access Plans</span>
                               </h2>
-                              <p className="text-slate-400 text-sm font-medium max-w-xl mx-auto">
-                                Transparent, student-friendly one-time pricing. Unlock complete test series, instant AI doubt solutions, and PDF booklets.
+                              <p className="text-slate-400 text-xs font-medium max-w-md mx-auto">
+                                One-time payment. Instant UPI unlock. Zero auto-debit renewals.
                               </p>
                             </div>
 
-                            {/* 3-Column Pricing Grid */}
-                            <div className="grid grid-cols-3 gap-6 items-stretch pt-2 pb-1">
-                              {/* Card 1: Starter Booster (₹29) */}
-                              <div className="bg-slate-900/60 border border-white/10 hover:border-blue-400/40 rounded-3xl p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-[0_10px_30px_rgba(59,130,246,0.15)] group relative">
+                            {/* 3-Column Minimalist Pricing Grid */}
+                            <div className="grid grid-cols-3 gap-6 items-stretch pt-1">
+                              {/* Card 1: ⚡ Starter */}
+                              <div className="bg-slate-900/50 border border-white/10 hover:border-blue-400/40 rounded-3xl p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-[0_12px_32px_rgba(59,130,246,0.12)] group">
                                 <div className="space-y-4">
-                                  <div className="flex items-center justify-between">
-                                    <span className="text-base font-extrabold text-white flex items-center gap-1.5">
-                                      ⚡ Starter Booster
-                                    </span>
-                                    <span className="text-[10px] font-black text-blue-300 bg-blue-500/20 border border-blue-400/30 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                      3 MONTHS
-                                    </span>
+                                  <div>
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-base font-black text-white">
+                                        ⚡ Starter
+                                      </span>
+                                      <span className="text-[10px] font-black text-blue-300 bg-blue-500/15 border border-blue-400/30 px-2 py-0.5 rounded-full uppercase">
+                                        3 Months
+                                      </span>
+                                    </div>
+                                    <p className="text-xs text-slate-400 font-medium mt-1">
+                                      Essential mock tests to test your baseline.
+                                    </p>
                                   </div>
-                                  <p className="text-xs text-slate-400 font-medium leading-relaxed">
-                                    First {starterTestCount} high-yield tests to test your baseline & boost score.
-                                  </p>
 
-                                  <div className="pt-2 pb-3 border-y border-white/5">
+                                  <div className="py-3 border-y border-white/5 space-y-1">
                                     <div className="flex items-baseline gap-2">
                                       <span className="text-3xl font-black text-white font-mono">₹{starterOfferPrice}</span>
-                                      <span className="text-sm font-bold text-slate-500 line-through font-mono">₹{starterMrpPrice}</span>
-                                      <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest bg-blue-500/10 px-2 py-0.5 rounded-full">
+                                      <span className="text-xs font-bold text-slate-500 line-through font-mono">₹{starterMrpPrice}</span>
+                                      <span className="text-[10px] font-black text-blue-400 uppercase bg-blue-500/10 px-1.5 py-0.5 rounded">
                                         {Math.round(((starterMrpPrice - starterOfferPrice) / starterMrpPrice) * 100)}% OFF
                                       </span>
                                     </div>
-                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mt-1">
-                                      One-Time • No Auto-Debit
+                                    <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
+                                      One-Time Payment
                                     </span>
                                   </div>
 
-                                  <div className="space-y-2.5 pt-1 text-left">
+                                  <div className="space-y-2.5 pt-1">
                                     {[
-                                      `First ${starterTestCount} Full-Length Mock Tests for ${activeExamBundleName}`,
-                                      'Access to 500+ Target Subject PYQs',
-                                      'Downloadable Test PDF with Step-by-Step Solutions',
-                                      'Instant State Rank & Accuracy Diagnostics',
-                                      '3 Months Exam Season Validity'
+                                      `First ${starterTestCount} Full-Length Mock Tests`,
+                                      '500+ Practice PYQs with Solutions',
+                                      'Downloadable Test PDFs',
+                                      'State Rank & Accuracy Analytics',
+                                      '3 Months Exam Access'
                                     ].map((feat, idx) => (
-                                      <div key={idx} className="flex items-start gap-2.5 text-xs text-slate-300 font-medium">
-                                        <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+                                      <div key={idx} className="flex items-center gap-2.5 text-xs text-slate-300 font-medium">
+                                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                                         <span>{feat}</span>
                                       </div>
                                     ))}
@@ -6746,57 +6748,58 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                 <div className="pt-6 mt-auto">
                                   <Button 
                                     onClick={() => initiatePaymentForTier('starter')}
-                                    className="w-full h-11 rounded-xl text-xs font-black bg-slate-800 hover:bg-blue-600 text-white border border-white/10 hover:border-blue-400/50 shadow-md transition-all active:scale-[0.98]"
+                                    className="w-full h-11 rounded-xl text-xs font-black bg-slate-800 hover:bg-blue-600 text-white border border-white/10 hover:border-blue-400/50 shadow-sm transition-all active:scale-[0.98]"
                                   >
-                                    ⚡ Get Starter Booster (₹{starterOfferPrice})
+                                    ⚡ Get Starter (₹{starterOfferPrice})
                                   </Button>
                                 </div>
                               </div>
 
-                              {/* Card 2: Complete Exam Pass (₹99) - CENTER ELEVATED */}
-                              <div className="bg-gradient-to-b from-brand-950/95 via-slate-900/95 to-indigo-950/95 border-2 border-brand-400/80 shadow-[0_0_40px_rgba(37,99,235,0.3)] ring-2 ring-brand-400/30 rounded-3xl p-6 lg:p-7 flex flex-col justify-between relative transform lg:-translate-y-2 group transition-all duration-300">
-                                {/* Floating Most Popular Pill */}
-                                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 text-[10px] font-black uppercase px-3 py-1 rounded-full shadow-lg border border-white/20 tracking-wider flex items-center gap-1">
-                                  <Flame className="w-3 h-3 fill-current" /> MOST POPULAR • BEST VALUE
+                              {/* Card 2: 🌟 Complete Exam Pass (CENTER ELEVATED) */}
+                              <div className="bg-gradient-to-b from-brand-950/90 via-slate-900/95 to-indigo-950/90 border-2 border-brand-400/80 shadow-[0_0_35px_rgba(37,99,235,0.25)] ring-2 ring-brand-400/30 rounded-3xl p-6 lg:p-7 flex flex-col justify-between relative transform lg:-translate-y-2 group transition-all duration-300">
+                                {/* Clean Top Floating Pill */}
+                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 text-[10px] font-black uppercase px-3 py-0.5 rounded-full shadow-md border border-white/20 tracking-wider flex items-center gap-1">
+                                  <Flame className="w-3 h-3 fill-current" /> MOST POPULAR
                                 </div>
 
                                 <div className="space-y-4">
-                                  <div className="flex items-center justify-between pt-1">
-                                    <span className="text-base font-black text-white flex items-center gap-1.5">
-                                      🌟 {activeExamBundleName} Full Pass
-                                    </span>
-                                    <span className="text-[10px] font-black text-amber-300 bg-amber-500/20 border border-amber-400/30 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                      6 MONTHS
-                                    </span>
+                                  <div className="pt-1">
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-base font-black text-white truncate max-w-[170px]" title={activeExamBundleName}>
+                                        🌟 {activeExamBundleName}
+                                      </span>
+                                      <span className="text-[10px] font-black text-amber-300 bg-amber-500/20 border border-amber-400/30 px-2 py-0.5 rounded-full uppercase">
+                                        6 Months
+                                      </span>
+                                    </div>
+                                    <p className="text-xs text-slate-300 font-medium mt-1">
+                                      Complete test series & AI mentor for this exam.
+                                    </p>
                                   </div>
-                                  <p className="text-xs text-slate-300 font-medium leading-relaxed">
-                                    Everything you need to crack {activeExamBundleName} with top ranks.
-                                  </p>
 
-                                  <div className="pt-2 pb-3 border-y border-white/10">
+                                  <div className="py-3 border-y border-white/10 space-y-1">
                                     <div className="flex items-baseline gap-2">
                                       <span className="text-3xl lg:text-4xl font-black text-white font-mono">₹{examPassOfferPrice}</span>
-                                      <span className="text-sm font-bold text-slate-400 line-through font-mono">₹{examPassMrpPrice}</span>
-                                      <span className="text-[10px] font-black text-emerald-300 uppercase tracking-widest bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-400/30">
+                                      <span className="text-xs font-bold text-slate-400 line-through font-mono">₹{examPassMrpPrice}</span>
+                                      <span className="text-[10px] font-black text-emerald-300 uppercase bg-emerald-500/20 px-1.5 py-0.5 rounded border border-emerald-400/30">
                                         {Math.round(((examPassMrpPrice - examPassOfferPrice) / examPassMrpPrice) * 100)}% OFF
                                       </span>
                                     </div>
-                                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block mt-1">
-                                      Full Season Access • Instant Unlock
+                                    <span className="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider block">
+                                      Full Season Access
                                     </span>
                                   </div>
 
-                                  <div className="space-y-2.5 pt-1 text-left">
+                                  <div className="space-y-2.5 pt-1">
                                     {[
-                                      `ALL ${examMockCount}+ Full-Length Mock Tests & Live Mocks`,
-                                      'ALL Subject-Wise Question Banks & Practice Sets',
-                                      'Downloadable Chapter-Wise PDF Booklets & Answer Keys',
-                                      'Detailed Step-by-Step AI Solutions & LaTeX Math',
-                                      '24/7 AI Mentor Doubt Resolution & Smart Hints',
-                                      'Valid for 6 Months • Full Exam Season Coverage'
+                                      `All ${examMockCount}+ Full Mock Tests & Live Mocks`,
+                                      'All Question Banks & Practice Sets',
+                                      '24/7 AI Mentor Doubt Resolution',
+                                      'All Test PDFs with Step-by-Step Solutions',
+                                      '6 Months Full Season Access'
                                     ].map((feat, idx) => (
-                                      <div key={idx} className="flex items-start gap-2.5 text-xs text-slate-100 font-bold">
-                                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                                      <div key={idx} className="flex items-center gap-2.5 text-xs text-slate-100 font-bold">
+                                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                                         <span>{feat}</span>
                                       </div>
                                     ))}
@@ -6806,51 +6809,53 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                 <div className="pt-6 mt-auto">
                                   <Button 
                                     onClick={() => initiatePaymentForTier('bundle')}
-                                    className="w-full h-12 rounded-xl text-sm font-black bg-gradient-to-r from-brand-600 via-brand-500 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white shadow-[0_8px_25px_rgba(37,99,235,0.4)] border border-white/20 transition-all active:scale-[0.98]"
+                                    className="w-full h-12 rounded-xl text-sm font-black bg-gradient-to-r from-brand-600 via-brand-500 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white shadow-[0_6px_20px_rgba(37,99,235,0.35)] border border-white/20 transition-all active:scale-[0.98]"
                                   >
-                                    🚀 Unlock Full Exam Pass (₹{examPassOfferPrice})
+                                    🚀 Unlock Full Pass (₹{examPassOfferPrice})
                                   </Button>
                                 </div>
                               </div>
 
-                              {/* Card 3: All-Odisha Super Pass (₹199) */}
-                              <div className="bg-gradient-to-b from-purple-950/40 via-slate-900/80 to-slate-900/90 border border-purple-500/40 hover:border-purple-400/70 rounded-3xl p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-[0_10px_35px_rgba(168,85,247,0.2)] group relative">
+                              {/* Card 3: 👑 All-Odisha Super Pass */}
+                              <div className="bg-slate-900/50 border border-purple-500/30 hover:border-purple-400/60 rounded-3xl p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-[0_12px_32px_rgba(168,85,247,0.15)] group">
                                 <div className="space-y-4">
-                                  <div className="flex items-center justify-between">
-                                    <span className="text-base font-extrabold text-white flex items-center gap-1.5">
-                                      👑 All-Odisha Super Pass
-                                    </span>
-                                    <span className="text-[10px] font-black text-emerald-300 bg-emerald-500/20 border border-emerald-400/30 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                      1 YEAR VIP
-                                    </span>
+                                  <div>
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-base font-black text-white">
+                                        👑 Super Pass
+                                      </span>
+                                      <span className="text-[10px] font-black text-purple-300 bg-purple-500/20 border border-purple-400/30 px-2 py-0.5 rounded-full uppercase">
+                                        1 Year VIP
+                                      </span>
+                                    </div>
+                                    <p className="text-xs text-slate-400 font-medium mt-1">
+                                      Unlimited access to all Odisha state exams.
+                                    </p>
                                   </div>
-                                  <p className="text-xs text-slate-400 font-medium leading-relaxed">
-                                    Unlimited 365-day access to every single Odisha government exam.
-                                  </p>
 
-                                  <div className="pt-2 pb-3 border-y border-white/5">
+                                  <div className="py-3 border-y border-white/5 space-y-1">
                                     <div className="flex items-baseline gap-2">
                                       <span className="text-3xl font-black text-white font-mono">₹{megaPassOfferPrice}</span>
-                                      <span className="text-sm font-bold text-slate-500 line-through font-mono">₹{megaPassMrpPrice}</span>
-                                      <span className="text-[10px] font-black text-purple-300 uppercase tracking-widest bg-purple-500/20 px-2 py-0.5 rounded-full">
+                                      <span className="text-xs font-bold text-slate-500 line-through font-mono">₹{megaPassMrpPrice}</span>
+                                      <span className="text-[10px] font-black text-purple-300 uppercase bg-purple-500/20 px-1.5 py-0.5 rounded">
                                         {Math.round(((megaPassMrpPrice - megaPassOfferPrice) / megaPassMrpPrice) * 100)}% OFF
                                       </span>
                                     </div>
-                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mt-1">
-                                      Entire Website • 1 Full Year
+                                    <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
+                                      All Exams • 365 Days
                                     </span>
                                   </div>
 
-                                  <div className="space-y-2.5 pt-1 text-left">
+                                  <div className="space-y-2.5 pt-1">
                                     {[
-                                      'UNLIMITED Access to ALL OPSC, OSSC, OSSSC & Police Exams',
-                                      'Unlocks ALL 500+ Tests across the entire platform',
-                                      'All Future Test Series & Updates for 1 Full Year Included',
-                                      'Unlimited 24/7 AI Mentor Doubt Solving & LaTeX Math',
-                                      'Priority VIP Server Access & Instant PDF Downloads'
+                                      'All Odisha Exams (OPSC, OSSC, OSSSC, Police)',
+                                      '500+ Tests across the entire platform',
+                                      'Unlimited 24/7 AI Mentor Access',
+                                      'All Future Test Series Included',
+                                      'Priority VIP PDF Downloads'
                                     ].map((feat, idx) => (
-                                      <div key={idx} className="flex items-start gap-2.5 text-xs text-slate-300 font-medium">
-                                        <CheckCircle2 className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                                      <div key={idx} className="flex items-center gap-2.5 text-xs text-slate-300 font-medium">
+                                        <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0" />
                                         <span>{feat}</span>
                                       </div>
                                     ))}
@@ -6860,22 +6865,22 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                 <div className="pt-6 mt-auto">
                                   <Button 
                                     onClick={() => initiatePaymentForTier('mega')}
-                                    className="w-full h-11 rounded-xl text-xs font-black bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white border border-purple-400/30 shadow-md transition-all active:scale-[0.98]"
+                                    className="w-full h-11 rounded-xl text-xs font-black bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white border border-purple-400/30 shadow-sm transition-all active:scale-[0.98]"
                                   >
-                                    👑 Claim 1-Year VIP Pass (₹{megaPassOfferPrice})
+                                    👑 Claim VIP Pass (₹{megaPassOfferPrice})
                                   </Button>
                                 </div>
                               </div>
                             </div>
 
-                            {/* Desktop Security Footer */}
-                            <div className="flex items-center justify-center gap-6 text-xs text-slate-400 font-medium pt-2 border-t border-white/5">
+                            {/* Minimalist Security Footer */}
+                            <div className="flex items-center justify-center gap-6 text-xs text-slate-400 font-medium pt-1 border-t border-white/5">
                               <span className="flex items-center gap-1.5">
                                 <Lock className="w-3.5 h-3.5 text-emerald-400" /> Razorpay 256-Bit SSL Secured
                               </span>
                               <span>•</span>
                               <span className="flex items-center gap-1.5">
-                                <Zap className="w-3.5 h-3.5 text-amber-400" /> Instant UPI Activation (GPay, PhonePe, Paytm, QR)
+                                <Zap className="w-3.5 h-3.5 text-amber-400" /> Instant UPI Unlock (GPay, PhonePe, Paytm, QR)
                               </span>
                               <span>•</span>
                               <span className="flex items-center gap-1.5">
@@ -6907,7 +6912,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                 Choose Your <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-brand-300 via-pink-200 to-indigo-300">Access Pass</span>
                               </h2>
                               <p className="text-slate-400 text-[11px] sm:text-xs font-medium leading-relaxed max-w-sm mx-auto">
-                                Select a plan to unlock high-yield mock tests, question banks, and instant AI doubt explanations.
+                                Instant UPI unlock. Zero auto-debit renewals.
                               </p>
                             </div>
 
@@ -6936,7 +6941,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                   <div className="space-y-0.5">
                                     <div className="flex items-center gap-1.5 flex-wrap">
                                       <span className="font-extrabold text-white text-xs sm:text-sm tracking-tight flex items-center gap-1">
-                                        ⚡ Starter Booster
+                                        ⚡ Starter
                                       </span>
                                       <span className="text-[8px] font-black text-blue-300 uppercase tracking-wider bg-blue-500/20 border border-blue-400/30 px-1.5 py-0.5 rounded-full">
                                         3 MONTHS
@@ -6976,15 +6981,15 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
                                   <div className="space-y-0.5">
                                     <div className="flex items-center gap-1.5 flex-wrap">
-                                      <span className="font-extrabold text-white text-xs sm:text-sm tracking-tight flex items-center gap-1">
-                                        🌟 {activeExamBundleName} Full Pass
+                                      <span className="font-extrabold text-white text-xs sm:text-sm tracking-tight flex items-center gap-1 truncate max-w-[170px]">
+                                        🌟 {activeExamBundleName}
                                       </span>
                                       <span className="text-[8px] font-black text-amber-300 uppercase tracking-wider bg-amber-500/20 border border-amber-400/30 px-1.5 py-0.5 rounded-full">
-                                        🔥 MOST POPULAR
+                                        🔥 POPULAR
                                       </span>
                                     </div>
                                     <p className="text-[10px] sm:text-[10.5px] text-slate-300 font-medium leading-snug">
-                                      <strong className="text-brand-300">ALL</strong> Mocks, Question Banks, Chapter Notes & AI Mentor (6 Mos)
+                                      <strong className="text-brand-300">ALL</strong> Mocks, Question Banks, Chapter Notes & AI Mentor
                                     </p>
                                   </div>
                                 </div>
@@ -7018,14 +7023,14 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                   <div className="space-y-0.5">
                                     <div className="flex items-center gap-1.5 flex-wrap">
                                       <span className="font-extrabold text-white text-xs sm:text-sm tracking-tight flex items-center gap-1">
-                                        👑 All-Odisha Super Pass
+                                        👑 Super Pass
                                       </span>
                                       <span className="text-[8px] font-black text-emerald-300 uppercase tracking-wider bg-emerald-500/20 border border-emerald-400/30 px-1.5 py-0.5 rounded-full">
                                         1 YEAR VIP
                                       </span>
                                     </div>
                                     <p className="text-[10px] sm:text-[10.5px] text-slate-300 font-medium leading-snug">
-                                      UNLIMITED access to <strong className="text-emerald-300">ALL</strong> OPSC, OSSC, OSSSC & Police Exams
+                                      UNLIMITED access to <strong className="text-emerald-300">ALL</strong> Odisha Exams (500+ Tests)
                                     </p>
                                   </div>
                                 </div>
@@ -7095,7 +7100,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                     ? `👑 Unlock All-Odisha Super Pass (₹${effectivePrice})` 
                                     : checkoutTier === 'starter' 
                                     ? `⚡ Unlock Starter Booster (₹${effectivePrice})` 
-                                    : `🚀 Unlock ${activeExamBundleName} Full Pass (₹${effectivePrice})`}
+                                    : `🚀 Unlock Full Pass (₹${effectivePrice})`}
                                   <ChevronRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
                                 </span>
                               </Button>

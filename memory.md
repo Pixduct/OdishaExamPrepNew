@@ -1,32 +1,72 @@
-# Memory — Dynamic SVG Venn Diagram Engine, Pie Charts, Mobile Test Engine & Authoritative Count Fix
+# Memory — 3-Tier SaaS Pricing Architecture, 3-Pillar Granular Starter Controls & Balanced Multi-Subject Entitlement
 
-Last updated: August 29, 2026, 19:18 IST
+Last updated: September 1, 2026, 19:55 IST
+
+---
 
 ## What was built
 
-### 1. Database-Level Count Audit & Permanent Phantom Count Elimination
-- **Supabase Audit**: Discovered that 3 High-Yield question banks (`Coding-Decoding, Blood Relations & Direction — High-Yield`, `Number, Alphabet & Figure Series — High-Yield`, `Pie Charts, Mixed Graphs & Caselets — High-Yield DI`) had stale `questionCount = 20` hardcoded in the Postgres `questionBanks` table from earlier seeding, despite having 0 rows in the `questions` table.
-- **Authoritative SQL Recount**: Executed a comprehensive database update in Supabase querying actual `questions` rows for every question bank.
-- **Server Sync Route (`/api/admin/questions/sync-counts`)**: Added an automated backend synchronization route in `server.ts` to ensure `questionBanks.questionCount` is always synchronized with exact database table counts on bulk upload and administrative requests.
+### 1. Minimalist 3-Tier SaaS Pricing Grid (`src/App.tsx`)
+- **ChatGPT & Claude Pro Design Standard**: Replaced cluttered text boxes with a clean, scannable 3-column pricing grid (`TieredPricingSaaSFallbackModal`) inside the unlock modal.
+- **Smart Content Truth Engine**: Live dynamic calculation of real database metrics (`totalExamMocks`, `totalExamQuestions`, and global platform counts for Super Pass) replacing hardcoded numbers.
+- **Direct 1-Click Razorpay Checkout**: Each card features a dedicated checkout launcher with dynamic payload resolution (`starter-booster_${examId}`, `exam-pass_${examId}`, `all-access`).
 
-### 2. Universal Automated SVG Venn Diagram Engine (`src/components/MathTextRenderer.tsx`)
-- **Automated Mathematical Set-Theory Solver**: Parses natural language survey bullets (e.g. `200 own car`, `150 bike`, `50 both`, `20 all three`, `total 500`) and computes all 8 disjoint regions (`Only A = 110`, `Only B = 50`, `Only C = 140`, `Only AB = 30`, `Only BC = 50`, `Only AC = 40`, `All 3 = 20`, `None = 50`).
-- **Interactive Translucent Vector Circles**: Renders 2-set and 3-set overlapping SVG circles with centroid region labels, outer set badges, and dynamic hover lighting.
-- **Disjoint Breakdown Grid & View Toggle**: Color-coded breakdown cards with sync'd circle hover states and a 1-click switcher between `⭕ Venn Diagram View` and `📋 Text Only View`.
+### 2. 3-Pillar Granular Starter Booster Controls (`src/AdminPanel.tsx`)
+- **Admin Control over Starter Inclusions**: Inside Admin Panel ➔ Exams ➔ Tier 1 Starter Booster, admins have independent granular controls:
+  1. `Offer Price (₹)` (e.g. 29) & `MRP (₹)` (e.g. 99)
+  2. `Full Mocks Included` (`starterMockCount`, default: 5)
+  3. `Sectional Tests / Subject` (`starterSectionalCount`, default: 2)
+  4. `Question Banks / Subject` (`starterBankCount`, default: 2)
+- **Global Super Pass Info Card**: Streamlined Tier 3 inside exam modals into an informational card explaining that this exam is automatically included for all 1-Year Super Pass students platform-wide (managed globally).
+- **Default Toggle State**: Creating a new exam defaults `isPremium: true` (ON) with standard presets; editing an existing exam strictly reflects its real database state.
 
-### 3. Dynamic SVG Pie Chart & Mixed Graph Engine (`src/components/MathTextRenderer.tsx`)
-- **Automated Distribution Detection**: Analyzes 2-column and multi-column tables to detect percentage shares (summing to ~100%) or degree angles (summing to ~360°).
-- **High-Resolution Vector Graphics**: Interactive SVG Donut/Pie Charts with 10 harmonious colors, hover slice expansion, and dynamic center percentage hub.
-- **Mixed Graph Companion Table Engine**: Renders visual SVG Pie Chart at the top with the full companion data & ratio table directly underneath.
-- **Dual-View Switcher**: 1-click toggle between `📊 Mixed Graph View` and `📋 Data Table View`.
+### 3. Balanced Subject Taster Entitlement Engine (`src/lib/entitlementEngine.ts`, `src/App.tsx`)
+- **Multi-Subject Sectional Unlocking**: Evaluates relative subject rank (`subjectRank <= starterSectionalCount`). Starter Booster holders get tests #1 and #2 unlocked across **every subject** (Anatomy, Pharmacology, Community Health, etc.) rather than exhausting all 5 slots on Subject #1.
+- **Subject-Wise Question Bank Unlocking**: Evaluates relative rank within each subject category (`bankSubjectRank <= starterBankCount`). Starter Booster holders get the first 2 Question Banks / Practice Sets unlocked in every subject.
+- **Full Exam Pass (₹149)**: Unlocks 100% of all tests, banks, PDF solution vaults, and AI Mentor.
 
-### 4. Mobile Viewport Unconditional Scrolling (`src/MockTestSystem.tsx`)
-- **Universal Table & Chart Detection**: Recognizes all pipe tables, diagrams, and chart questions (`pie-chart`, `bar-graph`, `caselet`).
-- **Zero Scroll Lock on Mobile**: Main container `<main>` is unconditionally `overflow-y-auto` with `pb-28 sm:pb-32` bottom inset on mobile screens (`< lg`), guaranteeing smooth full-screen touch scrolling.
+### 4. End-to-End Price Parity & Automated Expiration (`server.ts`, `src/lib/examService.ts`)
+- **Fixed ₹99 vs ₹149 Pricing Parity**: Corrected frontend metadata extraction so real active exam prices (e.g. ₹149) render immediately on cards and match backend Razorpay order creation with 0 discrepancy.
+- **Automated Expiration Tracking**: `server.ts` calculates tier-specific durations upon payment verification:
+  - Starter Booster: 90 Days (`3 Months`)
+  - Complete Exam Pass: 180 Days (`6 Months`)
+  - Super Pass: 365 Days (`1 Year VIP`)
+  - Records `expires_at` in the `user_purchases` ledger and synchronizes user metadata in Supabase Auth.
+- **Instant Live Update Broadcast**: Saving changes in `AdminPanel.tsx` clears `sessionStorage` and dispatches `oep_catalog_updated`, immediately re-rendering the frontend without manual refresh.
+
+---
+
+## Decisions made
+
+1. **Relative Subject Ranking over Global Sequence**: For sectional tests and question banks, evaluation is based on the item's relative rank *within its subject group* rather than its global database sort order. This guarantees balanced exposure across the entire syllabus.
+2. **Decoupled Global Pass vs Exam-Specific Pass**: Tier 3 (Super Pass) is treated as a global platform membership. Individual exam edit modals only configure what is specific to that exam (Tier 1 & Tier 2).
+3. **Fail-Safe Metadata Hydration**: Exam metadata is resolved with a robust fallback chain (`item.rawDescription` ➔ `item.pricingConfig` ➔ direct fields), ensuring `isPremium` and pricing inputs always load accurately.
+
+---
+
+## Problems solved
+
+1. **Starter Pack Subject Exhaustion**: A 5-test limit previously consumed all slots on Subject #1 (*Anatomy*), leaving all subsequent subjects locked. Fixed via subject-relative ranking in `entitlementEngine.ts` and `App.tsx`.
+2. **Price Discrepancy on Checkout**: Fixed `examService.ts` mapping so cleaned descriptions do not strip pricing JSON, ensuring ₹149 exam price renders accurately.
+3. **Toggle Defaulting to OFF on Edit**: Resolved `handleEditClick` checking `item.description` instead of `item.rawDescription`, restoring accurate `isPremium` toggle state on edit.
 
 ---
 
 ## Current state
-- **Production Build**: Verified with `tsc --noEmit` (**0 errors**) and built with Vite + esbuild.
-- **Git Repository**: All commits cleanly pushed to `origin/main` (`afe8afb`, `c652c1f`, `12c0150`, `2f20453`, `4a29919`).
-- **Database Status**: All question bank counts in Supabase Postgres match actual `questions` rows (0 for unuploaded High-Yield banks).
+
+- **Build Status**: `npm run build` passes with **0 errors (Exit code 0)**.
+- **Git Repository**: All changes pushed to `origin/main` (latest commit `cc5c5d9`).
+- **Functionality**: 3-tier dynamic pricing, granular starter controls, balanced subject unlocking, and automated expiration tracking are active and verified.
+
+---
+
+## What comes next
+
+1. **Strategy 5 (Post-Exam "Download Test PDF with Solutions")**: Enable candidates to download a formatted, branded PDF with complete step-by-step solutions after completing a mock test.
+2. **Mobile Layout Optimization Deep Pass**: Fine-tune touch targets and responsive card layouts across small viewports.
+
+---
+
+## Open questions
+
+- None currently pending.

@@ -3951,5 +3951,32 @@ Last updated: September 1, 2026
 **Pattern notes:**
 - **Zero JS Execution on Touch**: Mobile video carousel runs on native GPU touch scrolling with no RAF ticker or touch event interceptors, guaranteeing 0ms vertical page scroll handoff.
 
+---
+
+### `ExamDetailMockTestHeroModule`
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) (`L10040–L10310`)
+Last updated: September 1, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Shell Container** | `relative rounded-2xl sm:rounded-[2.2rem] text-white p-4 sm:p-8 md:p-10 shadow-2xl border-none transition-all duration-500 card-3d-deep group mb-6 sm:mb-10 shadow-slate-950/30` |
+| **Background Vector Overlay** | `absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]` with floating exam watermark icon (`absolute -right-6 -bottom-6 w-48 h-48 sm:w-64 sm:h-64 opacity-15 stroke-[1.2]`) |
+| **Header Badge** | `badge-recommended flex items-center gap-1.5 shadow-sm text-[9px] sm:text-xs py-0.5 sm:py-1 px-2.5 sm:px-3` with `Sparkles` icon (`text-amber-300 animate-pulse`) |
+| **Category Pill** | `px-2.5 py-0.5 sm:px-3 sm:py-1 text-[8.5px] sm:text-[10px] font-black uppercase tracking-widest rounded-full border backdrop-blur-md shadow-xs` |
+| **Heading Typography** | `text-base sm:text-2xl md:text-3xl font-black tracking-tight text-white leading-snug` |
+| **Description Typography** | `text-white/80 font-medium text-xs sm:text-sm md:text-base leading-relaxed mt-1 sm:mt-2` |
+| **Meta Information Pills** | `bg-black/20 sm:bg-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-white/15 backdrop-blur-xs text-[11px] sm:text-xs font-bold text-white/90` |
+| **Active Action Button** | `h-11 sm:h-16 px-5 sm:px-8 rounded-xl sm:rounded-2xl bg-gradient-to-r from-brand-500 via-indigo-600 to-brand-600 hover:from-brand-400 hover:to-indigo-500 text-white font-black text-xs sm:text-base shadow-lg shadow-brand-500/25 hover:shadow-brand-500/50 hover:scale-[1.02] active:scale-95` |
+| **Preparation Fallback Button** | `bg-slate-800/80 hover:bg-slate-700/80 text-amber-200 border border-amber-400/30` with `Info` icon |
+
+**Pattern notes:**
+- **Tri-State Adaptive Hero**: Seamlessly renders in 3 distinct modes:
+  1. *In-Progress Resume Session* (shows solved vs total count, exact time remaining, and instant resume CTA).
+  2. *Featured Live Mock Test* (prefers tests with uploaded question papers, shows marks/time badges, and primary start CTA).
+  3. *In-Preparation Placeholder* (shows release pending notice only when the exam genuinely has 0 uploaded questions).
+- **Service Contract Resilience**: Relies on normalized `_questionCount` / `questionCount` / `practiceQuestionCount` attributes to prevent false-positive empty state alerts.
+
+
 
 

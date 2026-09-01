@@ -613,10 +613,19 @@ export const examService = {
       }
     }
 
-    return tests.map(t => ({
-      ...t,
-      questions: questions.filter(q => q.topic === `mockTest__${t.id}`)
-    })) as MockTest[];
+    return tests.map(t => {
+      const qList = questions.filter(q => q.topic === `mockTest__${t.id}`);
+      const cnt = qList.length;
+      return {
+        ...t,
+        questions: qList,
+        _questionCount: cnt,
+        questionCount: cnt,
+        actualQuestionCount: cnt,
+        practiceQuestionCount: cnt,
+        totalQuestions: (t as any).totalQuestions || cnt,
+      };
+    }) as MockTest[];
   },
 
   /**
@@ -660,7 +669,17 @@ export const examService = {
 
         const _questionCount = countMap[`mockTest__${t.id}`] || 0;
 
-        return { ...t, examId, isPremium, category, _questionCount };
+        return {
+          ...t,
+          examId,
+          isPremium,
+          category,
+          _questionCount,
+          questionCount: _questionCount,
+          actualQuestionCount: _questionCount,
+          practiceQuestionCount: _questionCount,
+          totalQuestions: t.totalQuestions || _questionCount,
+        };
       }) as MockTest[];
 
       return result;

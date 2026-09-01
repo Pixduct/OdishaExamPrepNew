@@ -10086,7 +10086,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           
           const actualQsCount = Array.isArray(incompleteMockActivity.metadata?.test?.questions)
             ? incompleteMockActivity.metadata.test.questions.length
-            : (matchingMock?.practiceQuestionCount || matchingMock?.actualQuestionCount || matchingMock?.questionCount || 0);
+            : (matchingMock?.practiceQuestionCount || matchingMock?.actualQuestionCount || matchingMock?.questionCount || matchingMock?._questionCount || matchingMock?.totalQuestions || 0);
 
           const totalCount = actualQsCount > 0 
             ? actualQsCount 
@@ -10191,11 +10191,14 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           );
         }
 
-        // 4. If no incomplete mock test exists, check if there is a featured mock test for this exam
-        const featuredMock = examMockTests[0];
+        // 4. If no incomplete mock test exists, check if there is a featured mock test for this exam (prefer tests with questions)
+        const featuredMock = examMockTests.find((mt: any) => {
+          const cnt = mt.practiceQuestionCount || mt.actualQuestionCount || mt.questionCount || mt._questionCount || mt.totalQuestions || (mt.questions?.length || 0);
+          return cnt > 0;
+        }) || examMockTests[0];
         if (!featuredMock) return null;
 
-        const qCount = featuredMock.practiceQuestionCount || featuredMock.actualQuestionCount || featuredMock.questionCount || featuredMock.question_count || featuredMock.totalQuestions || (featuredMock.questions?.length || 0);
+        const qCount = featuredMock.practiceQuestionCount || featuredMock.actualQuestionCount || featuredMock.questionCount || featuredMock._questionCount || featuredMock.question_count || featuredMock.totalQuestions || (featuredMock.questions?.length || 0);
         const hasQuestions = qCount > 0;
         const durMins = featuredMock.durationMinutes || 120;
         const totalMarks = featuredMock.totalMarks || 100;

@@ -98,11 +98,33 @@ export const hasAccessTo = (
     return true;
   }
 
-  // 7. Check Starter Booster inheritance rules
+  // 7. Check Starter Booster inheritance rules (Balanced Subject Taster Engine)
   if (itemExamId && (
     purchased.includes(`starter-booster_${itemExamId}`) || 
     purchased.includes(`starter_${itemExamId}`)
   )) {
+    // A. Subject-aware Sectional test evaluation
+    if (itemOrId && typeof itemOrId === 'object') {
+      const subjectRank = Number((itemOrId as any).subjectRank);
+      if (subjectRank > 0 && subjectRank <= 2) {
+        return true;
+      }
+
+      // Check if test metadata indicates a sectional / subject-wise test
+      if (itemOrId.seriesId) {
+        try {
+          const parsed = typeof itemOrId.seriesId === 'string' ? JSON.parse(itemOrId.seriesId) : itemOrId.seriesId;
+          if (parsed && (parsed.subject || parsed.type === 'sectional')) {
+            const sortOrder = Number((itemOrId as any).sortOrder || 1);
+            if (sortOrder <= 2 || (sortOrder % 5 === 1 || sortOrder % 5 === 2)) {
+              return true;
+            }
+          }
+        } catch (e) {}
+      }
+    }
+
+    // B. Standard Full-Length Mock Tests evaluation
     const starterLimit = (itemOrId && typeof itemOrId === 'object' && (itemOrId as any).starterTestCount !== undefined)
       ? Number((itemOrId as any).starterTestCount)
       : ((itemOrId && typeof itemOrId === 'object' && (itemOrId as any).pricingConfig?.starterTestCount !== undefined)

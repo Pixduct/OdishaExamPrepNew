@@ -6658,11 +6658,11 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         totalExamMocks > 0 
                           ? `First ${effectiveStarterCount} of ${totalExamMocks} Full Mock Tests`
                           : `First ${effectiveStarterCount} Full-Length Mock Tests`,
+                        'Sample Tests across ALL Subject Sections',
                         totalExamQuestions > 0 
                           ? `${totalExamQuestions.toLocaleString()}+ Practice Questions & PYQs`
                           : 'Subject-Wise Practice PYQs',
                         'Downloadable Test PDFs with Solutions',
-                        'Real-Time State Rank & Diagnostics',
                         '3 Months Full Exam Access'
                       ];
 
@@ -11146,10 +11146,10 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           <div key={subject} className="space-y-2.5 sm:space-y-5 cv-card-auto">
                             <h4 className="text-[13px] sm:text-xl font-black text-brand-700 dark:text-indigo-300 px-3 py-1.5 sm:px-5 sm:py-2.5 bg-brand-50/80 dark:bg-[#0B1528] rounded-lg sm:rounded-xl inline-flex items-center gap-1.5 border border-brand-100/50 dark:border-slate-800 shadow-sm">{subject}</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6">
-                              {(tests as any[]).map(test => (
+                              {(tests as any[]).map((test, testIdx) => (
                                 <ExamDetailMockTestCard
                                   key={test.id}
-                                  test={test}
+                                  test={{ ...test, subjectRank: testIdx + 1, subject }}
                                   isMobile={isMobile}
                                   hasAccessTo={hasAccessTo}
                                   activities={activities}

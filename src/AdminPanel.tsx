@@ -2494,61 +2494,38 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     }
   };
 
-  // ⚡ BATCH MONETIZATION & FREEMIUM RULE EXECUTOR
-  const handleApplyBatchMonetization = async () => {
+  // ⚡ BATCH CONTENT ACTIONS (PREMIUM / FREE / BULK DELETE)
+  const handleApplyBatchStatus = async (targetStatus: 'premium' | 'free') => {
     if (selectedItemIds.size === 0) return;
     if (!['banks', 'practice', 'tests'].includes(activeTab)) return;
 
-    // 1. Get the selected items sorted by sortOrder ascending
-    const selectedItems = items
-      .filter(it => selectedItemIds.has(it.id))
-      .sort((a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0));
-
+    const selectedItems = items.filter(it => selectedItemIds.has(it.id));
     if (selectedItems.length === 0) return;
 
     const total = selectedItems.length;
-    const effectiveFreeCount = Math.min(batchFreeCount, total);
-
-    const confirmMsg = batchMonetizeMode === 'first_n_free'
-      ? `Apply Freemium Rule to ${total} selected ${activeTab === 'tests' ? 'mock tests' : activeTab === 'practice' ? 'practice sets' : 'question banks'}?\n\n• First ${effectiveFreeCount} item(s) (#1 .. #${effectiveFreeCount}) will be FREE demo.\n• Remaining ${Math.max(0, total - effectiveFreeCount)} item(s) will be PREMIUM at ₹${batchOfferPrice} (MRP ₹${batchMrpPrice}).`
-      : batchMonetizeMode === 'all_premium'
-      ? `Make all ${total} selected items PREMIUM at ₹${batchOfferPrice} (MRP ₹${batchMrpPrice})?`
-      : `Make all ${total} selected items FREE?`;
+    const isPrem = targetStatus === 'premium';
+    const itemLabel = activeTab === 'tests' ? 'mock tests' : activeTab === 'practice' ? 'practice sets' : 'question banks';
+    const confirmMsg = isPrem
+      ? `Protect all ${total} selected ${itemLabel} under the Exam's 3-Tier Paywall (Starter Booster & Full Exam Pass)?`
+      : `Make all ${total} selected ${itemLabel} 100% FREE DEMO for all guest students?`;
 
     if (!confirm(confirmMsg)) return;
 
     setIsApplyingBatchMonetize(true);
     setLoading(true);
 
-    let freeCount = 0;
-    let premiumCount = 0;
-
     try {
       const updates: Promise<any>[] = [];
 
-      selectedItems.forEach((item, index) => {
-        let isPrem = false;
-        if (batchMonetizeMode === 'first_n_free') {
-          isPrem = index >= effectiveFreeCount;
-        } else if (batchMonetizeMode === 'all_premium') {
-          isPrem = true;
-        } else {
-          isPrem = false;
-        }
-
-        if (isPrem) premiumCount++;
-        else freeCount++;
-
+      selectedItems.forEach(item => {
         if (activeTab === 'banks' || activeTab === 'practice') {
-          let metaTaglineObj: any = { text: '', price: batchOfferPrice, originalPrice: batchMrpPrice, subject: '' };
+          let metaTaglineObj: any = {};
           if (item.tagline) {
             try {
               if (item.tagline.startsWith('{')) {
-                metaTaglineObj = { ...JSON.parse(item.tagline), price: batchOfferPrice, originalPrice: batchMrpPrice, isPremium: isPrem };
+                metaTaglineObj = { ...JSON.parse(item.tagline), isPremium: isPrem };
               } else {
                 metaTaglineObj.text = item.tagline;
-                metaTaglineObj.price = batchOfferPrice;
-                metaTaglineObj.originalPrice = batchMrpPrice;
                 metaTaglineObj.isPremium = isPrem;
               }
             } catch (e) {
@@ -2561,11 +2538,11 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           const updatedTagline = JSON.stringify(metaTaglineObj);
           updates.push(examService.updateQuestionBank(item.id, { isPremium: isPrem, tagline: updatedTagline }));
         } else if (activeTab === 'tests') {
-          let mockConfig: any = { examId: item.examId, category: 'full-length', isPremium: isPrem, price: batchOfferPrice, originalPrice: batchMrpPrice };
+          let mockConfig: any = { examId: item.examId, category: 'full-length', isPremium: isPrem };
           if (item.seriesId) {
             try {
               if (typeof item.seriesId === 'string' && item.seriesId.startsWith('{')) {
-                mockConfig = { ...JSON.parse(item.seriesId), isPremium: isPrem, price: batchOfferPrice, originalPrice: batchMrpPrice };
+                mockConfig = { ...JSON.parse(item.seriesId), isPremium: isPrem };
               }
             } catch (e) {}
           }
@@ -2576,52 +2553,52 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
 
       await Promise.all(updates);
 
-      // Optimistic State Update
-      if (activeTab === 'banks' || activeTab === 'practice') {
-        setBanks(prev => prev.map(b => {
-          const idx = selectedItems.findIndex(it => it.id === b.id);
-          if (idx === -1) return b;
-          const isPrem = batchMonetizeMode === 'first_n_free' ? idx >= effectiveFreeCount : batchMonetizeMode === 'all_premium';
-          let metaTaglineObj: any = { text: '', price: batchOfferPrice, originalPrice: batchMrpPrice, subject: '' };
-          if (b.tagline) {
-            try {
-              if (b.tagline.startsWith('{')) metaTaglineObj = { ...JSON.parse(b.tagline), price: batchOfferPrice, originalPrice: batchMrpPrice, isPremium: isPrem };
-              else metaTaglineObj.text = b.tagline;
-            } catch (e) {}
-          }
-          return { ...b, isPremium: isPrem, tagline: JSON.stringify(metaTaglineObj) };
-        }));
-      } else if (activeTab === 'tests') {
-        setMockTests(prev => prev.map(t => {
-          const idx = selectedItems.findIndex(it => it.id === t.id);
-          if (idx === -1) return t;
-          const isPrem = batchMonetizeMode === 'first_n_free' ? idx >= effectiveFreeCount : batchMonetizeMode === 'all_premium';
-          let mockConfig: any = { examId: t.examId, category: 'full-length', isPremium: isPrem, price: batchOfferPrice, originalPrice: batchMrpPrice };
-          if (t.seriesId) {
-            try {
-              if (typeof t.seriesId === 'string' && t.seriesId.startsWith('{')) {
-                mockConfig = { ...JSON.parse(t.seriesId), isPremium: isPrem, price: batchOfferPrice, originalPrice: batchMrpPrice };
-              }
-            } catch (e) {}
-          }
-          return { ...t, isPremium: isPrem, seriesId: JSON.stringify(mockConfig) };
-        }));
-      }
+      setSelectedItemIds(new Set());
+      try {
+        sessionStorage.removeItem('oep_admin_catalog_cache');
+        sessionStorage.removeItem(ADMIN_CACHE_KEY);
+        window.dispatchEvent(new Event('oep_catalog_updated'));
+      } catch(e) {}
+
+      alert(`✅ Successfully updated ${total} items to ${isPrem ? 'Paywall Protected (Premium)' : '100% Free Demo'}.`);
+    } catch (err: any) {
+      console.error('Batch status update failed:', err);
+      alert('Error updating items: ' + (err.message || err));
+    } finally {
+      setIsApplyingBatchMonetize(false);
+      setLoading(false);
+      fetchData();
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedItemIds.size === 0) return;
+    const total = selectedItemIds.size;
+    const itemLabel = activeTab === 'tests' ? 'mock tests' : activeTab === 'practice' ? 'practice sets' : 'question banks';
+    if (!confirm(`⚠️ Are you sure you want to permanently delete all ${total} selected ${itemLabel}? This action cannot be undone.`)) return;
+
+    setLoading(true);
+    try {
+      const deletePromises = Array.from(selectedItemIds).map(id => {
+        if (activeTab === 'tests') return examService.deleteMockTest(id);
+        if (activeTab === 'banks' || activeTab === 'practice') return examService.deleteQuestionBank(id);
+        return Promise.resolve();
+      });
+      await Promise.all(deletePromises);
 
       setSelectedItemIds(new Set());
       try {
         sessionStorage.removeItem('oep_admin_catalog_cache');
         sessionStorage.removeItem(ADMIN_CACHE_KEY);
+        window.dispatchEvent(new Event('oep_catalog_updated'));
       } catch(e) {}
-
-      alert(`🎉 Batch Monetization Applied Successfully!\n\nUpdated ${total} items:\n• ${freeCount} Free demo test(s)\n• ${premiumCount} Premium test(s) at ₹${batchOfferPrice} (MRP ₹${batchMrpPrice})`);
+      await fetchData();
+      alert(`🗑️ Successfully deleted ${total} ${itemLabel}.`);
     } catch (err: any) {
-      console.error('Batch monetization failed:', err);
-      alert('Error applying batch monetization: ' + (err.message || err));
+      console.error('Bulk delete failed:', err);
+      alert('Error deleting items: ' + (err.message || err));
     } finally {
-      setIsApplyingBatchMonetize(false);
       setLoading(false);
-      fetchData();
     }
   };
 
@@ -9850,10 +9827,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         )}
       </AnimatePresence>
 
-      {/* ⚡ FLOATING BATCH MONETIZATION & FREEMIUM CONTROL CENTER */}
+      {/* ⚡ FLOATING BATCH ACTIONS CONTROL CENTER */}
       {selectedItemIds.size > 0 && ['banks', 'practice', 'tests'].includes(activeTab) && (
-        <div className="fixed bottom-6 inset-x-4 max-w-5xl mx-auto z-40 animate-in fade-in slide-in-from-bottom-6 duration-200">
-          <div className="rounded-2xl border border-slate-700/80 shadow-2xl p-3.5 bg-slate-900/95 text-white backdrop-blur-xl flex flex-wrap items-center justify-between gap-3">
+        <div className="fixed bottom-6 inset-x-4 max-w-4xl mx-auto z-40 animate-in fade-in slide-in-from-bottom-6 duration-200">
+          <div className="rounded-2xl border border-slate-700/80 shadow-2xl p-3 sm:p-3.5 bg-slate-900/95 text-white backdrop-blur-xl flex flex-wrap items-center justify-between gap-3">
             {/* Left: Selected count info */}
             <div className="flex items-center gap-2.5 shrink-0">
               <div className="w-8 h-8 rounded-xl bg-brand-500/20 border border-brand-400/40 flex items-center justify-center text-brand-400 font-black text-xs">
@@ -9864,111 +9841,48 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                   {selectedItemIds.size} {activeTab === 'tests' ? 'Tests' : activeTab === 'practice' ? 'Practice Sets' : 'Banks'} Selected
                 </div>
                 <div className="text-[10px] text-slate-400 font-semibold">
-                  Batch Freemium & Pricing Engine
+                  Batch Content Actions
                 </div>
               </div>
             </div>
 
-            {/* Middle: Mode selector pills */}
-            <div className="flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700/60 gap-1 shrink-0">
-              <button
-                type="button"
-                onClick={() => setBatchMonetizeMode('first_n_free')}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5",
-                  batchMonetizeMode === 'first_n_free'
-                    ? "bg-brand-600 text-white shadow-md"
-                    : "text-slate-400 hover:text-slate-200"
-                )}
-              >
-                <span>🎁 First N Free</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setBatchMonetizeMode('all_premium')}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5",
-                  batchMonetizeMode === 'all_premium'
-                    ? "bg-amber-600 text-white shadow-md"
-                    : "text-slate-400 hover:text-slate-200"
-                )}
-              >
-                <span>🔒 All Premium</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setBatchMonetizeMode('all_free')}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5",
-                  batchMonetizeMode === 'all_free'
-                    ? "bg-emerald-600 text-white shadow-md"
-                    : "text-slate-400 hover:text-slate-200"
-                )}
-              >
-                <span>🔓 All Free</span>
-              </button>
-            </div>
-
-            {/* Parameters: Free Count, Price, MRP */}
-            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-              {batchMonetizeMode === 'first_n_free' && (
-                <div className="flex items-center gap-1.5 bg-slate-800/80 px-2.5 py-1 rounded-xl border border-slate-700/60">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Keep Free:</span>
-                  <input
-                    type="number"
-                    min={1}
-                    max={selectedItemIds.size}
-                    value={batchFreeCount}
-                    onChange={(e) => setBatchFreeCount(Math.max(1, Number(e.target.value) || 1))}
-                    className="w-10 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-xs font-black text-center text-emerald-400 focus:outline-none focus:border-brand-400"
-                  />
-                  <span className="text-[10px] text-slate-500 font-semibold">Test(s)</span>
-                </div>
-              )}
-
-              {batchMonetizeMode !== 'all_free' && (
-                <div className="flex items-center gap-2 bg-slate-800/80 px-2.5 py-1 rounded-xl border border-slate-700/60">
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase">₹</span>
-                    <input
-                      type="number"
-                      value={batchOfferPrice}
-                      onChange={(e) => setBatchOfferPrice(Math.max(0, Number(e.target.value) || 0))}
-                      className="w-14 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-xs font-black text-center text-amber-400 focus:outline-none focus:border-brand-400"
-                      placeholder="Price"
-                      title="Offer Price (₹)"
-                    />
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px] font-bold text-slate-500 line-through">MRP:</span>
-                    <input
-                      type="number"
-                      value={batchMrpPrice}
-                      onChange={(e) => setBatchMrpPrice(Math.max(0, Number(e.target.value) || 0))}
-                      className="w-14 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-xs font-semibold text-center text-slate-400 focus:outline-none focus:border-brand-400"
-                      placeholder="MRP"
-                      title="MRP Original Price (₹)"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Action Button */}
+            {/* Right: Quick Action Buttons */}
+            <div className="flex items-center gap-2 flex-wrap">
               <button
                 type="button"
                 disabled={isApplyingBatchMonetize}
-                onClick={handleApplyBatchMonetization}
-                className="px-4 py-2 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white rounded-xl text-xs font-black transition-all shadow-lg shadow-brand-500/25 flex items-center gap-1.5 active:scale-95 cursor-pointer disabled:opacity-50 shrink-0"
+                onClick={() => handleApplyBatchStatus('premium')}
+                className="px-3.5 py-2 bg-amber-600/90 hover:bg-amber-500 text-white rounded-xl text-xs font-black transition-all shadow-md flex items-center gap-1.5 active:scale-95 cursor-pointer disabled:opacity-50 shrink-0"
               >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Apply to {selectedItemIds.size} Items</span>
+                <Lock className="w-3.5 h-3.5" />
+                <span>Make Premium</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={isApplyingBatchMonetize}
+                onClick={() => handleApplyBatchStatus('free')}
+                className="px-3.5 py-2 bg-emerald-600/90 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition-all shadow-md flex items-center gap-1.5 active:scale-95 cursor-pointer disabled:opacity-50 shrink-0"
+              >
+                <Unlock className="w-3.5 h-3.5" />
+                <span>Make Free Demo</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={isApplyingBatchMonetize}
+                onClick={handleBulkDelete}
+                className="px-3.5 py-2 bg-rose-600/90 hover:bg-rose-500 text-white rounded-xl text-xs font-black transition-all shadow-md flex items-center gap-1.5 active:scale-95 cursor-pointer disabled:opacity-50 shrink-0"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Selected</span>
               </button>
 
               {/* Deselect button */}
               <button
                 type="button"
                 onClick={() => setSelectedItemIds(new Set())}
-                className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-all cursor-pointer shrink-0"
+                className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-all cursor-pointer shrink-0 ml-1"
                 title="Deselect All"
               >
                 <X className="w-4 h-4" />

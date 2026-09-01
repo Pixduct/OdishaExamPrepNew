@@ -6880,7 +6880,11 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                               <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 z-10" />
 
                               <span className="relative z-10 flex items-center justify-center gap-2">
-                                {isBundleSelected ? `🚀 Unlock Complete Exam Pass (₹${effectivePrice})` : `Unlock ${paywallItemTitle} (₹${effectivePrice})`}
+                                {checkoutTier === 'mega' 
+                                  ? `👑 Unlock All-Odisha Super Pass (₹${effectivePrice})` 
+                                  : checkoutTier === 'starter' 
+                                  ? `⚡ Unlock Starter Booster (₹${effectivePrice})` 
+                                  : `🚀 Unlock ${activeExamBundleName} Full Pass (₹${effectivePrice})`}
                                 <ChevronRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
                               </span>
                             </Button>

@@ -74,17 +74,44 @@ export const hasAccessTo = (
 
   const purchased = profile?.purchasedSeries || [];
 
-  // 4. Check explicit ownership
+  // 4. Global Mega Pass / Full Access
+  if (
+    purchased.includes('full_access') || 
+    purchased.includes('all-access') || 
+    purchased.includes('all-access-pass') || 
+    purchased.includes('mega_pass')
+  ) {
+    return true;
+  }
+
+  // 5. Check explicit ownership
   if (purchased.includes(itemId)) {
     return true;
   }
 
-  // 5. Check bundle inheritance rules: Exam Bundle access
-  if (itemExamId && purchased.includes(`exam_bundle_${itemExamId}`)) {
+  // 6. Check Full Exam Pass / Exam Bundle inheritance rules
+  if (itemExamId && (
+    purchased.includes(`exam_bundle_${itemExamId}`) || 
+    purchased.includes(`exam-pass_${itemExamId}`) || 
+    purchased.includes(`exam_${itemExamId}`)
+  )) {
     return true;
   }
 
-  // 6. Check bundle inheritance rules: Test Series access
+  // 7. Check Starter Booster inheritance rules
+  if (itemExamId && (
+    purchased.includes(`starter-booster_${itemExamId}`) || 
+    purchased.includes(`starter_${itemExamId}`)
+  )) {
+    const sortOrder = (itemOrId && typeof itemOrId === 'object' && (itemOrId as any).sortOrder !== undefined) 
+      ? Number((itemOrId as any).sortOrder) 
+      : 1;
+    if (sortOrder <= 5) {
+      return true;
+    }
+  }
+
+  // 8. Check bundle inheritance rules: Test Series access
   if (itemSeriesId && purchased.includes(itemSeriesId)) {
     return true;
   }

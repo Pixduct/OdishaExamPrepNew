@@ -6907,235 +6907,207 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           </div>
 
                           {/* ========================================================================= */}
-                          {/* MOBILE / TABLET VIEW (< lg screen viewports)                              */}
                           {/* ========================================================================= */}
-                          <div className="lg:hidden text-center space-y-3 sm:space-y-4 flex flex-col flex-1 py-1 mt-0.5 sm:mt-1.5">
-                            {/* Pulsing visual badge */}
-                            <motion.div 
-                              animate={{ y: [0, -3, 0] }}
-                              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-                              className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-tr from-brand-600 via-brand-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto shadow-[0_6px_20px_rgba(37,99,235,0.25)] border border-white/10 relative group shrink-0"
-                            >
-                              {checkoutTier === 'mega' ? (
-                                <Crown className="text-amber-300 w-5 h-5 sm:w-6 sm:h-6 filter drop-shadow-[0_2px_6px_rgba(255,255,255,0.2)]" />
-                              ) : (
-                                <Award className="text-white w-5 h-5 sm:w-6 sm:h-6 filter drop-shadow-[0_2px_6px_rgba(255,255,255,0.2)]" />
-                              )}
-                              <div className="absolute inset-0 border border-brand-400/25 rounded-2xl animate-ping opacity-25 pointer-events-none" />
-                            </motion.div>
-                            
-                            <div className="space-y-1 shrink-0">
-                              <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight leading-tight px-1 font-sans">
+                          {/* MOBILE / TABLET VIEW (< lg screen viewports - ChatGPT & Claude Pro Style) */}
+                          {/* ========================================================================= */}
+                          <div className="lg:hidden flex flex-col space-y-3.5 py-1">
+                            {/* Sleek Minimalist Header */}
+                            <div className="text-center space-y-1">
+                              <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-brand-500/10 border border-brand-400/20 text-brand-300 text-[10px] font-black uppercase tracking-wider">
+                                <Sparkles className="w-2.5 h-2.5 text-amber-400" />
+                                Simple, Transparent Plans
+                              </div>
+                              <h2 className="text-xl font-black text-white tracking-tight leading-tight">
                                 Choose Your <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-brand-300 via-pink-200 to-indigo-300">Access Pass</span>
                               </h2>
-                              <p className="text-slate-400 text-[11px] sm:text-xs font-medium leading-relaxed max-w-sm mx-auto">
-                                Instant UPI unlock. Zero auto-debit renewals.
+                              <p className="text-slate-400 text-[11px] font-medium">
+                                One-time payment • Zero auto-debit renewals
                               </p>
                             </div>
 
-                            {/* 3-Tier Interactive Selector */}
-                            <div className="space-y-2 text-left my-1">
-                              {/* Tier 1: Starter Booster (₹29) */}
-                              <div 
+                            {/* iOS / Claude Style Segmented Plan Switcher */}
+                            <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-900/90 border border-white/10 rounded-2xl backdrop-blur-md">
+                              {/* Tab 1: Starter */}
+                              <button
+                                type="button"
                                 onClick={() => setCheckoutTier('starter')}
                                 className={cn(
-                                  "p-2.5 sm:p-3 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex items-center justify-between gap-3 group select-none",
+                                  "py-2 px-1.5 rounded-xl text-center transition-all cursor-pointer flex flex-col items-center justify-center relative select-none",
                                   checkoutTier === 'starter'
-                                    ? "bg-slate-900/95 border-blue-400/80 shadow-[0_0_20px_rgba(59,130,246,0.2)] ring-1 ring-blue-400/40"
-                                    : "bg-white/[0.02] border-white/10 hover:bg-white/[0.05] opacity-75"
+                                    ? "bg-gradient-to-b from-slate-800 to-slate-900 text-white shadow-md border border-blue-400/50"
+                                    : "text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]"
                                 )}
                               >
-                                <div className="flex items-start gap-2.5">
-                                  <div className={cn(
-                                    "w-4 h-4 rounded-full mt-0.5 flex items-center justify-center border transition-all shrink-0",
-                                    checkoutTier === 'starter'
-                                      ? "border-blue-400 bg-blue-500 text-white shadow-sm"
-                                      : "border-slate-600 bg-white/5"
-                                  )}>
-                                    {checkoutTier === 'starter' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                                  </div>
+                                <span className="text-[11px] font-black tracking-tight leading-tight">⚡ Starter</span>
+                                <span className={cn(
+                                  "text-[10px] font-bold font-mono mt-0.5",
+                                  checkoutTier === 'starter' ? "text-blue-300" : "text-slate-400"
+                                )}>
+                                  ₹{starterOfferPrice}
+                                </span>
+                              </button>
 
-                                  <div className="space-y-0.5">
-                                    <div className="flex items-center gap-1.5 flex-wrap">
-                                      <span className="font-extrabold text-white text-xs sm:text-sm tracking-tight flex items-center gap-1">
-                                        ⚡ Starter
-                                      </span>
-                                      <span className="text-[8px] font-black text-blue-300 uppercase tracking-wider bg-blue-500/20 border border-blue-400/30 px-1.5 py-0.5 rounded-full">
-                                        3 MONTHS
-                                      </span>
-                                    </div>
-                                    <p className="text-[10px] sm:text-[10.5px] text-slate-300 font-medium leading-snug">
-                                      First <strong className="text-blue-300">{starterTestCount} Full Mocks</strong> + 500 PYQs + PDF Solutions
-                                    </p>
-                                  </div>
-                                </div>
-
-                                <div className="text-right shrink-0">
-                                  <div className="text-sm sm:text-base font-black text-white font-mono">₹{starterOfferPrice}</div>
-                                  <div className="text-[10px] text-slate-500 line-through font-mono">₹{starterMrpPrice}</div>
-                                </div>
-                              </div>
-
-                              {/* Tier 2: Complete Exam Pass (₹99) - PRE-SELECTED / RECOMMENDED */}
-                              <div 
+                              {/* Tab 2: Complete Pass (RECOMMENDED) */}
+                              <button
+                                type="button"
                                 onClick={() => setCheckoutTier('bundle')}
                                 className={cn(
-                                  "p-3 sm:p-3.5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex items-center justify-between gap-3 group select-none",
+                                  "py-2 px-1.5 rounded-xl text-center transition-all cursor-pointer flex flex-col items-center justify-center relative select-none",
                                   checkoutTier === 'bundle'
-                                    ? "bg-gradient-to-r from-brand-950/95 via-slate-900/95 to-indigo-950/95 border-brand-500/90 shadow-[0_0_25px_rgba(37,99,235,0.25)] ring-1 ring-brand-400/40"
-                                    : "bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20 opacity-75"
+                                    ? "bg-gradient-to-b from-brand-600 to-indigo-700 text-white shadow-[0_0_15px_rgba(37,99,235,0.35)] border border-brand-400/60"
+                                    : "text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]"
                                 )}
                               >
-                                <div className="flex items-start gap-2.5">
-                                  <div className={cn(
-                                    "w-4 h-4 rounded-full mt-0.5 flex items-center justify-center border transition-all shrink-0",
-                                    checkoutTier === 'bundle'
-                                      ? "border-brand-400 bg-brand-500 text-white shadow-sm"
-                                      : "border-slate-600 bg-white/5"
-                                  )}>
-                                    {checkoutTier === 'bundle' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                                  </div>
+                                <span className="text-[11px] font-black tracking-tight leading-tight flex items-center gap-0.5">
+                                  🔥 Pass
+                                </span>
+                                <span className={cn(
+                                  "text-[10px] font-bold font-mono mt-0.5",
+                                  checkoutTier === 'bundle' ? "text-amber-200" : "text-slate-400"
+                                )}>
+                                  ₹{examPassOfferPrice}
+                                </span>
+                              </button>
 
-                                  <div className="space-y-0.5">
-                                    <div className="flex items-center gap-1.5 flex-wrap">
-                                      <span className="font-extrabold text-white text-xs sm:text-sm tracking-tight flex items-center gap-1 truncate max-w-[170px]">
-                                        🌟 {activeExamBundleName}
-                                      </span>
-                                      <span className="text-[8px] font-black text-amber-300 uppercase tracking-wider bg-amber-500/20 border border-amber-400/30 px-1.5 py-0.5 rounded-full">
-                                        🔥 POPULAR
-                                      </span>
-                                    </div>
-                                    <p className="text-[10px] sm:text-[10.5px] text-slate-300 font-medium leading-snug">
-                                      <strong className="text-brand-300">ALL</strong> Mocks, Question Banks, Chapter Notes & AI Mentor
-                                    </p>
-                                  </div>
-                                </div>
-
-                                <div className="text-right shrink-0">
-                                  <div className="text-sm sm:text-base font-black text-white font-mono">₹{examPassOfferPrice}</div>
-                                  <div className="text-[10px] text-slate-500 line-through font-mono">₹{examPassMrpPrice}</div>
-                                </div>
-                              </div>
-
-                              {/* Tier 3: All-Odisha 1-Year Super Pass (₹199) */}
-                              <div 
+                              {/* Tab 3: Super Pass */}
+                              <button
+                                type="button"
                                 onClick={() => setCheckoutTier('mega')}
                                 className={cn(
-                                  "p-2.5 sm:p-3 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex items-center justify-between gap-3 group select-none",
+                                  "py-2 px-1.5 rounded-xl text-center transition-all cursor-pointer flex flex-col items-center justify-center relative select-none",
                                   checkoutTier === 'mega'
-                                    ? "bg-gradient-to-r from-indigo-950/95 via-purple-950/95 to-slate-900/95 border-indigo-400/80 shadow-[0_0_25px_rgba(99,102,241,0.25)] ring-1 ring-indigo-400/40"
-                                    : "bg-white/[0.02] border-white/10 hover:bg-white/[0.05] opacity-75"
+                                    ? "bg-gradient-to-b from-purple-800 to-indigo-900 text-white shadow-md border border-purple-400/50"
+                                    : "text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]"
                                 )}
                               >
-                                <div className="flex items-start gap-2.5">
-                                  <div className={cn(
-                                    "w-4 h-4 rounded-full mt-0.5 flex items-center justify-center border transition-all shrink-0",
-                                    checkoutTier === 'mega'
-                                      ? "border-indigo-400 bg-indigo-500 text-white shadow-sm"
-                                      : "border-slate-600 bg-white/5"
-                                  )}>
-                                    {checkoutTier === 'mega' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                                  </div>
-
-                                  <div className="space-y-0.5">
-                                    <div className="flex items-center gap-1.5 flex-wrap">
-                                      <span className="font-extrabold text-white text-xs sm:text-sm tracking-tight flex items-center gap-1">
-                                        👑 Super Pass
-                                      </span>
-                                      <span className="text-[8px] font-black text-emerald-300 uppercase tracking-wider bg-emerald-500/20 border border-emerald-400/30 px-1.5 py-0.5 rounded-full">
-                                        1 YEAR VIP
-                                      </span>
-                                    </div>
-                                    <p className="text-[10px] sm:text-[10.5px] text-slate-300 font-medium leading-snug">
-                                      UNLIMITED access to <strong className="text-emerald-300">ALL</strong> Odisha Exams (500+ Tests)
-                                    </p>
-                                  </div>
-                                </div>
-
-                                <div className="text-right shrink-0">
-                                  <div className="text-sm sm:text-base font-black text-white font-mono">₹{megaPassOfferPrice}</div>
-                                  <div className="text-[10px] text-slate-500 line-through font-mono">₹{megaPassMrpPrice}</div>
-                                </div>
-                              </div>
+                                <span className="text-[11px] font-black tracking-tight leading-tight">👑 Super</span>
+                                <span className={cn(
+                                  "text-[10px] font-bold font-mono mt-0.5",
+                                  checkoutTier === 'mega' ? "text-purple-300" : "text-slate-400"
+                                )}>
+                                  ₹{megaPassOfferPrice}
+                                </span>
+                              </button>
                             </div>
 
-                            {/* Features Panel */}
-                            <motion.div 
-                              initial="hidden"
-                              animate="show"
-                              variants={{
-                                hidden: { opacity: 0 },
-                                show: {
-                                  opacity: 1,
-                                  transition: { staggerChildren: 0.05 }
-                                }
-                              }}
-                              className="space-y-1.5 text-left bg-white/[0.02] border border-white/[0.06] p-3 sm:p-3.5 rounded-[1.25rem] backdrop-blur-md shrink-0"
-                            >
-                              {activeMobileFeatures.map((benefit, i) => (
-                                <motion.div 
-                                  key={i} 
-                                  variants={{
-                                    hidden: { opacity: 0, x: -6 },
-                                    show: { opacity: 1, x: 0 }
-                                  }}
-                                  className="flex items-center gap-2 text-slate-200 font-bold"
-                                >
-                                  <div className="w-4 h-4 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
-                                    <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
-                                  </div>
-                                  <span className="text-[10px] sm:text-[11px] tracking-wide">{benefit}</span>
-                                </motion.div>
-                              ))}
-                            </motion.div>
-
-                            {/* Pricing Block & Mobile CTA */}
-                            <div className="space-y-2 sm:space-y-2.5 pt-0.5 shrink-0">
-                              <div className="flex flex-col items-center justify-center gap-0.5">
-                                <div className="flex items-center justify-center gap-2">
-                                  <span className="text-xs sm:text-base font-bold text-slate-500 line-through font-mono">₹{effectiveOriginalPrice}</span>
-                                  <span className="text-2xl sm:text-4xl font-black text-white font-mono tracking-tighter">₹{effectivePrice}</span>
-                                  <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                                    {discountPercent}% OFF
-                                  </span>
-                                </div>
-                                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                                  One-Time Payment • Instant UPI Unlock
-                                </span>
-                              </div>
-
-                              {/* CTA Button */}
-                              <Button 
-                                className="w-full h-11 sm:h-12 rounded-xl text-sm sm:text-base font-black bg-gradient-to-r from-brand-600 via-brand-500 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white shadow-[0_6px_20px_rgba(37,99,235,0.25)] hover:shadow-[0_12px_35px_rgba(37,99,235,0.4)] group/btn relative overflow-hidden transition-all duration-300 active:scale-[0.98] border border-white/10"
-                                onClick={() => initiatePaymentForTier(checkoutTier)}
+                            {/* Active Hero Plan Card (ChatGPT & Claude Mobile Style) */}
+                            <AnimatePresence mode="wait">
+                              <motion.div
+                                key={checkoutTier}
+                                initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                                transition={{ duration: 0.2 }}
+                                className={cn(
+                                  "rounded-[1.75rem] p-4 sm:p-5 text-left flex flex-col justify-between transition-all duration-300 shadow-2xl relative overflow-hidden",
+                                  checkoutTier === 'bundle'
+                                    ? "bg-gradient-to-b from-brand-950/95 via-slate-900/95 to-indigo-950/95 border-2 border-brand-400/70 shadow-[0_0_30px_rgba(37,99,235,0.25)]"
+                                    : checkoutTier === 'mega'
+                                    ? "bg-gradient-to-b from-purple-950/90 via-slate-900/95 to-indigo-950/90 border border-purple-400/50 shadow-[0_0_30px_rgba(168,85,247,0.2)]"
+                                    : "bg-slate-900/90 border border-blue-400/40 shadow-[0_0_20px_rgba(59,130,246,0.15)]"
+                                )}
                               >
-                                {/* Button Shine Effect */}
-                                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 z-10" />
+                                {/* Top Header of Plan */}
+                                <div className="space-y-3">
+                                  <div className="flex items-center justify-between gap-2">
+                                    <div>
+                                      <h3 className="text-base font-black text-white tracking-tight flex items-center gap-1.5">
+                                        {checkoutTier === 'mega' ? (
+                                          <>👑 All-Odisha Super Pass</>
+                                        ) : checkoutTier === 'starter' ? (
+                                          <>⚡ Starter Booster</>
+                                        ) : (
+                                          <>🌟 {activeExamBundleName}</>
+                                        )}
+                                      </h3>
+                                      <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+                                        {checkoutTier === 'mega'
+                                          ? 'Unlimited access to all Odisha state exams.'
+                                          : checkoutTier === 'starter'
+                                          ? 'Essential mock tests to test your baseline.'
+                                          : 'Complete test series & AI mentor for this exam.'}
+                                      </p>
+                                    </div>
 
-                                <span className="relative z-10 flex items-center justify-center gap-2">
-                                  {checkoutTier === 'mega' 
-                                    ? `👑 Unlock All-Odisha Super Pass (₹${effectivePrice})` 
-                                    : checkoutTier === 'starter' 
-                                    ? `⚡ Unlock Starter Booster (₹${effectivePrice})` 
-                                    : `🚀 Unlock Full Pass (₹${effectivePrice})`}
-                                  <ChevronRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
-                                </span>
-                              </Button>
+                                    <span className={cn(
+                                      "text-[9px] font-black uppercase px-2 py-0.5 rounded-full border shrink-0",
+                                      checkoutTier === 'bundle'
+                                        ? "bg-amber-500/20 text-amber-300 border-amber-400/40"
+                                        : checkoutTier === 'mega'
+                                        ? "bg-purple-500/20 text-purple-300 border-purple-400/40"
+                                        : "bg-blue-500/20 text-blue-300 border-blue-400/40"
+                                    )}>
+                                      {checkoutTier === 'mega' ? '1 Year VIP' : checkoutTier === 'starter' ? '3 Months' : '6 Months'}
+                                    </span>
+                                  </div>
 
-                              {/* Secure Info Footer */}
-                              <div className="flex items-center justify-center gap-2.5 text-[9.5px] text-slate-400 font-medium pt-0.5 flex-wrap">
-                                <span className="flex items-center gap-1">
-                                  <Lock className="w-3 h-3 text-emerald-400" /> Razorpay 256-Bit SSL
-                                </span>
-                                <span>•</span>
-                                <span className="flex items-center gap-1">
-                                  <Zap className="w-3 h-3 text-amber-400" /> Instant Activation
-                                </span>
-                                <span>•</span>
-                                <span className="flex items-center gap-1">
-                                  <ShieldCheck className="w-3 h-3 text-brand-400" /> 100% Verified
-                                </span>
-                              </div>
+                                  {/* Hero Price Tag */}
+                                  <div className="py-2.5 px-3 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-between">
+                                    <div className="flex items-baseline gap-2">
+                                      <span className="text-2xl sm:text-3xl font-black text-white font-mono tracking-tight">
+                                        ₹{effectivePrice}
+                                      </span>
+                                      <span className="text-xs font-bold text-slate-500 line-through font-mono">
+                                        ₹{effectiveOriginalPrice}
+                                      </span>
+                                    </div>
+                                    <span className="text-[10px] font-black text-emerald-400 uppercase bg-emerald-500/15 border border-emerald-400/30 px-2 py-0.5 rounded-md">
+                                      {discountPercent}% SAVED
+                                    </span>
+                                  </div>
+
+                                  {/* Feature Checklist */}
+                                  <div className="space-y-2 pt-1">
+                                    {activeMobileFeatures.map((feat, idx) => (
+                                      <div key={idx} className="flex items-center gap-2 text-xs text-slate-200 font-medium">
+                                        <div className="w-4 h-4 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                                          <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
+                                        </div>
+                                        <span className="text-[11px] leading-snug">{feat}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* Direct In-Card 1-Click Action Button */}
+                                <div className="pt-4 mt-1">
+                                  <Button 
+                                    onClick={() => initiatePaymentForTier(checkoutTier)}
+                                    className={cn(
+                                      "w-full h-11 rounded-xl text-xs sm:text-sm font-black text-white shadow-lg transition-all active:scale-[0.98] border border-white/20 flex items-center justify-center gap-1.5 cursor-pointer",
+                                      checkoutTier === 'bundle'
+                                        ? "bg-gradient-to-r from-brand-600 via-brand-500 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 shadow-brand-500/30"
+                                        : checkoutTier === 'mega'
+                                        ? "bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 shadow-purple-500/30"
+                                        : "bg-slate-800 hover:bg-blue-600 border-white/10"
+                                    )}
+                                  >
+                                    <span>
+                                      {checkoutTier === 'mega'
+                                        ? `👑 Claim 1-Year Super Pass (₹${effectivePrice})`
+                                        : checkoutTier === 'starter'
+                                        ? `⚡ Get Starter Booster (₹${effectivePrice})`
+                                        : `🚀 Unlock Full Pass (₹${effectivePrice})`}
+                                    </span>
+                                    <ChevronRight className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </motion.div>
+                            </AnimatePresence>
+
+                            {/* Minimalist Trust Badges */}
+                            <div className="flex items-center justify-center gap-3 text-[10px] text-slate-400 font-medium pt-0.5">
+                              <span className="flex items-center gap-1">
+                                <Lock className="w-3 h-3 text-emerald-400" /> Razorpay 256-Bit SSL
+                              </span>
+                              <span>•</span>
+                              <span className="flex items-center gap-1">
+                                <Zap className="w-3 h-3 text-amber-400" /> Instant UPI
+                              </span>
+                              <span>•</span>
+                              <span className="flex items-center gap-1">
+                                <ShieldCheck className="w-3 h-3 text-brand-400" /> 100% Verified
+                              </span>
                             </div>
                           </div>
                         </motion.div>

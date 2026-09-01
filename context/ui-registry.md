@@ -108,11 +108,28 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`AdminUsersManagerTable`** | Admin / Data Table | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L4464-L4535) | 4-Column Table, Avatar Badges, Global Master Access Controls, Manual Content Grant & Revocation, Dynamic Loading Spinner | AdminPanel.tsx (Users tab) | Active |
 | **`HighConversionDualTierPaywallModal`** | Monetization / Checkout | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L6440-L6700) | 2-Tier Interactive Plan Selector, Anchor Savings Callout, Glowing Recommended Badge, Dynamic Razorpay Payload Routing | App.tsx (Single Item & Bundle Unlock) | Active |
 | **`AdminBankQuestionLiveCounter`** | Admin / Question Counters | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7040-L7055) | Dynamic Topic Match Evaluator, Live State Synchronization, Zero-Stale Fallback Hierarchy | AdminPanel.tsx (Questions, Banks, Practice tabs) | Active |
-| **`AdminItemEditStatePreservation`** | Admin / Modal Form State | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L1795-L1955) | Auto-Fill Sequence Fallback Hierarchy, JSON Question & Key Hydration, Zero-Blank Validation | AdminPanel.tsx (Edit Modals) | Active |
+| **`TieredPricingSaaSFallbackModal`** | Monetization / Checkout | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L6460-L7120) | 3-Column Minimalist SaaS Grid (ChatGPT & Claude Standard), Dynamic Smart Content Truth Engine, 1-Click Razorpay Launcher | App.tsx (Paywall) | Active |
+| **`AdminTieredPricingFormControls`** | Admin / Form Control | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L3265-L3335) | 3-Tier Pricing Configuration Cards with Impulse Starter Limit, Full Pass, and 1-Year VIP Controls | AdminPanel.tsx (Exams tab) | Active |
 
 ---
 
 ## Component Details
+
+### `TieredPricingSaaSFallbackModal` (Minimalist 3-Tier SaaS Paywall Grid)
+- **File Path:** [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L6460-L7120)
+- **Category:** Monetization / Checkout
+- **Last Updated:** September 1, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Container Width** | `max-w-5xl` / `max-w-6xl` responsive modal container |
+| **Tier 1 Card (Starter)** | `bg-slate-900/50 border border-white/10 hover:border-blue-400/40 rounded-3xl p-6` |
+| **Tier 2 Card (Featured)** | `bg-gradient-to-b from-brand-950/90 via-slate-900/95 to-indigo-950/90 border-2 border-brand-400/80 shadow-[0_0_35px_rgba(37,99,235,0.25)] ring-2 ring-brand-400/30 rounded-3xl p-6 lg:p-7 transform lg:-translate-y-2` |
+| **Tier 3 Card (VIP Pass)** | `bg-slate-900/50 border border-purple-500/30 hover:border-purple-400/60 rounded-3xl p-6` |
+| **Floating Badges** | `bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 text-[10px] font-black uppercase px-3 py-0.5 rounded-full` |
+| **Typography & Numbers** | Font mono for bold prices (`text-3xl lg:text-4xl font-black font-mono`), 4-5 bite-sized scannable bullets (3-5 words each) |
+| **Action CTAs** | 1-Click direct Razorpay launch buttons per card with instant UPI intent support |
+| **Security Strip** | `flex items-center justify-center gap-6 text-xs text-slate-400 font-medium pt-1 border-t border-white/5` |
 
 ### 0. `PWAEngine` (Progressive Web App & Standalone WebAPK)
 - **File Path:** [`public/site.webmanifest`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/site.webmanifest) & [`public/sw.js`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/sw.js)

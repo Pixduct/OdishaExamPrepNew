@@ -1,11 +1,13 @@
 # Progress Tracker
 
 ## Completed Tasks
-- [x] 💳 3-Tier Dynamic Pricing & Admin Control Architecture (`src/AdminPanel.tsx`, `src/App.tsx`, `server.ts`, `src/lib/examService.ts`):
-  1. **Admin Panel Dynamic Pricing Controller**: Added full UI control inside Exam Settings allowing admins to configure Offer Price, MRP, and included test counts for Tier 1 Starter Booster (e.g. ₹29 / 5 tests), Tier 2 Full Exam Pass (e.g. ₹99), and Tier 3 All-Odisha Mega Pass (e.g. ₹199).
-  2. **Hierarchical Access Evaluation Engine**: Implemented `evaluateTestAccess` and `evaluateBankAccess` in `examService.ts` to seamlessly validate Tier 0 (Free Test 1), Tier 1 (Starter Booster tests), Tier 2 (Full Exam Pass), and Tier 3 (1-Year All-Access VIP).
-  3. **Backend Tamper-Proof Resolution**: Enhanced `getProductPrice` in `server.ts` to dynamically resolve configured prices for `starter-booster`, `exam-pass`, and `all-access` before issuing Razorpay orders and recording entitlements in `user_purchases`.
-  4. **Mobile-First 3-Tier Checkout UI**: Upgraded the checkout modal with responsive, high-converting tier cards, instant savings badges, and 1-tap UPI checkout.
+- [x] 💳 3-Tier Minimalist SaaS Pricing, Smart Content Truth Engine & Zero-Bug Admin Control Architecture (`src/AdminPanel.tsx`, `src/App.tsx`, `server.ts`, `src/lib/examService.ts`, `src/lib/entitlementEngine.ts`, `src/lib/AuthContext.tsx`, `context/ui-registry.md`):
+  1. **Minimalist SaaS Grid (ChatGPT & Claude Standard)**: Re-architected desktop and mobile checkout modal into clean, scannable cards with 4–5 bite-sized bullet points (3–5 words each), removing text clutter and direct single-test price tags.
+  2. **Smart Content Truth Engine**: Live dynamic calculation of real database metrics (exact mock test counts, real total questions across banks and mocks, and dynamic platform totals for Super Pass). Replaced all hardcoded estimates with 100% truthful data.
+  3. **Full Admin Control & Exact Parity**: Full UI controls in Admin Panel ➔ Exams tab for Tier 1 Starter Booster (Offer Price, MRP, and `starterTestCount`), Tier 2 Complete Exam Pass (Offer Price, MRP), and Tier 3 All-Odisha Super Pass (Global Price, MRP). Fixed frontend-backend price binding so updated prices (e.g. ₹149) render immediately on cards and in Razorpay orders with 0 discrepancy.
+  4. **Dynamic Starter Entitlement Limit**: Enhanced `entitlementEngine.ts` to evaluate `starterTestCount` dynamically from exam metadata (unlocking tests 1 through $N$ as configured by admin) rather than a fixed limit of 5.
+  5. **Automated Expiration Tracking**: `server.ts` generates automated `expires_at` timestamps upon payment verification (90 days for Starter, 180 days for Exam Pass, 365 days for Super Pass) and writes them to the database ledger (`user_purchases`).
+  6. **Instant Cache Invalidation & Event Broadcast**: Admin exam updates purge client `sessionStorage` and broadcast `oep_catalog_updated`, triggering instant state updates without requiring a manual page refresh.
 - [x] 🔔 Universal Telegram Notification Delivery & HTML Fallback Resilience (`automations/shared/telegram.py`, `automations/ca_publisher.py`, `automations/mcq_engine.py`, all 7 GitHub Actions workflows):
   1. **Root Cause of Missing Notifications**: Python error tracebacks containing unescaped angle brackets (`<module>`, `<string>`, `<stdin>`) caused Telegram API to return `HTTP 400 Bad Request: can't parse entities`, resulting in silent notification drop.
   2. **Bulletproof Plain-Text Fallback**: If Telegram API returns HTTP 400 on HTML parsing, every script now automatically strips HTML tags and re-dispatches the notification in plain text, guaranteeing 100% delivery.

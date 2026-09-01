@@ -116,16 +116,18 @@ Before creating any new component, developers and AI agents MUST consult this re
 
 ## Component Details
 
-### `BalancedSubjectTasterEngine` (Multi-Subject Sectional Starter Entitlement)
-- **File Path:** [`src/lib/entitlementEngine.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/entitlementEngine.ts) & [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L11145-L11165)
+### `BalancedSubjectTasterEngine` (3-Pillar Multi-Subject Starter Entitlement Engine)
+- **File Path:** [`src/lib/entitlementEngine.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/entitlementEngine.ts), [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L10825-L11165), and [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L3285-L3330)
 - **Category:** Monetization / Entitlement
 - **Last Updated:** September 1, 2026
 
 | Property | Class / Token |
 | :--- | :--- |
-| **Entitlement Rule** | Relative Subject Ranking (`subjectRank <= 2` within each subject section) |
-| **Starter Access Scope** | First 2 mock tests of **EVERY subject category** (Anatomy, Pharmacology, Community Health, etc.) + First 5 Full Mocks |
-| **Upgrade Gate** | Test #3+ in any subject triggers `🔒 Unlock Full Pass` modal |
+| **Entitlement Rule** | 3-Pillar Granular Evaluation (`starterMockLimit`, `starterSectionalLimit`, `starterBankLimit`) |
+| **Pillar 1: Full Mocks** | Unlocks first $N$ Full Mocks (e.g. 5 Mocks, admin configurable) |
+| **Pillar 2: Sectional Tests** | Unlocks first $N$ tests in **EVERY subject category** (`subjectRank <= starterSectionalCount`, e.g. 2 tests / subject) |
+| **Pillar 3: Question Banks** | Unlocks first $N$ Question Banks / Practice Sets in **EVERY subject category** (`bankSubjectRank <= starterBankCount`, e.g. 2 banks / subject) |
+| **Upgrade Gate** | Test #3+ & Bank #3+ in any subject trigger `🔒 Unlock Full Pass` modal |
 | **Header Badge** | `text-[13px] sm:text-xl font-black text-brand-700 dark:text-indigo-300 px-3 py-1.5 sm:px-5 sm:py-2.5 bg-brand-50/80 dark:bg-[#0B1528] rounded-lg sm:rounded-xl` |
 
 ### `TieredPricingSaaSFallbackModal` (Minimalist 3-Tier SaaS Paywall Grid)

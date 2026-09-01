@@ -110,10 +110,23 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`AdminBankQuestionLiveCounter`** | Admin / Question Counters | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7040-L7055) | Dynamic Topic Match Evaluator, Live State Synchronization, Zero-Stale Fallback Hierarchy | AdminPanel.tsx (Questions, Banks, Practice tabs) | Active |
 | **`TieredPricingSaaSFallbackModal`** | Monetization / Checkout | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L6460-L7120) | 3-Column Minimalist SaaS Grid (ChatGPT & Claude Standard), Dynamic Smart Content Truth Engine, 1-Click Razorpay Launcher | App.tsx (Paywall) | Active |
 | **`AdminTieredPricingFormControls`** | Admin / Form Control | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L3265-L3335) | 3-Tier Pricing Configuration Cards with Impulse Starter Limit, Full Pass, and 1-Year VIP Controls | AdminPanel.tsx (Exams tab) | Active |
+| **`BalancedSubjectTasterEngine`** | Monetization / Entitlement | [`src/lib/entitlementEngine.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/entitlementEngine.ts) & [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L11145-L11165) | Multi-Subject Sectional Starter Entitlement (First 2 tests unlocked per subject category) | App.tsx (Sectional Tests) | Active |
 
 ---
 
 ## Component Details
+
+### `BalancedSubjectTasterEngine` (Multi-Subject Sectional Starter Entitlement)
+- **File Path:** [`src/lib/entitlementEngine.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/entitlementEngine.ts) & [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L11145-L11165)
+- **Category:** Monetization / Entitlement
+- **Last Updated:** September 1, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Entitlement Rule** | Relative Subject Ranking (`subjectRank <= 2` within each subject section) |
+| **Starter Access Scope** | First 2 mock tests of **EVERY subject category** (Anatomy, Pharmacology, Community Health, etc.) + First 5 Full Mocks |
+| **Upgrade Gate** | Test #3+ in any subject triggers `🔒 Unlock Full Pass` modal |
+| **Header Badge** | `text-[13px] sm:text-xl font-black text-brand-700 dark:text-indigo-300 px-3 py-1.5 sm:px-5 sm:py-2.5 bg-brand-50/80 dark:bg-[#0B1528] rounded-lg sm:rounded-xl` |
 
 ### `TieredPricingSaaSFallbackModal` (Minimalist 3-Tier SaaS Paywall Grid)
 - **File Path:** [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L6460-L7120)

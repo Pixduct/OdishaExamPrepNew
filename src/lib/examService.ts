@@ -792,8 +792,10 @@ export const examService = {
             starterPrice: Number(metaObj.starterPrice ?? 29),
             starterOriginalPrice: Number(metaObj.starterOriginalPrice ?? 99),
             starterTestCount: Number(metaObj.starterTestCount ?? 5),
-            examPassPrice: Number(metaObj.price || metaObj.examPassPrice || 99),
-            examPassOriginalPrice: Number(metaObj.originalPrice || metaObj.examPassOriginalPrice || 299),
+            price: Number(metaObj.price || ex.price || 99),
+            originalPrice: Number(metaObj.originalPrice || ex.originalPrice || 299),
+            examPassPrice: Number(metaObj.price || metaObj.examPassPrice || ex.price || 99),
+            examPassOriginalPrice: Number(metaObj.originalPrice || metaObj.examPassOriginalPrice || ex.originalPrice || 299),
             allAccessPrice: Number(metaObj.allAccessPrice ?? 199),
             allAccessOriginalPrice: Number(metaObj.allAccessOriginalPrice ?? 999)
           }

@@ -6467,25 +6467,26 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
                       let activeExamBundleName = activeExamForBundle?.name || 'Complete Exam';
 
-                      // Extract dynamic 3-tier pricing from exam metadata
+                      // Extract dynamic 3-tier pricing from exam metadata and pricingConfig
                       const examPricingMeta = (() => {
-                        if (activeExamForBundle?.description && typeof activeExamForBundle.description === 'string' && activeExamForBundle.description.startsWith('JSON_METADATA_')) {
+                        const rawDesc = (activeExamForBundle as any)?.rawDescription || activeExamForBundle?.description;
+                        if (rawDesc && typeof rawDesc === 'string' && rawDesc.startsWith('JSON_METADATA_')) {
                           try {
-                            return JSON.parse(activeExamForBundle.description.replace('JSON_METADATA_', ''));
+                            return JSON.parse(rawDesc.replace('JSON_METADATA_', ''));
                           } catch(e) { return {}; }
                         }
                         return (activeExamForBundle?.pricingConfig as any) || {};
                       })();
 
-                      const starterOfferPrice = Number(examPricingMeta.starterPrice) || 29;
-                      const starterMrpPrice = Number(examPricingMeta.starterOriginalPrice) || 99;
-                      const starterTestCount = Number(examPricingMeta.starterTestCount) || 5;
+                      const starterOfferPrice = Number(examPricingMeta.starterPrice ?? activeExamForBundle?.pricingConfig?.starterPrice ?? 29);
+                      const starterMrpPrice = Number(examPricingMeta.starterOriginalPrice ?? activeExamForBundle?.pricingConfig?.starterOriginalPrice ?? 99);
+                      const starterTestCount = Number(examPricingMeta.starterTestCount ?? activeExamForBundle?.pricingConfig?.starterTestCount ?? 5);
 
-                      const examPassOfferPrice = Number(examPricingMeta.price) || 99;
-                      const examPassMrpPrice = Number(examPricingMeta.originalPrice) || 299;
+                      const examPassOfferPrice = Number(examPricingMeta.price ?? examPricingMeta.examPassPrice ?? activeExamForBundle?.price ?? activeExamForBundle?.pricingConfig?.examPassPrice ?? 99);
+                      const examPassMrpPrice = Number(examPricingMeta.originalPrice ?? examPricingMeta.examPassOriginalPrice ?? activeExamForBundle?.originalPrice ?? activeExamForBundle?.pricingConfig?.examPassOriginalPrice ?? 299);
 
-                      const megaPassOfferPrice = Number(examPricingMeta.allAccessPrice) || 199;
-                      const megaPassMrpPrice = Number(examPricingMeta.allAccessOriginalPrice) || 999;
+                      const megaPassOfferPrice = Number(examPricingMeta.allAccessPrice ?? activeExamForBundle?.pricingConfig?.allAccessPrice ?? 199);
+                      const megaPassMrpPrice = Number(examPricingMeta.allAccessOriginalPrice ?? activeExamForBundle?.pricingConfig?.allAccessOriginalPrice ?? 999);
 
                       // Reusable Razorpay payment launcher
                       const initiatePaymentForTier = async (targetTier: 'starter' | 'bundle' | 'mega') => {

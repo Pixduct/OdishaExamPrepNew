@@ -198,7 +198,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       // Merge cached metadata entitlements with direct DB ledger entries
       const mergedPurchased = Array.from(new Set([...metaPurchased, ...dbPurchasedIds]));
-      const isFullAccess = currentFullAccess || mergedPurchased.includes('full_access');
+      const isFullAccess = currentFullAccess || 
+        mergedPurchased.includes('full_access') || 
+        mergedPurchased.includes('all-access') || 
+        mergedPurchased.includes('all-access-pass') || 
+        mergedPurchased.includes('mega_pass');
 
       const tempProfile = {
         role: currentRole,
@@ -233,7 +237,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         displayName: meta.full_name || meta.displayName || meta.name || activeUser.email?.split('@')[0],
         photoURL: meta.avatar_url || meta.picture || meta.photoURL,
         role: currentRole,
-        hasFullAccess: isFullAccess || finalPurchased.includes('full_access'),
+        hasFullAccess: isFullAccess || 
+          finalPurchased.includes('full_access') || 
+          finalPurchased.includes('all-access') || 
+          finalPurchased.includes('all-access-pass') || 
+          finalPurchased.includes('mega_pass'),
         purchasedSeries: finalPurchased,
       };
 

@@ -1039,6 +1039,26 @@ async function startServer() {
       if (userId && productId) {
         console.log(`Payment verified. Creating entitlement in ledger for User: ${userId}, Product: ${productId}`);
         
+        // Calculate dynamic expiration duration based on tier
+        const nowMs = Date.now();
+        let durationDays = 180; // Default 6 months for exam passes
+        if (
+          productType === 'starter-booster' || 
+          productType === 'starter' || 
+          productId.startsWith('starter-booster_') || 
+          productId.startsWith('starter_')
+        ) {
+          durationDays = 90; // 3 months for Starter
+        } else if (
+          productType === 'all-access' || 
+          productType === 'mega_pass' || 
+          productId === 'all-access' || 
+          productId === 'full_access'
+        ) {
+          durationDays = 365; // 1 year for Super Pass VIP
+        }
+        const expiresAtIso = new Date(nowMs + durationDays * 24 * 60 * 60 * 1000).toISOString();
+
         // 1. Insert or update the purchase record in the user_purchases table
         const { error: dbError } = await supabaseAdmin
           .from("user_purchases")
@@ -1052,7 +1072,8 @@ async function startServer() {
               razorpay_payment_id,
               snapshot: snapshot || {},
               status: "active",
-              purchase_date: new Date().toISOString()
+              purchase_date: new Date().toISOString(),
+              expires_at: expiresAtIso
             },
             { onConflict: "user_id,product_id" }
           );
@@ -1073,7 +1094,11 @@ async function startServer() {
         } else {
           // Rebuild purchasedSeries array and determine full access status
           const purchasedIds = (userPurchases || []).map(p => p.product_id);
-          const hasFullAccess = purchasedIds.includes("full_access");
+          const hasFullAccess = 
+            purchasedIds.includes("full_access") || 
+            purchasedIds.includes("all-access") ||
+            purchasedIds.includes("all-access-pass") ||
+            purchasedIds.includes("mega_pass");
 
           // 3. Update the user metadata in Supabase Auth to refresh their browser token/session cache
           const { data: userData, error: getUserErr } = await supabaseAdmin.auth.admin.getUserById(userId);

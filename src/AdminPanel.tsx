@@ -2371,7 +2371,12 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         }
         try { 
           sessionStorage.removeItem('oep_admin_catalog_cache');
+          sessionStorage.removeItem('oep_cached_exams');
+          sessionStorage.removeItem('oep_cached_testSeries');
+          sessionStorage.removeItem('oep_cached_mockTests');
+          sessionStorage.removeItem('oep_cached_dynamicQuestionBanks');
           sessionStorage.removeItem(ADMIN_CACHE_KEY); 
+          window.dispatchEvent(new Event('oep_catalog_updated'));
         } catch(e) {}
       } else if (activeTab === 'banks' || activeTab === 'practice') {
         if (!formData.examId) { alert("Please select an exam."); return; }

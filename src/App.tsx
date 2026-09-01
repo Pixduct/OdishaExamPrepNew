@@ -7984,6 +7984,15 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       }
     };
     fetchDashboardData();
+
+    const handleCatalogUpdated = () => {
+      _dashboardCache.hasFetchedThisSession = false;
+      fetchDashboardData();
+    };
+    window.addEventListener('oep_catalog_updated', handleCatalogUpdated);
+    return () => {
+      window.removeEventListener('oep_catalog_updated', handleCatalogUpdated);
+    };
   }, [user?.id]);
 
   const [examSearchQuery, setExamSearchQuery] = useState(() => {

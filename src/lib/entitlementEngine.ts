@@ -103,10 +103,16 @@ export const hasAccessTo = (
     purchased.includes(`starter-booster_${itemExamId}`) || 
     purchased.includes(`starter_${itemExamId}`)
   )) {
+    const starterLimit = (itemOrId && typeof itemOrId === 'object' && (itemOrId as any).starterTestCount !== undefined)
+      ? Number((itemOrId as any).starterTestCount)
+      : ((itemOrId && typeof itemOrId === 'object' && (itemOrId as any).pricingConfig?.starterTestCount !== undefined)
+        ? Number((itemOrId as any).pricingConfig.starterTestCount)
+        : 5);
+
     const sortOrder = (itemOrId && typeof itemOrId === 'object' && (itemOrId as any).sortOrder !== undefined) 
       ? Number((itemOrId as any).sortOrder) 
       : 1;
-    if (sortOrder <= 5) {
+    if (sortOrder <= starterLimit) {
       return true;
     }
   }

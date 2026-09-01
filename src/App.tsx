@@ -6429,18 +6429,18 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   initial="hidden"
                   animate="visible"
                   exit="exit"
-                  className="relative overflow-hidden rounded-t-[2.5rem] md:rounded-[2.5rem] p-[1px] bg-gradient-to-b from-white/15 via-white/5 to-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] w-full max-w-md max-h-fit md:max-h-fit flex flex-col pointer-events-auto"
+                  className="relative overflow-hidden rounded-t-[2.5rem] md:rounded-[2.5rem] p-[1px] bg-gradient-to-b from-white/15 via-white/5 to-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] w-full max-w-md lg:max-w-5xl xl:max-w-6xl max-h-[92vh] flex flex-col pointer-events-auto overflow-y-auto custom-scrollbar"
                   style={{ willChange: 'transform, opacity' }}
                 >
                   {/* Drag handle (mobile only) */}
                   <div className="sm:hidden w-10 h-1 bg-slate-700/50 rounded-full mx-auto mt-3 shrink-0" />
 
                   {/* Background ambient light */}
-                  <div className="absolute top-0 left-1/4 w-[180px] h-[180px] bg-brand-500/10 rounded-full blur-[50px] pointer-events-none" />
-                  <div className="absolute bottom-0 right-1/4 w-[180px] h-[180px] bg-indigo-500/10 rounded-full blur-[50px] pointer-events-none" />
+                  <div className="absolute top-0 left-1/4 w-[280px] h-[280px] bg-brand-500/10 rounded-full blur-[70px] pointer-events-none" />
+                  <div className="absolute bottom-0 right-1/4 w-[280px] h-[280px] bg-indigo-500/10 rounded-full blur-[70px] pointer-events-none" />
 
-                  <div className="bg-[#0B0F19] rounded-t-[2.45rem] sm:rounded-[2.45rem] p-4 sm:p-6 pb-5 sm:pb-7 relative overflow-hidden flex flex-col flex-1">
-                    {/* Close button with subtle outline */}
+                  <div className="bg-[#0B0F19] rounded-t-[2.45rem] sm:rounded-[2.45rem] p-4 sm:p-6 lg:p-8 pb-5 sm:pb-7 lg:pb-8 relative overflow-hidden flex flex-col flex-1">
+                    {/* Close button */}
                     {paymentState === 'idle' && (
                     <button 
                       onClick={() => { 
@@ -6457,13 +6457,6 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
                   <AnimatePresence mode="wait">
                     {paymentState === 'idle' && (() => {
-                      const isSingleItemPaywall = Boolean(
-                        paywallProductType !== 'exam_bundle' && 
-                        paywallProductType !== 'full_access' && 
-                        paywallItemId && 
-                        !paywallItemId.startsWith('exam_bundle_')
-                      );
-
                       const allFlatBanks = Object.values(dynamicQuestionBanks || {}).flat() as any[];
                       const activeExamForBundle = exams.find(e => e.id === selectedExam) || 
                         exams.find(e => {
@@ -6494,30 +6487,170 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       const megaPassOfferPrice = Number(examPricingMeta.allAccessPrice) || 199;
                       const megaPassMrpPrice = Number(examPricingMeta.allAccessOriginalPrice) || 999;
 
-                      // Determine effective pricing based on selected checkoutTier
+                      const examMockCount = mockTests.filter(t => t.examId === activeExamForBundle?.id).length || 20;
+
+                      // Reusable Razorpay payment launcher
+                      const initiatePaymentForTier = async (targetTier: 'starter' | 'bundle' | 'mega') => {
+                        try {
+                          let tierPrice = examPassOfferPrice;
+                          let tierProductId = `exam-pass_${activeExamForBundle?.id || selectedExam}`;
+                          let tierProductType = 'exam-pass';
+                          let tierTitle = `${activeExamBundleName} Full Exam Pass`;
+
+                          if (targetTier === 'starter') {
+                            tierPrice = starterOfferPrice;
+                            tierProductId = `starter-booster_${activeExamForBundle?.id || selectedExam}`;
+                            tierProductType = 'starter-booster';
+                            tierTitle = `${activeExamBundleName} Starter Booster (${starterTestCount} Tests)`;
+                          } else if (targetTier === 'mega') {
+                            tierPrice = megaPassOfferPrice;
+                            tierProductId = 'all-access';
+                            tierProductType = 'all-access';
+                            tierTitle = 'All-Odisha 1-Year Super Pass';
+                          }
+
+                          const res = await loadRazorpay();
+                          if (!res) {
+                            alert('Failed to load payment gateway SDK. Please check your internet connection.');
+                            setPaymentState('idle');
+                            return;
+                          }
+
+                          // 1. Create order on the server
+                          const orderRes = await fetch('/api/payment/order', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                              productId: tierProductId,
+                              productType: tierProductType,
+                              userId: profile?.uid || user?.id || 'unknown',
+                              currency: 'INR'
+                            })
+                          });
+
+                          let orderData;
+                          const orderText = await orderRes.text();
+                          try {
+                            orderData = orderText ? JSON.parse(orderText) : {};
+                          } catch (e) {
+                            throw new Error(`Invalid response from server. Status: ${orderRes.status}. If you just updated the server, please restart the dev server (npm run dev).`);
+                          }
+
+                          if (!orderRes.ok) {
+                            throw new Error(orderData.message || `Failed to create payment order (status ${orderRes.status}).`);
+                          }
+
+                          if (!orderData.orderId) {
+                            throw new Error('Server did not return a valid order ID. Please verify your Razorpay API key configurations in .env and restart your dev server.');
+                          }
+
+                          localStorage.setItem('oep_pending_payment', JSON.stringify({
+                            orderId: orderData.orderId,
+                            productId: tierProductId,
+                            timestamp: Date.now()
+                          }));
+
+                          // 2. Open Razorpay checkout with the orderId
+                          const options = {
+                            key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_StcJAJY1MgRGmJ',
+                            amount: orderData.amount,
+                            currency: orderData.currency,
+                            name: 'OdishaExamPrep Premium',
+                            description: tierTitle === 'Full Access' ? 'Unlock Full Access' : `Unlock ${tierTitle}`,
+                            order_id: orderData.orderId,
+                            handler: async function (response: any) {
+                              try {
+                                setPaymentState('processing');
+                                setPaymentError(null);
+                                const verifyRes = await fetch('/api/payment/verify', {
+                                  method: 'POST',
+                                  headers: {
+                                    'Content-Type': 'application/json'
+                                  },
+                                  body: JSON.stringify({
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    userId: profile?.uid || user?.id,
+                                    productId: tierProductId,
+                                    productType: tierProductType,
+                                    pricePaid: tierPrice,
+                                    snapshot: {
+                                      id: tierProductId,
+                                      title: tierTitle,
+                                      price: tierPrice
+                                    }
+                                  })
+                                });
+
+                                let verifyData;
+                                const verifyText = await verifyRes.text();
+                                try {
+                                  verifyData = verifyText ? JSON.parse(verifyText) : {};
+                                } catch (e) {
+                                  throw new Error(`Invalid verification response from server. Status: ${verifyRes.status}`);
+                                }
+
+                                if (!verifyRes.ok) {
+                                  throw new Error(verifyData.message || 'Payment verification failed.');
+                                }
+                                if (verifyData.success) {
+                                  setPaymentState('success');
+                                  if (tierProductId) {
+                                    await unlockItem(tierProductId);
+                                  } else {
+                                    await grantFullAccess();
+                                  }
+                                  setTimeout(() => {
+                                    setShowPaywall(false);
+                                    setPaywallItemId(null);
+                                    setPaymentState('idle');
+                                  }, 2000);
+                                } else {
+                                  throw new Error(verifyData.message || 'Payment verification failed.');
+                                }
+                              } catch (err: any) {
+                                console.error('Verification error:', err);
+                                setPaymentState('error');
+                                setPaymentError(err.message || 'Payment verification failed.');
+                              }
+                            },
+                            prefill: {
+                              name: profile?.displayName || '',
+                              email: profile?.email || ''
+                            },
+                            theme: { color: '#4f46e5' },
+                            modal: {
+                              ondismiss: function () {
+                                console.log('Payment checkout closed');
+                                localStorage.removeItem('oep_pending_payment');
+                              }
+                            }
+                          };
+
+                          const rzp = new (window as any).Razorpay(options);
+                          rzp.open();
+                        } catch (err: any) {
+                          console.error('Payment initialization failed:', err);
+                          alert('Payment initialization failed: ' + err.message);
+                        }
+                      };
+
+                      // Effective prices for mobile single selector
                       let effectivePrice = examPassOfferPrice;
                       let effectiveOriginalPrice = examPassMrpPrice;
-                      let effectiveProductId = `exam-pass_${activeExamForBundle?.id || selectedExam}`;
-                      let effectiveProductType = 'exam-pass';
-                      let effectiveTitle = `${activeExamBundleName} Full Exam Pass`;
-
                       if (checkoutTier === 'starter') {
                         effectivePrice = starterOfferPrice;
                         effectiveOriginalPrice = starterMrpPrice;
-                        effectiveProductId = `starter-booster_${activeExamForBundle?.id || selectedExam}`;
-                        effectiveProductType = 'starter-booster';
-                        effectiveTitle = `${activeExamBundleName} Starter Booster (${starterTestCount} Tests)`;
                       } else if (checkoutTier === 'mega') {
                         effectivePrice = megaPassOfferPrice;
                         effectiveOriginalPrice = megaPassMrpPrice;
-                        effectiveProductId = 'all-access';
-                        effectiveProductType = 'all-access';
-                        effectiveTitle = 'All-Odisha 1-Year Super Pass';
                       }
-
                       const discountPercent = Math.round(((effectiveOriginalPrice - effectivePrice) / effectiveOriginalPrice) * 100) || 80;
 
-                      const activeFeatures = checkoutTier === 'mega' ? [
+                      const activeMobileFeatures = checkoutTier === 'mega' ? [
                         'UNLIMITED Access to ALL OPSC, OSSC, OSSSC & Police Exams',
                         'Unlocks ALL 500+ Mock Tests, Question Banks & Practice Modules',
                         'All Chapter-Wise PDF Booklets & Full Solution Keys',
@@ -6530,7 +6663,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         'Instant State Rank & Accuracy Diagnostics',
                         'Valid for 3 Months • One-Time Payment'
                       ] : [
-                        `Unlocks ALL ${mockTests.filter(t => t.examId === activeExamForBundle?.id).length || 20}+ Mock Tests for ${activeExamBundleName}`,
+                        `Unlocks ALL ${examMockCount}+ Mock Tests for ${activeExamBundleName}`,
                         'Unlocks ALL Question Banks & Chapter Notes for this Exam',
                         'Downloadable Test PDFs with Answer Keys & Explanations',
                         '24/7 AI Mentor Step-by-Step Doubt Resolution',
@@ -6544,364 +6677,443 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}
                           transition={{ duration: 0.25 }}
-                          className="text-center space-y-3 sm:space-y-4 flex flex-col flex-1 py-1 mt-0.5 sm:mt-1.5 overflow-visible"
+                          className="flex flex-col flex-1 overflow-visible"
                         >
-                          {/* Pulsing visual badge */}
-                          <motion.div 
-                            animate={{ y: [0, -3, 0] }}
-                            transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-                            className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-tr from-brand-600 via-brand-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto shadow-[0_6px_20px_rgba(37,99,235,0.25)] border border-white/10 relative group shrink-0"
-                          >
-                            {checkoutTier === 'mega' ? (
-                              <Crown className="text-amber-300 w-5 h-5 sm:w-6 sm:h-6 filter drop-shadow-[0_2px_6px_rgba(255,255,255,0.2)]" />
-                            ) : (
-                              <Award className="text-white w-5 h-5 sm:w-6 sm:h-6 filter drop-shadow-[0_2px_6px_rgba(255,255,255,0.2)]" />
-                            )}
-                            <div className="absolute inset-0 border border-brand-400/25 rounded-2xl animate-ping opacity-25 pointer-events-none" />
-                          </motion.div>
-                          
-                          <div className="space-y-1 shrink-0">
-                            <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight leading-tight px-1 font-sans">
-                              Choose Your <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-brand-300 via-pink-200 to-indigo-300">Access Pass</span>
-                            </h2>
-                            <p className="text-slate-400 text-[11px] sm:text-xs font-medium leading-relaxed max-w-sm mx-auto">
-                              Select a plan to unlock high-yield mock tests, question banks, and instant AI doubt explanations.
-                            </p>
-                          </div>
+                          {/* ========================================================================= */}
+                          {/* DESKTOP/LAPTOP VIEW (3-Column SaaS Grid - Claude & ChatGPT Style)         */}
+                          {/* ========================================================================= */}
+                          <div className="hidden lg:flex flex-col space-y-6">
+                            {/* Header */}
+                            <div className="text-center space-y-2">
+                              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-400/20 text-brand-300 text-xs font-black uppercase tracking-wider">
+                                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                                🏆 Odisha's #1 Exam Preparation Platform
+                              </div>
+                              <h2 className="text-3xl font-black text-white tracking-tight font-sans">
+                                Choose Your <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-brand-300 via-pink-200 to-indigo-300">Access Pass</span>
+                              </h2>
+                              <p className="text-slate-400 text-sm font-medium max-w-xl mx-auto">
+                                Transparent, student-friendly one-time pricing. Unlock complete test series, instant AI doubt solutions, and PDF booklets.
+                              </p>
+                            </div>
 
-                          {/* 3-Tier Interactive Selector */}
-                          <div className="space-y-2 text-left my-1">
-                            {/* Tier 1: Starter Booster (₹29) */}
-                            <div 
-                              onClick={() => setCheckoutTier('starter')}
-                              className={cn(
-                                "p-2.5 sm:p-3 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex items-center justify-between gap-3 group select-none",
-                                checkoutTier === 'starter'
-                                  ? "bg-slate-900/95 border-blue-400/80 shadow-[0_0_20px_rgba(59,130,246,0.2)] ring-1 ring-blue-400/40"
-                                  : "bg-white/[0.02] border-white/10 hover:bg-white/[0.05] opacity-75"
-                              )}
-                            >
-                              <div className="flex items-start gap-2.5">
-                                <div className={cn(
-                                  "w-4 h-4 rounded-full mt-0.5 flex items-center justify-center border transition-all shrink-0",
-                                  checkoutTier === 'starter'
-                                    ? "border-blue-400 bg-blue-500 text-white shadow-sm"
-                                    : "border-slate-600 bg-white/5"
-                                )}>
-                                  {checkoutTier === 'starter' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                                </div>
-
-                                <div className="space-y-0.5">
-                                  <div className="flex items-center gap-1.5 flex-wrap">
-                                    <span className="font-extrabold text-white text-xs sm:text-sm tracking-tight flex items-center gap-1">
+                            {/* 3-Column Pricing Grid */}
+                            <div className="grid grid-cols-3 gap-6 items-stretch pt-2 pb-1">
+                              {/* Card 1: Starter Booster (₹29) */}
+                              <div className="bg-slate-900/60 border border-white/10 hover:border-blue-400/40 rounded-3xl p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-[0_10px_30px_rgba(59,130,246,0.15)] group relative">
+                                <div className="space-y-4">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-base font-extrabold text-white flex items-center gap-1.5">
                                       ⚡ Starter Booster
                                     </span>
-                                    <span className="text-[8px] font-black text-blue-300 uppercase tracking-wider bg-blue-500/20 border border-blue-400/30 px-1.5 py-0.5 rounded-full">
+                                    <span className="text-[10px] font-black text-blue-300 bg-blue-500/20 border border-blue-400/30 px-2 py-0.5 rounded-full uppercase tracking-wider">
                                       3 MONTHS
                                     </span>
                                   </div>
-                                  <p className="text-[10px] sm:text-[10.5px] text-slate-300 font-medium leading-snug">
-                                    First <strong className="text-blue-300">{starterTestCount} Full Mocks</strong> + 500 PYQs + PDF Solutions
+                                  <p className="text-xs text-slate-400 font-medium leading-relaxed">
+                                    First {starterTestCount} high-yield tests to test your baseline & boost score.
                                   </p>
-                                </div>
-                              </div>
 
-                              <div className="text-right shrink-0">
-                                <div className="text-sm sm:text-base font-black text-white font-mono">₹{starterOfferPrice}</div>
-                                <div className="text-[10px] text-slate-500 line-through font-mono">₹{starterMrpPrice}</div>
-                              </div>
-                            </div>
-
-                            {/* Tier 2: Complete Exam Pass (₹99) - PRE-SELECTED / RECOMMENDED */}
-                            <div 
-                              onClick={() => setCheckoutTier('bundle')}
-                              className={cn(
-                                "p-3 sm:p-3.5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex items-center justify-between gap-3 group select-none",
-                                checkoutTier === 'bundle'
-                                  ? "bg-gradient-to-r from-brand-950/95 via-slate-900/95 to-indigo-950/95 border-brand-500/90 shadow-[0_0_25px_rgba(37,99,235,0.25)] ring-1 ring-brand-400/40"
-                                  : "bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20 opacity-75"
-                              )}
-                            >
-                              <div className="flex items-start gap-2.5">
-                                <div className={cn(
-                                  "w-4 h-4 rounded-full mt-0.5 flex items-center justify-center border transition-all shrink-0",
-                                  checkoutTier === 'bundle'
-                                    ? "border-brand-400 bg-brand-500 text-white shadow-sm"
-                                    : "border-slate-600 bg-white/5"
-                                )}>
-                                  {checkoutTier === 'bundle' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                                </div>
-
-                                <div className="space-y-0.5">
-                                  <div className="flex items-center gap-1.5 flex-wrap">
-                                    <span className="font-extrabold text-white text-xs sm:text-sm tracking-tight flex items-center gap-1">
-                                      🌟 {activeExamBundleName} Full Pass
-                                    </span>
-                                    <span className="text-[8px] font-black text-amber-300 uppercase tracking-wider bg-amber-500/20 border border-amber-400/30 px-1.5 py-0.5 rounded-full">
-                                      🔥 MOST POPULAR
+                                  <div className="pt-2 pb-3 border-y border-white/5">
+                                    <div className="flex items-baseline gap-2">
+                                      <span className="text-3xl font-black text-white font-mono">₹{starterOfferPrice}</span>
+                                      <span className="text-sm font-bold text-slate-500 line-through font-mono">₹{starterMrpPrice}</span>
+                                      <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest bg-blue-500/10 px-2 py-0.5 rounded-full">
+                                        {Math.round(((starterMrpPrice - starterOfferPrice) / starterMrpPrice) * 100)}% OFF
+                                      </span>
+                                    </div>
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mt-1">
+                                      One-Time • No Auto-Debit
                                     </span>
                                   </div>
-                                  <p className="text-[10px] sm:text-[10.5px] text-slate-300 font-medium leading-snug">
-                                    <strong className="text-brand-300">ALL</strong> Mocks, Question Banks, Chapter Notes & AI Mentor (6 Mos)
+
+                                  <div className="space-y-2.5 pt-1 text-left">
+                                    {[
+                                      `First ${starterTestCount} Full-Length Mock Tests for ${activeExamBundleName}`,
+                                      'Access to 500+ Target Subject PYQs',
+                                      'Downloadable Test PDF with Step-by-Step Solutions',
+                                      'Instant State Rank & Accuracy Diagnostics',
+                                      '3 Months Exam Season Validity'
+                                    ].map((feat, idx) => (
+                                      <div key={idx} className="flex items-start gap-2.5 text-xs text-slate-300 font-medium">
+                                        <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+                                        <span>{feat}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                <div className="pt-6 mt-auto">
+                                  <Button 
+                                    onClick={() => initiatePaymentForTier('starter')}
+                                    className="w-full h-11 rounded-xl text-xs font-black bg-slate-800 hover:bg-blue-600 text-white border border-white/10 hover:border-blue-400/50 shadow-md transition-all active:scale-[0.98]"
+                                  >
+                                    ⚡ Get Starter Booster (₹{starterOfferPrice})
+                                  </Button>
+                                </div>
+                              </div>
+
+                              {/* Card 2: Complete Exam Pass (₹99) - CENTER ELEVATED */}
+                              <div className="bg-gradient-to-b from-brand-950/95 via-slate-900/95 to-indigo-950/95 border-2 border-brand-400/80 shadow-[0_0_40px_rgba(37,99,235,0.3)] ring-2 ring-brand-400/30 rounded-3xl p-6 lg:p-7 flex flex-col justify-between relative transform lg:-translate-y-2 group transition-all duration-300">
+                                {/* Floating Most Popular Pill */}
+                                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 text-[10px] font-black uppercase px-3 py-1 rounded-full shadow-lg border border-white/20 tracking-wider flex items-center gap-1">
+                                  <Flame className="w-3 h-3 fill-current" /> MOST POPULAR • BEST VALUE
+                                </div>
+
+                                <div className="space-y-4">
+                                  <div className="flex items-center justify-between pt-1">
+                                    <span className="text-base font-black text-white flex items-center gap-1.5">
+                                      🌟 {activeExamBundleName} Full Pass
+                                    </span>
+                                    <span className="text-[10px] font-black text-amber-300 bg-amber-500/20 border border-amber-400/30 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                      6 MONTHS
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-slate-300 font-medium leading-relaxed">
+                                    Everything you need to crack {activeExamBundleName} with top ranks.
                                   </p>
+
+                                  <div className="pt-2 pb-3 border-y border-white/10">
+                                    <div className="flex items-baseline gap-2">
+                                      <span className="text-3xl lg:text-4xl font-black text-white font-mono">₹{examPassOfferPrice}</span>
+                                      <span className="text-sm font-bold text-slate-400 line-through font-mono">₹{examPassMrpPrice}</span>
+                                      <span className="text-[10px] font-black text-emerald-300 uppercase tracking-widest bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-400/30">
+                                        {Math.round(((examPassMrpPrice - examPassOfferPrice) / examPassMrpPrice) * 100)}% OFF
+                                      </span>
+                                    </div>
+                                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block mt-1">
+                                      Full Season Access • Instant Unlock
+                                    </span>
+                                  </div>
+
+                                  <div className="space-y-2.5 pt-1 text-left">
+                                    {[
+                                      `ALL ${examMockCount}+ Full-Length Mock Tests & Live Mocks`,
+                                      'ALL Subject-Wise Question Banks & Practice Sets',
+                                      'Downloadable Chapter-Wise PDF Booklets & Answer Keys',
+                                      'Detailed Step-by-Step AI Solutions & LaTeX Math',
+                                      '24/7 AI Mentor Doubt Resolution & Smart Hints',
+                                      'Valid for 6 Months • Full Exam Season Coverage'
+                                    ].map((feat, idx) => (
+                                      <div key={idx} className="flex items-start gap-2.5 text-xs text-slate-100 font-bold">
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                                        <span>{feat}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                <div className="pt-6 mt-auto">
+                                  <Button 
+                                    onClick={() => initiatePaymentForTier('bundle')}
+                                    className="w-full h-12 rounded-xl text-sm font-black bg-gradient-to-r from-brand-600 via-brand-500 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white shadow-[0_8px_25px_rgba(37,99,235,0.4)] border border-white/20 transition-all active:scale-[0.98]"
+                                  >
+                                    🚀 Unlock Full Exam Pass (₹{examPassOfferPrice})
+                                  </Button>
                                 </div>
                               </div>
 
-                              <div className="text-right shrink-0">
-                                <div className="text-sm sm:text-base font-black text-white font-mono">₹{examPassOfferPrice}</div>
-                                <div className="text-[10px] text-slate-500 line-through font-mono">₹{examPassMrpPrice}</div>
-                              </div>
-                            </div>
-
-                            {/* Tier 3: All-Odisha 1-Year Super Pass (₹199) */}
-                            <div 
-                              onClick={() => setCheckoutTier('mega')}
-                              className={cn(
-                                "p-2.5 sm:p-3 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex items-center justify-between gap-3 group select-none",
-                                checkoutTier === 'mega'
-                                  ? "bg-gradient-to-r from-indigo-950/95 via-purple-950/95 to-slate-900/95 border-indigo-400/80 shadow-[0_0_25px_rgba(99,102,241,0.25)] ring-1 ring-indigo-400/40"
-                                  : "bg-white/[0.02] border-white/10 hover:bg-white/[0.05] opacity-75"
-                              )}
-                            >
-                              <div className="flex items-start gap-2.5">
-                                <div className={cn(
-                                  "w-4 h-4 rounded-full mt-0.5 flex items-center justify-center border transition-all shrink-0",
-                                  checkoutTier === 'mega'
-                                    ? "border-indigo-400 bg-indigo-500 text-white shadow-sm"
-                                    : "border-slate-600 bg-white/5"
-                                )}>
-                                  {checkoutTier === 'mega' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                                </div>
-
-                                <div className="space-y-0.5">
-                                  <div className="flex items-center gap-1.5 flex-wrap">
-                                    <span className="font-extrabold text-white text-xs sm:text-sm tracking-tight flex items-center gap-1">
+                              {/* Card 3: All-Odisha Super Pass (₹199) */}
+                              <div className="bg-gradient-to-b from-purple-950/40 via-slate-900/80 to-slate-900/90 border border-purple-500/40 hover:border-purple-400/70 rounded-3xl p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-[0_10px_35px_rgba(168,85,247,0.2)] group relative">
+                                <div className="space-y-4">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-base font-extrabold text-white flex items-center gap-1.5">
                                       👑 All-Odisha Super Pass
                                     </span>
-                                    <span className="text-[8px] font-black text-emerald-300 uppercase tracking-wider bg-emerald-500/20 border border-emerald-400/30 px-1.5 py-0.5 rounded-full">
+                                    <span className="text-[10px] font-black text-emerald-300 bg-emerald-500/20 border border-emerald-400/30 px-2 py-0.5 rounded-full uppercase tracking-wider">
                                       1 YEAR VIP
                                     </span>
                                   </div>
-                                  <p className="text-[10px] sm:text-[10.5px] text-slate-300 font-medium leading-snug">
-                                    UNLIMITED access to <strong className="text-emerald-300">ALL</strong> OPSC, OSSC, OSSSC & Police Exams
+                                  <p className="text-xs text-slate-400 font-medium leading-relaxed">
+                                    Unlimited 365-day access to every single Odisha government exam.
                                   </p>
+
+                                  <div className="pt-2 pb-3 border-y border-white/5">
+                                    <div className="flex items-baseline gap-2">
+                                      <span className="text-3xl font-black text-white font-mono">₹{megaPassOfferPrice}</span>
+                                      <span className="text-sm font-bold text-slate-500 line-through font-mono">₹{megaPassMrpPrice}</span>
+                                      <span className="text-[10px] font-black text-purple-300 uppercase tracking-widest bg-purple-500/20 px-2 py-0.5 rounded-full">
+                                        {Math.round(((megaPassMrpPrice - megaPassOfferPrice) / megaPassMrpPrice) * 100)}% OFF
+                                      </span>
+                                    </div>
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mt-1">
+                                      Entire Website • 1 Full Year
+                                    </span>
+                                  </div>
+
+                                  <div className="space-y-2.5 pt-1 text-left">
+                                    {[
+                                      'UNLIMITED Access to ALL OPSC, OSSC, OSSSC & Police Exams',
+                                      'Unlocks ALL 500+ Tests across the entire platform',
+                                      'All Future Test Series & Updates for 1 Full Year Included',
+                                      'Unlimited 24/7 AI Mentor Doubt Solving & LaTeX Math',
+                                      'Priority VIP Server Access & Instant PDF Downloads'
+                                    ].map((feat, idx) => (
+                                      <div key={idx} className="flex items-start gap-2.5 text-xs text-slate-300 font-medium">
+                                        <CheckCircle2 className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                                        <span>{feat}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                <div className="pt-6 mt-auto">
+                                  <Button 
+                                    onClick={() => initiatePaymentForTier('mega')}
+                                    className="w-full h-11 rounded-xl text-xs font-black bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white border border-purple-400/30 shadow-md transition-all active:scale-[0.98]"
+                                  >
+                                    👑 Claim 1-Year VIP Pass (₹{megaPassOfferPrice})
+                                  </Button>
                                 </div>
                               </div>
+                            </div>
 
-                              <div className="text-right shrink-0">
-                                <div className="text-sm sm:text-base font-black text-white font-mono">₹{megaPassOfferPrice}</div>
-                                <div className="text-[10px] text-slate-500 line-through font-mono">₹{megaPassMrpPrice}</div>
-                              </div>
+                            {/* Desktop Security Footer */}
+                            <div className="flex items-center justify-center gap-6 text-xs text-slate-400 font-medium pt-2 border-t border-white/5">
+                              <span className="flex items-center gap-1.5">
+                                <Lock className="w-3.5 h-3.5 text-emerald-400" /> Razorpay 256-Bit SSL Secured
+                              </span>
+                              <span>•</span>
+                              <span className="flex items-center gap-1.5">
+                                <Zap className="w-3.5 h-3.5 text-amber-400" /> Instant UPI Activation (GPay, PhonePe, Paytm, QR)
+                              </span>
+                              <span>•</span>
+                              <span className="flex items-center gap-1.5">
+                                <ShieldCheck className="w-3.5 h-3.5 text-brand-400" /> 100% Verified Content
+                              </span>
                             </div>
                           </div>
 
-                          {/* Features Panel */}
-                          <motion.div 
-                            initial="hidden"
-                            animate="show"
-                            variants={{
-                              hidden: { opacity: 0 },
-                              show: {
-                                opacity: 1,
-                                transition: { staggerChildren: 0.05 }
-                              }
-                            }}
-                            className="space-y-1.5 text-left bg-white/[0.02] border border-white/[0.06] p-3 sm:p-3.5 rounded-[1.25rem] backdrop-blur-md shrink-0"
-                          >
-                            {activeFeatures.map((benefit, i) => (
-                              <motion.div 
-                                key={i} 
-                                variants={{
-                                  hidden: { opacity: 0, x: -6 },
-                                  show: { opacity: 1, x: 0 }
-                                }}
-                                className="flex items-center gap-2 text-slate-200 font-bold"
-                              >
-                                <div className="w-4 h-4 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
-                                  <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
-                                </div>
-                                <span className="text-[10px] sm:text-[11px] tracking-wide">{benefit}</span>
-                              </motion.div>
-                            ))}
-                          </motion.div>
-
-                          {/* Pricing Block */}
-                          <div className="space-y-2 sm:space-y-2.5 pt-0.5 shrink-0">
-                            <div className="flex flex-col items-center justify-center gap-0.5">
-                              <div className="flex items-center justify-center gap-2">
-                                <span className="text-xs sm:text-base font-bold text-slate-500 line-through font-mono">₹{effectiveOriginalPrice}</span>
-                                <span className="text-2xl sm:text-4xl font-black text-white font-mono tracking-tighter">₹{effectivePrice}</span>
-                                <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                                  {discountPercent}% OFF
-                                </span>
-                              </div>
-                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                                One-Time Payment • Instant UPI Unlock
-                              </span>
+                          {/* ========================================================================= */}
+                          {/* MOBILE / TABLET VIEW (< lg screen viewports)                              */}
+                          {/* ========================================================================= */}
+                          <div className="lg:hidden text-center space-y-3 sm:space-y-4 flex flex-col flex-1 py-1 mt-0.5 sm:mt-1.5">
+                            {/* Pulsing visual badge */}
+                            <motion.div 
+                              animate={{ y: [0, -3, 0] }}
+                              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+                              className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-tr from-brand-600 via-brand-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto shadow-[0_6px_20px_rgba(37,99,235,0.25)] border border-white/10 relative group shrink-0"
+                            >
+                              {checkoutTier === 'mega' ? (
+                                <Crown className="text-amber-300 w-5 h-5 sm:w-6 sm:h-6 filter drop-shadow-[0_2px_6px_rgba(255,255,255,0.2)]" />
+                              ) : (
+                                <Award className="text-white w-5 h-5 sm:w-6 sm:h-6 filter drop-shadow-[0_2px_6px_rgba(255,255,255,0.2)]" />
+                              )}
+                              <div className="absolute inset-0 border border-brand-400/25 rounded-2xl animate-ping opacity-25 pointer-events-none" />
+                            </motion.div>
+                            
+                            <div className="space-y-1 shrink-0">
+                              <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight leading-tight px-1 font-sans">
+                                Choose Your <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-brand-300 via-pink-200 to-indigo-300">Access Pass</span>
+                              </h2>
+                              <p className="text-slate-400 text-[11px] sm:text-xs font-medium leading-relaxed max-w-sm mx-auto">
+                                Select a plan to unlock high-yield mock tests, question banks, and instant AI doubt explanations.
+                              </p>
                             </div>
 
-                            {/* CTA Button */}
-                            <Button 
-                              className="w-full h-11 sm:h-12 rounded-xl text-sm sm:text-base font-black bg-gradient-to-r from-brand-600 via-brand-500 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white shadow-[0_6px_20px_rgba(37,99,235,0.25)] hover:shadow-[0_12px_35px_rgba(37,99,235,0.4)] group/btn relative overflow-hidden transition-all duration-300 active:scale-[0.98] border border-white/10"
-                              onClick={async () => {
-                              try {
-                                const res = await loadRazorpay();
-                                if (!res) {
-                                  alert('Failed to load payment gateway SDK. Please check your internet connection.');
-                                  setPaymentState('idle');
-                                  return;
+                            {/* 3-Tier Interactive Selector */}
+                            <div className="space-y-2 text-left my-1">
+                              {/* Tier 1: Starter Booster (₹29) */}
+                              <div 
+                                onClick={() => setCheckoutTier('starter')}
+                                className={cn(
+                                  "p-2.5 sm:p-3 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex items-center justify-between gap-3 group select-none",
+                                  checkoutTier === 'starter'
+                                    ? "bg-slate-900/95 border-blue-400/80 shadow-[0_0_20px_rgba(59,130,246,0.2)] ring-1 ring-blue-400/40"
+                                    : "bg-white/[0.02] border-white/10 hover:bg-white/[0.05] opacity-75"
+                                )}
+                              >
+                                <div className="flex items-start gap-2.5">
+                                  <div className={cn(
+                                    "w-4 h-4 rounded-full mt-0.5 flex items-center justify-center border transition-all shrink-0",
+                                    checkoutTier === 'starter'
+                                      ? "border-blue-400 bg-blue-500 text-white shadow-sm"
+                                      : "border-slate-600 bg-white/5"
+                                  )}>
+                                    {checkoutTier === 'starter' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                  </div>
+
+                                  <div className="space-y-0.5">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <span className="font-extrabold text-white text-xs sm:text-sm tracking-tight flex items-center gap-1">
+                                        ⚡ Starter Booster
+                                      </span>
+                                      <span className="text-[8px] font-black text-blue-300 uppercase tracking-wider bg-blue-500/20 border border-blue-400/30 px-1.5 py-0.5 rounded-full">
+                                        3 MONTHS
+                                      </span>
+                                    </div>
+                                    <p className="text-[10px] sm:text-[10.5px] text-slate-300 font-medium leading-snug">
+                                      First <strong className="text-blue-300">{starterTestCount} Full Mocks</strong> + 500 PYQs + PDF Solutions
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="text-right shrink-0">
+                                  <div className="text-sm sm:text-base font-black text-white font-mono">₹{starterOfferPrice}</div>
+                                  <div className="text-[10px] text-slate-500 line-through font-mono">₹{starterMrpPrice}</div>
+                                </div>
+                              </div>
+
+                              {/* Tier 2: Complete Exam Pass (₹99) - PRE-SELECTED / RECOMMENDED */}
+                              <div 
+                                onClick={() => setCheckoutTier('bundle')}
+                                className={cn(
+                                  "p-3 sm:p-3.5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex items-center justify-between gap-3 group select-none",
+                                  checkoutTier === 'bundle'
+                                    ? "bg-gradient-to-r from-brand-950/95 via-slate-900/95 to-indigo-950/95 border-brand-500/90 shadow-[0_0_25px_rgba(37,99,235,0.25)] ring-1 ring-brand-400/40"
+                                    : "bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20 opacity-75"
+                                )}
+                              >
+                                <div className="flex items-start gap-2.5">
+                                  <div className={cn(
+                                    "w-4 h-4 rounded-full mt-0.5 flex items-center justify-center border transition-all shrink-0",
+                                    checkoutTier === 'bundle'
+                                      ? "border-brand-400 bg-brand-500 text-white shadow-sm"
+                                      : "border-slate-600 bg-white/5"
+                                  )}>
+                                    {checkoutTier === 'bundle' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                  </div>
+
+                                  <div className="space-y-0.5">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <span className="font-extrabold text-white text-xs sm:text-sm tracking-tight flex items-center gap-1">
+                                        🌟 {activeExamBundleName} Full Pass
+                                      </span>
+                                      <span className="text-[8px] font-black text-amber-300 uppercase tracking-wider bg-amber-500/20 border border-amber-400/30 px-1.5 py-0.5 rounded-full">
+                                        🔥 MOST POPULAR
+                                      </span>
+                                    </div>
+                                    <p className="text-[10px] sm:text-[10.5px] text-slate-300 font-medium leading-snug">
+                                      <strong className="text-brand-300">ALL</strong> Mocks, Question Banks, Chapter Notes & AI Mentor (6 Mos)
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="text-right shrink-0">
+                                  <div className="text-sm sm:text-base font-black text-white font-mono">₹{examPassOfferPrice}</div>
+                                  <div className="text-[10px] text-slate-500 line-through font-mono">₹{examPassMrpPrice}</div>
+                                </div>
+                              </div>
+
+                              {/* Tier 3: All-Odisha 1-Year Super Pass (₹199) */}
+                              <div 
+                                onClick={() => setCheckoutTier('mega')}
+                                className={cn(
+                                  "p-2.5 sm:p-3 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex items-center justify-between gap-3 group select-none",
+                                  checkoutTier === 'mega'
+                                    ? "bg-gradient-to-r from-indigo-950/95 via-purple-950/95 to-slate-900/95 border-indigo-400/80 shadow-[0_0_25px_rgba(99,102,241,0.25)] ring-1 ring-indigo-400/40"
+                                    : "bg-white/[0.02] border-white/10 hover:bg-white/[0.05] opacity-75"
+                                )}
+                              >
+                                <div className="flex items-start gap-2.5">
+                                  <div className={cn(
+                                    "w-4 h-4 rounded-full mt-0.5 flex items-center justify-center border transition-all shrink-0",
+                                    checkoutTier === 'mega'
+                                      ? "border-indigo-400 bg-indigo-500 text-white shadow-sm"
+                                      : "border-slate-600 bg-white/5"
+                                  )}>
+                                    {checkoutTier === 'mega' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                  </div>
+
+                                  <div className="space-y-0.5">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <span className="font-extrabold text-white text-xs sm:text-sm tracking-tight flex items-center gap-1">
+                                        👑 All-Odisha Super Pass
+                                      </span>
+                                      <span className="text-[8px] font-black text-emerald-300 uppercase tracking-wider bg-emerald-500/20 border border-emerald-400/30 px-1.5 py-0.5 rounded-full">
+                                        1 YEAR VIP
+                                      </span>
+                                    </div>
+                                    <p className="text-[10px] sm:text-[10.5px] text-slate-300 font-medium leading-snug">
+                                      UNLIMITED access to <strong className="text-emerald-300">ALL</strong> OPSC, OSSC, OSSSC & Police Exams
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="text-right shrink-0">
+                                  <div className="text-sm sm:text-base font-black text-white font-mono">₹{megaPassOfferPrice}</div>
+                                  <div className="text-[10px] text-slate-500 line-through font-mono">₹{megaPassMrpPrice}</div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Features Panel */}
+                            <motion.div 
+                              initial="hidden"
+                              animate="show"
+                              variants={{
+                                hidden: { opacity: 0 },
+                                show: {
+                                  opacity: 1,
+                                  transition: { staggerChildren: 0.05 }
                                 }
-
-                                // 1. Create order on the server
-                                const orderRes = await fetch('/api/payment/order', {
-                                  method: 'POST',
-                                  headers: {
-                                    'Content-Type': 'application/json'
-                                  },
-                                  body: JSON.stringify({
-                                    productId: effectiveProductId,
-                                    productType: effectiveProductType,
-                                    userId: profile?.uid || user?.id || 'unknown',
-                                    currency: 'INR'
-                                  })
-                                });
-
-                                let orderData;
-                                const orderText = await orderRes.text();
-                                try {
-                                  orderData = orderText ? JSON.parse(orderText) : {};
-                                } catch (e) {
-                                  throw new Error(`Invalid response from server. Status: ${orderRes.status}. If you just updated the server, please restart the dev server (npm run dev).`);
-                                }
-
-                                if (!orderRes.ok) {
-                                  throw new Error(orderData.message || `Failed to create payment order (status ${orderRes.status}).`);
-                                }
-
-                                if (!orderData.orderId) {
-                                  throw new Error('Server did not return a valid order ID. Please verify your Razorpay API key configurations in .env and restart your dev server.');
-                                }
-
-                                // Track pending payment state in localStorage (essential for auto-recovery on page reloads/switches)
-                                localStorage.setItem('oep_pending_payment', JSON.stringify({
-                                  orderId: orderData.orderId,
-                                  productId: effectiveProductId,
-                                  timestamp: Date.now()
-                                }));
-
-                                // 2. Open Razorpay checkout with the orderId
-                                const options = {
-                                  key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_StcJAJY1MgRGmJ',
-                                  amount: orderData.amount,
-                                  currency: orderData.currency,
-                                  name: 'OdishaExamPrep Premium',
-                                  description: effectiveTitle === 'Full Access' ? 'Unlock Full Access' : `Unlock ${effectiveTitle}`,
-                                  order_id: orderData.orderId,
-                                  handler: async function (response: any) {
-                                    try {
-                                      setPaymentState('processing');
-                                      setPaymentError(null);
-                                      // 3. Verify payment signature on the server and record secure entitlement
-                                      const verifyRes = await fetch('/api/payment/verify', {
-                                        method: 'POST',
-                                        headers: {
-                                          'Content-Type': 'application/json'
-                                        },
-                                        body: JSON.stringify({
-                                          razorpay_order_id: response.razorpay_order_id,
-                                          razorpay_payment_id: response.razorpay_payment_id,
-                                          razorpay_signature: response.razorpay_signature,
-                                          userId: profile?.uid || user?.id,
-                                          productId: effectiveProductId,
-                                          productType: effectiveProductType,
-                                          pricePaid: effectivePrice,
-                                          snapshot: {
-                                            id: effectiveProductId,
-                                            title: effectiveTitle,
-                                            price: effectivePrice
-                                          }
-                                        })
-                                      });
-
-                                      let verifyData;
-                                      const verifyText = await verifyRes.text();
-                                      try {
-                                        verifyData = verifyText ? JSON.parse(verifyText) : {};
-                                      } catch (e) {
-                                        throw new Error(`Invalid verification response from server. Status: ${verifyRes.status}`);
-                                      }
-
-                                      if (!verifyRes.ok) {
-                                        throw new Error(verifyData.message || 'Payment verification failed.');
-                                      }
-                                      if (verifyData.success) {
-                                        setPaymentState('success');
-                                        if (effectiveProductId) {
-                                          await unlockItem(effectiveProductId);
-                                        } else {
-                                          await grantFullAccess();
-                                        }
-                                        setTimeout(() => {
-                                          setShowPaywall(false);
-                                          setPaywallItemId(null);
-                                          setPaymentState('idle');
-                                        }, 2000);
-                                      } else {
-                                        throw new Error(verifyData.message || 'Payment verification failed.');
-                                      }
-                                    } catch (err: any) {
-                                      console.error('Verification error:', err);
-                                      setPaymentState('error');
-                                      setPaymentError(err.message || 'Payment verification failed.');
-                                    }
-                                  },
-                                  prefill: {
-                                    name: profile?.displayName || '',
-                                    email: profile?.email || ''
-                                  },
-                                  theme: { color: '#4f46e5' },
-                                  modal: {
-                                    ondismiss: function () {
-                                      console.log('Payment checkout closed');
-                                      localStorage.removeItem('oep_pending_payment');
-                                    }
-                                  }
-                                };
-
-                                const rzp = new (window as any).Razorpay(options);
-                                rzp.open();
-                              } catch (err: any) {
-                                console.error('Payment initialization failed:', err);
-                                alert('Payment initialization failed: ' + err.message);
-                              }
-                            }}
+                              }}
+                              className="space-y-1.5 text-left bg-white/[0.02] border border-white/[0.06] p-3 sm:p-3.5 rounded-[1.25rem] backdrop-blur-md shrink-0"
                             >
-                              {/* Button Shine Effect */}
-                              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 z-10" />
+                              {activeMobileFeatures.map((benefit, i) => (
+                                <motion.div 
+                                  key={i} 
+                                  variants={{
+                                    hidden: { opacity: 0, x: -6 },
+                                    show: { opacity: 1, x: 0 }
+                                  }}
+                                  className="flex items-center gap-2 text-slate-200 font-bold"
+                                >
+                                  <div className="w-4 h-4 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                                    <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
+                                  </div>
+                                  <span className="text-[10px] sm:text-[11px] tracking-wide">{benefit}</span>
+                                </motion.div>
+                              ))}
+                            </motion.div>
 
-                              <span className="relative z-10 flex items-center justify-center gap-2">
-                                {checkoutTier === 'mega' 
-                                  ? `👑 Unlock All-Odisha Super Pass (₹${effectivePrice})` 
-                                  : checkoutTier === 'starter' 
-                                  ? `⚡ Unlock Starter Booster (₹${effectivePrice})` 
-                                  : `🚀 Unlock ${activeExamBundleName} Full Pass (₹${effectivePrice})`}
-                                <ChevronRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
-                              </span>
-                            </Button>
+                            {/* Pricing Block & Mobile CTA */}
+                            <div className="space-y-2 sm:space-y-2.5 pt-0.5 shrink-0">
+                              <div className="flex flex-col items-center justify-center gap-0.5">
+                                <div className="flex items-center justify-center gap-2">
+                                  <span className="text-xs sm:text-base font-bold text-slate-500 line-through font-mono">₹{effectiveOriginalPrice}</span>
+                                  <span className="text-2xl sm:text-4xl font-black text-white font-mono tracking-tighter">₹{effectivePrice}</span>
+                                  <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                                    {discountPercent}% OFF
+                                  </span>
+                                </div>
+                                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                  One-Time Payment • Instant UPI Unlock
+                                </span>
+                              </div>
 
-                            {/* Secure Info Footer */}
-                            <div className="flex items-center justify-center gap-2.5 text-[9.5px] text-slate-400 font-medium pt-0.5 flex-wrap">
-                              <span className="flex items-center gap-1">
-                                <Lock className="w-3 h-3 text-emerald-400" /> Razorpay 256-Bit SSL
-                              </span>
-                              <span>•</span>
-                              <span className="flex items-center gap-1">
-                                <Zap className="w-3 h-3 text-amber-400" /> Instant Activation
-                              </span>
-                              <span>•</span>
-                              <span className="flex items-center gap-1">
-                                <ShieldCheck className="w-3 h-3 text-brand-400" /> 100% Verified
-                              </span>
+                              {/* CTA Button */}
+                              <Button 
+                                className="w-full h-11 sm:h-12 rounded-xl text-sm sm:text-base font-black bg-gradient-to-r from-brand-600 via-brand-500 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white shadow-[0_6px_20px_rgba(37,99,235,0.25)] hover:shadow-[0_12px_35px_rgba(37,99,235,0.4)] group/btn relative overflow-hidden transition-all duration-300 active:scale-[0.98] border border-white/10"
+                                onClick={() => initiatePaymentForTier(checkoutTier)}
+                              >
+                                {/* Button Shine Effect */}
+                                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 z-10" />
+
+                                <span className="relative z-10 flex items-center justify-center gap-2">
+                                  {checkoutTier === 'mega' 
+                                    ? `👑 Unlock All-Odisha Super Pass (₹${effectivePrice})` 
+                                    : checkoutTier === 'starter' 
+                                    ? `⚡ Unlock Starter Booster (₹${effectivePrice})` 
+                                    : `🚀 Unlock ${activeExamBundleName} Full Pass (₹${effectivePrice})`}
+                                  <ChevronRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+                                </span>
+                              </Button>
+
+                              {/* Secure Info Footer */}
+                              <div className="flex items-center justify-center gap-2.5 text-[9.5px] text-slate-400 font-medium pt-0.5 flex-wrap">
+                                <span className="flex items-center gap-1">
+                                  <Lock className="w-3 h-3 text-emerald-400" /> Razorpay 256-Bit SSL
+                                </span>
+                                <span>•</span>
+                                <span className="flex items-center gap-1">
+                                  <Zap className="w-3 h-3 text-amber-400" /> Instant Activation
+                                </span>
+                                <span>•</span>
+                                <span className="flex items-center gap-1">
+                                  <ShieldCheck className="w-3 h-3 text-brand-400" /> 100% Verified
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </motion.div>

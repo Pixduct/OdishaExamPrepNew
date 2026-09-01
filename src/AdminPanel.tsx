@@ -1979,15 +1979,20 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       setBankAnswerKeyFileName(loadedAnswerKeyJson ? 'existing-keys.json' : '');
     } else if (activeTab === 'exams') {
       let parsedExamMeta: any = {};
-      if (item.description && typeof item.description === 'string' && item.description.startsWith('JSON_METADATA_')) {
+      const rawDesc = item.rawDescription || item.description || '';
+      if (typeof rawDesc === 'string' && rawDesc.startsWith('JSON_METADATA_')) {
         try {
-          parsedExamMeta = JSON.parse(item.description.replace('JSON_METADATA_', ''));
+          parsedExamMeta = JSON.parse(rawDesc.replace('JSON_METADATA_', ''));
         } catch(e) {}
+      } else if (item.pricingConfig && typeof item.pricingConfig === 'object') {
+        parsedExamMeta = item.pricingConfig;
       }
 
-      const isExamPremium = parsedExamMeta.isPremium !== undefined
+      const isExamPremium = (parsedExamMeta.isPremium !== undefined)
         ? Boolean(parsedExamMeta.isPremium)
-        : Boolean(parsedExamMeta.price && Number(parsedExamMeta.price) > 0);
+        : ((item.isPremium !== undefined)
+          ? Boolean(item.isPremium)
+          : Boolean((parsedExamMeta.price && Number(parsedExamMeta.price) > 0) || (item.price && Number(item.price) > 0)));
 
       newData = {
         ...newData,
@@ -2003,8 +2008,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         starterPrice: (parsedExamMeta.starterPrice !== undefined && parsedExamMeta.starterPrice !== null && parsedExamMeta.starterPrice !== '') ? Number(parsedExamMeta.starterPrice) : 29,
         starterOriginalPrice: (parsedExamMeta.starterOriginalPrice !== undefined && parsedExamMeta.starterOriginalPrice !== null && parsedExamMeta.starterOriginalPrice !== '') ? Number(parsedExamMeta.starterOriginalPrice) : 99,
         starterTestCount: (parsedExamMeta.starterTestCount !== undefined && parsedExamMeta.starterTestCount !== null && parsedExamMeta.starterTestCount !== '') ? Number(parsedExamMeta.starterTestCount) : 5,
-        price: (parsedExamMeta.price !== undefined && parsedExamMeta.price !== null && parsedExamMeta.price !== '') ? Number(parsedExamMeta.price) : 99,
-        originalPrice: (parsedExamMeta.originalPrice !== undefined && parsedExamMeta.originalPrice !== null && parsedExamMeta.originalPrice !== '') ? Number(parsedExamMeta.originalPrice) : 299,
+        price: (parsedExamMeta.price !== undefined && parsedExamMeta.price !== null && parsedExamMeta.price !== '') ? Number(parsedExamMeta.price) : (item.price !== undefined ? Number(item.price) : 99),
+        originalPrice: (parsedExamMeta.originalPrice !== undefined && parsedExamMeta.originalPrice !== null && parsedExamMeta.originalPrice !== '') ? Number(parsedExamMeta.originalPrice) : (item.originalPrice !== undefined ? Number(item.originalPrice) : 299),
         allAccessPrice: (parsedExamMeta.allAccessPrice !== undefined && parsedExamMeta.allAccessPrice !== null && parsedExamMeta.allAccessPrice !== '') ? Number(parsedExamMeta.allAccessPrice) : 199,
         allAccessOriginalPrice: (parsedExamMeta.allAccessOriginalPrice !== undefined && parsedExamMeta.allAccessOriginalPrice !== null && parsedExamMeta.allAccessOriginalPrice !== '') ? Number(parsedExamMeta.allAccessOriginalPrice) : 999,
         description: parsedExamMeta.description !== undefined ? parsedExamMeta.description : (item.description || ''),

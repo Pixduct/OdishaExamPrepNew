@@ -98,44 +98,51 @@ export const hasAccessTo = (
     return true;
   }
 
-  // 7. Check Starter Booster inheritance rules (Balanced Subject Taster Engine)
+  // 7. Check Starter Booster inheritance rules (3-Pillar Balanced Subject Taster Engine)
   if (itemExamId && (
     purchased.includes(`starter-booster_${itemExamId}`) || 
     purchased.includes(`starter_${itemExamId}`)
   )) {
-    // A. Subject-aware Sectional test evaluation
     if (itemOrId && typeof itemOrId === 'object') {
-      const subjectRank = Number((itemOrId as any).subjectRank);
-      if (subjectRank > 0 && subjectRank <= 2) {
+      const pricing = (itemOrId as any).pricingConfig || {};
+      const starterMockLimit = Number((itemOrId as any).starterMockCount || pricing.starterMockCount || (itemOrId as any).starterTestCount || pricing.starterTestCount || 5);
+      const starterSectionalLimit = Number((itemOrId as any).starterSectionalCount || pricing.starterSectionalCount || 2);
+      const starterBankLimit = Number((itemOrId as any).starterBankCount || pricing.starterBankCount || 2);
+
+      // A. Question Banks & Practice Sets evaluation
+      const isBankItem = (itemOrId as any).target_mode !== undefined || (itemOrId as any).questionCount !== undefined || (itemOrId as any).tagline !== undefined || (itemOrId as any).pdfUrl !== undefined;
+      if (isBankItem) {
+        const bankRank = Number((itemOrId as any).subjectRank || (itemOrId as any).bankSubjectRank || (itemOrId as any).sortOrder || 1);
+        if (bankRank <= starterBankLimit) {
+          return true;
+        }
+      }
+
+      // B. Subject-aware Sectional test evaluation
+      const isSectionalTest = (itemOrId as any).subjectRank !== undefined || (itemOrId.seriesId && typeof itemOrId.seriesId === 'string' && (itemOrId.seriesId.includes('"subject"') || itemOrId.seriesId.includes('"sectional"')));
+      if (isSectionalTest) {
+        const subjectRank = Number((itemOrId as any).subjectRank);
+        if (subjectRank > 0 && subjectRank <= starterSectionalLimit) {
+          return true;
+        }
+        if (itemOrId.seriesId) {
+          try {
+            const parsed = typeof itemOrId.seriesId === 'string' ? JSON.parse(itemOrId.seriesId) : itemOrId.seriesId;
+            if (parsed && (parsed.subject || parsed.type === 'sectional')) {
+              const sortOrder = Number((itemOrId as any).sortOrder || 1);
+              if (sortOrder <= starterSectionalLimit || (sortOrder % 5 > 0 && sortOrder % 5 <= starterSectionalLimit)) {
+                return true;
+              }
+            }
+          } catch (e) {}
+        }
+      }
+
+      // C. Standard Full-Length Mock Tests evaluation
+      const sortOrder = Number((itemOrId as any).sortOrder || 1);
+      if (sortOrder <= starterMockLimit) {
         return true;
       }
-
-      // Check if test metadata indicates a sectional / subject-wise test
-      if (itemOrId.seriesId) {
-        try {
-          const parsed = typeof itemOrId.seriesId === 'string' ? JSON.parse(itemOrId.seriesId) : itemOrId.seriesId;
-          if (parsed && (parsed.subject || parsed.type === 'sectional')) {
-            const sortOrder = Number((itemOrId as any).sortOrder || 1);
-            if (sortOrder <= 2 || (sortOrder % 5 === 1 || sortOrder % 5 === 2)) {
-              return true;
-            }
-          }
-        } catch (e) {}
-      }
-    }
-
-    // B. Standard Full-Length Mock Tests evaluation
-    const starterLimit = (itemOrId && typeof itemOrId === 'object' && (itemOrId as any).starterTestCount !== undefined)
-      ? Number((itemOrId as any).starterTestCount)
-      : ((itemOrId && typeof itemOrId === 'object' && (itemOrId as any).pricingConfig?.starterTestCount !== undefined)
-        ? Number((itemOrId as any).pricingConfig.starterTestCount)
-        : 5);
-
-    const sortOrder = (itemOrId && typeof itemOrId === 'object' && (itemOrId as any).sortOrder !== undefined) 
-      ? Number((itemOrId as any).sortOrder) 
-      : 1;
-    if (sortOrder <= starterLimit) {
-      return true;
     }
   }
 

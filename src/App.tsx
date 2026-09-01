@@ -6653,15 +6653,16 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       const totalPlatformMocks = Math.max(mockTests.length, 500);
                       const totalPlatformExams = Math.max(exams.length, 12);
 
+                      const starterSectionalLimit = Number(examPricingMeta.starterSectionalCount ?? activeExam.pricingConfig?.starterSectionalCount ?? 2);
+                      const starterBankLimit = Number(examPricingMeta.starterBankCount ?? activeExam.pricingConfig?.starterBankCount ?? 2);
+
                       // Truthful Bullet Lists:
                       const starterBullets = [
                         totalExamMocks > 0 
                           ? `First ${effectiveStarterCount} of ${totalExamMocks} Full Mock Tests`
                           : `First ${effectiveStarterCount} Full-Length Mock Tests`,
-                        'Sample Tests across ALL Subject Sections',
-                        totalExamQuestions > 0 
-                          ? `${totalExamQuestions.toLocaleString()}+ Practice Questions & PYQs`
-                          : 'Subject-Wise Practice PYQs',
+                        `First ${starterSectionalLimit} Tests in EVERY Subject Section`,
+                        `First ${starterBankLimit} Question Banks in EVERY Subject`,
                         'Downloadable Test PDFs with Solutions',
                         '3 Months Full Exam Access'
                       ];
@@ -10823,16 +10824,24 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       )}
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {visibleBanks.map((bank: any) => (
-                          <ScheduledPracticeBankCard
-                            key={bank.id}
-                            bank={bank}
-                            isMobile={isMobile}
-                            hasAccessTo={hasAccessTo}
-                            activities={activities}
-                            handleStartDirectPractice={handleStartDirectPractice}
-                          />
-                        ))}
+                        {(() => {
+                          const subjectCounters: Record<string, number> = {};
+                          return visibleBanks.map((bank: any) => {
+                            const subj = bank.subject || 'General';
+                            subjectCounters[subj] = (subjectCounters[subj] || 0) + 1;
+                            const bankSubjectRank = subjectCounters[subj];
+                            return (
+                              <ScheduledPracticeBankCard
+                                key={bank.id}
+                                bank={{ ...bank, subjectRank: bankSubjectRank, bankSubjectRank, subject: subj }}
+                                isMobile={isMobile}
+                                hasAccessTo={hasAccessTo}
+                                activities={activities}
+                                handleStartDirectPractice={handleStartDirectPractice}
+                              />
+                            );
+                          });
+                        })()}
                       </div>
                     </div>
                   );

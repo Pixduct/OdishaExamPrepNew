@@ -539,6 +539,9 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     starterPrice: 29,
     starterOriginalPrice: 99,
     starterTestCount: 5,
+    starterMockCount: 5,
+    starterSectionalCount: 2,
+    starterBankCount: 2,
     price: 99,
     originalPrice: 299,
     allAccessPrice: 199,
@@ -925,6 +928,9 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       initial.starterPrice = 29;
       initial.starterOriginalPrice = 99;
       initial.starterTestCount = 5;
+      initial.starterMockCount = 5;
+      initial.starterSectionalCount = 2;
+      initial.starterBankCount = 2;
       initial.price = 99;
       initial.originalPrice = 299;
       initial.allAccessPrice = 199;
@@ -2008,6 +2014,9 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         starterPrice: (parsedExamMeta.starterPrice !== undefined && parsedExamMeta.starterPrice !== null && parsedExamMeta.starterPrice !== '') ? Number(parsedExamMeta.starterPrice) : 29,
         starterOriginalPrice: (parsedExamMeta.starterOriginalPrice !== undefined && parsedExamMeta.starterOriginalPrice !== null && parsedExamMeta.starterOriginalPrice !== '') ? Number(parsedExamMeta.starterOriginalPrice) : 99,
         starterTestCount: (parsedExamMeta.starterTestCount !== undefined && parsedExamMeta.starterTestCount !== null && parsedExamMeta.starterTestCount !== '') ? Number(parsedExamMeta.starterTestCount) : 5,
+        starterMockCount: (parsedExamMeta.starterMockCount !== undefined && parsedExamMeta.starterMockCount !== null && parsedExamMeta.starterMockCount !== '') ? Number(parsedExamMeta.starterMockCount) : ((parsedExamMeta.starterTestCount !== undefined) ? Number(parsedExamMeta.starterTestCount) : 5),
+        starterSectionalCount: (parsedExamMeta.starterSectionalCount !== undefined && parsedExamMeta.starterSectionalCount !== null && parsedExamMeta.starterSectionalCount !== '') ? Number(parsedExamMeta.starterSectionalCount) : 2,
+        starterBankCount: (parsedExamMeta.starterBankCount !== undefined && parsedExamMeta.starterBankCount !== null && parsedExamMeta.starterBankCount !== '') ? Number(parsedExamMeta.starterBankCount) : 2,
         price: (parsedExamMeta.price !== undefined && parsedExamMeta.price !== null && parsedExamMeta.price !== '') ? Number(parsedExamMeta.price) : (item.price !== undefined ? Number(item.price) : 99),
         originalPrice: (parsedExamMeta.originalPrice !== undefined && parsedExamMeta.originalPrice !== null && parsedExamMeta.originalPrice !== '') ? Number(parsedExamMeta.originalPrice) : (item.originalPrice !== undefined ? Number(item.originalPrice) : 299),
         allAccessPrice: (parsedExamMeta.allAccessPrice !== undefined && parsedExamMeta.allAccessPrice !== null && parsedExamMeta.allAccessPrice !== '') ? Number(parsedExamMeta.allAccessPrice) : 199,
@@ -2358,7 +2367,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           isPremium: isExamPremium,
           starterPrice: Number(formData.starterPrice) || 29,
           starterOriginalPrice: Number(formData.starterOriginalPrice) || 99,
-          starterTestCount: Number(formData.starterTestCount) || 5,
+          starterTestCount: Number(formData.starterMockCount ?? formData.starterTestCount) || 5,
+          starterMockCount: Number(formData.starterMockCount ?? formData.starterTestCount) || 5,
+          starterSectionalCount: Number(formData.starterSectionalCount) || 2,
+          starterBankCount: Number(formData.starterBankCount) || 2,
           price: Number(formData.price) || 99,
           originalPrice: Number(formData.originalPrice) || 299,
           allAccessPrice: Number(formData.allAccessPrice) || 199,
@@ -3290,9 +3302,9 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                         <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Tier 1: Starter Booster</span>
                         <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-800">Impulse Buy</span>
                       </div>
-                      <span className="text-[10px] font-bold text-slate-400">Unlocks first N tests</span>
+                      <span className="text-[10px] font-bold text-slate-400">Sample starter pack</span>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="space-y-1">
                         <label className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase">Offer Price (₹)</label>
                         <input type="number" value={formData.starterPrice} onChange={e => setFormData({ ...formData, starterPrice: e.target.value })} className={inputClass} placeholder="29" />
@@ -3301,9 +3313,19 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                         <label className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase">MRP (₹)</label>
                         <input type="number" value={formData.starterOriginalPrice} onChange={e => setFormData({ ...formData, starterOriginalPrice: e.target.value })} className={inputClass} placeholder="99" />
                       </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
                       <div className="space-y-1">
-                        <label className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase">Include First N Tests</label>
-                        <input type="number" value={formData.starterTestCount} onChange={e => setFormData({ ...formData, starterTestCount: e.target.value })} className={inputClass} placeholder="5" />
+                        <label className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase">Full Mocks Included</label>
+                        <input type="number" value={formData.starterMockCount ?? formData.starterTestCount ?? 5} onChange={e => setFormData({ ...formData, starterMockCount: e.target.value, starterTestCount: e.target.value })} className={inputClass} placeholder="5" />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase">Sectional Tests / Subject</label>
+                        <input type="number" value={formData.starterSectionalCount ?? 2} onChange={e => setFormData({ ...formData, starterSectionalCount: e.target.value })} className={inputClass} placeholder="2" />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase">Question Banks / Subject</label>
+                        <input type="number" value={formData.starterBankCount ?? 2} onChange={e => setFormData({ ...formData, starterBankCount: e.target.value })} className={inputClass} placeholder="2" />
                       </div>
                     </div>
                   </div>

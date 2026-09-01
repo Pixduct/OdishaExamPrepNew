@@ -4,8 +4,22 @@ let lenisInstance: Lenis | null = null;
 let isScrollingTimer: ReturnType<typeof setTimeout> | null = null;
 let rafId: number | null = null;
 let resizeObserver: ResizeObserver | null = null;
+let globalScrollHandler: (() => void) | null = null;
 
 let lastWheelDeltaY = 0;
+
+export function markScrolling() {
+  if (typeof document === 'undefined') return;
+  if (!document.body.classList.contains('is-scrolling')) {
+    document.body.classList.add('is-scrolling');
+  }
+  if (isScrollingTimer) clearTimeout(isScrollingTimer);
+  isScrollingTimer = setTimeout(() => {
+    if (typeof document !== 'undefined') {
+      document.body.classList.remove('is-scrolling');
+    }
+  }, 100);
+}
 
 if (typeof window !== 'undefined') {
   window.addEventListener('wheel', (e) => {
@@ -17,46 +31,43 @@ export function initLenis(): Lenis | null {
   if (typeof window === 'undefined') return null;
   if (lenisInstance) return lenisInstance;
 
-  // Initialize Lenis Smooth Scroll Engine — 0ms Zero-Delay 120FPS Continuous Momentum Flow
+  // On touch/mobile devices, rely 100% on native OS compositor hardware momentum scrolling (60–120Hz)
+  const isTouch = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768;
+  if (isTouch) {
+    return null;
+  }
+
+  // Initialize Lenis Smooth Scroll Engine strictly for desktop/laptop mouse wheel momentum
   lenisInstance = new Lenis({
     lerp: 0.16,
     smoothWheel: true,
     wheelMultiplier: 1.0,
-    touchMultiplier: 0, // Keeps 0ms native touch latency on mobile/tablets
+    touchMultiplier: 0,
     allowNestedScroll: true,
     duration: 1.1,
   });
 
-  // Apply root classes immediately for 0ms layout coordination
+  // Apply root classes immediately on desktop
   if (typeof document !== 'undefined') {
     document.documentElement.classList.add('lenis', 'lenis-smooth');
   }
 
-  // High performance RAF loop synced with display refresh rate (60Hz / 90Hz / 120Hz / 144Hz)
+  // High performance RAF loop synced with display refresh rate on desktop
   function raf(time: number) {
     lenisInstance?.raf(time);
     rafId = requestAnimationFrame(raf);
   }
   rafId = requestAnimationFrame(raf);
 
-  // Active Scroll Guard: Toggle 'is-scrolling' class to lock hover recalculations and repaints during scroll
+  // Active Scroll Guard on Lenis Engine (desktop mouse wheel only)
   lenisInstance.on('scroll', () => {
     if (typeof window !== 'undefined' && window.scrollX !== 0) {
       window.scrollTo(0, window.scrollY);
     }
-    if (typeof document !== 'undefined' && !document.body.classList.contains('is-scrolling')) {
-      document.body.classList.add('is-scrolling');
-    }
-
-    if (isScrollingTimer) clearTimeout(isScrollingTimer);
-    isScrollingTimer = setTimeout(() => {
-      if (typeof document !== 'undefined') {
-        document.body.classList.remove('is-scrolling');
-      }
-    }, 120);
+    markScrolling();
   });
 
-  // Watch document layout changes to dynamically resize scroll bounds instantly
+  // Watch document layout changes on desktop
   if (typeof window !== 'undefined' && typeof ResizeObserver !== 'undefined') {
     try {
       resizeObserver = new ResizeObserver(() => {
@@ -66,7 +77,7 @@ export function initLenis(): Lenis | null {
         resizeObserver.observe(document.body);
       }
     } catch {
-      // Graceful fallback if ResizeObserver is not supported
+      // Graceful fallback
     }
   }
 
@@ -103,6 +114,15 @@ export function destroyLenis() {
   if (resizeObserver) {
     resizeObserver.disconnect();
     resizeObserver = null;
+  }
+  if (globalScrollHandler && typeof window !== 'undefined') {
+    window.removeEventListener('scroll', globalScrollHandler, true);
+    window.removeEventListener('touchmove', globalScrollHandler, true);
+    globalScrollHandler = null;
+  }
+  if (isScrollingTimer) {
+    clearTimeout(isScrollingTimer);
+    isScrollingTimer = null;
   }
   if (lenisInstance) {
     lenisInstance.destroy();

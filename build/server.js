@@ -415,12 +415,41 @@ async function startServer() {
     }
   });
   const getProductPrice = async (productId, productType) => {
-    if (productId === "full_access") {
-      return 999;
-    }
     const normType = (productType || "").toLowerCase();
-    if (normType === "exam_bundle" || normType === "exam" || productId.startsWith("exam_bundle_")) {
-      const examId = productId.replace("exam_bundle_", "");
+    const normId = (productId || "").toLowerCase();
+    if (normId === "full_access" || normId === "all-access" || normId === "all-access-pass" || normId === "mega_pass" || normType === "all_access" || normType === "all-access" || normType === "mega_pass") {
+      try {
+        const { data: anyExam } = await supabaseAdmin.from("exams").select("description").limit(5);
+        for (const ex of anyExam || []) {
+          if (ex.description && ex.description.startsWith("JSON_METADATA_")) {
+            const meta = JSON.parse(ex.description.replace("JSON_METADATA_", ""));
+            if (meta.allAccessPrice && Number(meta.allAccessPrice) > 0) {
+              return Number(meta.allAccessPrice);
+            }
+          }
+        }
+      } catch (e) {
+      }
+      return 199;
+    }
+    if (normType === "starter" || normType === "starter_booster" || normType === "starter-booster" || normId.startsWith("starter-booster_") || normId.startsWith("starter_")) {
+      const examId = productId.replace(/^starter-booster_|^starter_/, "");
+      if (examId) {
+        const { data: exam } = await supabaseAdmin.from("exams").select("description").eq("id", examId).single();
+        if (exam?.description?.startsWith("JSON_METADATA_")) {
+          try {
+            const meta = JSON.parse(exam.description.replace("JSON_METADATA_", ""));
+            if (meta.starterPrice !== void 0 && Number(meta.starterPrice) > 0) {
+              return Number(meta.starterPrice);
+            }
+          } catch (e) {
+          }
+        }
+      }
+      return 29;
+    }
+    if (normType === "exam_bundle" || normType === "exam" || normType === "exam-pass" || normType === "exam_pass" || productId.startsWith("exam_bundle_") || productId.startsWith("exam-pass_") || productId.startsWith("exam_")) {
+      const examId = productId.replace(/^exam_bundle_|^exam-pass_|^exam_/, "");
       const { data: exam, error } = await supabaseAdmin.from("exams").select("description").eq("id", examId).single();
       if (error || !exam) {
         throw new Error(`Exam bundle not found: ${examId}`);
@@ -432,12 +461,12 @@ async function startServer() {
           if (!isPremium) {
             throw new Error("Exam bundle is not enabled for this exam");
           }
-          return Number(meta.price) || 499;
+          return Number(meta.price) || 99;
         } catch (e) {
           throw new Error(e.message || "Failed to parse exam metadata");
         }
       }
-      throw new Error("Exam is not premium");
+      return 99;
     }
     if (normType === "test_series" || normType === "series") {
       const { data: series, error } = await supabaseAdmin.from("testSeries").select("price").eq("id", productId).single();
@@ -773,6 +802,14 @@ async function startServer() {
       }
       if (userId && productId) {
         console.log(`Payment verified. Creating entitlement in ledger for User: ${userId}, Product: ${productId}`);
+        const nowMs = Date.now();
+        let durationDays = 180;
+        if (productType === "starter-booster" || productType === "starter" || productId.startsWith("starter-booster_") || productId.startsWith("starter_")) {
+          durationDays = 90;
+        } else if (productType === "all-access" || productType === "mega_pass" || productId === "all-access" || productId === "full_access") {
+          durationDays = 365;
+        }
+        const expiresAtIso = new Date(nowMs + durationDays * 24 * 60 * 60 * 1e3).toISOString();
         const { error: dbError } = await supabaseAdmin.from("user_purchases").upsert(
           {
             user_id: userId,
@@ -783,7 +820,8 @@ async function startServer() {
             razorpay_payment_id,
             snapshot: snapshot || {},
             status: "active",
-            purchase_date: (/* @__PURE__ */ new Date()).toISOString()
+            purchase_date: (/* @__PURE__ */ new Date()).toISOString(),
+            expires_at: expiresAtIso
           },
           { onConflict: "user_id,product_id" }
         );
@@ -795,7 +833,7 @@ async function startServer() {
           console.error("Failed to fetch user purchases to sync metadata:", fetchError);
         } else {
           const purchasedIds = (userPurchases || []).map((p) => p.product_id);
-          const hasFullAccess = purchasedIds.includes("full_access");
+          const hasFullAccess = purchasedIds.includes("full_access") || purchasedIds.includes("all-access") || purchasedIds.includes("all-access-pass") || purchasedIds.includes("mega_pass");
           const { data: userData, error: getUserErr } = await supabaseAdmin.auth.admin.getUserById(userId);
           if (!getUserErr && userData?.user) {
             const currentMetadata = userData.user.user_metadata || {};

@@ -144,8 +144,9 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
     }
   }, [totalWidth]);
 
-  // Auto-scroll loop
+  // Auto-scroll loop — strictly desktop only
   const tick = useCallback(() => {
+    if (isMobile) return;
     const isModalOpen = typeof document !== 'undefined' && 
       (document.body.getAttribute('data-premium-blur') === 'true' || 
        document.body.getAttribute('data-modal-open') === 'true');
@@ -156,15 +157,16 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
       applyOffset();
     }
     rafRef.current = requestAnimationFrame(tick);
-  }, [applyOffset, isVisible]);
+  }, [applyOffset, isVisible, isMobile]);
 
   useEffect(() => {
-    // Start positioned at the middle copy so we can scroll in both directions
+    if (isMobile) return;
+    // Start positioned at the middle copy on desktop so we can scroll in both directions
     offsetRef.current = totalWidth / 3;
     applyOffset();
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [tick, applyOffset, totalWidth]);
+  }, [tick, applyOffset, totalWidth, isMobile]);
 
   // Pause / Resume helpers
   const pauseAuto = useCallback(() => {
@@ -179,7 +181,7 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
     }, RESUME_DELAY_MS);
   }, []);
 
-  // Mouse drag
+  // Mouse drag — Desktop only
   const onMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging.current) return;
     const delta = dragStartX.current - e.clientX;
@@ -196,75 +198,22 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
   }, [scheduleResume, onMouseMove]);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('button, a')) return;
+    if (isMobile || (e.target as HTMLElement).closest('button, a')) return;
     isDragging.current = true;
     dragStartX.current = e.clientX;
     dragStartOffset.current = offsetRef.current;
     pauseAuto();
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup',   onMouseUp);
-  }, [pauseAuto, onMouseMove, onMouseUp]);
-
-  // Touch drag
-  const onTouchEnd = useCallback(() => {
-    if (!isDragging.current) return;
-    isDragging.current = false;
-    touchDirection.current = null;
-    scheduleResume();
-    window.removeEventListener('touchmove', onTouchMove);
-    window.removeEventListener('touchend',  onTouchEnd);
-  }, [scheduleResume]);
-
-  const onTouchMove = useCallback((e: TouchEvent) => {
-    if (!isDragging.current || !e.touches || e.touches.length === 0) return;
-    const deltaX = dragStartX.current - e.touches[0].clientX;
-    const deltaY = dragStartY.current - e.touches[0].clientY;
-
-    if (!touchDirection.current) {
-      if (Math.abs(deltaX) < 6 && Math.abs(deltaY) < 6) return;
-      if (Math.abs(deltaY) >= Math.abs(deltaX)) {
-        // Vertical swipe detected - user is scrolling the page!
-        touchDirection.current = 'vertical';
-        isDragging.current = false;
-        scheduleResume();
-        window.removeEventListener('touchmove', onTouchMove);
-        window.removeEventListener('touchend',  onTouchEnd);
-        return;
-      } else {
-        touchDirection.current = 'horizontal';
-      }
-    }
-
-    if (touchDirection.current === 'horizontal') {
-      offsetRef.current = dragStartOffset.current + deltaX;
-      applyOffset();
-      if (e.cancelable) {
-        e.preventDefault(); // prevent vertical page scroll only while intentionally swiping carousel horizontally
-      }
-    }
-  }, [applyOffset, scheduleResume, onTouchEnd]);
-
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    if ((e.target as HTMLElement).closest('button, a')) return;
-    isDragging.current = true;
-    dragStartX.current = e.touches[0].clientX;
-    dragStartY.current = e.touches[0].clientY;
-    dragStartOffset.current = offsetRef.current;
-    touchDirection.current = null;
-    pauseAuto();
-    window.addEventListener('touchmove', onTouchMove, { passive: true });
-    window.addEventListener('touchend',  onTouchEnd);
-  }, [pauseAuto, onTouchMove, onTouchEnd]);
+  }, [pauseAuto, onMouseMove, onMouseUp, isMobile]);
 
   // Cleanup window-level listeners on unmount
   useEffect(() => {
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup',   onMouseUp);
-      window.removeEventListener('touchmove', onTouchMove);
-      window.removeEventListener('touchend',  onTouchEnd);
     };
-  }, [onMouseMove, onMouseUp, onTouchMove, onTouchEnd]);
+  }, [onMouseMove, onMouseUp]);
 
   // Early return AFTER all hooks
   if (sourceVideos.length === 0) return null;
@@ -329,130 +278,145 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
         </a>
       </div>
 
-      {/* ── DRAGGABLE CAROUSEL TRACK ──────────────────────────────────── */}
-      <div
-        className="relative overflow-hidden cursor-grab active:cursor-grabbing py-2 touch-pan-y"
-        style={{
-          WebkitMaskImage: 'linear-gradient(to right, transparent 0px, black 36px, black calc(100% - 36px), transparent 100%)',
-          maskImage: 'linear-gradient(to right, transparent 0px, black 36px, black calc(100% - 36px), transparent 100%)',
-          touchAction: 'pan-y'
-        }}
-        onMouseDown={onMouseDown}
-        onTouchStart={onTouchStart}
-      >
-
-        {/* Scrolling track */}
-        <div
-          ref={trackRef}
-          className={cn("flex will-change-transform touch-pan-y", isMobile ? "gap-3 px-4 pb-1" : "gap-6 px-10 py-2")}
-          style={{ width: `${totalWidth}px`, touchAction: 'pan-y' }}
-        >
-          {items.map((video, idx) => {
+      {/* ── MOBILE NATIVE HORIZONTAL SCROLL TRACK (Zero JS overhead, 60fps touch physics) ── */}
+      {isMobile ? (
+        <div className="w-full overflow-x-auto no-scrollbar py-2 px-3.5 flex gap-3 -webkit-overflow-scrolling-touch touch-pan-x">
+          {sourceVideos.map((video, idx) => {
             const catStyle = categoryColours[video.category] ?? defaultCatStyle;
             const displayCat = getCategoryLabel(video.category);
             return (
-              <DynamicVectorCard
-                key={`${video.id}-${idx}`}
-                glowColor="rgba(37, 99, 235, 0.28)"
-                roundedClass="rounded-2xl"
-                className="shrink-0"
-                style={{ width: cardWidth }}
-                onClick={() => {
-                  if (!isDragging.current) setActiveVideo(video.id);
-                }}
-              >
               <div
-                className={cn(
-                  "relative w-full h-full shrink-0 rounded-2xl overflow-hidden border-2 border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-900 group/video transition-all cursor-pointer flex flex-col",
-                  isMobile
-                    ? "shadow-[3px_3px_0px_rgba(0,0,0,0.85)] dark:shadow-[3px_3px_0px_rgba(37,99,235,0.4)] active:shadow-[1px_1px_0px_rgba(0,0,0,0.85)] active:translate-x-[2px] active:translate-y-[2px]"
-                    : "shadow-[4px_4px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)] md:hover:-translate-x-0.5 md:hover:-translate-y-0.5 md:hover:shadow-[6px_6px_0px_rgba(37,99,235,0.4)]"
-                )}
+                key={`${video.id}-${idx}`}
+                onClick={() => setActiveVideo(video.id)}
+                style={{ width: cardWidth }}
+                className="shrink-0 relative rounded-2xl overflow-hidden border-2 border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-[3px_3px_0px_rgba(0,0,0,0.85)] dark:shadow-[3px_3px_0px_rgba(37,99,235,0.4)] active:scale-[0.98] transition-transform cursor-pointer flex flex-col select-none"
               >
-                {/* Thumbnail with aspect ratio */}
-                <div className={cn(
-                  "relative w-full border-b-2 border-slate-900 overflow-hidden shrink-0",
-                  isMobile ? "h-[110px]" : "h-[160px]"
-                )}>
+                {/* Thumbnail */}
+                <div className="relative w-full h-[110px] border-b-2 border-slate-900 overflow-hidden shrink-0 bg-slate-900">
                   <img
-                    src={`https://i.ytimg.com/vi_webp/${video.id}/maxresdefault.webp`}
-                    alt={`Odisha Exam Prep Strategy Video: ${video.title}`}
+                    src={`https://i.ytimg.com/vi_webp/${video.id}/hqdefault.webp`}
+                    alt={video.title}
+                    loading="lazy"
                     draggable={false}
-                    className="w-full h-full object-cover transition-transform duration-700 md:group-hover/video:scale-105"
+                    className="w-full h-full object-cover"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        `https://i.ytimg.com/vi_webp/${video.id}/hqdefault.webp`;
+                      (e.target as HTMLImageElement).src = `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`;
                     }}
                   />
-
-                  {/* Gradient overlay for readability */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent pointer-events-none" />
-
-                  {/* Darken on hover — desktop only */}
-                  <div className="absolute inset-0 bg-slate-950/20 opacity-0 md:group-hover/video:opacity-100 transition-opacity duration-300" />
-
-                  {/* Play Button */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/50 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute inset-0 flex items-center justify-center z-10">
-                    <div className={cn(
-                      "bg-[#2563EB] text-white rounded-full border-2 border-slate-900 flex items-center justify-center shadow-lg transition-transform duration-300",
-                      isMobile ? "w-10 h-10" : "w-11 h-11 md:group-hover/video:scale-110"
-                    )}>
-                      <Play className={cn("text-white fill-white ml-0.5", isMobile ? "w-4 h-4" : "w-5 h-5")} />
+                    <div className="w-10 h-10 bg-[#2563EB] text-white rounded-full border-2 border-slate-900 flex items-center justify-center shadow-lg">
+                      <Play className="text-white fill-white ml-0.5 w-4 h-4" />
                     </div>
                   </div>
                 </div>
 
-                {/* Text Meta section */}
-                <div className={cn(
-                  "flex-1 flex flex-col justify-between bg-white dark:bg-slate-800",
-                  isMobile ? "p-2.5" : "p-4"
-                )}>
+                {/* Text Meta */}
+                <div className="flex-1 flex flex-col justify-between bg-white dark:bg-slate-800 p-2.5">
                   <div>
-                    {/* Category badge — coloured on mobile for premium feel */}
-                    <div className="mb-2">
+                    <div className="mb-1.5">
                       <span className={cn(
-                        "inline-flex items-center border font-black uppercase rounded-md leading-none",
-                        isMobile ? "text-[9px] tracking-wider px-2 py-1" : "text-[8px] tracking-widest px-2 py-0.5",
+                        "inline-flex items-center border font-black uppercase rounded-md leading-none text-[9px] tracking-wider px-2 py-1",
                         catStyle.bg, catStyle.text, catStyle.border
                       )}>
                         {displayCat}
                       </span>
                     </div>
-
-                    {/* Title */}
-                    <h3 className={cn(
-                      "text-slate-900 dark:text-white font-serif font-extrabold line-clamp-2 leading-snug md:group-hover/video:text-[#2563EB] dark:md:group-hover/video:text-brand-400 transition-colors",
-                      isMobile ? "text-[12px] min-h-[2.4rem]" : "text-base min-h-[2.75rem]"
-                    )}>
+                    <h4 className="text-slate-900 dark:text-white font-serif font-extrabold text-[12px] min-h-[2.4rem] line-clamp-2 leading-snug">
                       {video.title}
-                    </h3>
+                    </h4>
                   </div>
-
-                  {/* Footer row */}
-                  <div className={cn(
-                    "flex items-center justify-between border-t border-slate-100 dark:border-slate-700",
-                    isMobile ? "pt-2.5 mt-3" : "pt-3 mt-4"
-                  )}>
-                    <span className={cn(
-                      "font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 font-mono",
-                      isMobile ? "text-[8px]" : "text-[9px]"
-                    )}>
+                  <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-2 mt-2.5">
+                    <span className="font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 font-mono text-[8px]">
                       {t('home.videos.freeLecture', 'Free Lecture')}
                     </span>
-                    <span className={cn(
-                      "text-[#2563EB] flex items-center gap-1 font-bold uppercase tracking-wider",
-                      isMobile ? "text-[9px]" : "text-[9px]"
-                    )}>
+                    <span className="text-[#2563EB] flex items-center gap-1 font-bold uppercase tracking-wider text-[9px]">
                       {t('home.videos.watchNow', 'Watch Now')} <Play className="w-3 h-3 fill-[#2563EB] stroke-none" />
                     </span>
                   </div>
                 </div>
               </div>
-              </DynamicVectorCard>
             );
           })}
         </div>
-      </div>
+      ) : (
+        /* ── DESKTOP DRAGGABLE AUTO-SCROLL TRACK ── */
+        <div
+          className="relative overflow-hidden cursor-grab active:cursor-grabbing py-2"
+          style={{
+            WebkitMaskImage: 'linear-gradient(to right, transparent 0px, black 36px, black calc(100% - 36px), transparent 100%)',
+            maskImage: 'linear-gradient(to right, transparent 0px, black 36px, black calc(100% - 36px), transparent 100%)'
+          }}
+          onMouseDown={onMouseDown}
+        >
+          <div
+            ref={trackRef}
+            className="flex will-change-transform gap-6 px-10 py-2"
+            style={{ width: `${totalWidth}px` }}
+          >
+            {items.map((video, idx) => {
+              const catStyle = categoryColours[video.category] ?? defaultCatStyle;
+              const displayCat = getCategoryLabel(video.category);
+              return (
+                <DynamicVectorCard
+                  key={`${video.id}-${idx}`}
+                  glowColor="rgba(37, 99, 235, 0.28)"
+                  roundedClass="rounded-2xl"
+                  className="shrink-0"
+                  style={{ width: cardWidth }}
+                  onClick={() => {
+                    if (!isDragging.current) setActiveVideo(video.id);
+                  }}
+                >
+                  <div className="relative w-full h-full shrink-0 rounded-2xl overflow-hidden border-2 border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-900 group/video transition-all cursor-pointer flex flex-col shadow-[4px_4px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)] md:hover:-translate-x-0.5 md:hover:-translate-y-0.5 md:hover:shadow-[6px_6px_0px_rgba(37,99,235,0.4)]">
+                    <div className="relative w-full h-[160px] border-b-2 border-slate-900 overflow-hidden shrink-0">
+                      <img
+                        src={`https://i.ytimg.com/vi_webp/${video.id}/maxresdefault.webp`}
+                        alt={video.title}
+                        draggable={false}
+                        className="w-full h-full object-cover transition-transform duration-700 md:group-hover/video:scale-105"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = `https://i.ytimg.com/vi_webp/${video.id}/hqdefault.webp`;
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent pointer-events-none" />
+                      <div className="absolute inset-0 bg-slate-950/20 opacity-0 md:group-hover/video:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute inset-0 flex items-center justify-center z-10">
+                        <div className="w-11 h-11 bg-[#2563EB] text-white rounded-full border-2 border-slate-900 flex items-center justify-center shadow-lg transition-transform duration-300 md:group-hover/video:scale-110">
+                          <Play className="text-white fill-white ml-0.5 w-5 h-5" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex-1 flex flex-col justify-between bg-white dark:bg-slate-800 p-4">
+                      <div>
+                        <div className="mb-2">
+                          <span className={cn(
+                            "inline-flex items-center border font-black uppercase rounded-md leading-none text-[8px] tracking-widest px-2 py-0.5",
+                            catStyle.bg, catStyle.text, catStyle.border
+                          )}>
+                            {displayCat}
+                          </span>
+                        </div>
+                        <h3 className="text-slate-900 dark:text-white font-serif font-extrabold text-base min-h-[2.75rem] line-clamp-2 leading-snug md:group-hover/video:text-[#2563EB] dark:md:group-hover/video:text-brand-400 transition-colors">
+                          {video.title}
+                        </h3>
+                      </div>
+                      <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-3 mt-4">
+                        <span className="font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 font-mono text-[9px]">
+                          {t('home.videos.freeLecture', 'Free Lecture')}
+                        </span>
+                        <span className="text-[#2563EB] flex items-center gap-1 font-bold uppercase tracking-wider text-[9px]">
+                          {t('home.videos.watchNow', 'Watch Now')} <Play className="w-3 h-3 fill-[#2563EB] stroke-none" />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </DynamicVectorCard>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ── Swipe hint for mobile — shown briefly ─────────────────────── */}
       <div className="flex sm:hidden items-center justify-center gap-1.5 mt-2.5 px-5 pointer-events-none">

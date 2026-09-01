@@ -31,20 +31,21 @@
    GLOBAL BASE
    ============================================================ */
 html {
-  overflow-x: clip !important;
-  max-width: 100vw !important;
-  width: 100% !important;
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
 }
 
 body {
-  scroll-behavior: auto; /* Lenis handles smooth physics scrolling */
-  overscroll-behavior-y: auto; /* Allow native pull-to-refresh on mobile devices */
-  overflow-x: clip !important;
-  max-width: 100vw !important;
-  width: 100% !important;
+  scroll-behavior: auto;
+  overscroll-behavior-y: auto;
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
   position: relative;
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 html::-webkit-scrollbar,
@@ -55,7 +56,7 @@ body::-webkit-scrollbar,
   height: 0 !important;
 }
 
-/* ---------- Lenis Smooth Scroll Core Rules ---------- */
+/* ---------- Lenis Smooth Scroll Core Rules (Desktop Only) ---------- */
 html.lenis, html.lenis body {
   height: auto;
 }
@@ -78,7 +79,6 @@ html.lenis, html.lenis body {
 }
 
 /* Active Scroll Guard: Temporarily pause heavy keyframe animations during fast scrolling for 120 FPS performance */
-
 body.is-scrolling .animate-spin-slow,
 body.is-scrolling .animate-orb,
 body.is-scrolling .animate-pulse-soft,
@@ -90,26 +90,18 @@ body.is-scrolling .animate-gradient {
   animation-play-state: paused !important;
 }
 
-body.is-scrolling .group\/vector-card * {
+body.is-scrolling .group\/vector-card *,
+body.is-scrolling .card-3d,
+body.is-scrolling .card-3d-deep {
   transition: none !important;
+  transform: none !important;
 }
 
-/* Scroll-Active Blur Offloading: Bypasses GPU backdrop-blur rasterization while actively scrolling for 0 frame drops */
-body.is-scrolling .backdrop-blur-xl,
-body.is-scrolling .backdrop-blur-2xl,
-body.is-scrolling .backdrop-blur-lg,
-body.is-scrolling .backdrop-blur-md,
-body.is-scrolling .backdrop-blur-sm,
-body.is-scrolling .backdrop-blur {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-/* Universal Scroll Isolation: Keeps horizontal scroll isolated while allowing vertical page scrolling */
+/* Universal Scroll Isolation: Keeps horizontal scroll isolated while allowing frictionless vertical page scrolling */
 .overflow-x-auto,
 .no-scrollbar {
   overscroll-behavior-x: contain;
-  touch-action: pan-x pan-y;
+  overscroll-behavior-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 .overscroll-contain,
@@ -118,11 +110,22 @@ body.is-scrolling .backdrop-blur {
   overscroll-behavior-y: contain;
 }
 
-/* Force GPU Layer Compositing */
+/* Force GPU Layer Compositing on Desktop, Prune on Touch */
 .gpu-accelerated {
   transform: translateZ(0);
   backface-visibility: hidden;
-  will-change: transform;
+}
+
+/* On mobile/touch viewports: prune 3D layer explosions for lightweight 60 FPS compositor passes */
+@media (max-width: 767px), (hover: none) and (pointer: coarse) {
+  .card-3d,
+  .card-3d-deep,
+  .group\/vector-card {
+    transform: none !important;
+    perspective: none !important;
+    transform-style: flat !important;
+    will-change: auto !important;
+  }
 }
 
 @media (min-width: 768px) {
@@ -439,6 +442,14 @@ body[data-premium-blur="true"] #root {
   .cv-card-auto {
     content-visibility: auto;
     contain-intrinsic-size: auto 280px;
+  }
+
+  @media (max-width: 767px) {
+    .content-visibility-auto,
+    .cv-card-auto {
+      content-visibility: visible !important;
+      contain-intrinsic-size: none !important;
+    }
   }
 
   .transition-colors-shadow {

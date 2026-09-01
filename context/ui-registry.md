@@ -3911,4 +3911,45 @@ Last updated: August 31, 2026
 - **Zero-Downtime Model Deprecation Immunity**: All engines fail forward across 5 model tiers with individual 25–30s timeouts. If a provider or model sunset occurs, downstream engines transition transparently without runner crashes.
 - **Zero-Drop Notification Delivery**: Protects against Telegram entity parsing errors (e.g. `<module>`, `<string>` in tracebacks), ensuring the admin is guaranteed a delivery on every automation event.
 
+---
+
+### `DiscreteHardwareScrollArchitecture`
+
+File: [`src/lib/lenisScroll.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/lenisScroll.ts), [`src/index.css`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/index.css), [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
+Last updated: September 1, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Desktop / Laptop Scroll Engine** | Lenis Smooth Wheel (`lerp: 0.16`, `duration: 1.1`) strictly bound to `pointer: fine` |
+| **Mobile / Touch Scroll Engine** | 100% Native OS Compositor Thread (60–120Hz ProMotion) with 0ms touch latency |
+| **Container Overflow** | `overflow-x: hidden` (No `clip` or artificial touch-action restrictions on root) |
+| **Horizontal Track Physics** | `overflow-x-auto no-scrollbar -webkit-overflow-scrolling: touch` |
+| **Catalog Card Layout** | `.cv-card-auto` with `@media (max-width: 767px) { content-visibility: visible !important; contain-intrinsic-size: none !important; }` |
+| **Active Scroll State** | `body.is-scrolling` pauses CSS keyframe animations with 0 dynamic `backdrop-filter` thrashing |
+
+**Pattern notes:**
+- **Zero Touch Contention**: Lenis is completely bypassed on touch devices, preventing RAF loops or event listeners from fighting mobile swipe momentum.
+- **Stable Layout Heights**: Mobile cards render with visible layout bounds, eliminating off-screen intersection recalculations and scrollbar jumping.
+
+---
+
+### `YouTubeCarouselMobileTrack`
+
+File: [`src/components/YouTubeCarousel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/YouTubeCarousel.tsx)
+Last updated: September 1, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Mobile Track** | `w-full overflow-x-auto no-scrollbar py-2 px-3.5 flex gap-3 -webkit-overflow-scrolling: touch touch-pan-x` |
+| **Mobile Card Shell** | `shrink-0 relative rounded-2xl overflow-hidden border-2 border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-[3px_3px_0px_rgba(0,0,0,0.85)] dark:shadow-[3px_3px_0px_rgba(37,99,235,0.4)] active:scale-[0.98]` |
+| **Thumbnail Frame** | `relative w-full h-[110px] border-b-2 border-slate-900 overflow-hidden shrink-0 bg-slate-900` |
+| **Play Button Badge** | `w-10 h-10 bg-[#2563EB] text-white rounded-full border-2 border-slate-900 flex items-center justify-center shadow-lg` |
+| **Category Pill** | `inline-flex items-center border font-black uppercase rounded-md leading-none text-[9px] tracking-wider px-2 py-1` |
+| **Title Typography** | `text-slate-900 dark:text-white font-serif font-extrabold text-[12px] min-h-[2.4rem] line-clamp-2 leading-snug` |
+| **Footer Action Link** | `text-[#2563EB] flex items-center gap-1 font-bold uppercase tracking-wider text-[9px]` |
+
+**Pattern notes:**
+- **Zero JS Execution on Touch**: Mobile video carousel runs on native GPU touch scrolling with no RAF ticker or touch event interceptors, guaranteeing 0ms vertical page scroll handoff.
+
+
 

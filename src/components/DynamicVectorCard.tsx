@@ -50,6 +50,7 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
   const rimAlpha  = isDark ? 0.95 : 0.75;
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) return;
     const card = cardRef.current;
     if (!card) return;
     if (typeof document !== 'undefined' && document.body.classList.contains('is-scrolling')) return;
@@ -98,6 +99,7 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
   }, [isDark, glowColor, ambientRadius, coreAlpha, midAlpha, rimAlpha, enableTilt]);
 
   const handleMouseLeave = useCallback(() => {
+    if (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) return;
     const card = cardRef.current;
     if (!card) return;
     isHovered.current = false;
@@ -117,7 +119,6 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
     pointerEvents:    'none',
     opacity:          0,
     transition:       'opacity 200ms ease',
-    willChange:       'opacity',
     borderRadius:     'inherit',
   };
 
@@ -128,18 +129,16 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
       style={{
-        perspective:          '1000px',
-        transformStyle:       'preserve-3d',
         WebkitFontSmoothing:  'antialiased',
         MozOsxFontSmoothing:  'grayscale',
-        willChange:           'transform',
         ...style
       }}
-      className={`relative isolate ${roundedClass} ${className} group/vector-card transition-transform duration-200 ease-out [.is-card-hovered_&]:[transform:perspective(1000px)_rotateX(var(--rotate-x,0deg))_rotateY(var(--rotate-y,0deg))_scale3d(1.015,1.015,1.015)]`}
+      className={`relative isolate ${roundedClass} ${className} group/vector-card transition-transform duration-200 ease-out md:[perspective:1000px] md:[transform-style:preserve-3d] md:[will-change:transform] [.is-card-hovered_&]:[transform:perspective(1000px)_rotateX(var(--rotate-x,0deg))_rotateY(var(--rotate-y,0deg))_scale3d(1.015,1.015,1.015)]`}
     >
-      {/* ── Layer A: Ambient + cursor warmth (z-0, behind content) ───── */}
+      {/* ── Layer A: Ambient + cursor warmth (z-0, hidden on mobile) ───── */}
       <div
         ref={ambientRef}
+        className="hidden md:block"
         style={{ ...layerBase, zIndex: 0, overflow: 'hidden' }}
       />
 
@@ -148,11 +147,10 @@ export const DynamicVectorCard: React.FC<DynamicVectorCardProps> = ({
         {children}
       </div>
 
-      {/* ── Layer D: Rim border glow  (z-20, painted as 1-px inset border light) */}
-      {/*    Technique: 1px inset box-shadow uses the radial gradient as its colour */}
-      {/*    We paint it as a border-box background on a 1px-bordered div           */}
+      {/* ── Layer D: Rim border glow  (z-20, hidden on mobile) */}
       <div
         ref={rimRef}
+        className="hidden md:block"
         style={{
           ...layerBase,
           zIndex:      20,

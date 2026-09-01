@@ -3354,8 +3354,8 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-300 relative overflow-x-clip">
-      {/* Site-Wide Vector Canvas Grid Overlay */}
-      <div className="fixed inset-0 pointer-events-none z-[0] opacity-40 dark:opacity-[0.05] bg-[radial-gradient(#94a3b8_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:24px_24px]" />
+      {/* Site-Wide Vector Canvas Grid Overlay — Desktop only for peak GPU framerate */}
+      <div className="hidden sm:block fixed inset-0 pointer-events-none z-[0] opacity-40 dark:opacity-[0.05] bg-[radial-gradient(#94a3b8_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:24px_24px]" />
       
       {/* Floating Ambient Academic Watermarks — hidden on mobile to prevent icon collision */}
       <div className="hidden md:block fixed top-20 right-10 pointer-events-none z-[0] opacity-[0.03] dark:opacity-[0.04] text-slate-900 dark:text-white animate-watermark-spin">
@@ -4078,17 +4078,9 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
   const currentQuestionIndex = incompleteAct ? ((incompleteAct.metadata?.currentQuestionIndex || 0) + 1) : 0;
   const progressPercent = totalQs > 0 ? Math.min(100, Math.round((currentQuestionIndex / totalQs) * 100)) : 0;
 
-  return (
-    <motion.div
-      key={bank.id}
-      initial={false}
-      animate={isMobile ? undefined : { opacity: 1, y: 0 }}
-      exit={isMobile ? undefined : { opacity: 0, scale: 0.95 }}
-      whileHover={isMobile || isScheduledUpcoming ? undefined : whileHover.liftTap}
-      whileTap={isScheduledUpcoming ? undefined : whileTap.press}
-      className="w-full h-full cv-card-auto"
-    >
-      {isMobile ? (
+  if (isMobile) {
+    return (
+      <div key={bank.id} className="w-full h-full cv-card-auto">
         <div
           onClick={() => {
             if (!isScheduledUpcoming) handleStartDirectPractice(effectiveBank);
@@ -4179,13 +4171,42 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
             )}
           </div>
         </div>
-      ) : (
-        <DynamicVectorCard
-          roundedClass="rounded-[1.5rem]"
-          glowColor={isLocked ? "rgba(245, 158, 11, 0.28)" : "rgba(99, 102, 241, 0.28)"}
-          className="w-full h-full cv-card-auto"
-          onClick={() => { if (!isScheduledUpcoming) handleStartDirectPractice(effectiveBank); }}
-        >
+
+        <AttemptPerformanceModal
+          isOpen={showAttemptModal}
+          onClose={() => setShowAttemptModal(false)}
+          title={bank.title}
+          activity={completedAct || incompleteAct}
+          totalQs={totalQs}
+          totalMarks={totalQs}
+          onAction={() => {
+            if (isInProgress && incompleteAct) {
+              handleStartDirectPractice(effectiveBank, incompleteAct);
+            } else {
+              handleStartDirectPractice(effectiveBank);
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      key={bank.id}
+      initial={false}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      whileHover={isScheduledUpcoming ? undefined : whileHover.liftTap}
+      whileTap={isScheduledUpcoming ? undefined : whileTap.press}
+      className="w-full h-full cv-card-auto"
+    >
+      <DynamicVectorCard
+        roundedClass="rounded-[1.5rem]"
+        glowColor={isLocked ? "rgba(245, 158, 11, 0.28)" : "rgba(99, 102, 241, 0.28)"}
+        className="w-full h-full cv-card-auto"
+        onClick={() => { if (!isScheduledUpcoming) handleStartDirectPractice(effectiveBank); }}
+      >
         <div
           className={cn(
             "p-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-200/80 dark:border-indigo-500/20 shadow-lg shadow-slate-200/30 dark:shadow-indigo-950/20 rounded-[1.5rem] transition-all duration-300 flex flex-col justify-between gap-6 relative overflow-hidden h-full text-slate-900 dark:text-white cv-card-auto",
@@ -4374,8 +4395,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
             </Button>
           )}
         </div>
-        </DynamicVectorCard>
-      )}
+      </DynamicVectorCard>
 
       <AttemptPerformanceModal
         isOpen={showAttemptModal}
@@ -4457,16 +4477,9 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
     }
   }
 
-  return (
-    <motion.div
-      initial={false}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      whileHover={isMobile || isScheduledUpcoming ? undefined : whileHover.liftTap}
-      whileTap={isScheduledUpcoming ? undefined : whileTap.press}
-      className="w-full cv-card-auto"
-    >
-      {isMobile ? (
+  if (isMobile) {
+    return (
+      <div key={test.id} className="w-full cv-card-auto">
         <div
           onClick={() => {
             if (isScheduledUpcoming) return;
@@ -4619,11 +4632,223 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
             )}
           </div>
         </div>
-      ) : (
-        <Card 
-          key={test.id} 
-          onClick={() => {
-            if (!isScheduledUpcoming) {
+
+        <AttemptPerformanceModal
+          isOpen={showAttemptModal}
+          onClose={() => setShowAttemptModal(false)}
+          title={test.title}
+          activity={completedAct || incompleteAct}
+          totalQs={totalQs}
+          totalMarks={test.totalMarks}
+          onAction={() => {
+            if (isInProgress && incompleteAct) {
+              handleStartTest({ ...test, isPremium, price }, incompleteAct);
+            } else {
+              handleStartTest({ ...test, isPremium, price });
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={false}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      whileHover={isScheduledUpcoming ? undefined : whileHover.liftTap}
+      whileTap={isScheduledUpcoming ? undefined : whileTap.press}
+      className="w-full cv-card-auto"
+    >
+      <Card 
+        onClick={() => {
+          if (!isScheduledUpcoming) {
+            if (totalQs === 0) {
+              showPremiumAlert(
+                "Question Paper in Preparation",
+                "The question paper and verified solutions for this mock test are currently being finalized and uploaded by our faculty team. Please check back shortly!"
+              );
+              return;
+            }
+            handleStartTest({ ...test, isPremium, price });
+          }
+        }}
+        className={cn(
+          "p-6 rounded-2xl sm:rounded-3xl border transition-all duration-300 flex flex-col justify-between group relative overflow-hidden h-full text-slate-900 dark:text-white cursor-pointer bg-white dark:bg-[#0B1528] dark:border-slate-800", 
+          isScheduledUpcoming
+            ? "border-amber-200 dark:border-amber-800 bg-amber-50/20 dark:bg-amber-950/20 cursor-not-allowed opacity-90 shadow-sm"
+            : totalQs === 0
+              ? "border-amber-200/60 dark:border-amber-800/60 bg-amber-50/10 dark:bg-amber-950/10 shadow-sm hover:border-amber-300"
+              : isCompleted
+                ? "border-emerald-200 dark:border-emerald-800/60 shadow-[0_4px_20px_-4px_rgba(16,185,129,0.05)] hover:border-emerald-400 hover:shadow-emerald-500/10"
+                : isInProgress
+                  ? "border-amber-200 dark:border-amber-800/60 shadow-[0_4px_20px_-4px_rgba(245,158,11,0.05)] hover:border-amber-400 hover:shadow-amber-500/10"
+                  : isLocked 
+                    ? "border-slate-100 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(245,158,11,0.04),0_1px_2px_rgba(245,158,11,0.02)] hover:border-amber-200 hover:shadow-amber-500/10" 
+                    : isPremiumUnlocked 
+                      ? "border-slate-100 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(16,185,129,0.04),0_1px_2px_rgba(16,185,129,0.02)] hover:border-emerald-200 hover:shadow-emerald-500/10" 
+                      : "border-slate-100 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(79,70,229,0.04),0_1px_2px_rgba(79,70,229,0.02)] hover:border-brand-200 hover:shadow-brand-500/10"
+        )}
+      >
+        <div className={cn(
+          "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none",
+          isScheduledUpcoming
+            ? "bg-amber-500/0"
+            : isLocked 
+              ? "bg-gradient-to-br from-amber-500/[0.01] to-amber-500/0" 
+              : isPremiumUnlocked 
+                ? "bg-gradient-to-br from-emerald-500/[0.01] to-emerald-500/0" 
+                : "bg-gradient-to-br from-brand-500/[0.01] to-brand-500/0"
+        )} />
+        <div className={cn(
+          "absolute left-0 top-0 bottom-0 w-[4px] rounded-r-md opacity-90",
+          isScheduledUpcoming
+            ? "bg-gradient-to-b from-amber-400 to-orange-500"
+            : isCompleted
+              ? "bg-gradient-to-b from-emerald-400 to-teal-500"
+              : isInProgress
+                ? "bg-gradient-to-b from-amber-400 to-orange-500"
+                : isLocked 
+                  ? "bg-gradient-to-b from-amber-400 to-orange-500" 
+                  : isPremiumUnlocked 
+                    ? "bg-gradient-to-b from-emerald-400 to-teal-500" 
+                    : "bg-gradient-to-b from-indigo-500 to-purple-600"
+        )} />
+        
+        <div className="flex items-start justify-between gap-4 relative z-10">
+          <div className="flex items-start gap-4 min-w-0 flex-1">
+            <div className={cn(
+              "w-12 h-12 rounded-2xl flex items-center justify-center text-white shrink-0 relative overflow-hidden shadow-sm",
+              isScheduledUpcoming
+                ? "bg-amber-600 dark:bg-amber-700"
+                : isCompleted
+                  ? "bg-emerald-600 dark:bg-emerald-700"
+                  : isInProgress
+                    ? "bg-amber-500 dark:bg-amber-600"
+                    : isLocked 
+                      ? "bg-amber-500 dark:bg-amber-600" 
+                      : isPremiumUnlocked 
+                        ? "bg-emerald-600 dark:bg-emerald-700" 
+                        : "bg-gradient-to-br from-brand-600 to-indigo-600 dark:from-blue-600 dark:to-indigo-700"
+            )}>
+              {isScheduledUpcoming ? (
+                <Calendar className="w-6 h-6 text-white" />
+              ) : isCompleted ? (
+                <CheckCircle2 className="w-6 h-6 text-white" />
+              ) : isInProgress ? (
+                <Play className="w-6 h-6 text-white fill-white/10 ml-0.5 animate-pulse" />
+              ) : (
+                <Target className="w-6 h-6" />
+              )}
+            </div>
+            <div className="text-left min-w-0 flex-1">
+              <h4 className="font-black text-lg text-slate-955 dark:text-white tracking-tight group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors uppercase leading-snug line-clamp-2" title={test.title}>{mainTitle}</h4>
+              <div className="flex items-center flex-wrap gap-1.5 mt-1">
+                {isScheduledUpcoming ? (
+                  <span className="text-[10px] font-black text-amber-800 dark:text-amber-300 uppercase tracking-widest bg-amber-100 dark:bg-amber-950/60 px-2.5 py-0.5 rounded border border-amber-200 dark:border-amber-800 flex items-center gap-1">
+                    📅 UPCOMING
+                  </span>
+                ) : totalQs === 0 ? (
+                  <span className="text-[10px] font-black text-amber-700 dark:text-amber-300 uppercase tracking-widest bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800 whitespace-nowrap">
+                    ⏳ In Preparation
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase tracking-widest bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-100 dark:border-slate-700 whitespace-nowrap">Official Mock</span>
+                )}
+                {suffix && (
+                  <span className="text-[10px] font-black text-brand-700 dark:text-indigo-300 uppercase tracking-widest bg-brand-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded border border-brand-100/60 dark:border-indigo-800 shadow-2xs whitespace-nowrap">Set {suffix}</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {isScheduledUpcoming ? (
+          <div className="bg-amber-50/80 dark:bg-amber-950/60 border border-amber-200/80 dark:border-amber-800 rounded-xl p-3.5 space-y-1.5 relative z-10 text-left">
+            <div className="flex items-center justify-between text-xs font-extrabold text-amber-900 dark:text-amber-300">
+              <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" /> Release Countdown</span>
+              <span className="font-mono text-xs tracking-wider font-black text-amber-950 dark:text-amber-200 bg-amber-200/60 dark:bg-amber-900/60 px-2 py-0.5 rounded-md border border-amber-300/60 dark:border-amber-700/60">{countdown.formattedCountdown}</span>
+            </div>
+            <div className="flex items-center justify-between text-[11px] font-semibold text-amber-800 dark:text-amber-400 pt-0.5">
+              <span>Scheduled for {countdown.formattedScheduledDate}</span>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4 flex-1 relative z-10 pt-4 text-left">
+            <div className="flex gap-4 text-xs font-bold text-slate-555 dark:text-slate-300 flex-wrap">
+              <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><FileText className="w-3.5 h-3.5 text-slate-400"/> {totalQs} Questions</span>
+              <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><Clock className="w-3.5 h-3.5 text-slate-400"/> {totalQs} Mins</span>
+              <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><Award className="w-3.5 h-3.5 text-slate-400"/> {test.totalMarks} Marks</span>
+            </div>
+          </div>
+        )}
+
+        {isScheduledUpcoming ? (
+          <button
+            type="button"
+            onClick={(e) => e.stopPropagation()}
+            className="w-full h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-xs sm:text-sm bg-amber-500/15 border-2 border-amber-400 dark:border-amber-600 text-amber-950 dark:text-amber-200 shadow-sm cursor-not-allowed mt-auto pointer-events-none relative z-10"
+          >
+            <Lock className="w-4 h-4 text-amber-800 dark:text-amber-400 shrink-0" />
+            <span className="text-amber-950 dark:text-amber-200 font-black tracking-tight">Unlocks {countdown.formattedScheduledDate}</span>
+          </button>
+        ) : isCompleted ? (
+          <div className="flex items-center gap-2 w-full mt-auto relative z-10">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowAttemptModal(true);
+              }}
+              className="w-1/3 h-[48px] rounded-xl flex items-center justify-center gap-1.5 font-black text-xs sm:text-sm bg-emerald-50 text-emerald-700 border border-emerald-200/90 hover:bg-emerald-100 hover:border-emerald-300 transition-all cursor-pointer shadow-xs shrink-0"
+            >
+              <BarChart3 className="w-4 h-4 text-emerald-600" />
+              <span className="truncate">Score</span>
+            </button>
+            <Button 
+              variant="outline"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleStartTest({ ...test, isPremium, price });
+              }}
+              className="flex-1 h-[48px] rounded-xl font-black text-xs sm:text-sm border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 bg-white transition-all overflow-hidden group/btn"
+            >
+              <span className="relative z-10 flex items-center justify-center gap-1.5">
+                <RotateCw className="w-4 h-4" /> {t('exams.cardActions.retake', 'Retake')}
+              </span>
+            </Button>
+          </div>
+        ) : isInProgress && totalQs > 0 ? (
+          <div className="flex items-center gap-2 w-full mt-auto relative z-10">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowAttemptModal(true);
+              }}
+              className="w-1/3 h-[48px] rounded-xl flex items-center justify-center gap-1.5 font-black text-xs sm:text-sm bg-amber-50 text-amber-700 border border-amber-200/90 hover:bg-amber-100 hover:border-amber-300 transition-all cursor-pointer shadow-xs shrink-0"
+            >
+              <BarChart3 className="w-4 h-4 text-amber-600" />
+              <span className="truncate">Progress</span>
+            </button>
+            <Button 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleStartTest({ ...test, isPremium, price }, incompleteAct);
+              }}
+              className="flex-1 h-[48px] rounded-xl font-black text-xs sm:text-sm bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/20 hover:shadow-xl hover:shadow-amber-500/30 transition-all overflow-hidden group/btn"
+            >
+              <span className="relative z-10 flex items-center justify-center gap-1.5">
+                <Play className="w-4 h-4 fill-white/20" /> {t('exams.cardActions.resume', 'Resume')} ({progressPercent}%)
+              </span>
+            </Button>
+          </div>
+        ) : (
+          <Button 
+            variant={isLocked ? "outline" : "primary"}
+            onClick={(e) => {
+              e.stopPropagation();
               if (totalQs === 0) {
                 showPremiumAlert(
                   "Question Paper in Preparation",
@@ -4632,225 +4857,39 @@ const ExamDetailMockTestCard = React.memo(({ test, isMobile, hasAccessTo, activi
                 return;
               }
               handleStartTest({ ...test, isPremium, price });
-            }
-          }}
-          className={cn(
-            "p-6 rounded-2xl sm:rounded-3xl border transition-all duration-300 flex flex-col justify-between group relative overflow-hidden h-full text-slate-900 dark:text-white cursor-pointer bg-white dark:bg-[#0B1528] dark:border-slate-800", 
-            isScheduledUpcoming
-              ? "border-amber-200 dark:border-amber-800 bg-amber-50/20 dark:bg-amber-950/20 cursor-not-allowed opacity-90 shadow-sm"
-              : totalQs === 0
-                ? "border-amber-200/60 dark:border-amber-800/60 bg-amber-50/10 dark:bg-amber-950/10 shadow-sm hover:border-amber-300"
-                : isCompleted
-                  ? "border-emerald-200 dark:border-emerald-800/60 shadow-[0_4px_20px_-4px_rgba(16,185,129,0.05)] hover:border-emerald-400 hover:shadow-emerald-500/10"
-                  : isInProgress
-                    ? "border-amber-200 dark:border-amber-800/60 shadow-[0_4px_20px_-4px_rgba(245,158,11,0.05)] hover:border-amber-400 hover:shadow-amber-500/10"
-                    : isLocked 
-                      ? "border-slate-100 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(245,158,11,0.04),0_1px_2px_rgba(245,158,11,0.02)] hover:border-amber-200 hover:shadow-amber-500/10" 
-                      : isPremiumUnlocked 
-                        ? "border-slate-100 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(16,185,129,0.04),0_1px_2px_rgba(16,185,129,0.02)] hover:border-emerald-200 hover:shadow-emerald-500/10" 
-                        : "border-slate-100 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(79,70,229,0.04),0_1px_2px_rgba(79,70,229,0.02)] hover:border-brand-200 hover:shadow-brand-500/10"
-          )}
-        >
-          <div className={cn(
-            "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none",
-            isScheduledUpcoming
-              ? "bg-amber-500/0"
-              : isLocked 
-                ? "bg-gradient-to-br from-amber-500/[0.01] to-amber-500/0" 
-                : isPremiumUnlocked 
-                  ? "bg-gradient-to-br from-emerald-500/[0.01] to-emerald-500/0" 
-                  : "bg-gradient-to-br from-brand-500/[0.01] to-brand-500/0"
-          )} />
-          <div className={cn(
-            "absolute left-0 top-0 bottom-0 w-[4px] rounded-r-md opacity-90",
-            isScheduledUpcoming
-              ? "bg-gradient-to-b from-amber-400 to-orange-500"
-              : isCompleted
-                ? "bg-gradient-to-b from-emerald-400 to-teal-500"
-                : isInProgress
-                  ? "bg-gradient-to-b from-amber-400 to-orange-500"
-                  : isLocked 
-                    ? "bg-gradient-to-b from-amber-400 to-orange-500" 
-                    : isPremiumUnlocked 
-                      ? "bg-gradient-to-b from-emerald-400 to-teal-500" 
-                      : "bg-gradient-to-b from-indigo-500 to-purple-600"
-          )} />
-          
-          <div className="flex items-start justify-between gap-4 relative z-10">
-            <div className="flex items-start gap-4 min-w-0 flex-1">
-              <div className={cn(
-                "w-12 h-12 rounded-2xl flex items-center justify-center text-white shrink-0 relative overflow-hidden shadow-sm",
-                isScheduledUpcoming
-                  ? "bg-amber-600 dark:bg-amber-700"
-                  : isCompleted
-                    ? "bg-emerald-600 dark:bg-emerald-700"
-                    : isInProgress
-                      ? "bg-amber-500 dark:bg-amber-600"
-                      : isLocked 
-                        ? "bg-amber-500 dark:bg-amber-600" 
-                        : isPremiumUnlocked 
-                          ? "bg-emerald-600 dark:bg-emerald-700" 
-                          : "bg-gradient-to-br from-brand-600 to-indigo-600 dark:from-blue-600 dark:to-indigo-700"
-              )}>
-                {isScheduledUpcoming ? (
-                  <Calendar className="w-6 h-6 text-white" />
-                ) : isCompleted ? (
-                  <CheckCircle2 className="w-6 h-6 text-white" />
-                ) : isInProgress ? (
-                  <Play className="w-6 h-6 text-white fill-white/10 ml-0.5 animate-pulse" />
-                ) : (
-                  <Target className="w-6 h-6" />
-                )}
-              </div>
-              <div className="text-left min-w-0 flex-1">
-                <h4 className="font-black text-lg text-slate-955 dark:text-white tracking-tight group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors uppercase leading-snug line-clamp-2" title={test.title}>{mainTitle}</h4>
-                <div className="flex items-center flex-wrap gap-1.5 mt-1">
-                  {isScheduledUpcoming ? (
-                    <span className="text-[10px] font-black text-amber-800 dark:text-amber-300 uppercase tracking-widest bg-amber-100 dark:bg-amber-950/60 px-2.5 py-0.5 rounded border border-amber-200 dark:border-amber-800 flex items-center gap-1">
-                      📅 UPCOMING
-                    </span>
-                  ) : totalQs === 0 ? (
-                    <span className="text-[10px] font-black text-amber-700 dark:text-amber-300 uppercase tracking-widest bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800 whitespace-nowrap">
-                      ⏳ In Preparation
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase tracking-widest bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-100 dark:border-slate-700 whitespace-nowrap">Official Mock</span>
-                  )}
-                  {suffix && (
-                    <span className="text-[10px] font-black text-brand-700 dark:text-indigo-300 uppercase tracking-widest bg-brand-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded border border-brand-100/60 dark:border-indigo-800 shadow-2xs whitespace-nowrap">Set {suffix}</span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {isScheduledUpcoming ? (
-            <div className="bg-amber-50/80 dark:bg-amber-950/60 border border-amber-200/80 dark:border-amber-800 rounded-xl p-3.5 space-y-1.5 relative z-10 text-left">
-              <div className="flex items-center justify-between text-xs font-extrabold text-amber-900 dark:text-amber-300">
-                <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" /> Release Countdown</span>
-                <span className="font-mono text-xs tracking-wider font-black text-amber-950 dark:text-amber-200 bg-amber-200/60 dark:bg-amber-900/60 px-2 py-0.5 rounded-md border border-amber-300/60 dark:border-amber-700/60">{countdown.formattedCountdown}</span>
-              </div>
-              <div className="flex items-center justify-between text-[11px] font-semibold text-amber-800 dark:text-amber-300 pt-0.5">
-                <span>Scheduled for {countdown.formattedScheduledDate}</span>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4 flex-1 relative z-10 pt-2 text-left">
-              <div className="flex gap-4 text-xs font-bold text-slate-500 dark:text-slate-300 flex-wrap">
-                <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><Clock className="w-3.5 h-3.5 text-slate-400"/> {t('exams.details.duration', `${test.durationMinutes} Mins`, { mins: test.durationMinutes })}</span>
-                <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><Award className="w-3.5 h-3.5 text-slate-400"/> {t('exams.details.totalMarks', `${test.totalMarks} Marks`, { marks: test.totalMarks })}</span>
-                <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-1 rounded border border-slate-100/60 dark:border-slate-700/60"><FileText className="w-3.5 h-3.5 text-slate-400"/> {t('exams.details.questions', `${totalQs} Qs`, { count: totalQs })}</span>
-              </div>
-            </div>
-          )}
-          
-          {isScheduledUpcoming ? (
-            <button
-              type="button"
-              onClick={(e) => e.stopPropagation()}
-              className="w-full h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-xs sm:text-sm bg-amber-500/15 border-2 border-amber-400 text-amber-950 shadow-sm cursor-not-allowed mt-auto pointer-events-none relative z-10"
-            >
-              <Lock className="w-4 h-4 text-amber-800 shrink-0" />
-              <span className="text-amber-950 font-black tracking-tight">Unlocks {countdown.formattedScheduledDate}</span>
-            </button>
-          ) : isCompleted && totalQs > 0 ? (
-            <div className="flex items-center gap-2 w-full mt-auto relative z-10">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowAttemptModal(true);
-                }}
-                className="w-1/3 h-[48px] rounded-xl flex items-center justify-center gap-1.5 font-black text-xs sm:text-sm bg-emerald-50 text-emerald-700 border border-emerald-200/90 hover:bg-emerald-100 hover:border-emerald-300 transition-all cursor-pointer shadow-xs shrink-0"
-              >
-                <BarChart3 className="w-4 h-4 text-emerald-600" />
-                <span className="truncate">Score</span>
-              </button>
-              <Button 
-                variant="outline"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleStartTest({ ...test, isPremium, price });
-                }}
-                className="flex-1 h-[48px] rounded-xl font-black text-xs sm:text-sm border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 bg-white transition-all overflow-hidden group/btn"
-              >
-                <span className="relative z-10 flex items-center justify-center gap-1.5">
-                  <RotateCw className="w-4 h-4" /> {t('exams.cardActions.retake', 'Retake')}
-                </span>
-              </Button>
-            </div>
-          ) : isInProgress && totalQs > 0 ? (
-            <div className="flex items-center gap-2 w-full mt-auto relative z-10">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowAttemptModal(true);
-                }}
-                className="w-1/3 h-[48px] rounded-xl flex items-center justify-center gap-1.5 font-black text-xs sm:text-sm bg-amber-50 text-amber-700 border border-amber-200/90 hover:bg-amber-100 hover:border-amber-300 transition-all cursor-pointer shadow-xs shrink-0"
-              >
-                <BarChart3 className="w-4 h-4 text-amber-600" />
-                <span className="truncate">Progress</span>
-              </button>
-              <Button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleStartTest({ ...test, isPremium, price }, incompleteAct);
-                }}
-                className="flex-1 h-[48px] rounded-xl font-black text-xs sm:text-sm bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/20 hover:shadow-xl hover:shadow-amber-500/30 transition-all overflow-hidden group/btn"
-              >
-                <span className="relative z-10 flex items-center justify-center gap-1.5">
-                  <Play className="w-4 h-4 fill-white/20" /> {t('exams.cardActions.resume', 'Resume')} ({progressPercent}%)
-                </span>
-              </Button>
-            </div>
-          ) : (
-            <Button 
-              variant={isLocked ? "outline" : "primary"}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (totalQs === 0) {
-                  showPremiumAlert(
-                    "Question Paper in Preparation",
-                    "The question paper and verified solutions for this mock test are currently being finalized and uploaded by our faculty team. Please check back shortly!"
-                  );
-                  return;
-                }
-                handleStartTest({ ...test, isPremium, price });
-              }}
-              className={cn(
-                "w-full h-[48px] rounded-xl font-black text-sm relative z-10 transition-all overflow-hidden group/btn mt-auto", 
-                totalQs === 0
-                  ? "bg-slate-100 dark:bg-slate-800/80 text-amber-700 dark:text-amber-300 border border-amber-300/40 hover:bg-slate-200 dark:hover:bg-slate-700/80 shadow-none cursor-pointer"
-                  : !isLocked 
-                    ? "premium-gradient text-white shadow-lg shadow-brand-500/20 group-hover:premium-glow" 
-                    : "border-amber-200 text-amber-600 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700"
-              )}
-            >
-              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 z-10" />
+            }}
+            className={cn(
+              "w-full h-[48px] rounded-xl font-black text-sm relative z-10 transition-all overflow-hidden group/btn mt-auto", 
+              totalQs === 0
+                ? "bg-slate-100 dark:bg-slate-800/80 text-amber-700 dark:text-amber-300 border border-amber-300/40 hover:bg-slate-200 dark:hover:bg-slate-700/80 shadow-none cursor-pointer"
+                : !isLocked 
+                  ? "premium-gradient text-white shadow-lg shadow-brand-500/20 group-hover:premium-glow" 
+                  : "border-amber-200 text-amber-600 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700"
+            )}
+          >
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 z-10" />
 
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                {totalQs === 0 ? (
-                  <>
-                    <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    <span>In Preparation</span>
-                  </>
-                ) : isLocked ? (
-                  <>
-                    <Lock className="w-4 h-4 mr-2" />
-                    {t('exams.cardActions.unlockTest', 'Unlock to Access')}
-                  </>
-                ) : (
-                  <>
-                    {t('exams.cardActions.startMock', 'Start Test Now')}
-                    <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 duration-300" />
-                  </>
-                )}
-              </span>
-            </Button>
-          )}
-        </Card>
-      )}
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              {totalQs === 0 ? (
+                <>
+                  <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <span>In Preparation</span>
+                </>
+              ) : isLocked ? (
+                <>
+                  <Lock className="w-4 h-4 mr-2" />
+                  {t('exams.cardActions.unlockTest', 'Unlock to Access')}
+                </>
+              ) : (
+                <>
+                  {t('exams.cardActions.startMock', 'Start Test Now')}
+                  <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 duration-300" />
+                </>
+              )}
+            </span>
+          </Button>
+        )}
+      </Card>
 
       <AttemptPerformanceModal
         isOpen={showAttemptModal}
@@ -8879,7 +8918,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     container.scrollLeft += e.deltaY * 0.85;
                   }
                 }}
-                className="flex gap-2.5 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory py-2.5 sm:py-4 px-1 sm:px-1"
+                className="flex gap-2.5 sm:gap-4 overflow-x-auto no-scrollbar py-2.5 sm:py-4 px-1 sm:px-1 -webkit-overflow-scrolling-touch touch-pan-x"
               >
                 {incompleteTests.slice(0, 6).map((a: any, i: number) => {
                   // Support both full-question activities (local) and lite cloud-synced ones
@@ -8923,6 +8962,52 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     (Array.isArray(a.metadata?.test?.questions) && a.metadata.test.questions.length > 0)
                   );
 
+                  const resumeAction = async () => {
+                    if (!canResume) return;
+                    requestUniversalFullscreen();
+                    let testToResume = { ...a.metadata?.test };
+                    if (!testToResume.title && a.title) testToResume.title = a.title;
+                    if (!testToResume.id && a.metadata?.testId) testToResume.id = a.metadata.testId;
+                    handleStartTest(testToResume, a);
+                  };
+
+                  if (isMobile) {
+                    return (
+                      <div
+                        key={i}
+                        onClick={resumeAction}
+                        className={`shrink-0 w-[72vw] xs:w-[260px] rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0A1628] shadow-sm transition-transform active:scale-[0.98] p-3.5 flex flex-col gap-2.5 relative overflow-hidden select-none ${
+                          canResume ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 relative z-10">
+                          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shrink-0 shadow-xs shadow-brand-500/20 text-white">
+                            <Play className="w-3.5 h-3.5 fill-white ml-0.5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-extrabold text-[12.5px] text-slate-900 dark:text-white line-clamp-1 leading-snug">{a.title || t('common.activity.continuePractice', 'Practice Session')}</h4>
+                            <p className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">{t('common.activity.lastPracticed', 'Last practiced {time}', { time: timeAgo })}</p>
+                            {a.metadata?.testCategory && (
+                              <span className="inline-block mt-0.5 text-[8px] font-black uppercase tracking-widest text-brand-600 dark:text-brand-400 bg-brand-50/70 dark:bg-brand-950/50 border border-brand-100/40 dark:border-brand-800/50 px-1.5 py-0.5 rounded">{a.metadata.testCategory}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-0.5 relative z-10 pt-0.5">
+                          <div className="flex items-center justify-between mb-0.5">
+                            <span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{t('common.activity.progress', 'Progress')}</span>
+                            <span className="text-[9.5px] font-black text-brand-600">{isOdia ? toOdiaDigits(progressPct) : progressPct}%</span>
+                          </div>
+                          <div className="w-full h-1 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-brand-600 to-brand-400 rounded-full"
+                              style={{ width: `${Math.max(progressPct, progressPct === 0 ? 0 : 4)}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+
                   return (
                     <DynamicVectorCard key={i} glowColor="rgba(37, 99, 235, 0.28)" roundedClass="rounded-2xl" className="snap-start shrink-0 w-[66vw] xs:w-[250px] sm:w-[280px] lg:w-[320px]">
                       <motion.div
@@ -8930,19 +9015,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         transition={{ type: 'spring', stiffness: 200, damping: 22, delay: i * 0.06 }}
                         whileTap={whileTap.press}
-                        onClick={async () => {
-                          if (!canResume) return;
-                          requestUniversalFullscreen();
-                          
-                          let testToResume = { ...a.metadata?.test };
-                          if (!testToResume.title && a.title) {
-                            testToResume.title = a.title;
-                          }
-                          if (!testToResume.id && a.metadata?.testId) {
-                            testToResume.id = a.metadata.testId;
-                          }
-                          handleStartTest(testToResume, a);
-                        }}
+                        onClick={resumeAction}
                         className={`w-full h-full rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0A1628] hover:border-brand-300 dark:hover:border-brand-500/50 shadow-md dark:shadow-xl dark:shadow-slate-950/40 transition-all duration-300 group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container relative overflow-hidden ${
                           canResume ? 'cursor-pointer active:scale-[0.98]' : 'opacity-60 cursor-not-allowed'
                         }`}
@@ -9043,7 +9116,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     container.scrollLeft += e.deltaY * 0.85;
                   }
                 }}
-                className="flex gap-2.5 sm:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory py-2.5 sm:py-4 px-1 sm:px-1"
+                className="flex gap-2.5 sm:gap-4 overflow-x-auto no-scrollbar py-2.5 sm:py-4 px-1 sm:px-1 -webkit-overflow-scrolling-touch touch-pan-x"
               >
                 {activities.filter((a: any) => a.type !== 'test_incomplete').slice(0, 6).map((a: any, i: number) => {
                   const isTestResult = a.type === 'mock_test_completed' || a.type === 'practice_test_completed';
@@ -9063,6 +9136,43 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     : scorePct >= 35
                     ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400'
                     : 'bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400';
+
+                  const itemAction = () => {
+                    if (isTestResult) handleViewResults(a.metadata);
+                    else if (a.type === 'question_bank_accessed' && a.metadata?.pdfUrl) window.open(a.metadata.pdfUrl, '_blank');
+                  };
+
+                  if (isMobile) {
+                    return (
+                      <div
+                        key={i}
+                        onClick={itemAction}
+                        className="shrink-0 w-[72vw] xs:w-[260px] rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0A1628] shadow-sm transition-transform active:scale-[0.98] p-3.5 flex flex-col gap-2.5 relative overflow-hidden select-none cursor-pointer"
+                      >
+                        <div className="flex items-start gap-2.5 relative z-10">
+                          <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 border border-brand-100 dark:border-brand-800/50">
+                            <CheckCircle2 className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-extrabold text-[12.5px] text-slate-900 dark:text-white line-clamp-1 leading-snug">{a.title}</h4>
+                            <p className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">{new Date(a.timestamp).toLocaleDateString()}</p>
+                          </div>
+                          <ChevronRight className="w-3.5 h-3.5 text-slate-300 shrink-0 mt-0.5" />
+                        </div>
+                        <div className="flex items-center justify-between pt-1.5 border-t border-slate-100 dark:border-slate-700/60 relative z-10">
+                          <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 truncate">
+                            {a.metadata?.testCategory || t('common.activity.recentActivity', 'Activity')}
+                          </span>
+                          {scoreLabel && (
+                            <span className={`text-[9.5px] font-black px-2 py-0.5 rounded-md shrink-0 ml-2 ${scoreColour}`}>
+                              {scoreLabel}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  }
+
                   return (
                     <DynamicVectorCard key={i} glowColor="rgba(37, 99, 235, 0.28)" roundedClass="rounded-2xl" className="snap-start shrink-0 w-[66vw] xs:w-[250px] sm:w-[280px] lg:w-[320px]">
                       <motion.div
@@ -9070,10 +9180,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         transition={{ type: 'spring', stiffness: 200, damping: 22, delay: i * 0.06 }}
                         whileTap={whileTap.press}
-                        onClick={() => {
-                          if (isTestResult) handleViewResults(a.metadata);
-                          else if (a.type === 'question_bank_accessed' && a.metadata?.pdfUrl) window.open(a.metadata.pdfUrl, '_blank');
-                        }}
+                        onClick={itemAction}
                         className="w-full h-full rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0A1628] hover:border-brand-300 dark:hover:border-brand-500/50 shadow-md dark:shadow-xl dark:shadow-slate-950/40 transition-all duration-300 cursor-pointer group p-3.5 sm:p-5 flex flex-col gap-2.5 premium-shine-container relative overflow-hidden active:scale-[0.98]"
                       >
                         {/* Inner Vector Grid Overlay */}
@@ -9521,18 +9628,9 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             const VecMainIcon = vecTheme.MainIcon;
             const VecWatermarkIcon = vecTheme.WatermarkIcon;
 
-            return (
-              <motion.div
-                key={item.id}
-                variants={{
-                  hidden: { opacity: 0, y: 15 },
-                  show: { opacity: 1, y: 0 }
-                }}
-                whileHover={isMobile ? undefined : whileHover.liftTap}
-                whileTap={whileTap.press}
-                className="w-full cv-card-auto"
-              >
-                {isMobile ? (
+            if (isMobile) {
+              return (
+                <div key={item.id} className="w-full cv-card-auto">
                   <div
                     onClick={() => setSelectedBankItem(item)}
                     className={cn(
@@ -9607,131 +9705,136 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       {isLocked ? <Lock className="w-3 h-3" /> : <ChevronRight className="w-3.5 h-3.5" />}
                     </div>
                   </div>
-                ) : (
-                  <Card 
-                    onClick={() => setSelectedBankItem(item)}
-                    className={cn(
-                      "group cursor-pointer relative overflow-hidden rounded-[2rem] h-full border-slate-200/50 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex flex-col",
-                      !isMobile && "hover:border-brand-300/80 dark:hover:border-indigo-500/80 transition-all duration-500 hover:shadow-xl hover:shadow-brand-500/5 premium-shine-container"
-                    )}
-                  >
-                    {/* Ambient grid-bg inside the card */}
-                    <div className={cn("absolute inset-0 grid-bg opacity-[0.02] pointer-events-none", !isMobile && "group-hover:opacity-[0.04] transition-opacity duration-500")} />
-                    
-                    {/* Hero Vector Banner Section */}
-                    <div className={cn(
-                      "h-44 overflow-hidden relative shrink-0 border-b border-slate-100 flex flex-col justify-between p-5 text-white select-none transition-all duration-500",
-                      vecTheme.gradient,
-                      isLocked && "blur-[1px]"
-                    )}>
-                      {/* Procedural Vector Texture Layer */}
-                      <VectorCoverTextureOverlay pattern={vecTheme.pattern} />
-                      
-                      {/* Large Vector Watermark Icon */}
-                      <VecWatermarkIcon className="absolute -right-4 -bottom-4 w-32 h-32 opacity-15 stroke-[1.2] text-white pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
+                </div>
+              );
+            }
 
-                      {/* Top Badge Row */}
-                      <div className="flex items-center justify-between relative z-10">
-                        <span className={cn("text-[9.5px] font-mono tracking-wider font-extrabold px-2.5 py-1 rounded-md uppercase border backdrop-blur-xs shadow-xs", vecTheme.badgeBg)}>
-                          {vecTheme.badgeText}
+            return (
+              <motion.div
+                key={item.id}
+                variants={{
+                  hidden: { opacity: 0, y: 15 },
+                  show: { opacity: 1, y: 0 }
+                }}
+                whileHover={whileHover.liftTap}
+                whileTap={whileTap.press}
+                className="w-full cv-card-auto"
+              >
+                <Card 
+                  onClick={() => setSelectedBankItem(item)}
+                  className="group cursor-pointer relative overflow-hidden rounded-[2rem] h-full border-slate-200/50 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex flex-col hover:border-brand-300/80 dark:hover:border-indigo-500/80 transition-all duration-500 hover:shadow-xl hover:shadow-brand-500/5 premium-shine-container"
+                >
+                  {/* Ambient grid-bg inside the card */}
+                  <div className="absolute inset-0 grid-bg opacity-[0.02] group-hover:opacity-[0.04] transition-opacity duration-500 pointer-events-none" />
+                  
+                  {/* Hero Vector Banner Section */}
+                  <div className={cn(
+                    "h-44 overflow-hidden relative shrink-0 border-b border-slate-100 flex flex-col justify-between p-5 text-white select-none transition-all duration-500",
+                    vecTheme.gradient,
+                    isLocked && "blur-[1px]"
+                  )}>
+                    {/* Procedural Vector Texture Layer */}
+                    <VectorCoverTextureOverlay pattern={vecTheme.pattern} />
+                    
+                    {/* Large Vector Watermark Icon */}
+                    <VecWatermarkIcon className="absolute -right-4 -bottom-4 w-32 h-32 opacity-15 stroke-[1.2] text-white pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6" />
+
+                    {/* Top Badge Row */}
+                    <div className="flex items-center justify-between relative z-10">
+                      <span className={cn("text-[9.5px] font-mono tracking-wider font-extrabold px-2.5 py-1 rounded-md uppercase border backdrop-blur-xs shadow-xs", vecTheme.badgeBg)}>
+                        {vecTheme.badgeText}
+                      </span>
+                      {isLocked ? (
+                        <span className="px-2 py-0.5 bg-rose-500/20 border border-rose-400/30 text-rose-200 text-[8px] font-black uppercase tracking-wider rounded">
+                          Premium
                         </span>
-                        {isLocked ? (
-                          <span className="px-2 py-0.5 bg-rose-500/20 border border-rose-400/30 text-rose-200 text-[8px] font-black uppercase tracking-wider rounded">
+                      ) : (
+                        <span className="px-2 py-0.5 bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 text-[8px] font-black uppercase tracking-wider rounded">
+                          Free
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Bottom Exam Target Info */}
+                    <div className="relative z-10 space-y-1">
+                      <div className="flex items-center gap-1.5 text-white/90 text-xs font-black uppercase tracking-wider">
+                        <VecMainIcon className="w-4 h-4 shrink-0 text-white" />
+                        <span className="line-clamp-1">{vecTheme.examTag}</span>
+                      </div>
+                      <div className="text-[10.5px] text-white/75 font-semibold tracking-wide flex items-center gap-1">
+                        <span>
+                          {(item.questionCount || (Array.isArray(item.questions) ? item.questions.length : 0)) > 0
+                            ? `${item.questionCount || item.questions.length} Practice Questions`
+                            : 'Chapter Practice Bank'}
+                        </span>
+                        <span>•</span>
+                        <span>Answer Key & Solutions</span>
+                      </div>
+                    </div>
+                    
+                    {isLocked && (
+                      <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px] flex items-center justify-center z-20">
+                        <div className="w-12 h-12 bg-white/95 rounded-2xl flex items-center justify-center shadow-lg border border-slate-200/50">
+                           <Lock className="w-5 h-5 text-[#2563EB]" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Card Content Body */}
+                  <div className={cn("p-6 flex flex-col flex-1 relative z-10 bg-white/50 dark:bg-slate-900/80 backdrop-blur-sm", isLocked && "opacity-60")}>
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="text-lg font-serif font-extrabold text-slate-900 dark:text-white capitalize tracking-tight leading-snug line-clamp-1 group-hover:text-brand-650 dark:group-hover:text-brand-400 transition-colors">
+                        {item.title.toLowerCase()}
+                      </h3>
+                      {isLocked ? (
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <Lock className="w-3.5 h-3.5 text-[#2563EB]" />
+                          <span className="px-2 py-0.5 bg-rose-50 dark:bg-rose-950/60 text-[#2563EB] dark:text-rose-300 text-[8px] font-black uppercase tracking-wider rounded border border-rose-200/40 dark:border-rose-800">
                             Premium
                           </span>
-                        ) : (
-                          <span className="px-2 py-0.5 bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 text-[8px] font-black uppercase tracking-wider rounded">
-                            Free
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Bottom Exam Target Info */}
-                      <div className="relative z-10 space-y-1">
-                        <div className="flex items-center gap-1.5 text-white/90 text-xs font-black uppercase tracking-wider">
-                          <VecMainIcon className="w-4 h-4 shrink-0 text-white" />
-                          <span className="line-clamp-1">{vecTheme.examTag}</span>
                         </div>
-                        <div className="text-[10.5px] text-white/75 font-semibold tracking-wide flex items-center gap-1">
-                          <span>
-                            {(item.questionCount || (Array.isArray(item.questions) ? item.questions.length : 0)) > 0
-                              ? `${item.questionCount || item.questions.length} Practice Questions`
-                              : 'Chapter Practice Bank'}
-                          </span>
-                          <span>•</span>
-                          <span>Answer Key & Solutions</span>
+                      ) : (
+                        <span className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[8px] font-black uppercase tracking-wider rounded border border-emerald-200/40 dark:border-emerald-800 shrink-0">
+                          Free
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Stats and Highlights */}
+                    <div className="space-y-3.5 mb-6">
+                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                        <div className="w-6.5 h-6.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100/60 dark:border-slate-700 flex items-center justify-center text-slate-400 shadow-sm group-hover:text-brand-500 dark:group-hover:text-brand-400 group-hover:bg-brand-50/50 dark:group-hover:bg-slate-700 transition-all">
+                          <FileText className="w-3.5 h-3.5" />
                         </div>
+                        <span className="text-xs font-bold text-slate-500 dark:text-slate-300 group-hover:text-slate-700 dark:group-hover:text-white transition-colors">
+                          {item.questionCount || item.questions} Questions
+                        </span>
                       </div>
                       
-                      {isLocked && (
-                        <div className={cn("absolute inset-0 bg-slate-950/40 flex items-center justify-center z-20", !isMobile && "backdrop-blur-[2px]")}>
-                          <div className="w-12 h-12 bg-white/95 rounded-2xl flex items-center justify-center shadow-lg border border-slate-200/50">
-                             <Lock className="w-5 h-5 text-[#2563EB]" />
-                          </div>
+                      {item.tagline && (
+                        <div className="flex items-center gap-2 text-brand-650 dark:text-indigo-300 bg-gradient-to-r from-brand-50/70 to-indigo-50/40 dark:from-indigo-950/80 dark:to-slate-900/80 px-3 py-1.5 rounded-xl w-fit border border-brand-100/30 dark:border-indigo-800">
+                          <Zap className="w-3.5 h-3.5 fill-brand-650 dark:fill-indigo-300 text-brand-650 dark:text-indigo-300 shrink-0" />
+                          <span className="text-[10px] font-black uppercase tracking-wider">{item.tagline}</span>
                         </div>
                       )}
                     </div>
                     
-                    {/* Card Content Body */}
-                    <div className={cn("p-6 flex flex-col flex-1 relative z-10 bg-white/90 dark:bg-slate-900/95", !isMobile && "bg-white/50 dark:bg-slate-900/80 backdrop-blur-sm", isLocked && "opacity-60")}>
-                      <div className="flex justify-between items-start mb-3">
-                        <h3 className={cn("text-lg font-serif font-extrabold text-slate-900 dark:text-white capitalize tracking-tight leading-snug line-clamp-1", !isMobile && "group-hover:text-brand-650 dark:group-hover:text-brand-400 transition-colors")}>
-                          {item.title.toLowerCase()}
-                        </h3>
-                        {isLocked ? (
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <Lock className="w-3.5 h-3.5 text-[#2563EB]" />
-                            <span className="px-2 py-0.5 bg-rose-50 dark:bg-rose-950/60 text-[#2563EB] dark:text-rose-300 text-[8px] font-black uppercase tracking-wider rounded border border-rose-200/40 dark:border-rose-800">
-                              Premium
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[8px] font-black uppercase tracking-wider rounded border border-emerald-200/40 dark:border-emerald-800 shrink-0">
-                            Free
-                          </span>
-                        )}
-                      </div>
-                      
-                      {/* Stats and Highlights */}
-                      <div className="space-y-3.5 mb-6">
-                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                          <div className={cn("w-6.5 h-6.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100/60 dark:border-slate-700 flex items-center justify-center text-slate-400 shadow-sm", !isMobile && "group-hover:text-brand-500 dark:group-hover:text-brand-400 group-hover:bg-brand-50/50 dark:group-hover:bg-slate-700 transition-all")}>
-                            <FileText className="w-3.5 h-3.5" />
-                          </div>
-                          <span className={cn("text-xs font-bold text-slate-500 dark:text-slate-300", !isMobile && "group-hover:text-slate-700 dark:group-hover:text-white transition-colors")}>
-                            {item.questionCount || item.questions} Questions
-                          </span>
-                        </div>
-                        
-                        {item.tagline && (
-                          <div className="flex items-center gap-2 text-brand-650 dark:text-indigo-300 bg-gradient-to-r from-brand-50/70 to-indigo-50/40 dark:from-indigo-950/80 dark:to-slate-900/80 px-3 py-1.5 rounded-xl w-fit border border-brand-100/30 dark:border-indigo-800">
-                            <Zap className="w-3.5 h-3.5 fill-brand-650 dark:fill-indigo-300 text-brand-650 dark:text-indigo-300 shrink-0" />
-                            <span className="text-[10px] font-black uppercase tracking-wider">{item.tagline}</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* View Details Button */}
-                      <div className="mt-auto pt-2">
-                        <button 
-                          className={cn(
-                            "w-full py-3 px-6 rounded-xl font-black text-xs uppercase tracking-wider relative overflow-hidden flex items-center justify-center gap-2 border border-brand-100 dark:border-indigo-800/80 bg-brand-50/40 dark:bg-indigo-950/60 text-brand-600 dark:text-indigo-300 shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
-                            !isMobile && "transition-all duration-500 hover:scale-[1.02] active:scale-95 group-hover:bg-gradient-to-r group-hover:from-brand-600 group-hover:to-brand-500 group-hover:text-white group-hover:border-transparent group-hover:shadow-lg group-hover:shadow-brand-500/20"
-                          )}
-                        >
-                          {/* Button Shine Effect */}
-                          {!isMobile && (
-                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 z-10" />
-                          )}
-                          <span className="relative z-10 flex items-center justify-center gap-1.5">
-                            {isLocked ? 'Unlock to View' : 'View Details'}
-                            <ArrowRight className={cn("w-3.5 h-3.5 relative -top-[0.5px]", !isMobile && "group-hover:translate-x-1 transition-transform")} />
-                          </span>
-                        </button>
-                      </div>
+                    {/* View Details Button */}
+                    <div className="mt-auto pt-2">
+                      <button 
+                        className="w-full py-3 px-6 rounded-xl font-black text-xs uppercase tracking-wider relative overflow-hidden flex items-center justify-center gap-2 border border-brand-100 dark:border-indigo-800/80 bg-brand-50/40 dark:bg-indigo-950/60 text-brand-600 dark:text-indigo-300 shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500 hover:scale-[1.02] active:scale-95 group-hover:bg-gradient-to-r group-hover:from-brand-600 group-hover:to-brand-500 group-hover:text-white group-hover:border-transparent group-hover:shadow-lg group-hover:shadow-brand-500/20"
+                      >
+                        {/* Button Shine Effect */}
+                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 z-10" />
+                        <span className="relative z-10 flex items-center justify-center gap-1.5">
+                          {isLocked ? 'Unlock to View' : 'View Details'}
+                          <ArrowRight className="w-3.5 h-3.5 relative -top-[0.5px] group-hover:translate-x-1 transition-transform" />
+                        </span>
+                      </button>
                     </div>
-                  </Card>
-                )}
+                  </div>
+                </Card>
               </motion.div>
             );
           })}

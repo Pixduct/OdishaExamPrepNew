@@ -4251,7 +4251,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
                     </span>
                   ) : isLocked ? (
                     <span className="text-[10px] font-black text-amber-800 dark:text-amber-300 uppercase tracking-widest bg-amber-100 dark:bg-amber-950/60 px-2.5 py-0.5 rounded border border-amber-200 dark:border-amber-800 flex items-center gap-1">
-                      <Lock className="w-3 h-3" /> PREMIUM (₹{price})
+                      <Lock className="w-3 h-3" /> PREMIUM
                     </span>
                   ) : isPremiumUnlocked ? (
                     <span className="text-[10px] font-black text-emerald-800 dark:text-emerald-300 uppercase tracking-widest bg-emerald-100 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
@@ -4363,7 +4363,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
                 {isLocked ? (
                   <>
                     <Lock className="w-4 h-4 mr-1" />
-                    {t('exams.cardActions.unlockTest', 'Unlock Test')} (₹{price})
+                    {t('exams.cardActions.unlockTest', 'Unlock Test')}
                   </>
                 ) : (
                   <>

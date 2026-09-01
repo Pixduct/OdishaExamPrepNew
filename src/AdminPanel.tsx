@@ -920,6 +920,15 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       initial.target_mode = 'practice';
     } else if (targetTab === 'banks') {
       initial.target_mode = 'bank';
+    } else if (targetTab === 'exams') {
+      initial.isPremium = true;
+      initial.starterPrice = 29;
+      initial.starterOriginalPrice = 99;
+      initial.starterTestCount = 5;
+      initial.price = 99;
+      initial.originalPrice = 299;
+      initial.allAccessPrice = 199;
+      initial.allAccessOriginalPrice = 999;
     }
     // Always dynamically re-calculate the fresh next available order from latest state
     initial.sortOrder = getNextAvailableOrder(
@@ -3316,26 +3325,19 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                     </div>
                   </div>
 
-                  {/* Tier 3: All-Odisha Mega Pass */}
-                  <div className="p-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-indigo-200/80 dark:border-indigo-800/60 space-y-3">
+                  {/* Tier 3: All-Odisha Super Pass (Global Platform Membership) */}
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-50/70 via-indigo-50/70 to-slate-50/70 dark:from-purple-950/30 dark:via-indigo-950/30 dark:to-slate-900/50 border border-purple-200/80 dark:border-purple-800/50 space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 shrink-0" />
-                        <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Tier 3: All-Odisha Mega Pass</span>
-                        <span className="text-[10px] font-black text-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">👑 1-Year VIP</span>
+                        <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shrink-0" />
+                        <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Tier 3: All-Odisha Super Pass</span>
+                        <span className="text-[10px] font-black text-purple-600 dark:text-purple-300 bg-purple-100 dark:bg-purple-950/80 px-2 py-0.5 rounded-md border border-purple-200 dark:border-purple-800">👑 1-Year VIP</span>
                       </div>
-                      <span className="text-[10px] font-bold text-slate-400">Unlocks entire website</span>
+                      <span className="text-[10px] font-black text-purple-700 dark:text-purple-300 bg-purple-100/80 dark:bg-purple-900/50 px-2.5 py-0.5 rounded-full border border-purple-300/60 dark:border-purple-700">Auto-Included</span>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <label className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase">All-Access Price (₹)</label>
-                        <input type="number" value={formData.allAccessPrice} onChange={e => setFormData({ ...formData, allAccessPrice: e.target.value })} className={inputClass} placeholder="199" />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase">MRP (₹)</label>
-                        <input type="number" value={formData.allAccessOriginalPrice} onChange={e => setFormData({ ...formData, allAccessOriginalPrice: e.target.value })} className={inputClass} placeholder="999" />
-                      </div>
-                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+                      This exam is automatically included for all <strong>1-Year Super Pass</strong> students. (Universal All-Access membership across all Odisha exams on the website).
+                    </p>
                   </div>
                 </div>
               )}

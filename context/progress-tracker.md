@@ -1,5 +1,9 @@
 # Progress Tracker
 
+- [x] 🎯 Exam Mock Test Hero Banner & Question Count Data Contract Normalization (`src/lib/examService.ts`, `src/App.tsx`):
+  1. **Normalized Service Boundary Contract**: Updated `getAllMockTestsLite()` and `getAllMockTests()` in `examService.ts` to automatically populate all standard count aliases (`_questionCount`, `questionCount`, `actualQuestionCount`, `practiceQuestionCount`, `totalQuestions`) from `countMap`, ensuring consistency across all consuming views.
+  2. **Live Test Prioritization**: Updated Exam Hero Banner selector in `App.tsx` to actively prefer and feature mock tests containing live uploaded questions (`cnt > 0`) before falling back to placeholders.
+  3. **Zero False-Positive Preparation Badges**: Fixed Hero Banner question count resolver (`qCount`) to include `_questionCount`, eliminating erroneous "Questions In Preparation" warnings on exams with valid question papers.
 - [x] 📱 Full-Stack Mobile vs Desktop Discrete Scrolling Architecture (`src/lib/lenisScroll.ts`, `src/index.css`, `src/App.tsx`, `src/components/YouTubeCarousel.tsx`):
   1. **Clean Hardware Separation**: Isolated Lenis smooth wheel interpolation strictly to desktop mouse pointers (`pointer: fine`), completely bypassing Lenis initialization, RAF loops, and root layout classes on mobile/touch screens.
   2. **100% Native OS Hardware Compositing for Mobile**: Mobile scrolling now runs entirely on the browser's native hardware-accelerated compositor thread (up to 120Hz ProMotion/90Hz/60Hz) with 0ms touch latency.

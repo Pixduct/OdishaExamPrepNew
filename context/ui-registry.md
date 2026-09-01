@@ -138,6 +138,10 @@ Before creating any new component, developers and AI agents MUST consult this re
 | Property | Class / Token |
 | :--- | :--- |
 | **Container Width** | `max-w-5xl` / `max-w-6xl` responsive modal container |
+| **Desktop Layout** | 3-Column Minimalist SaaS Grid (`hidden lg:flex`) with elevated center card (`transform lg:-translate-y-2`) |
+| **Mobile Segmented Switcher** | `grid grid-cols-3 gap-1.5 p-1 bg-slate-900/90 border border-white/10 rounded-2xl backdrop-blur-md` |
+| **Mobile Hero Plan Card** | `rounded-[1.75rem] p-4 sm:p-5 shadow-2xl relative overflow-hidden bg-gradient-to-b from-brand-950/95 via-slate-900/95 to-indigo-950/95 border-2 border-brand-400/70` |
+| **Mobile In-Card Price Tag** | `py-2.5 px-3 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-between` |
 | **Tier 1 Card (Starter)** | `bg-slate-900/50 border border-white/10 hover:border-blue-400/40 rounded-3xl p-6` |
 | **Tier 2 Card (Featured)** | `bg-gradient-to-b from-brand-950/90 via-slate-900/95 to-indigo-950/90 border-2 border-brand-400/80 shadow-[0_0_35px_rgba(37,99,235,0.25)] ring-2 ring-brand-400/30 rounded-3xl p-6 lg:p-7 transform lg:-translate-y-2` |
 | **Tier 3 Card (VIP Pass)** | `bg-slate-900/50 border border-purple-500/30 hover:border-purple-400/60 rounded-3xl p-6` |

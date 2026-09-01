@@ -502,14 +502,75 @@ async function startServer() {
 
   // Helper to resolve official product prices from database
   const getProductPrice = async (productId: string, productType: string): Promise<number> => {
-    if (productId === 'full_access') {
-      return 999; // Fallback global Full Access price
+    const normType = (productType || '').toLowerCase();
+    const normId = (productId || '').toLowerCase();
+
+    // 1. All-Access Mega Pass (Tier 3)
+    if (
+      normId === 'full_access' || 
+      normId === 'all-access' || 
+      normId === 'all-access-pass' || 
+      normId === 'mega_pass' ||
+      normType === 'all_access' ||
+      normType === 'all-access' ||
+      normType === 'mega_pass'
+    ) {
+      // Look up if any exam defines a global allAccessPrice
+      try {
+        const { data: anyExam } = await supabaseAdmin
+          .from('exams')
+          .select('description')
+          .limit(5);
+        for (const ex of (anyExam || [])) {
+          if (ex.description && ex.description.startsWith('JSON_METADATA_')) {
+            const meta = JSON.parse(ex.description.replace('JSON_METADATA_', ''));
+            if (meta.allAccessPrice && Number(meta.allAccessPrice) > 0) {
+              return Number(meta.allAccessPrice);
+            }
+          }
+        }
+      } catch (e) {}
+      return 199; // Default 1-Year All-Access Mega Pass price
     }
 
-    const normType = (productType || '').toLowerCase();
+    // 2. Starter Booster (Tier 1)
+    if (
+      normType === 'starter' || 
+      normType === 'starter_booster' || 
+      normType === 'starter-booster' ||
+      normId.startsWith('starter-booster_') ||
+      normId.startsWith('starter_')
+    ) {
+      const examId = productId.replace(/^starter-booster_|^starter_/, '');
+      if (examId) {
+        const { data: exam } = await supabaseAdmin
+          .from('exams')
+          .select('description')
+          .eq('id', examId)
+          .single();
+        if (exam?.description?.startsWith('JSON_METADATA_')) {
+          try {
+            const meta = JSON.parse(exam.description.replace('JSON_METADATA_', ''));
+            if (meta.starterPrice !== undefined && Number(meta.starterPrice) > 0) {
+              return Number(meta.starterPrice);
+            }
+          } catch (e) {}
+        }
+      }
+      return 29; // Default Starter Booster price
+    }
 
-    if (normType === 'exam_bundle' || normType === 'exam' || productId.startsWith('exam_bundle_')) {
-      const examId = productId.replace('exam_bundle_', '');
+    // 3. Full Exam Pass (Tier 2)
+    if (
+      normType === 'exam_bundle' || 
+      normType === 'exam' || 
+      normType === 'exam-pass' ||
+      normType === 'exam_pass' ||
+      productId.startsWith('exam_bundle_') ||
+      productId.startsWith('exam-pass_') ||
+      productId.startsWith('exam_')
+    ) {
+      const examId = productId.replace(/^exam_bundle_|^exam-pass_|^exam_/, '');
       const { data: exam, error } = await supabaseAdmin
         .from('exams')
         .select('description')
@@ -527,12 +588,12 @@ async function startServer() {
           if (!isPremium) {
             throw new Error('Exam bundle is not enabled for this exam');
           }
-          return Number(meta.price) || 499;
+          return Number(meta.price) || 99;
         } catch (e: any) {
           throw new Error(e.message || 'Failed to parse exam metadata');
         }
       }
-      throw new Error('Exam is not premium');
+      return 99;
     }
 
     if (normType === 'test_series' || normType === 'series') {

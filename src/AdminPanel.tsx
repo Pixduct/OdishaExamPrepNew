@@ -531,13 +531,18 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     pdfLinks: [] as { title: string; url: string }[],
     hasPracticeMode: true,
     
-    // Series / Test
+    // Series / Test / Pricing Plans
     examId: '',
     seriesId: '',
     mockCategory: 'full-length',
     mockSubject: '',
-    price: 0,
-    originalPrice: 0,
+    starterPrice: 29,
+    starterOriginalPrice: 99,
+    starterTestCount: 5,
+    price: 99,
+    originalPrice: 299,
+    allAccessPrice: 199,
+    allAccessOriginalPrice: 999,
     durationDays: 30,
     durationMinutes: 60,
     totalMarks: 100,
@@ -1986,8 +1991,13 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         keywords: item.keywords || '',
         targetExamId: item.targetExamId || '',
         isPremium: isExamPremium,
-        price: (parsedExamMeta.price !== undefined && parsedExamMeta.price !== null && parsedExamMeta.price !== '') ? Number(parsedExamMeta.price) : 499,
-        originalPrice: (parsedExamMeta.originalPrice !== undefined && parsedExamMeta.originalPrice !== null && parsedExamMeta.originalPrice !== '') ? Number(parsedExamMeta.originalPrice) : 999,
+        starterPrice: (parsedExamMeta.starterPrice !== undefined && parsedExamMeta.starterPrice !== null && parsedExamMeta.starterPrice !== '') ? Number(parsedExamMeta.starterPrice) : 29,
+        starterOriginalPrice: (parsedExamMeta.starterOriginalPrice !== undefined && parsedExamMeta.starterOriginalPrice !== null && parsedExamMeta.starterOriginalPrice !== '') ? Number(parsedExamMeta.starterOriginalPrice) : 99,
+        starterTestCount: (parsedExamMeta.starterTestCount !== undefined && parsedExamMeta.starterTestCount !== null && parsedExamMeta.starterTestCount !== '') ? Number(parsedExamMeta.starterTestCount) : 5,
+        price: (parsedExamMeta.price !== undefined && parsedExamMeta.price !== null && parsedExamMeta.price !== '') ? Number(parsedExamMeta.price) : 99,
+        originalPrice: (parsedExamMeta.originalPrice !== undefined && parsedExamMeta.originalPrice !== null && parsedExamMeta.originalPrice !== '') ? Number(parsedExamMeta.originalPrice) : 299,
+        allAccessPrice: (parsedExamMeta.allAccessPrice !== undefined && parsedExamMeta.allAccessPrice !== null && parsedExamMeta.allAccessPrice !== '') ? Number(parsedExamMeta.allAccessPrice) : 199,
+        allAccessOriginalPrice: (parsedExamMeta.allAccessOriginalPrice !== undefined && parsedExamMeta.allAccessOriginalPrice !== null && parsedExamMeta.allAccessOriginalPrice !== '') ? Number(parsedExamMeta.allAccessOriginalPrice) : 999,
         description: parsedExamMeta.description !== undefined ? parsedExamMeta.description : (item.description || ''),
         sortOrder: (item.sortOrder !== undefined && item.sortOrder !== null && item.sortOrder !== '') ? item.sortOrder : (item.sort_order || parsedExamMeta.sortOrder || 1),
         examDateStatus: parsedExamMeta.examDateStatus || (parsedExamMeta.examDate || item.examDate ? 'published' : 'tba'),
@@ -2332,8 +2342,13 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           formFillupStatus: formData.formFillupStatus || 'tba',
           formFillupEndDate: formData.formFillupEndDate || '',
           isPremium: isExamPremium,
-          price: Number(formData.price) || 0,
-          originalPrice: Number(formData.originalPrice) || 0
+          starterPrice: Number(formData.starterPrice) || 29,
+          starterOriginalPrice: Number(formData.starterOriginalPrice) || 99,
+          starterTestCount: Number(formData.starterTestCount) || 5,
+          price: Number(formData.price) || 99,
+          originalPrice: Number(formData.originalPrice) || 299,
+          allAccessPrice: Number(formData.allAccessPrice) || 199,
+          allAccessOriginalPrice: Number(formData.allAccessOriginalPrice) || 999
         };
         const payload: any = {
           name: formData.name,
@@ -3229,15 +3244,15 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
             </div>
             </div>
             
-            <div className="md:col-span-2 p-6 bg-brand-50/40 rounded-3xl border border-brand-100/50 space-y-4 mt-6">
+            <div className="md:col-span-2 p-6 bg-gradient-to-br from-brand-50/60 via-slate-50/60 to-indigo-50/60 dark:from-slate-800/80 dark:via-slate-800/40 dark:to-indigo-950/30 rounded-3xl border border-brand-200/60 dark:border-slate-700 space-y-5 mt-6 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center text-white shadow-md shadow-brand-500/10">
+                  <div className="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-brand-500/20">
                     <Award className="w-5 h-5" />
                   </div>
                   <div>
-                    <label className="text-base font-black text-slate-900 leading-tight">Full Exam Access Bundle</label>
-                    <p className="text-xs font-bold text-slate-400 italic mt-0.5">Allow users to unlock ALL question banks and mock tests for this exam at once</p>
+                    <label className="text-base font-black text-slate-900 dark:text-white leading-tight">3-Tier Dynamic Pricing & Access Plans</label>
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-0.5">Control pricing for Starter Booster (₹29), Full Exam Pass (₹99), and All-Access Pass (₹199)</p>
                   </div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -3245,15 +3260,77 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                   <div className="w-12 h-6.5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[22px] after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-sm peer-checked:bg-brand-500"></div>
                 </label>
               </div>
+
               {formData.isPremium && (
-                <div className="grid grid-cols-2 gap-6 pt-4 border-t border-brand-100/30 animate-in fade-in slide-in-from-top-2">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Bundle Price (₹)</label>
-                    <input type="number" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} className={inputClass} placeholder="e.g. 499" />
+                <div className="space-y-4 pt-4 border-t border-brand-100 dark:border-slate-700 animate-in fade-in slide-in-from-top-2">
+                  {/* Tier 1: Starter Booster */}
+                  <div className="p-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-700 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0" />
+                        <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Tier 1: Starter Booster</span>
+                        <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-800">Impulse Buy</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-400">Unlocks first N tests</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase">Offer Price (₹)</label>
+                        <input type="number" value={formData.starterPrice} onChange={e => setFormData({ ...formData, starterPrice: e.target.value })} className={inputClass} placeholder="29" />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase">MRP (₹)</label>
+                        <input type="number" value={formData.starterOriginalPrice} onChange={e => setFormData({ ...formData, starterOriginalPrice: e.target.value })} className={inputClass} placeholder="99" />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase">Include First N Tests</label>
+                        <input type="number" value={formData.starterTestCount} onChange={e => setFormData({ ...formData, starterTestCount: e.target.value })} className={inputClass} placeholder="5" />
+                      </div>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Original Price (₹)</label>
-                    <input type="number" value={formData.originalPrice} onChange={e => setFormData({ ...formData, originalPrice: e.target.value })} className={inputClass} placeholder="e.g. 999" />
+
+                  {/* Tier 2: Full Exam Pass */}
+                  <div className="p-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-brand-200/80 dark:border-brand-800/60 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-brand-500 shrink-0" />
+                        <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Tier 2: Full Exam Pass</span>
+                        <span className="text-[10px] font-black text-amber-500 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-800">🔥 Most Popular</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-400">All tests & banks for this exam</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase">Exam Pass Price (₹)</label>
+                        <input type="number" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} className={inputClass} placeholder="99" />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase">MRP (₹)</label>
+                        <input type="number" value={formData.originalPrice} onChange={e => setFormData({ ...formData, originalPrice: e.target.value })} className={inputClass} placeholder="299" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tier 3: All-Odisha Mega Pass */}
+                  <div className="p-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-indigo-200/80 dark:border-indigo-800/60 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 shrink-0" />
+                        <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Tier 3: All-Odisha Mega Pass</span>
+                        <span className="text-[10px] font-black text-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">👑 1-Year VIP</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-400">Unlocks entire website</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase">All-Access Price (₹)</label>
+                        <input type="number" value={formData.allAccessPrice} onChange={e => setFormData({ ...formData, allAccessPrice: e.target.value })} className={inputClass} placeholder="199" />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase">MRP (₹)</label>
+                        <input type="number" value={formData.allAccessOriginalPrice} onChange={e => setFormData({ ...formData, allAccessOriginalPrice: e.target.value })} className={inputClass} placeholder="999" />
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}

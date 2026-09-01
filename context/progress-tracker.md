@@ -1,6 +1,11 @@
 # Progress Tracker
 
 ## Completed Tasks
+- [x] 💳 3-Tier Dynamic Pricing & Admin Control Architecture (`src/AdminPanel.tsx`, `src/App.tsx`, `server.ts`, `src/lib/examService.ts`):
+  1. **Admin Panel Dynamic Pricing Controller**: Added full UI control inside Exam Settings allowing admins to configure Offer Price, MRP, and included test counts for Tier 1 Starter Booster (e.g. ₹29 / 5 tests), Tier 2 Full Exam Pass (e.g. ₹99), and Tier 3 All-Odisha Mega Pass (e.g. ₹199).
+  2. **Hierarchical Access Evaluation Engine**: Implemented `evaluateTestAccess` and `evaluateBankAccess` in `examService.ts` to seamlessly validate Tier 0 (Free Test 1), Tier 1 (Starter Booster tests), Tier 2 (Full Exam Pass), and Tier 3 (1-Year All-Access VIP).
+  3. **Backend Tamper-Proof Resolution**: Enhanced `getProductPrice` in `server.ts` to dynamically resolve configured prices for `starter-booster`, `exam-pass`, and `all-access` before issuing Razorpay orders and recording entitlements in `user_purchases`.
+  4. **Mobile-First 3-Tier Checkout UI**: Upgraded the checkout modal with responsive, high-converting tier cards, instant savings badges, and 1-tap UPI checkout.
 - [x] 🔔 Universal Telegram Notification Delivery & HTML Fallback Resilience (`automations/shared/telegram.py`, `automations/ca_publisher.py`, `automations/mcq_engine.py`, all 7 GitHub Actions workflows):
   1. **Root Cause of Missing Notifications**: Python error tracebacks containing unescaped angle brackets (`<module>`, `<string>`, `<stdin>`) caused Telegram API to return `HTTP 400 Bad Request: can't parse entities`, resulting in silent notification drop.
   2. **Bulletproof Plain-Text Fallback**: If Telegram API returns HTTP 400 on HTML parsing, every script now automatically strips HTML tags and re-dispatches the notification in plain text, guaranteeing 100% delivery.

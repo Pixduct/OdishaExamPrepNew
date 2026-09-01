@@ -6472,39 +6472,69 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           return e.id === (foundTest?.examId || foundBank?.examId);
                         }) || exams[0];
 
-                      let activeExamBundlePrice = 199;
-                      let activeExamBundleOriginalPrice = 1999;
                       let activeExamBundleName = activeExamForBundle?.name || 'Complete Exam';
 
-                      if (activeExamForBundle?.description && typeof activeExamForBundle.description === 'string' && activeExamForBundle.description.startsWith('JSON_METADATA_')) {
-                        try {
-                          const meta = JSON.parse(activeExamForBundle.description.replace('JSON_METADATA_', ''));
-                          if (meta.price && Number(meta.price) > 0) activeExamBundlePrice = Number(meta.price);
-                          if (meta.originalPrice && Number(meta.originalPrice) > 0) activeExamBundleOriginalPrice = Number(meta.originalPrice);
-                        } catch (e) {}
+                      // Extract dynamic 3-tier pricing from exam metadata
+                      const examPricingMeta = (() => {
+                        if (activeExamForBundle?.description && typeof activeExamForBundle.description === 'string' && activeExamForBundle.description.startsWith('JSON_METADATA_')) {
+                          try {
+                            return JSON.parse(activeExamForBundle.description.replace('JSON_METADATA_', ''));
+                          } catch(e) { return {}; }
+                        }
+                        return (activeExamForBundle?.pricingConfig as any) || {};
+                      })();
+
+                      const starterOfferPrice = Number(examPricingMeta.starterPrice) || 29;
+                      const starterMrpPrice = Number(examPricingMeta.starterOriginalPrice) || 99;
+                      const starterTestCount = Number(examPricingMeta.starterTestCount) || 5;
+
+                      const examPassOfferPrice = Number(examPricingMeta.price) || 99;
+                      const examPassMrpPrice = Number(examPricingMeta.originalPrice) || 299;
+
+                      const megaPassOfferPrice = Number(examPricingMeta.allAccessPrice) || 199;
+                      const megaPassMrpPrice = Number(examPricingMeta.allAccessOriginalPrice) || 999;
+
+                      // Determine effective pricing based on selected checkoutTier
+                      let effectivePrice = examPassOfferPrice;
+                      let effectiveOriginalPrice = examPassMrpPrice;
+                      let effectiveProductId = `exam-pass_${activeExamForBundle?.id || selectedExam}`;
+                      let effectiveProductType = 'exam-pass';
+                      let effectiveTitle = `${activeExamBundleName} Full Exam Pass`;
+
+                      if (checkoutTier === 'starter') {
+                        effectivePrice = starterOfferPrice;
+                        effectiveOriginalPrice = starterMrpPrice;
+                        effectiveProductId = `starter-booster_${activeExamForBundle?.id || selectedExam}`;
+                        effectiveProductType = 'starter-booster';
+                        effectiveTitle = `${activeExamBundleName} Starter Booster (${starterTestCount} Tests)`;
+                      } else if (checkoutTier === 'mega') {
+                        effectivePrice = megaPassOfferPrice;
+                        effectiveOriginalPrice = megaPassMrpPrice;
+                        effectiveProductId = 'all-access';
+                        effectiveProductType = 'all-access';
+                        effectiveTitle = 'All-Odisha 1-Year Super Pass';
                       }
 
-                      const isBundleSelected = !isSingleItemPaywall || checkoutTier === 'bundle';
-                      const effectivePrice = isBundleSelected ? (isSingleItemPaywall ? activeExamBundlePrice : paywallPrice) : paywallPrice;
-                      const effectiveOriginalPrice = isBundleSelected ? (isSingleItemPaywall ? activeExamBundleOriginalPrice : paywallOriginalPrice) : paywallOriginalPrice;
-                      const effectiveProductId = isBundleSelected ? (isSingleItemPaywall ? `exam_bundle_${activeExamForBundle?.id || selectedExam}` : (paywallItemId || 'full_access')) : (paywallItemId || 'full_access');
-                      const effectiveProductType = isBundleSelected ? 'exam_bundle' : paywallProductType;
-                      const effectiveTitle = isBundleSelected ? (isSingleItemPaywall ? `${activeExamBundleName} Full Access Pass` : paywallItemTitle) : paywallItemTitle;
-                      const priceDiff = Math.max(0, activeExamBundlePrice - paywallPrice);
-                      const bundleDiscountPercent = Math.round(((activeExamBundleOriginalPrice - activeExamBundlePrice) / activeExamBundleOriginalPrice) * 100) || 90;
-                      const singleDiscountPercent = Math.round(((paywallOriginalPrice - paywallPrice) / paywallOriginalPrice) * 100) || 97;
+                      const discountPercent = Math.round(((effectiveOriginalPrice - effectivePrice) / effectiveOriginalPrice) * 100) || 80;
 
-                      const activeFeatures = isBundleSelected ? [
-                        `Unlocks ALL ${mockTests.filter(t => t.examId === activeExamForBundle?.id).length || 30}+ Mock Tests & Live Mocks`,
-                        'Unlocks ALL Question Banks & Practice Sets',
-                        'All Chapter-Wise PDF Booklets & Notes',
-                        'Detailed Step-by-Step AI Solutions & Analytics',
-                        'Lifetime Access & Free Future Updates'
+                      const activeFeatures = checkoutTier === 'mega' ? [
+                        'UNLIMITED Access to ALL OPSC, OSSC, OSSSC & Police Exams',
+                        'Unlocks ALL 500+ Mock Tests, Question Banks & Practice Modules',
+                        'All Chapter-Wise PDF Booklets & Full Solution Keys',
+                        'Unlimited 24/7 AI Mentor Doubt Solving & LaTeX Math',
+                        'Valid for 1 Full Year • All Future Test Updates Included'
+                      ] : checkoutTier === 'starter' ? [
+                        `Unlocks First ${starterTestCount} Full-Length Mock Tests for ${activeExamBundleName}`,
+                        'Access to 500+ Target Subject PYQs & Practice Sets',
+                        'Downloadable Test PDF with Step-by-Step Solutions',
+                        'Instant State Rank & Accuracy Diagnostics',
+                        'Valid for 3 Months • One-Time Payment'
                       ] : [
-                        `Full Access to ${paywallItemTitle}`,
-                        'Detailed Step-by-Step Solutions',
-                        'Unlimited Practice Mode & Retakes',
-                        'Performance & Accuracy Breakdown'
+                        `Unlocks ALL ${mockTests.filter(t => t.examId === activeExamForBundle?.id).length || 20}+ Mock Tests for ${activeExamBundleName}`,
+                        'Unlocks ALL Question Banks & Chapter Notes for this Exam',
+                        'Downloadable Test PDFs with Answer Keys & Explanations',
+                        '24/7 AI Mentor Step-by-Step Doubt Resolution',
+                        'Valid for 6 Months • Full Exam Season Access'
                       ];
 
                       return (
@@ -6522,8 +6552,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                             transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
                             className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-tr from-brand-600 via-brand-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto shadow-[0_6px_20px_rgba(37,99,235,0.25)] border border-white/10 relative group shrink-0"
                           >
-                            {isBundleSelected ? (
-                              <Crown className="text-white w-5 h-5 sm:w-6 sm:h-6 filter drop-shadow-[0_2px_6px_rgba(255,255,255,0.2)]" />
+                            {checkoutTier === 'mega' ? (
+                              <Crown className="text-amber-300 w-5 h-5 sm:w-6 sm:h-6 filter drop-shadow-[0_2px_6px_rgba(255,255,255,0.2)]" />
                             ) : (
                               <Award className="text-white w-5 h-5 sm:w-6 sm:h-6 filter drop-shadow-[0_2px_6px_rgba(255,255,255,0.2)]" />
                             )}
@@ -6532,118 +6562,138 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                           
                           <div className="space-y-1 shrink-0">
                             <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight leading-tight px-1 font-sans">
-                              {isSingleItemPaywall ? (
-                                <>Choose Your <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-brand-300 via-pink-200 to-indigo-300">Access Pass</span></>
-                              ) : paywallItemTitle.includes('Full Access') ? (
-                                <>Unlock <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-brand-300 via-pink-200 to-indigo-300">Full Access</span></>
-                              ) : (
-                                <>Unlock <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-brand-300 via-pink-200 to-indigo-300">{paywallItemTitle}</span></>
-                              )}
+                              Choose Your <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-brand-300 via-pink-200 to-indigo-300">Access Pass</span>
                             </h2>
                             <p className="text-slate-400 text-[11px] sm:text-xs font-medium leading-relaxed max-w-sm mx-auto">
-                              {isSingleItemPaywall 
-                                ? 'Get the complete exam vault for maximum savings, or unlock this single test.'
-                                : paywallItemTitle.includes('Full Access')
-                                ? 'Unlock full lifetime access to all Question Banks, Practice Mode, Premium Mock Tests, PDF notes, and any future content added to this exam.'
-                                : `Unlock full lifetime access to this specific premium content, including detailed solutions and any future updates.`
-                              }
+                              Select a plan to unlock high-yield mock tests, question banks, and instant AI doubt explanations.
                             </p>
                           </div>
 
-                          {/* Dual-Tier Interactive Selector for Single Item Checkout */}
-                          {isSingleItemPaywall && (
-                            <div className="space-y-2 text-left my-1">
-                              {/* Option A: Complete Exam All-Access Pass (Highlighted Recommended Tier) */}
-                              <div 
-                                onClick={() => setCheckoutTier('bundle')}
-                                className={cn(
-                                  "p-3 sm:p-3.5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex items-center justify-between gap-3 group select-none",
-                                  checkoutTier === 'bundle'
-                                    ? "bg-gradient-to-r from-brand-950/95 via-slate-900/95 to-indigo-950/95 border-brand-500/90 shadow-[0_0_25px_rgba(37,99,235,0.25)] ring-1 ring-brand-400/40"
-                                    : "bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20 opacity-75"
-                                )}
-                              >
-                                <div className="flex items-start gap-2.5">
-                                  <div className={cn(
-                                    "w-4.5 h-4.5 rounded-full mt-0.5 flex items-center justify-center border transition-all shrink-0",
-                                    checkoutTier === 'bundle'
-                                      ? "border-brand-400 bg-brand-500 text-white shadow-sm"
-                                      : "border-slate-600 bg-white/5"
-                                  )}>
-                                    {checkoutTier === 'bundle' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                                  </div>
-
-                                  <div className="space-y-0.5">
-                                    <div className="flex items-center gap-1.5 flex-wrap">
-                                      <span className="font-extrabold text-white text-xs sm:text-sm tracking-tight flex items-center gap-1">
-                                        🌟 Complete Exam Pass
-                                      </span>
-                                      <span className="text-[8.5px] font-black text-amber-300 uppercase tracking-wider bg-amber-500/20 border border-amber-400/30 px-1.5 py-0.5 rounded-full">
-                                        🔥 BEST VALUE
-                                      </span>
-                                    </div>
-                                    <p className="text-[10.5px] text-slate-300 font-medium leading-snug">
-                                      Unlocks <strong className="text-brand-300">ALL</strong> mock tests, banks, PDF notes & updates
-                                    </p>
-                                  </div>
-                                </div>
-
-                                <div className="text-right shrink-0">
-                                  <div className="text-sm sm:text-base font-black text-white font-mono">₹{activeExamBundlePrice}</div>
-                                  <div className="text-[10px] text-slate-500 line-through font-mono">₹{activeExamBundleOriginalPrice}</div>
-                                </div>
-                              </div>
-
-                              {/* Option B: Single Item Only */}
-                              <div 
-                                onClick={() => setCheckoutTier('single')}
-                                className={cn(
-                                  "p-2.5 sm:p-3 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex items-center justify-between gap-3 group select-none",
-                                  checkoutTier === 'single'
-                                    ? "bg-slate-900/95 border-slate-400/60 shadow-md ring-1 ring-slate-400/30"
-                                    : "bg-white/[0.02] border-white/10 hover:bg-white/[0.05] opacity-65"
-                                )}
-                              >
-                                <div className="flex items-start gap-2.5">
-                                  <div className={cn(
-                                    "w-4.5 h-4.5 rounded-full mt-0.5 flex items-center justify-center border transition-all shrink-0",
-                                    checkoutTier === 'single'
-                                      ? "border-slate-300 bg-slate-200 text-slate-900 shadow-sm"
-                                      : "border-slate-600 bg-white/5"
-                                  )}>
-                                    {checkoutTier === 'single' && <div className="w-1.5 h-1.5 rounded-full bg-slate-900" />}
-                                  </div>
-
-                                  <div className="space-y-0.5">
-                                    <span className="font-bold text-slate-200 text-xs tracking-tight block line-clamp-1">
-                                      📄 {paywallItemTitle} Only
-                                    </span>
-                                    <p className="text-[10px] text-slate-400 font-medium">
-                                      Unlocks only this 1 specific test / bank
-                                    </p>
-                                  </div>
-                                </div>
-
-                                <div className="text-right shrink-0">
-                                  <div className="text-xs sm:text-sm font-black text-slate-300 font-mono">₹{paywallPrice}</div>
-                                  <div className="text-[9.5px] text-slate-500 line-through font-mono">₹{paywallOriginalPrice}</div>
-                                </div>
-                              </div>
-
-                              {/* Dynamic Upsell Value Anchor Callout */}
-                              {checkoutTier === 'bundle' && (
-                                <div className="bg-gradient-to-r from-emerald-500/10 via-brand-500/10 to-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-1.5 flex items-center justify-between text-[10.5px] font-bold text-emerald-300">
-                                  <span className="flex items-center gap-1.5">
-                                    <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                                    Only ₹{priceDiff} more to unlock the ENTIRE exam vault!
-                                  </span>
-                                  <span className="text-[9.5px] font-black text-white bg-emerald-500/20 px-2 py-0.5 rounded-md border border-emerald-500/30 shrink-0">
-                                    Save {bundleDiscountPercent}%
-                                  </span>
-                                </div>
+                          {/* 3-Tier Interactive Selector */}
+                          <div className="space-y-2 text-left my-1">
+                            {/* Tier 1: Starter Booster (₹29) */}
+                            <div 
+                              onClick={() => setCheckoutTier('starter')}
+                              className={cn(
+                                "p-2.5 sm:p-3 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex items-center justify-between gap-3 group select-none",
+                                checkoutTier === 'starter'
+                                  ? "bg-slate-900/95 border-blue-400/80 shadow-[0_0_20px_rgba(59,130,246,0.2)] ring-1 ring-blue-400/40"
+                                  : "bg-white/[0.02] border-white/10 hover:bg-white/[0.05] opacity-75"
                               )}
+                            >
+                              <div className="flex items-start gap-2.5">
+                                <div className={cn(
+                                  "w-4 h-4 rounded-full mt-0.5 flex items-center justify-center border transition-all shrink-0",
+                                  checkoutTier === 'starter'
+                                    ? "border-blue-400 bg-blue-500 text-white shadow-sm"
+                                    : "border-slate-600 bg-white/5"
+                                )}>
+                                  {checkoutTier === 'starter' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                </div>
+
+                                <div className="space-y-0.5">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span className="font-extrabold text-white text-xs sm:text-sm tracking-tight flex items-center gap-1">
+                                      ⚡ Starter Booster
+                                    </span>
+                                    <span className="text-[8px] font-black text-blue-300 uppercase tracking-wider bg-blue-500/20 border border-blue-400/30 px-1.5 py-0.5 rounded-full">
+                                      3 MONTHS
+                                    </span>
+                                  </div>
+                                  <p className="text-[10px] sm:text-[10.5px] text-slate-300 font-medium leading-snug">
+                                    First <strong className="text-blue-300">{starterTestCount} Full Mocks</strong> + 500 PYQs + PDF Solutions
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="text-right shrink-0">
+                                <div className="text-sm sm:text-base font-black text-white font-mono">₹{starterOfferPrice}</div>
+                                <div className="text-[10px] text-slate-500 line-through font-mono">₹{starterMrpPrice}</div>
+                              </div>
                             </div>
-                          )}
+
+                            {/* Tier 2: Complete Exam Pass (₹99) - PRE-SELECTED / RECOMMENDED */}
+                            <div 
+                              onClick={() => setCheckoutTier('bundle')}
+                              className={cn(
+                                "p-3 sm:p-3.5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex items-center justify-between gap-3 group select-none",
+                                checkoutTier === 'bundle'
+                                  ? "bg-gradient-to-r from-brand-950/95 via-slate-900/95 to-indigo-950/95 border-brand-500/90 shadow-[0_0_25px_rgba(37,99,235,0.25)] ring-1 ring-brand-400/40"
+                                  : "bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20 opacity-75"
+                              )}
+                            >
+                              <div className="flex items-start gap-2.5">
+                                <div className={cn(
+                                  "w-4 h-4 rounded-full mt-0.5 flex items-center justify-center border transition-all shrink-0",
+                                  checkoutTier === 'bundle'
+                                    ? "border-brand-400 bg-brand-500 text-white shadow-sm"
+                                    : "border-slate-600 bg-white/5"
+                                )}>
+                                  {checkoutTier === 'bundle' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                </div>
+
+                                <div className="space-y-0.5">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span className="font-extrabold text-white text-xs sm:text-sm tracking-tight flex items-center gap-1">
+                                      🌟 {activeExamBundleName} Full Pass
+                                    </span>
+                                    <span className="text-[8px] font-black text-amber-300 uppercase tracking-wider bg-amber-500/20 border border-amber-400/30 px-1.5 py-0.5 rounded-full">
+                                      🔥 MOST POPULAR
+                                    </span>
+                                  </div>
+                                  <p className="text-[10px] sm:text-[10.5px] text-slate-300 font-medium leading-snug">
+                                    <strong className="text-brand-300">ALL</strong> Mocks, Question Banks, Chapter Notes & AI Mentor (6 Mos)
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="text-right shrink-0">
+                                <div className="text-sm sm:text-base font-black text-white font-mono">₹{examPassOfferPrice}</div>
+                                <div className="text-[10px] text-slate-500 line-through font-mono">₹{examPassMrpPrice}</div>
+                              </div>
+                            </div>
+
+                            {/* Tier 3: All-Odisha 1-Year Super Pass (₹199) */}
+                            <div 
+                              onClick={() => setCheckoutTier('mega')}
+                              className={cn(
+                                "p-2.5 sm:p-3 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex items-center justify-between gap-3 group select-none",
+                                checkoutTier === 'mega'
+                                  ? "bg-gradient-to-r from-indigo-950/95 via-purple-950/95 to-slate-900/95 border-indigo-400/80 shadow-[0_0_25px_rgba(99,102,241,0.25)] ring-1 ring-indigo-400/40"
+                                  : "bg-white/[0.02] border-white/10 hover:bg-white/[0.05] opacity-75"
+                              )}
+                            >
+                              <div className="flex items-start gap-2.5">
+                                <div className={cn(
+                                  "w-4 h-4 rounded-full mt-0.5 flex items-center justify-center border transition-all shrink-0",
+                                  checkoutTier === 'mega'
+                                    ? "border-indigo-400 bg-indigo-500 text-white shadow-sm"
+                                    : "border-slate-600 bg-white/5"
+                                )}>
+                                  {checkoutTier === 'mega' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                </div>
+
+                                <div className="space-y-0.5">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span className="font-extrabold text-white text-xs sm:text-sm tracking-tight flex items-center gap-1">
+                                      👑 All-Odisha Super Pass
+                                    </span>
+                                    <span className="text-[8px] font-black text-emerald-300 uppercase tracking-wider bg-emerald-500/20 border border-emerald-400/30 px-1.5 py-0.5 rounded-full">
+                                      1 YEAR VIP
+                                    </span>
+                                  </div>
+                                  <p className="text-[10px] sm:text-[10.5px] text-slate-300 font-medium leading-snug">
+                                    UNLIMITED access to <strong className="text-emerald-300">ALL</strong> OPSC, OSSC, OSSSC & Police Exams
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="text-right shrink-0">
+                                <div className="text-sm sm:text-base font-black text-white font-mono">₹{megaPassOfferPrice}</div>
+                                <div className="text-[10px] text-slate-500 line-through font-mono">₹{megaPassMrpPrice}</div>
+                              </div>
+                            </div>
+                          </div>
 
                           {/* Features Panel */}
                           <motion.div 
@@ -6682,11 +6732,11 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                                 <span className="text-xs sm:text-base font-bold text-slate-500 line-through font-mono">₹{effectiveOriginalPrice}</span>
                                 <span className="text-2xl sm:text-4xl font-black text-white font-mono tracking-tighter">₹{effectivePrice}</span>
                                 <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                                  {Math.round(((effectiveOriginalPrice - effectivePrice) / effectiveOriginalPrice) * 100)}% OFF
+                                  {discountPercent}% OFF
                                 </span>
                               </div>
                               <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                                Lifetime Access • Instant Unlock
+                                One-Time Payment • Instant UPI Unlock
                               </span>
                             </div>
 
@@ -7295,7 +7345,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
   ]);
   const [paywallItemId, setPaywallItemId] = useState<string | null>(null);
   const [paywallProductType, setPaywallProductType] = useState<string>('full_access');
-  const [checkoutTier, setCheckoutTier] = useState<'bundle' | 'single'>('bundle');
+  const [checkoutTier, setCheckoutTier] = useState<'starter' | 'bundle' | 'mega'>('bundle');
   const [loadingPractice, setLoadingPractice] = useState(false);
 
   useEffect(() => {

@@ -189,6 +189,10 @@ export interface Exam {
   sortOrder?: number;
   createdAt?: string;
   is_archived?: boolean;
+  isPremium?: boolean;
+  price?: number;
+  originalPrice?: number;
+  pricingConfig?: ExamPricingConfig;
 }
 
 export interface QuestionBank {
@@ -208,6 +212,129 @@ export interface QuestionBank {
   createdAt?: string;
   is_archived?: boolean;
   scheduled_at?: string | null;
+}
+
+/**
+ * Universal Hierarchical Access Evaluator for Mock Tests
+ * Tier 0 (Free): Test #1 or non-premium
+ * Tier 1 (Starter Booster): First N tests for this exam
+ * Tier 2 (Full Exam Pass): All tests for this exam
+ * Tier 3 (All-Access Mega Pass): Full platform unlock
+ */
+export function evaluateTestAccess(
+  user: any,
+  test: any,
+  exam?: any,
+  userPurchases: string[] = []
+): { hasAccess: boolean; reason: 'free' | 'all-access' | 'exam-pass' | 'starter-booster' | 'single' | 'locked' } {
+  // 1. Is this Test #1 or explicitly marked non-premium?
+  if (test.sortOrder === 1 || !test.isPremium) {
+    return { hasAccess: true, reason: 'free' };
+  }
+
+  // Combine user metadata purchases and userPurchases array
+  const metaPurchases: string[] = user?.user_metadata?.purchases || [];
+  const activePasses: string[] = user?.user_metadata?.activePasses || [];
+  const allPurchases = Array.from(new Set([...userPurchases, ...metaPurchases]));
+
+  // 2. All-Access Mega Pass (Tier 3)
+  if (
+    activePasses.includes('all-access') || 
+    allPurchases.includes('all-access') || 
+    allPurchases.includes('all-access-pass') || 
+    allPurchases.includes('mega_pass')
+  ) {
+    return { hasAccess: true, reason: 'all-access' };
+  }
+
+  // 3. Full Exam Pass (Tier 2)
+  let examId = test.examId;
+  if (!examId && typeof test.seriesId === 'string' && test.seriesId.startsWith('{')) {
+    try {
+      const parsed = JSON.parse(test.seriesId);
+      examId = parsed.examId;
+    } catch (e) {}
+  }
+
+  if (examId) {
+    if (
+      allPurchases.includes(`exam-pass_${examId}`) ||
+      allPurchases.includes(`exam_bundle_${examId}`) ||
+      allPurchases.includes(`exam_${examId}`) ||
+      activePasses.includes(`exam_${examId}`)
+    ) {
+      return { hasAccess: true, reason: 'exam-pass' };
+    }
+  }
+
+  // 4. Starter Booster (Tier 1)
+  if (examId && (allPurchases.includes(`starter-booster_${examId}`) || allPurchases.includes(`starter_${examId}`))) {
+    let starterLimit = 5;
+    if (exam && exam.description && typeof exam.description === 'string' && exam.description.startsWith('JSON_METADATA_')) {
+      try {
+        const meta = JSON.parse(exam.description.replace('JSON_METADATA_', ''));
+        if (meta.starterTestCount) starterLimit = Number(meta.starterTestCount);
+      } catch (e) {}
+    } else if (exam?.pricingConfig?.starterTestCount) {
+      starterLimit = Number(exam.pricingConfig.starterTestCount);
+    }
+    const testIndex = typeof test.sortOrder === 'number' ? test.sortOrder : 1;
+    if (testIndex <= starterLimit) {
+      return { hasAccess: true, reason: 'starter-booster' };
+    }
+  }
+
+  // 5. Single Test Purchase
+  if (allPurchases.includes(`mockTest__${test.id}`) || allPurchases.includes(test.id)) {
+    return { hasAccess: true, reason: 'single' };
+  }
+
+  return { hasAccess: false, reason: 'locked' };
+}
+
+/**
+ * Universal Access Evaluator for Question Banks
+ */
+export function evaluateBankAccess(
+  user: any,
+  bank: any,
+  _exam?: any,
+  userPurchases: string[] = []
+): { hasAccess: boolean; reason: 'free' | 'all-access' | 'exam-pass' | 'single' | 'locked' } {
+  if (!bank.isPremium) {
+    return { hasAccess: true, reason: 'free' };
+  }
+
+  const metaPurchases: string[] = user?.user_metadata?.purchases || [];
+  const activePasses: string[] = user?.user_metadata?.activePasses || [];
+  const allPurchases = Array.from(new Set([...userPurchases, ...metaPurchases]));
+
+  if (
+    activePasses.includes('all-access') || 
+    allPurchases.includes('all-access') || 
+    allPurchases.includes('all-access-pass') || 
+    allPurchases.includes('mega_pass')
+  ) {
+    return { hasAccess: true, reason: 'all-access' };
+  }
+
+  const examId = bank.examId;
+  if (examId) {
+    if (
+      allPurchases.includes(`exam-pass_${examId}`) ||
+      allPurchases.includes(`exam_bundle_${examId}`) ||
+      allPurchases.includes(`exam_${examId}`) ||
+      activePasses.includes(`exam_${examId}`)
+    ) {
+      return { hasAccess: true, reason: 'exam-pass' };
+    }
+  }
+
+  if (allPurchases.includes(bank.id) || allPurchases.includes(`bank_${bank.id}`)) {
+    return { hasAccess: true, reason: 'single' };
+  }
+
+  return { hasAccess: false, reason: 'locked' };
 }
 
 // --- Services ---
@@ -644,7 +771,34 @@ export const examService = {
         .select('*')
         .order('sortOrder', { ascending: true });
       if (error) throw error;
-      return ((data || []) as Exam[]).filter(ex => !ex.is_archived);
+      const exams = ((data || []) as any[]).filter(ex => !ex.is_archived);
+      return exams.map(ex => {
+        let metaObj: any = {};
+        let cleanDesc = ex.description || '';
+        if (typeof ex.description === 'string' && ex.description.startsWith('JSON_METADATA_')) {
+          try {
+            metaObj = JSON.parse(ex.description.replace('JSON_METADATA_', ''));
+            cleanDesc = metaObj.description || '';
+          } catch (e) {}
+        }
+        return {
+          ...ex,
+          description: cleanDesc,
+          rawDescription: ex.description,
+          isPremium: metaObj.isPremium ?? (Number(metaObj.price || ex.price) > 0),
+          price: Number(metaObj.price || ex.price || 99),
+          originalPrice: Number(metaObj.originalPrice || ex.originalPrice || 299),
+          pricingConfig: {
+            starterPrice: Number(metaObj.starterPrice ?? 29),
+            starterOriginalPrice: Number(metaObj.starterOriginalPrice ?? 99),
+            starterTestCount: Number(metaObj.starterTestCount ?? 5),
+            examPassPrice: Number(metaObj.price || metaObj.examPassPrice || 99),
+            examPassOriginalPrice: Number(metaObj.originalPrice || metaObj.examPassOriginalPrice || 299),
+            allAccessPrice: Number(metaObj.allAccessPrice ?? 199),
+            allAccessOriginalPrice: Number(metaObj.allAccessOriginalPrice ?? 999)
+          }
+        } as Exam;
+      });
     });
   },
   async deleteExam(id: string) {

@@ -1209,7 +1209,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       const catalogPromise = Promise.all([
         examService.getAllTestSeries(),
         examService.getAllMockTestsLite(),
-        examService.getAllExams(),
+        examService.getAllExams(true),
         examService.getAllQuestionBanks(),
       ]);
 
@@ -2022,8 +2022,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       setBankAnswerKeyFileName(loadedAnswerKeyJson ? 'existing-keys.json' : '');
     } else if (activeTab === 'exams') {
       let parsedExamMeta: any = {};
-      const rawDesc = item.rawDescription || item.description || '';
-      if (typeof rawDesc === 'string' && rawDesc.startsWith('JSON_METADATA_')) {
+      const rawDesc = (typeof item.rawDescription === 'string' && item.rawDescription.startsWith('JSON_METADATA_'))
+        ? item.rawDescription
+        : (typeof item.description === 'string' && item.description.startsWith('JSON_METADATA_') ? item.description : '');
+      if (rawDesc) {
         try {
           parsedExamMeta = JSON.parse(rawDesc.replace('JSON_METADATA_', ''));
         } catch(e) {}
@@ -2036,6 +2038,18 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         : ((item.isPremium !== undefined)
           ? Boolean(item.isPremium)
           : Boolean((parsedExamMeta.price && Number(parsedExamMeta.price) > 0) || (item.price && Number(item.price) > 0)));
+
+      // Resolve stages robustly: check array length explicitly so empty array [] does not trigger truthy short-circuit
+      let resolvedStages: string[] = [];
+      if (Array.isArray(item.stages) && item.stages.length > 0) {
+        resolvedStages = [...item.stages];
+      } else if (Array.isArray(parsedExamMeta.stages) && parsedExamMeta.stages.length > 0) {
+        resolvedStages = [...parsedExamMeta.stages];
+      } else if (parsedExamMeta.stage && typeof parsedExamMeta.stage === 'string') {
+        resolvedStages = [parsedExamMeta.stage];
+      } else if (Array.isArray(item.stages)) {
+        resolvedStages = [...item.stages];
+      }
 
       newData = {
         ...newData,
@@ -2058,12 +2072,12 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         originalPrice: (parsedExamMeta.originalPrice !== undefined && parsedExamMeta.originalPrice !== null && parsedExamMeta.originalPrice !== '') ? Number(parsedExamMeta.originalPrice) : (item.originalPrice !== undefined ? Number(item.originalPrice) : 299),
         allAccessPrice: (parsedExamMeta.allAccessPrice !== undefined && parsedExamMeta.allAccessPrice !== null && parsedExamMeta.allAccessPrice !== '') ? Number(parsedExamMeta.allAccessPrice) : 199,
         allAccessOriginalPrice: (parsedExamMeta.allAccessOriginalPrice !== undefined && parsedExamMeta.allAccessOriginalPrice !== null && parsedExamMeta.allAccessOriginalPrice !== '') ? Number(parsedExamMeta.allAccessOriginalPrice) : 999,
-        description: parsedExamMeta.description !== undefined ? parsedExamMeta.description : (item.description || ''),
+        description: parsedExamMeta.description !== undefined ? parsedExamMeta.description : (typeof item.description === 'string' && !item.description.startsWith('JSON_METADATA_') ? item.description : ''),
         sortOrder: (item.sortOrder !== undefined && item.sortOrder !== null && item.sortOrder !== '') ? item.sortOrder : (item.sort_order || parsedExamMeta.sortOrder || 1),
         examDateStatus: parsedExamMeta.examDateStatus || (parsedExamMeta.examDate || item.examDate ? 'published' : 'tba'),
         formFillupStatus: parsedExamMeta.formFillupStatus || 'tba',
         formFillupEndDate: parsedExamMeta.formFillupEndDate || '',
-        stages: parsedExamMeta.stages || item.stages || []
+        stages: resolvedStages
       };
     } else if (activeTab === 'blogs') {
       newData = {
@@ -2423,9 +2437,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           allAccessPrice: Number(formData.allAccessPrice) || 199,
           allAccessOriginalPrice: Number(formData.allAccessOriginalPrice) || 999
         };
+        const rawDescriptionString = `JSON_METADATA_${JSON.stringify(metaObj)}`;
         const payload: any = {
           name: formData.name,
-          description: `JSON_METADATA_${JSON.stringify(metaObj)}`,
+          description: rawDescriptionString,
           icon: formData.icon,
           category: activeTab === 'blogs' ? 'blog' : (formData.examCategory as 'popular' | 'upcoming' | 'blog' | 'system'),
           examDate: formData.examDate || null,
@@ -2435,15 +2450,32 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           targetExamId: formData.targetExamId
         };
         if (!validateChangeBeforePublish('exam', payload, !!editingId)) return;
+        const updatedStages = Array.isArray(formData.stages) ? [...formData.stages] : [];
         if (editingId) {
           await examService.updateExam(editingId, payload);
-          // Optimistic update: include stages explicitly since they live in formData
-          // not in payload (payload uses the serialized description blob)
-          const updatedStages = Array.isArray(formData.stages) ? formData.stages : [];
-          setExams(prev => prev.map(e => e.id === editingId ? { ...e, ...payload, id: editingId, stages: updatedStages } : e));
+          // Optimistic update: synchronously set clean description, rawDescription, stages, and pricingConfig
+          setExams(prev => prev.map(e => e.id === editingId ? {
+            ...e,
+            ...payload,
+            id: editingId,
+            description: formData.description || '',
+            rawDescription: rawDescriptionString,
+            stages: updatedStages,
+            pricingConfig: metaObj
+          } : e));
         } else {
           const res = await examService.addExam(payload);
-          if (res) setExams(prev => [...prev.filter(e => e.id !== res.id), res]);
+          if (res) {
+            const newExamObj = {
+              ...res,
+              ...payload,
+              description: formData.description || '',
+              rawDescription: rawDescriptionString,
+              stages: updatedStages,
+              pricingConfig: metaObj
+            };
+            setExams(prev => [...prev.filter(e => e.id !== res.id), newExamObj]);
+          }
         }
         try { clearCatalogCache(); } catch(e) {}
       } else if (activeTab === 'banks' || activeTab === 'practice') {

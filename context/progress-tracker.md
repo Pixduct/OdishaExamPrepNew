@@ -1,5 +1,15 @@
 # Progress Tracker
 
+- [x] 🎯 Exam Stage Modal Hydration & Truthy Array Fallback Fix (`src/AdminPanel.tsx`):
+  1. **Root Cause Analysis (Truthy Array Trap & Incomplete Optimistic Update)**:
+     - *JavaScript Array Truthiness Bug*: In `handleEditClick`, `stages: parsedExamMeta.stages || item.stages || []` was used. In JavaScript, empty arrays are truthy (`Boolean([]) === true`). When opening an exam whose parsed metadata contained `stages: []`, the expression evaluated to `[]` instead of falling back to `item.stages`, instantly wiping out the freshly saved stages.
+     - *Optimistic `rawDescription` Desynchronization*: In `handleAdd`, `setExams` spread `payload` which lacked `rawDescription`. As a result, `item.rawDescription` retained the old serialized metadata from initial page load. When clicking Edit, `handleEditClick` read the stale `item.rawDescription`, resulting in a 1-step lag where edits reflected the previous save rather than the latest one.
+     - *SWR Stale Cache in Admin Panel*: `fetchData()` in `AdminPanel.tsx` called `getAllExams()` without `forceFresh = true`.
+  2. **Strict Stage Resolution Order (`src/AdminPanel.tsx`)**: Refactored `handleEditClick` to explicitly check array lengths (`Array.isArray(item.stages) && item.stages.length > 0`) before falling back, preventing truthiness short-circuiting on empty arrays.
+  3. **Complete State Synchronization (`src/AdminPanel.tsx`)**: In `handleAdd`, `setExams` now synchronizes `description` (clean text), `rawDescription` (fresh `JSON_METADATA_...` string), `stages` (fresh array), and `pricingConfig` (fresh object) for both edit and creation pathways.
+  4. **Force Fresh Catalog Fetch (`src/AdminPanel.tsx`)**: Updated `fetchData()` to invoke `examService.getAllExams(true)` ensuring zero cache pollution in the admin dashboard.
+  5. **Zero TypeScript Errors & Verified Production Build**: `npx tsc --noEmit` exited with code 0; `npm run build` completed cleanly in 35.88s.
+
 - [x] ⚡ Exam Stage Save Reliability & Event Race Invalidation Engine (`src/lib/examService.ts`, `src/AdminPanel.tsx`, `src/App.tsx`):
   1. **Root Cause Analysis (Race Condition & Cascade)**: Identified 4 interconnected causes of intermittent save failure:
      - *Pre-write event dispatch*: `clearCatalogCache()` was being called *before* database writes inside `updateExam` and `addExam`, firing `oep_catalog_updated` which triggered `fetchDashboardData()` while the DB write was still pending, causing stale data to be fetched and stored in the cache.

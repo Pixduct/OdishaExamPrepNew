@@ -4604,5 +4604,31 @@ Last updated: September 11, 2026
 - Clicking `Single Stage` automatically deselects other stages; selecting any specific stage removes `Single Stage` toggle.
 - Status badge automatically reflects mode: `⚡ Unified Mode` when 0 or `Single Stage` selected, versus `🏆 N Stages Active`.
 - Provides 1-click `Clear All` button when one or more stages are configured.
+- Hydration pattern: Evaluates `Array.isArray(item.stages) && item.stages.length > 0` before checking parsed metadata to prevent JavaScript `[]` truthiness fallback bugs when reopening in Edit mode.
+
+---
+
+### `AdminSaveButtonWithLoadingLock` (Admin Action Guard & Concurrent Save Lock)
+
+File: `src/AdminPanel.tsx` (lines 9262–9280 & 9292–9306)
+Last updated: September 11, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Background** | `bg-brand-600 hover:bg-brand-700` (Quick Save active), `bg-brand-400` (Quick Save disabled/in-flight), `premium-gradient hover:premium-glow` (Modal Submit active), `bg-brand-400` (Modal Submit disabled/in-flight) |
+| **Border** | `border border-brand-700/20` (Quick Save active), `border-brand-400/20` (Quick Save disabled) |
+| **Border radius** | `rounded-xl` (Both Quick Save and Bottom Submit) |
+| **Text — primary** | `text-xs font-black text-white` (Quick Save), `text-sm font-black text-white` (Bottom Submit) |
+| **Spacing** | `px-3 py-1.5 gap-1.5` (Quick Save), `px-8 py-3 gap-2` (Bottom Submit) |
+| **Interactive states** | `disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.98] transition-all` |
+| **Shadow** | `shadow-sm` (Quick Save), `shadow-lg shadow-brand-500/20` (Bottom Submit active), `shadow-brand-400/20` (Bottom Submit disabled) |
+| **Loading Indicator** | Inline animated SVG spinner (`animate-spin w-3.5 h-3.5` for Quick Save, `w-4 h-4` for Bottom Submit) rendering dynamically during `isSaving === true` |
+
+**Pattern notes:**
+- Rendered in dual locations inside Admin Entity Modals (`Add New` / `Edit`): (1) Top header bar (`form="add-new-form"` wired via HTML5 attribute), (2) Bottom modal actions row.
+- Bound to component-level `isSaving` state guard to permanently prevent double-click mutations and race-condition data clobbering.
+- Automatically swaps label from `Save` to `Saving…` during in-flight operations.
+- Enclosed in `finally { setIsSaving(false); }` block ensuring UI unlock even on server proxy rejections.
+
 
 

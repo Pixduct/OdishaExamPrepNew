@@ -120,6 +120,7 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`AdminBankEmptyStateBanner`** | Admin / Empty State | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L8440-L8505) | Contextual Actionable Empty State with Target Title, 1-Click AI Studio, Direct Bulk Upload, and Single Question CTAs | AdminPanel.tsx (Questions Tab) | Active |
 | **`Stage1NamingFormulaToolbar`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L3572-L3665) | 1-Click Title Formula Presets, Token Insert Chips & Delimiter-Aware Dynamic Formatter | AIQuestionStudio.tsx (Stage 1) | Active |
 | **`ExamStageTabBar`** | Navigation / Exam Detail | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) | Glassmorphic Examination Stage Selector Pill Bar, Real-time Item Counts, URL Sync (`?stage=...`) | App.tsx (Exam Detail) | Active |
+| **`AdminExamStagePicker`** | Admin / Form Control | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L3299-L3362) | Multi-Select Examination Stages Hierarchy Pill Selector with Unified Mode & Clear All Controls | AdminPanel.tsx (Exam Modal) | Active |
 
 ---
 
@@ -4577,5 +4578,31 @@ Last updated: September 11, 2026
 - Displays real-time content counts per stage (`stageTestCount`).
 - Synchronizes with URL search parameters (`?stage=prelims`, `?stage=mains`) via `window.history.replaceState` for shareable links.
 - Strictly filters items across Practice Tests (Step 1), Mock Tests (Step 2), and Question Banks (Step 3) with fallback for legacy exams and un-staged items (`!item.stage || item.stage === 'All Stages'`).
+
+---
+
+### `AdminExamStagePicker` (Examination Stages Hierarchy Multi-Select Pill Box)
+
+File: `src/AdminPanel.tsx` (lines 3299–3362)
+Last updated: September 11, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Background** | `bg-slate-100/70 dark:bg-slate-800/50` (Outer container), `bg-brand-50 dark:bg-brand-950/60` (Icon container), `bg-white dark:bg-slate-900` (Status badge & Unselected pill), `bg-brand-600` (Selected pill) |
+| **Border** | `border border-slate-200/80 dark:border-slate-700` (Outer container), `border-brand-200 dark:border-brand-800` (Icon container), `border-brand-700` (Selected pill), `border-slate-200 dark:border-slate-700` (Unselected pill), `hover:border-brand-400` (Pill hover) |
+| **Border radius** | `rounded-3xl` (Outer container), `rounded-xl` (Icon container & Pill button), `rounded-lg` (Status badge & Clear All button), `rounded-full` (Unselected dot bullet) |
+| **Text — primary** | `text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider` (Header title), `text-white` (Selected pill text), `text-slate-700 dark:text-slate-300` (Unselected pill text) |
+| **Text — secondary** | `text-xs text-slate-500 dark:text-slate-400 mt-0.5` (Description), `text-[11px] font-black uppercase tracking-wider` (Status badge), `text-rose-500 hover:text-rose-600 font-bold` (Clear All) |
+| **Spacing** | `p-5 space-y-3.5 mt-2` (Outer container), `flex flex-wrap gap-2 pt-1` (Pills flex list), `px-3.5 py-1.5` (Pill button), `px-2.5 py-1` (Status badge), `px-2 py-1` (Clear All button) |
+| **Interactive states** | `hover:border-brand-400 hover:text-brand-600 transition-all cursor-pointer select-none` (Pill button), `hover:bg-rose-50 dark:hover:bg-rose-950/40` (Clear All) |
+| **Shadow** | `shadow-xs` (Icon container & Pill button), `shadow-md shadow-brand-500/20` (Selected pill) |
+| **Accent usage** | `bg-brand-600 text-white border-brand-700 shadow-brand-500/20` (Active selection highlight) |
+
+**Pattern notes:**
+- Rendered in Admin Panel Exam Form Modal (`type === 'exam'`).
+- Renders canonical `EXAM_STAGES` (`Prelims`, `Mains`, `Tier 1`, `Tier 2`, `Tier 3`, `CBT 1`, `CBT 2`, `Paper 1`, `Paper 2`, `Screening Test`, `Written Examination`, `Single Stage`).
+- Clicking `Single Stage` automatically deselects other stages; selecting any specific stage removes `Single Stage` toggle.
+- Status badge automatically reflects mode: `⚡ Unified Mode` when 0 or `Single Stage` selected, versus `🏆 N Stages Active`.
+- Provides 1-click `Clear All` button when one or more stages are configured.
 
 

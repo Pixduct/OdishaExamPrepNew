@@ -43,7 +43,7 @@ import {
   Unlock
 } from 'lucide-react';
 import { Reorder } from 'framer-motion';
-import { examService, Question, TestSeries, MockTest, Exam, EXAM_STAGES } from './lib/examService';
+import { examService, clearCatalogCache, Question, TestSeries, MockTest, Exam, EXAM_STAGES } from './lib/examService';
 import { destroyLenis, initLenis } from './lib/lenisScroll';
 import { DEFAULT_ACHIEVERS_JOURNAL, AchieverStory } from './lib/defaultAchievers';
 import { cn, getDirectImageUrl } from './lib/utils';
@@ -1768,25 +1768,25 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
 
     if (type === 'exam') {
       if (isEdit) {
-        nextExams = exams.map(e => e.id === targetId ? { ...e, ...payload } : e);
+        nextExams = exams.map(e => e.id === targetId ? { ...e, ...payload, id: targetId } : e);
       } else {
         nextExams.push({ id: targetId, ...payload });
       }
     } else if (type === 'series') {
       if (isEdit) {
-        nextSeries = series.map(s => s.id === targetId ? { ...s, ...payload } : s);
+        nextSeries = series.map(s => s.id === targetId ? { ...s, ...payload, id: targetId } : s);
       } else {
         nextSeries.push({ id: targetId, ...payload });
       }
     } else if (type === 'test') {
       if (isEdit) {
-        nextMockTests = mockTests.map(t => t.id === targetId ? { ...t, ...payload } : t);
+        nextMockTests = mockTests.map(t => t.id === targetId ? { ...t, ...payload, id: targetId } : t);
       } else {
         nextMockTests.push({ id: targetId, ...payload });
       }
     } else if (type === 'bank') {
       if (isEdit) {
-        nextBanks = banks.map(b => b.id === targetId ? { ...b, ...payload } : b);
+        nextBanks = banks.map(b => b.id === targetId ? { ...b, ...payload, id: targetId } : b);
       } else {
         nextBanks.push({ id: targetId, ...payload });
       }
@@ -1833,15 +1833,38 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       }
     }
 
-    const validation = validateCatalogEntitlements({
+    // Baseline validation before current modification
+    const currentValidation = validateCatalogEntitlements({
+      exams,
+      mockTests,
+      testSeries: series,
+      questionBanks: banks,
+    });
+    const currentErrors = new Set(currentValidation.errors);
+
+    // Validation after current modification
+    const nextValidation = validateCatalogEntitlements({
       exams: nextExams,
       mockTests: nextMockTests,
       testSeries: nextSeries,
       questionBanks: nextBanks,
     });
 
-    if (!validation.isValid) {
-      const msg = `Conflict or Mismatch Warning:\n\n${validation.errors.join('\n')}\n\nDo you want to proceed and publish these changes anyway?`;
+    // Only surface NEW errors introduced by this specific modification
+    const introducedErrors = nextValidation.errors.filter(err => !currentErrors.has(err));
+
+    // If saving/updating a test directly, also check if that test itself lacks a valid parent
+    if (type === 'test') {
+      const testSpecificErrors = nextValidation.errors.filter(err =>
+        err.includes(targetId) || (payload.title && err.includes(payload.title))
+      );
+      testSpecificErrors.forEach(err => {
+        if (!introducedErrors.includes(err)) introducedErrors.push(err);
+      });
+    }
+
+    if (introducedErrors.length > 0) {
+      const msg = `Conflict or Mismatch Warning:\n\n${introducedErrors.join('\n')}\n\nDo you want to proceed and publish these changes anyway?`;
       return confirm(msg);
     }
     return true;
@@ -2416,15 +2439,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           const res = await examService.addExam(payload);
           if (res) setExams(prev => [...prev.filter(e => e.id !== res.id), res]);
         }
-        try { 
-          sessionStorage.removeItem('oep_admin_catalog_cache');
-          sessionStorage.removeItem('oep_cached_exams');
-          sessionStorage.removeItem('oep_cached_testSeries');
-          sessionStorage.removeItem('oep_cached_mockTests');
-          sessionStorage.removeItem('oep_cached_dynamicQuestionBanks');
-          sessionStorage.removeItem(ADMIN_CACHE_KEY); 
-          window.dispatchEvent(new Event('oep_catalog_updated'));
-        } catch(e) {}
+        try { clearCatalogCache(); } catch(e) {}
       } else if (activeTab === 'banks' || activeTab === 'practice') {
         if (!formData.examId) { alert("Please select an exam."); return; }
         
@@ -2576,11 +2591,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       await Promise.all(updates);
 
       setSelectedItemIds(new Set());
-      try {
-        sessionStorage.removeItem('oep_admin_catalog_cache');
-        sessionStorage.removeItem(ADMIN_CACHE_KEY);
-        window.dispatchEvent(new Event('oep_catalog_updated'));
-      } catch(e) {}
+      try { clearCatalogCache(); } catch(e) {}
 
       alert(`✅ Successfully updated ${total} items to ${isPrem ? 'Paywall Protected (Premium)' : '100% Free Demo'}.`);
     } catch (err: any) {
@@ -2609,11 +2620,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       await Promise.all(deletePromises);
 
       setSelectedItemIds(new Set());
-      try {
-        sessionStorage.removeItem('oep_admin_catalog_cache');
-        sessionStorage.removeItem(ADMIN_CACHE_KEY);
-        window.dispatchEvent(new Event('oep_catalog_updated'));
-      } catch(e) {}
+      try { clearCatalogCache(); } catch(e) {}
       await fetchData();
       alert(`🗑️ Successfully deleted ${total} ${itemLabel}.`);
     } catch (err: any) {

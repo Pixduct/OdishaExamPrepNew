@@ -24,6 +24,27 @@ export function fetchWithInFlightDeduplication<T>(key: string, fetcher: () => Pr
   return promise;
 }
 
+export function clearCatalogCache(): void {
+  inFlightPromises.clear();
+  cacheService.clear();
+  if (typeof sessionStorage !== 'undefined') {
+    try {
+      sessionStorage.removeItem('oep_admin_catalog_cache_v2');
+      sessionStorage.removeItem('oep_admin_catalog_cache');
+      sessionStorage.removeItem('oep_cached_exams');
+      sessionStorage.removeItem('oep_cached_testSeries');
+      sessionStorage.removeItem('oep_cached_mockTests');
+      sessionStorage.removeItem('oep_cached_dynamicQuestionBanks');
+      sessionStorage.removeItem('oep_cached_loadedForUserId');
+    } catch (e) {}
+  }
+  if (typeof window !== 'undefined') {
+    try {
+      window.dispatchEvent(new Event('oep_catalog_updated'));
+    } catch (e) {}
+  }
+}
+
 let schemaHasDiagram: boolean | null = null;
 
 async function checkSchemaHasDiagram(): Promise<boolean> {
@@ -831,12 +852,17 @@ export const examService = {
 
   // Exams
   async addExam(exam: Exam) {
-    cacheService.clear('all_exams');
+    clearCatalogCache();
     const data = await callAdminDbProxy('exams', 'insert', exam);
+    clearCatalogCache();
     return data?.[0] || data;
   },
 
-  async getAllExams() {
+  async getAllExams(forceFresh: boolean = false) {
+    if (forceFresh) {
+      cacheService.clear('all_exams');
+      inFlightPromises.delete('all_exams');
+    }
     return fetchWithInFlightDeduplication('all_exams', async () => {
       const { data, error } = await supabase
         .from('exams')
@@ -1063,23 +1089,15 @@ export const examService = {
     await callAdminDbProxy('mockTests', 'delete', undefined, undefined, { seriesId: { op: 'like', val: `%\"examId\":\"${id}\"%` } });
 
     // Delete the exam
-    cacheService.clear('all_exams');
-    cacheService.clear('all_question_banks');
-    cacheService.clear('all_test_series');
-    cacheService.clear('all_mock_tests_lite');
-    cacheService.clear('topic_counts');
+    clearCatalogCache();
     await callAdminDbProxy('exams', 'delete', undefined, id);
-    cacheService.clear('all_exams');
-    cacheService.clear('all_question_banks');
-    cacheService.clear('all_test_series');
-    cacheService.clear('all_mock_tests_lite');
-    cacheService.clear('topic_counts');
+    clearCatalogCache();
   },
 
   async updateExam(id: string, updates: Partial<Exam>) {
-    cacheService.clear('all_exams');
+    clearCatalogCache();
     const data = await callAdminDbProxy('exams', 'update', updates, id);
-    cacheService.clear('all_exams');
+    clearCatalogCache();
     return data?.[0] || data;
   },
 

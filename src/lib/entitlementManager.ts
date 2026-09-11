@@ -29,6 +29,21 @@ export interface EntitlementResolutionResult {
   needsUpdate: boolean;
 }
 
+// Helper to parse series config from mock test stringified seriesId
+export const getExamIdFromMockTest = (test: any): string | null => {
+  if (test.examId) return test.examId;
+  let seriesData = test.seriesId;
+  if (typeof seriesData === 'string' && seriesData.startsWith('{')) {
+    try {
+      seriesData = JSON.parse(seriesData);
+    } catch (e) {}
+  }
+  if (seriesData && typeof seriesData === 'object') {
+    return seriesData.examId || null;
+  }
+  return null;
+};
+
 /**
  * Resolves user entitlements, handles auto-backfilling of purchase records,
  * and synchronizes user metadata.
@@ -41,21 +56,6 @@ export function resolveUserEntitlements(
   const activePurchased = purchasedSeries || [];
   const activeRecords = purchaseRecords || [];
   const resolvedIds = new Set<string>();
-
-  // Helper to parse series config from mock test stringified seriesId
-  const getExamIdFromMockTest = (test: any): string | null => {
-    if (test.examId) return test.examId;
-    let seriesData = test.seriesId;
-    if (typeof seriesData === 'string' && seriesData.startsWith('{')) {
-      try {
-        seriesData = JSON.parse(seriesData);
-      } catch (e) {}
-    }
-    if (seriesData && typeof seriesData === 'object') {
-      return seriesData.examId || null;
-    }
-    return null;
-  };
 
   // 1. Entitlement Auditor: Self-Heal from missing array references.
   // If the user has a valid purchase record (not revoked), but it is missing
@@ -283,27 +283,33 @@ export function validateCatalogEntitlements(catalog: Catalog): {
 
   catalog.exams.forEach(e => addAndCheckId(e.id, 'exams'));
   catalog.testSeries.forEach(s => addAndCheckId(s.id, 'testSeries'));
-  catalog.mockTests.forEach(t => addAndCheckId(t.id, 'mockTests'));
+  catalog.mockTests.forEach(t => {
+    if (!t.is_archived) addAndCheckId(t.id, 'mockTests');
+  });
   catalog.questionBanks.forEach(b => addAndCheckId(b.id, 'questionBanks'));
 
   // Check that mock tests have valid seriesId or examId
   catalog.mockTests.forEach(t => {
+    if (t.is_archived) return;
     let hasValidParent = false;
-    if (t.examId && catalog.exams.some(e => e.id === t.examId)) {
+    const resolvedExamId = getExamIdFromMockTest(t);
+    if (resolvedExamId && catalog.exams.some(e => e.id === resolvedExamId)) {
       hasValidParent = true;
     }
-    if (t.seriesId && typeof t.seriesId === 'string') {
-      if (t.seriesId.startsWith('{')) {
-        try {
-          const parsed = JSON.parse(t.seriesId);
-          if (parsed.examId && catalog.exams.some(e => e.id === parsed.examId)) {
-            hasValidParent = true;
-          }
-        } catch (e) {}
-      } else if (catalog.testSeries.some(s => s.id === t.seriesId)) {
-        hasValidParent = true;
+
+    if (!hasValidParent && t.seriesId) {
+      if (typeof t.seriesId === 'string') {
+        if (!t.seriesId.startsWith('{') && catalog.testSeries.some(s => s.id === t.seriesId)) {
+          hasValidParent = true;
+        }
+      } else if (typeof t.seriesId === 'object') {
+        const seriesIdStr = t.seriesId.seriesId || t.seriesId.id;
+        if (seriesIdStr && catalog.testSeries.some(s => s.id === seriesIdStr)) {
+          hasValidParent = true;
+        }
       }
     }
+
     if (!hasValidParent) {
       errors.push(`Mismatched Parent: Mock Test "${t.title}" (${t.id}) is not linked to any valid active exam or test series.`);
     }

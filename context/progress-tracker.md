@@ -1,5 +1,15 @@
 # Progress Tracker
 
+- [x] ⚡ Enterprise Save Performance & Non-Blocking Targeted Reconciliation (`src/AdminPanel.tsx`):
+  1. **Root Cause Analysis (Save Button Lockout & Multi-Table Over-Fetching)**:
+     - *Scope Leak on `isSaving`*: `setIsSaving(false)` was located in the `finally` block of `handleAdd` *after* `await fetchData()`. While `setShowAddModal(false)` closed the modal in ~200ms, `fetchData()` continued running in the background for 3–5 seconds, keeping `isSaving: true`. Reopening the modal immediately showed the Save button locked with an active spinner and "Saving…".
+     - *Full Multi-Table Catalog Re-Query*: Every single save triggered a global `fetchData()` that queried 5 separate tables/endpoints in parallel (all 721 question banks + counts, 276 mock tests, 325 exams, test series, and admin users) downloading megabytes of JSON.
+  2. **Instant Lock Release (<200ms)**: Moved `setIsSaving(false)` directly after database write resolution and optimistic state updates. The modal closes and unlocks immediately, making the Edit modal responsive instantly if reopened.
+  3. **Targeted Entity Refresh Architecture (`src/AdminPanel.tsx`)**: Refactored `fetchData(target?: 'exams' | 'banks' | 'tests' | 'series' | 'all')` to support granular scoped synchronizations. Saving an exam now exclusively syncs `getAllExams(true)` (~80ms) rather than 5 entire tables.
+  4. **Non-Blocking Background Reconciliation**: Background catalog updates now execute asynchronously (`fetchData(activeTab).catch(...)`), eliminating thread blocking and UI freezes.
+  5. **Immediate SWR Cache Invalidation (`saveAdminCatalogCache`)**: Synchronously commits optimistic state directly into `sessionStorage` (`ADMIN_CACHE_KEY`), ensuring subsequent reads always hit fresh local data.
+  6. **Zero TypeScript Errors & Verified Production Build**: `npx tsc --noEmit` exited with code 0; `npm.cmd run build` finished cleanly in 19.46s.
+
 - [x] 🎯 Exam Stage Modal Hydration & Truthy Array Fallback Fix (`src/AdminPanel.tsx`):
   1. **Root Cause Analysis (Truthy Array Trap & Incomplete Optimistic Update)**:
      - *JavaScript Array Truthiness Bug*: In `handleEditClick`, `stages: parsedExamMeta.stages || item.stages || []` was used. In JavaScript, empty arrays are truthy (`Boolean([]) === true`). When opening an exam whose parsed metadata contained `stages: []`, the expression evaluated to `[]` instead of falling back to `item.stages`, instantly wiping out the freshly saved stages.

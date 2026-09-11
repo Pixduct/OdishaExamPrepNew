@@ -1199,8 +1199,61 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     return [];
   };
 
-  const fetchData = async () => {
-    // Only show global loading state if there is zero cached data in memory/state
+  const fetchData = async (target?: 'all' | 'exams' | 'banks' | 'practice' | 'tests' | 'series' | 'questions') => {
+    // If a specific target tab is requested, perform instant targeted synchronization
+    if (target === 'exams') {
+      try {
+        const ex = await examService.getAllExams(true);
+        if (ex && ex.length > 0) {
+          setExams(ex);
+          saveAdminCatalogCache({ ex });
+        }
+      } catch (e) {
+        console.error("Error refreshing exams:", e);
+      }
+      return;
+    }
+    if (target === 'banks' || target === 'practice') {
+      try {
+        const bks = await examService.getAllQuestionBanks();
+        if (bks) {
+          setBanks(bks);
+          saveAdminCatalogCache({ bks });
+        }
+      } catch (e) {
+        console.error("Error refreshing banks:", e);
+      }
+      return;
+    }
+    if (target === 'tests') {
+      try {
+        const ts = await examService.getAllMockTestsLite();
+        if (ts) {
+          setMockTests(ts);
+          saveAdminCatalogCache({ ts });
+        }
+      } catch (e) {
+        console.error("Error refreshing mock tests:", e);
+      }
+      return;
+    }
+    if (target === 'series') {
+      try {
+        const ss = await examService.getAllTestSeries();
+        if (ss) {
+          setSeries(ss);
+          saveAdminCatalogCache({ ss });
+        }
+      } catch (e) {
+        console.error("Error refreshing test series:", e);
+      }
+      return;
+    }
+    if (target === 'questions') {
+      return;
+    }
+
+    // Default: Full initial/global load (queries all tables in parallel)
     if (!exams.length && !mockTests.length && !banks.length && !series.length) {
       setLoading(true);
     }
@@ -2411,10 +2464,20 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         
         if (editingId) {
           await examService.updateMockTest(editingId, payload);
-          setMockTests(prev => prev.map(t => t.id === editingId ? { ...t, ...payload, id: editingId } : t));
+          setMockTests(prev => {
+            const next = prev.map(t => t.id === editingId ? { ...t, ...payload, id: editingId } : t);
+            saveAdminCatalogCache({ ts: next });
+            return next;
+          });
         } else {
           const res = await examService.createMockTest(payload);
-          if (res) setMockTests(prev => [...prev.filter(t => t.id !== res.id), res]);
+          if (res) {
+            setMockTests(prev => {
+              const next = [...prev.filter(t => t.id !== res.id), res];
+              saveAdminCatalogCache({ ts: next });
+              return next;
+            });
+          }
         }
       } else if (activeTab === 'exams' || activeTab === 'blogs') {
         const isExamPremium = formData.isPremium === true;
@@ -2454,15 +2517,19 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         if (editingId) {
           await examService.updateExam(editingId, payload);
           // Optimistic update: synchronously set clean description, rawDescription, stages, and pricingConfig
-          setExams(prev => prev.map(e => e.id === editingId ? {
-            ...e,
-            ...payload,
-            id: editingId,
-            description: formData.description || '',
-            rawDescription: rawDescriptionString,
-            stages: updatedStages,
-            pricingConfig: metaObj
-          } : e));
+          setExams(prev => {
+            const next = prev.map(e => e.id === editingId ? {
+              ...e,
+              ...payload,
+              id: editingId,
+              description: formData.description || '',
+              rawDescription: rawDescriptionString,
+              stages: updatedStages,
+              pricingConfig: metaObj
+            } : e);
+            saveAdminCatalogCache({ ex: next });
+            return next;
+          });
         } else {
           const res = await examService.addExam(payload);
           if (res) {
@@ -2474,7 +2541,11 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
               stages: updatedStages,
               pricingConfig: metaObj
             };
-            setExams(prev => [...prev.filter(e => e.id !== res.id), newExamObj]);
+            setExams(prev => {
+              const next = [...prev.filter(e => e.id !== res.id), newExamObj];
+              saveAdminCatalogCache({ ex: next });
+              return next;
+            });
           }
         }
         try { clearCatalogCache(); } catch(e) {}
@@ -2523,11 +2594,19 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         
         if (editingId) {
           await examService.updateQuestionBank(editingId, payload);
-          setBanks(prev => prev.map(b => b.id === editingId ? { ...b, ...payload, id: editingId } : b));
+          setBanks(prev => {
+            const next = prev.map(b => b.id === editingId ? { ...b, ...payload, id: editingId } : b);
+            saveAdminCatalogCache({ bks: next });
+            return next;
+          });
         } else {
           const res = await examService.createQuestionBank(payload);
           if (res) {
-            setBanks(prev => [...prev.filter(b => b.id !== res.id), { ...payload, ...res }]);
+            setBanks(prev => {
+              const next = [...prev.filter(b => b.id !== res.id), { ...payload, ...res }];
+              saveAdminCatalogCache({ bks: next });
+              return next;
+            });
           }
         }
 
@@ -2555,6 +2634,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       // Save sticky creation memory for the active tab
       saveStickyFormData(activeTab, formData);
 
+      // Instantly release saving lock and close modal for immediate UI responsiveness
+      setIsSaving(false);
       setShowAddModal(false);
       setFormData(getStickyFormData(activeTab));
       setDiagramText('');
@@ -2562,7 +2643,9 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       setBankAnswerKeyJson('');
       setBankQuestionsFileName('');
       setBankAnswerKeyFileName('');
-      await fetchData();
+
+      // Background targeted synchronization (non-blocking, fast and non-disruptive)
+      fetchData(activeTab as any).catch(err => console.warn("Background catalog refresh notice:", err));
     } catch (error: any) {
       console.error(error);
       alert('Error adding item: ' + (error.message || 'Unknown error'));

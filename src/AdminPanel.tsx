@@ -36,10 +36,14 @@ import {
   HelpCircle,
   Target,
   Save,
-  FileJson
+  FileJson,
+  Bot,
+  Wand2,
+  Lock,
+  Unlock
 } from 'lucide-react';
 import { Reorder } from 'framer-motion';
-import { examService, Question, TestSeries, MockTest, Exam } from './lib/examService';
+import { examService, Question, TestSeries, MockTest, Exam, EXAM_STAGES } from './lib/examService';
 import { destroyLenis, initLenis } from './lib/lenisScroll';
 import { DEFAULT_ACHIEVERS_JOURNAL, AchieverStory } from './lib/defaultAchievers';
 import { cn, getDirectImageUrl } from './lib/utils';
@@ -48,6 +52,7 @@ import { dropdown, modalContent, scaleIn } from './lib/animations';
 import { MathTextRenderer, DiagramRenderer, cleanJsonString, extractEmbeddedDiagram, diagramValidator } from './components/MathTextRenderer';
 import DiagramTemplateSelector from './components/DiagramTemplateSelector';
 import { validateCatalogEntitlements } from './lib/entitlementManager';
+import { AIQuestionStudio } from './components/admin/AIQuestionStudio';
 
 // --- Custom Components ---
 const SearchableDropdown = ({ value, onChange, options, placeholder, required, disabled }: { value: string, onChange: (v: string) => void, options: {value: string, label: string}[], placeholder: string, required?: boolean, disabled?: boolean }) => {
@@ -318,17 +323,19 @@ const getMockTestSubject = (t: any): string => {
 };
 
 const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () => void }) => {
-  const [activeTab, setActiveTab] = useState<'questions' | 'series' | 'tests' | 'exams' | 'banks' | 'practice' | 'users' | 'updates' | 'settings' | 'subscribers' | 'notifications'>(() => {
+  const [activeTab, setActiveTab] = useState<'questions' | 'series' | 'tests' | 'exams' | 'banks' | 'practice' | 'users' | 'updates' | 'settings' | 'subscribers' | 'notifications' | 'blogs' | 'ai-studio'>(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       const tabParam = urlParams.get('tab');
-      const validTabs = ['questions', 'series', 'tests', 'exams', 'banks', 'practice', 'users', 'updates', 'settings', 'subscribers', 'notifications'];
+      const validTabs = ['questions', 'series', 'tests', 'exams', 'banks', 'practice', 'users', 'updates', 'settings', 'subscribers', 'notifications', 'blogs', 'ai-studio'];
       if (tabParam && validTabs.includes(tabParam)) return tabParam as any;
       const saved = sessionStorage.getItem('oep_adminActiveTab');
       if (saved && validTabs.includes(saved)) return saved as any;
     }
     return 'exams';
   });
+  const [aiStudioTargetExamId, setAiStudioTargetExamId] = useState<string | undefined>(undefined);
+  const [aiStudioTargetTestId, setAiStudioTargetTestId] = useState<string | undefined>(undefined);
   const [questionFilter, setQuestionFilter] = useState<'all' | 'practice' | 'mock'>('all');
   const [examFilter, setExamFilter] = useState<'all' | 'popular' | 'upcoming'>('all');
   const [testFilter, setTestFilter] = useState<'all' | 'full-length' | 'sectional' | 'pyq' | 'daily'>('all');
@@ -405,10 +412,12 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       const urlParams = new URLSearchParams(window.location.search);
       const sub = urlParams.get('subTab');
       if (sub === 'banks' || sub === 'practice' || sub === 'all') return sub;
+      const tabParam = urlParams.get('tab');
+      if (tabParam === 'questions') return 'all';
       const saved = sessionStorage.getItem('oep_bankSubTab');
       if (saved === 'banks' || saved === 'practice' || saved === 'all') return saved as any;
     }
-    return 'banks';
+    return 'all';
   });
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -515,6 +524,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     icon: '🏛️',
     examCategory: 'popular',
     examDate: '',
+    stages: [] as string[],
+    stage: '',
     
     // Generic
     title: '',
@@ -593,6 +604,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [bulkJsonInput, setBulkJsonInput] = useState('');
   const [bulkGlobalExamId, setBulkGlobalExamId] = useState('');
+  const [bulkGlobalStage, setBulkGlobalStage] = useState('');
   const [bulkGlobalCategory, setBulkGlobalCategory] = useState('topic-wise');
   const [bulkGlobalTagline, setBulkGlobalTagline] = useState('');
   const [bulkGlobalTargetMode, setBulkGlobalTargetMode] = useState<'bank' | 'practice' | 'both'>('practice');
@@ -1914,6 +1926,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         ...newData,
         examId: item.examId || '',
         mockSubject: parsedTagline.subject || (item as any).subject || '',
+        stage: parsedTagline.stage || item.stage || '',
         type: item.type || 'topic-wise',
         target_mode: (item.target_mode || 'both') as 'bank' | 'practice' | 'both',
         title: item.title || '',
@@ -2025,7 +2038,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         sortOrder: (item.sortOrder !== undefined && item.sortOrder !== null && item.sortOrder !== '') ? item.sortOrder : (item.sort_order || parsedExamMeta.sortOrder || 1),
         examDateStatus: parsedExamMeta.examDateStatus || (parsedExamMeta.examDate || item.examDate ? 'published' : 'tba'),
         formFillupStatus: parsedExamMeta.formFillupStatus || 'tba',
-        formFillupEndDate: parsedExamMeta.formFillupEndDate || ''
+        formFillupEndDate: parsedExamMeta.formFillupEndDate || '',
+        stages: parsedExamMeta.stages || item.stages || []
       };
     } else if (activeTab === 'blogs') {
       newData = {
@@ -2094,6 +2108,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         examId: parsedMockConfig.examId || '',
         mockCategory: parsedMockConfig.category || 'full-length',
         mockSubject: parsedMockConfig.subject || '',
+        stage: parsedMockConfig.stage || item.stage || '',
         isPremium: parsedMockConfig.isPremium || false,
         price: parsedMockConfig.price || 499,
         originalPrice: parsedMockConfig.originalPrice || ((parsedMockConfig.price || 499) * 2),
@@ -2183,15 +2198,18 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       const itemSortOrder = item.sortOrder !== undefined ? Number(item.sortOrder) : getNextOrderForItem(itemSubject);
       const itemScheduledAt = computeScheduleForItem(item, i);
 
+      const itemStage = item.stage || bulkGlobalStage || undefined;
+
       try {
         if (activeTab === 'banks' || activeTab === 'practice') {
           const metaTaglineObj = {
             text: itemTagline,
             price: itemPrice,
             originalPrice: itemOrigPrice,
-            subject: item.subject || ''
+            subject: item.subject || '',
+            stage: itemStage
           };
-          const hasTaglineMeta = itemIsPremium || item.subject || itemTagline || item.price !== undefined;
+          const hasTaglineMeta = itemIsPremium || item.subject || itemTagline || item.price !== undefined || itemStage;
           const payload = {
             examId: bulkGlobalExamId,
             type: bulkGlobalCategory,
@@ -2213,6 +2231,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
             category: bulkGlobalCategory,
             subject: bulkGlobalCategory === 'sectional' ? (item.subject || '') : null,
             tagline: itemTagline || undefined,
+            stage: itemStage,
             isPremium: itemIsPremium,
             price: itemPrice,
             originalPrice: itemOrigPrice,
@@ -2312,6 +2331,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         const mockConfig = JSON.stringify({
            examId: formData.examId,
            category: formData.mockCategory,
+           stage: formData.stage || null,
            subject: formData.mockCategory === 'sectional' ? formData.mockSubject : null,
            isPremium: formData.isPremium,
            price: Number(formData.price) || 499,
@@ -2364,6 +2384,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           examDateStatus: formData.examDateStatus || 'tba',
           formFillupStatus: formData.formFillupStatus || 'tba',
           formFillupEndDate: formData.formFillupEndDate || '',
+          stages: Array.isArray(formData.stages) ? formData.stages : [],
           isPremium: isExamPremium,
           starterPrice: Number(formData.starterPrice) || 29,
           starterOriginalPrice: Number(formData.starterOriginalPrice) || 99,
@@ -2423,7 +2444,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           text: formData.tagline || '',
           price: Number(formData.price) || 499,
           originalPrice: Number(formData.originalPrice) || ((Number(formData.price) || 499) * 2),
-          subject: formData.mockSubject || ''
+          subject: formData.mockSubject || '',
+          stage: formData.stage || ''
         };
 
         const assignedTargetMode = formData.target_mode || (activeTab === 'practice' ? 'practice' : 'bank');
@@ -2437,7 +2459,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           title: formData.title,
           sortOrder: targetOrder,
           questionCount: finalQuestionCount,
-          tagline: (formData.isPremium || formData.mockSubject || formData.tagline) ? JSON.stringify(metaTaglineObj) : '',
+          tagline: (formData.isPremium || formData.mockSubject || formData.tagline || formData.stage) ? JSON.stringify(metaTaglineObj) : '',
           image: formData.image,
           isPremium: formData.isPremium,
           pdfUrl: finalPdfPayload,
@@ -2579,7 +2601,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
 
     setLoading(true);
     try {
-      const deletePromises = Array.from(selectedItemIds).map(id => {
+      const deletePromises = Array.from(selectedItemIds).map((id: string) => {
         if (activeTab === 'tests') return examService.deleteMockTest(id);
         if (activeTab === 'banks' || activeTab === 'practice') return examService.deleteQuestionBank(id);
         return Promise.resolve();
@@ -3250,6 +3272,70 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                 </div>
               </div>
             </div>
+
+            {/* Examination Stages Hierarchy */}
+            <div className="md:col-span-2 p-5 bg-slate-100/70 dark:bg-slate-800/50 rounded-3xl border border-slate-200/80 dark:border-slate-700 space-y-3.5 mt-2">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center border border-brand-200 dark:border-brand-800 shrink-0 shadow-xs">
+                    <Layers className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Examination Stages Hierarchy</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Select stages for this exam (e.g. Prelims, Mains). If Single Stage or unselected, content displays in unified mode.</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
+                    {(formData.stages || []).length === 0 || (formData.stages || []).includes('Single Stage')
+                      ? '⚡ Unified Mode'
+                      : `🏆 ${(formData.stages || []).length} Stages Active`}
+                  </span>
+                  {(formData.stages || []).length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, stages: [] })}
+                      className="text-[11px] font-bold text-rose-500 hover:text-rose-600 px-2 py-1 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all"
+                    >
+                      Clear All
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 pt-1">
+                {EXAM_STAGES.map(stageName => {
+                  const isSelected = (formData.stages || []).includes(stageName);
+                  return (
+                    <button
+                      key={stageName}
+                      type="button"
+                      onClick={() => {
+                        const current = formData.stages || [];
+                        if (stageName === 'Single Stage') {
+                          setFormData({ ...formData, stages: isSelected ? [] : ['Single Stage'] });
+                        } else {
+                          const withoutSingle = current.filter(s => s !== 'Single Stage');
+                          const updated = isSelected
+                            ? withoutSingle.filter(s => s !== stageName)
+                            : [...withoutSingle, stageName];
+                          setFormData({ ...formData, stages: updated });
+                        }
+                      }}
+                      className={cn(
+                        "px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all border shadow-xs flex items-center gap-1.5 cursor-pointer select-none",
+                        isSelected
+                          ? "bg-brand-600 text-white border-brand-700 shadow-md shadow-brand-500/20"
+                          : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-brand-400 hover:text-brand-600"
+                      )}
+                    >
+                      {isSelected ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <span className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />}
+                      <span>{stageName}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             </div>
             
             <div className="md:col-span-2 p-6 bg-gradient-to-br from-brand-50/60 via-slate-50/60 to-indigo-50/60 dark:from-slate-800/80 dark:via-slate-800/40 dark:to-indigo-950/30 rounded-3xl border border-brand-200/60 dark:border-slate-700 space-y-5 mt-6 shadow-sm">
@@ -3476,6 +3562,32 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                   <ChevronDown className="w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
               </div>
+
+              {(() => {
+                const targetExam = actualExams.find(ex => ex.id === formData.examId);
+                const stages = (targetExam?.stages && targetExam.stages.length > 0 && !targetExam.stages.includes('Single Stage'))
+                  ? targetExam.stages
+                  : [];
+                if (stages.length === 0) return null;
+                return (
+                  <div className="space-y-2 col-span-1 md:col-span-2 bg-slate-50/80 dark:bg-slate-800/40 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700">
+                    <label className={labelClass}>Target Examination Stage</label>
+                    <div className={selectWrapperClass}>
+                      <select 
+                        value={formData.stage || ''} 
+                        onChange={e => setFormData({ ...formData, stage: e.target.value })} 
+                        className={selectClass}
+                      >
+                        <option value="">-- All Stages / General (Shown across all stages) --</option>
+                        {stages.map(st => (
+                          <option key={st} value={st}>{st}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+                  </div>
+                );
+              })()}
               
               {formData.mockCategory === 'sectional' && (() => {
                 const testTitlePatterns = /Solved PYQ|Master Practice|Daily Quiz|Set \d+|Practice Set|Mock Test|Quiz \d+/i;
@@ -3719,6 +3831,33 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                   placeholder={isPracticeTab ? "e.g. Fundamental Rights & DPSP Chapter Drill" : "e.g. Indian Polity & Constitution Master Bank"} 
                 />
               </div>
+
+              {/* Target Stage (if exam has multiple stages) */}
+              {(() => {
+                const targetExam = actualExams.find(ex => ex.id === formData.examId);
+                const stages = (targetExam?.stages && targetExam.stages.length > 0 && !targetExam.stages.includes('Single Stage'))
+                  ? targetExam.stages
+                  : [];
+                if (stages.length === 0) return null;
+                return (
+                  <div className="space-y-2 col-span-1 md:col-span-2 bg-slate-50/80 dark:bg-slate-800/40 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700">
+                    <label className={labelClass}>Target Examination Stage</label>
+                    <div className={selectWrapperClass}>
+                      <select 
+                        value={formData.stage || ''} 
+                        onChange={e => setFormData({ ...formData, stage: e.target.value })} 
+                        className={selectClass}
+                      >
+                        <option value="">-- All Stages / General (Shown across all stages) --</option>
+                        {stages.map(st => (
+                          <option key={st} value={st}>{st}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Subtitle / Topics */}
               {(() => {
@@ -4974,6 +5113,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           <div className="h-6 w-px bg-slate-200 shrink-0" />
           <nav className="flex gap-2 overflow-x-auto custom-scrollbar pb-1 flex-1 min-w-0">
              {[
+              { id: 'ai-studio', label: '🤖 AI Studio', icon: Bot, isSpecial: true },
               { id: 'exams', label: 'Exams', icon: Award },
               { id: 'blogs', label: 'Blog Posts', icon: FileText },
               { id: 'banks', label: 'Question Banks', icon: BookMarked },
@@ -4986,16 +5126,22 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
               { id: 'settings', label: 'Site Settings', icon: Settings },
               { id: 'subscribers', label: 'Subscribers', icon: Mail },
               { id: 'notifications', label: 'Push Notify', icon: Bell },
-            ].map((tab) => (
+            ].map((tab: any) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={cn(
                   "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-extrabold transition-all whitespace-nowrap",
-                  activeTab === tab.id ? "bg-brand-50 text-brand-700 shadow-sm border border-brand-100" : "text-slate-500 hover:bg-slate-50"
+                  activeTab === tab.id
+                    ? tab.isSpecial
+                      ? "bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-md shadow-brand-500/30 font-black"
+                      : "bg-brand-50 text-brand-700 shadow-sm border border-brand-100"
+                    : tab.isSpecial
+                    ? "bg-brand-50/80 text-brand-700 border border-brand-200/80 hover:bg-brand-100/80 font-black"
+                    : "text-slate-500 hover:bg-slate-50"
                 )}
               >
-                <tab.icon className="w-4 h-4" />
+                <tab.icon className={cn("w-4 h-4", tab.isSpecial && activeTab !== tab.id ? "text-brand-600" : "")} />
                 {tab.label}
               </button>
             ))}
@@ -5011,108 +5157,62 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       {/* Content */}
       <main className="flex-1 overflow-y-auto p-8 sm:p-12 overscroll-contain" data-lenis-prevent>
         <div className="max-w-7xl mx-auto space-y-8">
-          <div className="flex justify-between items-end">
-            <div className="space-y-1">
-              <h2 className="text-4xl font-extrabold text-slate-950 capitalize tracking-tight">
-                {activeTab === 'banks' ? 'Question Banks' : activeTab === 'practice' ? 'Practice Sets' : `${activeTab} Manager`}
-              </h2>
-              <p className="text-slate-500 font-medium text-lg">
-                {activeTab === 'banks'
-                  ? 'Manage interactive PDF question banks & offline reference material.'
-                  : activeTab === 'practice'
-                  ? 'Manage interactive chapter-wise drills, daily quizzes, and topic practice.'
-                  : `Manage your ${activeTab} data efficiently.`}
-              </p>
-            </div>
-            <div className="flex gap-3 overflow-x-auto custom-scrollbar pb-2 items-center flex-nowrap">
-              {['questions', 'tests', 'banks', 'practice', 'exams', 'series', 'blogs', 'users'].includes(activeTab) && (
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="px-4 py-2 border border-slate-200 rounded-xl text-sm font-medium w-40 outline-none focus:border-brand-500 bg-white flex-shrink-0"
-                />
-              )}
-              {['questions', 'banks', 'practice', 'series'].includes(activeTab) && (
-                <select
-                  value={filterExamId}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setFilterExamId(val);
-                    if (activeTab === 'questions') {
-                      if (val === 'all') {
-                        setSelectedExamIdForQuestions(null);
-                        setSelectedTypeForQuestions(null);
-                        setSelectedCategoryForQuestions(null);
-                        setSelectedTargetIdForQuestions(null);
-                      } else {
-                        setSelectedExamIdForQuestions(val);
-                        setSelectedTypeForQuestions(null);
-                        setSelectedCategoryForQuestions(null);
-                        setSelectedTargetIdForQuestions(null);
+          {activeTab !== 'ai-studio' && (
+            <div className="flex justify-between items-end">
+              <div className="space-y-1">
+                <h2 className="text-4xl font-extrabold text-slate-950 capitalize tracking-tight">
+                  {activeTab === 'banks' ? 'Question Banks' : activeTab === 'practice' ? 'Practice Sets' : `${activeTab} Manager`}
+                </h2>
+                <p className="text-slate-500 font-medium text-lg">
+                  {activeTab === 'banks'
+                    ? 'Manage interactive PDF question banks & offline reference material.'
+                    : activeTab === 'practice'
+                    ? 'Manage interactive chapter-wise drills, daily quizzes, and topic practice.'
+                    : `Manage your ${activeTab} data efficiently.`}
+                </p>
+              </div>
+              <div className="flex gap-3 overflow-x-auto custom-scrollbar pb-2 items-center flex-nowrap">
+                {['questions', 'tests', 'banks', 'practice', 'exams', 'series', 'blogs', 'users'].includes(activeTab) && (
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="px-4 py-2 border border-slate-200 rounded-xl text-sm font-medium w-40 outline-none focus:border-brand-500 bg-white flex-shrink-0"
+                  />
+                )}
+                {['questions', 'banks', 'practice', 'series'].includes(activeTab) && (
+                  <select
+                    value={filterExamId}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFilterExamId(val);
+                      if (activeTab === 'questions') {
+                        if (val === 'all') {
+                          setSelectedExamIdForQuestions(null);
+                          setSelectedTypeForQuestions(null);
+                          setSelectedCategoryForQuestions(null);
+                          setSelectedTargetIdForQuestions(null);
+                        } else {
+                          setSelectedExamIdForQuestions(val);
+                          setSelectedTypeForQuestions(null);
+                          setSelectedCategoryForQuestions(null);
+                          setSelectedTargetIdForQuestions(null);
+                        }
+                      } else if (activeTab === 'banks' || activeTab === 'practice') {
+                        if (val === 'all') setSelectedExamIdForBanks(null);
+                        else setSelectedExamIdForBanks(val);
+                      } else if (activeTab === 'series') {
+                        if (val === 'all') setSelectedExamIdForSeries(null);
+                        else setSelectedExamIdForSeries(val);
                       }
-                    } else if (activeTab === 'banks' || activeTab === 'practice') {
-                      if (val === 'all') setSelectedExamIdForBanks(null);
-                      else setSelectedExamIdForBanks(val);
-                    } else if (activeTab === 'series') {
-                      if (val === 'all') setSelectedExamIdForSeries(null);
-                      else setSelectedExamIdForSeries(val);
-                    }
-                  }}
-                  className="px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold bg-white text-slate-700 outline-none focus:border-brand-500 w-32 flex-shrink-0"
-                >
-                  <option value="all">All Exams</option>
-                  {actualExams.map(ex => <option key={ex.id} value={ex.id as string}>{ex.name}</option>)}
-                </select>
-              )}
-              {activeTab === 'questions' && (
-                <>
-                  <div className="hidden lg:flex items-center bg-slate-100 p-1 rounded-xl mr-2 h-10 border border-slate-200/50 flex-shrink-0">
-                    <button onClick={() => setQuestionFilter('all')} className={cn("px-4 py-1.5 rounded-lg text-sm font-bold transition-all h-full", questionFilter === 'all' ? "bg-white shadow-sm text-brand-600" : "text-slate-500 hover:text-slate-700")}>All</button>
-                    <button onClick={() => setQuestionFilter('practice')} className={cn("px-4 py-1.5 rounded-lg text-sm font-bold transition-all h-full", questionFilter === 'practice' ? "bg-white shadow-sm text-brand-600" : "text-slate-500 hover:text-slate-700")}>Practice</button>
-                    <button onClick={() => setQuestionFilter('mock')} className={cn("px-4 py-1.5 rounded-lg text-sm font-bold transition-all h-full", questionFilter === 'mock' ? "bg-white shadow-sm text-brand-600" : "text-slate-500 hover:text-slate-700")}>Mock Tests</button>
-                  </div>
-                  <button 
-                    onClick={() => setShowBulkUploadModal(true)}
-                    className="flex items-center justify-center gap-2 px-6 py-2.5 glass border border-slate-200 rounded-xl text-sm font-extrabold hover:bg-white transition-all premium-shadow flex-shrink-0"
+                    }}
+                    className="px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold bg-white text-slate-700 outline-none focus:border-brand-500 w-32 flex-shrink-0"
                   >
-                    <Upload className="w-4 h-4" /> Bulk Upload
-                  </button>
-                  {/* Selected items delete button handled generically next to Add New */}
-                  {(() => {
-                     if (items.length === 0 || filterExamId === 'all') return null;
-                     const targetExamId = items[0].examId;
-                     const targetTopic = items[0].topic;
-                     // Only show button if all displayed items fall under the EXACT same exam and topic.
-                     const isSpecificSelection = items.every((q: any) => q.examId === targetExamId && q.topic === targetTopic);
-                     if (!isSpecificSelection) return null;
-                     
-                     return (
-                       <button 
-                         onClick={async () => {
-                            const subjectName = (targetTopic || '').startsWith('mockTest__') ? 'this Mock Test' : `the subject '${targetTopic}'`;
-                            const confirmMessage = `WARNING: Are you sure you want to delete ALL ${items.length} questions for ${subjectName}?\n\nThis action cannot be undone.`;
-                            if (!confirm(confirmMessage)) return;
-                            
-                            try {
-                                const promises = items.map((item: any) => examService.deleteQuestion(item.id));
-                                await Promise.all(promises);
-                                alert(`Successfully deleted ${items.length} questions.`);
-                                fetchData();
-                            } catch(e: any) {
-                                alert(`Failed to delete some or all questions: ${e.message}`);
-                                fetchData();
-                            }
-                         }}
-                         className="flex items-center justify-center gap-2 px-6 py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-extrabold hover:bg-red-100 transition-all premium-shadow flex-shrink-0"
-                       >
-                         <Trash2 className="w-4 h-4" /> Bulk Delete Filtered
-                       </button>
-                     );
-                  })()}
-                </>
-              )}
+                    <option value="all">All Exams</option>
+                    {actualExams.map(ex => <option key={ex.id} value={ex.id as string}>{ex.name}</option>)}
+                  </select>
+                )}
               {activeTab === 'tests' && selectedExamIdForTests && selectedCategoryForTests && (
                 <>
                   <div className="flex items-center bg-slate-100 p-1 rounded-xl mr-2 h-10 border border-slate-200/50 flex-shrink-0">
@@ -5339,9 +5439,23 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
               )}
             </div>
           </div>
+          )}
 
-          {/* Table View */}
-          {activeTab === 'settings' ? (
+          {/* Persistent AI Question Studio (Never unmounted so all drafts, generated titles & questions persist across tab navigation) */}
+          <div className={activeTab === 'ai-studio' ? 'block' : 'hidden'}>
+            <AIQuestionStudio
+              exams={actualExams}
+              mockTests={mockTests}
+              questionBanks={banks}
+              onRefreshCatalog={fetchData}
+              preselectedExamId={aiStudioTargetExamId}
+              preselectedTestId={aiStudioTargetTestId}
+            />
+          </div>
+
+          {/* Table View for Other Tabs */}
+          {activeTab !== 'ai-studio' && (
+            activeTab === 'settings' ? (
              <div className="glass rounded-[2rem] border border-slate-200/50 shadow-xl overflow-hidden bg-white/70 p-8 sm:p-12 space-y-8">
                 <div>
                   <h3 className="text-3xl font-black text-slate-900 tracking-tight">YouTube Carousel Integration</h3>
@@ -7161,7 +7275,19 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                      <motion.div
                        whileHover={{ y: -4, scale: 1.02 }}
                        whileTap={{ scale: 0.98 }}
-                       onClick={() => setSelectedTypeForQuestions('bank')}
+                       onClick={() => {
+                          setSelectedTypeForQuestions('bank');
+                          const examBanks = banks.filter(b => b.examId === selectedExamIdForQuestions);
+                          const hasBankOnly = examBanks.some(b => (b.target_mode || 'both') !== 'practice');
+                          const hasPractice = examBanks.some(b => (b.target_mode || 'both') !== 'bank');
+                          if (!hasBankOnly && hasPractice) {
+                            setBankSubTab('practice');
+                          } else if (hasBankOnly && !hasPractice) {
+                            setBankSubTab('banks');
+                          } else {
+                            setBankSubTab('all');
+                          }
+                        }}
                        className="bg-white rounded-[2rem] border border-slate-200/60 p-8 flex flex-col justify-between hover:border-brand-500/50 hover:shadow-xl hover:shadow-brand-500/5 transition-all duration-300 cursor-pointer premium-shadow group relative overflow-hidden"
                      >
                        <div className="absolute inset-0 bg-gradient-to-br from-brand-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -7211,60 +7337,104 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                       </div>
 
                       {/* Practice Sub-Tab Switcher & Category Filter Pills */}
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200/60">
-                        <div className="flex items-center gap-1 bg-slate-200/60 p-1 rounded-xl">
-                          <button
-                            onClick={() => setBankSubTab('banks')}
-                            className={cn(
-                              "px-3 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5",
-                              bankSubTab === 'banks' ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
-                            )}
-                          >
-                            📦 Question Banks
-                          </button>
-                          <button
-                            onClick={() => setBankSubTab('practice')}
-                            className={cn(
-                              "px-3 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5",
-                              bankSubTab === 'practice' ? "bg-brand-600 text-white shadow-sm" : "text-slate-600 hover:text-slate-900"
-                            )}
-                          >
-                            🎯 Practice Sets
-                          </button>
-                          <button
-                            onClick={() => setBankSubTab('all')}
-                            className={cn(
-                              "px-3 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5",
-                              bankSubTab === 'all' ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:text-slate-900"
-                            )}
-                          >
-                            🌟 All
-                          </button>
-                        </div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-xs font-black text-slate-400 uppercase tracking-wider mr-1">Category:</span>
-                          {[
-                            { id: 'all', label: 'All' },
-                            { id: 'topic-wise', label: 'Chapter-Wise' },
-                            { id: 'exam-focused', label: 'High-Yield' },
-                            { id: 'revision-sets', label: 'Daily Quizzes' },
-                            { id: 'pyq-collections', label: 'Topic PYQs' },
-                          ].map((f) => (
-                            <button
-                              key={f.id}
-                              onClick={() => setBankFilter(f.id as any)}
-                              className={cn(
-                                "px-3 py-1 rounded-xl text-xs font-extrabold transition-all cursor-pointer border",
-                                bankFilter === f.id
-                                  ? "bg-slate-800 text-white border-slate-800 shadow-xs"
-                                  : "bg-white text-slate-600 border-slate-200 hover:border-brand-300 hover:text-brand-600"
-                              )}
-                            >
-                              {f.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                      {(() => {
+                        const examBanks = banks.filter(b => b.examId === selectedExamIdForQuestions);
+                        const bankOnlyCount = examBanks.filter(b => (b.target_mode || 'both') !== 'practice').length;
+                        const practiceCount = examBanks.filter(b => (b.target_mode || 'both') !== 'bank').length;
+                        const totalExamBankCount = examBanks.length;
+
+                        return (
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200/60">
+                            <div className="flex items-center gap-1 bg-slate-200/60 p-1 rounded-xl">
+                              <button
+                                onClick={() => setBankSubTab('banks')}
+                                className={cn(
+                                  "px-3 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5",
+                                  bankSubTab === 'banks' ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
+                                )}
+                              >
+                                <span>📦 Question Banks</span>
+                                <span className={cn(
+                                  "px-1.5 py-0.5 rounded-md text-[10px] font-black",
+                                  bankSubTab === 'banks' ? "bg-slate-900 text-white" : "bg-slate-200 text-slate-700"
+                                )}>
+                                  {bankOnlyCount}
+                                </span>
+                              </button>
+                              <button
+                                onClick={() => setBankSubTab('practice')}
+                                className={cn(
+                                  "px-3 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5",
+                                  bankSubTab === 'practice' ? "bg-brand-600 text-white shadow-sm" : "text-slate-600 hover:text-slate-900"
+                                )}
+                              >
+                                <span>🎯 Practice Sets</span>
+                                <span className={cn(
+                                  "px-1.5 py-0.5 rounded-md text-[10px] font-black",
+                                  bankSubTab === 'practice' ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700"
+                                )}>
+                                  {practiceCount}
+                                </span>
+                              </button>
+                              <button
+                                onClick={() => setBankSubTab('all')}
+                                className={cn(
+                                  "px-3 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5",
+                                  bankSubTab === 'all' ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:text-slate-900"
+                                )}
+                              >
+                                <span>🌟 All</span>
+                                <span className={cn(
+                                  "px-1.5 py-0.5 rounded-md text-[10px] font-black",
+                                  bankSubTab === 'all' ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700"
+                                )}>
+                                  {totalExamBankCount}
+                                </span>
+                              </button>
+                            </div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs font-black text-slate-400 uppercase tracking-wider mr-1">Category:</span>
+                              {(bankSubTab === 'banks'
+                                ? [
+                                    { id: 'all', label: 'All' },
+                                    { id: 'topic-wise', label: 'Topic-Wise Bank' },
+                                    { id: 'exam-focused', label: 'High-Yield' },
+                                    { id: 'revision-sets', label: 'Revision Sets' },
+                                    { id: 'pyq-collections', label: 'PYQ Archives' },
+                                  ]
+                                : bankSubTab === 'practice'
+                                ? [
+                                    { id: 'all', label: 'All' },
+                                    { id: 'topic-wise', label: 'Chapter-Wise' },
+                                    { id: 'exam-focused', label: 'High-Yield' },
+                                    { id: 'revision-sets', label: 'Daily Quizzes' },
+                                    { id: 'pyq-collections', label: 'Topic PYQs' },
+                                  ]
+                                : [
+                                    { id: 'all', label: 'All' },
+                                    { id: 'topic-wise', label: 'Topic-Wise' },
+                                    { id: 'exam-focused', label: 'High-Yield' },
+                                    { id: 'revision-sets', label: 'Revision Sets' },
+                                    { id: 'pyq-collections', label: 'PYQs' },
+                                  ]
+                              ).map((f) => (
+                                <button
+                                  key={f.id}
+                                  onClick={() => setBankFilter(f.id as any)}
+                                  className={cn(
+                                    "px-3 py-1 rounded-xl text-xs font-extrabold transition-all cursor-pointer border",
+                                    bankFilter === f.id
+                                      ? "bg-slate-800 text-white border-slate-800 shadow-xs"
+                                      : "bg-white text-slate-600 border-slate-200 hover:border-brand-300 hover:text-brand-600"
+                                  )}
+                                >
+                                  {f.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })()}
 
                       {/* Subject Hierarchy Filters Bar */}
                       {availableAdminSubjects.length > 0 && (
@@ -7342,22 +7512,58 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                           });
 
                         if (questionFilteredBanks.length === 0) {
+                          const examTotal = banks.filter(b => b.examId === selectedExamIdForQuestions);
+                          const examPracticeCount = examTotal.filter(b => (b.target_mode || 'both') !== 'bank').length;
+                          const examBankCount = examTotal.filter(b => (b.target_mode || 'both') !== 'practice').length;
+
                           return (
                             <div className="bg-white rounded-[2rem] border border-slate-200/50 p-12 text-center text-slate-400 font-extrabold shadow-sm flex flex-col items-center gap-4">
-                              <p className="text-slate-500 font-bold text-base">
-                                No {bankFilter === 'all' ? '' : ({
-                                  'topic-wise': 'Chapter-Wise Practice',
-                                  'exam-focused': 'High-Yield',
-                                  'revision-sets': 'Daily Quizzes',
-                                  'pyq-collections': 'Topic PYQs'
-                                }[bankFilter] || '')} content banks found for this filter.
-                              </p>
-                              <button
-                                onClick={() => { setBankFilter('all'); setSelectedAdminBankSubject('all'); }}
-                                className="px-4 py-2 bg-brand-50 text-brand-600 rounded-xl text-xs font-black hover:bg-brand-100 transition-colors"
-                              >
-                                Clear Filters
-                              </button>
+                              <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center text-2xl shadow-inner">
+                                📂
+                              </div>
+                              <div>
+                                <p className="text-slate-800 font-extrabold text-base">
+                                  {bankSubTab === 'banks' && examBankCount === 0 && examPracticeCount > 0
+                                    ? `No Question Banks (bank mode) found for ${exams.find(e => e.id === selectedExamIdForQuestions)?.name || 'this exam'}.`
+                                    : bankSubTab === 'practice' && examPracticeCount === 0 && examBankCount > 0
+                                    ? `No Practice Sets (practice mode) found for ${exams.find(e => e.id === selectedExamIdForQuestions)?.name || 'this exam'}.`
+                                    : `No ${bankFilter === 'all' ? '' : ({
+                                        'topic-wise': 'Chapter-Wise Practice',
+                                        'exam-focused': 'High-Yield',
+                                        'revision-sets': 'Daily Quizzes',
+                                        'pyq-collections': 'Topic PYQs'
+                                      }[bankFilter] || '')} content banks found for this filter.`}
+                                </p>
+                                {bankSubTab === 'banks' && examBankCount === 0 && examPracticeCount > 0 && (
+                                  <p className="text-slate-500 font-bold text-xs mt-1">
+                                    There are <span className="text-brand-600 font-extrabold">{examPracticeCount} Practice Sets</span> available under this exam!
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 flex-wrap justify-center mt-2">
+                                {bankSubTab === 'banks' && examPracticeCount > 0 && (
+                                  <button
+                                    onClick={() => { setBankSubTab('practice'); setBankFilter('all'); setSelectedAdminBankSubject('all'); }}
+                                    className="px-4 py-2 bg-brand-600 text-white rounded-xl text-xs font-black hover:bg-brand-700 transition-all shadow-md shadow-brand-500/20"
+                                  >
+                                    🎯 Switch to Practice Sets ({examPracticeCount})
+                                  </button>
+                                )}
+                                {bankSubTab !== 'all' && examTotal.length > 0 && (
+                                  <button
+                                    onClick={() => { setBankSubTab('all'); setBankFilter('all'); setSelectedAdminBankSubject('all'); }}
+                                    className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-black hover:bg-slate-800 transition-all shadow-sm"
+                                  >
+                                    🌟 Show All ({examTotal.length})
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => { setBankSubTab('all'); setBankFilter('all'); setSelectedAdminBankSubject('all'); }}
+                                  className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-black hover:bg-slate-200 transition-colors"
+                                >
+                                  Clear Filters
+                                </button>
+                              </div>
                             </div>
                           );
                         }
@@ -7460,23 +7666,45 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                         </div>
                                         
                                         <div className="flex justify-between items-center pt-6 mt-6 border-t border-slate-100 relative z-10 gap-2">
-                                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-slate-50 text-slate-500 group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors border border-slate-100">
-                                            {count} Questions
-                                          </span>
+                                          {count === 0 ? (
+                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-amber-50 text-amber-700 border border-amber-200/80 shadow-2xs">
+                                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                                              0 Qs • Empty
+                                            </span>
+                                          ) : (
+                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-slate-50 text-slate-500 group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors border border-slate-100">
+                                              📦 {count} Questions
+                                            </span>
+                                          )}
                                           
-                                          <button
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              setBulkExamId(bank.examId);
-                                              setBulkTopic(bank.title);
-                                              setShowBulkUploadModal(true);
-                                            }}
-                                            className="px-3 py-1.5 rounded-xl text-xs font-black bg-brand-50 text-brand-600 hover:bg-brand-600 hover:text-white border border-brand-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
-                                            title="Upload questions directly to this bank"
-                                          >
-                                            <Upload className="w-3.5 h-3.5" />
-                                            <span>Upload Qs</span>
-                                          </button>
+                                          <div className="flex items-center gap-1.5">
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setAiStudioTargetExamId(bank.examId);
+                                                setAiStudioTargetTestId(bank.id);
+                                                setActiveTab('ai-studio');
+                                              }}
+                                              className="px-2.5 py-1.5 rounded-xl text-xs font-black bg-indigo-50 text-indigo-700 hover:bg-indigo-600 hover:text-white border border-indigo-200 transition-all flex items-center gap-1 cursor-pointer shadow-xs shrink-0"
+                                              title="Generate questions with AI Studio for this bank"
+                                            >
+                                              <Sparkles className="w-3.5 h-3.5" />
+                                              <span>AI Studio</span>
+                                            </button>
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setBulkExamId(bank.examId);
+                                                setBulkTopic(bank.title);
+                                                setShowBulkUploadModal(true);
+                                              }}
+                                              className="px-2.5 py-1.5 rounded-xl text-xs font-black bg-brand-50 text-brand-600 hover:bg-brand-600 hover:text-white border border-brand-200 transition-all flex items-center gap-1 cursor-pointer shadow-xs shrink-0"
+                                              title="Upload questions directly to this bank"
+                                            >
+                                              <Upload className="w-3.5 h-3.5" />
+                                              <span>Upload Qs</span>
+                                            </button>
+                                          </div>
                                         </div>
                                       </motion.div>
                                     );
@@ -7582,7 +7810,20 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                       {count} Questions
                                     </span>
                                     
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-1.5">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setAiStudioTargetExamId(selectedExamIdForQuestions || undefined);
+                                          setAiStudioTargetTestId(mt.id);
+                                          setActiveTab('ai-studio');
+                                        }}
+                                        className="px-2.5 py-1.5 rounded-xl text-xs font-black bg-indigo-50 text-indigo-700 hover:bg-indigo-600 hover:text-white border border-indigo-200 transition-all flex items-center gap-1 cursor-pointer shadow-xs shrink-0"
+                                        title="Generate questions with AI Studio for this mock test"
+                                      >
+                                        <Sparkles className="w-3.5 h-3.5" />
+                                        <span>AI Studio</span>
+                                      </button>
                                       <button
                                         onClick={(e) => {
                                           e.stopPropagation();
@@ -7590,7 +7831,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                           setBulkTopic(`mockTest__${mt.id}`);
                                           setShowBulkUploadModal(true);
                                         }}
-                                        className="px-3 py-1.5 rounded-xl text-xs font-black bg-brand-50 text-brand-600 hover:bg-brand-600 hover:text-white border border-brand-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
+                                        className="px-2.5 py-1.5 rounded-xl text-xs font-black bg-brand-50 text-brand-600 hover:bg-brand-600 hover:text-white border border-brand-200 transition-all flex items-center gap-1 cursor-pointer shadow-xs shrink-0"
                                         title="Upload questions directly to this mock test"
                                       >
                                         <Upload className="w-3.5 h-3.5" />
@@ -8116,19 +8357,38 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                       <span className="text-xs font-black uppercase tracking-wider text-slate-400 px-3 py-1">
                         Hierarchy:
                       </span>
-                      {([
-                        { id: 'all',             label: 'All Categories',      icon: '🌟', autoTab: 'all'      as const },
-                        { id: 'topic-wise',      label: 'Chapter-Wise Practice', icon: '📘', autoTab: 'banks'    as const },
-                        { id: 'exam-focused',    label: 'High-Yield Topic',    icon: '🎯', autoTab: 'practice' as const },
-                        { id: 'revision-sets',   label: 'Daily Speed Quiz',    icon: '⚡', autoTab: 'practice' as const },
-                        { id: 'pyq-collections', label: 'Topic-Wise PYQ',      icon: '📜', autoTab: 'practice' as const },
-                      ] as { id: 'all' | 'topic-wise' | 'exam-focused' | 'revision-sets' | 'pyq-collections'; label: string; icon: string; autoTab: 'all' | 'banks' | 'practice' }[]).map(cat => {
-                        // Count is ALWAYS across all sub-tabs — not filtered by bankSubTab
-                        // This ensures High-Yield shows 6 even when on Question Banks tab
+                      {(bankSubTab === 'banks'
+                        ? [
+                            { id: 'all',             label: 'All Categories',             icon: '🌟' },
+                            { id: 'topic-wise',      label: 'Topic-Wise Question Bank',   icon: '📚' },
+                            { id: 'exam-focused',    label: 'Exam-Focused High Yield',     icon: '💎' },
+                            { id: 'revision-sets',   label: 'Last-Minute Revision Sets',  icon: '⚡' },
+                            { id: 'pyq-collections', label: 'PYQ Question Archives',      icon: '📜' },
+                          ]
+                        : bankSubTab === 'practice'
+                        ? [
+                            { id: 'all',             label: 'All Categories',             icon: '🌟' },
+                            { id: 'topic-wise',      label: 'Chapter-Wise Practice',      icon: '📖' },
+                            { id: 'exam-focused',    label: 'High-Yield Topic Banks',     icon: '💎' },
+                            { id: 'revision-sets',   label: 'Daily Speed Quizzes',        icon: '⚡' },
+                            { id: 'pyq-collections', label: 'Topic-Wise Solved PYQs',     icon: '📜' },
+                          ]
+                        : [
+                            { id: 'all',             label: 'All Categories',             icon: '🌟' },
+                            { id: 'topic-wise',      label: 'Topic-Wise / Chapter-Wise',  icon: '📘' },
+                            { id: 'exam-focused',    label: 'Exam-Focused High Yield',    icon: '🎯' },
+                            { id: 'revision-sets',   label: 'Revision Sets & Quizzes',    icon: '⚡' },
+                            { id: 'pyq-collections', label: 'PYQ Collections & Archives', icon: '📜' },
+                          ]
+                      ).map(cat => {
                         const count = banks.filter(b => {
                           const matchExam = !selectedExamIdForBanks || b.examId === selectedExamIdForBanks;
-                          const matchCat = cat.id === 'all' || b.type === cat.id;
-                          return matchExam && matchCat;
+                          const matchCat = cat.id === 'all' || (b.type || 'topic-wise') === cat.id;
+                          const matchSubTab = 
+                            bankSubTab === 'banks' ? (b.target_mode || 'both') !== 'practice' :
+                            bankSubTab === 'practice' ? (b.target_mode || 'both') !== 'bank' :
+                            true;
+                          return matchExam && matchCat && matchSubTab;
                         }).length;
 
                         const isActive = bankFilter === cat.id;
@@ -8136,9 +8396,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                           <button
                             key={cat.id}
                             onClick={() => {
-                              setBankFilter(cat.id);
-                              // Auto-switch sub-tab to the right view for this category
-                              setBankSubTab(cat.autoTab);
+                              setBankFilter(cat.id as any);
                             }}
                             className={cn(
                               "flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer",
@@ -8310,13 +8568,83 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                       ))}
                     </div>
                   ) : items.length === 0 ? (
-                     <div className="px-8 py-24 text-center">
-                        <div className="flex flex-col items-center gap-4 text-slate-400">
-                          <AlertCircle className="w-12 h-12 text-slate-300" />
-                          <p className="font-extrabold text-xl text-slate-500">No items found in {activeTab}</p>
-                          <button onClick={() => openAddModal(activeTab)} className="text-brand-600 hover:text-brand-700 font-extrabold text-sm underline mt-2">Create the first record</button>
+                    (() => {
+                      const targetBank = (activeTab === 'questions' && selectedTypeForQuestions === 'bank' && selectedTargetIdForQuestions)
+                        ? banks.find(b => 
+                            (b.title === selectedTargetIdForQuestions || b.id === selectedTargetIdForQuestions || (b.title && b.title.trim().toLowerCase() === selectedTargetIdForQuestions.trim().toLowerCase())) &&
+                            (!selectedExamIdForQuestions || b.examId === selectedExamIdForQuestions)
+                          )
+                        : null;
+                      const targetMock = (activeTab === 'questions' && selectedTypeForQuestions === 'mock' && selectedTargetIdForQuestions)
+                        ? mockTests.find(m => m.id === selectedTargetIdForQuestions || m.title === selectedTargetIdForQuestions)
+                        : null;
+
+                      if (activeTab === 'questions' && selectedTargetIdForQuestions) {
+                        return (
+                          <div className="px-8 py-20 text-center max-w-lg mx-auto">
+                            <div className="flex flex-col items-center gap-4">
+                              <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/70 flex items-center justify-center text-3xl shadow-sm">
+                                🎯
+                              </div>
+                              <div>
+                                <h4 className="font-extrabold text-xl text-slate-800 tracking-tight">
+                                  No questions inside &ldquo;{targetBank?.title || targetMock?.title || selectedTargetIdForQuestions}&rdquo;
+                                </h4>
+                                <p className="text-xs text-slate-500 font-semibold mt-1.5 leading-relaxed">
+                                  This {targetBank ? (targetBank.target_mode === 'practice' ? 'Practice Set' : 'Question Bank') : 'Mock Test'} container is currently empty. Generate questions with AI Studio or bulk upload questions directly.
+                                </p>
+                              </div>
+
+                              <div className="flex items-center gap-2.5 mt-3 flex-wrap justify-center">
+                                {targetBank && (
+                                  <button
+                                    onClick={() => {
+                                      setAiStudioTargetExamId(targetBank.examId);
+                                      setAiStudioTargetTestId(targetBank.id);
+                                      setActiveTab('ai-studio');
+                                    }}
+                                    className="px-4 py-2.5 rounded-xl text-xs font-black bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 transition-all flex items-center gap-1.5 cursor-pointer"
+                                  >
+                                    <Sparkles className="w-4 h-4" />
+                                    <span>AI Studio</span>
+                                  </button>
+                                )}
+                                {targetBank && (
+                                  <button
+                                    onClick={() => {
+                                      setBulkExamId(targetBank.examId);
+                                      setBulkTopic(targetBank.title);
+                                      setShowBulkUploadModal(true);
+                                    }}
+                                    className="px-4 py-2.5 rounded-xl text-xs font-black bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-500/20 transition-all flex items-center gap-1.5 cursor-pointer"
+                                  >
+                                    <Upload className="w-4 h-4" />
+                                    <span>Upload Questions</span>
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => openAddModal('questions')}
+                                  className="px-4 py-2.5 rounded-xl text-xs font-black bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                  <span>Add Single Question</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div className="px-8 py-24 text-center">
+                          <div className="flex flex-col items-center gap-4 text-slate-400">
+                            <AlertCircle className="w-12 h-12 text-slate-300" />
+                            <p className="font-extrabold text-xl text-slate-500">No items found in {activeTab}</p>
+                            <button onClick={() => openAddModal(activeTab)} className="text-brand-600 hover:text-brand-700 font-extrabold text-sm underline mt-2">Create the first record</button>
+                          </div>
                         </div>
-                     </div>
+                      );
+                    })()
                   ) : (
                     <Reorder.Group axis="y" values={items} onReorder={handleReorder} className="divide-y divide-slate-100">
                       {items.map((item, index) => {
@@ -8440,7 +8768,14 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                       />
                                     </div>
                                     <div className="col-span-5">
-                                       <div className="font-extrabold text-slate-900 text-lg line-clamp-2 pr-4">{item.name || item.title || item.questionText || 'Untitled'}</div>
+                                       <div className="flex items-center gap-2">
+                                         <div className="font-extrabold text-slate-900 text-lg line-clamp-2 pr-4">{item.name || item.title || item.questionText || 'Untitled'}</div>
+                                         {item.stage && (
+                                           <span className="shrink-0 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200">
+                                             📍 {item.stage}
+                                           </span>
+                                         )}
+                                       </div>
                                        <div className="text-xs text-slate-400 font-bold mt-1 uppercase tracking-wider">
                                           {(() => {
                                             if (activeTab === 'banks' || activeTab === 'practice') {
@@ -8662,7 +8997,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                   )}
                 </div>
               </div>
-           )}
+           )
+          )}
         </div>
       </main>
 
@@ -8966,7 +9302,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                     <label className="text-xs font-black text-slate-600 uppercase tracking-wider">Select Exam *</label>
                     <select
                       value={bulkGlobalExamId}
-                      onChange={e => setBulkGlobalExamId(e.target.value)}
+                      onChange={e => {
+                        setBulkGlobalExamId(e.target.value);
+                        setBulkGlobalStage('');
+                      }}
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-brand-400 focus:outline-none font-bold text-sm bg-white"
                     >
                       <option value="">-- Choose Exam --</option>
@@ -8975,6 +9314,35 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                       ))}
                     </select>
                   </div>
+
+                  {/* Target Examination Stage (Only shown if selected exam has stages configured) */}
+                  {(() => {
+                    const selectedEx = exams.find((ex: any) => ex.id === bulkGlobalExamId);
+                    if (!selectedEx || !selectedEx.stages || selectedEx.stages.length === 0 || (selectedEx.stages.length === 1 && selectedEx.stages[0] === 'Single Stage')) {
+                      return null;
+                    }
+                    return (
+                      <div className="space-y-1.5 p-3 rounded-xl bg-purple-50/60 border border-purple-100 animate-in fade-in duration-150">
+                        <label className="text-xs font-black text-purple-900 uppercase tracking-wider flex items-center gap-1.5">
+                          <span>🎯 Target Examination Stage</span>
+                          <span className="text-[10px] text-purple-600 font-normal lowercase">(optional / batch-wide)</span>
+                        </label>
+                        <select
+                          value={bulkGlobalStage}
+                          onChange={e => setBulkGlobalStage(e.target.value)}
+                          className="w-full px-4 py-2 rounded-xl border border-purple-200 focus:border-purple-400 focus:outline-none font-bold text-sm bg-white text-purple-950"
+                        >
+                          <option value="">-- All Stages / General (Unified) --</option>
+                          {selectedEx.stages.map((st: string) => (
+                            <option key={st} value={st}>📍 {st}</option>
+                          ))}
+                        </select>
+                        <p className="text-[10px] text-purple-700 font-semibold">
+                          Items with individual <code className="bg-white/80 px-1 rounded font-mono">"stage"</code> in their JSON will override this batch stage.
+                        </p>
+                      </div>
+                    );
+                  })()}
 
                   {/* Target Mode — banks/practice only (placed above Category for dynamic sync) */}
                   {(activeTab === 'banks' || activeTab === 'practice') && (
@@ -9347,7 +9715,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                   />
                   <p className="text-[10px] text-slate-400 font-semibold">
                     Required per item: <code className="bg-slate-100 px-1 rounded">title</code>
-                    {' · '}Optional: <code className="bg-slate-100 px-1 rounded">subject</code>
+                    {' · '}Optional: <code className="bg-slate-100 px-1 rounded">subject</code>, <code className="bg-slate-100 px-1 rounded">stage</code>
                     {activeTab !== 'tests' ? <>, <code className="bg-slate-100 px-1 rounded">tagline</code>, <code className="bg-slate-100 px-1 rounded">price</code>, <code className="bg-slate-100 px-1 rounded">scheduled_at</code>, <code className="bg-slate-100 px-1 rounded">questionCount</code></> : <>, <code className="bg-slate-100 px-1 rounded">durationMinutes</code>, <code className="bg-slate-100 px-1 rounded">totalMarks</code>, <code className="bg-slate-100 px-1 rounded">scheduled_at</code></>}
                     {' '}(per-item values override global settings)
                   </p>

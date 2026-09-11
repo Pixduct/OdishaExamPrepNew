@@ -1519,10 +1519,12 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 
 /* ── Inline math ── */
 .math-equation-inline {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
   vertical-align: middle;
-  padding: 0 2px;
-  line-height: 1;
+  padding: 0 3px;
+  line-height: normal;
 }
 
 .math-equation-inline--default .katex {

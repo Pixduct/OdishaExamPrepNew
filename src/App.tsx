@@ -5456,11 +5456,65 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
   const currentExam = useMemo(() => exams.find((e: any) => e.id === selectedExam), [exams, selectedExam]);
 
+  // Examination Stages Hierarchy support
+  const [activeStage, setActiveStage] = useState<string>(() => {
+    try {
+      const sp = new URLSearchParams(window.location.search);
+      const urlStage = sp.get('stage');
+      return urlStage || '';
+    } catch (e) {
+      return '';
+    }
+  });
+
+  // Sync activeStage from currentExam.stages or URL
+  useEffect(() => {
+    if (!currentExam) {
+      setActiveStage('');
+      return;
+    }
+    const stages = currentExam.stages;
+    if (!stages || stages.length <= 1 || stages.includes('Single Stage')) {
+      setActiveStage('');
+      return;
+    }
+    const sp = new URLSearchParams(window.location.search);
+    const urlStage = sp.get('stage');
+    if (urlStage) {
+      const match = stages.find((s: string) => s.toLowerCase() === urlStage.toLowerCase() || s.toLowerCase().replace(/\s+/g, '-') === urlStage.toLowerCase());
+      if (match) {
+        setActiveStage(match);
+        return;
+      }
+    }
+    setActiveStage(prev => (prev && stages.includes(prev)) ? prev : stages[0]);
+  }, [currentExam]);
+
+  const handleStageSelect = (stageName: string) => {
+    setActiveStage(stageName);
+    try {
+      const sp = new URLSearchParams(window.location.search);
+      if (stageName) {
+        sp.set('stage', stageName.toLowerCase().replace(/\s+/g, '-'));
+      } else {
+        sp.delete('stage');
+      }
+      const newRelativePathQuery = window.location.pathname + (sp.toString() ? '?' + sp.toString() : '');
+      window.history.replaceState(null, '', newRelativePathQuery);
+    } catch (e) {}
+  };
+
   const setSelectedExam = (val: string | null) => {
     if (val === null) {
       sessionStorage.setItem('oep_auto_navigated_dismissed', 'true');
       sessionStorage.removeItem('oep_selectedExam');
       sessionStorage.removeItem('oep_selectedExamName');
+      try {
+        const sp = new URLSearchParams(window.location.search);
+        sp.delete('stage');
+        const newRel = window.location.pathname + (sp.toString() ? '?' + sp.toString() : '');
+        window.history.replaceState(null, '', newRel);
+      } catch (e) {}
     } else {
       sessionStorage.setItem('oep_selectedExam', val);
     }
@@ -6692,8 +6746,8 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       const totalPlatformMocks = Math.max(mockTests.length, 500);
                       const totalPlatformExams = Math.max(exams.length, 12);
 
-                      const starterSectionalLimit = Number(examPricingMeta.starterSectionalCount ?? activeExam.pricingConfig?.starterSectionalCount ?? 2);
-                      const starterBankLimit = Number(examPricingMeta.starterBankCount ?? activeExam.pricingConfig?.starterBankCount ?? 2);
+                      const starterSectionalLimit = Number(examPricingMeta.starterSectionalCount ?? activeExamForBundle?.pricingConfig?.starterSectionalCount ?? 2);
+                      const starterBankLimit = Number(examPricingMeta.starterBankCount ?? activeExamForBundle?.pricingConfig?.starterBankCount ?? 2);
 
                       // Truthful Bullet Lists:
                       const starterBullets = [
@@ -9476,6 +9530,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       // target_mode filter: 'practice' items are ONLY for Practice Mode (Step 2), not Step 1
       const mode = item.target_mode || 'both';
       if (mode === 'practice') return false;
+      if (activeStage && item.stage && item.stage !== 'All Stages' && item.stage !== activeStage) return false;
       return true;
     });
     const bankTitle = selectedBankType.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
@@ -9976,6 +10031,83 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           </div>
         </div>
 
+        {/* Executive Examination Stages Hierarchy Segmented Bar */}
+        {currentExam?.stages && currentExam.stages.length > 1 && !currentExam.stages.includes('Single Stage') && (
+          <div className="mb-6 sm:mb-8 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="p-2 sm:p-2.5 rounded-2xl bg-white/90 dark:bg-[#0B1528]/90 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 shadow-sm">
+              <div className="flex items-center justify-between px-2 py-1.5 mb-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-2 w-2 rounded-full bg-brand-500 animate-pulse" />
+                  <span className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    Select Exam Stage
+                  </span>
+                </div>
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-tight">
+                  {currentExam.stages.length} Stages Available
+                </span>
+              </div>
+
+              {/* Segmented Controller: Balanced full-width grid on mobile for <=3 stages, auto-scroll for larger counts */}
+              <div className={cn(
+                "p-1 rounded-xl bg-slate-100/90 dark:bg-[#060B16] border border-slate-200/60 dark:border-slate-800/80 relative",
+                currentExam.stages.length <= 3 
+                  ? "grid grid-flow-col auto-cols-fr gap-1.5" 
+                  : "flex items-center gap-1.5 overflow-x-auto no-scrollbar"
+              )}>
+                {currentExam.stages.map((st: string) => {
+                  const isSelected = activeStage === st;
+                  // Compute total mock tests + question banks matching this stage
+                  const stageTestCount = (mockTests || []).filter((mt: any) => {
+                    if (mt.is_archived && !hasAccessTo(mt.id, selectedExam)) return false;
+                    try {
+                      const cfg = typeof mt.seriesId === 'string' ? JSON.parse(mt.seriesId) : (mt.seriesId || {});
+                      if (cfg.examId !== selectedExam && mt.examId !== selectedExam) return false;
+                      return !mt.stage || mt.stage === st || mt.stage === 'All Stages';
+                    } catch (e) {
+                      return mt.examId === selectedExam && (!mt.stage || mt.stage === st);
+                    }
+                  }).length;
+
+                  return (
+                    <button
+                      key={st}
+                      type="button"
+                      onClick={() => handleStageSelect(st)}
+                      className={cn(
+                        "relative flex-1 py-2 sm:py-2.5 px-3 rounded-lg text-xs sm:text-sm font-black transition-colors cursor-pointer flex items-center justify-center gap-2 z-10 select-none",
+                        isSelected
+                          ? "text-brand-700 dark:text-white"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                      )}
+                    >
+                      {isSelected && (
+                        <motion.div
+                          layoutId="activeExamStageSegment"
+                          className="absolute inset-0 bg-white dark:bg-brand-600 rounded-lg shadow-sm border border-slate-200/80 dark:border-brand-500/50 -z-10"
+                          transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                        />
+                      )}
+                      
+                      <span className="truncate">{st}</span>
+                      
+                      {stageTestCount > 0 && (
+                        <span className={cn(
+                          "text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full transition-colors shrink-0",
+                          isSelected
+                            ? "bg-brand-50 dark:bg-white/20 text-brand-700 dark:text-white border border-brand-200/60 dark:border-white/10"
+                            : "bg-slate-200/80 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                        )}>
+                          {stageTestCount}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
           {/* Mobile Premium Segmented Tab Switcher */}
           {isMobile && (
             <div className="sticky top-16 z-20 -mx-4 px-4 py-2.5 bg-slate-50/95 dark:bg-[#060B16]/95 backdrop-blur-md mt-1">
@@ -10045,8 +10177,16 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           if (mt.is_archived && !hasAccessTo(mt.id, selectedExam)) return false;
           try {
             const cfg = typeof mt.seriesId === 'string' ? JSON.parse(mt.seriesId) : (mt.seriesId || {});
-            return cfg.examId === selectedExam || mt.examId === selectedExam;
-          } catch(e) { return mt.examId === selectedExam; }
+            const matchesExam = cfg.examId === selectedExam || mt.examId === selectedExam;
+            if (!matchesExam) return false;
+            if (activeStage && mt.stage && mt.stage !== 'All Stages' && mt.stage !== activeStage) return false;
+            return true;
+          } catch(e) { 
+            const matchesExam = mt.examId === selectedExam;
+            if (!matchesExam) return false;
+            if (activeStage && mt.stage && mt.stage !== 'All Stages' && mt.stage !== activeStage) return false;
+            return true;
+          }
         });
 
         // If no mock tests have been added for this exam at all -> Return null (nothing displayed there)
@@ -10669,7 +10809,9 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       if (b.is_archived && !hasAccessTo(b.id, selectedExam)) return false;
                       if (b.examId !== selectedExam) return false;
                       const mode = b.target_mode || 'both';
-                      return mode !== 'bank';
+                      if (mode === 'bank') return false;
+                      if (activeStage && b.stage && b.stage !== 'All Stages' && b.stage !== activeStage) return false;
+                      return true;
                     }).length;
 
                     return (
@@ -10829,6 +10971,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       // target_mode filter: 'bank' items are ONLY for Step 1 PDF store, NOT Practice Mode
                       const mode = item.target_mode || 'both';
                       if (mode === 'bank') return false;
+                      if (activeStage && item.stage && item.stage !== 'All Stages' && item.stage !== activeStage) return false;
                       return true;
                     });
 
@@ -10985,7 +11128,9 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     if (mt.is_archived && !hasAccessTo(mt.id, selectedExam)) return false;
                     try {
                       const cfg = JSON.parse(mt.seriesId);
-                      return cfg.examId === selectedExam && cfg.category === test.id;
+                      if (cfg.examId !== selectedExam || cfg.category !== test.id) return false;
+                      if (activeStage && mt.stage && mt.stage !== 'All Stages' && mt.stage !== activeStage) return false;
+                      return true;
                     } catch (e) {
                       return false;
                     }
@@ -11141,7 +11286,9 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   if (mt.is_archived && !hasAccessTo(mt.id, selectedExam)) return false;
                   try {
                     const cfg = JSON.parse(mt.seriesId);
-                    return cfg.examId === selectedExam && cfg.category === selectedMockCategory;
+                    if (cfg.examId !== selectedExam || cfg.category !== selectedMockCategory) return false;
+                    if (activeStage && mt.stage && mt.stage !== 'All Stages' && mt.stage !== activeStage) return false;
+                    return true;
                   } catch(e) { return false; }
                 });
 
@@ -11322,7 +11469,9 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                 if (b.is_archived && !hasAccessTo(b.id, selectedExam)) return false;
                 if (b.examId !== selectedExam) return false;
                 const mode = b.target_mode || 'both';
-                return mode !== 'practice';
+                if (mode === 'practice') return false;
+                if (activeStage && b.stage && b.stage !== 'All Stages' && b.stage !== activeStage) return false;
+                return true;
               }).length;
 
               return (

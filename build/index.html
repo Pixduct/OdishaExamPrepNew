@@ -118,6 +118,15 @@
             document.body.appendChild(div);
           } catch(e) {}
         }
+        function isChunkLoadError(msg) {
+          if (!msg) return false;
+          var str = msg.toLowerCase();
+          return str.indexOf('failed to fetch dynamically imported module') !== -1 ||
+                 str.indexOf('error loading dynamically imported module') !== -1 ||
+                 str.indexOf('loading chunk') !== -1 ||
+                 str.indexOf('loading css chunk') !== -1;
+        }
+
         function isIgnorableError(msg, stack) {
           if (!msg) return true;
           var str = (msg + ' ' + (stack || '')).toLowerCase();
@@ -126,7 +135,13 @@
                  str.indexOf('resizeobserver') !== -1 ||
                  str.indexOf('script error') !== -1 ||
                  str.indexOf('extension') !== -1 ||
-                 str.indexOf('chunk') !== -1;
+                 str.indexOf('chunk') !== -1 ||
+                 str.indexOf('failed to fetch') !== -1 ||
+                 str.indexOf('networkerror') !== -1 ||
+                 str.indexOf('aborterror') !== -1 ||
+                 str.indexOf('load failed') !== -1 ||
+                 str.indexOf('signal is aborted') !== -1 ||
+                 str.indexOf('user denied') !== -1;
         }
 
         window.addEventListener('error', function(e) {
@@ -136,9 +151,7 @@
           }
           var msg = e.message || '';
           var stack = e.error ? e.error.stack : '';
-          if (msg.indexOf('Failed to fetch dynamically') !== -1 || 
-              msg.indexOf('loading chunk') !== -1 || 
-              msg.indexOf('Failed to fetch') !== -1) {
+          if (isChunkLoadError(msg)) {
             reloadPage();
           } else if (msg && !isIgnorableError(msg, stack)) {
             showErrorOverlay(msg, stack);
@@ -147,9 +160,7 @@
         window.addEventListener('unhandledrejection', function(e) {
           var reason = e.reason && (e.reason.message || e.reason.toString()) || '';
           var stack = e.reason && e.reason.stack || '';
-          if (reason.indexOf('Failed to fetch dynamically') !== -1 || 
-              reason.indexOf('loading chunk') !== -1 || 
-              reason.indexOf('Failed to fetch') !== -1) {
+          if (isChunkLoadError(reason)) {
             reloadPage();
           } else if (reason && !isIgnorableError(reason, stack)) {
             showErrorOverlay(reason, stack);
@@ -204,14 +215,14 @@
       }
     ]
     </script>
-    <script type="module" crossorigin src="/assets/index-CArLWnek.js"></script>
+    <script type="module" crossorigin src="/assets/index-Chmbe2Dd.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-core-DwVPQc1P.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-supabase-BdjHczpr.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-motion-Drd0HiS8.js">
-    <link rel="modulepreload" crossorigin href="/assets/vendor-lucide-qqPzWSrE.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-lucide-BDQfpuRs.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-katex-BkGmXwAI.js">
     <link rel="stylesheet" crossorigin href="/assets/vendor-katex-Cp579UoJ.css">
-    <link rel="stylesheet" crossorigin href="/assets/index-BukF56AI.css">
+    <link rel="stylesheet" crossorigin href="/assets/index-UoenjLXr.css">
   </head>
   <body>
     <div id="root"></div>

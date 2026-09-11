@@ -8,7 +8,9 @@ import crypto from "crypto";
 import webpush from "web-push";
 import { createClient } from "@supabase/supabase-js";
 import { ROUTE_LIST } from "./src/lib/routes-config";
+import { generateExamStructure, generateExamQuestions, queryAIModel, refineTestTitles, auditAndVerifyQuestions } from "./src/lib/serverAiGenerator";
 
+// Server reloaded with universal multi-provider AI key router: 2026-09-09T11:09:00
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -441,7 +443,7 @@ async function startServer() {
   app.post("/api/log-error", (req, res) => {
     try {
       console.log("[Client Error Logged]", req.body);
-      fs.writeFileSync("client_error.json", JSON.stringify(req.body, null, 2));
+      safeAppendLog("client_error.log", `[${new Date().toISOString()}] ${JSON.stringify(req.body)}\n`);
       res.json({ success: true });
     } catch (e) {
       res.status(500).json({ error: "Failed to write error" });
@@ -1503,6 +1505,301 @@ async function startServer() {
     }
   });
 
+  // Admin AI Studio: Test API Key & Model Connectivity Endpoint
+  app.post("/api/admin/ai/test-key", requireAdmin, async (req, res) => {
+    try {
+      const { apiKey, model, baseUrl } = req.body;
+      const testPrompt = "Reply with a single word: OK";
+      const result = await queryAIModel("You are a system health verifier.", testPrompt, {
+        apiKey,
+        model,
+        baseUrl,
+        temperature: 0.1,
+        maxOutputTokens: 1024
+      });
+      res.json({ success: true, message: "AI Connection Successful", output: result.trim() });
+    } catch (err: any) {
+      console.error("[Admin AI Key Test Error]", err);
+      res.status(400).json({ error: err.message || "Failed to connect to AI API" });
+    }
+  });
+
+  // Admin AI Studio: Stage 1 Structure & Naming Generator Endpoint
+  app.post("/api/admin/ai/generate-structure", requireAdmin, async (req, res) => {
+    try {
+      const {
+        examId,
+        examName,
+        targetType,
+        mainSection,
+        subCategory,
+        autoCalibrate,
+        syllabusMarkdown,
+        directivesMarkdown,
+        count,
+        subjectFocus,
+        apiKey,
+        model,
+        baseUrl,
+        namingPattern,
+        mockDuration,
+        mockTotalMarks,
+        mockNegativeMarking,
+        mockQuestionCount
+      } = req.body;
+      if (!examId) {
+        return res.status(400).json({ error: "examId is required" });
+      }
+
+      const structures = await generateExamStructure({
+        examId,
+        examName: examName || examId,
+        targetType: targetType || 'mock_test',
+        mainSection,
+        subCategory,
+        autoCalibrate: autoCalibrate !== false,
+        syllabusMarkdown,
+        directivesMarkdown,
+        count: Number(count) || 6,
+        subjectFocus,
+        apiKey,
+        model,
+        baseUrl,
+        namingPattern,
+        mockDuration: typeof mockDuration === 'number' ? mockDuration : (mockDuration ? Number(mockDuration) : undefined),
+        mockTotalMarks: typeof mockTotalMarks === 'number' ? mockTotalMarks : (mockTotalMarks ? Number(mockTotalMarks) : undefined),
+        mockNegativeMarking: typeof mockNegativeMarking === 'number' ? mockNegativeMarking : (mockNegativeMarking !== undefined && mockNegativeMarking !== null && mockNegativeMarking !== '' ? Number(mockNegativeMarking) : undefined),
+        mockQuestionCount: typeof mockQuestionCount === 'number' ? mockQuestionCount : (mockQuestionCount ? Number(mockQuestionCount) : undefined)
+      });
+
+      res.json({ success: true, count: structures.length, data: structures });
+    } catch (err: any) {
+      console.error("[Admin AI Structure Generation Error]", err);
+      res.status(500).json({ error: err.message || "Failed to generate exam structure with AI" });
+    }
+  });
+
+  // Admin AI Studio: Refine Test Titles with AI Endpoint
+  app.post("/api/admin/ai/refine-titles", requireAdmin, async (req, res) => {
+    try {
+      const { titles, instruction, examName, apiKey, model, baseUrl } = req.body;
+      if (!Array.isArray(titles) || titles.length === 0) {
+        return res.status(400).json({ error: "titles array is required" });
+      }
+      if (!instruction || !instruction.trim()) {
+        return res.status(400).json({ error: "instruction is required" });
+      }
+
+      const refined = await refineTestTitles({
+        titles,
+        instruction,
+        examName,
+        apiKey,
+        model,
+        baseUrl
+      });
+
+      res.json({ success: true, titles: refined });
+    } catch (err: any) {
+      console.error("[Admin AI Title Refinement Error]", err);
+      res.status(500).json({ error: err.message || "Failed to refine test titles with AI" });
+    }
+  });
+
+  // Admin AI Studio: Stage 2 Advanced Questions Generator Endpoint (Non-streaming Fallback)
+  app.post("/api/admin/ai/generate-questions", requireAdmin, async (req, res) => {
+    try {
+      const { 
+        examId, 
+        examName, 
+        testTitle, 
+        subject, 
+        syllabusMarkdown, 
+        directivesMarkdown,
+        difficulty, 
+        questionCount, 
+        includeDiagrams, 
+        apiKey, 
+        model, 
+        baseUrl,
+        batchSize 
+      } = req.body;
+
+      if (!testTitle) {
+        return res.status(400).json({ error: "testTitle is required" });
+      }
+
+      // Pre-fetch existing question stems for this topic from database to prevent semantic collisions
+      let existingStems: string[] = [];
+      try {
+        const safeTopic = (testTitle || '').replace(/[^a-zA-Z0-9 ]/g, ' ').trim();
+        if (safeTopic) {
+          const { data: existingQ } = await supabaseAdmin
+            .from('questions')
+            .select('question')
+            .ilike('topic', `%${safeTopic}%`)
+            .limit(100);
+          if (Array.isArray(existingQ)) {
+            existingStems = existingQ.map(q => q.question).filter(Boolean);
+          }
+        }
+      } catch (e) {}
+
+      const questions = await generateExamQuestions({
+        examId: examId || 'generic',
+        examName,
+        testTitle,
+        subject,
+        syllabusMarkdown,
+        directivesMarkdown,
+        difficulty: difficulty || 'hard',
+        questionCount: Number(questionCount) || 10,
+        includeDiagrams: Boolean(includeDiagrams),
+        apiKey,
+        model,
+        baseUrl,
+        batchSize: Number(batchSize) || 10,
+        existingQuestionStems: [
+          ...existingStems,
+          ...(Array.isArray(req.body.alreadyGeneratedStems) ? req.body.alreadyGeneratedStems : [])
+        ],
+        batchNumber: req.body.batchNumber ? Number(req.body.batchNumber) : undefined
+      });
+
+      res.json({ success: true, count: questions.length, data: questions });
+    } catch (err: any) {
+      console.error("[Admin AI Questions Generation Error]", err);
+      res.status(500).json({ error: err.message || "Failed to generate questions with AI" });
+    }
+  });
+
+  // Admin AI Studio: Stage 2 Real-Time Streaming Questions Generator Endpoint (SSE)
+  app.post("/api/admin/ai/generate-questions-stream", requireAdmin, async (req, res) => {
+    // Set SSE HTTP Headers
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    if (typeof (res as any).flushHeaders === 'function') {
+      (res as any).flushHeaders();
+    }
+
+    const sendEvent = (event: string, payload: any) => {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
+      if (typeof (res as any).flush === 'function') {
+        (res as any).flush();
+      }
+    };
+
+    try {
+      const { 
+        examId, 
+        examName, 
+        testTitle, 
+        subject, 
+        syllabusMarkdown, 
+        directivesMarkdown,
+        difficulty, 
+        questionCount, 
+        includeDiagrams, 
+        apiKey, 
+        model, 
+        baseUrl,
+        batchSize 
+      } = req.body;
+
+      if (!testTitle) {
+        sendEvent("error", { error: "testTitle is required" });
+        return res.end();
+      }
+
+      // Pre-fetch existing question stems for this topic from database to prevent semantic collisions
+      let existingStems: string[] = [];
+      try {
+        const safeTopic = (testTitle || '').replace(/[^a-zA-Z0-9 ]/g, ' ').trim();
+        if (safeTopic) {
+          const { data: existingQ } = await supabaseAdmin
+            .from('questions')
+            .select('question')
+            .ilike('topic', `%${safeTopic}%`)
+            .limit(100);
+          if (Array.isArray(existingQ)) {
+            existingStems = existingQ.map(q => q.question).filter(Boolean);
+          }
+        }
+      } catch (e) {}
+
+      const questions = await generateExamQuestions(
+        {
+          examId: examId || 'generic',
+          examName,
+          testTitle,
+          subject,
+          syllabusMarkdown,
+          directivesMarkdown,
+          difficulty: difficulty || 'hard',
+          questionCount: Number(questionCount) || 10,
+          includeDiagrams: Boolean(includeDiagrams),
+          apiKey,
+          model,
+          baseUrl,
+          batchSize: Number(batchSize) || 10,
+          existingQuestionStems: [
+            ...existingStems,
+            ...(Array.isArray(req.body.alreadyGeneratedStems) ? req.body.alreadyGeneratedStems : [])
+          ],
+          batchNumber: req.body.batchNumber ? Number(req.body.batchNumber) : undefined
+        },
+        (progressEvent) => {
+          sendEvent("progress", progressEvent);
+        }
+      );
+
+      sendEvent("complete", { success: true, count: questions.length, data: questions });
+      res.end();
+    } catch (err: any) {
+      console.error("[Admin AI Questions Stream Error]", err);
+      sendEvent("error", { error: err.message || "Failed to generate questions with AI" });
+      res.end();
+    }
+  });
+
+  // Admin AI Studio: Double-Blind Question Auditor & Auto-Repair Endpoint
+  app.post("/api/admin/ai/audit-questions", requireAdmin, async (req, res) => {
+    try {
+      const { 
+        questions, 
+        testTitle, 
+        subject, 
+        examName, 
+        syllabusMarkdown, 
+        difficulty, 
+        apiKey, 
+        model, 
+        baseUrl 
+      } = req.body;
+
+      if (!Array.isArray(questions) || questions.length === 0) {
+        return res.status(400).json({ error: "questions array is required" });
+      }
+
+      const auditedQuestions = await auditAndVerifyQuestions(questions, {
+        testTitle: testTitle || 'Examination Module',
+        subject,
+        examName,
+        syllabusSnippet: syllabusMarkdown ? syllabusMarkdown.slice(0, 4000) : undefined,
+        difficulty,
+        apiKey,
+        model,
+        baseUrl
+      });
+
+      res.json({ success: true, count: auditedQuestions.length, data: auditedQuestions });
+    } catch (err: any) {
+      console.error("[Admin AI Questions Audit Error]", err);
+      res.status(500).json({ error: err.message || "Failed to audit questions" });
+    }
+  });
+
   // Admin Questions Full Recount Sync Endpoint
   app.post("/api/admin/questions/sync-counts", requireAdmin, async (req, res) => {
     try {
@@ -1671,10 +1968,17 @@ async function startServer() {
       if (table === 'mockTests' && payload) {
         const sanitizeMockTestObj = (obj: any) => {
           if (!obj || typeof obj !== 'object') return obj;
-          const { examId, questions, questionIds, isPremium, category, _questionCount, ...rest } = obj;
+          const { examId, questions, questionIds, isPremium, category, _questionCount, subject, chapter, topicsCovered, mainSection, subCategory, subCategoryTitle, targetTable, targetMode, description, questionCountTarget, ...rest } = obj;
           return rest;
         };
         cleanPayload = Array.isArray(payload) ? payload.map(sanitizeMockTestObj) : sanitizeMockTestObj(payload);
+      } else if (table === 'questionBanks' && payload) {
+        const sanitizeQuestionBankObj = (obj: any) => {
+          if (!obj || typeof obj !== 'object') return obj;
+          const { subject, description, topicsCovered, mainSection, subCategory, subCategoryTitle, targetTable, durationMinutes, totalMarks, negativeMarking, questionCountTarget, ...rest } = obj;
+          return rest;
+        };
+        cleanPayload = Array.isArray(payload) ? payload.map(sanitizeQuestionBankObj) : sanitizeQuestionBankObj(payload);
       }
 
       let result: any;
@@ -2606,7 +2910,20 @@ Sitemap: ${sitemapUrl}
   // Vite middleware for development
   if (!isProduction) {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        watch: {
+          ignored: [
+            '**/scratch/**',
+            '**/*.log',
+            '**/client_error.json',
+            '**/startup-log.json',
+            '**/.git/**',
+            '**/build/**',
+            '**/dist/**'
+          ]
+        }
+      },
       appType: "spa",
     });
     app.use(vite.middlewares);

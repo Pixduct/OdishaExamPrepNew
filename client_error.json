@@ -1,8 +1,0 @@
-{
-  "type": "onerror",
-  "message": "ResizeObserver loop completed with undelivered notifications.",
-  "source": "http://localhost:3000/",
-  "lineno": 0,
-  "colno": 0,
-  "stack": ""
-}

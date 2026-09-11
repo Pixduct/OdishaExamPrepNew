@@ -47,10 +47,10 @@ const looksLikeMath = (s: string): boolean => {
  *   2. \[...\] or \\[...\\] → block display
  *   3. [...]               → block display (custom DB shorthand; content must look like math)
  *   4. \(...\) or \\(...\\) → inline
- *   5. $...$               → inline (guards against lone $ signs)
+ *   5. $...$               → inline (matches non-empty inner content; trimmed in classifyPart)
  */
 const MATH_REGEX =
-  /(\$\$[\s\S]*?\$\$|\\\\?\[[\s\S]*?\\\\?\]|\[[^\[\]\n]{2,160}\]|\\\\?\([\s\S]*?\\\\?\)|(?:\$(?!\s)[^$\n]+(?<!\s)\$))/g;
+  /(\$\$[\s\S]*?\$\$|\\\\?\[[\s\S]*?\\\\?\]|\[[^\[\]\n]{2,160}\]|\\\\?\([\s\S]*?\\\\?\)|(?:\$[^$\n]+?\$))/g;
 
 // ─────────────────────────────────────────────────────────────
 // Part classifier
@@ -91,8 +91,26 @@ function classifyPart(part: string): MathPart {
     };
 
   // ── Inline: $ ... $
-  if (part.startsWith('$') && part.endsWith('$') && part.length > 2)
-    return { raw: part, math: part.slice(1, -1).trim(), display: 'inline' };
+  if (part.startsWith('$') && part.endsWith('$') && part.length > 2) {
+    const inner = part.slice(1, -1).trim();
+
+    // 1. If it's just a single English word (>= 2 letters) with no math commands/symbols/operators, render as clean plain text
+    if (/^[A-Za-z]{2,}$/.test(inner) && !/^(pi|mu|nu|xi|chi|phi|rho|tau|eta)$/i.test(inner)) {
+      return { raw: part, math: inner, display: 'text' };
+    }
+
+    // 2. If it's a descriptive parameter label with colon/units (e.g. "Trout : 5 - 10kg/ha/year"), render as clean plain text
+    if (/^[A-Za-z\s]+[:\-]\s*[0-9\s\-]+[a-zA-Z\/]+$/.test(inner) || /^\([A-Za-z\s]+[:\-]\s*[0-9\s\-]+[a-zA-Z\/]+\)$/.test(inner)) {
+      return { raw: part, math: inner, display: 'text' };
+    }
+
+    // 3. Auto-promote tall fractions or full equations with '=' to block display for clean single-line formatting
+    if (/\\(?:frac|dfrac)\b/.test(inner) || (/=/.test(inner) && inner.length > 30)) {
+      return { raw: part, math: inner, display: 'block' };
+    }
+
+    return { raw: part, math: inner, display: 'inline' };
+  }
 
   return { raw: part, math: part, display: 'text' };
 }
@@ -101,7 +119,16 @@ function classifyPart(part: string): MathPart {
 const katexCache = new Map<string, { html: string; ok: boolean }>();
 
 function renderKatex(math: string, display: boolean): { html: string; ok: boolean } {
-  const cacheKey = `${display ? 'block' : 'inline'}:${math}`;
+  // Pre-sanitize math string so LaTeX comment character % never breaks KaTeX macro parsing
+  let safeMath = math;
+  if (safeMath.includes('%')) {
+    safeMath = safeMath
+      .replace(/\\text\{\s*\\?%\s*\}/g, '\\%')
+      .replace(/\\text\{\s*\\?%\s*\\text\{\s*day\s*\}\^?\{?-1\}?\s*\}/gi, '\\%\\text{/day}')
+      .replace(/(^|[^\\])%(?![0-9a-fA-F]{2})/g, '$1\\%');
+  }
+
+  const cacheKey = `${display ? 'block' : 'inline'}:${safeMath}`;
   const cached = katexCache.get(cacheKey);
   if (cached) return cached;
 
@@ -109,7 +136,7 @@ function renderKatex(math: string, display: boolean): { html: string; ok: boolea
 
   // First attempt: strict render — produces clean output for valid LaTeX
   try {
-    const html = katex.renderToString(math, {
+    const html = katex.renderToString(safeMath, {
       throwOnError: true,
       displayMode: display,
       trust: false,
@@ -121,7 +148,7 @@ function renderKatex(math: string, display: boolean): { html: string; ok: boolea
     // Second attempt: lenient render — KaTeX inlines its own error highlight
     // and returns partial HTML without crashing the page
     try {
-      const html = katex.renderToString(math, {
+      const html = katex.renderToString(safeMath, {
         throwOnError: false,
         displayMode: display,
         trust: false,
@@ -132,7 +159,7 @@ function renderKatex(math: string, display: boolean): { html: string; ok: boolea
       const ok = !html.includes('katex-error');
       result = { html, ok };
     } catch (e) {
-      console.warn('[MathTextRenderer] KaTeX render failed:', math, e);
+      console.warn('[MathTextRenderer] KaTeX render failed:', safeMath, e);
       result = { html: '', ok: false };
     }
   }
@@ -153,16 +180,23 @@ const BlockMath: React.FC<{
 }> = ({ math, raw, index, blockSize = 'md' }) => {
   const { html, ok } = renderKatex(math, true);
 
-  // Graceful fallback: show the naked LaTeX source (without delimiters) in a
-  // monospace code block — never show raw $$...$$ delimiters to the student.
+  // Graceful fallback: NEVER render raw $$...$$ delimiters or broken code boxes in exam UI!
+  // Strip raw LaTeX formatting tags and render as clean, readable text.
   if (!ok || !html) {
+    const fallbackText = math
+      .replace(/\\text\{\s*([^}]+)\s*\}/g, '$1')
+      .replace(/\\(?:frac|dfrac)\{([^}]+)\}\{([^}]+)\}/g, '$1/$2')
+      .replace(/\\(?:times|cdot)/g, '×')
+      .replace(/\\(?:circ)/g, '°')
+      .replace(/\\%/g, '%')
+      .replace(/\\/g, '');
     return (
-      <span
+      <div
         key={index}
-        className="math-equation-block math-equation-block--fallback"
+        className="math-equation-block text-center font-medium text-slate-800 dark:text-slate-200 py-2 my-1"
       >
-        <code className="font-mono text-sm text-slate-700 whitespace-pre-wrap">{math}</code>
-      </span>
+        {fallbackText}
+      </div>
     );
   }
 
@@ -187,15 +221,23 @@ const InlineMath: React.FC<{
 }> = ({ math, raw, index, isUser }) => {
   const { html, ok } = renderKatex(math, false);
 
-  // Graceful fallback: show the naked math source without inline $ delimiters
+  // Graceful fallback: NEVER render raw code boxes or error badges in exam UI!
+  // Strip LaTeX macro tags and render clean, natural text.
   if (!ok || !html) {
+    const fallbackText = math
+      .replace(/\\text\{\s*([^}]+)\s*\}/g, '$1')
+      .replace(/\\(?:frac|dfrac)\{([^}]+)\}\{([^}]+)\}/g, '$1/$2')
+      .replace(/\\(?:times|cdot)/g, '×')
+      .replace(/\\(?:circ)/g, '°')
+      .replace(/\\%/g, '%')
+      .replace(/\\/g, '');
     return (
-      <code
+      <span
         key={index}
-        className="inline-block px-1 py-0.5 bg-slate-100 border border-slate-200 rounded text-slate-700 text-xs font-mono align-middle"
+        className="font-medium text-slate-800 dark:text-slate-200 align-baseline inline-block px-0.5"
       >
-        {math}
-      </code>
+        {fallbackText}
+      </span>
     );
   }
 
@@ -322,20 +364,28 @@ const isDiagramLabelLine = (line: string): boolean => {
 };
 
 /**
- * Try parsing the text as JSON to see if it represents a structured diagram definition.
+ * Universal LaTeX Grammar Normalizer & Prose Cleaner:
+ * Restores JSON control character corruptions, un-glues text and function prefixes,
+ * resolves unbraced fraction grammars across arbitrary variables and numbers,
+ * and cleanly wraps mathematical formulas without corrupting plain English text or species.
  */
-export const repairJSStringLatex = (str: string): string => {
+export const repairJSStringLatex = (str: string, isOption: boolean = false): string => {
   if (!str) return '';
   let repaired = str
     // 1. Control character escapes where JS string parsing stripped leading letters (f, b, t, r, n, v)
     .replace(/\x0c(rac|orall|rown|lat|otnote)(?![a-zA-Z])/g, '\\f$1')
     .replace(/\x08(eta|ar|ox|ullet|igcap|igcup|igsqcup|iguplus|igodot|mod|owtie)(?![a-zA-Z])/g, '\\b$1')
+    .replace(/\x09(au)(?![a-zA-Z])/g, '\\tau')
+    .replace(/(^|[^\\])\x09au(?=[_0-9\s{}\\])/g, '$1\\tau')
     .replace(/\x09(heta|imes|riangle|an|tilde|ext|tfrac|tau|o|op|hickspace|iny|today|binom|extbf|extit|exttt|extsf)(?![a-zA-Z])/g, '\\t$1')
     .replace(/\x0d(ight|ho|angle|ightarrow|ightharpoonup|ightharpoondown|brace|floor|ceil)(?![a-zA-Z])/g, '\\r$1')
     .replace(/\x0a(eq|earrow|abla|eg|ode|u|otin|olimits|ormalsize|obreak|cong|parallel|exists|geq|leq|sub|sube|supe|sup|mid|succ|prec|sim|simeq|um)(?![a-zA-Z])/g, '\\n$1')
     .replace(/\x0b(ec)(?![a-zA-Z])/g, '\\v$1')
 
     // 2. Comprehensive predictive repair for literal corrupted commands (when stored directly in DB/JSON)
+    .replace(/(^|[^a-zA-Z\\])au_\{/g, '$1\\tau_{')
+    .replace(/\$\s*au([_0-9\s{}\\])/g, '$\\tau$1')
+    .replace(/\\tau(?![a-zA-Z])/g, '\\tau')
     .replace(/\\imes(?![a-zA-Z])/g, '\\times')
     .replace(/\\ext(?![a-zA-Z])/g, '\\text')
     .replace(/\\rac(?![a-zA-Z])/g, '\\frac')
@@ -366,9 +416,163 @@ export const repairJSStringLatex = (str: string): string => {
     .replace(/\\olimits(?![a-zA-Z])/g, '\\nolimits')
     .replace(/\\ormalsize(?![a-zA-Z])/g, '\\normalsize')
     .replace(/\\obreak(?![a-zA-Z])/g, '\\nobreak')
-    .replace(/\\ec(?=\{)/g, '\\vec');
+    .replace(/\\ec(?=\{)/g, '\\vec')
 
-  return repaired;
+    // 3. Unwrap plain English words/species mistakenly wrapped in $...$
+    .replace(/\$([A-Za-z]{2,})\$/g, (match, word) => {
+      if (/^(pi|mu|nu|xi|chi|phi|rho|tau|eta)$/i.test(word)) {
+        return `$\\${word.toLowerCase()}$`;
+      }
+      return word;
+    })
+
+    // 4. Unwrap parenthetical parameter notes in $...$
+    .replace(/\$\(([A-Za-z\s]+[:\-]\s*[0-9\s\-]+[a-zA-Z\/]+)\)\$/g, '($1)')
+    .replace(/\$([A-Za-z\s]+[:\-]\s*[0-9\s\-]+[a-zA-Z\/]+)\$/g, '$1')
+
+    // 5. Flatten erroneous stacked fractions around numbers + units or percentages:
+    .replace(/\\?(?:frac|dfrac)\s*\{\s*([0-9.]+[%]?)\s*\}\s*\{\s*(?:\\?text\{?)?\s*([a-zA-Z\/%]+)\}?\s*\}?/gi, (m, num, unit) => {
+      return num + ' ' + unit.replace(/^text/i, '');
+    })
+    .replace(/\\?(?:frac|dfrac)\s*([0-9.]+[%]?)\s*(?:\\?text\{?)?\s*([a-zA-Z\/%]+)\}?/gi, (m, num, unit) => {
+      return num + ' ' + unit.replace(/^text/i, '');
+    })
+
+    // 6. Clean raw 'text' prefixes glued to physical units (prose or math)
+    .replace(/\\?text(kg|g|mg|l|ml|ha|cm|m|days|day|hr|s|caco_?3|cp|do|ppm)(\b|\/)/gi, (m, unit, suffix) => {
+      if (unit.toLowerCase().startsWith('caco')) return 'CaCO₃' + suffix;
+      return unit + suffix;
+    })
+
+    // 7. Clean chemical formulas
+    .replace(/\\?text\{?CaCO_?3\}?/gi, 'CaCO₃')
+    .replace(/\$CaCO_?3\$/gi, 'CaCO₃')
+    .replace(/\$H_?2O\$/gi, 'H₂O')
+    .replace(/\$CO_?2\$/gi, 'CO₂')
+    .replace(/\$NH_?3\$/gi, 'NH₃')
+    .replace(/\$O_?2\$/gi, 'O₂')
+    .replace(/\$N_?2\$/gi, 'N₂')
+    .replace(/\$CH_?4\$/gi, 'CH₄')
+
+    // 8. Purge scratchpad / inner deliberation thoughts from explanations:
+    .replace(/\s*\bWait,?\s*(?:recalculating|option\s+[\d:]+\s+comes\s+from)[\s\S]*?(?=(?:Parts\s+of\s+bran|Ratio\s+=|Therefore|Hence|\b\d+\s*:\s*\d+\b|\bLet's\s+use\s+standard|$))/gi, '. ')
+    .replace(/\s*\bLet's\s*(?:check\s+options|use\s+correct\s+values|formulate\s+with|use\s+standard\s+Pearson)[^.]*?\.\s*/gi, ' ')
+    .replace(/\s*\?\s*Wait,?\s*recalculating:[\s\S]*?(?=(?:Parts\s+of\s+bran|Ratio\s+=|Therefore|Hence|\b\d+\s*:\s*\d+\b|$))/i, '. ')
+
+    // 9. Normalize percent patterns inside or outside LaTeX:
+    // e.g. "24\text{%}" -> "24%", "3.5\text{ %}" -> "3.5%", "\text{ %}" -> "%", "$3.5\text{ %}$" -> "3.5%"
+    .replace(/(^|[^a-zA-Z0-9\\])\$?\s*([0-9.]+)\s*\\?(?:text|\t?ext)\s*\{\s*[%％]\s*\}\s*\$?(\b|\s|$)/g, '$1$2% $3')
+    .replace(/\\?(?:text|\t?ext)\s*\{\s*[%％]\s*\}/g, '%')
+    .replace(/\$([0-9.]+)\s*%\$/g, '$1%')
+
+    // 10. Normalize SGR unit rate patterns:
+    // e.g. "\text{%\text{ day}^{-1}}" -> "%/day", "%\text{ day}^{-1}" -> "%/day"
+    .replace(/\\?(?:text|\t?ext)\s*\{\s*[%％]\s*\\?(?:text|\t?ext)\s*\{\s*day\s*\}\^?\{?-1\}?\s*\}/gi, '%/day')
+    .replace(/[%％]\s*\\?(?:text|\t?ext)\s*\{\s*day\s*\}\^?\{?-1\}?/gi, '%/day')
+    .replace(/\\?(?:text|\t?ext)\s*\{\s*[%％]\s*\/\s*day\s*\}/gi, '%/day')
+
+    // 11. Normalize degree Celsius:
+    // e.g. "$28^\circ C$" -> "28°C", "28^\circ C" -> "28°C"
+    .replace(/(^|[^a-zA-Z0-9\\])\$?\s*([0-9.]+)\s*(?:\^\\circ|\\circ|\^°|°)\s*C\s*\$?(\b|\s|$)/g, '$1$2°C$3')
+
+    // 12. Unwrap count units & stocking densities (e.g. "$50 fish/m^2$" -> "50 fish/m²"):
+    .replace(/(^|[^a-zA-Z0-9\\])\$?\s*([0-9.]+)\s*(fish|fingerlings|fry|shrimp|prawns|crabs|plants|seeds|trees|eggs|larvae)\s*\/\s*([a-zA-Z0-9^_\/]+)\s*\$?(\b|\s|$)/gi, (m, prefix, num, noun, den, suffix) => {
+      const cleanDen = den.replace(/\^2/g, '²').replace(/\^3/g, '³');
+      return `${prefix}${num} ${noun}/${cleanDen}${suffix}`;
+    })
+
+    // 13. Unwrap complex physical units mistakenly wrapped in $...$:
+    // e.g. "$5.2 gO_2/m^2/day$" -> "5.2 g O₂/m²/day"
+    .replace(/\$\s*([0-9.]+)\s*gO_?2\s*\/\s*m\^?2\s*\/\s*day\s*\$/gi, '$1 g O₂/m²/day')
+    .replace(/([0-9.]+)\s*gO_?2\s*\/\s*m\^?2\s*\/\s*day\b/gi, '$1 g O₂/m²/day')
+    .replace(/gO_?2\s*\/\s*m\^?2\s*\/\s*day\b/gi, 'g O₂/m²/day')
+
+    // 14. Clean spaced parentheses & detached punctuation:
+    .replace(/\(\s*([A-Za-z0-9_.\/+\-]+)\s*\)/g, '($1)')
+    .replace(/\s+([.,;:?!])/g, '$1')
+    .replace(/([.,;:?!])([A-Za-z])/g, '$1 $2')
+    .replace(/\s{2,}/g, ' ')
+
+    // 15. Normalize options that are numbers + units
+    .replace(/\$\s*([0-9.]+)\s*\\?text\{\s*([a-zA-Z\/]+)\s*\}\s*\$/gi, '$1 $2')
+    .replace(/([0-9.]+)\s*\\?text\{\s*([a-zA-Z\/]+)\s*\}/gi, '$1 $2')
+    .replace(/([0-9.]+)\s*text(kg|g|mg|ha|cm|m|days|day|%)\b/gi, '$1 $2')
+
+    // 16. Separate concatenated math functions or digits from frac:
+    .replace(/\\?frac(ln|log|exp|sin|cos|tan)\b/gi, '\\frac \\$1')
+    .replace(/\\?frac(\d+)/gi, '\\frac $1')
+
+    // 17. Universal PascalCase & Acronym text un-wrapping:
+    .replace(/\\?text([A-Z][a-zA-Z0-9_]*)\b/g, (m, phrase) => {
+      const isPureAcronym = /^[A-Z0-9_]+$/.test(phrase);
+      const formatted = isPureAcronym ? phrase : phrase.replace(/([a-z])([A-Z])/g, '$1 $2');
+      return `\\text{${formatted}}`;
+    })
+
+    // 18. Ensure backslash on text{...}, frac{...}{...}, sqrt{...}
+    .replace(/(^|[^\\])\btext\{([^}]+)\}/g, '$1\\text{$2}')
+    .replace(/(^|[^\\])\b(?:frac|dfrac)\s*\{([^}]+)\}\s*\{([^}]+)\}/g, '$1\\frac{$2}{$3}')
+    .replace(/(^|[^\\])\bsqrt\{([^}]+)\}/g, '$1\\sqrt{$2}')
+
+    // 19. Universal math symbol and function backslash restoration
+    .replace(new RegExp(`(^|[^\\\\a-zA-Z])(times|div|pm|mp|cdot|circ|approx|neq|leq|geq|equiv|sum|prod|int|infty|partial|alpha|beta|gamma|delta|theta|lambda|mu|pi|sigma|tau|phi|omega|Delta|Sigma|Omega)(?![a-zA-Z])`, 'g'), '$1\\$2')
+    .replace(new RegExp(`(^|[^\\\\a-zA-Z])(ln|log|exp|sin|cos|tan|cot|sec|csc|arcsin|arccos|arctan)\\s+([a-zA-Z0-9_]+|\\d+)`, 'g'), '$1\\$2 $3')
+
+    // 20. Universal unbraced fraction normalizer
+    // Pattern A: Expression with operator (e.g. \frac \ln W_2 - \ln W_1 t \times 100 OR \frac 80 - 50 60 \times 100 OR \frac 80 \times 50 60 \times 100)
+    .replace(
+      /\\?frac\s+(\\\w+\s+[\w_]+|[\w_]+)\s*([\+\-\*\/]|\\times)\s*(\\\w+\s+[\w_]+|[\w_]+)\s+([\w_]+(?:\^\{?[0-9a-zA-Z]+\}?)?)(?:\s*(\\times|\*)\s*(\d+))?/gi,
+      (m, numA, op, numB, den, mulOp, factor) => {
+        let res = `\\frac{${numA} ${op} ${numB}}{${den}}`;
+        if (factor) res += ` \\times ${factor}`;
+        return res;
+      }
+    )
+
+    // Pattern B: Simple unbraced fraction (e.g. frac A B or \frac 80 60)
+    .replace(
+      /\\?frac\s+([A-Za-z0-9_]+)\s+([A-Za-z0-9_]+(?:\^\{?[0-9a-zA-Z]+\}?)?)(?:\s*(\\times|\*)\s*(\d+))?/gi,
+      (m, num, den, mulOp, factor) => {
+        let res = `\\frac{${num}}{${den}}`;
+        if (factor) res += ` \\times ${factor}`;
+        return res;
+      }
+    )
+
+    // 21. Repair fractions with equals in numerator: frac{1000 - 200 = 800}{textkg}
+    .replace(/\\?frac\{([^}]+)\s*=\s*(\d+)\}\{text(kg|g|mg|cm|m)\}/gi, 
+      (m, diff, val, unit) => diff + ' = ' + val + ' ' + unit
+    );
+
+  // 22. Escape any remaining bare '%' inside LaTeX math expressions so KaTeX never crashes:
+  if (repaired.includes('$') || repaired.includes('\\')) {
+    repaired = repaired.replace(/([^\\])%(?![0-9a-fA-F]{2})/g, '$1\\%');
+  }
+
+  // 23. Context-aware LaTeX Math Boundary Wrapping:
+  // Case A: Standalone Option or expression string containing \frac or math operator without delimiters:
+  if (isOption || (!repaired.includes('\n') && !repaired.includes(':') && (repaired.startsWith('\\frac') || repaired.startsWith('\\text')))) {
+    if (!repaired.includes('$') && (repaired.includes('\\frac') || repaired.includes('\\times') || repaired.includes('\\ln'))) {
+      repaired = `$${repaired.trim()}$`;
+    }
+  }
+
+  // Case B: Embedded or standalone math equation with '=' (e.g. \text{SGR} = \frac{...}{...} or \text{FCR} = \frac{...}{...})
+  repaired = repaired.replace(
+    /(?:^|(?<=[:\n.]))\s*(\\text\{[A-Za-z0-9_\s]+\}\s*=\s*[^$\n]+?)(?=(?:\s*\.|\s*$|\n))/gm,
+    (match, equation) => {
+      if (equation.includes('$$') || equation.includes('$')) return match;
+      if (equation.includes('\\frac') || equation.includes('\\times') || equation.includes('\\ln') || equation.includes('+') || equation.includes('-')) {
+        return `\n\n$$${equation.trim()}$$\n\n`;
+      }
+      return match;
+    }
+  );
+
+  // Clean up any extra redundant newlines around $$ blocks
+  repaired = repaired.replace(/\n{3,}\$\$/g, '\n\n$$').replace(/\$\$\n{3,}/g, '$$\n\n');
+
+  return repaired.trim();
 };
 
 export const repairLatexBackslashes = (str: string): string => {
@@ -1837,18 +2041,21 @@ export const TableRenderer: React.FC<{ tableData: TableData; isOption?: boolean 
           <tbody className="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900/90">
             {tableData.rows.map((row, rIdx) => (
               <tr key={rIdx} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors odd:bg-white dark:odd:bg-slate-900 even:bg-slate-50/40 dark:even:bg-slate-800/30">
-                {row.map((cell, cIdx) => (
-                  <td 
-                    key={cIdx} 
-                    className={cn(
-                      "px-3.5 py-2.5 sm:px-4 sm:py-3 md:px-6 md:py-3.5 border-r border-slate-200 dark:border-slate-800 last:border-r-0 font-medium text-slate-700 dark:text-slate-200 whitespace-nowrap md:whitespace-normal md:break-words",
-                      tableData.alignments[cIdx] === 'center' && 'text-center',
-                      tableData.alignments[cIdx] === 'right' && 'text-right'
-                    )}
-                  >
-                    <MathTextRenderer text={cell} isOption={isOption} />
-                  </td>
-                ))}
+                {row.map((cell, cIdx) => {
+                  const safeCell = (cell || '').replace(/[\r\n]+/g, ' ').trim();
+                  return (
+                    <td 
+                      key={cIdx} 
+                      className={cn(
+                        "px-3.5 py-2.5 sm:px-4 sm:py-3 md:px-6 md:py-3.5 border-r border-slate-200 dark:border-slate-800 last:border-r-0 font-medium text-slate-700 dark:text-slate-200 whitespace-nowrap md:whitespace-normal md:break-words",
+                        tableData.alignments[cIdx] === 'center' && 'text-center',
+                        tableData.alignments[cIdx] === 'right' && 'text-right'
+                      )}
+                    >
+                      <MathTextRenderer text={safeCell} isOption={isOption} />
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
@@ -1933,7 +2140,7 @@ function renderMathBlock(
   blockSize: 'sm' | 'md' | 'lg',
   keyPrefix: string
 ): React.ReactNode {
-  const repairedText = repairJSStringLatex(content);
+  const repairedText = repairJSStringLatex(content, isOption);
   const parts = repairedText.split(MATH_REGEX);
   return (
     <React.Fragment key={keyPrefix}>
@@ -2334,9 +2541,13 @@ export const MathTextRenderer: React.FC<MathTextRendererProps> = React.memo(({
 }: MathTextRendererProps) => {
   const rawContent = text || '';
 
+  // Pre-clean raw input string:
+  // 1. Convert newlines
+  // 2. Pre-heal \t when followed by letters (e.g. \tau, \theta, \times, \text) before turning lone \t into tab
   const content = rawContent
     .replace(/\\n/g, '\n')
-    .replace(/\\t/g, '\t')
+    .replace(/\\t(au|heta|imes|riangle|an|tilde|ext|tfrac|to|top|hickspace|iny|today|binom|extbf|extit|exttt|extsf)(?![a-zA-Z])/g, '\\$1')
+    .replace(/\\t(?![a-zA-Z])/g, '\t')
     .replace(/\\r/g, '');
 
   const vennData = React.useMemo(() => {

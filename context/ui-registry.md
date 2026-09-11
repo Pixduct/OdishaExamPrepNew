@@ -111,10 +111,54 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`TieredPricingSaaSFallbackModal`** | Monetization / Checkout | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L6460-L7120) | 3-Column Minimalist SaaS Grid (ChatGPT & Claude Standard), Dynamic Smart Content Truth Engine, 1-Click Razorpay Launcher | App.tsx (Paywall) | Active |
 | **`AdminTieredPricingFormControls`** | Admin / Form Control | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L3265-L3335) | 3-Tier Pricing Configuration Cards with Impulse Starter Limit, Full Pass, and 1-Year VIP Controls | AdminPanel.tsx (Exams tab) | Active |
 | **`BalancedSubjectTasterEngine`** | Monetization / Entitlement | [`src/lib/entitlementEngine.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/entitlementEngine.ts) & [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L11145-L11165) | Multi-Subject Sectional Starter Entitlement (First 2 tests unlocked per subject category) | App.tsx (Sectional Tests) | Active |
+| **`AIQuestionStudio`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx) | 2-Stage Structure & Advanced Question Generator, Markdown Syllabus Anchor, Live KaTeX & Diagram Review Table, 1-Click Direct DB Sync | AdminPanel.tsx (AI Studio tab & Card triggers) | Active |
+| **`AdaptiveCategoryHierarchyFilterPillsBar`** | Admin / Toolbar | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx) | Context-Aware Subtab Dynamic Labels & Isolated Counts Filter Pill Bar | AdminPanel.tsx | Active |
+| **`HierarchicalStage2TopicSelectorCard`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx) | 5-Step Hierarchical Subcategory Filter & Grouped Dropdown Selector Card | AdminPanel.tsx (AI Studio Stage 2) | Active |
+| **`MultiBatchAutoRunnerSuite`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx) | Configurable Question & Batch Multipliers, Sequential Auto-Runner, Cross-Batch Deduplication Memory, Batch Filter Tabs & Per-Batch Direct DB Publishing | AdminPanel.tsx (AI Studio Stage 2) | Active |
+| **`MultiBankQueueAutoRunner`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L4010-L4950) | Multi-Bank Sequential Auto-Runner, Target Mode Switcher, Zero-Contamination Direct DB Publisher & Dynamic Telemetry Suite | AdminPanel.tsx (AI Studio Stage 2) | Active |
+| **`ContentBankCountBadge`** | Admin / Data Display | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7536-L7548) | Status-Aware Live Question Badge (`0 Qs • Empty` with pulsing amber dot vs `📦 N Questions` with slate) | AdminPanel.tsx (Content Banks) | Active |
+| **`AdminBankEmptyStateBanner`** | Admin / Empty State | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L8440-L8505) | Contextual Actionable Empty State with Target Title, 1-Click AI Studio, Direct Bulk Upload, and Single Question CTAs | AdminPanel.tsx (Questions Tab) | Active |
+| **`Stage1NamingFormulaToolbar`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L3572-L3665) | 1-Click Title Formula Presets, Token Insert Chips & Delimiter-Aware Dynamic Formatter | AIQuestionStudio.tsx (Stage 1) | Active |
+| **`ExamStageTabBar`** | Navigation / Exam Detail | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) | Glassmorphic Examination Stage Selector Pill Bar, Real-time Item Counts, URL Sync (`?stage=...`) | App.tsx (Exam Detail) | Active |
 
 ---
 
 ## Component Details
+
+### `AIQuestionStudio` (Enterprise AI Question & Test Structure Generator Suite)
+
+File: `src/components/admin/AIQuestionStudio.tsx`
+Last updated: September 9, 2026
+
+| Property | Class |
+| :--- | :--- |
+| Background | `bg-gradient-to-br from-slate-900 via-brand-950 to-indigo-950` (Hero), `bg-white/[0.03]` (Sub-cards), `bg-slate-900` (Controls), `bg-white dark:bg-slate-900` (Stage cards), `bg-slate-50/90 dark:bg-slate-800/50` (Step panels) |
+| Border | `border border-brand-500/20` (Hero), `border border-white/10` (Panels), `border border-white/15` (Inputs/Selects), `border-slate-200 dark:border-slate-700` (Step cards & fields) |
+| Border radius | `rounded-3xl` (Outer containers), `rounded-2xl` (Stage cards & CTA buttons), `rounded-xl` (Controls/Inputs/Pills), `rounded-lg` / `rounded-full` (Badges/Pills) |
+| Text — primary | `text-white` (Dark surfaces), `text-slate-900 dark:text-white` (Dual surfaces) |
+| Text — secondary | `text-slate-300` (Hero subtitles), `text-slate-400` (Captions/Helpers), `text-slate-600 dark:text-slate-400` (Content) |
+| Spacing | `p-6 sm:p-8` (Hero container), `p-4 sm:p-5` (Sub-cards), `px-3.5 py-2.5` to `px-4 py-3` (Controls), `gap-4` (Symmetrical grid), `space-y-6` (5-Step flow) |
+| Hover state | `hover:bg-brand-500`, `hover:bg-white/10`, `hover:border-white/20`, `hover:text-white`, `hover:border-brand-500` |
+| Shadow | `shadow-2xl` (Hero container), `shadow-inner` (Inputs/Selects), `shadow-lg shadow-brand-500/25` (Primary CTAs) |
+| Accent usage | `brand-500` / `brand-600` (Primary Blue), `amber-400` (Key icons/Precedence), `emerald-500` / `emerald-600` (Simple difficulty / Success), `amber-500` (Moderate difficulty / Proportional mode), `rose-500` (Advanced difficulty / Delete), `indigo-500` / `indigo-600` (Subject lock mode) |
+
+**Pattern notes:**
+- **5-Step Hierarchical Question Studio (Stage 2)**: Stage 2 implements an explicit 5-step funnel: (1) Test Destination Type (3 cards: Mock Test, Practice Test, Question Bank), (2) Dynamic Subcategory Filter pills, (3) Aggregated Topic Selector combining existing DB tests with parsed live syllabus chapters/units, (4) Question Count specification with quick presets and custom numeric input, and (5) 3-Tier Cognitive Difficulty switcher.
+- **3-Tier Cognitive Difficulty Calibration**: Distinct visual cards calibrating the AI prompt engine: `🟢 Simple / Foundational` (`easy` — direct definitions/formulas), `🟡 Moderate / Standard` (`medium` — 2-step calculations, standard OSSC/OSSSC level), and `🔴 Advanced / Rigorous` (`hard` — multi-statement assertion-reasoning, deep LaTeX math derivations, OPSC OAS / UPSC standards).
+- **Dual Domain Scoping & 100% Subject Lock**: Automatic subject scope detection displays a live mode banner: `🎯 Strict Subject Isolation Focus Mode` (100% locked to chosen chapter/subject) vs `⚖️ Proportional Full-Syllabus Distribution Mode` (balanced sampling across all units without bias).
+- **Domain-Grounded Authenticity (Zero Fictional Formulas)**: Biological, agricultural, and general studies questions must test authentic scientific parameters (species biology, water/soil chemistry, pathology, statutes) and strictly forbid artificial algebraic formulas.
+- **Zero-Discrepancy Option-to-Explanation Rule**: The designated correct option (`options[correctAnswerIndex]`) must mathematically and textually match the conclusion in the `explanation`.
+- **Exact Question Count Top-Up Guarantee**: Automatic top-up pass ensures that if the primary LLM batch returns fewer questions than requested, the missing questions are immediately generated to guarantee 100% of the requested count.
+- **Symmetrical 2-Column Suite**: The AI Settings panel must always use a balanced 2-column grid (`grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch`). Never use fragile 12-column sub-span grids (`lg:col-span-*`) in this card to prevent Tailwind v4 column collapse bugs.
+- **Strict Precedence Feedback**: Always include the Precedence Status Bar above the controls showing whether client Custom Key (`🟢 Custom Key Active`) or server `.env` Key (`🔵 Server Default Active`) is in effect, with a 1-click Reset button when active.
+- **Action Group Integration**: Inputs with auxiliary actions (like Custom Key with Paste, Show/Hide, and Test) must be grouped as a cohesive input-action unit (`flex flex-col sm:flex-row items-stretch gap-2.5`) with fixed CTA button widths (`sm:w-36`).
+- **Workflow Stepper Tabs & Collapsible Drawer**: The AI Studio must use a prominent 2-column Stepper Tabs Bar above the workspace with viewport auto-scroll (`scrollIntoView`) on stage switch. The Syllabus Anchor must be a collapsible context drawer (`~50px` resting height) to keep active stage controls above the fold.
+- **Dual-Anchor Knowledge & Directives Suite**: The syllabus and paper-setting controls must be split into two symmetrical columns (`grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch`). Part 1 represents Domain Knowledge ("The What", with upload/export/presets) and Part 2 represents Generation Directives ("The How", with upload/export/rubrics). Both sections must feature sticky per-exam persistence and client file ingestion via HTML5 FileReader.
+- **Safe Callback LaTeX Parsing & Formula Auto-Repair**: All mathematical post-processing in `serverAiGenerator.ts` and `MathTextRenderer.tsx` must utilize function-based regex replacements (`(match, p1, p2, p3) => ...`). Never use literal `$` replacement strings containing `$1`, `$2` tokens inside `$...$` delimiters to avoid JavaScript token-stripping collisions.
+- **Deterministic Numerical Calculation Alignment Guard**: When an explanation derives a numeric calculation (e.g. `... = 1.50`), the system must verify that `options[correctAnswerIndex]` contains that exact value, auto-correcting any option mismatch or distractor hallucination before presenting to the user. Only apply this to scalar numeric questions; never modify symbolic mathematical formula options (`\frac`, `\ln`, `\times`).
+- **Strict Anti-Placeholder Distractor Policy**: Nonsense placeholder options (e.g. `"00"`, `"0"`, `"Option 4"`, `(Type II)`, `(Alternative Variant)`, empty strings) are strictly prohibited; the engine automatically replaces duplicates with realistic, mathematically derived variants based on the genuine answer.
+- **Unit Fraction Flattening Engine**: Physical rates and application quantities (`1000 kg/ha`, `40% CP`, `180 mg/L`) must NEVER be formatted as vertical stacked math fractions ($\frac{1000}{\text{kg/ha}}$). Both backend and frontend transformers automatically flatten any fraction with a physical unit in the denominator into clean, human-readable inline text.
+- **State-Machine LaTeX JSON Scanner (`sanitizeLatexJsonTokens`)**: All LLM JSON responses must be pre-parsed using a character-by-character backslash state machine that preserves legitimate JSON whitespace escapes (`\n`, `\t`, `\"`) while safely escaping raw LaTeX mathematical backslashes (`\frac`, `\text`, `\times`, `\ln`, `\sqrt`, Greek symbols) before passing to `JSON.parse`.
 
 ### `BalancedSubjectTasterEngine` (3-Pillar Multi-Subject Starter Entitlement Engine)
 - **File Path:** [`src/lib/entitlementEngine.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/entitlementEngine.ts), [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L10825-L11165), and [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L3285-L3330)
@@ -544,6 +588,77 @@ import { SearchableSelect } from '../components/SearchableSelect';
 - **Hover Paint-Containment Protection**: When items use `.cv-card-auto` (`content-visibility: auto`), hover lift transformations MUST be placed on the outer `<motion.div whileHover={whileHover.liftTap}>` instead of using CSS `hover:-translate-y-*` on the child `<Card>`. This prevents the top edge from clipping against the browser's paint containment boundary.
 - **Admin `questionCount` Priority**: Question Bank cards MUST prioritize displaying `item.questionCount` (the total number of questions configured by the admin for the downloadable bank) rather than overwriting it with interactive DB practice test counts.
 - **Defensive Tagline Parsing**: Tagline values stored in `questionBanks` table can be either plain strings (`"Concept-Focused Practice"`) or JSON-encoded strings (`{"text": "...", "price": 499}`). Parsers in `App.tsx` and `AdminPanel.tsx` MUST check `trim().startsWith('{')` before parsing JSON to prevent wiping plain text taglines.
+
+---
+
+### 14. `AIQuestionStudioFormulaEngine`
+- **File Path:** [`src/lib/serverAiGenerator.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/serverAiGenerator.ts), [`src/lib/syllabusParser.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/syllabusParser.ts)
+- **Category:** Generator / Engine Architecture
+- **Purpose:** Universal Tier-Based Syllabus Ingestion and Dynamic Placeholder Generation engine across Mock Tests, Practice Tests, and Question Banks.
+- **Last Updated:** September 11, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Formula Placeholder Detection** | `determinePlaceholderTier(formula)` detects active tier (`'paper'`, `'subject'`, `'subsubject'`, `'chapter'`) |
+| **AI Dynamic Scanning** | `extractSyllabusHierarchyWithAI` triggers automatically if regex misses requested academic tier or markdown is unstructured |
+| **Subject Tier Grouping** | Generates 1 test/bank per unique subject (e.g. `[Subject] Question Bank`), aggregating all child chapters into `topicsCovered` |
+| **Sub-Subject Tier Grouping** | Generates 1 test/module per unique sub-subject (e.g. `[Sub-Subject] Practice Set #[01-10]`), zero duplicate titles |
+| **Chapter Tier Emission** | Emits granular chapter drills (e.g. `[Sub-Subject] : [Chapter] Drill`) covering individual leaf topics |
+| **Placeholder Isolation** | Strict zero-borrowing placeholder purity via `applyNamingPattern` — strictly selected placeholders appear |
+
+**Pattern notes:**
+- **Zero Duplicate Titles**: In-memory frequency counters guard against title collisions across batch generations when formulas omit numeric counters.
+- **Dynamic Session Cache**: `syllabusAiCache` caches extracted syllabus hierarchy keyed by content fingerprint for sub-5ms instant re-evaluation.
+
+---
+
+### 15. `AIStudioNamingFormulaBox`
+- **File Path:** [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L3575-L3695)
+- **Category:** Form / Interactive Configuration
+- **Purpose:** Interactive naming formula builder with 1-click presets, dynamic syllabus tag insertion pills (`[Paper]`, `[Subject]`, `[Sub-Subject]`, `[Unit]`, `[Chapter]`), and live editable mono formula input.
+- **Last Updated:** September 11, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Background** | `bg-gradient-to-br from-indigo-50/60 via-white to-sky-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950/20` |
+| **Border** | `border border-indigo-200 dark:border-indigo-900/60` |
+| **Border radius** | `rounded-2xl` |
+| **Text — primary** | `text-xs font-mono font-semibold text-slate-900 dark:text-white` (input), `text-xs font-black text-slate-900 dark:text-white` (title) |
+| **Text — secondary** | `text-[11px] text-slate-500 dark:text-slate-400` |
+| **Spacing** | `p-3 sm:p-4 space-y-3` |
+| **Hover state** | Presets: `hover:bg-indigo-50 dark:hover:bg-indigo-950/40`; Tag buttons: `hover:bg-indigo-100 dark:hover:bg-indigo-950`; Reset: `hover:bg-slate-100 dark:hover:bg-slate-700` |
+| **Shadow** | `shadow-xs` |
+| **Accent usage** | Icon container: `bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400`; Active preset: `bg-indigo-600 text-white border-indigo-600 shadow-xs`; Tag pills: `text-indigo-700 dark:text-indigo-300 font-mono text-[10px]` |
+
+**Pattern notes:**
+- **Mono Pattern Typography**: The formula input field MUST use `font-mono text-xs font-semibold` to distinguish syntactic placeholder brackets like `[Subject]` and sequential counters `#[01-10]` from regular prose.
+- **Dynamic Tag Insertion**: Clicking any tag button appends the token to the end of the existing pattern string and updates the selected preset to `'custom'`.
+
+---
+
+### 16. `AIStudioArchitectureReviewCard`
+- **File Path:** [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L3915-L4040)
+- **Category:** Data Display / Interactive Review Card
+- **Purpose:** Pre-ingestion review card displaying individual generated test modules with selection checkboxes, category pills, inline title editing, and syllabus coverage tags.
+- **Last Updated:** September 11, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Background (Selected)** | `bg-white dark:bg-slate-800/80` |
+| **Background (Unselected)** | `bg-slate-50/50 dark:bg-slate-900/40 opacity-70` |
+| **Border (Selected)** | `border-slate-300 dark:border-slate-600 ring-1 ring-brand-500/20` |
+| **Border (Unselected)** | `border-slate-200 dark:border-slate-800` |
+| **Border radius** | `rounded-2xl` |
+| **Text — primary** | `font-bold text-sm text-slate-900 dark:text-white leading-snug` |
+| **Text — secondary** | `text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed` |
+| **Spacing** | `p-4 space-y-3` |
+| **Hover state** | Checkbox: `hover:text-brand-500`; Title edit icon: `opacity-0 group-hover/title:opacity-100 text-slate-400 hover:text-slate-600`; Stage 2 transfer button: `hover:bg-brand-600 hover:text-white` |
+| **Shadow** | `shadow-xs` |
+| **Accent usage** | Practice badge: `bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800`; Mock badge: `bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 border-brand-200 dark:border-brand-800`; Bank badge: `bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800` |
+
+**Pattern notes:**
+- **Unselected Demotion**: Unselected structure cards receive `opacity-70 bg-slate-50/50 dark:bg-slate-900/40` so selected tests remain the dominant visual focal point.
+- **Inline Title Editing**: Double-clicking or clicking the hover pencil icon replaces the title with a live input (`border-brand-500 text-xs font-bold`) supporting `Enter` to commit and `Escape` to cancel.
 
 ---
 
@@ -3975,8 +4090,492 @@ Last updated: September 1, 2026
   1. *In-Progress Resume Session* (shows solved vs total count, exact time remaining, and instant resume CTA).
   2. *Featured Live Mock Test* (prefers tests with uploaded question papers, shows marks/time badges, and primary start CTA).
   3. *In-Preparation Placeholder* (shows release pending notice only when the exam genuinely has 0 uploaded questions).
-- **Service Contract Resilience**: Relies on normalized `_questionCount` / `questionCount` / `practiceQuestionCount` attributes to prevent false-positive empty state alerts.
+---
 
+### `CurriculumTestReviewBoard`
 
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx)
+Last updated: September 2, 2026
+
+Pre-ingestion curriculum review board enabling administrators to inspect, filter across 3 sections, inline-edit titles, and batch-persist AI-architected tests to database.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Board Shell** | `space-y-4 pt-5 border-t border-slate-200 dark:border-slate-800 animate-in fade-in duration-300` |
+| **Top Header Bar** | `flex flex-col md:flex-row md:items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-4` |
+| **Section Filter Tabs** | `grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-100 dark:bg-slate-900/50 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800` |
+| **Active Tab Pill** | `bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs font-black border border-slate-200/80 dark:border-slate-700` |
+| **Test Card Container** | `p-4 rounded-2xl border transition-all relative group bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600` |
+| **Inline Title Input** | `text-xs sm:text-sm font-black text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-900/80 border border-brand-500 rounded-lg px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-brand-500` |
+| **Save Primary CTA** | `px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-md shadow-emerald-600/20 cursor-pointer disabled:opacity-50` |
+
+---
+
+### `AITitleRefinementAssistant`
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx)
+Last updated: September 2, 2026
+
+Interactive batch AI prompt assistant inside the Curriculum Review Board enabling administrators to rewrite, trim, tag, or standardize all generated test titles in 1 click with multi-level undo.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Container** | `bg-gradient-to-br from-indigo-50/70 via-white to-brand-50/70 dark:from-slate-800/90 dark:via-slate-850 dark:to-slate-800/90 border border-indigo-200/80 dark:border-indigo-800/50 rounded-2xl p-4 space-y-3 shadow-xs` |
+| **Icon Container** | `w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs` |
+| **Category Badge** | `text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-800 px-2 py-0.2 rounded-full` |
+| **Prompt Input** | `flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none` |
+| **Apply Button** | `px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer disabled:opacity-50 shrink-0` |
+| **Preset Prompt Pill** | `px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white dark:bg-slate-800/80 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-700 transition-all cursor-pointer shadow-2xs` |
+| **Undo Button** | `px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-1 cursor-pointer shrink-0` |
+
+---
+
+### `AdminFloatingBatchActionBar`
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx)
+Last updated: September 2, 2026
+
+Sticky viewport-anchored bottom action bar that elevates when items are selected in admin lists, offering batch status modification and bulk deletion.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Fixed Container** | `fixed bottom-6 inset-x-4 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-5 duration-200` |
+| **Bar Shell** | `bg-slate-900/95 backdrop-blur-md text-white border border-slate-700/80 rounded-2xl px-4 py-3 shadow-2xl flex flex-wrap items-center justify-between gap-4 max-w-3xl w-full` |
+| **Selection Counter** | `flex items-center gap-2 text-xs font-bold text-slate-300` |
+| **Make Premium CTA** | `px-3.5 py-2 bg-amber-600/90 hover:bg-amber-500 text-white rounded-xl text-xs font-black transition-all shadow-md flex items-center gap-1.5 active:scale-95 cursor-pointer disabled:opacity-50 shrink-0` |
+| **Make Free CTA** | `px-3.5 py-2 bg-emerald-600/90 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition-all shadow-md flex items-center gap-1.5 active:scale-95 cursor-pointer disabled:opacity-50 shrink-0` |
+| **Bulk Delete CTA** | `px-3.5 py-2 bg-rose-600/90 hover:bg-rose-500 text-white rounded-xl text-xs font-black transition-all shadow-md flex items-center gap-1.5 active:scale-95 cursor-pointer disabled:opacity-50 shrink-0` |
+
+---
+
+### `TitleNamingFormulaPresetBar`
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx)
+Last updated: September 2, 2026
+
+Interactive title formula preset manager and pattern builder allowing administrators to choose from exact subcategory presets with dynamic token insertion chips (`[Subject]`, `[Chapter]`, `#[01-10]`) and custom formula overrides.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Shell** | `bg-gradient-to-br from-indigo-50/60 via-white to-brand-50/60 dark:from-slate-800/80 dark:via-slate-850 dark:to-slate-800/80 border border-indigo-200/70 dark:border-indigo-800/40 rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-xs` |
+| **Header Icon Container** | `w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs` |
+| **Auto-Standardized Badge**| `text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-800 px-2 py-0.5 rounded-full` |
+| **Preset Pill — Active** | `bg-indigo-600 text-white border-indigo-600 shadow-xs px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border shadow-2xs` |
+| **Preset Pill — Inactive** | `bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border shadow-2xs` |
+| **Tag Insertion Chip** | `px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-mono text-[10px] font-semibold transition-all cursor-pointer border border-slate-200 dark:border-slate-700` |
+| **Formula Text Input** | `w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs font-mono font-semibold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none` |
+| **Reset CTA** | `px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-1 cursor-pointer shrink-0` |
+
+---
+
+### `CustomMockRulesStudioCard`
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx)
+Last updated: September 2, 2026
+
+Spacious parameter studio in Stage 1 enabling administrators to configure and customize Test Duration, Maximum Total Marks, Negative Marking Penalty, and Target Question Count with live summary feedback.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Shell** | `bg-gradient-to-br from-amber-50/70 via-white to-orange-50/50 dark:from-slate-800/90 dark:via-slate-850 dark:to-slate-800/90 border border-amber-200/80 dark:border-amber-800/50 rounded-2xl p-4 sm:p-5 space-y-4 shadow-xs` |
+| **Header Icon Container** | `w-8 h-8 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0 shadow-xs` |
+| **Live Rules Summary Bar** | `px-3 py-1.5 rounded-xl bg-amber-100/80 dark:bg-amber-950/80 border border-amber-300/80 dark:border-amber-800/80 text-[11px] font-bold text-amber-900 dark:text-amber-300 flex items-center gap-2 flex-wrap shrink-0` |
+| **Input Card Container** | `bg-white dark:bg-slate-900/90 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2 shadow-2xs` |
+| **Custom Number Input** | `w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-black text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:bg-white dark:focus:bg-slate-800 outline-none` |
+| **Unit Suffix Tag** | `absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 pointer-events-none` |
+| **Quick Helper Pill — Active** | `bg-amber-600 text-white border-amber-600 shadow-2xs px-2 py-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer` |
+| **Quick Helper Pill — Inactive** | `bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-amber-50 dark:hover:bg-amber-950/40 px-2 py-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer` |
+
+---
+
+### `AIEngineModelConfigCard`
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx)
+Last updated: September 8, 2026
+
+Symmetrical dual-column AI Engine configuration card featuring active model dropdown selection (`openai/gpt-oss-20b`, `meta/llama-3.2-11b-vision-instruct`, `nvidia/nemotron-3.5-lightning-30b-a3b`, Google Gemini), key precedence status badge, custom API key input, and live connection tester.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Engine Card Shell** | `bg-white/[0.03] border border-white/10 rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-3` |
+| **Precedence Status Bar** | `flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-md` |
+| **Server Default Active Badge** | `px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-2 border shadow-sm bg-sky-500/20 text-sky-300 border-sky-400/30` |
+| **Custom Key Active Badge** | `px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-2 border shadow-sm bg-emerald-500/20 text-emerald-300 border-emerald-400/30` |
+| **Model Select Dropdown** | `w-full bg-slate-900 border border-white/15 rounded-xl px-4 py-3 text-xs sm:text-sm font-semibold text-white focus:ring-2 focus:ring-brand-500 outline-none transition-all shadow-inner` |
+| **Key Input Field** | `w-full bg-slate-900/80 border border-white/10 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-mono text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-500 outline-none transition-all` |
+---
+
+### `AdaptiveCategoryHierarchyFilterPillsBar`
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx) & [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx)
+Last updated: September 9, 2026
+
+Context-aware category hierarchy filter bar dynamically adjusting labels and isolated count badges based on the active subtab (`Question Banks` vs `Practice Sets` vs `Mock Tests`).
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Pill Bar Shell** | `flex flex-wrap items-center gap-2 p-2 bg-white/80 rounded-2xl border border-slate-200/80 shadow-2xs` |
+| **Label Prefix** | `text-xs font-black uppercase tracking-wider text-slate-400 px-3 py-1` |
+| **Active Category Pill** | `flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer bg-slate-900 text-white shadow-md shadow-slate-900/10` |
+| **Inactive Category Pill** | `flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer bg-slate-100/80 text-slate-600 hover:text-slate-900 hover:bg-slate-200/60` |
+| **Count Badge (Active)** | `px-2 py-0.5 rounded-md text-[10px] font-black bg-white/20 text-white` |
+| **Count Badge (Inactive)** | `px-2 py-0.5 rounded-md text-[10px] font-black bg-slate-200/80 text-slate-700` |
+
+---
+
+### `HierarchicalStage2TopicSelectorCard`
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx)
+Last updated: September 9, 2026
+
+Unified 5-step hierarchical selector uniting destination test types, 4-tier subcategory filter pills, subcategory-grouped `<optgroup>` test picker, and difficulty matrix.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Container Box** | `space-y-3 p-4.5 rounded-2xl bg-slate-50/90 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700` |
+| **Step Number Badge** | `w-5 h-5 rounded-full bg-brand-600 text-white text-[11px] font-black flex items-center justify-center shrink-0` |
+| **Category Pill (Studio Active)** | `px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer bg-brand-600 text-white shadow-md shadow-brand-500/20` |
+| **Category Pill (Studio Inactive)** | `px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700` |
+| **Grouped Select Dropdown** | `w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none shadow-xs` |
+| **Selected Target Card** | `p-4 rounded-xl bg-gradient-to-r from-brand-50 via-indigo-50/50 to-white dark:from-slate-800 dark:via-slate-800/80 dark:to-slate-850 border-2 border-brand-200 dark:border-brand-800 space-y-2` |
+
+---
+
+### `EnterpriseMultiAgentQualityAssuranceDashboard`
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx)
+Last updated: September 9, 2026
+
+Enterprise Quality Assurance dashboard and double-blind verification audit badges rendering live multi-agent consensus metrics, syllabus grounding scores, auto-repair reconciliation status, and chief auditor verdicts.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Dashboard Shell** | `p-5 bg-gradient-to-r from-emerald-950/90 via-slate-900 to-slate-900 border border-emerald-500/30 rounded-2xl shadow-xl space-y-4` |
+| **Protocol Pill** | `text-[10px] uppercase font-black px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30` |
+| **Metric Pill Box** | `p-2.5 bg-slate-800/60 rounded-xl border border-slate-700/50 flex items-center gap-2.5` |
+| **Auditor Re-Run Button** | `px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl flex items-center gap-1.5 border border-slate-700 transition-all disabled:opacity-50` |
+| **Consensus Verified Badge** | `text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 flex items-center gap-1` |
+| **Auto-Repaired Badge** | `text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800 flex items-center gap-1` |
+| **Syllabus Grounded Badge** | `text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-950/80 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-800 flex items-center gap-1` |
+| **Auditor Verdict Card** | `pt-2 border-t border-slate-200/60 dark:border-slate-700/60 flex items-start gap-2 text-[11px] text-emerald-700 dark:text-emerald-400` |
+| **Anti-Clustering Badge** | `flex items-center gap-1 text-sky-400 font-bold text-[11px]` |
+
+---
+
+### `RealTimeAiGenerationTelemetryCard`
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx)
+Last updated: September 9, 2026
+
+Real-time streaming generation telemetry dashboard and multi-stage status screen powered by Server-Sent Events (SSE) displaying question progress counters, 5-stage interactive pipeline stepper, elapsed execution timer, and collapsible live streaming terminal console.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Container Card** | `p-6 bg-slate-900/95 dark:bg-slate-950 border-2 border-brand-500/40 rounded-3xl shadow-2xl shadow-brand-500/10 backdrop-blur-xl space-y-5 animate-in fade-in zoom-in-95` |
+| **Bot Avatar Badge** | `w-10 h-10 rounded-2xl bg-brand-500/20 border border-brand-500/40 flex items-center justify-center text-brand-400 shadow-inner` |
+| **Pipeline Active Pill** | `text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30 animate-pulse` |
+| **Elapsed Timer Pill** | `px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-mono font-semibold flex items-center gap-1.5` |
+| **Completion Percent Pill** | `px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold` |
+| **Progress Track Bar** | `relative w-full h-3.5 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700/50` |
+| **Progress Fill Indicator** | `h-full bg-gradient-to-r from-brand-500 via-indigo-500 to-emerald-400 rounded-full transition-all duration-500 ease-out shadow-lg shadow-brand-500/50` |
+| **Stage Stepper Card (Active)** | `p-3 rounded-2xl border transition-all text-left flex flex-col justify-between relative overflow-hidden bg-brand-950/60 border-brand-500 text-white shadow-lg shadow-brand-500/20 ring-1 ring-brand-500` |
+| **Stage Stepper Card (Done)** | `p-3 rounded-2xl border transition-all text-left flex flex-col justify-between relative overflow-hidden bg-emerald-950/40 border-emerald-500/40 text-emerald-300` |
+| **Stage Stepper Card (Queued)** | `p-3 rounded-2xl border transition-all text-left flex flex-col justify-between relative overflow-hidden bg-slate-800/30 border-slate-800/60 text-slate-500` |
+| **Terminal Console Box** | `bg-slate-950/90 rounded-2xl border border-slate-800 p-3.5 space-y-2` |
+| **Terminal Log Stream Text** | `font-mono text-[10px] leading-relaxed space-y-1 text-slate-400` |
+
+---
+
+### `MathTextEquationRenderer`
+
+File: [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx)
+Last updated: September 9, 2026
+
+Universal LaTeX mathematical formula and prose cleaner rendering clean inline equations, automatic block promotions for fractions/equations, and unwrapped plain English words/species names.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Inline Math Wrapper** | `.math-equation-inline` (`display: inline-flex; align-items: center; white-space: nowrap; vertical-align: middle; padding: 0 3px;`) |
+| **Block Math Container** | `py-2 my-1 overflow-x-auto text-center flex justify-center items-center w-full` |
+| **Prose Equation Margin** | `my-2 text-slate-800 dark:text-slate-200 font-medium` |
+| **KaTeX Math Size** | Inherits font size smoothly with `white-space: nowrap` preventing mid-term word breaks |
+
+**Pattern notes:**
+- Automatically unwraps pseudo-math plain words (`$Trout$` $\rightarrow$ `Trout`) and parenthetical parameter notes (`$(Trout : 5 - 10kg/ha/year)$` $\rightarrow$ `(Trout: 5 - 10 kg/ha/year)`).
+- Automatically promotes multi-term formulas and tall fractions to centered single-line block displays to eliminate squishing and overlap with question text.
+
+---
+
+### `DualThreadParallelStreamingIndicator`
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx)
+Last updated: September 9, 2026
+
+Live dual-thread parallel question generator indicator and streaming question review table with real-time SSE progressive injection.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Dual-Thread Banner** | `p-3.5 bg-gradient-to-r from-brand-950/60 via-slate-900 to-indigo-950/60 border border-brand-500/30 rounded-2xl flex items-center justify-between` |
+| **Worker Pulse Pill** | `text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30 animate-pulse` |
+| **Progressive Batch Pill** | `text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30` |
+### `UniversalMultiProviderApiKeyBar`
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx)
+Last updated: September 9, 2026
+
+Universal Multi-Provider Custom API Key Bar with smart provider detection, instant key sniffing on paste, and live provider status badges (Google Gemini, NVIDIA NIM, OpenAI, DeepSeek).
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Container Frame** | `p-4 bg-slate-900/90 border border-slate-800/80 rounded-2xl space-y-3` |
+| **Precedence Banner (Gemini)** | `bg-purple-500/20 text-purple-300 border-purple-400/30 text-xs font-bold px-3 py-1 rounded-full border flex items-center gap-1.5` |
+| **Precedence Banner (NVIDIA)** | `bg-emerald-500/20 text-emerald-300 border-emerald-400/30 text-xs font-bold px-3 py-1 rounded-full border flex items-center gap-1.5` |
+| **Precedence Banner (Server .env)** | `bg-sky-500/20 text-sky-300 border-sky-400/30 text-xs font-bold px-3 py-1 rounded-full border flex items-center gap-1.5` |
+| **Input Field** | `w-full bg-slate-950/90 border border-slate-800 text-white rounded-xl px-3.5 py-2.5 font-mono text-xs focus:ring-1 focus:ring-brand-500` |
+| **Action Button (Test/Paste)** | `px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5` |
+| **Reset Server Defaults Button** | `text-xs font-bold text-slate-400 hover:text-white transition-colors underline` |
+
+**Pattern notes:**
+- Automatically identifies key provider signature upon typing or pasting (`AQ....` / `AIzaSy...` $\to$ Google Gemini, `nvapi-...` $\to$ NVIDIA NIM, `gsk_...` $\to$ Groq, `sk-ant-...` $\to$ Anthropic Claude, `sk-or-...` $\to$ OpenRouter, `sk-...` $\to$ OpenAI).
+- Includes expandable Advanced section for custom OpenAI-compatible base URLs (Ollama / LocalAI).
+
+### `MultiBatchAutoRunnerSuite`
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx)
+Last updated: September 9, 2026
+
+Enterprise-grade sequential Multi-Batch Auto-Runner suite with cross-batch anti-duplication memory, progressive live rendering, batch filter tabs, per-batch publishing, and telemetry stop controls.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Batch Selector Grid** | `grid grid-cols-3 sm:grid-cols-6 gap-1.5 mb-2.5` |
+| **Active Batch Pill** | `bg-indigo-600 text-white shadow-sm py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer` |
+| **Inactive Batch Pill** | `bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-indigo-500 py-1.5 rounded-xl text-xs font-bold` |
+| **Total Target Badge** | `p-2 rounded-xl bg-indigo-50/90 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/80 flex items-center justify-between text-xs` |
+| **Stop After Batch Button** | `px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs` |
+| **Batch Filter Toolbar** | `p-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-sm` |
+| **Question Card Batch Badge** | `text-[11px] font-black px-2.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 flex items-center gap-1` |
+| **Publish Single Batch Action** | `px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 transition-all disabled:opacity-50 cursor-pointer` |
+
+**Pattern notes:**
+- Eliminates browser timeouts and prompt degradation by running small micro-batches (e.g. 5 questions) sequentially in an auto-runner loop.
+- Cross-batch anti-duplication memory passes `alreadyGeneratedStems` to subsequent batches, preventing question stem repetition across batches.
+- Allows administrators to inspect all generated questions at once or filter by specific batch, and either publish individual batches or all batches together.
+
+---
+
+### `UniversalLatexGrammarNormalizer`
+
+File: [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx) & [`src/lib/serverAiGenerator.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/serverAiGenerator.ts)
+Last updated: September 9, 2026
+
+Universal, grammar-based LaTeX syntax normalizer and prose sanitizer eliminating all single-formula ad-hoc regex patches.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **State Machine Scanner** | `sanitizeLatexJsonTokens` escaping `\frac`, `\beta`, `\text`, `\times`, `\rho`, etc., avoiding JSON control character corruption (`\x0c`, `\x08`) |
+| **Prompt Safety** | Double-escaped template strings (`\\\\text`, `\\\\frac`, `\\\\ln`, `\\\\times`) preventing JavaScript template evaluation from injecting tabs and form feeds into prompts |
+| **Grammar Fraction Parser** | `\frac <numA> <op> <numB> <den> [\times <factor>]` $\rightarrow$ `\frac{<numA> <op> <numB>}{<den>} \times <factor>` |
+| **PascalCase / Acronym Un-wrapper** | `text([A-Z][a-zA-Z0-9_]*)` $\rightarrow$ `\text{...}` (splits PascalCase into space-separated words, keeps pure acronyms intact) |
+| **Context Boundary Promotion** | Full mathematical equations with `=` auto-promote to `\n\n$$...$$\n\n` block displays; inline fractions in options wrap in `$...$` |
+
+**Pattern notes:**
+- Handles novel and arbitrary algebraic variables ($W_2, W_1, t, L^3$), multi-term numerators, and numbers without hardcoded string matching.
+- Preserves authentic English words, biological species ($Trout$, $Catla$, $Pseudomonas$), and physical units ($1000\text{ kg/ha}$, $180\text{ mg/L CaCO}_3$).
+- Runs symmetrically on the backend during question generation (`cleanMathAndProseText`) and on the frontend during rendering (`repairJSStringLatex`), ensuring both new generations and legacy database items display cleanly.
+
+---
+
+### `MathUnitProseUnwrapperAndFailSafeRenderer`
+
+Files: [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx) & [`src/lib/serverAiGenerator.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/serverAiGenerator.ts)
+Last updated: September 9, 2026
+
+Universal unit unwrapper, prompt delimiter guard, chain-of-thought scratchpad purger, and zero-code-box fallback rendering engine.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Percentage Unwrapping** | `\b(\d+(?:\.\d+)?)\s*(?:\\text\s*\{\s*%\s*\}|\\%|%)\b` $\rightarrow$ `$1%` (clean plain-text percentages in both prompt generation and frontend parsing) |
+| **Unit & Temperature Normalizer** | Auto-unwraps `$28^\circ C$` $\rightarrow$ `28°C`, `$50 fish/m^2$` $\rightarrow$ `50 fish/m²`, and `$5.2 gO_2/m^2/day$` $\rightarrow$ `5.2 g O₂/m²/day` |
+| **SGR Rate Parser** | `\text{%\text{ day}^{-1}}` / `\text{%\text{day}^{-1}}` $\rightarrow$ `%/day` |
+| **Chain-of-Thought Purger** | Strips model deliberation and self-correction monologues (`Wait, recalculating...`, `Let's check options...`) from explanations |
+| **Fail-Safe Fallback Element** | `InlineMath` and `BlockMath` catch blocks render `<span className="font-medium text-slate-800 dark:text-slate-200">` stripping LaTeX control macros instead of rendering raw `<code className="bg-slate-100 border text-slate-700 font-mono">` boxes |
+
+**Pattern notes:**
+- Completely prevents KaTeX `%` comment delimiter parsing crashes (`Unexpected end of input in a macro argument, expected '}'`).
+- Eliminates unsightly grey monospace code boxes across question stems, options, and explanations.
+- Ensures physical units and biological count nouns render with natural typography rather than mathematical italic variables.
+
+---
+
+### `TauHealerAndTolerantMathRegex`
+
+Files: [`src/components/MathTextRenderer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/MathTextRenderer.tsx) & [`src/lib/serverAiGenerator.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/serverAiGenerator.ts)
+Last updated: September 9, 2026
+
+Selective tab parser, Greek letter tau auto-healer, and whitespace-tolerant math regex.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Selective Tab Cleaner** | Preserves `\tau`, `\theta`, `\times`, `\text` from being converted into literal `0x09` tab control characters |
+| **Tau Healer** | Automatically restores corrupted `\x09au` $\rightarrow$ `\tau`, `au_{` $\rightarrow$ `\tau_{`, and `$ au` $\rightarrow$ `$\tau` |
+| **Tolerant Delimiter Regex** | `MATH_REGEX = /(?:\$[^$\n]+?\$)/` allowing leading/trailing spaces inside inline math delimiters, trimmed cleanly by `classifyPart` |
+
+**Pattern notes:**
+- Resolves raw unrendered expressions like `$ au_{\max} = \frac{...}{...}$` across questions and solutions.
+---
+
+### `QuestionsManagerSubTabSynchronizer`
+
+Files: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7140-L7415)
+Last updated: September 9, 2026
+
+Content Bank visibility synchronizer, dynamic sub-tab counter badges, and smart fallback routing.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Sub-Tab Default** | Defaults to `'all'` when entering Questions Manager, avoiding artificial filtering of `target_mode: 'practice'` or `target_mode: 'bank'` |
+| **Live Count Badges** | `📦 Question Banks ({bankOnlyCount})`, `🎯 Practice Sets ({practiceCount})`, `🌟 All ({totalExamBankCount})` with active/inactive visual states |
+| **Smart Routing** | Auto-routes to `'practice'` when an exam only contains practice sets, or `'banks'` when only question banks exist |
+| **Empty State Switcher** | Direct 1-click CTA pills (`Switch to Practice Sets (X)` or `Show All (Y)`) with complete `Clear All Filters` reset handler |
+
+**Pattern notes:**
+- Prevents 77%+ of platform content banks from disappearing when admins navigate to manage questions.
+- Gives immediate visual clarity on the exact number of sets available under each target mode.
+
+---
+
+### `MultiBankQueueAutoRunner`
+
+Files: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L4010-L4950)
+Last updated: September 9, 2026
+
+Multi-Bank Sequential Auto-Runner & Direct Auto-Publish Pipeline with 100% strict question bank isolation.
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Target Mode Switcher** | `grid grid-cols-2 gap-2` pills switching between `🎯 Single Target Bank` and `⚡ Multi-Bank Queue Runner` |
+| **Category Scope Banner** | Gradient breadcrumb banner (`bg-gradient-to-r from-brand-50 to-indigo-50/50 dark:from-brand-950/40 dark:to-slate-900 border border-brand-200/80 dark:border-brand-800`) displaying active Step 2 subcategory (`📚 Topic-Wise Question Bank`), total bank count, and empty bank indicator (`⚠️ X banks have 0 questions`) with quick `Show All Categories` toggle |
+| **Category-Scoped Candidate Pool** | Scopes displayed bank pool strictly to Step 2 subcategory (`stage2SubCategory`) using `categorizedQuestionBanks` / `categorizedPracticeSets`, completely preventing cross-category bank pollution |
+| **0-Question Status Filter Tabs** | `All ({N})`, `⚠️ Needs Qs / 0 Qs ({emptyCount})` (styled with amber highlight), and `📦 Populated ({populatedCount})` pills |
+| **1-Click 0-Q Quick Selection** | Dedicated `⚡ Select 0-Q Banks ({emptyCount})` button (`bg-amber-500 hover:bg-amber-600 text-white font-black shadow-xs`) instantly selecting all 0-question banks in the active category with 1 click |
+| **Bank Selection Cards** | Checkbox cards with title, tagline/subject, subcategory badge, and live count pill; 0-question banks feature prominent amber badge (`⚠️ 0 Qs • Empty`) and subtle amber border |
+| **Status Tag Pills** | `Queued` (`bg-slate-200 text-slate-700`), `Running` (`bg-brand-500/20 text-brand-400 border border-brand-500/30 animate-pulse`), `Completed` (`bg-emerald-500/20 text-emerald-400 border border-emerald-500/30`), `Failed` (`bg-rose-500/20 text-rose-400 border border-rose-500/30`) |
+| **Queue Target Calculation Bar** | High-contrast stats banner displaying `N Banks Selected • X Qs/Bank • Y Total Qs` with target completion time projection |
+| **Sequential Isolation Engine** | Loop processes banks strictly sequentially: (1) pulls existing stems for `currentBank`, (2) generates batches with backoff retry, (3) stamps payload with `topic: currentBank.title` and `examId: selectedExamId`, (4) auto-publishes to `/api/admin/questions/bulk`, (5) increments bank question counter via `bankCountOverrides`, and (6) purges in-memory question batch before advancing to next bank |
+| **Live Telemetry Screen** | Pulsing header indicator, live progress bar, active stage stepper, and terminal log stream with real-time SSE updates |
+| **Persistent Queue Monitor** | Dedicated post-run execution monitor persisting after queue completes with total banks, duration, questions uploaded, and `✕ Dismiss Feed` button |
+| **Bank Pipeline Stepper Cards** | Mini progress cards for each bank with micro-steps (`1. Ground` → `2. Generate (Batch b/B)` → `3. Publish`) and live status badges |
+| **Chronological Live Event Feed** | Fixed-height auto-scrolling terminal (`h-44 sm:h-56`) logging timestamped events with color-coded type badges (`queue_init`, `bank_start`, `batch_gen`, `batch_done`, `publishing`, `bank_done`, `advancing`, `queue_complete`) |
+| **Audit Log Clipboard Exporter** | 1-click `📋 Copy Log` button copying full execution history formatted for admin logs |
+| **Graceful Queue Termination** | `⏹️ Stop After Current Bank` button (`bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40`) stopping queue runner without discarding or corrupting active/finished banks |
+| **Active Queue Navigation Guard** | Protective `beforeunload` event listener actively shielding session from accidental tab closure, page refresh, or navigation while queue is running |
+
+**Pattern notes:**
+- Strictly respects Step 2 subcategory selection, preventing candidate confusion and cross-category leakage.
+- Dedicated 0-question workflow allows admins to populate empty banks sequentially with a single click.
+- Active queue runner automatically binds a `beforeunload` browser shield, preventing accidental page navigation or reload while batches are generating or writing to database.
+- Completely prevents cross-bank contamination by strictly scoping each bank's generation and publishing cycle.
+- In-memory questions are purged after each bank's bulk publish succeeds, ensuring zero memory ballooning even across 50+ question banks.
+- Handles transient LLM rate limits and timeouts automatically with 3-tier exponential backoff retries.
+- Feed persists post-run so the admin has permanent visual confirmation of all generated and published question banks before dismissing.
+
+---
+
+### `ContentBankCountBadge` (Status-Aware Question Bank Counter Badge)
+
+File: `src/AdminPanel.tsx`
+Last updated: September 9, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Container (Empty State)** | `inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-amber-50 text-amber-700 border border-amber-200/80 shadow-2xs` |
+| **Pulsing Dot Indicator** | `w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse` |
+| **Text (Empty State)** | `0 Qs • Empty` |
+| **Container (Populated)** | `inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-slate-50 text-slate-500 group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors border border-slate-100` |
+| **Text (Populated)** | `📦 {count} Questions` |
+
+**Pattern notes:**
+- Clearly distinguishes unpopulated stubs from banks with questions, preventing admin disorientation.
+- Uses animated pulsing amber indicator to draw immediate attention to containers needing question creation.
+
+---
+
+### `AdminBankEmptyStateBanner` (Actionable Question Bank Empty State)
+
+File: `src/AdminPanel.tsx`
+Last updated: September 9, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Card Container** | `px-8 py-20 text-center max-w-lg mx-auto` |
+| **Icon Badge** | `w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/70 flex items-center justify-center text-3xl shadow-sm` (`🎯`) |
+| **Headline** | `font-extrabold text-xl text-slate-800 tracking-tight` |
+| **Subtext** | `text-xs text-slate-500 font-semibold mt-1.5 leading-relaxed` |
+| **CTA 1 (AI Studio)** | `px-4 py-2.5 rounded-xl text-xs font-black bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 transition-all flex items-center gap-1.5 cursor-pointer` |
+| **CTA 2 (Bulk Upload)** | `px-4 py-2.5 rounded-xl text-xs font-black bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-500/20 transition-all flex items-center gap-1.5 cursor-pointer` |
+| **CTA 3 (Single Question)** | `px-4 py-2.5 rounded-xl text-xs font-black bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer` |
+
+**Pattern notes:**
+- Replaces cold "No items found" with a guided 3-button workflow.
+- Directly pre-populates target exam and bank IDs into AI Studio and Bulk Upload states for immediate 1-click execution.
+
+---
+
+### `Stage1NamingFormulaToolbar` (Title Generation Formula & Preset Selector)
+
+File: `src/components/admin/AIQuestionStudio.tsx`
+Last updated: September 10, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Background** | `bg-gradient-to-br from-indigo-50/60 via-white to-brand-50/60 dark:from-slate-800/80 dark:via-slate-850 dark:to-slate-800/80` |
+| **Border** | `border border-indigo-200/70 dark:border-indigo-800/40` |
+| **Border radius** | `rounded-2xl` |
+| **Text — primary** | `text-xs font-black text-slate-900 dark:text-white` |
+| **Text — secondary** | `text-[11px] text-slate-500 dark:text-slate-400` |
+| **Spacing** | `p-4 sm:p-5 space-y-3.5` |
+| **Active Preset Pill** | `bg-indigo-600 text-white border-indigo-600 shadow-xs px-2.5 py-1.5 rounded-xl text-xs font-bold` |
+| **Inactive Preset Pill** | `bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 px-2.5 py-1.5 rounded-xl text-xs font-bold shadow-2xs` |
+| **Token Tag Button** | `px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-mono text-[10px] font-semibold border border-slate-200 dark:border-slate-700` |
+| **Input Formula** | `w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs font-mono font-semibold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none` |
+| **Shadow** | `shadow-xs`, `shadow-2xs` |
+| **Accent usage** | `text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/80 border-indigo-200 dark:border-indigo-800` |
+
+**Pattern notes:**
+- Offers 1-click pre-tested formula presets alongside an editable custom pattern input.
+- Insert tag buttons (`[Paper]`, `[Subject]`, `[Sub-Subject]`, `[Unit]`, `[Chapter]`, `#[01-10]`) allow single-click token injection into the formula string.
+- Backed by the **Dynamic AI Syllabus Deconstructor & Strict Placeholder Purity Engine** in `src/lib/serverAiGenerator.ts` and `src/lib/syllabusParser.ts`:
+  - **Dynamic AI Syllabus Deconstructor (`extractSyllabusHierarchyWithAI`)**: When complex or unstructured syllabi are uploaded, an intelligent LLM decomposes the full text into a structured JSON table containing every academic Paper, Subject, Sub-Subject, and Chapter with zero regex failure traps. Includes an in-memory session cache (`syllabusAiCache`) delivering sub-5ms instant responses.
+  - **Universal Placeholder Binding**: When an administrator specifies syllabus placeholders (`[Sub-Subject]`, `[Subject]`, `[Unit]`, `[Chapter]`), all mock test subcategories (including `Daily / Weekly Benchmark Tests`, `Sectional Tests`, `Official PYQ Tests`, and `Full-Length Mocks`) strictly honor the formula, binding directly to authentic syllabus items instead of falling back to generic repetitive templates. Whole-exam simulation tests only run when generic whole-exam naming patterns (e.g. `Weekly Benchmark Test #[01-08]`) are explicitly kept.
+  - **Sub-Subject Granular Grouping**: When `[Sub-Subject]` is selected, tests are grouped by `${item.subject}:::${item.subSubject}`, generating a discrete test for every unique sub-subject in the syllabus with accurate database metadata (`subject: authenticSubject`, `subSubject: authenticSubSubject`).
+  - **Strict Placeholder Purity**: Whichever placeholder is selected, strictly and solely that placeholder value appears on generated cards (zero unrequested chapter appending or parent subject prefixing). Delimiter-aware automatic pruning removes absent placeholders cleanly.
+- **Hierarchical Breadcrumbs**: Cleaned `parsedSyllabusTopics` breadcrumbs in `AIQuestionStudio.tsx` to display `Paper ➔ Broad Subject ➔ Sub-Subject` without repeating identical subject tokens.
+
+---
+
+### `ExamStageTabBar` (Executive Examination Stage Segmented Controller)
+
+File: `src/App.tsx`
+Last updated: September 11, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Background** | `bg-white/90 dark:bg-[#0B1528]/90 backdrop-blur-md` (Outer container), `bg-slate-100/90 dark:bg-[#060B16]` (Segment track), `bg-white dark:bg-brand-600` (Animated active sliding pill) |
+| **Border** | `border border-slate-200/80 dark:border-slate-800` (Outer container), `border-slate-200/60 dark:border-slate-800/80` (Segment track), `border-slate-200/80 dark:border-brand-500/50` (Active pill) |
+| **Border radius** | `rounded-2xl` (Outer container), `rounded-xl` (Track), `rounded-lg` (Segment button & sliding pill), `rounded-full` (Counter badge) |
+| **Text — primary** | `text-xs sm:text-sm font-black text-brand-700 dark:text-white` (Active), `text-slate-600 dark:text-slate-400 hover:text-slate-900` (Inactive) |
+| **Text — secondary** | `text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider` (Header title) |
+| **Layout & Grid** | `grid grid-flow-col auto-cols-fr gap-1.5` (Equal 50/50 width distribution on mobile for <=3 stages), `flex items-center gap-1.5 overflow-x-auto` (Scrollable fallback for >3 stages) |
+| **Spacing** | `p-2 sm:p-2.5 mb-6 sm:mb-8` (Outer container), `p-1` (Track), `py-2 sm:py-2.5 px-3` (Segment button), `px-1.5 sm:px-2 py-0.5` (Counter badge) |
+| **Shadow** | `shadow-sm` (Outer container & Active pill) |
+| **Animation** | Framer Motion layout spring (`stiffness: 450, damping: 35`) on `layoutId="activeExamStageSegment"` for smooth sliding transitions |
+
+**Pattern notes:**
+- Rendered conditionally below the Exam Header Card whenever `currentExam.stages && currentExam.stages.length > 1 && !currentExam.stages.includes('Single Stage')`.
+- Equal-width symmetric distribution eliminates empty visual void when 2 stages (e.g. `Prelims` vs `Mains`) are active.
+- Displays real-time content counts per stage (`stageTestCount`).
+- Synchronizes with URL search parameters (`?stage=prelims`, `?stage=mains`) via `window.history.replaceState` for shareable links.
+- Strictly filters items across Practice Tests (Step 1), Mock Tests (Step 2), and Question Banks (Step 3) with fallback for legacy exams and un-staged items (`!item.stage || item.stage === 'All Stages'`).
 
 

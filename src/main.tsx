@@ -27,31 +27,55 @@ if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
   });
 }
 
+function shouldReportError(msg: string, stack?: string): boolean {
+  if (!msg) return false;
+  const str = (msg + ' ' + (stack || '')).toLowerCase();
+  return !(
+    str.includes('websocket') ||
+    str.includes('@vite/client') ||
+    str.includes('resizeobserver') ||
+    str.includes('script error') ||
+    str.includes('extension') ||
+    str.includes('failed to fetch') ||
+    str.includes('networkerror') ||
+    str.includes('aborterror') ||
+    str.includes('signal is aborted')
+  );
+}
+
 // Global client-side error reporter for remote diagnostics
 window.onerror = function(message, source, lineno, colno, error) {
+  const msgStr = message ? message.toString() : '';
+  const stackStr = error?.stack || '';
+  if (!shouldReportError(msgStr, stackStr)) return;
+
   fetch('/api/log-error', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       type: 'onerror',
-      message: message ? message.toString() : '',
+      message: msgStr,
       source,
       lineno,
       colno,
-      stack: error?.stack || ''
+      stack: stackStr
     })
   }).catch(() => {});
 };
 
 window.addEventListener('unhandledrejection', function(event) {
+  const reasonStr = event.reason ? (event.reason.message || event.reason.toString()) : '';
+  const stackStr = event.reason?.stack || '';
+  if (!shouldReportError(reasonStr, stackStr)) return;
+
   fetch('/api/log-error', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       type: 'unhandledrejection',
       message: 'Unhandled Promise Rejection',
-      reason: event.reason ? (event.reason.message || event.reason.toString()) : '',
-      stack: event.reason?.stack || ''
+      reason: reasonStr,
+      stack: stackStr
     })
   }).catch(() => {});
 });

@@ -161,6 +161,35 @@ export interface TestSeries {
   is_archived?: boolean;
 }
 
+export const EXAM_STAGES = [
+  'Prelims',
+  'Mains',
+  'Tier 1',
+  'Tier 2',
+  'Tier 3',
+  'CBT 1',
+  'CBT 2',
+  'Paper 1',
+  'Paper 2',
+  'Screening Test',
+  'Written Examination',
+  'Single Stage'
+] as const;
+
+export type ExamStage = typeof EXAM_STAGES[number];
+
+export interface ExamPricingConfig {
+  starterTestCount?: number;
+  starterSectionalCount?: number;
+  starterBankCount?: number;
+  starterPrice?: number;
+  starterOriginalPrice?: number;
+  fullPrice?: number;
+  fullOriginalPrice?: number;
+  superPrice?: number;
+  superOriginalPrice?: number;
+}
+
 export interface MockTest {
   id?: string;
   seriesId: string;
@@ -173,6 +202,13 @@ export interface MockTest {
   createdAt?: string;
   is_archived?: boolean;
   scheduled_at?: string | null;
+  examId?: string;
+  category?: string;
+  mockCategory?: string;
+  mockSubject?: string;
+  stage?: string;
+  _questionCount?: number;
+  questionCount?: number;
 }
 
 export interface Exam {
@@ -193,6 +229,7 @@ export interface Exam {
   price?: number;
   originalPrice?: number;
   pricingConfig?: ExamPricingConfig;
+  stages?: string[];
 }
 
 export interface QuestionBank {
@@ -212,6 +249,7 @@ export interface QuestionBank {
   createdAt?: string;
   is_archived?: boolean;
   scheduled_at?: string | null;
+  stage?: string;
 }
 
 /**
@@ -616,8 +654,20 @@ export const examService = {
     return tests.map(t => {
       const qList = questions.filter(q => q.topic === `mockTest__${t.id}`);
       const cnt = qList.length;
+
+      let seriesData = t.seriesId;
+      if (typeof seriesData === 'string' && seriesData.startsWith('{')) {
+        try { seriesData = JSON.parse(seriesData); } catch(e) {}
+      }
+      const stage = (t as any).stage || (seriesData && typeof seriesData === 'object' ? seriesData.stage : null) || null;
+      const examId = (t as any).examId || (seriesData && typeof seriesData === 'object' ? seriesData.examId : null) || null;
+      const category = (t as any).category || (seriesData && typeof seriesData === 'object' ? seriesData.category : null) || null;
+
       return {
         ...t,
+        examId,
+        category,
+        stage: stage || undefined,
         questions: qList,
         _questionCount: cnt,
         questionCount: cnt,
@@ -655,6 +705,7 @@ export const examService = {
         let examId: string | null = t.examId || null;
         let isPremium = t.isPremium ?? false;
         let category: string | null = t.category || null;
+        let stage: string | null = t.stage || null;
 
         let seriesData = t.seriesId;
         if (typeof seriesData === 'string' && seriesData.startsWith('{')) {
@@ -665,6 +716,7 @@ export const examService = {
           examId   = examId   || seriesData.examId   || null;
           isPremium = seriesData.isPremium ?? isPremium;
           category  = category  || seriesData.category  || null;
+          stage     = stage     || seriesData.stage     || null;
         }
 
         const _questionCount = countMap[`mockTest__${t.id}`] || 0;
@@ -674,6 +726,7 @@ export const examService = {
           examId,
           isPremium,
           category,
+          stage: stage || undefined,
           _questionCount,
           questionCount: _questionCount,
           actualQuestionCount: _questionCount,
@@ -800,10 +853,14 @@ export const examService = {
             cleanDesc = metaObj.description || '';
           } catch (e) {}
         }
+        const stages = Array.isArray(metaObj.stages)
+          ? metaObj.stages
+          : (metaObj.stage ? [metaObj.stage] : []);
         return {
           ...ex,
           description: cleanDesc,
           rawDescription: ex.description,
+          stages,
           isPremium: metaObj.isPremium ?? (Number(metaObj.price || ex.price) > 0),
           price: Number(metaObj.price || ex.price || 99),
           originalPrice: Number(metaObj.originalPrice || ex.originalPrice || 299),
@@ -1090,6 +1147,15 @@ export const examService = {
             if (resolvedCount > 0) {
               b.questionCount = resolvedCount;
             }
+
+            let stage: string | null = (b as any).stage || null;
+            if (!stage && b.tagline && typeof b.tagline === 'string' && b.tagline.trim().startsWith('{')) {
+              try {
+                const parsed = JSON.parse(b.tagline);
+                if (parsed && parsed.stage) stage = parsed.stage;
+              } catch (_e) {}
+            }
+            b.stage = stage || undefined;
           });
         } catch (err) {
           console.error('Failed to fetch actual question counts for question banks:', err);

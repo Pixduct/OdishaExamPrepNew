@@ -24,7 +24,10 @@ export function fetchWithInFlightDeduplication<T>(key: string, fetcher: () => Pr
   return promise;
 }
 
-export function clearCatalogCache(): void {
+// Private: clears all cache data layers WITHOUT dispatching the event.
+// Use this inside service methods after a DB write to ensure a clean slate
+// before the event-bearing clearCatalogCache() fires from the UI layer.
+function clearCacheData(): void {
   inFlightPromises.clear();
   cacheService.clear();
   if (typeof sessionStorage !== 'undefined') {
@@ -38,6 +41,13 @@ export function clearCatalogCache(): void {
       sessionStorage.removeItem('oep_cached_loadedForUserId');
     } catch (e) {}
   }
+}
+
+// Public: clears all cache data layers AND dispatches the catalog-updated
+// event so App.tsx re-fetches immediately. Call this ONCE, from the UI layer,
+// after the DB write is confirmed — never before.
+export function clearCatalogCache(): void {
+  clearCacheData();
   if (typeof window !== 'undefined') {
     try {
       window.dispatchEvent(new Event('oep_catalog_updated'));
@@ -852,9 +862,8 @@ export const examService = {
 
   // Exams
   async addExam(exam: Exam) {
-    clearCatalogCache();
     const data = await callAdminDbProxy('exams', 'insert', exam);
-    clearCatalogCache();
+    clearCacheData(); // flush stale data AFTER write is committed, before UI dispatches the event
     return data?.[0] || data;
   },
 
@@ -1095,9 +1104,8 @@ export const examService = {
   },
 
   async updateExam(id: string, updates: Partial<Exam>) {
-    clearCatalogCache();
     const data = await callAdminDbProxy('exams', 'update', updates, id);
-    clearCatalogCache();
+    clearCacheData(); // flush stale data AFTER write is committed, before UI dispatches the event
     return data?.[0] || data;
   },
 

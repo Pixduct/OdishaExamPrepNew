@@ -7773,6 +7773,10 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     fetchMaxQuestions();
   }, [practiceSettings.topic, practiceSettings.examId, selectedExam, dynamicQuestionBanks]);
 
+  // Keep a stable ref to the latest fetchDashboardData so the event listener
+  // registered below never captures a stale closure from an earlier render cycle.
+  const fetchDashboardDataRef = React.useRef<(() => Promise<void>) | null>(null);
+
   useEffect(() => {
     const fetchDashboardData = async () => {
       const hasValidCache = 
@@ -8049,11 +8053,17 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         setLoadingDashboardData(false);
       }
     };
+
+    // Always keep the ref pointing to the latest version of fetchDashboardData
+    // so the event listener below never operates on a stale closure.
+    fetchDashboardDataRef.current = fetchDashboardData;
     fetchDashboardData();
 
     const handleCatalogUpdated = () => {
       _dashboardCache.hasFetchedThisSession = false;
-      fetchDashboardData();
+      // Call through the ref so we always invoke the latest fetchDashboardData,
+      // not the one captured at listener-registration time.
+      fetchDashboardDataRef.current?.();
     };
     window.addEventListener('oep_catalog_updated', handleCatalogUpdated);
     return () => {

@@ -336,6 +336,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   });
   const [aiStudioTargetExamId, setAiStudioTargetExamId] = useState<string | undefined>(undefined);
   const [aiStudioTargetTestId, setAiStudioTargetTestId] = useState<string | undefined>(undefined);
+  const [isSaving, setIsSaving] = useState(false); // guard against double-click / concurrent saves
   const [questionFilter, setQuestionFilter] = useState<'all' | 'practice' | 'mock'>('all');
   const [examFilter, setExamFilter] = useState<'all' | 'popular' | 'upcoming'>('all');
   const [testFilter, setTestFilter] = useState<'all' | 'full-length' | 'sectional' | 'pyq' | 'daily'>('all');
@@ -2285,6 +2286,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSaving) return; // prevent double-click / concurrent saves
+    setIsSaving(true);
     try {
       if (activeTab === 'questions') {
         if (!formData.examId) { alert("Please select an exam."); return; }
@@ -2434,7 +2437,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         if (!validateChangeBeforePublish('exam', payload, !!editingId)) return;
         if (editingId) {
           await examService.updateExam(editingId, payload);
-          setExams(prev => prev.map(e => e.id === editingId ? { ...e, ...payload, id: editingId } : e));
+          // Optimistic update: include stages explicitly since they live in formData
+          // not in payload (payload uses the serialized description blob)
+          const updatedStages = Array.isArray(formData.stages) ? formData.stages : [];
+          setExams(prev => prev.map(e => e.id === editingId ? { ...e, ...payload, id: editingId, stages: updatedStages } : e));
         } else {
           const res = await examService.addExam(payload);
           if (res) setExams(prev => [...prev.filter(e => e.id !== res.id), res]);
@@ -2528,6 +2534,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     } catch (error: any) {
       console.error(error);
       alert('Error adding item: ' + (error.message || 'Unknown error'));
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -9222,11 +9230,21 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                   <button
                     form="add-new-form"
                     type="submit"
+                    disabled={isSaving}
                     title="Save without scrolling to bottom"
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-black text-white bg-brand-600 hover:bg-brand-700 rounded-xl transition-all shadow-sm shrink-0 border border-brand-700/20"
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-1.5 text-xs font-black text-white rounded-xl transition-all shadow-sm shrink-0 border",
+                      isSaving
+                        ? "bg-brand-400 border-brand-400/20 cursor-not-allowed opacity-70"
+                        : "bg-brand-600 hover:bg-brand-700 border-brand-700/20"
+                    )}
                   >
-                    <Save className="w-3.5 h-3.5" />
-                    <span>Save</span>
+                    {isSaving ? (
+                      <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                    ) : (
+                      <Save className="w-3.5 h-3.5" />
+                    )}
+                    <span>{isSaving ? 'Saving…' : 'Save'}</span>
                   </button>
                   <button type="button" onClick={() => setShowAddModal(false)} className="p-2.5 text-slate-400 hover:bg-slate-50 hover:text-slate-700 rounded-xl transition-all border border-slate-200/50 shadow-sm bg-white shrink-0">
                     <X className="w-4 h-4" />
@@ -9239,8 +9257,20 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
 
                 <div className="flex justify-end gap-3.5 mt-8 pt-6 border-t border-slate-100">
                   <button type="button" onClick={() => setShowAddModal(false)} className="px-6 py-3 rounded-xl border border-slate-200 font-bold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all text-sm shrink-0 bg-white shadow-sm">Cancel</button>
-                  <button type="submit" className="px-8 py-3 rounded-xl premium-gradient text-white font-black hover:premium-glow shadow-lg shadow-brand-500/20 transition-all active:scale-[0.98] text-sm shrink-0">
-                    Save {activeTab === 'banks' ? 'Question Bank' : activeTab === 'practice' ? 'Practice Set' : activeTab}
+                  <button
+                    type="submit"
+                    disabled={isSaving}
+                    className={cn(
+                      "flex items-center gap-2 px-8 py-3 rounded-xl text-white font-black shadow-lg transition-all active:scale-[0.98] text-sm shrink-0",
+                      isSaving
+                        ? "bg-brand-400 shadow-brand-400/20 cursor-not-allowed opacity-70"
+                        : "premium-gradient hover:premium-glow shadow-brand-500/20"
+                    )}
+                  >
+                    {isSaving ? (
+                      <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                    ) : null}
+                    {isSaving ? 'Saving…' : `Save ${activeTab === 'banks' ? 'Question Bank' : activeTab === 'practice' ? 'Practice Set' : activeTab}`}
                   </button>
                 </div>
               </form>

@@ -1,5 +1,17 @@
 # Progress Tracker
 
+- [x] ⚡ Exam Stage Save Reliability & Event Race Invalidation Engine (`src/lib/examService.ts`, `src/AdminPanel.tsx`, `src/App.tsx`):
+  1. **Root Cause Analysis (Race Condition & Cascade)**: Identified 4 interconnected causes of intermittent save failure:
+     - *Pre-write event dispatch*: `clearCatalogCache()` was being called *before* database writes inside `updateExam` and `addExam`, firing `oep_catalog_updated` which triggered `fetchDashboardData()` while the DB write was still pending, causing stale data to be fetched and stored in the cache.
+     - *Triple invalidation cascade*: Redundant cache invalidations were firing in `updateExam` (pre + post write) and again in `handleAdd`, causing concurrent network requests that raced against each other.
+     - *Missing optimistic stages*: The optimistic `setExams` state update spread `payload` which lacked `stages` (since stages were serialized inside `metaObj.description`), leaving the stage counter showing stale counts immediately upon save.
+     - *Stale closure on event listener*: `handleCatalogUpdated` in `App.tsx` risked capturing a stale closure of `fetchDashboardData` across renders.
+  2. **Layer Separation (`src/lib/examService.ts`)**: Separated cache clearing into private `clearCacheData()` (no window events, invoked post-commit in service methods) and public `clearCatalogCache()` (clears cache and dispatches `oep_catalog_updated` exactly once after the promise settles).
+  3. **Optimistic State Synchronization (`src/AdminPanel.tsx`)**: Explicitly injected `stages: updatedStages` into the optimistic `setExams` mapping, guaranteeing instant and accurate UI state reflection before background re-fetch finishes.
+  4. **Save Button Lock & UI Loading State (`src/AdminPanel.tsx`)**: Introduced `isSaving` guard preventing double-clicks and concurrent saves, accompanied by animated spin icons and `Saving…` state on both Quick Save and Modal Submit buttons.
+  5. **Stable Ref Listener (`src/App.tsx`)**: Implemented `fetchDashboardDataRef = useRef(...)` ensuring `handleCatalogUpdated` always invokes the freshest dashboard fetch function without stale closure entrapment.
+  6. **Zero TypeScript Errors & Verified Production Build**: `npx tsc --noEmit` exited with code 0; `npm run build` completed cleanly in 27.44s.
+
 - [x] 🔧 Atomic Three-Layer Cache Invalidation — Exam Stages Persistence Fix (`src/lib/examService.ts`, `src/AdminPanel.tsx`):
   1. **Root Cause (3-Layer Stale Cache Problem)**: After an admin saved exam stages, the student portal continued showing stale data because three independent caching layers were not all invalidated atomically: ① `inFlightPromises` (module-level `Map`) could return a still-in-flight stale promise, ② `cacheService` (sessionStorage, TTL 5 min, prefixed `oep_cache_`) held the old exam list, ③ `_dashboardCache` module-level object in `App.tsx` with `hasFetchedThisSession: true` caused `fetchDashboardData()` to short-circuit and never re-fetch, leaving `currentExam.stages` permanently stale until manual hard reload.
   2. **`clearCatalogCache()` Exported Function (`src/lib/examService.ts`)**: Added a single exported atomic helper that: clears all `inFlightPromises`, calls `cacheService.clear()`, removes all `oep_cached_*` and `oep_admin_catalog_cache*` sessionStorage keys, and dispatches `oep_catalog_updated` window event — which triggers `handleCatalogUpdated` in `App.tsx` resetting `hasFetchedThisSession = false` and calling `fetchDashboardData()`.

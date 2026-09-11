@@ -4628,6 +4628,8 @@ Last updated: September 11, 2026
 - Rendered in dual locations inside Admin Entity Modals (`Add New` / `Edit`): (1) Top header bar (`form="add-new-form"` wired via HTML5 attribute), (2) Bottom modal actions row.
 - Bound to component-level `isSaving` state guard to permanently prevent double-click mutations and race-condition data clobbering.
 - Automatically swaps label from `Save` to `Saving…` during in-flight operations.
+- Instant-Unlock Lifecycle: `isSaving` is released immediately upon database write confirmation (~180ms) and modal close, preventing the Save button in a rapidly reopened Edit modal from remaining locked.
+- Non-blocking targeted reconciliation: Background sync is delegated to scoped `fetchData(activeTab)` asynchronously, eliminating thread freezing and keeping the modal interactions instantaneous.
 - Enclosed in `finally { setIsSaving(false); }` block ensuring UI unlock even on server proxy rejections.
 
 

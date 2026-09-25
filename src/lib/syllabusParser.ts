@@ -837,3 +837,112 @@ export function extractAutonomousSyllabusScope(
   };
 }
 
+
+
+// -----------------------------------------------------------------------------
+// QUESTION NATURAL DENSITY ENGINE
+// Mirrors the flashcard natural density engine for Question Banks, Practice
+// Tests, and Mock Test (sectional) generation.
+// -----------------------------------------------------------------------------
+
+/**
+ * Extracts individual bullet-point content items from a scoped chapter's
+ * syllabus block. Returns clean strings representing distinct content items
+ * (the individual topics/facts within a chapter or sub-subject section).
+ *
+ * Used to compute per-content question quotas so that every content item
+ * receives an explicit, hard-numbered question allocation.
+ */
+export function extractSyllabusContents(scopedMarkdown: string): string[] {
+  if (!scopedMarkdown || scopedMarkdown.trim().length < 10) return [];
+
+  const lines = scopedMarkdown.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const contents: string[] = [];
+
+  for (const line of lines) {
+    // Skip heading lines (the chapter/subject title itself)
+    if (/^#{1,6}\s/.test(line)) continue;
+    if (/^\[?(Paper|Subject|Discipline|Sub[\s\-_]?Subject|Unit|Section|Module|Chapter|Topic|Lesson)\]?[\s:\-]/i.test(line)) continue;
+    if (isStructuralMetaText(line)) continue;
+
+    // Accept bullet items, numbered items, or bold standalone lines
+    const isBullet = /^[-*\u2022]\s+/.test(line);
+    const isNumbered = /^\d+[\.\)]\s+/.test(line);
+    const isBoldLine = /^\*\*[^*:]+\*\*$/.test(line);
+
+    if (isBullet || isNumbered || isBoldLine) {
+      const clean = line
+        .replace(/^[-*\u2022\d]+[\)\.\s]*/, '')
+        .replace(/\*\*/g, '')
+        .trim();
+      if (clean.length > 5) {
+        contents.push(clean.slice(0, 120));
+      }
+    } else if (line.length > 20) {
+      // Non-bulleted prose or colon-delimited topic groups (standard in civil service & engineering syllabi)
+      // Split by sentence terminators: '. ' or '; ' or colon-cluster boundaries
+      const sentences = line.split(/(?<=[.!?])\s+(?=[A-Z0-9])|;\s+/).map(s => s.trim()).filter(s => s.length > 8);
+      if (sentences.length > 1) {
+        for (const s of sentences) {
+          contents.push(s.replace(/^[-*\u2022\d]+[\)\.\s]*/, '').slice(0, 120));
+        }
+      } else {
+        contents.push(line.slice(0, 120));
+      }
+    }
+  }
+
+  return contents;
+}
+
+/**
+ * Computes the natural question density for a scoped chapter's syllabus content.
+ *
+ * Algorithm:
+ *  1. Extract content items via enhanced extractSyllabusContents (bullets, numbered lists, sentences, and topic clusters).
+ *  2. Count concept points: 1 base point per cluster + additional points for comma/semicolon technical parameters.
+ *  3. Natural capacity = conceptPointCount x 2, bounded between 5 and 50.
+ *  4. If an optional ceiling is provided, cap the result at that ceiling.
+ */
+export function computeQuestionNaturalDensity(
+  scopedMarkdown: string,
+  ceiling?: number
+): { contentItems: string[]; naturalCount: number } {
+  const contentItems = extractSyllabusContents(scopedMarkdown);
+
+  let conceptPointCount = 0;
+  for (const item of contentItems) {
+    conceptPointCount += 1;
+
+    // Comma-separated technical parameters after a colon (e.g. "Fluid statics: Pascal's law, hydrostatic pressure, buoyancy")
+    const colonIdx = item.indexOf(':');
+    const listPart = colonIdx !== -1 ? item.slice(colonIdx + 1) : item;
+    const commaSegments = listPart.split(/,\s+/).filter(s => s.trim().length > 3);
+    if (commaSegments.length > 1) {
+      conceptPointCount += Math.min(commaSegments.length - 1, 4);
+    }
+
+    // Semicolon-separated clauses
+    const semiSegments = item.split(/;\s+/).filter(s => s.trim().length > 4);
+    if (semiSegments.length > 1) {
+      conceptPointCount += semiSegments.length - 1;
+    }
+  }
+
+  // Fallback: count non-heading lines as rough estimate
+  if (conceptPointCount === 0) {
+    const nonHeadingLines = scopedMarkdown
+      .split(/\r?\n/)
+      .map((l: string) => l.trim())
+      .filter((l: string) => l.length > 10 && !/^#{1,6}\s/.test(l) && !isStructuralMetaText(l));
+    conceptPointCount = Math.min(nonHeadingLines.length, 10);
+  }
+
+  // Natural capacity: 2 questions per concept point, bounded 5-50
+  const rawCapacity = Math.max(5, Math.min(conceptPointCount * 2, 50));
+  const naturalCount = (ceiling && ceiling > 0)
+    ? Math.min(rawCapacity, ceiling)
+    : rawCapacity;
+
+  return { contentItems, naturalCount };
+}

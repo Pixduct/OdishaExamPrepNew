@@ -1,57 +1,64 @@
-# Memory — Whole-Exam Mock Test Series & Syllabus Parity Audit
+# Memory — Comprehensive Odisha & Central Exam Coverage & Real-Time Notification Pipeline
 
-Last updated: September 25, 2026, 11:28 IST
+Last updated: September 25, 2026, 14:45 IST
 
 ## What was built
 
-1. **Stage 1 Structure Sizing Precision (`src/lib/serverAiGenerator.ts`)**:
-   - Corrected `targetCount` fallback evaluation in `generateExamStructure` so that whole-exam test series properly generate 10 tests for `full-length` and `pyq` and 8 tests for `daily` (Weekly Benchmark) matching template patterns like `#[01-10]` and `#[01-08]`.
-   - Verified Phase 1 generation:
-     - `Full Mock Test #[01-10]`: 10/10 tests, 120m duration, 100 marks, comprehensive whole-syllabus scope.
-     - `Official PYQ Paper #[01-10]`: 10/10 tests, 120m duration, 100 marks, authentic past paper simulation.
-     - `Weekly Benchmark Test #[01-08]`: 8/8 tests, 60m duration, 50 marks, weekly assessment rhythm.
+1. **Comprehensive 54-Authority Portal & Whitelist Alignment**:
+   - `exam_registry.json`: Synchronized 54 nodal authorities (20 Odisha State boards + 34 Central Government entities) covering small to mega exams.
+   - `automations/config/trusted_sources.json`: Added 18 missing official domains (DSE Odisha, India Post, KVS, NVS, EMRS, Army, Navy, Air Force, Coast Guard, CTET, CSIR, NIELIT, DTET, OSCSC, CHSE).
+   - `automations/shared/source_validator.py`: Upgraded `SourceValidator.is_official_domain` to recognize sovereign Indian government suffixes (`.gov.in`, `.nic.in`, `.res.in`), preventing legitimate sub-district/board notices from being dropped.
+   - `automations/exam_update_engine.py`: Verified `DIRECT_PORTAL_MAP` covers 100% (54/54) of registered recruitment portals with zero unmapped boards.
 
-2. **Stage 2 Whole-Syllabus Equal Allocation & Authentic Grounding (`src/lib/serverAiGenerator.ts`)**:
-   - Hardened `isGenericSetTitleWithoutPlaceholder` to catch `full\s*mock\s*test`, `official\s*pyq\s*paper`, and `weekly\s*(?:benchmark\s*)?test`.
-   - Autonomously expands syllabus context up to 8,000 characters when no chapter placeholder exists.
-   - Computes deterministic equal quotas across all constituent syllabus units (`Math.floor(totalQuestions / sectionCount)` + remainder distribution).
-   - Injects authentic subject unit names into each question's `topic` field, completely eliminating generic `"General Syllabus"` tags.
-   - Enforces paramount obedience to admin custom directives (`directivesMarkdown`) when specified.
+2. **Universal 54-Board Acronym Extraction & Word Boundary Clamping (`automations/breaking_engine.py`)**:
+   - Expanded `extract_board_info` from an incomplete 19-board hardcoded list to cover all 54 nodal authorities with correct short acronyms and official domains.
+   - Enforced regex word boundaries (`\b`) on short acronyms (`\blic\b`, `\bfci\b`, `\baai\b`, `\brbi\b`, `\bsbi\b`, `\bssc\b`, etc.), eliminating false-positive matches (e.g. `applications` previously matching `lic`).
 
-3. **Automation QA Test Suites & Quality Gates**:
-   - `scratch/test_mock_test_3_series.ts`: Live execution against Google Gemini across all 3 series -> **100% Pass** (Phase 1: 3/3 PASS, Phase 2: 3/3 PASS with exact 2 Qs / unit across History, Geography, Polity, Science).
-   - `scratch/test_whole_syllabus_no_placeholder.ts`: 3/3 PASS.
-   - `scratch/test_question_bank_4_categories.ts`: 4/4 PASS.
-   - `npx tsc --noEmit`: 0 errors.
-   - `npm run build`: Code 0 (clean production build in 25.80s, server bundle 249.5 KB).
+3. **20-Category Classification Precision & Prioritization (`automations/breaking_engine.py`)**:
+   - Prioritized high-urgency windows in classification logic: Objection Window before Answer Key, Final Answer Key before Provisional, Exam City Intimation slip before Exam Date, Corrigendum before Advt, and Advt Release before Application Start.
+   - Expanded regex tokens for Exam City Intimation (`examination city`, `city allotment`, `intimation slip`).
 
-4. **UI Pattern Registry Imprinting (`context/ui-registry.md`)**:
-   - Imprinted `SubcategoryCurriculumFilterBar` with dynamic section-aware presets, active pill states, and naming formula auto-sync.
+4. **1080x1080 Visual Alert Card Engine (`automations/exam_card_renderer.py`, `automations/templates/template_alert.html`)**:
+   - Upgraded top-bar to a 3-column CSS Grid (`grid-template-columns: auto 1fr auto;`) with board tag clamping ($\le 22$ chars) to eliminate badge collision with category badges.
+   - Replaced plain bullet lists with self-distributing Glass Highlight Cards (`flex: 1; justify-content: space-evenly;`) to eliminate vertical voids.
+   - Scaled typography for mobile legibility (34px–42px headlines, 21px–22px body, 30px stat icons).
+
+5. **Automated Senior QA Test Suite & Quality Verification (`scratch/senior_qa_exam_notification_audit.py`)**:
+   - Module 1 (Authority & Portal Coverage): 5/5 PASSED.
+   - Module 2 (20-Category Universal Classification): 21/21 PASSED.
+   - Module 3 (Anti-Noise & Anti-Hallucination Guardrails): 8/8 PASSED (Tenders, DPC promotions, deputations, and expired dates deterministically rejected; genuine vacancies preserved, hallucinated counts sanitized).
+   - Module 4 (End-to-End Scenarios & Playwright Card Rendering): 16/16 PASSED (District Courts, ISRO IPRC, Odisha Fire Service, SSC CGL).
+   - Total Suite: **50/50 Tests Passed (100.0%)** in 9.42s.
+   - TypeScript compilation (`npx tsc --noEmit`): 0 errors.
+
+6. **Documentation & Registry Imprints**:
+   - Updated `context/progress-tracker.md` with complete audit details.
+   - Imprinted `ExamNotificationVisualCardAndTopBar` in `context/ui-registry.md`.
 
 ## Decisions made
 
-- **Autonomous Whole-Exam Series vs Chapter-Locked Mode**: When a title lacks a specific chapter placeholder (e.g. `Full Mock Test #[01-10]`, `Official PYQ Paper #[01-10]`, `Weekly Benchmark Test #[01-08]`), the engine treats the title as a whole-syllabus examination rather than failing or restricting to a single chapter.
-- **Strict Multi-Unit Quota Balancing**: Autonomous whole-syllabus generation deterministically divides the requested question count equally across all constituent units.
-- **Authentic Subject Metadata**: Questions in full-length tests must always retain their specific constituent unit/subject in the `topic` field rather than generic labels.
+- **Sovereign Indian Government TLD Recognition**: Recognizing `.gov.in`, `.nic.in`, and `.res.in` in `SourceValidator` guarantees future district courts, municipal bodies, or newly created board websites are never rejected, while maintaining strict defense against third-party aggregators.
+- **Strict Word-Boundary Token Matching**: Short acronyms (2–3 characters) must always use `\b` regex boundaries to avoid inadvertent substring matches in general prose.
+- **Classification Specificity Hierarchy**: Specific lifecycle phases (Objection Window, Corrigendum, City Intimation) take precedence over generic parent phases (Answer Key, Exam Date, Application Notice).
+- **Anti-Hallucination Vacancy Grounding**: If AI outputs a vacancy number not present in raw official source text, it is deterministically stripped and replaced with `"Refer to Official Notification PDF"`.
 
 ## Problems solved
 
-- Resolved bug where `targetCount` in Stage 1 was prematurely defaulting to 6 tests when `req.count` was omitted, truncating 10-test series to 6.
-- Hardened regex token matching for `Weekly Benchmark Test` where the word "Benchmark" sat between "Weekly" and "Test".
-- Resolved generic topic metadata leakage by mapping each generated question index directly to its allocated syllabus section.
+- Fixed 18 missing official domains in `trusted_sources.json`.
+- Fixed defect where 35/54 authorities fell back to generic "RECRUITMENT BOARD" in breaking alert cards.
+- Fixed top-bar collision defect where long board names occluded category pills.
+- Eliminated dead empty voids in 1080x1080 cards via adaptive glassmorphic highlight cards.
 
 ## Current state
 
-- All 3 whole-exam Mock Test Series scenarios work with 100% precision.
-- Flashcard Natural Density, Question Bank (4 Categories), Practice Tests, and Mock Tests are in full production parity.
-- TypeScript compiler and production Vite + ESBuild bundles compile cleanly with 0 errors.
+- All 54 recruitment boards (Odisha & Central) are 100% covered and mapped.
+- Real-time notification ingestion, classification, anti-hallucination sanitization, card rendering, and Telegram caption generation pass all 50 automated tests.
+- Codebase is clean, TypeScript compiles with 0 errors.
 
 ## Next session starts with
 
-- Awaiting user's next priority or feature request from `context/build-plan.md`.
+- Confirm with user the next feature priority from `context/build-plan.md` or next operational workflow to execute.
 
 ## Open questions
 
-- None. All requirements and test scenarios are fully met and verified.
-
-
+- None. All 50 QA assertions and rendering stress scenarios are 100% verified and green.

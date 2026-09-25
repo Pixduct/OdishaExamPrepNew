@@ -678,6 +678,8 @@ export function AIQuestionStudio({
   const [stage2Chapter, setStage2Chapter] = useState<string>('');
   const [stage2QuestionCount, setStage2QuestionCount] = useState<number>(5);
   const [stage2NaturalDensity, setStage2NaturalDensity] = useState<boolean>(true);
+  const [stage2QuestionNaturalDensity, setStage2QuestionNaturalDensity] = useState<boolean>(false); // Natural Density for QB/PT/Mock questions
+  const [stage2QuestionCeiling, setStage2QuestionCeiling] = useState<number>(0); // 0 = fully auto when natural density ON
   const [stage2BatchCount, setStage2BatchCount] = useState<number>(1);
   const [currentRunningBatch, setCurrentRunningBatch] = useState<number>(1);
   const [isBatchRunnerActive, setIsBatchRunnerActive] = useState<boolean>(false);
@@ -2018,6 +2020,7 @@ export function AIQuestionStudio({
       body: JSON.stringify({
         examId: selectedExamId,
         examName: selectedExam?.name || selectedExamId,
+        mainSection: stage2TargetType === 'flashcards' ? undefined : stage2TargetType,
         stage: resolvedStage,
         testTitle: activeTitle,
         subject: overrideSubject || stage2Subject,
@@ -2027,7 +2030,9 @@ export function AIQuestionStudio({
         syllabusMarkdown: effectiveSyllabus,
         directivesMarkdown,
         difficulty: stage2Difficulty,
-        questionCount: stage2QuestionCount,
+        questionCount: stage2QuestionNaturalDensity ? (stage2QuestionCeiling > 0 ? stage2QuestionCeiling : 25) : stage2QuestionCount,
+        naturalDensity: stage2QuestionNaturalDensity,
+        questionCeiling: stage2QuestionNaturalDensity ? stage2QuestionCeiling : undefined,
         includeDiagrams: stage2IncludeDiagrams,
         apiKey: apiKey || undefined,
         model: selectedModel,
@@ -2133,6 +2138,7 @@ export function AIQuestionStudio({
       body: JSON.stringify({
         examId: selectedExamId,
         examName: selectedExam?.name || selectedExamId,
+        mainSection: stage2TargetType === 'flashcards' ? undefined : stage2TargetType,
         stage: resolvedStage,
         testTitle: activeTitle,
         subject: overrideSubject || stage2Subject,
@@ -2142,7 +2148,9 @@ export function AIQuestionStudio({
         syllabusMarkdown: effectiveSyllabus,
         directivesMarkdown,
         difficulty: stage2Difficulty,
-        questionCount: stage2QuestionCount,
+        questionCount: stage2QuestionNaturalDensity ? (stage2QuestionCeiling > 0 ? stage2QuestionCeiling : 25) : stage2QuestionCount,
+        naturalDensity: stage2QuestionNaturalDensity,
+        questionCeiling: stage2QuestionNaturalDensity ? stage2QuestionCeiling : undefined,
         includeDiagrams: stage2IncludeDiagrams,
         apiKey: apiKey || undefined,
         model: selectedModel,
@@ -6627,47 +6635,148 @@ export function AIQuestionStudio({
               ) : (
                 <div className="space-y-3.5 p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
                   <div>
-                    {/* Questions per Batch */}
+                    {/* Header: Title and Active Status */}
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                         <span className="w-5 h-5 rounded-full bg-brand-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">4</span>
-                        Questions per Batch
+                        Question Volume & Batch Strategy
                       </label>
                       <span className="text-xs font-bold text-brand-600 dark:text-brand-400">
-                        {stage2QuestionCount} Qs / Batch
+                        {stage2QuestionNaturalDensity
+                          ? (stage2QuestionCeiling === 0 ? '🎯 Natural Density (Auto)' : `🎯 Natural Density (≤${stage2QuestionCeiling} Cap)`)
+                          : `${stage2QuestionCount} Qs / Batch`}
                       </span>
                     </div>
 
-                    {/* Preset Pills for Questions per Batch */}
-                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 mb-2">
-                      {[5, 10, 15, 20, 25, 50].map(cnt => (
-                        <button
-                          key={cnt}
-                          type="button"
-                          onClick={() => setStage2QuestionCount(cnt)}
-                          className={cn(
-                            "py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
-                            stage2QuestionCount === cnt
-                              ? "bg-brand-600 text-white shadow-sm"
-                              : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-brand-500"
-                          )}
-                        >
-                          {cnt} Qs
-                        </button>
-                      ))}
+                    {/* Mode Cards: Natural Density (Adaptive) vs Fixed Quota (Manual) */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStage2QuestionNaturalDensity(true);
+                        }}
+                        className={cn(
+                          "p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between",
+                          stage2QuestionNaturalDensity
+                            ? "bg-brand-600 text-white border-brand-600 shadow-sm ring-2 ring-brand-500/30"
+                            : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-brand-400"
+                        )}
+                      >
+                        <div className="flex items-center justify-between w-full mb-1">
+                          <span className="text-xs font-black flex items-center gap-1.5">
+                            <span>🎯 Natural Density</span>
+                          </span>
+                          <span className={cn(
+                            "text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md",
+                            stage2QuestionNaturalDensity ? "bg-white/20 text-white" : "bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300"
+                          )}>
+                            Recommended
+                          </span>
+                        </div>
+                        <p className={cn("text-[10px] leading-relaxed", stage2QuestionNaturalDensity ? "text-brand-100" : "text-slate-500 dark:text-slate-400")}>
+                          AI analyzes chapter syllabus content density and autonomously sizes question count with equal quota per content item.
+                        </p>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStage2QuestionNaturalDensity(false);
+                        }}
+                        className={cn(
+                          "p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between",
+                          !stage2QuestionNaturalDensity
+                            ? "bg-brand-600 text-white border-brand-600 shadow-sm ring-2 ring-brand-500/30"
+                            : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-brand-400"
+                        )}
+                      >
+                        <div className="flex items-center justify-between w-full mb-1">
+                          <span className="text-xs font-black flex items-center gap-1.5">
+                            <span>⚙️ Fixed Quota</span>
+                          </span>
+                          <span className={cn(
+                            "text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md",
+                            !stage2QuestionNaturalDensity ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                          )}>
+                            Manual
+                          </span>
+                        </div>
+                        <p className={cn("text-[10px] leading-relaxed", !stage2QuestionNaturalDensity ? "text-brand-100" : "text-slate-500 dark:text-slate-400")}>
+                          Set a fixed question count per batch. AI strictly distributes questions equally across chapter content items.
+                        </p>
+                      </button>
                     </div>
 
-                    {/* Custom Questions per Batch Input */}
-                    <div className="flex items-center gap-2 mb-1">
-                      <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Custom Qs / Batch:</label>
-                      <input
-                        type="number"
-                        min={1}
-                        max={50}
-                        value={stage2QuestionCount}
-                        onChange={e => setStage2QuestionCount(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
-                        className="w-20 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-900 dark:text-white text-center focus:ring-1 focus:ring-brand-500 outline-none"
-                      />
+                    {/* Ceiling Cap (Natural Density) or Questions per Batch (Fixed Quota) */}
+                    <div className="mb-2">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                          {stage2QuestionNaturalDensity ? 'Maximum Ceiling Cap (per bank):' : 'Questions per Batch:'}
+                        </label>
+                        <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                          {stage2QuestionNaturalDensity
+                            ? (stage2QuestionCeiling === 0 ? '✨ 100% Dynamic Auto Sizing' : `Capped at max ${stage2QuestionCeiling} Qs`)
+                            : `${stage2QuestionCount} Qs fixed`}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 mb-2">
+                        {stage2QuestionNaturalDensity ? (
+                          [0, 10, 15, 20, 25, 30].map(cnt => (
+                            <button
+                              key={cnt}
+                              type="button"
+                              onClick={() => setStage2QuestionCeiling(cnt)}
+                              className={cn(
+                                "py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                                stage2QuestionCeiling === cnt
+                                  ? "bg-brand-600 text-white shadow-sm"
+                                  : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-brand-500"
+                              )}
+                            >
+                              {cnt === 0 ? '✨ Auto' : `≤ ${cnt} Cap`}
+                            </button>
+                          ))
+                        ) : (
+                          [5, 10, 15, 20, 25, 50].map(cnt => (
+                            <button
+                              key={cnt}
+                              type="button"
+                              onClick={() => setStage2QuestionCount(cnt)}
+                              className={cn(
+                                "py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                                stage2QuestionCount === cnt
+                                  ? "bg-brand-600 text-white shadow-sm"
+                                  : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-brand-500"
+                              )}
+                            >
+                              {cnt} Qs
+                            </button>
+                          ))
+                        )}
+                      </div>
+
+                      {/* Custom Input */}
+                      <div className="flex items-center gap-2 mb-1">
+                        <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                          {stage2QuestionNaturalDensity ? 'Custom Ceiling Cap (0 = Auto):' : 'Custom Qs / Batch:'}
+                        </label>
+                        <input
+                          type="number"
+                          min={stage2QuestionNaturalDensity ? 0 : 1}
+                          max={50}
+                          value={stage2QuestionNaturalDensity ? stage2QuestionCeiling : stage2QuestionCount}
+                          onChange={e => {
+                            const val = parseInt(e.target.value) || 0;
+                            if (stage2QuestionNaturalDensity) {
+                              setStage2QuestionCeiling(Math.max(0, Math.min(50, val)));
+                            } else {
+                              setStage2QuestionCount(Math.max(1, Math.min(50, val)));
+                            }
+                          }}
+                          className="w-20 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-900 dark:text-white text-center focus:ring-1 focus:ring-brand-500 outline-none"
+                        />
+                      </div>
                     </div>
 
                     {/* Number of Batches (Sequential Auto-Runner) */}
@@ -6715,12 +6824,20 @@ export function AIQuestionStudio({
                       </div>
 
                       {/* Live Total Badge */}
-                      <div className="p-2 rounded-xl bg-indigo-50/90 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/80 flex items-center justify-between text-xs">
+                      <div className="p-2.5 rounded-xl bg-indigo-50/90 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/80 flex items-center justify-between text-xs">
                         <span className="text-slate-600 dark:text-slate-300 font-medium">
                           Total Output Target:
                         </span>
                         <span className="font-black text-indigo-700 dark:text-indigo-300">
-                          {stage2QuestionCount} Qs × {stage2BatchCount} {stage2BatchCount === 1 ? 'Batch' : 'Batches'} = <span className="underline decoration-indigo-500 font-black">{stage2QuestionCount * stage2BatchCount} Total Qs</span>
+                          {stage2QuestionNaturalDensity ? (
+                            <span>
+                              {stage2QuestionCeiling === 0 ? 'Auto Density' : `≤${stage2QuestionCeiling} Cap`} × {stage2BatchCount} {stage2BatchCount === 1 ? 'Batch' : 'Batches'} = <span className="underline decoration-indigo-500 font-black">{stage2QuestionCeiling > 0 ? `≤${stage2QuestionCeiling * stage2BatchCount} Max Qs` : 'Syllabus-Sized Qs'}</span>
+                            </span>
+                          ) : (
+                            <span>
+                              {stage2QuestionCount} Qs × {stage2BatchCount} {stage2BatchCount === 1 ? 'Batch' : 'Batches'} = <span className="underline decoration-indigo-500 font-black">{stage2QuestionCount * stage2BatchCount} Total Qs</span>
+                            </span>
+                          )}
                         </span>
                       </div>
                     </div>

@@ -41,6 +41,9 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`SubcategoryCurriculumFilterBar`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L4070-L4112) | Dynamic Stage 1 Subcategory Target Selector with section-aware presets, active indicator badges, and formula auto-sync | AIQuestionStudio.tsx (Stage 1) | Active |
 | **`SectionalCurriculumCardSelector`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L3969-L4065) | 4-Section Curriculum Card Selector (Practice Tests, Mock Tests, Question Banks, Flashcards) with section-specific accent highlights, icon badges, and timing presets | AIQuestionStudio.tsx (Stage 1) | Active |
 | **`MockTestSubcategoryPillBar`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L4070-L4112) | Mock Test subcategory pill selector — 4 pills: Full-Length, Sectional, Official PYQ, Weekly Benchmark. Active pill: brand-600. Inactive: white/slate-800. Mini badge inside each pill. Auto-syncs `SECTION_NAMING_PRESETS` template on selection. | AIQuestionStudio.tsx (Stage 1) | Active |
+| **`QuestionVolumeBatchStrategySelector`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L6633-L6785) | Dual-Mode Question Volume & Batch Strategy Suite for Question Bank, Practice Test & Mock Test. Features Cognitive Natural Density (Auto vs Ceiling Cap) vs Fixed Quota, adaptive ceiling pills, and real-time output target telemetry | AIQuestionStudio.tsx (Stage 2) | Active |
+| **`NeuralGeneratorExecutionMonitor`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L7120-L7250) | Real-time multi-stage telemetry feed & terminal log monitor. Live progress across Grounding, Neural Generation, Deterministic Code Guards, Chief Auditor Verification, and Psychometric Balancing | AIQuestionStudio.tsx (Stage 2) | Active |
+| **`Stage2TargetTypeSelector`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L5390-L5475) | 4-Card Primary Routing Grid for Mock Tests, Practice Tests, Question Banks, and Flashcards with domain HSL gradients, active ring highlights, and check chips | AIQuestionStudio.tsx (Stage 2) | Active |
 | **`ActiveRecallCardReviewStudio`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx) | Minimal 2-Sided Active Recall Card Studio (Front prompt + direct crisp back answer), In-place editing, 1-click batch publishing to `flashcards` table | AIQuestionStudio.tsx (Stage 2) | Active |
 | **`FlashcardFlipCard`** | Study / Active Recall | [`src/components/flashcards/FlashcardFlipCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/flashcards/FlashcardFlipCard.tsx) | Google Gemini Seamless Tap-to-Toggle, Framer Motion Drag-to-Grade (Swipe Right: Got it / Swipe Left: Try again), True 3D Perspective Flip, Subtle Floating Answer Indicator, Cloze Tokenizer, KaTeX Math, Design System Tokens | FlashcardStudyModal.tsx | Active |
 | **`FlashcardStudyModal`** | Study / Overlay | [`src/components/flashcards/FlashcardStudyModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/flashcards/FlashcardStudyModal.tsx) | Google Gemini Segmented Pip Progress, Track Learning Switch, Undo History Rollback, Circular Red/Green Action Buttons, Dynamic Spaced Repetition (SM-2) Interval Previews, Gemini Dual-Card Completion Dashboard with 1-Click "Revise Missed Cards" Drill | FlashcardsHub.tsx, App.tsx | Active |
@@ -5314,7 +5317,7 @@ Last updated: September 24, 2026
 ### `ActiveRecallMemoryVolumeSuite` (Active Recall Flashcard Memory Volume & Natural Density Sizing Suite)
 
 File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx)
-Last updated: September 24, 2026
+Last updated: September 25, 2026
 
 | Property         | Class |
 | ---------------- | ----- |
@@ -5327,6 +5330,33 @@ Last updated: September 24, 2026
 | Hover state      | `hover:border-purple-400 transition-all cursor-pointer` |
 | Shadow           | `shadow-sm`, `ring-2 ring-purple-500/30` |
 | Accent usage     | `bg-purple-600`, `text-purple-600`, `bg-purple-100 dark:bg-purple-950` |
+
+**Pattern notes:**
+- **Dual-Mode Flashcard Volume Architecture**:
+  - `🎯 Natural Density (Auto Sizing)`: Directs the AI to act as a Senior Curriculum Architect (ChatGPT & Gemini style). Evaluates the true academic scope and density of the syllabus section to determine the precise volume of active recall flashcards needed for 100% mastery without fluff. Optional ceiling caps: `✨ Auto` (Unconstrained), `≤ 10 Cap`, `≤ 15 Cap`, `≤ 20 Cap`, `≤ 25 Cap`, `≤ 30 Cap`.
+  - `⚙️ Fixed Quota (Manual)`: Select standard card batches (`5`, `10`, `15`, `20`, `25`, `30` cards).
+- **LLM Cognitive Syllabus Decomposition Protocol**:
+  - Replaces rigid regex comma/colon counters with true LLM subject-matter comprehension.
+  - Systematically deconstructs any syllabus section across 5 examinable dimensions:
+    1. Fundamental Principles, Classifications & Governing Laws
+    2. Precise Mathematical Formulas, Equations, Numerical Metrics & SI Units
+    3. Operational Parameters, Standard Ratings, Clearances, Tolerances & Test Methods
+    4. Core Components, Working Sequences & Practical Diagnostics
+    5. High-Frequency Traps, Confusing Distinctions & Exceptions
+  - Broad engineering sections (e.g. *Internal Combustion Engines*) organically scale to 15–20 cards, while compact single-concept topics generate 5–8 cards.
+- **Ceiling Cap Prioritization**:
+  - When an administrator selects a ceiling cap (e.g. `≤ 10`), the LLM prioritizes the top-$N$ highest-yield examinable concepts within the limit.
+- **Guaranteed Educational Floor (Minimum 5 Cards)**:
+  - Enforces `MIN_FLASHCARDS_PER_DECK = 5` in `src/lib/serverAiGenerator.ts`.
+  - Guarantees no deck in live production is ever created or saved with fewer than 5 cards (eliminating 1–4 card truncation).
+- **Smart Safety Floor Top-Up**:
+  - Automatically triggers `shouldTopUp` if post-deduplication card yield drops below 5 cards, dispatching a complementary generation pass with explicit instructions to cover missing examinable angles without duplicate stems.
+- **High-Capacity Token Window**:
+  - Sets `maxOutputTokens` up to 4096–8192 tokens so comprehensive multi-card JSON outputs are never cut off mid-stream.
+- **Exact Deck Title Stem Matching**:
+  - Server endpoints use `.ilike('title', safeTitle)` rather than `%safeTitle%` wildcards, eliminating stem contamination between sibling decks (e.g. `Farm Machinery` vs `Farm Power and Machinery Management`).
+- **Design System Token Integrity**:
+  - Strictly uses purple semantic tokens (`bg-purple-600`, `border-purple-200`, `text-purple-900`, `ring-purple-500/30`) with zero raw hex codes.
 
 ---
 
@@ -5451,5 +5481,77 @@ Last updated: September 25, 2026
   - `daily` → `Weekly Benchmark Test #[01-08]`
 - **Count auto-reset**: On subcategory switch, if `sub.id === 'all'` → `stage1Count = 8`, otherwise → `stage1Count = 5`.
 - **Generator downstream effect**: The selected `stage1SubCategory` string is forwarded as `subCategory` to `generateExamQuestions` in `serverAiGenerator.ts`, which routes to whole-syllabus mode for `full-length`, `pyq`, and `daily`, and to chapter-locked mode for `sectional`.
-- **Zero raw hex**: All colors use design system tokens — `brand-600` for mock test accent, `slate-*` for neutrals.
+---
 
+### QuestionVolumeBatchStrategySelector
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L6633-L6785)
+Last updated: September 25, 2026
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | Container panel: `bg-slate-50/90 dark:bg-slate-800/50`. Active mode card: `bg-brand-600 text-white`. Inactive mode card: `bg-white dark:bg-slate-900`. Active pill: `bg-brand-600 text-white`. Inactive pill: `bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300`. Total badge card: `bg-indigo-50/90 dark:bg-indigo-950/40`. |
+| Border           | Container panel: `border border-slate-200 dark:border-slate-700`. Active card: `border-brand-600 ring-2 ring-brand-500/30`. Inactive card: `border border-slate-200 dark:border-slate-700 hover:border-brand-400`. Total badge: `border border-indigo-200 dark:border-indigo-800/80`. |
+| Border radius    | Container panel: `rounded-2xl`. Mode cards: `rounded-xl`. Preset pills: `rounded-xl`. Custom inputs: `rounded-xl`. Output target badge: `rounded-xl`. |
+| Text — primary   | Step indicator: `w-5 h-5 rounded-full bg-brand-600 text-white text-[11px] font-black`. Header label: `text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300`. Active status text: `text-xs font-bold text-brand-600 dark:text-brand-400`. |
+| Text — secondary | Card descriptions: `text-[10px] leading-relaxed text-brand-100` (active) / `text-slate-500 dark:text-slate-400` (inactive). Custom label: `text-[11px] font-medium text-slate-500 dark:text-slate-400`. |
+| Spacing          | Container: `p-4 space-y-3.5`. Mode grid: `grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3`. Preset pills grid: `grid grid-cols-3 sm:grid-cols-6 gap-1.5 mb-2`. Total badge: `p-2.5`. |
+| Hover state      | Inactive cards: `hover:border-brand-400 transition-all cursor-pointer`. Inactive pills: `hover:border-brand-500 transition-all cursor-pointer`. |
+| Shadow           | Active card: `shadow-sm`. Active pill: `shadow-sm`. |
+| Accent usage     | `brand-600` for primary question volume controls and active status; `indigo-600` for batch count presets and live output target calculations. |
+
+**Pattern notes:**
+- **Cognitive Syllabus Decomposition Architecture**: Offers a toggle between `🎯 Natural Density` (Recommended) and `⚙️ Fixed Quota` (Manual).
+  - In **Natural Density Mode**, the AI functions as an intelligent curriculum analyst (thinking like ChatGPT / Gemini), reading all underlying content beneath placeholders/sections, categorizing questions across the 4 core exam problem archetypes (Multi-statement, Numerical/LaTeX, Statutory/Articles, Technical mechanisms), and organically sizing question counts with an enforced educational floor ($\ge 5$ Qs).
+  - Supports optional ceiling presets (`✨ Auto`, `≤ 10 Cap`, `≤ 15 Cap`, `≤ 20 Cap`, `≤ 25 Cap`, `≤ 30 Cap`) where the LLM prioritizes highest-yield questions within the cap.
+  - In **Fixed Quota Mode**, standard fixed batches (`5 Qs`, `10 Qs`, `15 Qs`, `20 Qs`, `25 Qs`, `50 Qs`) are provided.
+- **Zero Raw Hex**: All colors use design tokens (`brand-600`, `indigo-600`, `slate-*`).
+
+---
+
+### NeuralGeneratorExecutionMonitor
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L7120-L7250)
+Last updated: September 25, 2026
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | Stage card: `bg-slate-900 border border-slate-800`. Terminal feed: `bg-slate-950 border border-slate-800`. Running badge: `bg-brand-500/30 text-brand-300`. Success badge: `bg-emerald-500/20 text-emerald-300`. Failure badge: `bg-rose-500/20 text-rose-300`. Queued badge: `bg-slate-800 text-slate-400`. |
+| Border           | Container: `border border-slate-800`. Active item: `border-brand-500/40`. Done item: `border-emerald-500/30`. Failed item: `border-rose-500/30`. Micro-step divider: `border-t border-slate-800/60`. |
+| Border radius    | Outer container: `rounded-2xl`. Stage cards: `rounded-xl`. Status pills: `rounded-full`. Step tags: `rounded`. |
+| Text — primary   | Title: `text-xs font-bold text-white`. Terminal header: `text-xs font-mono font-bold text-slate-300`. Feed logs: `font-mono text-[11px] leading-relaxed`. |
+| Text — secondary | Subtitle / taxonomy: `text-[10px] text-slate-400`. Event count: `text-[10px] text-slate-500 font-normal`. Micro-step labels: `text-[10px] font-medium text-slate-400`. |
+| Spacing          | Outer container: `p-4 space-y-2.5`. Stage card: `p-3 space-y-2`. Timeline step row: `pt-1 gap-1`. Log container: `h-44 sm:h-56 pr-2 space-y-1.5`. |
+| Interactive / Anim | Active pulse: `animate-pulse`. Active running indicator: `w-2 h-2 rounded-full bg-emerald-400 animate-ping`. Auto-scroll checkbox: `accent-brand-500`. |
+| Shadow           | `shadow-sm` on active stage cards. |
+| Accent usage     | `emerald-400` for completed stages (`✅ Saved N Qs`), `brand-400` for active neural burst / streaming stages, `amber-300` for publishing phase. |
+
+**Pattern notes:**
+- **Real-Time Telemetry Pipeline**: Displays live progress across the 5 generation stages (`1. Ground` $\rightarrow$ `2. Neural Generation` $\rightarrow$ `3. Deterministic Code Guards` $\rightarrow$ `4. Chief Auditor Verification` $\rightarrow$ `5. Psychometric 25% Balancing & Publish`).
+- **Domain Fidelity Indicators**: Accurately reports whether a task is in Auto Natural Density, Capped Density, or Fixed Quota mode, displaying live counts (`Saved 10 Qs` or `Saved 15 Cards`).
+- **Dark Mode Terminal Aesthetic**: Uses isolated `bg-slate-950` with monospace font (`font-mono text-[11px]`) and auto-scroll tracking so administrators can monitor model reasoning live.
+
+---
+
+### Stage2TargetTypeSelector
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L5390-L5475)
+Last updated: September 25, 2026
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | Active card: `bg-gradient-to-br shadow-md` with domain gradients (`from-amber-500/10 to-orange-500/10`, `from-blue-500/10 to-indigo-500/10`, `from-emerald-500/10 to-teal-500/10`, `from-purple-500/10 to-pink-500/10`). Inactive card: `bg-slate-50/70 dark:bg-slate-800/40`. Active icon container: `bg-brand-600 text-white shadow-xs`. Inactive icon container: `bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300`. |
+| Border           | Active card: `border-brand-500 ring-2 ring-brand-500/30`. Inactive card: `border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700`. |
+| Border radius    | Outer card: `rounded-2xl`. Icon box: `rounded-xl` (`w-8 h-8`). Selection check chip: `rounded-full` (`w-5 h-5`). Step badge: `rounded-full` (`w-5 h-5`). |
+| Text — primary   | Card title: `text-sm font-black text-slate-900 dark:text-white`. Step label: `text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300`. Step number: `text-[11px] font-black text-white`. |
+| Text — secondary | Card description: `text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2 leading-relaxed`. Category subtitle: `text-[11px] font-semibold text-slate-500 dark:text-slate-400`. |
+| Spacing          | Grid container: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3`. Card: `p-4 space-y-2`. Icon row: `mb-2`. |
+| Hover state      | Inactive cards: `hover:border-slate-300 dark:hover:border-slate-700 opacity-80 hover:opacity-100 transition-all cursor-pointer`. |
+| Shadow           | `shadow-md` on active cards, `shadow-xs` on active icon box. |
+| Accent usage     | `amber-500` (Mock Tests), `blue-500` (Practice Tests), `emerald-500` (Question Bank), `purple-500` (Flashcards), `brand-600` (Selected ring, check indicator, and step number). |
+
+**Pattern notes:**
+- **4-Target Unified Architecture**: Serves as the primary routing nexus in Stage 2 of AI Question Studio, ensuring admins can generate Mock Tests, Practice Tests, Question Banks, or Flashcards using the exact same intuitive workflow.
+- **Domain Identity Colors**: Each target type receives a distinct domain accent color and icon (`Award` for Mock Tests, `Zap` for Practice Tests, `BookOpen` for Question Bank, `Layers` for Flashcards) with subtle tinted background gradients (`from-*/10 to-*/10`) upon selection.
+- **State Clearing Guarantee**: Clicking any card immediately switches `stage2TargetType`, auto-resets `stage2SubCategory` to `'all'`, and clears `stage2SelectedTestId` to prevent cross-section contamination.
+- **Zero Raw Hex**: All colors use design system tokens (`brand-600`, `amber-500`, `blue-500`, `emerald-500`, `purple-500`, `slate-*`).

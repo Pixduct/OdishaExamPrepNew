@@ -1665,7 +1665,7 @@ async function startServer() {
           let deckQuery = supabaseAdmin
             .from('flashcard_decks')
             .select('id')
-            .ilike('title', `%${safeTitle}%`)
+            .ilike('title', safeTitle)
             .limit(5);
           if (examId && examId !== 'general') {
             deckQuery = deckQuery.eq('exam_id', examId);
@@ -1732,6 +1732,8 @@ async function startServer() {
         directivesMarkdown,
         difficulty, 
         questionCount, 
+        naturalDensity,
+        questionCeiling,
         includeDiagrams, 
         apiKey, 
         model, 
@@ -1777,6 +1779,7 @@ async function startServer() {
       const questions = await generateExamQuestions({
         examId: examId || 'generic',
         examName,
+        mainSection: req.body.mainSection || undefined,
         stage: stage || undefined,
         testTitle,
         subject,
@@ -1787,6 +1790,8 @@ async function startServer() {
         directivesMarkdown,
         difficulty: difficulty || 'hard',
         questionCount: Number(questionCount) || 10,
+        naturalDensity: Boolean(naturalDensity),
+        questionCeiling: questionCeiling !== undefined ? Number(questionCeiling) : undefined,
         includeDiagrams: Boolean(includeDiagrams),
         apiKey,
         model,
@@ -1837,6 +1842,8 @@ async function startServer() {
         directivesMarkdown,
         difficulty, 
         questionCount, 
+        naturalDensity,
+        questionCeiling,
         includeDiagrams, 
         apiKey, 
         model, 
@@ -1884,6 +1891,7 @@ async function startServer() {
         {
           examId: examId || 'generic',
           examName,
+          mainSection: req.body.mainSection || undefined,
           stage: stage || undefined,
           testTitle,
           subject,
@@ -1894,6 +1902,8 @@ async function startServer() {
           directivesMarkdown,
           difficulty: difficulty || 'hard',
           questionCount: Number(questionCount) || 10,
+          naturalDensity: Boolean(naturalDensity),
+          questionCeiling: questionCeiling !== undefined ? Number(questionCeiling) : undefined,
           includeDiagrams: Boolean(includeDiagrams),
           apiKey,
           model,

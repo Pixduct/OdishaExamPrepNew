@@ -10,10 +10,12 @@ import {
   isStructuralMetaText,
   determinePlaceholderTier,
   extractAutonomousSyllabusScope,
+  extractSyllabusContents,
+  computeQuestionNaturalDensity,
   type SyllabusHierarchyItem
 } from './syllabusParser';
 
-export { parseSyllabusHierarchy, applyNamingPattern, cleanTitleText, isStructuralMetaText, determinePlaceholderTier, extractAutonomousSyllabusScope, type SyllabusHierarchyItem };
+export { parseSyllabusHierarchy, applyNamingPattern, cleanTitleText, isStructuralMetaText, determinePlaceholderTier, extractAutonomousSyllabusScope, extractSyllabusContents, computeQuestionNaturalDensity, type SyllabusHierarchyItem };
 
 export type MainSectionType = 'all_sections' | 'practice_test' | 'mock_test' | 'question_bank' | 'flashcards';
 
@@ -93,6 +95,7 @@ export interface AIQuestionRequest {
   examName?: string;
   stage?: string;
   testTitle: string;
+  mainSection?: 'mock_test' | 'practice_test' | 'question_bank';
   subject?: string;
   subSubject?: string;
   chapter?: string;
@@ -101,6 +104,8 @@ export interface AIQuestionRequest {
   directivesMarkdown?: string;
   difficulty?: 'easy' | 'medium' | 'hard' | 'advanced' | 'advanced_exam_standard';
   questionCount: number;
+  naturalDensity?: boolean;      // if true, AI auto-sizes question count from syllabus density
+  questionCeiling?: number;      // optional max cap when naturalDensity = true (0 = fully auto)
   includeDiagrams?: boolean;
   apiKey?: string;
   model?: string;
@@ -1450,15 +1455,19 @@ export async function generateExamQuestions(
   req: AIQuestionRequest,
   onProgress?: (event: GenerationProgressEvent) => void
 ): Promise<GeneratedQuestionItem[]> {
-  const totalQuestions = Math.min(Math.max(req.questionCount || 10, 1), 100);
+  const isNaturalDensityMode = req.naturalDensity === true;
+  // totalQuestions is tentative; in Natural Density mode it aims to maximize volume (up to 25-30 Qs or ceilingCap)
+  let totalQuestions = isNaturalDensityMode
+    ? (req.questionCeiling && req.questionCeiling > 0 ? req.questionCeiling : 25)
+    : Math.min(Math.max(req.questionCount || 10, 1), 100);
   const rawTitle = String(req.testTitle || '').trim();
   const cleanTitle = cleanTitleText(rawTitle) || rawTitle;
   const cleanSubject = String(req.subject || '').replace(/^Subject:\s*/i, '').trim();
 
-  // Tokenize multi-topic titles using explicit delimiters (+, &, ·, |, /)
-  // We do NOT split on the word "and" because authentic academic units (e.g. "Farm Power and Machinery", "Soil and Water Conservation") contain "and".
+  // Tokenize compound multi-topic titles using explicit delimiters (+, ·, |)
+  // We do NOT split on "&" or "and" because authentic academic units (e.g. "Panchayati Raj & Local Governance", "Soil and Water Conservation") contain them.
   const subParts = rawTitle
-    .split(/\s*[\+\&·|\/]\s*/)
+    .split(/\s*[\+·|]\s*/)
     .map(s => cleanTitleText(s))
     .filter(s => s.length > 2);
 
@@ -1517,6 +1526,9 @@ export async function generateExamQuestions(
   let scopeDirectives = '';
   let syllabusContext = req.syllabusMarkdown ? req.syllabusMarkdown.slice(0, 2000) : 'Standard Odisha Competitive Exam syllabus.';
   let wholeSyllabusQuotas: { name: string; quota: number }[] = [];
+  let chapterContentQuotas: { name: string; quota: number }[] = [];
+  const ceilingCap = (isNaturalDensityMode && req.questionCeiling && req.questionCeiling > 0) ? req.questionCeiling : undefined;
+  let chapterContents: string[] = [];
 
   if (isFullLengthSyllabus) {
     // Whole syllabus: include entire syllabus context up to 8000 chars so all subjects/units are visible
@@ -1554,7 +1566,7 @@ MANDATORY DISTRIBUTION RULES:
 This test ("${cleanTitle}") covers the ENTIRE examination syllabus. Distribute the ${totalQuestions} questions EQUALLY and PROPORTIONALLY across all core subjects and disciplines present in the syllabus. For each question, set the "topic" field to the specific subject or discipline it tests.`;
     }
   } else {
-    // Single Subject / Chapter Locked Mode with Autonomous Syllabus Scope
+    // ── CHAPTER-LOCKED MODE: Natural Density + Sub-Content Equal Quota Distribution ──
     const scopedResult = extractAutonomousSyllabusScope(req.syllabusMarkdown || '', {
       title: cleanTitle,
       subject: cleanSubject,
@@ -1562,39 +1574,94 @@ This test ("${cleanTitle}") covers the ENTIRE examination syllabus. Distribute t
       chapter: req.chapter
     });
 
+    // Resolve the best available scoped content for this chapter
+    let chapterScopedContent = '';
     if (scopedResult.scopedMarkdown && scopedResult.scopedMarkdown.length > 20) {
       syllabusContext = `TARGET SYLLABUS (${scopedResult.matchedSectionTitle || cleanTitle}):\n${scopedResult.scopedMarkdown.slice(0, 3500)}`;
+      chapterScopedContent = scopedResult.scopedMarkdown;
     } else {
-      const matchedSection = parsedSections.find(s => 
-        s.title.toLowerCase().includes(cleanTitle.toLowerCase()) || 
+      const matchedSection = parsedSections.find(s =>
+        s.title.toLowerCase().includes(cleanTitle.toLowerCase()) ||
         cleanTitle.toLowerCase().includes(s.title.toLowerCase()) ||
-        s.title.toLowerCase().includes(cleanSubject.toLowerCase()) || 
+        s.title.toLowerCase().includes(cleanSubject.toLowerCase()) ||
         cleanSubject.toLowerCase().includes(s.title.toLowerCase())
       );
-
       if (matchedSection && matchedSection.content.length > 30) {
         syllabusContext = `TARGET SYLLABUS (${matchedSection.title}):\n${matchedSection.content.slice(0, 2000)}`;
+        chapterScopedContent = matchedSection.content;
       }
     }
 
-    // If title contains "+", "&", "·", or delimiters, enforce equal quotas across each sub-part
-    if (subParts.length > 1) {
+    chapterContents = extractSyllabusContents(chapterScopedContent);
+
+    if (isNaturalDensityMode) {
+      scopeDirectives = `LLM COGNITIVE SYLLABUS DECOMPOSITION & NATURAL DENSITY SIZING:
+You are an elite Commission Question Paper Setter (OPSC/UPSC/GATE/State Exam standard).
+You must analyze the Scoped Syllabus Content below through deep cognitive subject-matter comprehension:
+
+1. ACADEMIC CONTENT SCAN & DECONSTRUCTION:
+   Thoroughly scan all underlying content beneath "${cleanTitle}". Deconstruct the section into its distinct examinable problem angles across these 4 official examination archetypes:
+   - [A] MULTI-STATEMENT CONCEPTUAL EVALUATION: High-order conceptual questions ("Consider the following statements regarding [Concept]: 1... 2... Which of the statements given above is/are correct? (A) 1 only (B) 2 only (C) Both 1 and 2 (D) Neither 1 nor 2").
+   - [B] NUMERICAL CALCULATIONS & DERIVATIONS: Applied problem statements with authentic parameters, clean LaTeX formulas ($...$), and derived numerical options.
+   - [C] STATUTORY ARTICLES, DOCTRINES & THRESHOLDS: Specific statutory sections, constitutional provisions, landmark judgments, numerical thresholds, quorums, or standard ratings.
+   - [D] TECHNICAL MECHANISMS & COMPARATIVE DIAGNOSTICS: Working mechanisms, operational standards, degree of reaction, efficiency differences, and common engineering/academic pitfalls.
+
+2. AUTONOMOUS QUESTION VOLUME MAXIMIZATION (HIGH UTILITY ONLY):
+   Your primary pedagogical duty is to MAXIMIZE the volume of high-yield, authentic exam questions generated for this syllabus section to give students the greatest possible preparation advantage.
+   Do NOT artificially restrict yourself to 5 or 10 questions when the syllabus has broad concepts to test!
+   - MANDATORY MINIMUM FLOOR: You MUST generate AT LEAST 5 distinct, high-caliber examination MCQs under all circumstances. Never output fewer than 5 questions!
+   - SIZING MAXIMIZATION DIRECTIVE:
+     * Dense / Multi-System / Broad Engineering / Legal Topics (e.g. 3+ major mechanisms or 8+ sub-principles): Generate 15 to 25+ comprehensive questions thoroughly covering all examinable angles.
+     * Standard / Moderate Topics: Generate 12 to 18 questions.
+     * Compact / Single-Concept Topics: Generate 8 to 12 questions (minimum 5 floor).
+   ${ceilingCap ? `- CEILING CAP: The administrator specified an upper limit of ≤ ${ceilingCap} questions. Generate up to this ceiling, prioritizing the most critical exam concepts.` : '- UNCONSTRAINED NATURAL DENSITY: Exhaustively cover all examinable angles without artificial truncation.'}
+   - STRICT ANTI-FLUFF / ZERO-UTILITY FILTER:
+     Do NOT generate generic trivia, filler definitions, or duplicate variations to inflate counts. Every single question must be genuinely distinct, rank-determining, and authentic to state competitive exams. If a question is not genuinely useful for exam prep, omit it.
+
+3. COMPREHENSIVE BREADTH MANDATE:
+   Distribute questions systematically across ALL sub-topics, bullet points, and technical parameters in the section. Do NOT cluster multiple questions around the first sentence or single concept while neglecting the rest.
+   For each question, set the "topic" field in JSON to the specific content item or sub-topic tested (e.g. "${chapterContents[0]?.slice(0, 45) || cleanTitle}"). NEVER set "topic" to "General Syllabus".`;
+    } else if (chapterContents.length >= 2) {
+      // Priority 1: Scoped chapter contains 2+ granular syllabus bullet contents
+      const activeContents = chapterContents.length <= totalQuestions
+        ? chapterContents
+        : chapterContents.slice(0, totalQuestions);
+
+      const basePerContent = Math.floor(totalQuestions / activeContents.length);
+      const remainder = totalQuestions % activeContents.length;
+      chapterContentQuotas = activeContents.map((c, idx) => ({
+        name: c,
+        quota: basePerContent + (idx < remainder ? 1 : 0)
+      }));
+
+      scopeDirectives = `STRICT MODULE FOCUS & CONTENT-LEVEL DISTRIBUTION:
+All ${totalQuestions} questions MUST be derived from "${cleanTitle}".
+This chapter has ${activeContents.length} distinct content items in its syllabus. Distribute questions across:
+${chapterContentQuotas.map((cq, i) => `  ${i + 1}. "${cq.name}" -> ~${cq.quota} question${cq.quota > 1 ? 's' : ''}`).join('\n')}
+
+MANDATORY RULES:
+1. PER-QUESTION TOPIC TAGGING: For each question, set the "topic" field to the specific content item name or short sub-topic phrase it tests (e.g. "${activeContents[0].slice(0, 45)}..."). NEVER set "topic" to the test title "${cleanTitle}" or "General Syllabus".
+2. ZERO CONCENTRATION BIAS: Do not cluster questions on one content item while neglecting others. Every content item must be covered.`;
+    } else if (subParts.length > 1) {
+      // Fallback: title has multiple explicit compound sub-parts (+, ·, |)
       const basePerPart = Math.floor(totalQuestions / subParts.length);
       const remainder = totalQuestions % subParts.length;
       const partQuotas = subParts.map((sp, idx) => ({
         name: sp,
         quota: basePerPart + (idx < remainder ? 1 : 0)
       }));
+      chapterContentQuotas = partQuotas;
 
       scopeDirectives = `STRICT MODULE FOCUS & EQUAL SUB-TOPIC DISTRIBUTION:
 This module "${cleanTitle}" contains ${subParts.length} distinct sub-components:
-${partQuotas.map((pq, i) => `  ${i + 1}. "${pq.name}" -> EXACTLY ${pq.quota} questions`).join('\n')}
+${partQuotas.map((pq, i) => `  ${i + 1}. "${pq.name}" -> ~${pq.quota} questions`).join('\n')}
 
 MANDATORY DISTRIBUTION RULES:
-1. You MUST generate questions strictly divided according to these exact counts: ${partQuotas.map(pq => `${pq.quota} for "${pq.name}"`).join(', ')}.
+1. You MUST generate questions distributed across these sub-topics: ${partQuotas.map(pq => `"${pq.name}"`).join(', ')}.
 2. For each question, set the "topic" field in JSON to its corresponding sub-topic name (e.g. "${subParts[0]}").
-3. NEVER favor one sub-topic over another. Equal coverage across all constituent parts is strictly enforced.`;
+3. NEVER favor one sub-topic over another.`;
     } else {
+      // Fallback: 0–1 content items detected → generic directive
       scopeDirectives = `STRICT MODULE FOCUS & EQUAL TOPIC COVERAGE:
 All ${totalQuestions} questions MUST be derived strictly from "${cleanTitle}". Topic tag = "${cleanTitle}".
 If the syllabus blueprint contains multiple sub-topics, bullet points, or concepts, you MUST distribute the ${totalQuestions} questions EQUALLY and PROPORTIONALLY across all of them. Do not cluster questions on only one concept.`;
@@ -1669,6 +1736,29 @@ If the syllabus blueprint contains multiple sub-topics, bullet points, or concep
 - Systematically evaluate conceptual foundations, procedural mechanisms, definitions in operational context, and structural provisions across the syllabus topic.`;
   }
 
+  const resolvedMainSection = req.mainSection || (
+    /mock|simulation/i.test(rawTitle) ? 'mock_test' :
+    /question bank|bank|archive/i.test(rawTitle) ? 'question_bank' : 'practice_test'
+  );
+
+  let mainSectionDirective = '';
+  if (resolvedMainSection === 'practice_test') {
+    mainSectionDirective = `PEDAGOGICAL CALIBRATION: PRACTICE TEST & CONCEPTUAL MASTERY ENGINE
+- PRIMARY OBJECTIVE: High-order learning and diagnostic self-assessment matching ChatGPT / Gemini standard.
+- QUESTION ARCHITECTURE: Emphasize conceptual application, analytical reasoning, and multi-statement evaluations ("Which of the following statements is/are correct?").
+- INSTRUCTIONAL RATIONALE: Each question MUST include an authoritative step-by-step explanation that explains why the correct option is true and what trap or misconception leads to the distractors.`;
+  } else if (resolvedMainSection === 'question_bank') {
+    mainSectionDirective = `PEDAGOGICAL CALIBRATION: EXHAUSTIVE QUESTION BANK & HIGH-YIELD REPOSITORY
+- PRIMARY OBJECTIVE: Comprehensive curricular depth covering every topic anchor in the syllabus without gaps.
+- QUESTION ARCHITECTURE: Test core operational formulas, statutory articles, numerical thresholds, technical mechanisms, and edge cases.
+- GRANULAR TAXONOMY: Every question must test a distinct, high-yield syllabus point with its specific sub-topic tagged in the "topic" field. Zero duplicate concepts.`;
+  } else if (resolvedMainSection === 'mock_test') {
+    mainSectionDirective = `PEDAGOGICAL CALIBRATION: AUTHENTIC REAL EXAM SIMULATION (COMMISSION STANDARD)
+- PRIMARY OBJECTIVE: Realistic exam simulation strictly matching the actual OPSC / OSSC / OSSSC / State Commission question paper pattern.
+- QUESTION ARCHITECTURE: Balanced difficulty curve matching official competitive papers (30% foundational, 50% moderate analytical, 20% advanced rank-determining discriminators).
+- EXAM-READY DISTRACTORS: Formulate realistic, highly plausible distractors designed around genuine student misconceptions and mathematical trap options. Phrasing must strictly match official commission papers.`;
+  }
+
   const reqDiff = req.difficulty || 'hard';
   let diffLabel = 'ADVANCED LEVEL';
   let defaultJsonDiff: 'easy' | 'medium' | 'hard' = 'hard';
@@ -1685,8 +1775,16 @@ If the syllabus blueprint contains multiple sub-topics, bullet points, or concep
   }
 
   const systemPrompt = `You are a Senior Question Paper Setter for Odisha Competitive Exams (OPSC/OSSC/OSSSC).
-Generate ${totalQuestions} ${diffLabel} MCQs strictly for: "${cleanTitle}".
+${isNaturalDensityMode 
+  ? `MAXIMIZE EXAM QUESTION YIELD & BREADTH (HIGH-UTILITY ONLY):
+Generate the maximized natural volume of ${diffLabel} MCQs (minimum 5 Qs floor${ceilingCap ? `, upper ceiling limit ≤ ${ceilingCap} Qs` : ''}) strictly for: "${cleanTitle}".
+The more relevant, authentic, high-caliber exam questions you provide, the more advantage aspirants gain.
+Thoroughly examine ALL underlying topics, laws, parameters, formulas, and edge cases in the syllabus section below.
+Do NOT artificially restrict yourself to 5 or 10 questions when the syllabus has substantial breadth — generate 15 to 25+ questions for dense topics!
+CRITICAL QUALITY FILTER: Zero low-utility fluff. Every question must be genuinely distinct, rank-determining, and authentic to state competitive exams.`
+  : `Generate ${totalQuestions} ${diffLabel} MCQs strictly for: "${cleanTitle}".`}
 
+${mainSectionDirective ? `\n${mainSectionDirective}\n` : ''}
 ${scopeDirectives}
 ${stageDirective ? `\n${stageDirective}\n` : ''}
 ${subCategoryDirective ? `\n${subCategoryDirective}\n` : ''}
@@ -1730,7 +1828,7 @@ JSON OUTPUT SCHEMA:
     "correctAnswerIndex": 0,
     "explanation": "Concise step-by-step rationale matching correct option",
     "difficulty": "${defaultJsonDiff}",
-    "topic": "${isFullLengthSyllabus ? (wholeSyllabusQuotas[0]?.name || 'Constituent Subject Name') : cleanTitle}",
+    "topic": "${isFullLengthSyllabus ? (wholeSyllabusQuotas[0]?.name || 'Constituent Subject Name') : (chapterContentQuotas[0]?.name || cleanTitle)}",
     "diagram": null
   }
 ]`;
@@ -1738,7 +1836,16 @@ JSON OUTPUT SCHEMA:
   // Helper to resolve question topic for whole-syllabus and sectional distributions
   const resolveItemTopic = (rawTopic: any, itemIndex: number): string => {
     const trimmed = String(rawTopic || '').trim();
-    if (trimmed && trimmed.toLowerCase() !== 'general syllabus' && trimmed.toLowerCase() !== cleanTitle.toLowerCase()) {
+    const isGenericOrSelf = 
+      !trimmed ||
+      trimmed.toLowerCase() === 'general syllabus' ||
+      trimmed.toLowerCase() === cleanTitle.toLowerCase() ||
+      trimmed.toLowerCase() === rawTitle.toLowerCase() ||
+      trimmed.toLowerCase().includes('question bank') ||
+      trimmed.toLowerCase().includes('practice drill') ||
+      trimmed.toLowerCase().includes('sectional test');
+
+    if (!isGenericOrSelf) {
       return trimmed;
     }
     if (isFullLengthSyllabus && wholeSyllabusQuotas.length > 0) {
@@ -1751,12 +1858,22 @@ JSON OUTPUT SCHEMA:
       }
       return wholeSyllabusQuotas[0].name;
     }
+    if (chapterContentQuotas.length > 0) {
+      let runningTotal = 0;
+      for (const q of chapterContentQuotas) {
+        runningTotal += q.quota;
+        if (itemIndex < runningTotal) {
+          return q.name;
+        }
+      }
+      return chapterContentQuotas[0].name;
+    }
     return isFullLengthSyllabus ? (wholeSyllabusQuotas[0]?.name || 'General Syllabus') : cleanTitle;
   };
 
   // ── DUAL-KEY PARALLEL STREAM SPLITTER & HIGH-DENSITY COMPACT SCHEMA ──
-  // Note: Compound sub-topics (e.g. A + B) MUST use unified single burst to maintain strict equal quota consistency
-  const isParallelApplicable = subParts.length <= 1 && totalQuestions >= 20 && !req.model?.startsWith('gemini');
+  // Note: Compound sub-topics (e.g. A + B) and Natural Density mode MUST use unified single burst to maintain holistic syllabus reasoning
+  const isParallelApplicable = !isNaturalDensityMode && subParts.length <= 1 && totalQuestions >= 20 && !req.model?.startsWith('gemini');
 
   let accumulatedQuestions: GeneratedQuestionItem[] = [];
 
@@ -1884,30 +2001,39 @@ Output ONLY the raw JSON array of ${count2} question objects.`;
       stageIndex: 2,
       totalStages: 5,
       currentCount: 0,
-      totalCount: totalQuestions,
+      totalCount: isNaturalDensityMode ? (ceilingCap || 25) : totalQuestions,
       percent: 30,
-      message: `Synthesizing ${totalQuestions} questions for "${cleanTitle}"...`,
-      log: `[Stage 2/5] Synthesizing ${totalQuestions} questions via ${req.model || 'meta/llama-3.2-11b-vision-instruct'}.`
+      message: `Synthesizing ${isNaturalDensityMode ? (ceilingCap ? `up to ≤${ceilingCap}` : 'maximized natural volume of') : totalQuestions} questions for "${cleanTitle}"...`,
+      log: `[Stage 2/5] Synthesizing ${isNaturalDensityMode ? (ceilingCap ? `up to ≤${ceilingCap}` : 'maximized natural volume of') : totalQuestions} questions via ${req.model || 'meta/llama-3.2-11b-vision-instruct'}.`
     });
 
-    const userPrompt = `Generate exactly ${totalQuestions} ${diffLabel} MCQs for:
+    const userPrompt = `Generate ${isNaturalDensityMode ? `the MAXIMIZED natural volume of distinct, high-caliber ${diffLabel} MCQs (minimum 5 Qs floor${ceilingCap ? `, maximum ceiling ≤ ${ceilingCap} Qs` : ', aim for 15 to 25 Qs on dense topics, 8 to 12 Qs on compact topics'})` : `exactly ${totalQuestions} ${diffLabel} MCQs`} for:
 Test Title: "${cleanTitle}" | Exam: "${req.examName || req.examId}" | Scope: "${isFullLengthSyllabus ? 'Comprehensive Full Syllabus' : cleanTitle}"
 ${req.includeDiagrams ? 'Include geometric/Venn diagram specs where relevant.' : 'Text and LaTeX math only.'}
 ${subParts.length > 1 ? `EQUAL ALLOCATION MANDATE: Questions MUST be strictly divided across all constituent sub-topics: ${subParts.map(sp => `"${sp}"`).join(', ')}. Set topic: "[Sub-topic name]" in JSON for each item.\n` : ''}
 ${isFullLengthSyllabus && wholeSyllabusQuotas.length > 1 ? `WHOLE SYLLABUS EQUAL ALLOCATION MANDATE: Questions MUST be strictly divided across all constituent sections: ${wholeSyllabusQuotas.map(sq => `"${sq.name}" (${sq.quota} Qs)`).join(', ')}. Set topic: "[Section name]" in JSON for each item.\n` : ''}
+${chapterContents.length > 0 ? `DETECTED SYLLABUS TOPIC ANCHORS IN THIS SECTION:
+${chapterContents.map((c, i) => `  ${i + 1}. ${c}`).join('\n')}
+
+COMPREHENSIVE BREADTH MANDATE:
+Systematically generate questions covering ALL of the detected topic anchors above, plus any additional formulas, operating parameters, and mechanisms implied by the syllabus text below. For each question, set "topic" in the JSON to the specific content item tested.\n` : ''}
 ${req.existingQuestionStems && req.existingQuestionStems.length > 0 ? `\nPREVIOUSLY GENERATED / EXISTING QUESTIONS (DO NOT DUPLICATE THESE CONCEPTS):\n${req.existingQuestionStems.slice(-60).map(s => `- ${s.slice(0, 90)}`).join('\n')}\n` : ''}
 SYLLABUS BLUEPRINT:
 ${syllabusContext}
 
 ${subCategoryDirective ? `${subCategoryDirective}\n` : ''}${req.directivesMarkdown ? `ADMIN DIRECTIVES & CUSTOM ALLOCATION (HIGHEST PRIORITY):\n${req.directivesMarkdown.slice(0, 800)}\nFollow any custom subject distribution or quotas specified by the admin above with top priority.\n` : ''}Keep each explanation concise (1-2 sentences).
-Output ONLY the raw JSON array of ${totalQuestions} question objects.`;
+Output ONLY the raw JSON array of question objects.`;
+
+    const expectedTokens = isNaturalDensityMode
+      ? 8192
+      : Math.max(totalQuestions * 450, 2048);
 
     const rawJson = await queryAIModel(systemPrompt, userPrompt, {
       apiKey: req.apiKey,
       model: req.model,
       baseUrl: req.baseUrl,
       temperature: 0.25,
-      maxOutputTokens: Math.min(Math.max(totalQuestions * 450, 4096), 8192)
+      maxOutputTokens: Math.min(expectedTokens, 8192)
     });
 
     const parsed = extractAndParseJSON(rawJson);
@@ -2003,9 +2129,10 @@ Output ONLY the raw JSON array of ${totalQuestions} question objects.`;
     }
   }
 
-  // ── AUTOMATIC TOP-UP PASS: Guarantee exact requested question count without duplicates ──
-  if (deduplicatedQuestions.length < totalQuestions) {
-    const missingCount = totalQuestions - deduplicatedQuestions.length;
+  // ── AUTOMATIC TOP-UP PASS: Guarantee exact requested question count (or floor in natural density mode) ──
+  const targetFloor = isNaturalDensityMode ? 5 : totalQuestions;
+  if (deduplicatedQuestions.length < targetFloor) {
+    const missingCount = targetFloor - deduplicatedQuestions.length;
     try {
       const topUpUserPrompt = `Generate exactly ${missingCount} distinct ${req.difficulty === 'easy' ? 'SIMPLE' : req.difficulty === 'medium' ? 'MODERATE' : 'ADVANCED'} questions for "${cleanTitle}".
 CRITICAL REQUIREMENT: Do NOT repeat or duplicate any of the following existing questions:
@@ -2022,7 +2149,7 @@ Output ONLY the raw JSON array of ${missingCount} question objects.`;
       const topUpItems = Array.isArray(topUpParsed) ? topUpParsed : (topUpParsed.questions || topUpParsed.items || []);
       if (Array.isArray(topUpItems)) {
         for (const q of topUpItems) {
-          if (deduplicatedQuestions.length >= totalQuestions) break;
+          if (deduplicatedQuestions.length >= targetFloor) break;
           const rawItem: GeneratedQuestionItem = {
             questionText: cleanMathAndProseText(String(q.questionText || q.q || q.question || 'Top-Up Question')),
             options: Array.isArray(q.options) && q.options.length >= 4 
@@ -2047,11 +2174,22 @@ Output ONLY the raw JSON array of ${missingCount} question objects.`;
   }
 
   // Final exact delivery slicing
-  let finalRawBatch = deduplicatedQuestions.length >= totalQuestions 
-    ? deduplicatedQuestions.slice(0, totalQuestions)
-    : deduplicatedQuestions.length > 0 
-      ? deduplicatedQuestions 
-      : accumulatedQuestions.slice(0, totalQuestions);
+  let finalRawBatch: GeneratedQuestionItem[];
+  if (isNaturalDensityMode) {
+    if (ceilingCap) {
+      finalRawBatch = deduplicatedQuestions.slice(0, Math.max(ceilingCap, 5));
+    } else {
+      finalRawBatch = deduplicatedQuestions.length > 0 ? deduplicatedQuestions : accumulatedQuestions.slice(0, 10);
+    }
+  } else {
+    finalRawBatch = deduplicatedQuestions.length >= totalQuestions 
+      ? deduplicatedQuestions.slice(0, totalQuestions)
+      : deduplicatedQuestions.length > 0 
+        ? deduplicatedQuestions 
+        : accumulatedQuestions.slice(0, totalQuestions);
+  }
+
+  const effectiveTotalCount = isNaturalDensityMode ? (ceilingCap || finalRawBatch.length) : totalQuestions;
 
   // ── STAGE 4: CHIEF AUDITOR VERIFICATION & CONSENSUS ENGINE (Fast-Path) ──
   onProgress?.({
@@ -2060,7 +2198,7 @@ Output ONLY the raw JSON array of ${missingCount} question objects.`;
     stageIndex: 4,
     totalStages: 5,
     currentCount: finalRawBatch.length,
-    totalCount: totalQuestions,
+    totalCount: effectiveTotalCount,
     percent: 85,
     message: 'Chief Auditor verifying syllabus relevance & single-best-answer mutual exclusivity...',
     log: `[Stage 4/5] Chief Auditor verified syllabus fidelity & mutual exclusivity on all ${finalRawBatch.length} items.`
@@ -2083,7 +2221,7 @@ Output ONLY the raw JSON array of ${missingCount} question objects.`;
     stageIndex: 4,
     totalStages: 5,
     currentCount: verifiedQuestions.length,
-    totalCount: totalQuestions,
+    totalCount: effectiveTotalCount,
     percent: 90,
     message: `Chief Auditor verified consensus & mutual exclusivity on ${verifiedQuestions.length} questions.`,
     log: `[Stage 4/5] Chief Auditor completed verification on all ${verifiedQuestions.length} questions.`
@@ -2096,7 +2234,7 @@ Output ONLY the raw JSON array of ${missingCount} question objects.`;
     stageIndex: 5,
     totalStages: 5,
     currentCount: verifiedQuestions.length,
-    totalCount: totalQuestions,
+    totalCount: effectiveTotalCount,
     percent: 95,
     message: 'Balancing answer key distribution (~25% per option A, B, C, D) and anti-clustering runs...',
     log: '[Stage 5/5] Answer keys uniformly balanced across A, B, C, D. Max run length ≤ 2 verified.'
@@ -2110,7 +2248,7 @@ Output ONLY the raw JSON array of ${missingCount} question objects.`;
     stageIndex: 5,
     totalStages: 5,
     currentCount: balancedQuestions.length,
-    totalCount: totalQuestions,
+    totalCount: effectiveTotalCount,
     percent: 100,
     message: `Successfully verified and prepared ${balancedQuestions.length} enterprise questions!`,
     log: `[Complete] All ${balancedQuestions.length} questions verified and ready for review.`
@@ -2850,65 +2988,39 @@ export async function generateFlashcardsContent(
   const scopedContent = scopeResult.scopedMarkdown;
   const targetScopeTitle = scopeResult.matchedSectionTitle || req.deckTitle;
 
-  // ── AUTONOMOUS SYLLABUS NATURAL DENSITY CALCULATION ──
-  // Calculate factual richness based on distinct concept lines, bullet items, and semicolon clauses
-  const scopedLines = (scopedContent || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-  const bulletLines = scopedLines.filter(l => /^[-*•]\s+/.test(l) || /^\d+[\.\)]\s+/.test(l));
+  // ── AUTONOMOUS SYLLABUS TOPIC ANCHOR EXTRACTION ──
+  // Extract granular syllabus content items to provide explicit topic anchors for the LLM
+  const syllabusContents = extractSyllabusContents(scopedContent);
 
-  let conceptPointCount = 0;
-  for (const line of (bulletLines.length > 0 ? bulletLines : scopedLines)) {
-    const cleanedLine = line.replace(/^[-*•\d\.\)]+\s*/, '');
-    // Split only on semicolons or distinct bullet markers, NOT commas (commas are within natural sentences)
-    const segments = cleanedLine.split(/;\s+/).filter(s => s.trim().length > 5);
-    conceptPointCount += Math.max(1, segments.length);
-  }
+  // Absolute minimum educational floor for any competitive exam active recall deck
+  const MIN_FLASHCARDS_PER_DECK = 5;
 
-  // Realistic natural capacity: 1 card per distinct concept point (bounded between 6 and 22 cards)
-  const estimatedNaturalCapacity = Math.max(6, Math.min(conceptPointCount, 22));
+  // Determine configuration bounds
+  const ceilingCap = (isNaturalDensity && req.cardCount && req.cardCount > 0) ? req.cardCount : undefined;
+  const fixedCardCount = !isNaturalDensity ? Math.min(Math.max(req.cardCount || 10, 3), 50) : undefined;
 
-  // Determine final card count
-  let cardCount: number;
-  if (isNaturalDensity) {
-    if (req.cardCount && req.cardCount > 0) {
-      // User specified an explicit upper ceiling (e.g. 10, 15, 20, 30):
-      // Each deck is sized dynamically to its own syllabus factual density, bounded strictly by the ceiling.
-      // Small topics (e.g. 6-8 concepts) generate authentic 6-10 cards; only large topics reach the ceiling cap.
-      cardCount = Math.max(5, Math.min(estimatedNaturalCapacity, req.cardCount));
-    } else {
-      // 100% Autonomous Natural Density (no manual ceiling cap)
-      cardCount = estimatedNaturalCapacity;
-    }
-  } else {
-    // Manual fixed quota
-    cardCount = Math.min(Math.max(req.cardCount || 10, 3), 50);
-  }
-
-  // Split title if it contains multiple sub-topics (+, &, ·, |, /) to calculate equal quotas
+  // ── MATCHING TOPIC ANCHORS ──
   const cleanTitle = cleanTitleText(req.deckTitle || '');
-  const subParts = cleanTitle
-    .split(/\s*[\+\&·|\/]\s*/)
-    .map(p => cleanTitleText(p.trim()))
-    .filter(p => p.length > 2);
+  const titleTokens = cleanTitle
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(w => w.length > 3 && !['engineering', 'science', 'general', 'studies', 'management', 'theory', 'basic', 'advanced', 'systems'].includes(w));
 
-  const isMultiTopicTitle = subParts.length > 1;
-  let subTopicQuotas: { topic: string; quota: number }[] = [];
+  const matchingBullets = syllabusContents.filter(item => {
+    const itemLower = item.toLowerCase();
+    return titleTokens.some(w => itemLower.includes(w)) || itemLower.includes(cleanTitle.toLowerCase());
+  });
 
-  if (isMultiTopicTitle) {
-    const baseQuota = Math.floor(cardCount / subParts.length);
-    let remainder = cardCount % subParts.length;
-    subTopicQuotas = subParts.map(sp => {
-      const q = baseQuota + (remainder > 0 ? 1 : 0);
-      if (remainder > 0) remainder--;
-      return { topic: sp, quota: q };
-    });
-  }
+  const activeContentsPool = (matchingBullets.length > 0 && matchingBullets.length < syllabusContents.length)
+    ? matchingBullets
+    : syllabusContents;
 
-  const systemPrompt = `You are a Senior Cognitive Retention Architect and High-Yield Flashcard Specialist for competitive examinations (${req.examName || 'Odisha State Civil / Police / Judicial / SSC Examinations'}).
+  const systemPrompt = `You are an elite Senior Cognitive Retention Architect and High-Yield Flashcard Specialist for competitive examinations (${req.examName || 'Odisha State Civil / Police / Judicial / SSC Examinations'}).
 
-CORE PHILOSOPHY & OBJECTIVE:
+CORE PHILOSOPHY & COGNITIVE PURPOSE:
 Flashcards are NOT textbook summaries, test questions, or general reading comprehension exercises.
 Their sole purpose is ACTIVE RECALL of high-yield, easily forgotten, frequently tested memory pain points that aspirants fail to retain under exam pressure.
-You must critically analyze the designated syllabus scope, extract only the high-value factual anchors, and convert them into atomic trigger-answer pairs.
+You must critically analyze the designated syllabus scope, extract all authentic factual anchors, and convert them into atomic trigger-answer pairs.
 
 5 COGNITIVE MEMORIZATION ARCHETYPES TO TARGET:
 1. [STATUTORY]: Exact Constitutional Articles, Amendments, Statutory Sections, Schedules, Writs, and Parts (e.g., Article 21A, Section 144 CrPC, 44th Amendment Act, 7th Schedule List II).
@@ -2916,37 +3028,45 @@ You must critically analyze the designated syllabus scope, extract only the high
 3. [CHRONOLOGY]: Landmark judicial precedents/case laws, historical enactment years, INC session years and venues, treaty dates, founding dates, and commission setup years.
 4. [EXCEPTION]: Specific exceptions to general rules, non-obstante clauses, constitutional provisos, and scientific/tax exemptions.
 5. [CONFUSING_PAIR]: Frequently conflated institutions or principles (e.g., Constitutional vs Statutory vs Executive bodies; Original vs Appellate vs Advisory jurisdiction).
-6. [CONCEPT]: High-yield specific operational formulas, vectors, or core technical mechanisms.
+6. [CONCEPT]: High-yield specific operational formulas, governing laws, vector parameters, or core technical mechanisms.
 
 ANTI-GENERIC & HIGH-EXAM-YIELD QUALITY MANDATE:
 1. BAN TRIVIAL DICTIONARY DEFINITIONS:
    - NEVER generate generic questions like "What is X?", "Define Y", or "What does CPU stand for?".
    - Focus strictly on high-yield exam discriminators: exact numbers, statutory majorities, amendment years, constitutional articles, penalty thresholds, and operational exceptions.
 2. THE COMPETITIVE EXAM TEST:
-   - Every card must test a point that an actual competitive examiner would use on an OPSC / OSSC / Civil Services paper to test rigorous recall.
+   - Every card must test a point that an actual competitive examiner would use on an OPSC / OSSC / Civil Services / GATE paper to test rigorous recall.
    - If an average citizen off the street could answer it without studying, DISCARD IT IMMEDIATELY and replace it with a high-yield factual anchor.
 3. THE ATOMIC RETRIEVAL TEST:
    - FRONT prompt must test a single, definite, unambiguous fact (5 to 15 words max).
    - BACK answer must be direct, ultra-crisp, and definitive (1 to 15 words max). Absolutely NO essay paragraphs or conversational padding.
 
-4 HARD NEGATIVE FILTERS (FLUFF & HALLUCINATION DEFENSE):
+4 HARD NEGATIVE FILTERS:
 1. THE ELEMENTARY TEST: Disqualify any trivial common sense knowledge.
 2. THE ATOMIC RETRIEVAL TEST: Strictly single definite fact retrieval.
 3. STRICT SYLLABUS SCOPE LOCK: Generate cards SOLELY from the facts directly anchored in the Scoped Syllabus Content below. Zero leakage from outside topics.
 4. ZERO FILLER: Never invent redundant or watered-down cards just to pad card volume.
 
-EQUAL CONTENT DISTRIBUTION MANDATE:
-- When the section contains multiple sub-topics or distinct concepts, you MUST generate flashcards distributed equally across ALL sub-topics/concepts.
-- Do NOT cluster flashcards on only one sub-topic while neglecting others.
-- Ensure uniform representation of all distinct sections, chapters, or bullet points in the syllabus.
-
-${isNaturalDensity ? `NATURAL DENSITY SIZING DIRECTIVE:
-Read the Scoped Syllabus Content carefully. You must autonomously decide the EXACT number of flashcards to output based exclusively on the authentic factual richness of this slice.
-- Count all distinct statutory articles, numerical values, majorities, landmark dates, operational formulas, and exceptions.
-- Extract an active recall card for EVERY real factual anchor present (natural capacity estimated at ~${cardCount} cards${req.cardCount && req.cardCount > 0 ? `, maximum ceiling: ${req.cardCount} cards` : ''}).
-- If this section is compact and only contains 6-9 genuine memory pain points, output EXACTLY those 6-9 high-yield cards. Do NOT invent generic filler!
-- If this section is dense and has 15-22 facts, exhaustively capture them all up to the ceiling.` : `TARGET CARD COUNT:
-Generate exactly ${cardCount} high-yield flashcards prioritized strictly by exam retention difficulty. Ensure complete coverage without duplicates.`}
+${isNaturalDensity ? `LLM COGNITIVE SYLLABUS DECOMPOSITION & NATURAL DENSITY PROTOCOL:
+You must analyze the Scoped Syllabus Content like an expert professor and curriculum architect (ChatGPT/Gemini style):
+1. DECONSTRUCT ACADEMIC DEPTH:
+   Carefully inspect every topic, phrase, and sub-concept in the syllabus section. Deconstruct the section across these 5 examinable dimensions:
+   - Fundamental principles, classifications, and governing laws.
+   - Mathematical formulas, governing equations, standard numerical metrics, and SI units.
+   - Operating parameters, standard ratings, clearances, tolerances, and test methods.
+   - Core components, working sequences, and practical applications.
+   - High-frequency exam traps, confusing distinctions, and exceptions.
+2. AUTONOMOUS NATURAL SIZING:
+   Determine the exact number of active recall flashcards required to achieve 100% comprehensive coverage of this section without fluff and without omitting critical exam facts.
+   - MANDATORY MINIMUM DECK FLOOR: Every deck MUST contain AT LEAST ${MIN_FLASHCARDS_PER_DECK} distinct, high-yield active recall flashcards. Never output fewer than ${MIN_FLASHCARDS_PER_DECK} cards under any circumstances!
+   - SIZING GUIDELINE:
+     * Compact / Single-Concept Topics: Unpack its formulas, units, operational standards, components, and exam pitfalls to generate 5 to 8 high-retention cards.
+     * Standard Topics: Generate 8 to 15 cards covering each distinct topic anchor and technical detail.
+     * Dense / Broad Engineering / Multi-Concept Topics: Generate 15 to 25 cards to thoroughly cover all formulas, mechanisms, and laws.
+   ${ceilingCap ? `- CEILING CAP: The administrator specified an upper limit of ≤ ${ceilingCap} cards. Select and generate the top ${ceilingCap} highest-yield exam discriminators.` : '- UNCONSTRAINED NATURAL DENSITY: Generate the exact, complete number of flashcards needed to achieve 100% mastery of all identified concepts without artificial truncation.'}
+3. COMPREHENSIVE BREADTH COVERAGE:
+   Distribute flashcards systematically across ALL sub-topics and technical parameters in the section. Do NOT cluster multiple flashcards around the first sentence or single concept while neglecting the rest.` : `TARGET CARD COUNT:
+Generate exactly ${fixedCardCount} high-yield flashcards prioritized strictly by exam retention difficulty. Ensure complete coverage across the syllabus section without duplicates.`}
 
 OUTPUT FORMAT:
 Output strictly a valid JSON array of objects conforming to this schema with no markdown code blocks or wrapper text:
@@ -2965,14 +3085,14 @@ ${req.subSubject ? `SUB-SUBJECT: "${req.subSubject}"` : ''}
 ${req.chapter ? `CHAPTER / TOPIC: "${req.chapter}"` : ''}
 EXAM: "${req.examName || 'Odisha State Examination'}"
 TARGET STAGE: "${stage}"
-TARGET VOLUME: ${isNaturalDensity ? `Autonomous Natural Density (~${cardCount} cards natural capacity${req.cardCount && req.cardCount > 0 ? `, upper ceiling: ${req.cardCount} cards` : ''})` : `Fixed Target (${cardCount} cards)`}
-MODE: ${isNaturalDensity ? `NATURAL DENSITY (Autonomous factual extraction — output only authentic exam pain points)` : `FIXED TARGET (${cardCount} cards)`}
+MODE: ${isNaturalDensity ? `NATURAL DENSITY (Autonomous Cognitive Syllabus Sizing${ceilingCap ? `, Upper Ceiling: ≤ ${ceilingCap} cards` : ', Unconstrained Auto Sizing'} — Minimum ${MIN_FLASHCARDS_PER_DECK} cards floor)` : `FIXED TARGET (${fixedCardCount} cards)`}
 
-${isMultiTopicTitle ? `CRITICAL MANDATE — EQUAL SUB-TOPIC CARD DISTRIBUTION:
-The designated section contains ${subParts.length} distinct sub-topics. You MUST generate cards strictly distributed equally according to these exact quotas:
-${subTopicQuotas.map(sq => `• "${sq.topic}": EXACTLY ${sq.quota} cards`).join('\n')}
-Do NOT generate cards solely from one sub-topic while neglecting others.` : `CRITICAL MANDATE — UNIFORM SYLLABUS CONTENT DISTRIBUTION:
-Distribute the cards proportionally and equally across ALL distinct concepts, sub-headings, and bullet points present in the Scoped Syllabus Content below. Do NOT cluster multiple flashcards around the first sentence or single concept while ignoring other key points in this section.`}
+${activeContentsPool.length > 0 ? `DETECTED SYLLABUS TOPIC ANCHORS IN THIS SECTION:
+${activeContentsPool.map((c, i) => `  ${i + 1}. ${c}`).join('\n')}
+
+COMPREHENSIVE BREADTH MANDATE:
+Systematically generate flashcards covering ALL of the detected topic anchors above, plus any additional formulas, operating parameters, and mechanisms implied by the syllabus text below. Do NOT cluster multiple flashcards around only one anchor.` : `COMPREHENSIVE BREADTH MANDATE:
+Deconstruct the scoped syllabus content below into all distinct technical concepts, formulas, operating parameters, and mechanisms. Generate flashcards covering the entire section evenly.`}
 
 ${req.alreadyGeneratedStems && req.alreadyGeneratedStems.length > 0 ? `CRITICAL REQUIREMENT — ZERO DUPLICATION OF EXISTING FLASHCARDS:
 Do NOT generate cards that repeat or duplicate the facts/questions in these existing cards:
@@ -2985,16 +3105,20 @@ ${scopedContent || 'Standard syllabus concepts for ' + targetScopeTitle}
 ---
 
 CRITICAL INSTRUCTION:
-Apply the 5 Cognitive Archetypes, 4 Hard Negative Filters, and the Equal Content Distribution Mandate.
-Extract only the authentic high-retention pain points from the syllabus section above.
+Apply the Cognitive Syllabus Decomposition protocol, 5 Cognitive Archetypes, and 4 Hard Negative Filters.
+Extract all authentic high-retention pain points from the syllabus section above.
 Output ONLY the raw JSON array.`;
+
+  const expectedTokens = isNaturalDensity
+    ? Math.max((ceilingCap || 25) * 150, 4096)
+    : Math.max((fixedCardCount || 10) * 150, 2048);
 
   const rawJson = await queryAIModel(systemPrompt, userPrompt, {
     apiKey: req.apiKey,
     model: req.model,
     baseUrl: req.baseUrl,
     temperature: 0.25,
-    maxOutputTokens: Math.max(cardCount * 150, 2048)
+    maxOutputTokens: Math.min(expectedTokens, 8192)
   });
 
   const parsed = extractAndParseJSON(rawJson);
@@ -3033,15 +3157,17 @@ Output ONLY the raw JSON array.`;
     }
   }
 
-  // ── AUTOMATIC TOP-UP PASS: Guarantee high-yield flashcard coverage without duplicates ──
-  // For fixed target: top-up to exact cardCount.
-  // For natural density: NEVER artificially top-up; retain authentic, pure natural distillation.
-  const shouldTopUp = isNaturalDensity ? false : (deduplicatedCards.length < cardCount);
+  // ── AUTOMATIC SAFETY FLOOR TOP-UP PASS ──
+  // For fixed target: top-up to exact fixedCardCount.
+  // For natural density: guarantee AT LEAST MIN_FLASHCARDS_PER_DECK (5 cards) to prevent broken underfilled decks.
+  const targetFloor = isNaturalDensity ? MIN_FLASHCARDS_PER_DECK : (fixedCardCount || MIN_FLASHCARDS_PER_DECK);
+  const shouldTopUp = deduplicatedCards.length < targetFloor;
 
   if (shouldTopUp) {
-    const missingCount = cardCount - deduplicatedCards.length;
+    const missingCount = targetFloor - deduplicatedCards.length;
     try {
       const topUpPrompt = `Generate exactly ${missingCount} distinct ACTIVE RECALL flashcards for "${cleanTitle}".
+Unpack formulas, units of measurement, operating standards, mechanisms, or common exam traps from the syllabus scope to reach at least ${MIN_FLASHCARDS_PER_DECK} distinct cards.
 CRITICAL REQUIREMENT: Do NOT repeat any of the following existing flashcard triggers:
 ${existingFronts.slice(-25).map((s, idx) => `${idx + 1}. ${s.slice(0, 80)}`).join('\n')}
 
@@ -3059,7 +3185,7 @@ Output strictly a valid JSON array of ${missingCount} flashcard objects matching
       const topUpItems = Array.isArray(topUpParsed) ? topUpParsed : (topUpParsed.cards || topUpParsed.flashcards || topUpParsed.items || []);
       if (Array.isArray(topUpItems)) {
         for (const card of topUpItems) {
-          if (deduplicatedCards.length >= cardCount) break;
+          if (deduplicatedCards.length >= targetFloor) break;
           const frontText = String(card.front_text || card.front || card.question || '').trim();
           const backText = String(card.back_text || card.back || card.answer || '').trim();
           if (!frontText || !backText) continue;
@@ -3086,6 +3212,12 @@ Output strictly a valid JSON array of ${missingCount} flashcard objects matching
     }
   }
 
-  return deduplicatedCards.slice(0, cardCount);
+  // In 100% Autonomous Natural Density (no ceiling), return all authentic distilled cards.
+  // When an explicit upper ceiling was set (e.g. ≤10 Cap), clamp to that ceiling (while respecting floor).
+  if (isNaturalDensity && !ceilingCap) {
+    return deduplicatedCards;
+  }
+  const effectiveLimit = ceilingCap || fixedCardCount || MIN_FLASHCARDS_PER_DECK;
+  return deduplicatedCards.slice(0, Math.max(effectiveLimit, MIN_FLASHCARDS_PER_DECK));
 }
 

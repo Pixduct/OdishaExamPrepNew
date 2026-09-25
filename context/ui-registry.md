@@ -4234,14 +4234,14 @@ Last updated: September 25, 2026
 | Property | Class / Token |
 | :--- | :--- |
 | **Canvas & Layout** | `1080px x 1080px` High-Density Square Canvas with scenario-adaptive dark theme background (`EXAM_THEMES`), ambient dot matrix (`radial-gradient(rgba(255, 255, 255, 0.08) 1.2px, transparent 1.2px)`), and radial glow overlays |
-| **Top-Bar Layout** | `display: grid; grid-template-columns: auto 1fr auto; align-items: center; width: 100%; gap: 16px;` — Eliminates spatial collisions by isolating category badge, board tag, and date in distinct tracks |
+| **Top-Bar Layout** | `display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; width: 100%; gap: 16px;` — Eliminates spatial collisions by isolating category badge, board tag, and date in distinct tracks |
 | **Category Badge** | Scenario gradient (`{theme["badge_gradient"]}`), `padding: 11px 22px`, `border-radius: 12px`, `font-weight: 900`, `font-size: 16px`, `white-space: nowrap`, `justify-self: start` across all 20 discrete recruitment categories |
 | **Board Tag Center Wrapper** | Dedicated flex wrapper (`.board-tag-wrapper: display: flex; justify-content: center; min-width: 0; width: 100%;`) dynamically centers the pill in the middle grid cell |
 | **Board Tag Pill** | Glassmorphism badge (`rgba(255, 255, 255, 0.15)` with `backdrop-filter: blur(16px)`), `border: 1.5px solid rgba(255, 255, 255, 0.32)`, `padding: 10px 22px`, `border-radius: 12px`, `font-weight: 900`, `font-size: 16px`, `overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;` |
 | **Date Badge** | Translucent badge (`rgba(255, 255, 255, 0.08)` with `border: 1px solid rgba(255, 255, 255, 0.16)`), `padding: 10px 20px`, `border-radius: 12px`, `font-size: 16px`, `font-weight: 800`, `white-space: nowrap`, `justify-self: end` |
 | **Short Board Normalizer & Registry** | `extract_short_board_name(name)` & `extract_board_info(title)` synchronize across all 54 nodal authorities (Odisha District Courts, Fire Service, Prison Directorate, DSE Odisha, ICDS, KVS, NVS, EMRS, CSIR, CTET, Defence wings, up to OPSC, OSSC, OSSSC, SSC, RRB, UPSC, IBPS) with regex word-boundary isolation (`\b`) and an absolute 22-character truncation boundary (`name[:20] + "…"`) |
 | **Headline & Subheader** | `.exam-board-title: font-size: 19px, font-weight: 800, text-transform: uppercase, letter-spacing: 1.2px`, `.headline: font-family: 'Outfit', sans-serif, font-weight: 900, adaptive canvas font sizing (42px / 38px / 34px)` |
-| **Metric Stat Grid** | 2-column key metric cards (`.stat-grid: display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0 10px 0;`). Pill: `background: rgba(255, 255, 255, 0.06); border: 1.5px solid rgba(255, 255, 255, 0.14); border-radius: 16px; padding: 13px 20px; icon: 30px; value: 21px bold white` — Factually validated: genuine vacancies preserved, unverified AI counts sanitized to official notice link |
+| **Metric Stat Grid & Adaptive Pills** | 2-column key metric cards (`.stat-grid: display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0 10px 0;`). Pill: `background: rgba(255, 255, 255, 0.06); border: 1.5px solid rgba(255, 255, 255, 0.14); border-radius: 16px; padding: 13px 20px; icon: 30px; value: 21px bold white` — Validated via `is_valid_stat_metric()`: boilerplate strings (`"refer to"`, `"notification pdf"`, `"n/a"`) are strictly purged. If vacancies are invalid/empty, system dynamically substitutes `RECRUITMENT BODY` and `UPDATE TYPE` so the card retains balanced dual stat pills with zero dead voids |
 | **Adaptive Highlight Cards** | `.bullets-container: flex: 1; display: flex; flex-direction: column; justify-content: space-evenly; gap: 10px; min-height: 0;` — Eliminates vertical dead voids by auto-distributing cards across available height |
 | **Glass Highlight Card** | `.bullet-card: background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.10); border-left: 5px solid {accent_color}; border-radius: 16px; padding: 13px 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); font-size: 21px; line-height: 1.45; color: #F8FAFC;` |
 | **Inline Highlight Badge** | `.bullet-badge: display: inline-flex; align-items: center; background: rgba(255, 255, 255, 0.12); color: {accent_color}; border: 1px solid rgba(255, 255, 255, 0.22); padding: 3px 10px; border-radius: 8px; font-size: 14px; font-weight: 900; letter-spacing: 0.8px; text-transform: uppercase; margin-right: 10px;` |
@@ -4249,8 +4249,10 @@ Last updated: September 25, 2026
 | **Footer Branding** | `.website-text: font-size: 21px; font-weight: 800; color: #FFFFFF;`, `.verified-pill: background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.5); color: #6EE7B7; font-size: 15px; font-weight: 800;` |
 
 **Pattern notes:**
-- **Zero-Overlap Grid Guarantee**: Using CSS Grid `auto 1fr auto` guarantees that the center board pill can never visually collide with or obscure the category badge or date tag, even if the organization name is long.
-- **54-Authority Word-Boundary Acronym Resolution**: Acronym regex matches must enforce strict word boundaries (`\b`) to avoid false-positive token substring matches (e.g. `\blic\b`, `\bfci\b`, `\baai\b`).
+- **Zero-Overlap Grid Guarantee**: Using CSS Grid `grid-template-columns: 1fr auto 1fr` guarantees that the center board pill can never visually collide with or obscure the category badge or date tag, even if the organization name is long.
+- **Unified 20-Category Classification**: Both `exam_card_renderer.py` and `breaking_engine.py` share the exact 20-category schema. `detect_exam_scenario` implements prioritized keyword resolution to prevent misclassifications (e.g. Objections/Response Sheets strictly resolve to Category 13 `OBJECTION_WINDOW`, not `RESULT`).
+- **54-Authority Word-Boundary Acronym Resolution**: Acronym regex matches enforce strict word boundaries (`\b`) to avoid false-positive token substring matches (e.g. `\blic\b`, `\bfci\b`, `\baai\b`). Max board length is capped at 22 chars (`name[:20] + "…"`).
+- **Adaptive Stat Substitution**: When notice has no vacancy number (or AI extracted generic boilerplate), the stat grid adaptively substitutes authority name and update type so layout remains balanced without empty or corrupted fields.
 - **Adaptive Free-Space Distribution**: Replacing plain list tags with `flex: 1; justify-content: space-evenly;` glass cards ensures that whether a post has 2, 3, or 4 takeaways, the canvas is utilized symmetrically with zero gaping voids.
 - **Canvas-Scale Hierarchy**: Because 1080x1080 renders at ~380px on mobile screens, text sizes are scaled proportionally (headlines: 34px–42px, body: 21px–22px, metrics: 21px) to guarantee readability without ocular strain.
 - **Factual Integrity Guardrail**: Vacancy metrics and milestone dates are validated against raw official notice text before rendering; non-verified counts are replaced with standardized official portal link fallbacks to prevent misleading aspirants.
@@ -4260,7 +4262,7 @@ Last updated: September 25, 2026
 ### `MultiTierAiFailoverFleet` & `BulletproofTelegramNotificationDispatcher`
 
 File: [`automations/shared/telegram.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/telegram.py), [`automations/ca_formatter.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/ca_formatter.py), [`automations/ca_website_publisher.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/ca_website_publisher.py), [`automations/exam_update_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/exam_update_engine.py), [`automations/seo_blog_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/seo_blog_engine.py), [`automations/engagement_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/engagement_engine.py)
-Last updated: August 31, 2026
+Last updated: September 25, 2026
 
 | Property | Class / Token |
 | :--- | :--- |
@@ -4269,6 +4271,8 @@ Last updated: August 31, 2026
 | **Tier 3 (Reasoning)** | `nvidia/nemotron-3.5-lightning-30b-a3b` via `https://integrate.api.nvidia.com/v1/chat/completions` (HTTP 200, ~4.2s) |
 | **Tier 4 (Heavy Weight)** | `openai/gpt-oss-20b` via `https://integrate.api.nvidia.com/v1/chat/completions` (HTTP 200, ~3.8s) |
 | **Tier 5 (Direct Fallback)** | `deepseek-chat` via `https://api.deepseek.com/v1/chat/completions` |
+| **Dynamic Category Badge** | Scenario-bound header resolution via `detect_exam_scenario`: extracts exact 20-category badge (e.g. `🚨 ✏️ CORRECTION WINDOW OPEN`, `🚨 📝 OBJECTION WINDOW OPEN`) replacing static notification headers |
+| **Metric Boilerplate Sanitizer** | `is_valid_metric()` filter rejecting `"refer to"`, `"notification pdf"`, `"n/a"`, `"check official portal"` before constructing Telegram & WhatsApp captions |
 | **Telegram HTML Auto-Fallback** | Automatic plain-text regex strip (`re.sub(r'<[^>]+>', '', msg)`) and immediate retry if Telegram API returns `HTTP 400 Bad Request` |
 | **CI/CD Lifecycle Reporting** | `if: always()` step on all 7 GitHub Actions workflows with real-time runner status, run logs URL, and execution metrics |
 

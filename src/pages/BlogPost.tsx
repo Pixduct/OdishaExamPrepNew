@@ -143,7 +143,7 @@ export default function BlogPost() {
   useEffect(() => {
     const fetchBlog = async () => {
       try {
-        const exams = await examService.getAllExams();
+        const exams = await examService.getAllBlogs();
         const cleanParam = (id || '').trim().toLowerCase();
         
         let found = exams.find(e => {

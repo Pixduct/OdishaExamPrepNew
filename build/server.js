@@ -21,7 +21,8 @@ var ROUTE_PATHS = {
   CURRENT_AFFAIRS: "/current-affairs",
   ADMIN: "/admin",
   NOT_FOUND: "/404",
-  EXAM_DETAIL: "/exams/:examId"
+  EXAM_DETAIL: "/exams/:examId",
+  FLASHCARDS: "/flashcards"
 };
 var ROUTE_LIST = Object.values(ROUTE_PATHS);
 
@@ -72,7 +73,7 @@ function cleanTitleText(str, isPaper = false) {
     return "";
   let cleaned = str.replace(/^#+\s*/, "").replace(/^[\*\-•]\s*/, "").replace(/^\d+[\.\)\-]\s*/, "").replace(/^[*_~`]+|[*_~`]+$/g, "");
   if (!isPaper) {
-    cleaned = cleaned.replace(/^(?:Chapter|Topic|Lesson|Unit|Section|Module|Part)\s*(?:[\dIVX]+|\s*[-–—]\s*[\dIVX]+)?[:\s\-–—]+/i, "");
+    cleaned = cleaned.replace(/^(?:Chapter|Topic|Lesson|Unit|Section|Sectional(?:\s*Test)?|Mock(?:\s*Test)?|Practice(?:\s*Set)?|Module|Part)\s*(?:[\dIVX]+|\s*[-–—]\s*[\dIVX]+)?[:\s\-–—]+/i, "");
   }
   return cleaned.replace(/^\[(?:[A-Za-z0-9_\- ]+)\][:\s]*/i, "").replace(/\*\*([^*]+)\*\*/g, "$1").replace(/__([^_]+)__/g, "$1").replace(/\*([^*]+)\*/g, "$1").replace(/^[:\-–—|/•\s]+|[:\-–—|/•\s]+$/g, "").replace(/^[*_~`]+|[*_~`]+$/g, "").trim();
 }
@@ -314,17 +315,19 @@ function determinePlaceholderTier(formula) {
   if (/\[(?:subject|discipline)\]/i.test(norm)) {
     return "subject";
   }
-  if (/\[(?:paper|tier)\]/i.test(norm)) {
+  if (/\[(?:paper|tier|stage)\]/i.test(norm)) {
     return "paper";
   }
   return "chapter";
 }
-function applyNamingPattern(pattern, item, index, examName) {
+function applyNamingPattern(pattern, item, index, examName, stageName) {
   let title = (pattern || "").trim();
   if (!title) {
     title = item.chapter ? `${item.chapter} Drill #[01-10]` : `Practice Test #[01-10]`;
   }
   const exam = (examName || "").trim();
+  const rawStage = (stageName || item.stage || "").trim();
+  const validStage = rawStage && rawStage.toLowerCase() !== "single stage" && rawStage.toLowerCase() !== "all stages" ? rawStage : "";
   if (/\[Exam(?: Name)?\]/i.test(title)) {
     title = title.replace(/\[Exam(?: Name)?\]/gi, () => exam || "Exam");
   }
@@ -344,6 +347,8 @@ function applyNamingPattern(pattern, item, index, examName) {
     let val;
     if (item.placeholders && item.placeholders[normKey]) {
       val = item.placeholders[normKey];
+    } else if (normKey === "stage" || normKey === "examstage") {
+      val = validStage;
     } else if (normKey === "paper") {
       val = item.paper;
     } else if (normKey === "subject" || normKey === "discipline") {
@@ -373,6 +378,170 @@ function applyNamingPattern(pattern, item, index, examName) {
     title = `${fallbackName} Practice Set #${padNum}`;
   }
   return title;
+}
+function extractAutonomousSyllabusScope(fullMarkdown, target) {
+  if (!fullMarkdown || !fullMarkdown.trim()) {
+    return {
+      scopedMarkdown: "",
+      matchedSectionTitle: "",
+      hierarchyLevel: "full",
+      totalLines: 0
+    };
+  }
+  const rawLines = fullMarkdown.split(/\r?\n/);
+  const cleanTarget = (str) => (str || "").replace(/^\[(?:[A-Za-z0-9_\- ]+)\][:\s]*/i, "").replace(/[*_#\-:]/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
+  const chapQuery = cleanTarget(target.chapter);
+  const subSubjQuery = cleanTarget(target.subSubject);
+  const subjQuery = cleanTarget(target.subject);
+  const titleTokens = [];
+  const rawParts = [];
+  if (target.title) {
+    const splitParts = target.title.split(/[:·\-\–\—|+\&]/).map((p) => p.trim()).filter((p) => p.length > 2);
+    rawParts.push(...splitParts);
+    titleTokens.push(...splitParts.map((p) => cleanTarget(p)));
+  }
+  const searchQueries = [];
+  if (chapQuery && chapQuery.length > 2) {
+    searchQueries.push({ query: chapQuery, level: "chapter" });
+  }
+  if (subSubjQuery && subSubjQuery.length > 2) {
+    searchQueries.push({ query: subSubjQuery, level: "subsubject" });
+  }
+  for (const tok of titleTokens) {
+    if (tok !== subjQuery && tok !== chapQuery && tok !== subSubjQuery && tok.length > 3) {
+      searchQueries.push({ query: tok, level: "subsubject" });
+    }
+  }
+  if (subjQuery && subjQuery.length > 2 && !subjQuery.includes("all subjects") && !subjQuery.includes("comprehensive full syllabus")) {
+    searchQueries.push({ query: subjQuery, level: "subject" });
+  }
+  const getHeadingLevel = (line) => {
+    const trimmed = line.trim();
+    const hMatch = trimmed.match(/^(#{1,6})\s+/);
+    if (hMatch)
+      return hMatch[1].length;
+    if (/^(?:#\s*)?\[?paper/i.test(trimmed))
+      return 1;
+    if (/^(?:#\s*)?\[?subject/i.test(trimmed))
+      return 2;
+    if (/^(?:#\s*)?\[?(sub[\s\-_]?subject|unit|section|module)/i.test(trimmed))
+      return 3;
+    if (/^(?:#\s*)?\[?(chapter|topic|lesson)/i.test(trimmed))
+      return 4;
+    if (/^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(trimmed))
+      return 3;
+    return 99;
+  };
+  if (rawParts.length > 1) {
+    const multiSections = [];
+    const seenNorms = /* @__PURE__ */ new Set();
+    for (const part of rawParts) {
+      const q = cleanTarget(part);
+      if (q.length < 3)
+        continue;
+      for (let i = 0; i < rawLines.length; i++) {
+        const line = rawLines[i].trim();
+        if (!line)
+          continue;
+        const normLine = cleanTarget(line);
+        const isHeader = line.startsWith("#") || /^(?:#+\s*)?\[(?:[A-Za-z0-9_\- ]+)\](?:\s*[:\-–—]|$)/i.test(line) || /^(?:#+\s*)?(?:Paper|Subject|Discipline|Sub[\s\-_]?Subject|Unit|Section|Module|Chapter|Topic|Lesson)\s*[:\-–—]/i.test(line) || /^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(line);
+        if (isHeader && (normLine === q || normLine.includes(q) || q.includes(normLine))) {
+          const headingLevel = getHeadingLevel(line);
+          const collected = [rawLines[i]];
+          for (let j = i + 1; j < rawLines.length; j++) {
+            const nextTrim = rawLines[j].trim();
+            if (nextTrim && getHeadingLevel(nextTrim) <= headingLevel)
+              break;
+            collected.push(rawLines[j]);
+          }
+          const text = collected.join("\n").trim();
+          if (text.length > 20 && !seenNorms.has(normLine)) {
+            seenNorms.add(normLine);
+            multiSections.push({ title: part, content: text });
+          }
+          break;
+        }
+      }
+    }
+    if (multiSections.length > 1) {
+      const combined = multiSections.map((s) => `### [Sub-Topic: ${s.title}]
+${s.content}`).join("\n\n");
+      return {
+        scopedMarkdown: combined,
+        matchedSectionTitle: rawParts.join(" + "),
+        hierarchyLevel: "subsubject",
+        totalLines: combined.split("\n").length
+      };
+    }
+  }
+  for (const { query, level } of searchQueries) {
+    let matchLineIndex = -1;
+    let matchHeadingLevel = 99;
+    let matchedTitle = "";
+    for (let i = 0; i < rawLines.length; i++) {
+      const line = rawLines[i].trim();
+      if (!line)
+        continue;
+      const normLine = cleanTarget(line);
+      const isHeaderLine = line.startsWith("#") || /^(?:#+\s*)?\[(?:[A-Za-z0-9_\- ]+)\](?:\s*[:\-–—]|$)/i.test(line) || /^(?:#+\s*)?(?:Paper|Subject|Discipline|Sub[\s\-_]?Subject|Unit|Section|Module|Chapter|Topic|Lesson)\s*[:\-–—]/i.test(line) || /^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(line);
+      const isBulletOrTopicLine = /^(?:[\*\-•]|\d+[\.\)])\s+/.test(line);
+      if (isHeaderLine && (normLine === query || normLine.includes(query) || query.includes(normLine))) {
+        matchLineIndex = i;
+        matchHeadingLevel = getHeadingLevel(line);
+        matchedTitle = line.replace(/^[#\s*_\-]+/, "").replace(/[*_#]+$/g, "").trim();
+        break;
+      } else if (isBulletOrTopicLine && (normLine === query || normLine.includes(query) || query.includes(normLine))) {
+        let parentIdx = i - 1;
+        while (parentIdx >= 0) {
+          const prev = rawLines[parentIdx].trim();
+          const prevIsHeader = prev.startsWith("#") || /^(?:#+\s*)?\[(?:[A-Za-z0-9_\- ]+)\](?:\s*[:\-–—]|$)/i.test(prev) || /^(?:#+\s*)?(?:Paper|Subject|Discipline|Sub[\s\-_]?Subject|Unit|Section|Module|Chapter|Topic|Lesson)\s*[:\-–—]/i.test(prev) || /^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(prev);
+          if (prevIsHeader) {
+            break;
+          }
+          parentIdx--;
+        }
+        if (parentIdx >= 0) {
+          matchLineIndex = parentIdx;
+          matchHeadingLevel = getHeadingLevel(rawLines[parentIdx]);
+          matchedTitle = rawLines[parentIdx].replace(/^[#\s*_\-]+/, "").replace(/[*_#]+$/g, "").trim();
+        } else {
+          matchLineIndex = i;
+          matchHeadingLevel = 99;
+          matchedTitle = line;
+        }
+        break;
+      }
+    }
+    if (matchLineIndex !== -1) {
+      const collected = [rawLines[matchLineIndex]];
+      for (let j = matchLineIndex + 1; j < rawLines.length; j++) {
+        const nextLine = rawLines[j];
+        const trimmedNext = nextLine.trim();
+        if (trimmedNext) {
+          const nextLevel = getHeadingLevel(trimmedNext);
+          if (nextLevel <= matchHeadingLevel) {
+            break;
+          }
+        }
+        collected.push(nextLine);
+      }
+      const resultText = collected.join("\n").trim();
+      if (resultText.length > 20) {
+        return {
+          scopedMarkdown: resultText,
+          matchedSectionTitle: matchedTitle || query,
+          hierarchyLevel: level,
+          totalLines: collected.length
+        };
+      }
+    }
+  }
+  return {
+    scopedMarkdown: fullMarkdown.slice(0, 8e3).trim(),
+    matchedSectionTitle: target.title || "General Syllabus",
+    hierarchyLevel: "full",
+    totalLines: rawLines.length
+  };
 }
 
 // src/lib/serverAiGenerator.ts
@@ -611,8 +780,9 @@ async function queryAIModel(systemPrompt, userPrompt, options) {
     }
     const candidateModels = [
       cleanGeminiModel,
-      cleanGeminiModel !== "gemini-flash-lite-latest" ? "gemini-flash-lite-latest" : "gemini-3.1-flash-lite",
-      "gemini-3.1-flash-lite"
+      cleanGeminiModel !== "gemini-3.5-flash" ? "gemini-3.5-flash" : "gemini-flash-lite-latest",
+      "gemini-flash-lite-latest",
+      "gemini-3.6-flash"
     ].filter((m, i, arr) => arr.indexOf(m) === i);
     const effectiveMaxTokens = Math.max(options.maxOutputTokens || 3072, 1024);
     let lastError = null;
@@ -973,6 +1143,9 @@ async function generateExamStructure(req) {
     if (req.namingPattern && req.namingPattern.trim()) {
       return req.namingPattern.trim();
     }
+    if (mainSection === "flashcards") {
+      return req.namingPattern?.trim() || "[Sub-Subject] \xB7 [Chapter]";
+    }
     if (subCat === "sectional")
       return "[Subject] Sectional Test #[01-05]";
     if (subCat === "full-length")
@@ -1004,6 +1177,7 @@ async function generateExamStructure(req) {
     "exam-focused": "High-Yield Topic Bank",
     "revision-sets": "Daily Speed Quizzes & Revision",
     "pyq-collections": "Solved PYQ Collections",
+    "pyq-recall": "PYQ Active Recall Decks",
     "full-length": "Full-Length Mock Tests",
     "sectional": "Sectional Tests",
     "pyq": "Official PYQ Tests",
@@ -1011,7 +1185,7 @@ async function generateExamStructure(req) {
   };
   const formulaHasSyllabusPlaceholders = /\[(?:sub[\s\-_]?subject|subject|discipline|paper|unit|section|module|chapter|topic)\]/i.test(namingRule);
   if (mainSection === "mock_test" && ["full-length", "pyq", "daily"].includes(subCat) && !formulaHasSyllabusPlaceholders) {
-    const targetCount = count || (subCat === "daily" ? 8 : 10);
+    const targetCount = req.count ? Math.min(Math.max(req.count, 1), 30) : subCat === "daily" ? 8 : 10;
     const testStructures = [];
     let baseTitleTemplate = "Full Mock Test #[01-10]";
     let subCatTitle = "Full-Length Mock Tests";
@@ -1035,9 +1209,10 @@ async function generateExamStructure(req) {
     for (let i = 0; i < targetCount; i++) {
       const title = applyNamingPattern(
         baseTitleTemplate,
-        { subject: "", subSubject: "", chapter: "" },
+        { subject: "", subSubject: "", chapter: "", stage: req.stage },
         i,
-        req.examName
+        req.examName,
+        req.stage
       );
       testStructures.push({
         title,
@@ -1047,6 +1222,7 @@ async function generateExamStructure(req) {
         subCategoryTitle: subCatTitle,
         category: subCat === "daily" ? "Daily Benchmark" : subCat === "pyq" ? "Official PYQ" : "Full Mock Tests",
         targetTable: "mockTests",
+        stage: req.stage || void 0,
         durationMinutes: defaultDuration,
         totalMarks: defaultMarks,
         negativeMarking: defaultNegative,
@@ -1087,7 +1263,7 @@ async function generateExamStructure(req) {
         targetHierarchy = matched;
     }
     const hasSubSubjectsInSyllabus = targetHierarchy.some((it) => it.subSubject && it.subSubject.trim().length > 0);
-    const effectiveTier = formulaHasSyllabusPlaceholders ? requestedTier : subCat === "sectional" ? hasSubSubjectsInSyllabus ? "subsubject" : "subject" : "chapter";
+    const effectiveTier = formulaHasSyllabusPlaceholders ? requestedTier : subCat === "sectional" || mainSection === "flashcards" ? hasSubSubjectsInSyllabus ? "subsubject" : "subject" : "chapter";
     let tierEntries = [];
     if (effectiveTier === "chapter") {
       tierEntries = targetHierarchy.map((p) => ({
@@ -1152,12 +1328,13 @@ async function generateExamStructure(req) {
         }
       } else {
         itemSection = mainSection;
-        itemSubCat = subCat && subCat !== "all" ? subCat : itemSection === "mock_test" ? "sectional" : "topic-wise";
+        itemSubCat = subCat && subCat !== "all" ? subCat : itemSection === "mock_test" ? "sectional" : itemSection === "flashcards" ? "all" : "topic-wise";
       }
       const itemIsMock = itemSection === "mock_test";
-      const targetTable = itemIsMock ? "mockTests" : "questionBanks";
-      const targetMode = itemIsMock ? void 0 : itemSection === "practice_test" ? "practice" : "bank";
-      const targetSubCatTitle = subCategoryTitles[itemSubCat] || (itemIsMock ? itemSubCat === "daily" ? "Daily & Weekly Tests" : "Sectional Tests" : "Curriculum Set");
+      const itemIsFlashcard = itemSection === "flashcards";
+      const targetTable = itemIsMock ? "mockTests" : itemIsFlashcard ? "flashcardDecks" : "questionBanks";
+      const targetMode = itemIsMock || itemIsFlashcard ? void 0 : itemSection === "practice_test" ? "practice" : "bank";
+      const targetSubCatTitle = itemIsFlashcard ? "Active Recall Flashcard Decks" : subCategoryTitles[itemSubCat] || (itemIsMock ? itemSubCat === "daily" ? "Daily & Weekly Tests" : "Sectional Tests" : "Curriculum Set");
       let durationMinutes = 45;
       let totalMarks = 50;
       let negativeMarking = 0;
@@ -1183,6 +1360,10 @@ async function generateExamStructure(req) {
         durationMinutes = configuredMockDuration ?? 60;
         totalMarks = configuredMockMarks ?? 100;
         negativeMarking = configuredMockNegativeMarking ?? 0;
+      } else if (itemSection === "flashcards") {
+        durationMinutes = 15;
+        totalMarks = 20;
+        negativeMarking = 0;
       }
       const itemHierarchy = {
         paper: authenticPaper,
@@ -1197,18 +1378,21 @@ async function generateExamStructure(req) {
           unit: effectiveTier === "subsubject" || effectiveTier === "chapter" ? authenticSubSubject : "",
           section: effectiveTier === "subsubject" || effectiveTier === "chapter" ? authenticSubSubject : "",
           module: effectiveTier === "subsubject" || effectiveTier === "chapter" ? authenticSubSubject : "",
+          stage: req.stage,
           chapter: effectiveTier === "chapter" ? firstItem?.chapter || "" : "",
           topic: effectiveTier === "chapter" ? firstItem?.chapter || "" : "",
           lesson: effectiveTier === "chapter" ? firstItem?.chapter || "" : ""
         }
       };
-      const title = applyNamingPattern(namingRule, itemHierarchy, index, req.examName);
+      const title = applyNamingPattern(namingRule, itemHierarchy, index, req.examName, req.stage);
       const padNum = String(index + 1).padStart(2, "0");
       let description;
       if (itemIsMock) {
         description = `${targetSubCatTitle} focused on ${displayEntity}${authenticSubject && authenticSubSubject && authenticSubject !== authenticSubSubject ? ` (${authenticSubject})` : ""} covering ${chaps.length} syllabus topics.`;
       } else if (itemSection === "practice_test") {
         description = `Practice test module focused on ${displayEntity}${authenticSubject && authenticSubSubject && authenticSubject !== authenticSubSubject ? ` (${authenticSubject})` : ""} covering ${chaps.length} syllabus topics. Strictly mapped to official syllabus.`;
+      } else if (itemSection === "flashcards") {
+        description = `High-yield active recall flashcard deck focused on ${displayEntity}${authenticSubject && authenticSubSubject && authenticSubject !== authenticSubSubject ? ` (${authenticSubject})` : ""} for spaced repetition retention.`;
       } else {
         description = `Comprehensive question bank for ${displayEntity}${authenticSubject && authenticSubSubject && authenticSubject !== authenticSubSubject ? ` (${authenticSubject})` : ""} containing high-yield questions across ${chaps.length} syllabus topics.`;
       }
@@ -1218,9 +1402,10 @@ async function generateExamStructure(req) {
         mainSection: itemSection,
         subCategory: itemSubCat,
         subCategoryTitle: targetSubCatTitle,
-        category: itemIsMock ? itemSubCat === "daily" ? "Daily Benchmark" : itemSubCat === "pyq" ? "Official PYQ" : itemSubCat === "full-length" ? "Full Mock Test" : "Sectional Test" : itemSection === "practice_test" ? "Practice Set" : "Topic Bank",
+        category: itemIsMock ? itemSubCat === "daily" ? "Daily Benchmark" : itemSubCat === "pyq" ? "Official PYQ" : itemSubCat === "full-length" ? "Full Mock Test" : "Sectional Test" : itemSection === "flashcards" ? "Flashcard Deck" : itemSection === "practice_test" ? "Practice Set" : "Topic Bank",
         targetTable,
         targetMode,
+        stage: req.stage || void 0,
         paper: authenticPaper,
         subject: authenticSubject,
         subSubject: effectiveTier === "subsubject" || effectiveTier === "chapter" ? authenticSubSubject : "",
@@ -1294,9 +1479,10 @@ JSON array only. No explanation.`;
       itemSubCat = subCat && subCat !== "all" ? subCat : itemSection === "mock_test" ? "full-length" : "topic-wise";
     }
     const itemIsMock = itemSection === "mock_test";
-    const targetTable = itemIsMock ? "mockTests" : "questionBanks";
-    const targetMode = itemIsMock ? void 0 : itemSection === "practice_test" ? "practice" : "bank";
-    const subCategoryTitle = subCategoryTitles[itemSubCat] || "Curriculum Set";
+    const itemIsFlashcard = itemSection === "flashcards";
+    const targetTable = itemIsMock ? "mockTests" : itemIsFlashcard ? "flashcardDecks" : "questionBanks";
+    const targetMode = itemIsMock || itemIsFlashcard ? void 0 : itemSection === "practice_test" ? "practice" : "bank";
+    const subCategoryTitle = itemIsFlashcard ? "Active Recall Flashcard Decks" : subCategoryTitles[itemSubCat] || "Curriculum Set";
     let durationMinutes = 45;
     let totalMarks = 50;
     let negativeMarking = 0;
@@ -1325,11 +1511,12 @@ JSON array only. No explanation.`;
     const cleanChapter = String(t.chapter || t.subject || "Comprehensive Topic").trim();
     const hierarchyItem = {
       paper: cleanPaper,
+      stage: req.stage,
       subject: cleanSubject,
       subSubject: cleanSubSubject,
       chapter: cleanChapter
     };
-    const title = applyNamingPattern(namingRule, hierarchyItem, index, req.examName);
+    const title = applyNamingPattern(namingRule, hierarchyItem, index, req.examName, req.stage);
     return {
       title,
       description: `Targeted curriculum test module on ${cleanSubject || cleanChapter}. Strictly mapped to official syllabus.`,
@@ -1339,6 +1526,7 @@ JSON array only. No explanation.`;
       category: itemIsMock ? itemSubCat === "sectional" ? "Sectional Test" : "Full-Length Mock" : "Topic Bank",
       targetTable,
       targetMode,
+      stage: req.stage || void 0,
       paper: cleanPaper,
       subject: cleanSubject,
       subSubject: cleanSubSubject,
@@ -1378,8 +1566,10 @@ function extractSyllabusSections(markdown) {
 }
 async function generateExamQuestions(req, onProgress) {
   const totalQuestions = Math.min(Math.max(req.questionCount || 10, 1), 100);
-  const cleanSubject = String(req.subject || "").trim();
-  const cleanTitle = String(req.testTitle || "").trim();
+  const rawTitle = String(req.testTitle || "").trim();
+  const cleanTitle = cleanTitleText(rawTitle) || rawTitle;
+  const cleanSubject = String(req.subject || "").replace(/^Subject:\s*/i, "").trim();
+  const subParts = rawTitle.split(/\s*[\+\&·|\/]\s*/).map((s) => cleanTitleText(s)).filter((s) => s.length > 2);
   onProgress?.({
     stageId: "GROUNDING",
     stageName: "Curriculum & Syllabus Grounding",
@@ -1391,26 +1581,145 @@ async function generateExamQuestions(req, onProgress) {
     message: `Grounded in syllabus chapter: "${cleanTitle}". Pre-fetching existing questions...`,
     log: `[Stage 1/5] Initialized syllabus grounding for "${cleanTitle}".`
   });
-  const isFullLengthSyllabus = !cleanSubject || cleanSubject.toLowerCase() === "all subjects" || cleanSubject.toLowerCase() === "comprehensive full syllabus" || cleanSubject.toLowerCase().includes("all subjects balanced") || cleanSubject.toLowerCase() === "full syllabus" || /full mock|full-length|complete syllabus|official pyq paper|benchmark/i.test(cleanTitle) && (!cleanSubject || cleanSubject.toLowerCase() === "all subjects");
+  const hasSpecificChapterOrTopic = Boolean(
+    req.chapter && req.chapter.trim().length > 1 || req.subSubject && req.subSubject.trim().length > 1 || subParts.length > 1
+  );
+  const isGenericSetTitleWithoutPlaceholder = /^(?:pyq\s*set|pyq\s*paper|official\s*pyq|official\s*pyq\s*paper|solved\s*pyq|full\s*mock|full\s*mock\s*test|mock\s*test|practice\s*(?:set|test|drill)|model\s*paper|benchmark\s*test|weekly\s*(?:benchmark\s*)?test|daily\s*test|speed\s*quiz|test\s*series|paper\s*[-–—#]?\s*\d+)\b/i.test(rawTitle) || /^(?:pyq|mock|practice\s*(?:test|drill|set)?|benchmark|test)\s*#?\d+/i.test(rawTitle) || /^(?:full\s*mock\s*test|official\s*pyq\s*paper|weekly\s*benchmark\s*test|practice\s*test|practice\s*drill)\b/i.test(rawTitle);
   const parsedSections = extractSyllabusSections(req.syllabusMarkdown || "");
+  const titleMatchesSpecificSection = !isGenericSetTitleWithoutPlaceholder && parsedSections.some(
+    (s) => s.title.toLowerCase().includes(cleanTitle.toLowerCase()) || cleanTitle.toLowerCase().includes(s.title.toLowerCase())
+  );
+  const isFullLengthSyllabus = !hasSpecificChapterOrTopic && !titleMatchesSpecificSection && (cleanSubject.toLowerCase() === "all subjects" || cleanSubject.toLowerCase() === "comprehensive full syllabus" || cleanSubject.toLowerCase().includes("all subjects balanced") || cleanSubject.toLowerCase() === "full syllabus" || !cleanSubject || cleanSubject.toLowerCase() === "general studies" || cleanSubject.toLowerCase() === "general knowledge" || cleanSubject.toLowerCase() === "paper 1" || cleanSubject.toLowerCase() === "paper 2" || isGenericSetTitleWithoutPlaceholder || /full mock|full-length|complete syllabus|official pyq|pyq set|pyq paper|practice\s*(?:set|test|drill)|benchmark/i.test(rawTitle));
   let scopeDirectives = "";
   let syllabusContext = req.syllabusMarkdown ? req.syllabusMarkdown.slice(0, 2e3) : "Standard Odisha Competitive Exam syllabus.";
+  let wholeSyllabusQuotas = [];
   if (isFullLengthSyllabus) {
-    if (parsedSections.length > 1) {
-      const sectionNames = parsedSections.slice(0, 8).map((s) => `\u2022 ${s.title}`).join(", ");
-      scopeDirectives = `FULL-LENGTH MOCK: Distribute ${totalQuestions} questions proportionally across units: ${sectionNames}.`;
+    syllabusContext = req.syllabusMarkdown && req.syllabusMarkdown.trim().length > 30 ? `FULL EXAMINATION SYLLABUS BLUEPRINT:
+${req.syllabusMarkdown.slice(0, 8e3)}` : "Standard comprehensive Odisha competitive exam syllabus across all subjects.";
+    const validSections = parsedSections.filter((s) => s.title.toLowerCase() !== "general syllabus" && s.content.length > 15);
+    const sectionsToDistribute = validSections.length >= 2 ? validSections : parsedSections.length > 0 ? parsedSections : [];
+    if (sectionsToDistribute.length > 1) {
+      const activeSections = sectionsToDistribute.length <= totalQuestions ? sectionsToDistribute : sectionsToDistribute.slice(0, totalQuestions);
+      const basePerSec = Math.floor(totalQuestions / activeSections.length);
+      const remainder = totalQuestions % activeSections.length;
+      wholeSyllabusQuotas = activeSections.map((sec, idx) => ({
+        name: sec.title,
+        quota: basePerSec + (idx < remainder ? 1 : 0)
+      }));
+      scopeDirectives = `WHOLE SYLLABUS COMPREHENSIVE COVERAGE & STRICT EQUAL DISTRIBUTION:
+This test ("${cleanTitle}") does NOT target a single chapter; it covers the ENTIRE syllabus across all ${activeSections.length} constituent subjects/units:
+${wholeSyllabusQuotas.map((sq, i) => `  ${i + 1}. "${sq.name}" -> EXACTLY ${sq.quota} questions`).join("\n")}
+
+MANDATORY DISTRIBUTION RULES:
+1. STRICT EQUAL QUOTA ALLOCATION: You MUST generate questions strictly divided according to these exact counts: ${wholeSyllabusQuotas.map((sq) => `${sq.quota} for "${sq.name}"`).join(", ")}.
+2. PER-QUESTION TOPIC TAGGING: For each question, set the "topic" field in JSON to its corresponding subject/section name (e.g. "${activeSections[0].title}"), NEVER write "General Syllabus" or "${cleanTitle}".
+3. BALANCE ACROSS ENTIRE BLUEPRINT: Zero concentration bias. Cover each subject's core concepts equally.`;
     } else {
-      scopeDirectives = `FULL-LENGTH MOCK: Distribute questions evenly across core subjects and chapters.`;
+      scopeDirectives = `WHOLE SYLLABUS COMPREHENSIVE COVERAGE:
+This test ("${cleanTitle}") covers the ENTIRE examination syllabus. Distribute the ${totalQuestions} questions EQUALLY and PROPORTIONALLY across all core subjects and disciplines present in the syllabus. For each question, set the "topic" field to the specific subject or discipline it tests.`;
     }
   } else {
-    const matchedSection = parsedSections.find(
-      (s) => s.title.toLowerCase().includes(cleanTitle.toLowerCase()) || cleanTitle.toLowerCase().includes(s.title.toLowerCase()) || s.title.toLowerCase().includes(cleanSubject.toLowerCase()) || cleanSubject.toLowerCase().includes(s.title.toLowerCase())
-    );
-    if (matchedSection && matchedSection.content.length > 30) {
-      syllabusContext = `TARGET SYLLABUS (${matchedSection.title}):
-${matchedSection.content.slice(0, 1200)}`;
+    const scopedResult = extractAutonomousSyllabusScope(req.syllabusMarkdown || "", {
+      title: cleanTitle,
+      subject: cleanSubject,
+      subSubject: req.subSubject,
+      chapter: req.chapter
+    });
+    if (scopedResult.scopedMarkdown && scopedResult.scopedMarkdown.length > 20) {
+      syllabusContext = `TARGET SYLLABUS (${scopedResult.matchedSectionTitle || cleanTitle}):
+${scopedResult.scopedMarkdown.slice(0, 3500)}`;
+    } else {
+      const matchedSection = parsedSections.find(
+        (s) => s.title.toLowerCase().includes(cleanTitle.toLowerCase()) || cleanTitle.toLowerCase().includes(s.title.toLowerCase()) || s.title.toLowerCase().includes(cleanSubject.toLowerCase()) || cleanSubject.toLowerCase().includes(s.title.toLowerCase())
+      );
+      if (matchedSection && matchedSection.content.length > 30) {
+        syllabusContext = `TARGET SYLLABUS (${matchedSection.title}):
+${matchedSection.content.slice(0, 2e3)}`;
+      }
     }
-    scopeDirectives = `STRICT MODULE FOCUS: All questions MUST be strictly derived from "${cleanTitle}". Topic tag = "${cleanTitle}".`;
+    if (subParts.length > 1) {
+      const basePerPart = Math.floor(totalQuestions / subParts.length);
+      const remainder = totalQuestions % subParts.length;
+      const partQuotas = subParts.map((sp, idx) => ({
+        name: sp,
+        quota: basePerPart + (idx < remainder ? 1 : 0)
+      }));
+      scopeDirectives = `STRICT MODULE FOCUS & EQUAL SUB-TOPIC DISTRIBUTION:
+This module "${cleanTitle}" contains ${subParts.length} distinct sub-components:
+${partQuotas.map((pq, i) => `  ${i + 1}. "${pq.name}" -> EXACTLY ${pq.quota} questions`).join("\n")}
+
+MANDATORY DISTRIBUTION RULES:
+1. You MUST generate questions strictly divided according to these exact counts: ${partQuotas.map((pq) => `${pq.quota} for "${pq.name}"`).join(", ")}.
+2. For each question, set the "topic" field in JSON to its corresponding sub-topic name (e.g. "${subParts[0]}").
+3. NEVER favor one sub-topic over another. Equal coverage across all constituent parts is strictly enforced.`;
+    } else {
+      scopeDirectives = `STRICT MODULE FOCUS & EQUAL TOPIC COVERAGE:
+All ${totalQuestions} questions MUST be derived strictly from "${cleanTitle}". Topic tag = "${cleanTitle}".
+If the syllabus blueprint contains multiple sub-topics, bullet points, or concepts, you MUST distribute the ${totalQuestions} questions EQUALLY and PROPORTIONALLY across all of them. Do not cluster questions on only one concept.`;
+    }
+  }
+  const cleanStage = (req.stage || "").trim();
+  let stageDirective = "";
+  if (cleanStage && cleanStage.toLowerCase() !== "single stage" && cleanStage.toLowerCase() !== "all stages") {
+    if (/prelim/i.test(cleanStage)) {
+      stageDirective = `EXAMINATION STAGE CALIBRATION [${cleanStage.toUpperCase()}]: Screening standard. Focus on objective accuracy, high-yield factual recall, foundational concepts, and crisp multiple-choice evaluation matching the official ${cleanStage} exam pattern.`;
+    } else if (/main/i.test(cleanStage)) {
+      stageDirective = `EXAMINATION STAGE CALIBRATION [${cleanStage.toUpperCase()}]: Advanced analytical rigor. Include multi-statement evaluation questions ("Which of the statements given above is/are correct?"), assertion-reason formats, and deep conceptual application matching the official ${cleanStage} exam pattern.`;
+    } else if (/cbt\s*1/i.test(cleanStage)) {
+      stageDirective = `EXAMINATION STAGE CALIBRATION [${cleanStage.toUpperCase()}]: Computer Based Test Tier-1 screening standard covering speed, core knowledge, and accuracy.`;
+    } else if (/cbt\s*2/i.test(cleanStage)) {
+      stageDirective = `EXAMINATION STAGE CALIBRATION [${cleanStage.toUpperCase()}]: Computer Based Test Tier-2 technical/specialized standard covering in-depth syllabus mastery.`;
+    } else {
+      stageDirective = `EXAMINATION STAGE CALIBRATION [${cleanStage.toUpperCase()}]: Calibrate question complexity and format to the authentic ${cleanStage} stage standards.`;
+    }
+  }
+  const rawSubCat = (req.subCategory || "").toLowerCase().trim();
+  const titleLower = cleanTitle.toLowerCase();
+  let detectedSubCat = rawSubCat;
+  if (!detectedSubCat) {
+    if (/high yield|high-yield|exam-focused/i.test(titleLower)) {
+      detectedSubCat = "exam-focused";
+    } else if (/formula booster|last-minute|revision|speed quiz|speed-accuracy|accuracy quiz/i.test(titleLower)) {
+      detectedSubCat = "revision-sets";
+    } else if (/pyq archive|pyq|official pyq|solved pyq|10-year|previous year/i.test(titleLower)) {
+      detectedSubCat = "pyq";
+    } else if (/full mock|full-length/i.test(titleLower)) {
+      detectedSubCat = "full-length";
+    } else if (/benchmark|weekly benchmark|daily/i.test(titleLower)) {
+      detectedSubCat = "daily";
+    } else if (/topic-wise|chapter-wise|question bank|drill/i.test(titleLower)) {
+      detectedSubCat = "topic-wise";
+    }
+  }
+  let subCategoryDirective = "";
+  if (detectedSubCat === "exam-focused") {
+    subCategoryDirective = `SUBCATEGORY TARGET [EXAM-FOCUSED HIGH YIELD PRACTICE & CAPSULE]:
+- Focus strictly on high-frequency, rank-determining discriminators and recurring exam traps.
+- Target critical statutory provisions, constitutional articles, landmark judgments, pivotal exceptions, and nuanced comparisons (e.g. Article 32 vs Article 226, 42nd vs 44th Amendments).
+- Formulate realistic, highly plausible distractors reflecting common aspirant misconceptions. Every question must test a true rank-determining discriminator.`;
+  } else if (detectedSubCat === "revision-sets") {
+    subCategoryDirective = `SUBCATEGORY TARGET [DAILY SPEED QUIZZES, LAST-MINUTE REVISION & FORMULA BOOSTER]:
+- Focus on high-speed factual, formula, and quantitative recall: core operational formulas, numerical values/thresholds, quorums, statutory limits, and rapid calculations.
+- For quantitative/formula problems, state the formula clearly and provide concise step-by-step mathematical substitution in LaTeX ($...$).
+- Questions must be punchy, precise, and ideal for 10-minute speed drills and rapid-fire review before the exam.`;
+  } else if (detectedSubCat === "pyq" || detectedSubCat === "pyq-collections") {
+    subCategoryDirective = `SUBCATEGORY TARGET [TOPIC-WISE SOLVED PYQS & OFFICIAL PYQ PAPERS]:
+- Replicate the exact phrasing, stylistic tone, and cognitive standard of authentic Odisha State PSC / SSC / OSSSC previous year examination papers (e.g., "Which among the following...", "Consider the following statements...", "Under which of the following provisions...").
+- Ground questions in recurring past-paper themes, landmark statutory precedents, and official commission examination standards.
+- Provide comprehensive, authoritative explanations referencing official commissions and statutory sources.`;
+  } else if (detectedSubCat === "full-length") {
+    subCategoryDirective = `SUBCATEGORY TARGET [FULL-LENGTH COMPREHENSIVE MOCK TEST]:
+- Comprehensive, full-length official examination simulation matching commission standards (OPSC/OSSC/OSSSC).
+- Balanced difficulty across foundational, analytical, and rank-determining questions.
+- Distribute questions strictly and equally across all syllabus constituent subjects with zero topic concentration bias.`;
+  } else if (detectedSubCat === "daily") {
+    subCategoryDirective = `SUBCATEGORY TARGET [WEEKLY BENCHMARK & SPEED-ACCURACY TEST]:
+- Speed, precision, and foundational-to-moderate difficulty calibration designed for periodic performance tracking.
+- Test essential high-frequency concepts across syllabus subjects with concise, unambiguous problem statements and clean derivations.`;
+  } else if (detectedSubCat === "topic-wise") {
+    subCategoryDirective = `SUBCATEGORY TARGET [CHAPTER-WISE PRACTICE DRILLS & TOPIC-WISE QUESTION BANK (CURRICULAR DEPTH)]:
+- Comprehensive, modular coverage of the chapter from core fundamentals to standard applications.
+- Systematically evaluate conceptual foundations, procedural mechanisms, definitions in operational context, and structural provisions across the syllabus topic.`;
   }
   const reqDiff = req.difficulty || "hard";
   let diffLabel = "ADVANCED LEVEL";
@@ -1429,6 +1738,12 @@ ${matchedSection.content.slice(0, 1200)}`;
 Generate ${totalQuestions} ${diffLabel} MCQs strictly for: "${cleanTitle}".
 
 ${scopeDirectives}
+${stageDirective ? `
+${stageDirective}
+` : ""}
+${subCategoryDirective ? `
+${subCategoryDirective}
+` : ""}
 
 MANDATORY RULES:
 1. NATURAL ENGLISH, CLEAN UNITS & CLEAN MATH FORMATTING:
@@ -1452,9 +1767,13 @@ MANDATORY RULES:
    - For questions asking for a RATIO (e.g., Pearson Square method, mixing ratios), ALL 4 OPTIONS MUST BE FORMATTED AS RATIOS: e.g. "1:1", "2:1", "1:2", "3:2". NEVER output single numbers for a ratio question.
    - NEVER use placeholder names or nonsense distractors (e.g., "00", "Option 1", "Option A", "None of the above", "n/a"). All 4 options must be realistic, plausible exam choices.
    - In numerical/calculation questions, options[correctAnswerIndex] MUST contain the exact calculated numerical or ratio result derived in the explanation.
-3. STRICT SINGLE-BEST-ANSWER & MUTUAL EXCLUSIVITY: Exactly ONE option is factually true. All 3 distractors are false. No overlapping or duplicate options.
-4. Exactly 4 distinct options.
-5. Step-by-step concise explanation (2-3 sentences) strictly showing the final verified mathematical derivation.
+3. ANTI-GENERIC & HIGH-EXAM-YIELD QUALITY MANDATE:
+   - BAN TRIVIAL DICTIONARY DEFINITIONS: NEVER generate generic, superficial questions like "What is X?", "Define Y", or "What does CPU stand for?".
+   - Focus strictly on high-yield competitive exam discriminators: exact statutory articles, numerical thresholds, quorums, tenures, amendment years, operational formulas, case laws, and statutory exceptions.
+   - THE COMPETITIVE EXAM TEST: Every question must test a point that an actual competitive examiner would use on an OPSC / OSSC / State Exam paper to evaluate serious aspirants. If an average citizen off the street could guess the answer without studying, DISCARD IT IMMEDIATELY and replace with an authentic exam-level question.
+4. STRICT SINGLE-BEST-ANSWER & MUTUAL EXCLUSIVITY: Exactly ONE option is factually true. All 3 distractors are false. No overlapping or duplicate options.
+5. Exactly 4 distinct options.
+6. Step-by-step concise explanation (2-3 sentences) strictly showing the final verified mathematical derivation or factual authority.
    - NEVER include scratchpad notes, inner monologues, or trial-and-error thoughts (NEVER write "Wait, recalculating", "Let's check options", or "Wait, option comes from"). Output strictly the clean, authoritative solution.
 
 JSON OUTPUT SCHEMA:
@@ -1465,11 +1784,28 @@ JSON OUTPUT SCHEMA:
     "correctAnswerIndex": 0,
     "explanation": "Concise step-by-step rationale matching correct option",
     "difficulty": "${defaultJsonDiff}",
-    "topic": "${isFullLengthSyllabus ? "General Syllabus" : cleanTitle}",
+    "topic": "${isFullLengthSyllabus ? wholeSyllabusQuotas[0]?.name || "Constituent Subject Name" : cleanTitle}",
     "diagram": null
   }
 ]`;
-  const isParallelApplicable = totalQuestions >= 2 && !req.model?.startsWith("gemini");
+  const resolveItemTopic = (rawTopic, itemIndex) => {
+    const trimmed = String(rawTopic || "").trim();
+    if (trimmed && trimmed.toLowerCase() !== "general syllabus" && trimmed.toLowerCase() !== cleanTitle.toLowerCase()) {
+      return trimmed;
+    }
+    if (isFullLengthSyllabus && wholeSyllabusQuotas.length > 0) {
+      let runningTotal = 0;
+      for (const q of wholeSyllabusQuotas) {
+        runningTotal += q.quota;
+        if (itemIndex < runningTotal) {
+          return q.name;
+        }
+      }
+      return wholeSyllabusQuotas[0].name;
+    }
+    return isFullLengthSyllabus ? wholeSyllabusQuotas[0]?.name || "General Syllabus" : cleanTitle;
+  };
+  const isParallelApplicable = subParts.length <= 1 && totalQuestions >= 20 && !req.model?.startsWith("gemini");
   let accumulatedQuestions = [];
   if (isParallelApplicable) {
     const count1 = Math.ceil(totalQuestions / 2);
@@ -1522,7 +1858,7 @@ Output ONLY the raw JSON array of ${count2} question objects.`;
           correctAnswerIndex: correctIndex,
           explanation: String(q.explanation || q.exp || "Step-by-step verified rationale."),
           difficulty: q.difficulty === "easy" || q.difficulty === "medium" || q.difficulty === "hard" ? q.difficulty : defaultJsonDiff,
-          topic: String(q.topic || (isFullLengthSyllabus ? "General Syllabus" : cleanTitle) || cleanTitle),
+          topic: resolveItemTopic(q.topic, idx),
           diagram: q.diagram && typeof q.diagram === "object" ? q.diagram : null,
           batchNumber: req.batchNumber || 1
         };
@@ -1590,22 +1926,29 @@ Output ONLY the raw JSON array of ${count2} question objects.`;
     const userPrompt = `Generate exactly ${totalQuestions} ${diffLabel} MCQs for:
 Test Title: "${cleanTitle}" | Exam: "${req.examName || req.examId}" | Scope: "${isFullLengthSyllabus ? "Comprehensive Full Syllabus" : cleanTitle}"
 ${req.includeDiagrams ? "Include geometric/Venn diagram specs where relevant." : "Text and LaTeX math only."}
+${subParts.length > 1 ? `EQUAL ALLOCATION MANDATE: Questions MUST be strictly divided across all constituent sub-topics: ${subParts.map((sp) => `"${sp}"`).join(", ")}. Set topic: "[Sub-topic name]" in JSON for each item.
+` : ""}
+${isFullLengthSyllabus && wholeSyllabusQuotas.length > 1 ? `WHOLE SYLLABUS EQUAL ALLOCATION MANDATE: Questions MUST be strictly divided across all constituent sections: ${wholeSyllabusQuotas.map((sq) => `"${sq.name}" (${sq.quota} Qs)`).join(", ")}. Set topic: "[Section name]" in JSON for each item.
+` : ""}
 ${req.existingQuestionStems && req.existingQuestionStems.length > 0 ? `
 PREVIOUSLY GENERATED / EXISTING QUESTIONS (DO NOT DUPLICATE THESE CONCEPTS):
-${req.existingQuestionStems.slice(-25).map((s) => `- ${s.slice(0, 90)}`).join("\n")}
+${req.existingQuestionStems.slice(-60).map((s) => `- ${s.slice(0, 90)}`).join("\n")}
 ` : ""}
 SYLLABUS BLUEPRINT:
 ${syllabusContext}
 
-${req.directivesMarkdown ? `DIRECTIVES: ${req.directivesMarkdown.slice(0, 800)}` : ""}
-Keep each explanation concise (1-2 sentences).
+${subCategoryDirective ? `${subCategoryDirective}
+` : ""}${req.directivesMarkdown ? `ADMIN DIRECTIVES & CUSTOM ALLOCATION (HIGHEST PRIORITY):
+${req.directivesMarkdown.slice(0, 800)}
+Follow any custom subject distribution or quotas specified by the admin above with top priority.
+` : ""}Keep each explanation concise (1-2 sentences).
 Output ONLY the raw JSON array of ${totalQuestions} question objects.`;
     const rawJson = await queryAIModel(systemPrompt, userPrompt, {
       apiKey: req.apiKey,
       model: req.model,
       baseUrl: req.baseUrl,
       temperature: 0.25,
-      maxOutputTokens: Math.min(Math.max(totalQuestions * 600, 3200), 4096)
+      maxOutputTokens: Math.min(Math.max(totalQuestions * 450, 4096), 8192)
     });
     const parsed = extractAndParseJSON(rawJson);
     const batchItems = Array.isArray(parsed) ? parsed : parsed.questions || parsed.items || [];
@@ -1627,7 +1970,7 @@ Output ONLY the raw JSON array of ${totalQuestions} question objects.`;
         correctAnswerIndex: correctIndex,
         explanation: String(q.explanation || q.exp || "Detailed step-by-step solution."),
         difficulty: q.difficulty === "easy" || q.difficulty === "medium" || q.difficulty === "hard" ? q.difficulty : defaultJsonDiff,
-        topic: String(q.topic || (isFullLengthSyllabus ? "General Syllabus" : cleanTitle) || cleanTitle),
+        topic: resolveItemTopic(q.topic, idx),
         diagram: q.diagram && typeof q.diagram === "object" ? q.diagram : null,
         batchNumber: req.batchNumber || 1
       };
@@ -1662,7 +2005,7 @@ Output ONLY the raw JSON array of ${totalQuestions} question objects.`;
           correctAnswerIndex: typeof q.correctAnswerIndex === "number" && q.correctAnswerIndex >= 0 && q.correctAnswerIndex <= 3 ? q.correctAnswerIndex : 0,
           explanation: String(q.explanation || q.exp || "Step-by-step verified rationale."),
           difficulty: q.difficulty === "easy" || q.difficulty === "medium" || q.difficulty === "hard" ? q.difficulty : defaultJsonDiff,
-          topic: String(q.topic || (isFullLengthSyllabus ? "General Syllabus" : cleanTitle) || cleanTitle),
+          topic: resolveItemTopic(q.topic, idx),
           diagram: null
         });
       });
@@ -1670,55 +2013,62 @@ Output ONLY the raw JSON array of ${totalQuestions} question objects.`;
       console.warn("Fail-safe recovery pass notice:", recErr);
     }
   }
-  if (accumulatedQuestions.length < totalQuestions) {
-    const missingCount = totalQuestions - accumulatedQuestions.length;
+  onProgress?.({
+    stageId: "CODE_GUARDS",
+    stageName: "Deterministic Guardrails & Semantic Deduplication",
+    stageIndex: 3,
+    totalStages: 5,
+    currentCount: accumulatedQuestions.length,
+    totalCount: totalQuestions,
+    percent: 70,
+    message: "Validating distinct stems, 4 distinct options, and LaTeX math syntax...",
+    log: "[Stage 3/5] Deterministic guardrails & semantic deduplication running."
+  });
+  const deduplicatedQuestions = [];
+  const finalStemsTracker = [...req.existingQuestionStems || []];
+  for (const q of accumulatedQuestions) {
+    if (!isDuplicateQuestion(q.questionText, finalStemsTracker, 0.65)) {
+      deduplicatedQuestions.push(q);
+      finalStemsTracker.push(q.questionText);
+    }
+  }
+  if (deduplicatedQuestions.length < totalQuestions) {
+    const missingCount = totalQuestions - deduplicatedQuestions.length;
     try {
-      const topUpUserPrompt = `Generate the final remaining ${missingCount} ${req.difficulty === "easy" ? "SIMPLE" : req.difficulty === "medium" ? "MODERATE" : "ADVANCED"} questions for "${cleanTitle}".
-Ensure distinct questions from previously generated ones: ${accumulatedQuestions.map((q) => q.questionText.slice(0, 30)).join(" | ")}.
+      const topUpUserPrompt = `Generate exactly ${missingCount} distinct ${req.difficulty === "easy" ? "SIMPLE" : req.difficulty === "medium" ? "MODERATE" : "ADVANCED"} questions for "${cleanTitle}".
+CRITICAL REQUIREMENT: Do NOT repeat or duplicate any of the following existing questions:
+${finalStemsTracker.slice(-25).map((s, idx) => `${idx + 1}. ${s.slice(0, 80)}`).join("\n")}
+
 Output ONLY the raw JSON array of ${missingCount} question objects.`;
       const topUpRaw = await queryAIModel(
-        `You are a Senior Question Paper Setter. Generate exactly ${missingCount} questions in JSON format matching the exact schema.`,
+        systemPrompt,
         topUpUserPrompt,
         { apiKey: req.apiKey, model: req.model, baseUrl: req.baseUrl, temperature: 0.35, maxOutputTokens: Math.max(missingCount * 600, 2e3) }
       );
       const topUpParsed = extractAndParseJSON(topUpRaw);
       const topUpItems = Array.isArray(topUpParsed) ? topUpParsed : topUpParsed.questions || topUpParsed.items || [];
       if (Array.isArray(topUpItems)) {
-        const topUpValidated = topUpItems.map((q) => {
+        for (const q of topUpItems) {
+          if (deduplicatedQuestions.length >= totalQuestions)
+            break;
           const rawItem = {
             questionText: cleanMathAndProseText(String(q.questionText || q.q || q.question || "Top-Up Question")),
             options: Array.isArray(q.options) && q.options.length >= 4 ? q.options.slice(0, 4).map(cleanOptionText) : ["Option A", "Option B", "Option C", "Option D"],
             correctAnswerIndex: typeof q.correctAnswerIndex === "number" && q.correctAnswerIndex >= 0 && q.correctAnswerIndex <= 3 ? q.correctAnswerIndex : 0,
             explanation: cleanMathAndProseText(String(q.explanation || q.exp || "Detailed step-by-step solution.")),
             difficulty: req.difficulty === "easy" ? "easy" : req.difficulty === "medium" ? "medium" : "hard",
-            topic: isFullLengthSyllabus ? "General Syllabus" : cleanTitle,
+            topic: resolveItemTopic(q.topic, deduplicatedQuestions.length),
             diagram: q.diagram && typeof q.diagram === "object" ? q.diagram : null
           };
-          return enforceDeterministicGuards(rawItem);
-        });
-        accumulatedQuestions = [...accumulatedQuestions, ...topUpValidated];
+          const validatedItem = enforceDeterministicGuards(rawItem);
+          if (!isDuplicateQuestion(validatedItem.questionText, finalStemsTracker, 0.65)) {
+            deduplicatedQuestions.push(validatedItem);
+            finalStemsTracker.push(validatedItem.questionText);
+          }
+        }
       }
     } catch (e) {
-      console.warn("Top-up question generation pass skipped:", e);
-    }
-  }
-  onProgress?.({
-    stageId: "CODE_GUARDS",
-    stageName: "Deterministic Guardrails & Math Sanitizer",
-    stageIndex: 3,
-    totalStages: 5,
-    currentCount: accumulatedQuestions.length,
-    totalCount: totalQuestions,
-    percent: 70,
-    message: "Validating 4 distinct options, LaTeX math syntax, and single-best-answer exclusivity...",
-    log: "[Stage 3/5] Deterministic guardrails validated: LaTeX math syntax and single-best answer assertions."
-  });
-  const deduplicatedQuestions = [];
-  const finalStemsTracker = [...req.existingQuestionStems || []];
-  for (const q of accumulatedQuestions) {
-    if (!isDuplicateQuestion(q.questionText, finalStemsTracker, 0.88)) {
-      deduplicatedQuestions.push(q);
-      finalStemsTracker.push(q.questionText);
+      console.warn("Top-up question generation pass notice:", e);
     }
   }
   let finalRawBatch = deduplicatedQuestions.length >= totalQuestions ? deduplicatedQuestions.slice(0, totalQuestions) : deduplicatedQuestions.length > 0 ? deduplicatedQuestions : accumulatedQuestions.slice(0, totalQuestions);
@@ -1779,33 +2129,46 @@ Output ONLY the raw JSON array of ${missingCount} question objects.`;
   });
   return balancedQuestions;
 }
-function calculateJaccardSimilarity(strA, strB) {
-  if (!strA || !strB)
-    return 0;
-  const tokenize = (text) => {
-    return new Set(
-      text.toLowerCase().replace(/[^\w\s]/g, " ").split(/\s+/).filter((w) => w.length > 2 && !["the", "and", "for", "with", "which", "what", "following", "statement", "correct", "option", "select", "given", "below", "calculate", "determine", "primary", "type", "types", "regarding", "true", "false", "exam", "paper", "from", "into", "under", "over", "between", "during", "among", "terms", "using", "used", "does", "have", "been"].includes(w))
-    );
-  };
-  const setA = tokenize(strA);
-  const setB = tokenize(strB);
-  if (setA.size === 0 || setB.size === 0)
-    return 0;
-  let intersectionSize = 0;
-  for (const word of setA) {
-    if (setB.has(word)) {
-      intersectionSize++;
-    }
-  }
-  const unionSize = setA.size + setB.size - intersectionSize;
-  return unionSize > 0 ? intersectionSize / unionSize : 0;
-}
-function isDuplicateQuestion(candidateText, existingTexts, threshold = 0.88) {
+function isDuplicateQuestion(candidateText, existingTexts, threshold = 0.65) {
   if (!candidateText || !existingTexts || existingTexts.length === 0)
     return false;
+  const normalize = (t) => t.trim().toLowerCase().replace(/[^\w\s]/g, " ").replace(/\s+/g, " ");
+  const cleanCand = normalize(candidateText);
+  if (!cleanCand)
+    return false;
+  const tokenize = (text) => {
+    return new Set(
+      text.toLowerCase().replace(/[^\w\s]/g, " ").split(/\s+/).filter((w) => w.length > 2 && !["the", "and", "for", "with", "which", "what", "following", "statement", "correct", "option", "select", "given", "below", "calculate", "determine", "primary", "type", "types", "regarding", "true", "false", "exam", "paper", "from", "into", "under", "over", "between", "during", "among", "terms", "using", "used", "does", "have", "been", "state", "how", "when", "why"].includes(w))
+    );
+  };
+  const candTokens = tokenize(candidateText);
   for (const existing of existingTexts) {
-    if (calculateJaccardSimilarity(candidateText, existing) >= threshold) {
+    if (!existing)
+      continue;
+    const cleanExist = normalize(existing);
+    if (!cleanExist)
+      continue;
+    if (cleanCand === cleanExist)
       return true;
+    if (cleanCand.length > 25 && cleanExist.length > 25) {
+      if (cleanCand.includes(cleanExist) || cleanExist.includes(cleanCand))
+        return true;
+    }
+    const existTokens = tokenize(existing);
+    if (candTokens.size > 0 && existTokens.size > 0) {
+      let intersectionSize = 0;
+      for (const w of candTokens) {
+        if (existTokens.has(w))
+          intersectionSize++;
+      }
+      const unionSize = candTokens.size + existTokens.size - intersectionSize;
+      const jaccard = unionSize > 0 ? intersectionSize / unionSize : 0;
+      if (jaccard >= threshold)
+        return true;
+      const minTokens = Math.min(candTokens.size, existTokens.size);
+      if (minTokens >= 4 && intersectionSize / minTokens >= 0.75) {
+        return true;
+      }
     }
   }
   return false;
@@ -2230,6 +2593,219 @@ Return ONLY the refined JSON array of ${req.titles.length} strings.`;
     return refined;
   }
   return req.titles.map((orig, i) => refined[i] || orig);
+}
+async function generateFlashcardsContent(req) {
+  const isNaturalDensity = req.naturalDensity ?? (req.cardCount === 0 || !req.cardCount);
+  const stage = (req.stage || "Prelims").trim();
+  const scopeResult = extractAutonomousSyllabusScope(req.syllabusMarkdown || "", {
+    title: req.deckTitle,
+    subject: req.subject,
+    subSubject: req.subSubject,
+    chapter: req.chapter
+  });
+  const scopedContent = scopeResult.scopedMarkdown;
+  const targetScopeTitle = scopeResult.matchedSectionTitle || req.deckTitle;
+  const scopedLines = (scopedContent || "").split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const bulletLines = scopedLines.filter((l) => /^[-*•]\s+/.test(l) || /^\d+[\.\)]\s+/.test(l));
+  let conceptPointCount = 0;
+  for (const line of bulletLines.length > 0 ? bulletLines : scopedLines) {
+    const cleanedLine = line.replace(/^[-*•\d\.\)]+\s*/, "");
+    const segments = cleanedLine.split(/;\s+/).filter((s) => s.trim().length > 5);
+    conceptPointCount += Math.max(1, segments.length);
+  }
+  const estimatedNaturalCapacity = Math.max(6, Math.min(conceptPointCount, 22));
+  let cardCount;
+  if (isNaturalDensity) {
+    if (req.cardCount && req.cardCount > 0) {
+      cardCount = Math.max(5, Math.min(estimatedNaturalCapacity, req.cardCount));
+    } else {
+      cardCount = estimatedNaturalCapacity;
+    }
+  } else {
+    cardCount = Math.min(Math.max(req.cardCount || 10, 3), 50);
+  }
+  const cleanTitle = cleanTitleText(req.deckTitle || "");
+  const subParts = cleanTitle.split(/\s*[\+\&·|\/]\s*/).map((p) => cleanTitleText(p.trim())).filter((p) => p.length > 2);
+  const isMultiTopicTitle = subParts.length > 1;
+  let subTopicQuotas = [];
+  if (isMultiTopicTitle) {
+    const baseQuota = Math.floor(cardCount / subParts.length);
+    let remainder = cardCount % subParts.length;
+    subTopicQuotas = subParts.map((sp) => {
+      const q = baseQuota + (remainder > 0 ? 1 : 0);
+      if (remainder > 0)
+        remainder--;
+      return { topic: sp, quota: q };
+    });
+  }
+  const systemPrompt = `You are a Senior Cognitive Retention Architect and High-Yield Flashcard Specialist for competitive examinations (${req.examName || "Odisha State Civil / Police / Judicial / SSC Examinations"}).
+
+CORE PHILOSOPHY & OBJECTIVE:
+Flashcards are NOT textbook summaries, test questions, or general reading comprehension exercises.
+Their sole purpose is ACTIVE RECALL of high-yield, easily forgotten, frequently tested memory pain points that aspirants fail to retain under exam pressure.
+You must critically analyze the designated syllabus scope, extract only the high-value factual anchors, and convert them into atomic trigger-answer pairs.
+
+5 COGNITIVE MEMORIZATION ARCHETYPES TO TARGET:
+1. [STATUTORY]: Exact Constitutional Articles, Amendments, Statutory Sections, Schedules, Writs, and Parts (e.g., Article 21A, Section 144 CrPC, 44th Amendment Act, 7th Schedule List II).
+2. [THRESHOLD]: Numerical quotas, majorities (simple, special, absolute, effective), quorums, tenures, retirement ages, statutory notice periods, minimum capital, monetary penalties, or economic ratios.
+3. [CHRONOLOGY]: Landmark judicial precedents/case laws, historical enactment years, INC session years and venues, treaty dates, founding dates, and commission setup years.
+4. [EXCEPTION]: Specific exceptions to general rules, non-obstante clauses, constitutional provisos, and scientific/tax exemptions.
+5. [CONFUSING_PAIR]: Frequently conflated institutions or principles (e.g., Constitutional vs Statutory vs Executive bodies; Original vs Appellate vs Advisory jurisdiction).
+6. [CONCEPT]: High-yield specific operational formulas, vectors, or core technical mechanisms.
+
+ANTI-GENERIC & HIGH-EXAM-YIELD QUALITY MANDATE:
+1. BAN TRIVIAL DICTIONARY DEFINITIONS:
+   - NEVER generate generic questions like "What is X?", "Define Y", or "What does CPU stand for?".
+   - Focus strictly on high-yield exam discriminators: exact numbers, statutory majorities, amendment years, constitutional articles, penalty thresholds, and operational exceptions.
+2. THE COMPETITIVE EXAM TEST:
+   - Every card must test a point that an actual competitive examiner would use on an OPSC / OSSC / Civil Services paper to test rigorous recall.
+   - If an average citizen off the street could answer it without studying, DISCARD IT IMMEDIATELY and replace it with a high-yield factual anchor.
+3. THE ATOMIC RETRIEVAL TEST:
+   - FRONT prompt must test a single, definite, unambiguous fact (5 to 15 words max).
+   - BACK answer must be direct, ultra-crisp, and definitive (1 to 15 words max). Absolutely NO essay paragraphs or conversational padding.
+
+4 HARD NEGATIVE FILTERS (FLUFF & HALLUCINATION DEFENSE):
+1. THE ELEMENTARY TEST: Disqualify any trivial common sense knowledge.
+2. THE ATOMIC RETRIEVAL TEST: Strictly single definite fact retrieval.
+3. STRICT SYLLABUS SCOPE LOCK: Generate cards SOLELY from the facts directly anchored in the Scoped Syllabus Content below. Zero leakage from outside topics.
+4. ZERO FILLER: Never invent redundant or watered-down cards just to pad card volume.
+
+EQUAL CONTENT DISTRIBUTION MANDATE:
+- When the section contains multiple sub-topics or distinct concepts, you MUST generate flashcards distributed equally across ALL sub-topics/concepts.
+- Do NOT cluster flashcards on only one sub-topic while neglecting others.
+- Ensure uniform representation of all distinct sections, chapters, or bullet points in the syllabus.
+
+${isNaturalDensity ? `NATURAL DENSITY SIZING DIRECTIVE:
+Read the Scoped Syllabus Content carefully. You must autonomously decide the EXACT number of flashcards to output based exclusively on the authentic factual richness of this slice.
+- Count all distinct statutory articles, numerical values, majorities, landmark dates, operational formulas, and exceptions.
+- Extract an active recall card for EVERY real factual anchor present (natural capacity estimated at ~${cardCount} cards${req.cardCount && req.cardCount > 0 ? `, maximum ceiling: ${req.cardCount} cards` : ""}).
+- If this section is compact and only contains 6-9 genuine memory pain points, output EXACTLY those 6-9 high-yield cards. Do NOT invent generic filler!
+- If this section is dense and has 15-22 facts, exhaustively capture them all up to the ceiling.` : `TARGET CARD COUNT:
+Generate exactly ${cardCount} high-yield flashcards prioritized strictly by exam retention difficulty. Ensure complete coverage without duplicates.`}
+
+OUTPUT FORMAT:
+Output strictly a valid JSON array of objects conforming to this schema with no markdown code blocks or wrapper text:
+[
+  {
+    "front_text": "Concise recall trigger question (< 15 words)",
+    "back_text": "Direct crisp answer (< 15 words)",
+    "archetype": "STATUTORY" | "THRESHOLD" | "CHRONOLOGY" | "EXCEPTION" | "CONFUSING_PAIR" | "CONCEPT"
+  }
+]`;
+  const userPrompt = `DECK TITLE: "${req.deckTitle}"
+TARGET ACADEMIC SCOPE: "${targetScopeTitle}" (${scopeResult.hierarchyLevel.toUpperCase()} LEVEL)
+SUBJECT: "${req.subject || "General Studies"}"
+${req.subSubject ? `SUB-SUBJECT: "${req.subSubject}"` : ""}
+${req.chapter ? `CHAPTER / TOPIC: "${req.chapter}"` : ""}
+EXAM: "${req.examName || "Odisha State Examination"}"
+TARGET STAGE: "${stage}"
+TARGET VOLUME: ${isNaturalDensity ? `Autonomous Natural Density (~${cardCount} cards natural capacity${req.cardCount && req.cardCount > 0 ? `, upper ceiling: ${req.cardCount} cards` : ""})` : `Fixed Target (${cardCount} cards)`}
+MODE: ${isNaturalDensity ? `NATURAL DENSITY (Autonomous factual extraction \u2014 output only authentic exam pain points)` : `FIXED TARGET (${cardCount} cards)`}
+
+${isMultiTopicTitle ? `CRITICAL MANDATE \u2014 EQUAL SUB-TOPIC CARD DISTRIBUTION:
+The designated section contains ${subParts.length} distinct sub-topics. You MUST generate cards strictly distributed equally according to these exact quotas:
+${subTopicQuotas.map((sq) => `\u2022 "${sq.topic}": EXACTLY ${sq.quota} cards`).join("\n")}
+Do NOT generate cards solely from one sub-topic while neglecting others.` : `CRITICAL MANDATE \u2014 UNIFORM SYLLABUS CONTENT DISTRIBUTION:
+Distribute the cards proportionally and equally across ALL distinct concepts, sub-headings, and bullet points present in the Scoped Syllabus Content below. Do NOT cluster multiple flashcards around the first sentence or single concept while ignoring other key points in this section.`}
+
+${req.alreadyGeneratedStems && req.alreadyGeneratedStems.length > 0 ? `CRITICAL REQUIREMENT \u2014 ZERO DUPLICATION OF EXISTING FLASHCARDS:
+Do NOT generate cards that repeat or duplicate the facts/questions in these existing cards:
+${req.alreadyGeneratedStems.slice(-30).map((s, idx) => `${idx + 1}. ${s.slice(0, 80)}`).join("\n")}` : ""}
+
+---
+=== TARGET SYLLABUS SECTION ONLY ===
+${scopedContent || "Standard syllabus concepts for " + targetScopeTitle}
+===================================
+---
+
+CRITICAL INSTRUCTION:
+Apply the 5 Cognitive Archetypes, 4 Hard Negative Filters, and the Equal Content Distribution Mandate.
+Extract only the authentic high-retention pain points from the syllabus section above.
+Output ONLY the raw JSON array.`;
+  const rawJson = await queryAIModel(systemPrompt, userPrompt, {
+    apiKey: req.apiKey,
+    model: req.model,
+    baseUrl: req.baseUrl,
+    temperature: 0.25,
+    maxOutputTokens: Math.max(cardCount * 150, 2048)
+  });
+  const parsed = extractAndParseJSON(rawJson);
+  const items = Array.isArray(parsed) ? parsed : parsed.cards || parsed.flashcards || parsed.items || [];
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new Error("AI returned an invalid flashcard format. Please retry generation.");
+  }
+  const validArchetypes = /* @__PURE__ */ new Set(["STATUTORY", "THRESHOLD", "CHRONOLOGY", "EXCEPTION", "CONFUSING_PAIR", "CONCEPT"]);
+  const deduplicatedCards = [];
+  const existingFronts = [...req.alreadyGeneratedStems || []];
+  const existingBacks = [];
+  for (const card of items) {
+    const frontText = String(card.front_text || card.front || card.question || "").trim();
+    const backText = String(card.back_text || card.back || card.answer || "").trim();
+    if (!frontText || !backText)
+      continue;
+    const isFrontDuplicate = isDuplicateQuestion(frontText, existingFronts, 0.6);
+    const isBackDuplicate = backText.length > 4 && isDuplicateQuestion(backText, existingBacks, 0.65);
+    if (!isFrontDuplicate && !isBackDuplicate) {
+      const rawArch = String(card.archetype || "").toUpperCase().trim();
+      const resolvedArch = validArchetypes.has(rawArch) ? rawArch : "CONCEPT";
+      deduplicatedCards.push({
+        front_text: frontText,
+        back_text: backText,
+        archetype: resolvedArch,
+        key_points: Array.isArray(card.key_points) ? card.key_points : []
+      });
+      existingFronts.push(frontText);
+      existingBacks.push(backText);
+    }
+  }
+  const shouldTopUp = isNaturalDensity ? false : deduplicatedCards.length < cardCount;
+  if (shouldTopUp) {
+    const missingCount = cardCount - deduplicatedCards.length;
+    try {
+      const topUpPrompt = `Generate exactly ${missingCount} distinct ACTIVE RECALL flashcards for "${cleanTitle}".
+CRITICAL REQUIREMENT: Do NOT repeat any of the following existing flashcard triggers:
+${existingFronts.slice(-25).map((s, idx) => `${idx + 1}. ${s.slice(0, 80)}`).join("\n")}
+
+Output strictly a valid JSON array of ${missingCount} flashcard objects matching the schema:
+[ { "front_text": "...", "back_text": "...", "archetype": "CONCEPT" } ]`;
+      const topUpRaw = await queryAIModel(systemPrompt, topUpPrompt, {
+        apiKey: req.apiKey,
+        model: req.model,
+        baseUrl: req.baseUrl,
+        temperature: 0.35,
+        maxOutputTokens: Math.max(missingCount * 150, 1500)
+      });
+      const topUpParsed = extractAndParseJSON(topUpRaw);
+      const topUpItems = Array.isArray(topUpParsed) ? topUpParsed : topUpParsed.cards || topUpParsed.flashcards || topUpParsed.items || [];
+      if (Array.isArray(topUpItems)) {
+        for (const card of topUpItems) {
+          if (deduplicatedCards.length >= cardCount)
+            break;
+          const frontText = String(card.front_text || card.front || card.question || "").trim();
+          const backText = String(card.back_text || card.back || card.answer || "").trim();
+          if (!frontText || !backText)
+            continue;
+          const isFrontDup = isDuplicateQuestion(frontText, existingFronts, 0.6);
+          const isBackDup = backText.length > 4 && isDuplicateQuestion(backText, existingBacks, 0.65);
+          if (!isFrontDup && !isBackDup) {
+            const rawArch = String(card.archetype || "").toUpperCase().trim();
+            const resolvedArch = validArchetypes.has(rawArch) ? rawArch : "CONCEPT";
+            deduplicatedCards.push({
+              front_text: frontText,
+              back_text: backText,
+              archetype: resolvedArch,
+              key_points: Array.isArray(card.key_points) ? card.key_points : []
+            });
+            existingFronts.push(frontText);
+            existingBacks.push(backText);
+          }
+        }
+      }
+    } catch (topUpErr) {
+      console.warn("Flashcard top-up pass notice:", topUpErr);
+    }
+  }
+  return deduplicatedCards.slice(0, cardCount);
 }
 
 // server.ts
@@ -3310,6 +3886,9 @@ async function startServer() {
         if (q.diagram && hasDiagramCol) {
           payload.diagram = q.diagram;
         }
+        if (typeof q.sortOrder === "number") {
+          payload.sortOrder = q.sortOrder;
+        }
         return payload;
       });
       const { data, error } = await supabaseAdmin.from("questions").insert(payloads).select();
@@ -3318,12 +3897,30 @@ async function startServer() {
       try {
         const topicsUpdated = /* @__PURE__ */ new Set();
         for (const q of payloads) {
-          if (q.topic && q.examId && !topicsUpdated.has(`${q.examId}:::${q.topic}`)) {
-            topicsUpdated.add(`${q.examId}:::${q.topic}`);
-            const { count: totalQuestionsForTopic } = await supabaseAdmin.from("questions").select("id", { count: "exact", head: true }).eq("examId", q.examId).eq("topic", q.topic);
-            if (typeof totalQuestionsForTopic === "number") {
-              await supabaseAdmin.from("questionBanks").update({ questionCount: totalQuestionsForTopic }).eq("examId", q.examId).eq("title", q.topic);
-              await supabaseAdmin.from("questionBanks").update({ questionCount: totalQuestionsForTopic }).eq("id", q.topic);
+          if (q.topic && !topicsUpdated.has(`${q.examId || "any"}:::${q.topic}`)) {
+            topicsUpdated.add(`${q.examId || "any"}:::${q.topic}`);
+            let countQuery = supabaseAdmin.from("questions").select("id", { count: "exact", head: true }).eq("topic", q.topic);
+            if (q.examId) {
+              countQuery = countQuery.eq("examId", q.examId);
+            }
+            const { count: totalQuestionsForTopic } = await countQuery;
+            if (typeof totalQuestionsForTopic === "number" && totalQuestionsForTopic > 0) {
+              const cleanTopic = q.topic.replace(/(\s*-\s*Practice Session)+$/gi, "").trim();
+              const candidateTitles = Array.from(/* @__PURE__ */ new Set([q.topic, cleanTopic, `${cleanTopic} - Practice Session`]));
+              for (const titleCandidate of candidateTitles) {
+                let updateQuery = supabaseAdmin.from("questionBanks").update({
+                  questionCount: totalQuestionsForTopic,
+                  hasPracticeMode: true
+                }).eq("title", titleCandidate);
+                if (q.examId) {
+                  updateQuery = updateQuery.eq("examId", q.examId);
+                }
+                await updateQuery;
+              }
+              await supabaseAdmin.from("questionBanks").update({
+                questionCount: totalQuestionsForTopic,
+                hasPracticeMode: true
+              }).eq("id", q.topic);
             }
           }
         }
@@ -3358,6 +3955,7 @@ async function startServer() {
       const {
         examId,
         examName,
+        stage,
         targetType,
         mainSection,
         subCategory,
@@ -3381,6 +3979,7 @@ async function startServer() {
       const structures = await generateExamStructure({
         examId,
         examName: examName || examId,
+        stage: stage || void 0,
         targetType: targetType || "mock_test",
         mainSection,
         subCategory,
@@ -3427,13 +4026,85 @@ async function startServer() {
       res.status(500).json({ error: err.message || "Failed to refine test titles with AI" });
     }
   });
+  app.post("/api/admin/ai/generate-flashcards", requireAdmin, async (req, res) => {
+    try {
+      const {
+        examId,
+        examName,
+        stage,
+        deckTitle,
+        subject,
+        subSubject,
+        chapter,
+        syllabusMarkdown,
+        directivesMarkdown,
+        cardCount,
+        naturalDensity,
+        apiKey,
+        model,
+        baseUrl
+      } = req.body;
+      if (!deckTitle || !deckTitle.trim()) {
+        return res.status(400).json({ error: "deckTitle is required" });
+      }
+      let existingCardStems = [];
+      try {
+        const safeTitle = (deckTitle || "").replace(/[^a-zA-Z0-9 ]/g, " ").trim();
+        if (safeTitle) {
+          let deckQuery = supabaseAdmin.from("flashcard_decks").select("id").ilike("title", `%${safeTitle}%`).limit(5);
+          if (examId && examId !== "general") {
+            deckQuery = deckQuery.eq("exam_id", examId);
+          }
+          const { data: matchingDecks } = await deckQuery;
+          if (Array.isArray(matchingDecks) && matchingDecks.length > 0) {
+            const deckIds = matchingDecks.map((d) => d.id);
+            const { data: existingCards } = await supabaseAdmin.from("flashcards").select("front_text").in("deck_id", deckIds).limit(200);
+            if (Array.isArray(existingCards)) {
+              existingCardStems = existingCards.map((c) => c.front_text).filter(Boolean);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("[server.ts] Error pre-fetching flashcards stems:", e);
+      }
+      const cards = await generateFlashcardsContent({
+        examId: examId || "general",
+        examName,
+        stage: stage || void 0,
+        deckTitle: deckTitle.trim(),
+        subject,
+        subSubject,
+        chapter,
+        syllabusMarkdown,
+        directivesMarkdown,
+        cardCount: cardCount !== void 0 ? Number(cardCount) : 0,
+        naturalDensity: naturalDensity === void 0 ? false : Boolean(naturalDensity),
+        apiKey,
+        model,
+        baseUrl,
+        alreadyGeneratedStems: [
+          ...existingCardStems,
+          ...Array.isArray(req.body.alreadyGeneratedStems) ? req.body.alreadyGeneratedStems : []
+        ],
+        batchNumber: req.body.batchNumber ? Number(req.body.batchNumber) : void 0
+      });
+      res.json({ success: true, count: cards.length, data: cards });
+    } catch (err) {
+      console.error("[Admin AI Flashcards Generation Error]", err);
+      res.status(500).json({ error: err.message || "Failed to generate flashcards with AI" });
+    }
+  });
   app.post("/api/admin/ai/generate-questions", requireAdmin, async (req, res) => {
     try {
       const {
         examId,
         examName,
+        stage,
         testTitle,
         subject,
+        subSubject,
+        chapter,
+        subCategory,
         syllabusMarkdown,
         directivesMarkdown,
         difficulty,
@@ -3449,20 +4120,38 @@ async function startServer() {
       }
       let existingStems = [];
       try {
-        const safeTopic = (testTitle || "").replace(/[^a-zA-Z0-9 ]/g, " ").trim();
-        if (safeTopic) {
-          const { data: existingQ } = await supabaseAdmin.from("questions").select("question").ilike("topic", `%${safeTopic}%`).limit(100);
-          if (Array.isArray(existingQ)) {
-            existingStems = existingQ.map((q) => q.question).filter(Boolean);
+        const testId = req.body.testId || req.body.mockTestId;
+        let query = supabaseAdmin.from("questions").select("questionText").limit(300);
+        if (testTitle && String(testTitle).startsWith("mockTest__")) {
+          query = query.eq("topic", testTitle);
+        } else if (testId) {
+          const safeTopic = (testTitle || "").replace(/['"%]/g, "").trim();
+          query = query.or(`topic.eq.mockTest__${testId},topic.ilike.%${safeTopic}%`);
+        } else {
+          const safeTopic = (testTitle || "").replace(/['"%]/g, "").trim();
+          if (safeTopic) {
+            query = query.ilike("topic", `%${safeTopic}%`);
           }
         }
+        if (examId && examId !== "generic") {
+          query = query.eq("examId", examId);
+        }
+        const { data: existingQ } = await query;
+        if (Array.isArray(existingQ)) {
+          existingStems = existingQ.map((q) => q.questionText).filter(Boolean);
+        }
       } catch (e) {
+        console.warn("[server.ts] Error pre-fetching existing stems:", e);
       }
       const questions = await generateExamQuestions({
         examId: examId || "generic",
         examName,
+        stage: stage || void 0,
         testTitle,
         subject,
+        subSubject,
+        chapter,
+        subCategory,
         syllabusMarkdown,
         directivesMarkdown,
         difficulty: difficulty || "hard",
@@ -3504,8 +4193,12 @@ data: ${JSON.stringify(payload)}
       const {
         examId,
         examName,
+        stage,
         testTitle,
         subject,
+        subSubject,
+        chapter,
+        subCategory,
         syllabusMarkdown,
         directivesMarkdown,
         difficulty,
@@ -3522,21 +4215,39 @@ data: ${JSON.stringify(payload)}
       }
       let existingStems = [];
       try {
-        const safeTopic = (testTitle || "").replace(/[^a-zA-Z0-9 ]/g, " ").trim();
-        if (safeTopic) {
-          const { data: existingQ } = await supabaseAdmin.from("questions").select("question").ilike("topic", `%${safeTopic}%`).limit(100);
-          if (Array.isArray(existingQ)) {
-            existingStems = existingQ.map((q) => q.question).filter(Boolean);
+        const testId = req.body.testId || req.body.mockTestId;
+        let query = supabaseAdmin.from("questions").select("questionText").limit(300);
+        if (testTitle && String(testTitle).startsWith("mockTest__")) {
+          query = query.eq("topic", testTitle);
+        } else if (testId) {
+          const safeTopic = (testTitle || "").replace(/['"%]/g, "").trim();
+          query = query.or(`topic.eq.mockTest__${testId},topic.ilike.%${safeTopic}%`);
+        } else {
+          const safeTopic = (testTitle || "").replace(/['"%]/g, "").trim();
+          if (safeTopic) {
+            query = query.ilike("topic", `%${safeTopic}%`);
           }
         }
+        if (examId && examId !== "generic") {
+          query = query.eq("examId", examId);
+        }
+        const { data: existingQ } = await query;
+        if (Array.isArray(existingQ)) {
+          existingStems = existingQ.map((q) => q.questionText).filter(Boolean);
+        }
       } catch (e) {
+        console.warn("[server.ts] Error pre-fetching existing stems for stream:", e);
       }
       const questions = await generateExamQuestions(
         {
           examId: examId || "generic",
           examName,
+          stage: stage || void 0,
           testTitle,
           subject,
+          subSubject,
+          chapter,
+          subCategory,
           syllabusMarkdown,
           directivesMarkdown,
           difficulty: difficulty || "hard",
@@ -3717,11 +4428,32 @@ data: ${JSON.stringify(payload)}
       res.status(500).json({ error: err.message || "Failed to fetch paginated questions" });
     }
   });
+  app.get("/api/exams/:examId/syllabus", async (req, res) => {
+    try {
+      const { examId } = req.params;
+      const stage = (req.query.stage || "").trim();
+      let query = supabaseAdmin.from("exam_syllabi").select("*").eq("exam_id", examId);
+      if (stage) {
+        query = query.ilike("stage", stage);
+      }
+      const { data, error } = await query;
+      if (error)
+        throw error;
+      if (stage && (!data || data.length === 0)) {
+        const { data: fallbackData } = await supabaseAdmin.from("exam_syllabi").select("*").eq("exam_id", examId).in("stage", ["All Stages", "Single Stage", "General"]);
+        return res.json({ success: true, data: fallbackData || [] });
+      }
+      res.json({ success: true, data: data || [] });
+    } catch (err) {
+      console.error("[Get Exam Syllabus Error]", err);
+      res.status(500).json({ error: err.message || "Failed to fetch exam syllabus" });
+    }
+  });
   app.post("/api/admin/db/:table", requireAdmin, async (req, res) => {
     try {
       const { table } = req.params;
-      const { action, payload, id, filters } = req.body;
-      const allowedTables = ["exams", "testSeries", "mockTests", "questions", "questionBanks", "users"];
+      const { action, payload, id, filters, onConflict } = req.body;
+      const allowedTables = ["exams", "testSeries", "mockTests", "questions", "questionBanks", "users", "flashcard_decks", "flashcards", "exam_syllabi"];
       if (!allowedTables.includes(table)) {
         return res.status(400).json({ error: `Table ${table} is not allowed` });
       }
@@ -3746,6 +4478,14 @@ data: ${JSON.stringify(payload)}
       let result;
       if (action === "insert") {
         const { data, error } = await supabaseAdmin.from(table).insert(Array.isArray(cleanPayload) ? cleanPayload : [cleanPayload]).select();
+        if (error)
+          throw error;
+        result = data;
+      } else if (action === "upsert") {
+        const options = {};
+        if (onConflict)
+          options.onConflict = onConflict;
+        const { data, error } = await supabaseAdmin.from(table).upsert(cleanPayload, options).select();
         if (error)
           throw error;
         result = data;

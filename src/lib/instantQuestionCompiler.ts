@@ -526,9 +526,9 @@ export const getInstantQuestionsForTopic = (topicName: string, targetCount: numb
     }
   }
 
-  // Fallback to General Studies & Odisha GK instead of medical nursing
+  // If no topic matches, return empty array so callers handle empty state gracefully without content contamination
   if (matchedQuestions.length === 0) {
-    matchedQuestions = INSTANT_TOPIC_QUESTIONS['General Studies & Odisha GK'] || INSTANT_TOPIC_QUESTIONS['Fundamentals of Nursing'];
+    return [];
   }
 
   // Ensure EXACT targetCount questions are returned without clipping or shortage

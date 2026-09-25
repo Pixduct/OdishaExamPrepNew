@@ -8,7 +8,7 @@ import crypto from "crypto";
 import webpush from "web-push";
 import { createClient } from "@supabase/supabase-js";
 import { ROUTE_LIST } from "./src/lib/routes-config";
-import { generateExamStructure, generateExamQuestions, queryAIModel, refineTestTitles, auditAndVerifyQuestions } from "./src/lib/serverAiGenerator";
+import { generateExamStructure, generateExamQuestions, queryAIModel, refineTestTitles, auditAndVerifyQuestions, generateFlashcardsContent } from "./src/lib/serverAiGenerator";
 
 // Server reloaded with universal multi-provider AI key router: 2026-09-09T11:09:00
 const __filename = fileURLToPath(import.meta.url);
@@ -1458,6 +1458,9 @@ async function startServer() {
         if (q.diagram && hasDiagramCol) {
           payload.diagram = q.diagram;
         }
+        if (typeof q.sortOrder === 'number') {
+          payload.sortOrder = q.sortOrder;
+        }
         return payload;
       });
 
@@ -1472,24 +1475,46 @@ async function startServer() {
       try {
         const topicsUpdated = new Set<string>();
         for (const q of payloads) {
-          if (q.topic && q.examId && !topicsUpdated.has(`${q.examId}:::${q.topic}`)) {
-            topicsUpdated.add(`${q.examId}:::${q.topic}`);
-            const { count: totalQuestionsForTopic } = await supabaseAdmin
+          if (q.topic && !topicsUpdated.has(`${q.examId || 'any'}:::${q.topic}`)) {
+            topicsUpdated.add(`${q.examId || 'any'}:::${q.topic}`);
+            
+            let countQuery = supabaseAdmin
               .from('questions')
               .select('id', { count: 'exact', head: true })
-              .eq('examId', q.examId)
               .eq('topic', q.topic);
 
-            if (typeof totalQuestionsForTopic === 'number') {
-              await supabaseAdmin
-                .from('questionBanks')
-                .update({ questionCount: totalQuestionsForTopic })
-                .eq('examId', q.examId)
-                .eq('title', q.topic);
+            if (q.examId) {
+              countQuery = countQuery.eq('examId', q.examId);
+            }
 
+            const { count: totalQuestionsForTopic } = await countQuery;
+
+            if (typeof totalQuestionsForTopic === 'number' && totalQuestionsForTopic > 0) {
+              const cleanTopic = q.topic.replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
+              const candidateTitles = Array.from(new Set([q.topic, cleanTopic, `${cleanTopic} - Practice Session`]));
+
+              for (const titleCandidate of candidateTitles) {
+                let updateQuery = supabaseAdmin
+                  .from('questionBanks')
+                  .update({ 
+                    questionCount: totalQuestionsForTopic,
+                    hasPracticeMode: true
+                  })
+                  .eq('title', titleCandidate);
+
+                if (q.examId) {
+                  updateQuery = updateQuery.eq('examId', q.examId);
+                }
+                await updateQuery;
+              }
+
+              // Also try updating by bank ID if topic happened to be the bank ID
               await supabaseAdmin
                 .from('questionBanks')
-                .update({ questionCount: totalQuestionsForTopic })
+                .update({ 
+                  questionCount: totalQuestionsForTopic,
+                  hasPracticeMode: true
+                })
                 .eq('id', q.topic);
             }
           }
@@ -1530,6 +1555,7 @@ async function startServer() {
       const {
         examId,
         examName,
+        stage,
         targetType,
         mainSection,
         subCategory,
@@ -1554,6 +1580,7 @@ async function startServer() {
       const structures = await generateExamStructure({
         examId,
         examName: examName || examId,
+        stage: stage || undefined,
         targetType: targetType || 'mock_test',
         mainSection,
         subCategory,
@@ -1606,14 +1633,101 @@ async function startServer() {
     }
   });
 
+  // Admin AI Studio: Stage-Aware Flashcards Generator Endpoint
+  app.post("/api/admin/ai/generate-flashcards", requireAdmin, async (req, res) => {
+    try {
+      const {
+        examId,
+        examName,
+        stage,
+        deckTitle,
+        subject,
+        subSubject,
+        chapter,
+        syllabusMarkdown,
+        directivesMarkdown,
+        cardCount,
+        naturalDensity,
+        apiKey,
+        model,
+        baseUrl
+      } = req.body;
+
+      if (!deckTitle || !deckTitle.trim()) {
+        return res.status(400).json({ error: "deckTitle is required" });
+      }
+
+      // Pre-fetch existing flashcard stems for this deck to prevent duplicate card generation
+      let existingCardStems: string[] = [];
+      try {
+        const safeTitle = (deckTitle || '').replace(/[^a-zA-Z0-9 ]/g, ' ').trim();
+        if (safeTitle) {
+          let deckQuery = supabaseAdmin
+            .from('flashcard_decks')
+            .select('id')
+            .ilike('title', `%${safeTitle}%`)
+            .limit(5);
+          if (examId && examId !== 'general') {
+            deckQuery = deckQuery.eq('exam_id', examId);
+          }
+          const { data: matchingDecks } = await deckQuery;
+          if (Array.isArray(matchingDecks) && matchingDecks.length > 0) {
+            const deckIds = matchingDecks.map(d => d.id);
+            const { data: existingCards } = await supabaseAdmin
+              .from('flashcards')
+              .select('front_text')
+              .in('deck_id', deckIds)
+              .limit(200);
+            if (Array.isArray(existingCards)) {
+              existingCardStems = existingCards.map(c => c.front_text).filter(Boolean);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('[server.ts] Error pre-fetching flashcards stems:', e);
+      }
+
+      const cards = await generateFlashcardsContent({
+        examId: examId || "general",
+        examName,
+        stage: stage || undefined,
+        deckTitle: deckTitle.trim(),
+        subject,
+        subSubject,
+        chapter,
+        syllabusMarkdown,
+        directivesMarkdown,
+        cardCount: cardCount !== undefined ? Number(cardCount) : 0,
+        naturalDensity: naturalDensity === undefined ? false : Boolean(naturalDensity),
+        apiKey,
+        model,
+        baseUrl,
+        alreadyGeneratedStems: [
+          ...existingCardStems,
+          ...(Array.isArray(req.body.alreadyGeneratedStems) ? req.body.alreadyGeneratedStems : [])
+        ],
+        batchNumber: req.body.batchNumber ? Number(req.body.batchNumber) : undefined
+      });
+
+      res.json({ success: true, count: cards.length, data: cards });
+    } catch (err: any) {
+      console.error("[Admin AI Flashcards Generation Error]", err);
+      res.status(500).json({ error: err.message || "Failed to generate flashcards with AI" });
+    }
+  });
+
   // Admin AI Studio: Stage 2 Advanced Questions Generator Endpoint (Non-streaming Fallback)
   app.post("/api/admin/ai/generate-questions", requireAdmin, async (req, res) => {
     try {
       const { 
         examId, 
         examName, 
+        stage,
         testTitle, 
         subject, 
+        subSubject,
+        chapter,
+        subCategory,
         syllabusMarkdown, 
         directivesMarkdown,
         difficulty, 
@@ -1632,24 +1746,43 @@ async function startServer() {
       // Pre-fetch existing question stems for this topic from database to prevent semantic collisions
       let existingStems: string[] = [];
       try {
-        const safeTopic = (testTitle || '').replace(/[^a-zA-Z0-9 ]/g, ' ').trim();
-        if (safeTopic) {
-          const { data: existingQ } = await supabaseAdmin
-            .from('questions')
-            .select('question')
-            .ilike('topic', `%${safeTopic}%`)
-            .limit(100);
-          if (Array.isArray(existingQ)) {
-            existingStems = existingQ.map(q => q.question).filter(Boolean);
+        const testId = req.body.testId || req.body.mockTestId;
+        let query = supabaseAdmin
+          .from('questions')
+          .select('questionText')
+          .limit(300);
+
+        if (testTitle && String(testTitle).startsWith('mockTest__')) {
+          query = query.eq('topic', testTitle);
+        } else if (testId) {
+          const safeTopic = (testTitle || '').replace(/['"%]/g, '').trim();
+          query = query.or(`topic.eq.mockTest__${testId},topic.ilike.%${safeTopic}%`);
+        } else {
+          const safeTopic = (testTitle || '').replace(/['"%]/g, '').trim();
+          if (safeTopic) {
+            query = query.ilike('topic', `%${safeTopic}%`);
           }
         }
-      } catch (e) {}
+        if (examId && examId !== 'generic') {
+          query = query.eq('examId', examId);
+        }
+        const { data: existingQ } = await query;
+        if (Array.isArray(existingQ)) {
+          existingStems = existingQ.map(q => q.questionText).filter(Boolean);
+        }
+      } catch (e) {
+        console.warn('[server.ts] Error pre-fetching existing stems:', e);
+      }
 
       const questions = await generateExamQuestions({
         examId: examId || 'generic',
         examName,
+        stage: stage || undefined,
         testTitle,
         subject,
+        subSubject,
+        chapter,
+        subCategory,
         syllabusMarkdown,
         directivesMarkdown,
         difficulty: difficulty || 'hard',
@@ -1694,8 +1827,12 @@ async function startServer() {
       const { 
         examId, 
         examName, 
+        stage,
         testTitle, 
         subject, 
+        subSubject,
+        chapter,
+        subCategory,
         syllabusMarkdown, 
         directivesMarkdown,
         difficulty, 
@@ -1715,25 +1852,44 @@ async function startServer() {
       // Pre-fetch existing question stems for this topic from database to prevent semantic collisions
       let existingStems: string[] = [];
       try {
-        const safeTopic = (testTitle || '').replace(/[^a-zA-Z0-9 ]/g, ' ').trim();
-        if (safeTopic) {
-          const { data: existingQ } = await supabaseAdmin
-            .from('questions')
-            .select('question')
-            .ilike('topic', `%${safeTopic}%`)
-            .limit(100);
-          if (Array.isArray(existingQ)) {
-            existingStems = existingQ.map(q => q.question).filter(Boolean);
+        const testId = req.body.testId || req.body.mockTestId;
+        let query = supabaseAdmin
+          .from('questions')
+          .select('questionText')
+          .limit(300);
+
+        if (testTitle && String(testTitle).startsWith('mockTest__')) {
+          query = query.eq('topic', testTitle);
+        } else if (testId) {
+          const safeTopic = (testTitle || '').replace(/['"%]/g, '').trim();
+          query = query.or(`topic.eq.mockTest__${testId},topic.ilike.%${safeTopic}%`);
+        } else {
+          const safeTopic = (testTitle || '').replace(/['"%]/g, '').trim();
+          if (safeTopic) {
+            query = query.ilike('topic', `%${safeTopic}%`);
           }
         }
-      } catch (e) {}
+        if (examId && examId !== 'generic') {
+          query = query.eq('examId', examId);
+        }
+        const { data: existingQ } = await query;
+        if (Array.isArray(existingQ)) {
+          existingStems = existingQ.map(q => q.questionText).filter(Boolean);
+        }
+      } catch (e) {
+        console.warn('[server.ts] Error pre-fetching existing stems for stream:', e);
+      }
 
       const questions = await generateExamQuestions(
         {
           examId: examId || 'generic',
           examName,
+          stage: stage || undefined,
           testTitle,
           subject,
+          subSubject,
+          chapter,
+          subCategory,
           syllabusMarkdown,
           directivesMarkdown,
           difficulty: difficulty || 'hard',
@@ -1954,12 +2110,43 @@ async function startServer() {
   });
 
   // Admin DB Proxy endpoint for write operations
+  // Public endpoint to retrieve stage-segregated exam syllabi
+  app.get("/api/exams/:examId/syllabus", async (req, res) => {
+    try {
+      const { examId } = req.params;
+      const stage = (req.query.stage as string || '').trim();
+
+      let query = supabaseAdmin.from('exam_syllabi').select('*').eq('exam_id', examId);
+      if (stage) {
+        query = query.ilike('stage', stage);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      // If specific stage requested but not found, try to find 'All Stages' or 'Single Stage'
+      if (stage && (!data || data.length === 0)) {
+        const { data: fallbackData } = await supabaseAdmin
+          .from('exam_syllabi')
+          .select('*')
+          .eq('exam_id', examId)
+          .in('stage', ['All Stages', 'Single Stage', 'General']);
+        return res.json({ success: true, data: fallbackData || [] });
+      }
+
+      res.json({ success: true, data: data || [] });
+    } catch (err: any) {
+      console.error("[Get Exam Syllabus Error]", err);
+      res.status(500).json({ error: err.message || "Failed to fetch exam syllabus" });
+    }
+  });
+
   app.post("/api/admin/db/:table", requireAdmin, async (req, res) => {
     try {
       const { table } = req.params;
-      const { action, payload, id, filters } = req.body;
+      const { action, payload, id, filters, onConflict } = req.body;
       
-      const allowedTables = ['exams', 'testSeries', 'mockTests', 'questions', 'questionBanks', 'users'];
+      const allowedTables = ['exams', 'testSeries', 'mockTests', 'questions', 'questionBanks', 'users', 'flashcard_decks', 'flashcards', 'exam_syllabi'];
       if (!allowedTables.includes(table)) {
         return res.status(400).json({ error: `Table ${table} is not allowed` });
       }
@@ -1984,6 +2171,12 @@ async function startServer() {
       let result: any;
       if (action === 'insert') {
         const { data, error } = await supabaseAdmin.from(table).insert(Array.isArray(cleanPayload) ? cleanPayload : [cleanPayload]).select();
+        if (error) throw error;
+        result = data;
+      } else if (action === 'upsert') {
+        const options: any = {};
+        if (onConflict) options.onConflict = onConflict;
+        const { data, error } = await supabaseAdmin.from(table).upsert(cleanPayload, options).select();
         if (error) throw error;
         result = data;
       } else {

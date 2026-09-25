@@ -53,6 +53,7 @@ import { MathTextRenderer, DiagramRenderer, cleanJsonString, extractEmbeddedDiag
 import DiagramTemplateSelector from './components/DiagramTemplateSelector';
 import { validateCatalogEntitlements } from './lib/entitlementManager';
 import { AIQuestionStudio } from './components/admin/AIQuestionStudio';
+import { AdminFlashcardsManager } from './components/admin/AdminFlashcardsManager';
 
 // --- Custom Components ---
 const SearchableDropdown = ({ value, onChange, options, placeholder, required, disabled }: { value: string, onChange: (v: string) => void, options: {value: string, label: string}[], placeholder: string, required?: boolean, disabled?: boolean }) => {
@@ -323,11 +324,11 @@ const getMockTestSubject = (t: any): string => {
 };
 
 const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () => void }) => {
-  const [activeTab, setActiveTab] = useState<'questions' | 'series' | 'tests' | 'exams' | 'banks' | 'practice' | 'users' | 'updates' | 'settings' | 'subscribers' | 'notifications' | 'blogs' | 'ai-studio'>(() => {
+  const [activeTab, setActiveTab] = useState<'questions' | 'series' | 'tests' | 'exams' | 'banks' | 'practice' | 'users' | 'updates' | 'settings' | 'subscribers' | 'notifications' | 'blogs' | 'ai-studio' | 'flashcards'>(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       const tabParam = urlParams.get('tab');
-      const validTabs = ['questions', 'series', 'tests', 'exams', 'banks', 'practice', 'users', 'updates', 'settings', 'subscribers', 'notifications', 'blogs', 'ai-studio'];
+      const validTabs = ['questions', 'series', 'tests', 'exams', 'banks', 'practice', 'users', 'updates', 'settings', 'subscribers', 'notifications', 'blogs', 'ai-studio', 'flashcards'];
       if (tabParam && validTabs.includes(tabParam)) return tabParam as any;
       const saved = sessionStorage.getItem('oep_adminActiveTab');
       if (saved && validTabs.includes(saved)) return saved as any;
@@ -3296,11 +3297,14 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
 
       // Invalidate admin catalog cache so fresh counts are loaded
       sessionStorage.removeItem('oep_admin_catalog_cache_v2');
-      // Optimistically update banks state in memory
+      // Optimistically update banks state in memory and persist count to Supabase
       setBanks(prev => prev.map(b => {
-        if (b.examId === bulkExamId && (b.title === bulkTopic || b.id === bulkTopic)) {
+        const cleanBTitle = b.title ? b.title.replace(/(\s*-\s*Practice Session)+$/gi, '').trim().toLowerCase() : '';
+        const cleanBulkTopic = bulkTopic.replace(/(\s*-\s*Practice Session)+$/gi, '').trim().toLowerCase();
+        if (b.examId === bulkExamId && (b.title === bulkTopic || b.id === bulkTopic || cleanBTitle === cleanBulkTopic)) {
           const newCnt = (b.practiceQuestionCount || b.questionCount || 0) + formatted.length;
-          return { ...b, questionCount: newCnt, practiceQuestionCount: newCnt };
+          examService.updateQuestionBank(b.id, { questionCount: newCnt, hasPracticeMode: true }).catch(console.error);
+          return { ...b, questionCount: newCnt, practiceQuestionCount: newCnt, hasPracticeMode: true };
         }
         return b;
       }));
@@ -5248,6 +5252,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
               { id: 'blogs', label: 'Blog Posts', icon: FileText },
               { id: 'banks', label: 'Question Banks', icon: BookMarked },
               { id: 'practice', label: 'Practice Sets', icon: Target },
+              { id: 'flashcards', label: '🗂️ Flashcards', icon: Sparkles },
               { id: 'series', label: 'Test Series', icon: Layers },
               { id: 'tests', label: 'Mock Tests', icon: Check },
               { id: 'questions', label: 'Questions', icon: FileText },
@@ -5287,7 +5292,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       {/* Content */}
       <main className="flex-1 overflow-y-auto p-8 sm:p-12 overscroll-contain" data-lenis-prevent>
         <div className="max-w-7xl mx-auto space-y-8">
-          {activeTab !== 'ai-studio' && (
+          {activeTab !== 'ai-studio' && activeTab !== 'flashcards' && (
             <div className="flex justify-between items-end">
               <div className="space-y-1">
                 <h2 className="text-4xl font-extrabold text-slate-950 capitalize tracking-tight">
@@ -5583,8 +5588,13 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
             />
           </div>
 
+          {/* Flashcards Management Tab */}
+          <div className={activeTab === 'flashcards' ? 'block' : 'hidden'}>
+            <AdminFlashcardsManager exams={actualExams} isActive={activeTab === 'flashcards'} />
+          </div>
+
           {/* Table View for Other Tabs */}
-          {activeTab !== 'ai-studio' && (
+          {activeTab !== 'ai-studio' && activeTab !== 'flashcards' && (
             activeTab === 'settings' ? (
              <div className="glass rounded-[2rem] border border-slate-200/50 shadow-xl overflow-hidden bg-white/70 p-8 sm:p-12 space-y-8">
                 <div>

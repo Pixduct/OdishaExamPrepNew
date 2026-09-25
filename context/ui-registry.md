@@ -19,6 +19,33 @@ Before creating any new component, developers and AI agents MUST consult this re
 
 | Component Name | Category | File Path | Variants | Used By | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
+| **`AdminAIFailoverTelegramAlert`** | Notification / Telemetry | [`automations/shared/telegram.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/telegram.py) | High-Priority HTML Telegram Failover Alert, Error Code Isolation, Primary Gemini Exhaustion Trace, Engaged Fallback Badge | automations/ (All 6 Engines) | Active |
+| **`AdminAutomationExecutionReport`** | Notification / Telemetry | [`automations/shared/telegram.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/telegram.py) | Full Engine Status DM, Primary/Fallback Model Tag, Public Broadcast Verification, Runner Queue Delay Telemetry | automations/ (All 6 Engines) | Active |
+| **`DailyCurrentAffairsVisualSlide`** | Graphic / Social Card | [`automations/ca_renderer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/ca_renderer.py) | Dynamic 9-Palette Category Pills, 7 Day-of-Week Layout Variants, Exam Takeaway Card & Golden Highlight Anchors | automations/ca_formatter.py, automations/ca_publisher.py | Active |
+| **`DailyMcqGraphicCardAndPollEngine`** | Graphic / Quiz Poll | [`automations/mcq_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/mcq_engine.py) & [`automations/templates/template_mcq.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/templates/template_mcq.html) | 1080x1080 MCQ Graphic, Native Quiz Poll with 100-char option clamping, Question Stem Auto-Healing & Visual Card Fallback | automations/mcq_engine.py | Active |
+| **`ExamNotificationVisualCardAndTopBar`** | Graphic / Social Card | [`automations/exam_card_renderer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/exam_card_renderer.py) & [`automations/templates/template_alert.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/templates/template_alert.html) | 1080x1080 Visual Card, 3-Column CSS Grid Top-Bar, Board Acronym Normalization, 22-char Truncation, Adaptive Vertical Space Distribution, Glass Highlight Cards with Accent Pill Chips & Scaled Typography | automations/exam_update_engine.py, automations/breaking_engine.py | Active |
+| **`ExamDetailFlashcardDeckCard`** | Study / Flashcards | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L11882-L11930) | Responsive 3-Column Deck Card Grid, Subject Tag, Duration Pill, Async Card Fetcher & Modal Study Trigger | App.tsx (Exam Detail Step 3) | Active |
+| **`ExamDetailFlashcardHeroBanner`** | Study / Hero Banner | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L11838-L11880) | Ambient Watermark Gradient Banner, 3-Feature Chip Grid, 1-Click Flashcards Hub Router, Zero-Deck Empty State | App.tsx (Exam Detail Step 3) | Active |
+| **`ExamStageSyllabusCard`** | Study / Stage Syllabus | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) | Reactive Stage Syllabus Viewer, Auto-syncs with active exam stage, MathTextRenderer markdown parser, Stage Scoped Badge, Expand/Collapse Accordion | App.tsx (Exam Details) | Active |
+| **`StageSyllabusGovernanceSuite`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx) | Multi-Stage Syllabus Tabs (`Prelims`, `Mains`, `All Stages`), 1-Click `Save Cloud` upsert to `exam_syllabi`, Cloud-Ready telemetry footer badge | AIQuestionStudio.tsx (Part 1) | Active |
+| **`ZeroRepeatBatchRunner`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx) | Zero-duplicate question generator across all batches & DB history. Pre-fetches stems from Supabase, inverts deduplication before top-up, Jaccard 0.65 + token containment matching, sequential sortOrder auto-offset | AIQuestionStudio.tsx (Stage 2) | Active |
+| **`ZeroRepeatBatchRunnerToolbar`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx) | Multi-batch review & 1-click publishing toolbar with granular batch filter tabs, live duplicate guard badges, anti-clustering monitor, and batch-sliced publishing | AIQuestionStudio.tsx (Stage 2) | Active |
+| **`ZeroRepeatBatchMultiplierControls`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx) | Configurable questions-per-batch & batch multiplier presets (1, 2, 3, 4, 5, 10), custom inputs, and dynamic real-time total output target calculation card | AIQuestionStudio.tsx (Stage 2) | Active |
+| **`AIStage2QuestionReviewCard`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L7604-L7820) | Multi-Stage MCQ Question Review Card with 4-option interactive grid (green highlight on verified correct answer, letters A-D), KaTeX math rendering, Consensus badge, and inline editor | AIQuestionStudio.tsx (Stage 2) | Active |
+| **`ActiveRecallFlashcardReviewCard`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx) | AI Flashcard Batch Review Card with 2-sided active recall split (white front trigger, purple-tinted back answer), KaTeX math rendering, and 5 memory archetype badges | AIQuestionStudio.tsx (Stage 2) | Active |
+| **`ActiveRecallMemoryVolumeSuite`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx) | Active Recall Flashcard Volume & Natural Density Sizing Suite with dual-mode selector (Natural Density vs Max Cap Limit), quick cap pills, and real-time telemetry footer | AIQuestionStudio.tsx (Stage 2) | Active |
+| **`ActiveRecallMultiDeckPipelineCard`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx) | Multi-Deck Stage 2 Batch Execution Card with 3-phase micro-indicators (Ground → Natural Density/Generate → Publish), dynamic ceiling label, pulse loader, and authentic `✅ Saved N Cards` badge | AIQuestionStudio.tsx (Stage 2) | Active |
+| **`MultiDeckQueueRunner`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx) | Native Multi-Deck Batch Runner for Stage 2 Flashcards. Auto-extracts deck taxonomy, dedupes against existing cards via `getFlashcardsByDeckId`, directly writes to `flashcards` via `bulkAddFlashcards`, updates deck counts & caches | AIQuestionStudio.tsx (Stage 2) | Active |
+| **`FlashcardDualControlDeckStudio`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx) | Dual-Control Deck Generation Architecture (Auto 100% syllabus extraction vs Custom deck limit selector), Single-click "Generate Flashcards (Stage 2) →" action router | AIQuestionStudio.tsx (Stage 1) | Active |
+| **`Stage1SubjectGroupedReviewBoard`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx) | Hierarchical Curriculum Subject Folder view for Stage 1 deck review, Subject-level batch select/deselect, Autonomous syllabus hierarchy alignment (`Subject -> Sub-subject`) | AIQuestionStudio.tsx (Stage 1) | Active |
+| **`SubcategoryCurriculumFilterBar`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L4070-L4112) | Dynamic Stage 1 Subcategory Target Selector with section-aware presets, active indicator badges, and formula auto-sync | AIQuestionStudio.tsx (Stage 1) | Active |
+| **`SectionalCurriculumCardSelector`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L3969-L4065) | 4-Section Curriculum Card Selector (Practice Tests, Mock Tests, Question Banks, Flashcards) with section-specific accent highlights, icon badges, and timing presets | AIQuestionStudio.tsx (Stage 1) | Active |
+| **`MockTestSubcategoryPillBar`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L4070-L4112) | Mock Test subcategory pill selector — 4 pills: Full-Length, Sectional, Official PYQ, Weekly Benchmark. Active pill: brand-600. Inactive: white/slate-800. Mini badge inside each pill. Auto-syncs `SECTION_NAMING_PRESETS` template on selection. | AIQuestionStudio.tsx (Stage 1) | Active |
+| **`ActiveRecallCardReviewStudio`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx) | Minimal 2-Sided Active Recall Card Studio (Front prompt + direct crisp back answer), In-place editing, 1-click batch publishing to `flashcards` table | AIQuestionStudio.tsx (Stage 2) | Active |
+| **`FlashcardFlipCard`** | Study / Active Recall | [`src/components/flashcards/FlashcardFlipCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/flashcards/FlashcardFlipCard.tsx) | Google Gemini Seamless Tap-to-Toggle, Framer Motion Drag-to-Grade (Swipe Right: Got it / Swipe Left: Try again), True 3D Perspective Flip, Subtle Floating Answer Indicator, Cloze Tokenizer, KaTeX Math, Design System Tokens | FlashcardStudyModal.tsx | Active |
+| **`FlashcardStudyModal`** | Study / Overlay | [`src/components/flashcards/FlashcardStudyModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/flashcards/FlashcardStudyModal.tsx) | Google Gemini Segmented Pip Progress, Track Learning Switch, Undo History Rollback, Circular Red/Green Action Buttons, Dynamic Spaced Repetition (SM-2) Interval Previews, Gemini Dual-Card Completion Dashboard with 1-Click "Revise Missed Cards" Drill | FlashcardsHub.tsx, App.tsx | Active |
+| **`FlashcardsHub`** | Study / Hub | [`src/pages/FlashcardsHub.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/FlashcardsHub.tsx) | Due Today Hero, Subject Pills, Search, Deck Mastery Grid | Router (`/flashcards`) | Active |
+| **`AdminFlashcardsManager`** | Admin / Management | [`src/components/admin/AdminFlashcardsManager.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AdminFlashcardsManager.tsx) | Deck CRUD, Card Editor, Bulk JSON Import, Syllabus Hierarchy Auto-Architect Modal (Exam Stage derivation, dynamic formula builder, candidate review table & atomic Supabase batch insert) | AdminPanel.tsx | Active |
 | **`PWAEngine`** | Platform / PWA | [`public/site.webmanifest`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/site.webmanifest) & [`public/sw.js`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/sw.js) | Standalone WebAPK, Maskable Icons, Offline Cache | Root, Service Worker | Active |
 | **`PageLayout`** | Layout | [`src/components/PageLayout.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/PageLayout.tsx) | Default, Full Width | All Page Views | Active |
 | **`Button`** | Utility | [`src/components/Button.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/Button.tsx) | Primary, Secondary, Glass | App.tsx, AdminPanel.tsx | Active |
@@ -38,7 +65,7 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`ProtectedRoute`** | Guard | [`src/components/ProtectedRoute.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/ProtectedRoute.tsx) | Auth Route Guard | App.tsx | Active |
 | **`VoiceWaveVisualizer`** | Feedback | [`src/components/VoiceWaveVisualizer.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/VoiceWaveVisualizer.tsx) | Equalizer waveform animation | AiMentor.tsx, StickyAICompanion.tsx | Active |
 | **`QuestionBankCard`** | Data Display | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L6885-L7080) | Grid Card, Mobile List Item | App.tsx | Active |
-| **`ScheduledPracticeBankCard`** | Data Display | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L3073-L3285) | Desktop Grid, Mobile List Item | App.tsx | Active |
+| **`ScheduledPracticeBankCard`** | Data Display | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L3073-L3285) | Desktop Grid, Mobile List Item, Empty-State Curation Pending Badge (`CURATION PENDING` / `Questions in Preparation`), Role-Aware Execution Guard | App.tsx | Active |
 | **`NotificationCenter`** | Navigation / Overlay | [`src/components/NotificationCenter.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/NotificationCenter.tsx) | Bell Trigger + Floating Popover | App.tsx (Header) | Active |
 | **`GlobalSearchModal`** | Navigation / Overlay | [`src/components/GlobalSearchModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/GlobalSearchModal.tsx) | Spotlight Search Portal (Full-screen portal) | App.tsx (Header) | Active |
 | **`AdminSortDirectionToggle`** | Admin / Toolbar | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx) | Asc/Desc pill toggle in Content Banks sub-header | AdminPanel.tsx | Active |
@@ -53,7 +80,7 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`AdminQuestionEditModalForm`** | Admin / Form Modal | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L2445-L2595) | Dynamic question form editor with optgroup target selector & active radio answer selector | AdminPanel.tsx | Active |
 | **`CurrentAffairsPage`** | Page View | [`src/pages/CurrentAffairs.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/CurrentAffairs.tsx) | Multi-period time range toolbar & category grid view | Router (`/current-affairs`) | Active |
 | **`CurrentAffairsReaderModal`** | Overlay / Modal | [`src/components/CurrentAffairsReaderModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/CurrentAffairsReaderModal.tsx) | Glassmorphic 360° article reader with guaranteed self-test MCQs | CurrentAffairs.tsx | Active |
-| **`TopHeaderNavigation`** | Navigation | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L2085-L2285) | Executive Widescreen (`w-full px-4 sm:px-6 lg:px-8`), Viewport-Fixed Glass Navbar | App.tsx | Active |
+| **`TopHeaderNavigation`** | Navigation | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L2110-L2365) | Sleek 64px Widescreen (`w-full px-4 sm:px-6 lg:px-8`), Viewport-Fixed Glass Navbar, Unified Desktop Nav Links, Streamlined Icon Action Cluster (`Search`, `Notifications`, `Streak`, `LanguageToggle`, `ThemeToggle`, `UserAvatar` dropdown) | App.tsx | Active |
 | **`ExamRegistryStatusBadges`** | Data Display | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L1013-L1020) | Adaptive Dual-Theme Status Badges (Notification, Admit Card, Applications, Result, Postponed, Upcoming) | App.tsx (Recruitment Bulletin) | Active |
 | **`WidescreenLayoutBoundary`** | Layout System | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) | Executive Widescreen (`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`), Responsive 3-Column Grid | App.tsx | Active |
 | **`DynamicVectorCard`** | Container / Utility | [`src/components/DynamicVectorCard.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/DynamicVectorCard.tsx) | 3D Magnetic Parallax, Surface Spotlight, Edge Ring Illumination | StudyPlanView, AnalyticsView, App.tsx | Active |
@@ -69,7 +96,7 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`AdminQuestionBankPreviewModal`** | Admin / Modal | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7647-L7780) | Live Parsed Question Bank Review Modal with Math Renderer & Option Validation | AdminPanel.tsx | Active |
 | **`QuestionBankGuideModal`** | Overlay / Onboarding | [`src/components/QuestionBankGuideModal.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/QuestionBankGuideModal.tsx) | Interactive Feature Onboarding Dialog, First-Time Auto-Trigger, Feature Badges | QuestionBankReaderModal.tsx | Active |
 | **`AuthModal`** | Overlay / Authentication | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L2880-L3125) | Glassmorphic Authentication Dialog, Dark-Mode Inputs, Google OAuth, Password Reset | App.tsx | Active |
-| **`ExamAlertGraphicCard`** | Graphic / Social Card | [`automations/templates/template_alert.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/templates/template_alert.html) | 20-Category 1080x1080 Adaptive Visual Themes, Official Board Badges, Direct Gov Portal Verification | automations/breaking_engine.py | Active |
+| **`ExamAlertGraphicCard`** | Graphic / Social Card | [`automations/exam_card_renderer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/exam_card_renderer.py) & [`automations/templates/template_alert.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/templates/template_alert.html) | 20-Category 1080x1080 Adaptive Visual Themes, Zero-Overlap Dynamic Acronym Board Badges, Direct Gov Portal Verification | automations/exam_update_engine.py, automations/breaking_engine.py | Active |
 | **`ExecutiveBlogPostReader`** | Layout / Article | [`src/pages/BlogPost.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/BlogPost.tsx) & [`src/index.css`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/index.css) | `.oep-article-prose`, `.oep-table-wrapper`, Dynamic TOC anchors, Reading progress tracker | Router (`/blog/:id`) | Active |
 | **`ExamBoardVectorBanner`** | Graphic / Asset Engine | [`automations/shared/exam_logo_registry.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/exam_logo_registry.py) | 1200x630 High-Resolution Vector Card Banner, 10 Official Board Themes, Procedural Grid, Verified Badge | automations/ | Active |
 | **`ContinuePracticeSliderCard`** | Data Display / Slider | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L8124-L8180) | Horizontal Snap-Scroll Slider Card, Progress Bar, Resume Trigger | App.tsx (Home) | Active |
@@ -119,12 +146,110 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`ContentBankCountBadge`** | Admin / Data Display | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L7536-L7548) | Status-Aware Live Question Badge (`0 Qs • Empty` with pulsing amber dot vs `📦 N Questions` with slate) | AdminPanel.tsx (Content Banks) | Active |
 | **`AdminBankEmptyStateBanner`** | Admin / Empty State | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L8440-L8505) | Contextual Actionable Empty State with Target Title, 1-Click AI Studio, Direct Bulk Upload, and Single Question CTAs | AdminPanel.tsx (Questions Tab) | Active |
 | **`Stage1NamingFormulaToolbar`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L3572-L3665) | 1-Click Title Formula Presets, Token Insert Chips & Delimiter-Aware Dynamic Formatter | AIQuestionStudio.tsx (Stage 1) | Active |
+| **`AIStudioExamStageGovernance`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx) | Real-time reactive exam stage auto-sync, Stage selector header & banner, `[Stage]` formula tokens, Stage filter pills & badges | AIQuestionStudio.tsx | Active |
+| **`FlashcardsDirectSyllabusPlaceholder`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L3698-L3790) | Pure syllabus topic placeholder card, 1-click hierarchy granularity buttons, token insert chips & subject-only routing | AIQuestionStudio.tsx (Stage 1 & Stage 2) | Active |
 | **`ExamStageTabBar`** | Navigation / Exam Detail | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) | Glassmorphic Examination Stage Selector Pill Bar, Real-time Item Counts, URL Sync (`?stage=...`) | App.tsx (Exam Detail) | Active |
 | **`AdminExamStagePicker`** | Admin / Form Control | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L3299-L3362) | Multi-Select Examination Stages Hierarchy Pill Selector with Unified Mode & Clear All Controls | AdminPanel.tsx (Exam Modal) | Active |
+| **`FlashcardsHubExecutiveHeader`** | Navigation / Breadcrumb | [`src/pages/FlashcardsHub.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/pages/FlashcardsHub.tsx) | Direct Exam Scoped Executive Return Breadcrumb (`← Back to [Exam] Dashboard`) & Adaptive Segmented Multi-Stage Switcher | FlashcardsHub.tsx | Active |
+| **`FlashcardBulkActionDock`** | Admin / Bulk Action | [`src/components/admin/AdminFlashcardsManager.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AdminFlashcardsManager.tsx) | Floating Executive Selection Dock, Master Toggle Bar, Checkbox Focus Rings & Atomic Cascade Deletion Dialog | AdminFlashcardsManager.tsx | Active |
 
 ---
 
 ## Component Details
+
+### `FlashcardFlipCard` (Google Gemini Ultra-Clean Active Recall Flip Card)
+
+File: `src/components/flashcards/FlashcardFlipCard.tsx`
+Last updated: September 12, 2026
+
+| Property | Class / Implementation |
+| :--- | :--- |
+| Container / Perspective | `w-full max-w-lg mx-auto select-none [perspective:1200px]` |
+| Draggable Gesture Shell | `relative w-full h-[370px] xs:h-[390px] sm:h-[480px] cursor-pointer [transform-style:preserve-3d]` (`whileTap={{ scale: 0.985 }}`, `drag="x"`, `dragElastic={0.65}`) — zero background or container shadow footprint to prevent ghosting |
+| 3D Flipping Engine | GPU-accelerated `<motion.div animate={{ rotateY: isFlipped ? 180 : 0 }} transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }} [transform-style:preserve-3d]>` |
+| Front Face (Question) | `absolute inset-0 w-full h-full rounded-[28px] sm:rounded-[32px] p-6 xs:p-8 sm:p-12 flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-800/95 border border-slate-200/80 dark:border-slate-700/80 shadow-sm hover:shadow-md transition-shadow duration-300 [backface-visibility:hidden] [transform:rotateY(0deg)]` |
+| Back Face (Answer) | `absolute inset-0 w-full h-full rounded-[28px] sm:rounded-[32px] p-6 xs:p-8 sm:p-12 flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-800/95 border border-slate-200/80 dark:border-slate-700/80 shadow-sm hover:shadow-md transition-shadow duration-300 [backface-visibility:hidden] [transform:rotateY(180deg)]` |
+| Floating Answer Indicator | `absolute top-4 sm:top-5 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-700/60 border border-slate-300/60 dark:border-slate-600/60 text-slate-500 dark:text-slate-400 text-[10px] sm:text-[11px] font-bold tracking-wider uppercase select-none pointer-events-none` with 12px `CheckCheck` micro-icon |
+| Question Typography | `text-lg sm:text-xl md:text-2xl font-semibold text-slate-800 dark:text-slate-100 leading-relaxed tracking-tight text-center [text-wrap:balance]` |
+| Direct Answer Typography | `text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-snug text-center [text-wrap:balance]` |
+| Swipe Indicators | **Got it!** (`absolute -top-3 right-6 bg-emerald-500 text-white font-black text-xs px-3.5 py-1.5 rounded-full shadow-lg`), **Try again** (`absolute -top-3 left-6 bg-rose-500 text-white font-black text-xs px-3.5 py-1.5 rounded-full shadow-lg`) |
+| Cloze Blank (Front) | `inline-flex items-center justify-center align-middle px-3 py-1 mx-1.5 rounded-xl text-xs sm:text-sm font-black font-mono tracking-wider bg-brand-50 text-brand-700 border-2 border-brand-300/90 dark:bg-brand-950/80 dark:text-brand-300 dark:border-brand-700 shadow-2xs select-none` |
+| Unified Cloze Answer (Back) | Inline revealed emerald pill (`inline-flex items-center align-baseline px-3 py-1 mx-1.5 rounded-xl font-extrabold text-base sm:text-xl bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 shadow-2xs`) |
+| Gemini Shuffle Toggle Button | `absolute bottom-3.5 right-3.5 sm:bottom-4 sm:right-4 z-30 w-9 h-9 sm:w-10 sm:h-10 rounded-xl border flex items-center justify-center cursor-pointer pointer-events-auto transition-all duration-200 active:scale-95 [transform:translateZ(30px)]` — Active ON: `bg-brand-600 text-white border-brand-700 shadow-md shadow-brand-500/30 dark:bg-brand-500 dark:border-brand-400`; Inactive OFF: `bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-300/80 dark:border-slate-600 shadow-xs hover:shadow-sm` with 180° rotation indicator |
+
+**Pattern notes:**
+- **Zero Ghost Base Container**: The draggable shell carries zero border, zero background, and zero shadow, while preserving `preserve-3d` down the tree. Shadows live directly on the rotating face surfaces so mid-flip space is 100% clean.
+- **3D Spatial Elevation (`translateZ(30px)`) & Stacking Isolation**: The bottom-right shuffle button is explicitly lifted in the 3D depth buffer using `transform: translateZ(30px)` and `z-30 pointer-events-auto`, preventing WebKit and Blink GPU coplanar clipping or occlusion behind the card face mesh.
+- **Floating Neutral Answer Badge**: Kept in low-saturation slate to avoid pre-evaluation bias with the green rating button, anchored via `absolute top` so centered answer text maintains mathematical vertical balance.
+- **Dual Location Shuffle Controls**: Shuffle can be toggled either directly on the card face (bottom-right corner) or via the dedicated toolbar action button in the study modal header (both desktop and mobile viewports).
+- **Gemini Shuffle Toggle Isolation (`e.stopPropagation()`)**: Anchored in the bottom-right corner of both front and back faces. Clicks are intercepted to prevent accidental card flipping. Inactive state matches the card surface, while active state turns vibrant brand blue.
+- **Mobile-Calibrated Geometry**: Card height smoothly scales across breakpoints (`h-[370px]` on small mobile up to `h-[480px]` on desktop), maintaining proportional whitespace without compressing footer controls.
+- **Tap vs. Drag Discrimination**: Guarded by `Math.abs(dragX.get()) < 5` to prevent card flipping when swiping and prevent swipe-grading when tapping.
+- **Typographic Symmetry (`[text-wrap:balance]`)**: Enforces balanced multi-line layout without trailing orphaned words.
+- **Zero Raw Hex Colors**: Strictly bound to Tailwind semantic tokens (`bg-slate-100 dark:bg-slate-800/95`, `border-slate-200/80 dark:border-slate-700/80`).
+
+### `FlashcardStudyModal` (Gemini Experience & Adaptive Onboarding Guide)
+
+File: `src/components/flashcards/FlashcardStudyModal.tsx`
+Last updated: September 13, 2026
+
+| Property | Class / Implementation |
+| :--- | :--- |
+| Portal Mounting Architecture | Direct `createPortal(..., document.body)` mounting with `z-[99999]` and `z-[100000]` |
+| Overlay / Backdrop | `fixed inset-0 z-[99999] bg-slate-50 dark:bg-slate-950 flex flex-col justify-between overflow-hidden select-none` |
+| Mobile 2-Row Header | `sm:hidden px-4 pt-3 pb-2 space-y-2.5` (Row 1: Title + Action buttons Shuffle toggle, `?` Guide, and `✕` Close; Row 2: Fluid segmented pips + `1/3 ▾` drawer pill + live scores `✕ 0` and `✓ 0`) |
+| Desktop Single-Row Header | `hidden sm:flex h-16 px-8 items-center justify-between` (Deck Title/Subject, center `Card X of Y ▾` pill, right live score badges + Shuffle toggle + `?` and `✕` buttons) |
+| Symmetrical Rating Buttons | **Again**: `w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-rose-50 hover:bg-rose-100/90 text-rose-600 border border-rose-200/80`; **Good**: `w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-emerald-50 hover:bg-emerald-100/90 text-emerald-600 border border-emerald-200/80` |
+| Balanced Footer Bar | `h-16 sm:h-20 px-4 sm:px-8 pb-3 sm:pb-0` (Left: Undo button; Center: Symmetrical pastel buttons + intervals; Right: Track switch with mobile label `Track`) |
+| Guide Modal Backdrop | `fixed inset-0 z-[100000] bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4` |
+| Guide Modal Dialog | `w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden p-5 sm:p-6 space-y-4 sm:space-y-5` |
+| Mobile Guide Section | `sm:hidden space-y-2.5` (Pure touch gestures: Tap anywhere to flip, Swipe Right for Got it, Swipe Left for Try again, circular buttons. Zero keyboard/spacebar hints) |
+| Desktop Guide Section | `hidden sm:block space-y-4` (Mouse controls grid + keyboard shortcuts: Space, 1/2, 3/4, Ctrl+Z) |
+| Permanent Dismissal Checkbox | `w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500` with label `text-xs text-slate-600 dark:text-slate-400` linked to `odisha_fc_guide_permanently_dismissed` |
+| Guide Modal Action Button | `w-full py-3 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/25 active:scale-98` |
+| Completion Dashboard | Gemini dual cards: `Let's try these again` (rose card with count) and `Great progress` (emerald card with count) with 1-click **"Revise Missed Cards"** drill |
+
+### `FlashcardsHub` (Direct Exam & Stage-Scoped Flashcards Dashboard)
+
+File: `src/pages/FlashcardsHub.tsx`
+Last updated: September 13, 2026
+
+| Property | Class / Implementation |
+| :--- | :--- |
+| Navigation Header & Breadcrumb | Executive return button (`inline-flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-brand-600`) with rounded-xl icon container (`w-8 h-8 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700`) linking directly to active exam dashboard (`/?exam=${selectedExamId}`) |
+| Multi-Stage Segmented Bar | Compact inline stage switcher (`flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80`) rendered only when active exam has multiple stages (`currentExam.stages.length > 1 && !currentExam.stages.includes('Single Stage')`) |
+| Hero / Smart SRS Banner | `relative overflow-hidden rounded-2xl sm:rounded-3xl p-4 sm:p-7 bg-gradient-to-br from-brand-950 via-slate-900 to-indigo-950 text-white border border-brand-500/20 shadow-xl` with dynamic exam title (`${currentExam.name} Flashcards`) |
+| Subject Cards Grid | `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6` |
+| Subject Card | `p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs sm:shadow-xs hover:shadow-md dark:hover:border-brand-500/50 hover:border-brand-300 transition-all cursor-pointer` |
+| Subject Drill-Down View | Breadcrumb back button (`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold`) + Subject header banner + 1-Click Master Study button (`Study Entire Subject`) |
+| Topic Deck Card | `p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:shadow-md` with `Study Deck` button |
+| Study CTA Button | `px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl text-xs font-bold sm:font-black bg-brand-600 hover:bg-brand-700 text-white shadow-xs` |
+
+**Pattern notes:**
+- **Zero Redundant Exam Bar**: The top "Target Exam" horizontal pill bar has been completely eliminated. The module now mounts directly scoped to the student's selected exam and stage.
+- **Intelligent Fallback Resolution**: Checks `?exam=` URL parameter first. If absent, hydrators from `sessionStorage.getItem('oep_selectedExam')` or falls back gracefully to the first authentic exam in the catalog.
+- **Adaptive Stage Controller**: Shows the stage switcher (`All Stages`, `Prelims`, `Mains`) exclusively if the exam is multi-stage, enabling effortless stage switching within that exam without leaving the page. Single-stage exams keep the interface 100% minimalist with no stage noise.
+- **Bi-directional Navigation**: Accompanied by an executive breadcrumb link (`← Back to [Exam Name] Dashboard`) ensuring instantaneous return to the main dashboard.
+
+
+### `AdminFlashcardsManager` (Admin Spaced Repetition Suite)
+
+File: `src/components/admin/AdminFlashcardsManager.tsx`
+Last updated: September 13, 2026
+
+| Property | Class |
+| :--- | :--- |
+| Container | `p-6 space-y-6 max-w-7xl mx-auto animate-fade-in` |
+| Modals | `fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs` with `w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200` |
+| Card Row | `p-4 rounded-xl bg-white border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:shadow-xs` |
+| Primary CTA | `px-4 py-2 rounded-xl text-xs font-black text-white bg-brand-600 hover:bg-brand-700 shadow-sm cursor-pointer` |
+| Refresh Button | `inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shadow-2xs cursor-pointer` with `RefreshCw` spin animation on loading |
+| Action Icons | `p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer` (Edit) & `hover:text-rose-600 hover:bg-rose-50` (Delete) |
+
+**Pattern notes:**
+- **Tab Activation Lifecycle Sync**: Subscribes to `isActive={activeTab === 'flashcards'}` from `AdminPanel.tsx` to automatically re-fetch the latest database state when switching tabs, preventing stale empty states.
+- **On-Demand Cache Purge & Re-sync**: The header Refresh button triggers `loadDecks()` directly with `forceFresh: true`, clearing stale `sessionStorage` keys.
+
 
 ### `AIQuestionStudio` (Enterprise AI Question & Test Structure Generator Suite)
 
@@ -160,6 +285,71 @@ Last updated: September 9, 2026
 - **Strict Anti-Placeholder Distractor Policy**: Nonsense placeholder options (e.g. `"00"`, `"0"`, `"Option 4"`, `(Type II)`, `(Alternative Variant)`, empty strings) are strictly prohibited; the engine automatically replaces duplicates with realistic, mathematically derived variants based on the genuine answer.
 - **Unit Fraction Flattening Engine**: Physical rates and application quantities (`1000 kg/ha`, `40% CP`, `180 mg/L`) must NEVER be formatted as vertical stacked math fractions ($\frac{1000}{\text{kg/ha}}$). Both backend and frontend transformers automatically flatten any fraction with a physical unit in the denominator into clean, human-readable inline text.
 - **State-Machine LaTeX JSON Scanner (`sanitizeLatexJsonTokens`)**: All LLM JSON responses must be pre-parsed using a character-by-character backslash state machine that preserves legitimate JSON whitespace escapes (`\n`, `\t`, `\"`) while safely escaping raw LaTeX mathematical backslashes (`\frac`, `\text`, `\times`, `\ln`, `\sqrt`, Greek symbols) before passing to `JSON.parse`.
+
+### `ExamStageSyllabusCard` (Student Portal Reactive Stage-Specific Syllabus & Topic Blueprint)
+
+File: `src/App.tsx`
+Last updated: September 13, 2026
+
+| Property | Class / Implementation |
+| :--- | :--- |
+| Container Shell | `p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-50/60 via-indigo-50/40 to-purple-50/30 dark:from-[#0B1528] dark:to-[#060B16] border border-blue-200/70 dark:border-blue-900/40 shadow-xs mb-6 sm:mb-8` |
+| Leading Icon Box | `w-10 h-10 rounded-xl bg-blue-600/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-black shrink-0` with `BookOpen` icon |
+| Stage Scope Badge | `px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-blue-200 border border-blue-200/80 dark:border-blue-800 shrink-0` |
+| Toggle Action Button | `px-3.5 py-2 rounded-xl text-xs font-black bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all shadow-xs cursor-pointer` |
+| Markdown Prose Frame | `prose prose-sm dark:prose-invert max-w-none text-xs leading-relaxed max-h-96 overflow-y-auto pr-2 bg-white/70 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200/60 dark:border-slate-800/60 font-sans` with `MathTextRenderer` |
+
+**Pattern notes:**
+- **Dynamic Stage Sync**: Automatically re-fetches from `examService.getExamSyllabus(selectedExam, activeStage)` whenever `activeStage` or `selectedExam` updates.
+- **Graceful Empty State**: If no syllabus is published for that stage, displays a clean dashed card informing the student that syllabus compilation is in progress.
+
+### `StageSyllabusGovernanceSuite` (Admin AI Studio Multi-Stage Cloud-Synced Syllabus Suite)
+
+File: `src/components/admin/AIQuestionStudio.tsx`
+Last updated: September 13, 2026
+
+| Property | Class / Implementation |
+| :--- | :--- |
+| Stage Tabs Switcher | `flex items-center gap-1 p-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto no-scrollbar` |
+| Active Stage Tab | `px-2.5 py-1 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer bg-cyan-600 text-white font-black shadow-xs` |
+| Inactive Stage Tab | `px-2.5 py-1 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white` |
+| Cloud Save Trigger | `px-2.5 py-1.5 rounded-lg text-xs font-bold bg-cyan-600 hover:bg-cyan-700 text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-xs disabled:opacity-50` with `Cloud` / `Loader2` icon |
+| Telemetry Footer Badge | `flex items-center gap-1.5 truncate text-[11px] font-medium text-slate-500 dark:text-slate-400` with active stage badge in `text-cyan-600 dark:text-cyan-400 font-black` |
+
+**Pattern notes:**
+- **Atomic Cloud Upsert**: Saves directly to `public.exam_syllabi` using `onConflict: 'exam_id,stage'`.
+- **Draft Auto-Preservation**: When switching stage tabs, the current stage's draft is cached in `localStorage` under `oep_syllabus_${examId}_${stage}` to ensure zero input loss.
+
+### `MultiDeckQueueRunner` (Native Flashcard Multi-Deck Batch Pipeline & Queue Runner)
+
+File: `src/components/admin/AIQuestionStudio.tsx`
+Last updated: September 13, 2026
+
+| Property | Class / Implementation |
+| :--- | :--- |
+| Target Mode Switcher | `flex items-center gap-1 p-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs` |
+| Active Single Tab | `px-3 py-1.5 rounded-lg text-xs font-black bg-slate-900 text-white shadow-xs` |
+| Active Multi Tab | `px-3 py-1.5 rounded-lg text-xs font-black bg-brand-600 text-white shadow-xs` with badge `px-1.5 py-0.5 rounded-md text-[10px] bg-white/20 text-white font-extrabold` |
+| Scope Banner | `flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded-xl bg-gradient-to-r from-brand-50 to-indigo-50/50 dark:from-brand-950/40 dark:to-slate-900 border border-brand-200/80 dark:border-brand-800 text-xs` |
+| Strict Topic Lock Banner | `p-4 rounded-2xl bg-purple-500/10 dark:bg-purple-950/20 border border-purple-500/30 dark:border-purple-800/40 flex items-center justify-between gap-4 text-xs` with badge `🎯 Strict Per-Deck Subject & Syllabus Lock Mode` in `font-bold text-purple-700 dark:text-purple-300` |
+| Filter Pills Bar | `flex items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-700` |
+| Deck Card Row | `p-3 rounded-xl border transition-all flex items-center justify-between gap-3 cursor-pointer` (`bg-brand-50/80 dark:bg-brand-950/40 border-brand-400 dark:border-brand-600` when checked; `bg-amber-50/30` when empty; `bg-white dark:bg-slate-900` default) |
+| Empty Deck Badge | `px-2.5 py-1 rounded-lg text-[10.5px] font-black bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300/80 dark:border-amber-800 flex items-center gap-1` |
+| Populated Badge | `px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700` |
+| Target Summary Bar | `p-3.5 rounded-xl bg-gradient-to-r from-brand-500/10 via-indigo-500/10 to-transparent border border-brand-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs` |
+| Pipeline Step Indicators | Step 1 (`1. Ground`), Step 2 (`2. Natural Density (Auto)` or `2. Natural Density (≤{cap} Cards)` pre-run; `2. Generated ({N} Cards)` post-run), Step 3 (`3. Publish`) |
+| Pipeline Card Badge | Status badge (`✅ Saved {N} Cards` when complete, `⚡ Batch 1/1` when running, `Queued` when waiting) in `text-[9px] font-black uppercase px-2 py-0.5 rounded-full` |
+| Execution Feed Card | Looked up dynamically from `examFlashcardDecks`: Title `text-xs font-black text-slate-800 dark:text-slate-200 truncate`, Subtitle `text-[10px] text-slate-500 dark:text-slate-400 truncate`, Pill `Saved {N} Cards` in `bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold text-[10px] px-2 py-0.5 rounded-full` |
+| Trigger Button (Flashcards) | `w-full py-4 font-black rounded-2xl text-sm shadow-xl flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-700 hover:to-indigo-800 text-white shadow-purple-500/25` displaying dynamic mode (`Natural Density [≤{cap} Cap]` or `[Auto Sizing]`) |
+
+**Pattern notes:**
+- **Strict Per-Deck Subject & Syllabus Lock**: Explicitly guarantees that every deck in the runner queue receives its own scoped syllabus slice extracted via `extractAutonomousSyllabusScope`, preventing cross-topic leakage or full-syllabus proportional bias.
+- **Natural Density & Adaptive Step Telemetry**: Pre-run cards never show misleading fixed counts like `2. Generate (20 Qs)`; they truthfully show `2. Natural Density (Auto)` or `2. Natural Density (≤20 Cards)`, transitioning to `2. Generated (N Cards)` and `✅ Saved N Cards` upon atomic insertion.
+- **Zero Cross-Table Defect**: Binds strictly to `examFlashcardDecks` and direct-writes exclusively to `flashcards` via `examService.bulkAddFlashcards`, bypassing `questions` table and updating `flashcard_decks.card_count`.
+- **Pre-generation Duplicate Prevention**: Pre-fetches all existing front stems via `examService.getFlashcardsByDeckId(deckId)` to ensure no duplicate cards are generated across batches.
+- **Dynamic Subject Scoping**: When in Stage 2 Flashcards mode, filters decks dynamically by subject selected in Step 2 with accurate empty/populated counts.
+- **Purple Flashcards Theme Identity**: Adopts the platform flashcard identity tokens (`purple-600` / `purple-700` with `indigo-600` gradient) for the action trigger button and topic lock banners while retaining clean Sapphire dark mode contrast.
+- **Execution Feed Entity Resolution**: Guarantees truthful visual feedback in the pipeline feed by resolving IDs against `examFlashcardDecks` when `stage2TargetType === 'flashcards'`, preventing generic "Bank" / "Question Bank" fallbacks.
 
 ### `BalancedSubjectTasterEngine` (3-Pillar Multi-Subject Starter Entitlement Engine)
 - **File Path:** [`src/lib/entitlementEngine.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/lib/entitlementEngine.ts), [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L10825-L11165), and [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L3285-L3330)
@@ -789,36 +979,44 @@ Last updated: 2026-07-25
 
 ### 17. `ScheduledPracticeBankCard` & `ScheduledMockTestCard` (Scheduled & Dynamic Status Practice Cards)
 
-File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L3098-L3312)
-Last updated: 2026-07-26
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L4120-L4430)
+Last updated: 2026-09-13
 
 | Property | Class |
 | --- | --- |
 | Container (Grid Layout) | `h-full flex flex-col justify-between` |
 | Background — Card (Upcoming) | `bg-amber-50/10 border-amber-200 cursor-not-allowed` |
+| Background — Card (Empty / Curation Pending) | `border-slate-200/80 dark:border-slate-800 cursor-pointer hover:border-slate-300 dark:hover:border-slate-700` |
+| Glow — DynamicVectorCard (Empty) | `rgba(148, 163, 184, 0.15)` (Subtle Slate ambient halo) |
 | Icon Container (Upcoming) | `bg-gradient-to-br from-amber-400 to-orange-500 shadow-md text-white` |
+| Icon Container (Empty / Curation Pending) | `bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 shadow-xs` (`<Clock className="w-6 h-6" />`) |
 | Icon Container (Completed) | `bg-gradient-to-br from-emerald-500 to-teal-600 shadow-md text-white` |
 | Icon Container (In-Progress) | `bg-gradient-to-br from-amber-400 to-orange-500 shadow-md text-white animate-pulse` |
 | Badge — UPCOMING | `bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-black uppercase tracking-widest` |
+| Badge — CURATION PENDING | `bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 text-[10px] font-black uppercase tracking-widest flex items-center gap-1` |
+| Subtitle Advisory (In Preparation) | `bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/80 dark:border-amber-800/60 text-xs font-bold px-2.5 py-1 rounded-lg flex items-center gap-1` |
 | Badge — COMPLETED | `bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-black uppercase tracking-widest flex items-center gap-1` |
 | Badge — IN PROGRESS | `bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-black uppercase tracking-widest flex items-center gap-1 animate-pulse` |
 | Action Button — Completed | `bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-emerald-500/20 hover:shadow-emerald-500/40` (`Retake Practice` + `<RotateCw />`) |
 | Action Button — In-Progress | `bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-amber-500/20 hover:shadow-amber-500/40` (`Continue Practice (X%)` + `<Play />`) |
+| Action Button — Empty / Curation Pending | `w-full h-[48px] rounded-xl font-bold text-xs sm:text-sm border border-slate-200/90 dark:border-slate-700 text-slate-600 dark:text-slate-400 bg-slate-50/80 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer mt-auto` (`Questions Coming Soon` + `<Clock className="w-4 h-4 text-slate-400" />`) |
 | Action Button — Unattempted | `premium-gradient text-white shadow-brand-500/10 hover:shadow-brand-500/30` (`Start Practice` + `<ChevronRight />`) |
 | Unlock Action Button (Upcoming) | `w-full h-[48px] rounded-xl flex items-center justify-center gap-2 font-black text-xs sm:text-sm bg-amber-500/15 border-2 border-amber-400 text-amber-950 shadow-sm cursor-not-allowed mt-auto pointer-events-none` |
 
 **Pattern notes:**
 - Scheduled release cards MUST use `h-full flex flex-col justify-between` wrapper to guarantee equal card heights and baseline button alignment across grid rows.
 - Action buttons MUST dynamically change label, icon, and color theme based on user progress (`Retake Practice` for completed, `Continue Practice` for in-progress, `Start Practice` for unattempted) rather than generically showing `Start Practice` everywhere.
-- Card badges MUST reflect student attempt status at a glance: `COMPLETED` (emerald check), `IN PROGRESS (X%)` (pulsing amber), or `Practice Set` (slate border).
-- Mobile list items MUST mirror the exact same badge labels (`COMPLETED`, `IN PROGRESS`) and right indicator icons (`RotateCw`, `Play`, `ChevronRight`).
+- When `totalQs === 0` (no questions configured yet), cards MUST NOT render an active "Practice Now" CTA or silently fallback to unrelated mock questions. Instead, they MUST display the neutral Slate/Amber curation state with a `"CURATION PENDING"` badge, `"Questions in Preparation"` subtitle advisory, and `"Questions Coming Soon"` outline button.
+- Clicking an empty card or button MUST invoke the role-aware `showPremiumAlert` modal explaining question preparation status to candidates, and guiding administrators to AI Question Studio (Stage 2) or Admin Panel upload.
+- Card badges MUST reflect student attempt status at a glance: `COMPLETED` (emerald check), `IN PROGRESS (X%)` (pulsing amber), `CURATION PENDING` (slate clock), or `Practice Set` (slate border).
+- Mobile list items MUST mirror the exact same badge labels (`COMPLETED`, `IN PROGRESS`, `CURATION PENDING`) and right indicator icons (`RotateCw`, `Play`, `Clock`, `ChevronRight`).
 
 ---
 
 ### `NotificationCenter`
 
 File: [`src/components/NotificationCenter.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/NotificationCenter.tsx)
-Last updated: 2026-07-25
+Last updated: September 24, 2026
 
 | Property | Class |
 | --- | --- |
@@ -838,19 +1036,24 @@ Last updated: 2026-07-25
 | Row state — Read | `bg-transparent hover:bg-white/40 border-l-transparent hover:border-l-brand-500/40` |
 | Row state — LIVE | `bg-amber-50/60 hover:bg-amber-50 border-l-amber-500` |
 | Row state — SOON | `bg-slate-50/50 border-l-slate-200 opacity-80 cursor-default` |
+| Row state — NOTICE | `bg-rose-500/[0.03] hover:bg-rose-500/[0.06] border-l-rose-500` |
 | Icon container | `w-9 h-9 rounded-xl text-white mt-0.5` |
 | Icon — new_exam | `bg-gradient-to-br from-indigo-500 to-purple-500 shadow-md shadow-indigo-500/15` |
 | Icon — new_test | `bg-gradient-to-br from-blue-500 to-cyan-500 shadow-md shadow-blue-500/15` |
 | Icon — new_bank | `bg-gradient-to-br from-emerald-500 to-teal-500 shadow-md shadow-emerald-500/15` |
 | Icon — scheduled_live | `bg-gradient-to-br from-amber-500 to-orange-500 shadow-md shadow-amber-500/25 animate-pulse` |
 | Icon — scheduled_upcoming | `bg-gradient-to-br from-slate-400 to-slate-500 shadow-sm` |
+| Icon — exam_notice | `bg-gradient-to-br from-rose-500 to-amber-500 shadow-md shadow-rose-500/20` (`Megaphone`) |
 | Title text — default | `font-extrabold text-xs text-slate-900 group-hover:text-brand-600` |
 | Title text — LIVE | `font-extrabold text-xs text-amber-900 group-hover:text-amber-700` |
+| Title text — NOTICE | `font-extrabold text-xs text-slate-900 group-hover:text-rose-600` |
 | Body text — default | `text-[11px] font-semibold text-slate-500 group-hover:text-slate-600` |
 | Body text — LIVE | `text-[11px] font-semibold text-amber-700 group-hover:text-amber-800` |
+| Body text — NOTICE | `text-[11px] font-semibold text-slate-600 group-hover:text-rose-700` |
 | Badge — Unread dot | `w-2 h-2 rounded-full bg-brand-500 animate-pulse` |
 | Badge — LIVE pill | `px-1.5 py-0.5 bg-rose-500 text-white text-[9px] font-black rounded uppercase tracking-wide animate-pulse` |
 | Badge — SOON pill | `px-1.5 py-0.5 bg-slate-200 text-slate-600 text-[9px] font-black rounded uppercase tracking-wide` |
+| Badge — NOTICE pill | `px-1.5 py-0.5 bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 text-[9px] font-black rounded uppercase tracking-wide border border-rose-200 dark:border-rose-800/60` |
 | Unread count badge (bell) | `w-4 h-4 bg-rose-500 text-white font-black text-[9px] rounded-full border-2 border-white animate-pulse` |
 | Unread count badge (header) | `px-2 py-0.5 text-[10px] font-black text-rose-700 bg-rose-100 rounded-full border border-rose-200 animate-pulse` |
 | Bell trigger | `p-2 rounded-xl text-slate-600 hover:text-brand-600 hover:bg-slate-100/80 transition-all duration-200` |
@@ -864,6 +1067,7 @@ Last updated: 2026-07-25
 - Notification row icons are always `rounded-xl w-9 h-9` with a `bg-gradient-to-br` two-color gradient. Each notification type gets its own gradient pair — do not mix them.
 - LIVE scheduled tests are **always sorted before all other notifications** in the list, regardless of their timestamp. This is enforced in the `useMemo` builder by splitting `liveItems` and `otherItems`.
 - UPCOMING (not-yet-live scheduled) notifications are **non-clickable** (`actionType: 'none'`, `cursor-default`). No chevron is rendered for them.
+- Official exam notices are automatically populated from `exams` (`category='blog'`), decorated with a rose-amber `Megaphone` badge and `NOTICE` pill, and trigger navigation directly to `/blog/:id`.
 - Empty question banks (0 questions AND 0 pdfLinks) must be filtered out before being added to the notification list. The filter is: `hasQuestions || hasPdfs` must be `true`.
 - The bell badge uses `border-2 border-white` to create a cutout effect over the header background.
 - Animation entry uses framer-motion `spring` with `damping: 25, stiffness: 300` — do not change to `ease` or `tween` for this component.
@@ -2395,25 +2599,28 @@ Last updated: August 19, 2026
 
 ### 51. `ExamAlertGraphicCard` (20-Category Adaptive 1080x1080 Notice Graphic Engine)
 
-File: [`automations/templates/template_alert.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/templates/template_alert.html) & [`automations/breaking_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/breaking_engine.py)
-Last updated: August 19, 2026
+File: [`automations/exam_card_renderer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/exam_card_renderer.py) & [`automations/templates/template_alert.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/templates/template_alert.html)
+Last updated: September 24, 2026
 
 | Property | Class / Token |
 | :--- | :--- |
 | **Canvas Background** | `{{THEME_BG_COLOR}}` with 3-Stop Ambient Radial Lighting (`radial-gradient(at 0% 0%, {{THEME_RADIAL_1}}...)`) |
 | **Grid Texture** | Radial dot grid overlay (`background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1.2px, transparent 1.2px); background-size: 32px 32px;`) |
-| **Category Pill Badge** | `padding: 12px 24px; border-radius: 14px; font-weight: 900; font-size: 19px; background: {{THEME_BADGE_GRADIENT}}; box-shadow: 0 6px 25px {{THEME_GLOW_COLOR}}; border: 1px solid rgba(255, 255, 255, 0.35);` |
-| **Board Identity Tag** | `background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 12px; font-weight: 800; font-size: 18px;` |
+| **Top Bar Header Layout** | `display: flex; justify-content: space-between; align-items: center; gap: 14px; width: 100%;` (Strict flex flow, zero absolute collision) |
+| **Category Pill Badge** | `padding: 10px 18px; border-radius: 12px; font-weight: 800; font-size: 15px; letter-spacing: 0.8px; white-space: nowrap; flex-shrink: 0; background: {{THEME_BADGE_GRADIENT}}; box-shadow: 0 4px 18px {{THEME_GLOW_COLOR}}; border: 1px solid rgba(255, 255, 255, 0.35);` |
+| **Board Identity Tag** | `background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 12px; font-weight: 700; font-size: 15px; max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;` |
+| **Date Timestamp Pill** | `display: flex; align-items: center; gap: 7px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 9px 16px; font-size: 15px; font-weight: 700; white-space: nowrap;` |
 | **Main Card Container** | `background: {{THEME_CARD_BG}}; border: 2px solid {{THEME_BORDER_COLOR}}; border-radius: 26px; padding: 40px 46px; box-shadow: 0 0 60px {{THEME_GLOW_COLOR}}, inset 0 1px 0 rgba(255, 255, 255, 0.15);` |
 | **Exam Board Title** | `font-size: 20px; font-weight: 800; color: {{THEME_ACCENT_COLOR}}; letter-spacing: 1.5px; text-transform: uppercase;` |
 | **Headline Typography** | `font-family: 'Outfit', sans-serif; font-size: 33px; font-weight: 900; line-height: 1.3; color: #FFFFFF;` |
 | **Highlight Bullets** | `font-size: 21px; line-height: 1.45; color: #F1F5F9; font-weight: 500;` with `<b>` tags in `{{THEME_ACCENT_COLOR}}` |
-| **Official Portal Strip** | `background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 14px; padding: 12px 20px; color: #38BDF8; font-weight: 800; font-size: 18px;` |
+| **Official Portal Strip** | `background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 14px; padding: 12px 20px; color: #38BDF8; font-weight: 800; font-size: 18px;` labeled with `🌐 Official Notification Source:` |
 | **Footer Brand Stamp** | `border-top: 1px solid rgba(255, 255, 255, 0.15); padding-top: 20px; font-size: 21px; font-weight: 800; color: #FFFFFF;` with verified pill badge (`rgba(16, 185, 129, 0.2)`) |
 
 **Pattern notes:**
+- **Zero-Overlap Flex Header**: The header row uses pure `justify-content: space-between; gap: 14px;`. Never use `position: absolute; left: 50%; transform: translateX(-50%);` on `.board-tag` as it creates collisions with long category badges (e.g. `CORRECTION WINDOW NOTICE`).
+- **Acronym Extraction for Long Board Names**: `extract_short_board_name(name)` extracts short parenthetical acronyms (e.g., `"STATE SELECTION BOARD (SSB) ODISHA"` -> `"SSB ODISHA"`, `"ISRO PROPULSION COMPLEX (IPRC)"` -> `"ISRO IPRC"`) ensuring clean fit within max 320px tag bounds.
 - **20-Category Theme Tokens**: Dynamically shifts visual theme (Royal Blue, Emerald, Amber, Cyan, Purple, Crimson, Gold, Teal, Rose) across all 20 approved notification categories (`EXAM_CATEGORIES_CONFIG`).
-- **Authentic Board Attribution**: Injects exact short board identifier (`OSSC`, `OPSC`, `OSSSC`, `BSE ODISHA`, `SSC`, `UPSC`, `RRB`, `IBPS`, `NTA`, `SBI`) and full authority name.
 - **Direct Official Portal Verification**: Highlights the official government domain in the bottom strip and eliminates generic boilerplate.
 
 ---
@@ -3995,7 +4202,7 @@ Last updated: August 29, 2026
 ### `DailyMcqGraphicCardAndPollEngine`
 
 File: [`automations/mcq_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/mcq_engine.py), [`automations/templates/template_mcq.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/templates/template_mcq.html)
-Last updated: August 29, 2026
+Last updated: September 24, 2026
 
 | Property | Class / Token |
 | :--- | :--- |
@@ -4004,7 +4211,46 @@ Last updated: August 29, 2026
 | **Question Shell** | `rgba(30, 41, 59, 0.75)` with `backdrop-filter: blur(16px)`, `border: 1px solid rgba(255, 255, 255, 0.12)`, `border-radius: 24px`, `font-size: 34px` bold |
 | **Option Cards** | `rgba(30, 41, 59, 0.5)` with `border-radius: 18px`, `option-letter` circular pill (`rgba(255, 255, 255, 0.06)`), `font-size: 24px` |
 | **Footer Strip** | Official URL banner (`https://www.odishaexamprep.in/`), Live Test & PDF badges |
-| **Telegram Native Quiz Poll** | Type: `quiz`, `is_anonymous: True`, with embedded solution breakdown and multi-tier conversion CTA |
+| **Question Stem Auto-Healing** | `normalize_and_heal_mcq(row)` detects fragmented stems in Option A (ending in `:` or containing `"is defined as"`), merges them into the question text, shifts options forward, and decrements `correct_option_id` with 100% answer fidelity |
+| **Option Length Clamping** | Strict Telegram API bound clamp (`opt[:97] + '...'`) guaranteeing option strings $\le 100$ characters, preventing `POLL_OPTION_INVALID` |
+| **Explanation Bubble Sanitizer** | HTML-stripped explanation limited to $\le 195$ characters and $\le 2$ line breaks (`clean_expl\n🌐 odishaexamprep.in`), preventing entity parse errors |
+| **Visual Card Fallback** | Automated failover: If `send_telegram_quiz_poll` fails, dispatches 1080x1080 graphic card ([`output_mcq.png`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/output_mcq.png)) via `sendPhoto` with formatted question & options caption |
+| **Conditional Sheet Status** | Updates Google Sheet row to `'Published'` only if Telegram or YouTube success is confirmed; marks `'Failed - Retry'` otherwise and exits with `sys.exit(1)` |
+
+**Pattern notes:**
+- **Zero-Drop Guarantee**: The visual card fallback ensures questions are always delivered to the public channel even if Telegram API poll validation rejects a rare format.
+- **Queue Integrity**: No question is ever consumed as `'Published'` unless it was physically broadcast to students.
+
+---
+
+### `ExamNotificationVisualCardAndTopBar`
+
+File: [`automations/exam_card_renderer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/exam_card_renderer.py), [`automations/templates/template_alert.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/templates/template_alert.html), [`automations/breaking_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/breaking_engine.py)
+Last updated: September 25, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Canvas & Layout** | `1080px x 1080px` High-Density Square Canvas with scenario-adaptive dark theme background (`EXAM_THEMES`), ambient dot matrix (`radial-gradient(rgba(255, 255, 255, 0.08) 1.2px, transparent 1.2px)`), and radial glow overlays |
+| **Top-Bar Layout** | `display: grid; grid-template-columns: auto 1fr auto; align-items: center; width: 100%; gap: 16px;` — Eliminates spatial collisions by isolating category badge, board tag, and date in distinct tracks |
+| **Category Badge** | Scenario gradient (`{theme["badge_gradient"]}`), `padding: 11px 22px`, `border-radius: 12px`, `font-weight: 900`, `font-size: 16px`, `white-space: nowrap`, `justify-self: start` across all 20 discrete recruitment categories |
+| **Board Tag Center Wrapper** | Dedicated flex wrapper (`.board-tag-wrapper: display: flex; justify-content: center; min-width: 0; width: 100%;`) dynamically centers the pill in the middle grid cell |
+| **Board Tag Pill** | Glassmorphism badge (`rgba(255, 255, 255, 0.15)` with `backdrop-filter: blur(16px)`), `border: 1.5px solid rgba(255, 255, 255, 0.32)`, `padding: 10px 22px`, `border-radius: 12px`, `font-weight: 900`, `font-size: 16px`, `overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;` |
+| **Date Badge** | Translucent badge (`rgba(255, 255, 255, 0.08)` with `border: 1px solid rgba(255, 255, 255, 0.16)`), `padding: 10px 20px`, `border-radius: 12px`, `font-size: 16px`, `font-weight: 800`, `white-space: nowrap`, `justify-self: end` |
+| **Short Board Normalizer & Registry** | `extract_short_board_name(name)` & `extract_board_info(title)` synchronize across all 54 nodal authorities (Odisha District Courts, Fire Service, Prison Directorate, DSE Odisha, ICDS, KVS, NVS, EMRS, CSIR, CTET, Defence wings, up to OPSC, OSSC, OSSSC, SSC, RRB, UPSC, IBPS) with regex word-boundary isolation (`\b`) and an absolute 22-character truncation boundary (`name[:20] + "…"`) |
+| **Headline & Subheader** | `.exam-board-title: font-size: 19px, font-weight: 800, text-transform: uppercase, letter-spacing: 1.2px`, `.headline: font-family: 'Outfit', sans-serif, font-weight: 900, adaptive canvas font sizing (42px / 38px / 34px)` |
+| **Metric Stat Grid** | 2-column key metric cards (`.stat-grid: display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0 10px 0;`). Pill: `background: rgba(255, 255, 255, 0.06); border: 1.5px solid rgba(255, 255, 255, 0.14); border-radius: 16px; padding: 13px 20px; icon: 30px; value: 21px bold white` — Factually validated: genuine vacancies preserved, unverified AI counts sanitized to official notice link |
+| **Adaptive Highlight Cards** | `.bullets-container: flex: 1; display: flex; flex-direction: column; justify-content: space-evenly; gap: 10px; min-height: 0;` — Eliminates vertical dead voids by auto-distributing cards across available height |
+| **Glass Highlight Card** | `.bullet-card: background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.10); border-left: 5px solid {accent_color}; border-radius: 16px; padding: 13px 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); font-size: 21px; line-height: 1.45; color: #F8FAFC;` |
+| **Inline Highlight Badge** | `.bullet-badge: display: inline-flex; align-items: center; background: rgba(255, 255, 255, 0.12); color: {accent_color}; border: 1px solid rgba(255, 255, 255, 0.22); padding: 3px 10px; border-radius: 8px; font-size: 14px; font-weight: 900; letter-spacing: 0.8px; text-transform: uppercase; margin-right: 10px;` |
+| **Official Portal Ribbon** | `.official-portal-strip: background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(14px); border: 1.5px solid rgba(255, 255, 255, 0.16); border-radius: 16px; padding: 13px 22px; label: 18px; link: 20px bold sky-blue` — Backed by `SourceValidator` sovereign government TLD recognition (`.gov.in`, `.nic.in`, `.res.in`) |
+| **Footer Branding** | `.website-text: font-size: 21px; font-weight: 800; color: #FFFFFF;`, `.verified-pill: background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.5); color: #6EE7B7; font-size: 15px; font-weight: 800;` |
+
+**Pattern notes:**
+- **Zero-Overlap Grid Guarantee**: Using CSS Grid `auto 1fr auto` guarantees that the center board pill can never visually collide with or obscure the category badge or date tag, even if the organization name is long.
+- **54-Authority Word-Boundary Acronym Resolution**: Acronym regex matches must enforce strict word boundaries (`\b`) to avoid false-positive token substring matches (e.g. `\blic\b`, `\bfci\b`, `\baai\b`).
+- **Adaptive Free-Space Distribution**: Replacing plain list tags with `flex: 1; justify-content: space-evenly;` glass cards ensures that whether a post has 2, 3, or 4 takeaways, the canvas is utilized symmetrically with zero gaping voids.
+- **Canvas-Scale Hierarchy**: Because 1080x1080 renders at ~380px on mobile screens, text sizes are scaled proportionally (headlines: 34px–42px, body: 21px–22px, metrics: 21px) to guarantee readability without ocular strain.
+- **Factual Integrity Guardrail**: Vacancy metrics and milestone dates are validated against raw official notice text before rendering; non-verified counts are replaced with standardized official portal link fallbacks to prevent misleading aspirants.
 
 ---
 
@@ -4343,24 +4589,31 @@ Universal Multi-Provider Custom API Key Bar with smart provider detection, insta
 ### `MultiBatchAutoRunnerSuite`
 
 File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx)
-Last updated: September 9, 2026
+Last updated: September 24, 2026
 
-Enterprise-grade sequential Multi-Batch Auto-Runner suite with cross-batch anti-duplication memory, progressive live rendering, batch filter tabs, per-batch publishing, and telemetry stop controls.
+Enterprise-grade sequential Multi-Batch Auto-Runner suite with configurable question & batch multipliers, 3-tier exponential backoff retry resilience, 60-stem cross-batch anti-duplication memory, 8,192-token headroom, and universal syllabus structure compatibility.
 
 | Property | Class / Token |
 | :--- | :--- |
-| **Batch Selector Grid** | `grid grid-cols-3 sm:grid-cols-6 gap-1.5 mb-2.5` |
-| **Active Batch Pill** | `bg-indigo-600 text-white shadow-sm py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer` |
-| **Inactive Batch Pill** | `bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-indigo-500 py-1.5 rounded-xl text-xs font-bold` |
-| **Total Target Badge** | `p-2 rounded-xl bg-indigo-50/90 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/80 flex items-center justify-between text-xs` |
+| **Questions Per Batch Selector** | `grid grid-cols-3 sm:grid-cols-6 gap-1.5 mb-2.5` with quick pills (`5 Qs`, `10 Qs`, `15 Qs`, `20 Qs`, `25 Qs`, `50 Qs`) and custom input |
+| **Number of Batches Selector** | `grid grid-cols-3 sm:grid-cols-6 gap-1.5 mb-2.5` with auto-runner pills (`1 Batch`, `2 Batches`, `3 Batches`, `4 Batches`, `5 Batches`, `10 Batches`) and custom input |
+| **Total Target Calculation Badge** | `p-2 rounded-xl bg-indigo-50/90 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/80 flex items-center justify-between text-xs font-bold` |
+| **Active Multiplier Pill** | `bg-indigo-600 text-white shadow-sm py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer` |
+| **Inactive Multiplier Pill** | `bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-indigo-500 py-1.5 rounded-xl text-xs font-bold` |
+| **Multi-Batch Auto-Retry Shield** | 3-tier exponential backoff loop (`while (batchRetryCount < 3)`) with staggered delays (`1.2s`, `2.4s`, `3.6s`) trapping transient HTTP 429 rate limits or network blips |
+| **Non-Destructive Partial Recovery** | Preserves all accumulated questions in state if a late batch exhausts retries, safely delivering prior batches to admin rather than aborting |
+| **Extended Deduplication Memory** | 60-stem negative prompt buffer (`existingQuestionStems.slice(-60)`) preventing concept duplicates even across high-batch runs (e.g. Batch 10 of 10) |
+| **Token Headroom Ceiling** | `maxOutputTokens: 8192` (`Math.min(Math.max(totalQuestions * 450, 4096), 8192)`) guaranteeing large batches (25 or 50 Qs) never truncate mid-stream |
 | **Stop After Batch Button** | `px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs` |
 | **Batch Filter Toolbar** | `p-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-sm` |
 | **Question Card Batch Badge** | `text-[11px] font-black px-2.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 flex items-center gap-1` |
 | **Publish Single Batch Action** | `px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl flex items-center gap-2 shadow-md shadow-indigo-600/20 transition-all disabled:opacity-50 cursor-pointer` |
 
 **Pattern notes:**
-- Eliminates browser timeouts and prompt degradation by running small micro-batches (e.g. 5 questions) sequentially in an auto-runner loop.
-- Cross-batch anti-duplication memory passes `alreadyGeneratedStems` to subsequent batches, preventing question stem repetition across batches.
+- Multiplier Independence: Safely handles any combination (e.g. 5 Qs $\times$ 10 Batches = 50 Qs, 10 Qs $\times$ 5 Batches = 50 Qs, or 50 Qs $\times$ 1 Batch) without prompt drift or token exhaustion.
+- Universal Syllabus Topologies: Natively adapts to Hierarchical Markdown (`#`, `##`, `###`), Unstructured Plain Bullets (`•`, `-`), Compact 2-Line Syllabi, Composite Delimited Modules (`+`, `&`), and Empty Syllabi with exam-level fallback.
+- Cross-batch anti-duplication memory passes up to 60 previous stems to subsequent batches, completely eliminating repetition across the entire generation run.
+- Micro-pause throttling (`500ms`) between batches ensures API rate limits are respected during long sequential runs.
 - Allows administrators to inspect all generated questions at once or filter by specific batch, and either publish individual batches or all batches together.
 
 ---
@@ -4449,21 +4702,22 @@ Content Bank visibility synchronizer, dynamic sub-tab counter badges, and smart 
 ### `MultiBankQueueAutoRunner`
 
 Files: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L4010-L4950)
-Last updated: September 9, 2026
+Last updated: September 24, 2026
 
-Multi-Bank Sequential Auto-Runner & Direct Auto-Publish Pipeline with 100% strict question bank isolation.
+Multi-Bank Sequential Auto-Runner & Direct Auto-Publish Pipeline with 100% strict question bank isolation and autonomous sub-topic quota balancing.
 
 | Property | Class / Token |
 | :--- | :--- |
 | **Target Mode Switcher** | `grid grid-cols-2 gap-2` pills switching between `🎯 Single Target Bank` and `⚡ Multi-Bank Queue Runner` |
 | **Category Scope Banner** | Gradient breadcrumb banner (`bg-gradient-to-r from-brand-50 to-indigo-50/50 dark:from-brand-950/40 dark:to-slate-900 border border-brand-200/80 dark:border-brand-800`) displaying active Step 2 subcategory (`📚 Topic-Wise Question Bank`), total bank count, and empty bank indicator (`⚠️ X banks have 0 questions`) with quick `Show All Categories` toggle |
-| **Category-Scoped Candidate Pool** | Scopes displayed bank pool strictly to Step 2 subcategory (`stage2SubCategory`) using `categorizedQuestionBanks` / `categorizedPracticeSets`, completely preventing cross-category bank pollution |
+| **Category-Scoped Candidate Pool** | Scopes displayed candidate pool strictly to Step 2 subcategory (`stage2SubCategory`) using `categorizedMockTests` / `categorizedPracticeSets` / `categorizedQuestionBanks`, completely preventing cross-category and cross-format contamination |
 | **0-Question Status Filter Tabs** | `All ({N})`, `⚠️ Needs Qs / 0 Qs ({emptyCount})` (styled with amber highlight), and `📦 Populated ({populatedCount})` pills |
 | **1-Click 0-Q Quick Selection** | Dedicated `⚡ Select 0-Q Banks ({emptyCount})` button (`bg-amber-500 hover:bg-amber-600 text-white font-black shadow-xs`) instantly selecting all 0-question banks in the active category with 1 click |
 | **Bank Selection Cards** | Checkbox cards with title, tagline/subject, subcategory badge, and live count pill; 0-question banks feature prominent amber badge (`⚠️ 0 Qs • Empty`) and subtle amber border |
+| **Sub-Topic Equal Quota Badge** | `inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-indigo-50/80 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/70 dark:border-indigo-800/60` displaying dynamic sub-topic partitions and quota breakdowns |
 | **Status Tag Pills** | `Queued` (`bg-slate-200 text-slate-700`), `Running` (`bg-brand-500/20 text-brand-400 border border-brand-500/30 animate-pulse`), `Completed` (`bg-emerald-500/20 text-emerald-400 border border-emerald-500/30`), `Failed` (`bg-rose-500/20 text-rose-400 border border-rose-500/30`) |
 | **Queue Target Calculation Bar** | High-contrast stats banner displaying `N Banks Selected • X Qs/Bank • Y Total Qs` with target completion time projection |
-| **Sequential Isolation Engine** | Loop processes banks strictly sequentially: (1) pulls existing stems for `currentBank`, (2) generates batches with backoff retry, (3) stamps payload with `topic: currentBank.title` and `examId: selectedExamId`, (4) auto-publishes to `/api/admin/questions/bulk`, (5) increments bank question counter via `bankCountOverrides`, and (6) purges in-memory question batch before advancing to next bank |
+| **Sequential Isolation Engine** | Loop processes targets strictly sequentially: (1) pulls existing stems via `getQuestionsForMockTest`, `getQuestionsForQuestionBank`, or `getFlashcardsByDeckId`, (2) generates batches with backoff retry, (3) stamps payload with `topic: isMockTest ? mockTest__${id} : currentBank.title` and `examId: selectedExamId`, (4) auto-publishes to `/api/admin/questions/bulk` or `bulkAddFlashcards`, (5) updates target question count via `updateMockTest` / `updateQuestionBank` and `bankCountOverrides`, and (6) purges in-memory question batch before advancing to next target |
 | **Live Telemetry Screen** | Pulsing header indicator, live progress bar, active stage stepper, and terminal log stream with real-time SSE updates |
 | **Persistent Queue Monitor** | Dedicated post-run execution monitor persisting after queue completes with total banks, duration, questions uploaded, and `✕ Dismiss Feed` button |
 | **Bank Pipeline Stepper Cards** | Mini progress cards for each bank with micro-steps (`1. Ground` → `2. Generate (Batch b/B)` → `3. Publish`) and live status badges |
@@ -4473,8 +4727,10 @@ Multi-Bank Sequential Auto-Runner & Direct Auto-Publish Pipeline with 100% stric
 | **Active Queue Navigation Guard** | Protective `beforeunload` event listener actively shielding session from accidental tab closure, page refresh, or navigation while queue is running |
 
 **Pattern notes:**
+- Universal Multi-Target Architecture: Seamlessly handles Full Mock Tests, Sectional Tests, Chapter Practice Sets, Topic Question Banks, and Flashcard Decks under a unified sequential queue engine.
 - Strictly respects Step 2 subcategory selection, preventing candidate confusion and cross-category leakage.
 - Dedicated 0-question workflow allows admins to populate empty banks sequentially with a single click.
+- **Autonomous Sub-Topic (+) Scoping & Equal Distribution Mandate**: When bank titles contain multiple sub-topics joined by `+`, `&`, or delimiters, the runner automatically extracts syllabus slices for all constituent sub-components, calculates exact proportional question quotas (`Math.floor(total / count)`), and mandates strict equal question distribution without bias.
 - Active queue runner automatically binds a `beforeunload` browser shield, preventing accidental page navigation or reload while batches are generating or writing to database.
 - Completely prevents cross-bank contamination by strictly scoping each bank's generation and publishing cycle.
 - In-memory questions are purged after each bank's bulk publish succeeds, ensuring zero memory ballooning even across 50+ question banks.
@@ -4632,5 +4888,568 @@ Last updated: September 11, 2026
 - Non-blocking targeted reconciliation: Background sync is delegated to scoped `fetchData(activeTab)` asynchronously, eliminating thread freezing and keeping the modal interactions instantaneous.
 - Enclosed in `finally { setIsSaving(false); }` block ensuring UI unlock even on server proxy rejections.
 
+---
 
+### `AIStudioExamStageGovernance` (Real-Time Exam Stage Selector, Banner, Filter Pills & Badges)
+
+File: `src/components/admin/AIQuestionStudio.tsx`
+Last updated: September 11, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Background** | `bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-brand-500/10` (Banner container), `bg-slate-100 dark:bg-slate-800/60` (Stage 2 filter bar), `bg-purple-600` / `bg-brand-600` (Active pill), `bg-white dark:bg-slate-800` (Inactive pill), `bg-brand-100 dark:bg-brand-900/60` (Target Card badge), `bg-purple-50 dark:bg-purple-950/60` (Review Board stage badge), `bg-purple-100 dark:bg-purple-900/60` (Header stage pill) |
+| **Border** | `border border-purple-200 dark:border-purple-800/70` (Banner container), `border border-slate-200 dark:border-slate-700` (Filter bar & inactive pills), `border-purple-600` / `border-brand-600` (Active pill), `border border-brand-300 dark:border-brand-700` (Target Card badge), `border border-purple-200 dark:border-purple-800` (Review Board & Header stage pills) |
+| **Border radius** | `rounded-2xl` (Banner container), `rounded-xl` / `rounded-lg` (Pills), `rounded-full` (Stage badges & pills) |
+| **Text — primary** | `text-xs font-black text-purple-950 dark:text-purple-200 uppercase tracking-wider` (Banner header), `text-xs font-bold` / `text-[11px] font-black` (Pill labels) |
+| **Text — secondary** | `text-[11px] text-slate-600 dark:text-slate-400` (Banner description), `text-brand-700 dark:text-brand-300` (Target badge text), `text-purple-700 dark:text-purple-300` (Review Board & Header stage text) |
+| **Text — badge sizes**| `text-[9px] font-black uppercase` (Review Board stage badge), `text-[10px] font-black` (Header stage pill) |
+| **Spacing** | `p-3.5 sm:p-4 gap-3` (Banner container), `px-3 py-1.5 gap-1` (Banner pills), `p-1.5 gap-1.5` (Stage 2 filter container), `px-2.5 py-1` (Stage 2 pills), `px-2 py-0.5` (Stage badges) |
+| **Hover state** | `hover:bg-slate-50 dark:hover:bg-slate-700` (Inactive pill hover) |
+| **Shadow** | `shadow-xs` (Banner & active pills) |
+| **Accent usage** | `purple-600` (Stage Banner & badge theme), `brand-600` (Filter pills & badge icons) |
+
+**Pattern notes:**
+- Rendered in `AIQuestionStudio.tsx` to provide end-to-end stage awareness across AI Studio.
+- Banner (`Active Examination Stage Banner`) only renders when the active exam has `examConfiguredStages.length > 0`.
+- Reactive Auto-Loading & Bidirectional Sync: Switching stages via banner buttons or Governance Header dropdown simultaneously updates `selectedExamStage`, `stage2StageFilter`, and `multiBankStageFilter`.
+- Supports `[Stage]` and `[Exam Stage]` formula tokens in Stage 1 with delimiter-safe fallback for single-stage exams.
+- Displays explicit `📍 {item.stage}` badges on Stage 1 Review Board cards so administrators can verify stage assignments before database persistence.
+- Auto-syncs stage when transferring test structures from Stage 1 into Stage 2 (`handleTransferToStage2`).
+- Injects stage-calibrated cognitive directives (`Prelims` speed MCQs vs `Mains` multi-statement analytical depth) into question generation.
+- Filters tests and banks in Stage 2 with live `[Stage]` dropdown prefixes and target card `📍 {stage}` badges.
+
+---
+
+### `AIStudioFlashcardsIntegration` (Stage 1 & Stage 2 Flashcard Generation & Stage Partitioning)
+
+Files: `src/components/admin/AIQuestionStudio.tsx`, `src/pages/FlashcardsHub.tsx`, `src/lib/serverAiGenerator.ts`
+Last updated: September 12, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Stage 1 Flashcards Card** | `bg-gradient-to-br from-purple-50/70 via-white to-pink-50/50 dark:from-slate-800/90 dark:via-slate-850 dark:to-slate-800/90` |
+| **Border** | `border border-purple-200/80 dark:border-purple-800/50` |
+| **Border radius** | `rounded-2xl` (Settings card), `rounded-xl` (Child cards & pills), `rounded-full` (Stage badges) |
+| **Pill Selector** | `px-2.5 py-1 rounded-lg text-[10px] font-bold` (Active: `bg-purple-600 text-white`, Inactive: `bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700`) |
+| **Stage 2 Target Button** | `from-purple-500/10 to-pink-500/10 border-purple-500/30 text-purple-700 dark:text-purple-300` |
+| **Hub Stage Selector** | Horizontal pill bar (`Filter` icon + `All Stages`, `Prelims`, `Mains`) with `bg-purple-600` active state |
+| **Text — primary** | `text-xs font-black text-slate-900 dark:text-white` |
+| **Text — secondary** | `text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed` |
+| **Accent usage** | `purple-600` (Flashcards theme & active state indicators) |
+
+---
+
+### `AIStudioFlashcardsDirectSyllabusHierarchy` (Pure Syllabus Topic Hierarchy & Single Placeholder Generation)
+
+Files: `src/components/admin/AIQuestionStudio.tsx`, `src/lib/serverAiGenerator.ts`
+Last updated: September 13, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Syllabus Topic Placeholder Card** | `bg-gradient-to-br from-purple-50/70 via-white to-pink-50/50 dark:from-slate-800/90 dark:via-slate-850 dark:to-slate-800/90 border border-purple-200/80 dark:border-purple-800/50 rounded-2xl p-4 sm:p-5` |
+| **Hierarchy Quick Selectors** | `px-2.5 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer` (Active: `bg-purple-600 text-white border-purple-600`, Inactive: `bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700`) |
+| **Formula Input Bar** | `w-full bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-800/60 rounded-xl px-3.5 py-2 text-xs font-mono font-semibold text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none` |
+| **Token Insertion Chips** | `px-1.5 py-0.5 rounded font-mono text-[10px] font-semibold bg-purple-50 dark:bg-purple-950/60 hover:bg-purple-100 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 cursor-pointer` |
+| **Primary Action CTA (Flashcards)**| `w-full py-3.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-black rounded-xl text-sm shadow-md shadow-purple-500/20` |
+| **Step 2 Subject Filter Pills** | `px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer` (Active: `bg-brand-600 text-white`, Inactive: `bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300`) |
+
+**Pattern notes:**
+- **Elimination of Artificial Categories**: Mock and Practice test categories (`topic-wise`, `exam-focused`, `revision-sets`, `pyq-recall`) are completely bypassed for Flashcards. The UI cleanly reflects the cognitive nature of flashcards: `Syllabus -> Subject -> Sub-Subject / Chapter -> Cards`.
+- **Single Topic Placeholder Architecture**: In Stage 1, Section 2 provides a focused **Syllabus Topic Placeholder (Deck Name Generator)** card. Admins choose the granularity (`[Sub-Subject]`, `[Subject]`, or `[Chapter]`), and the backend syllabus deconstructor directly maps syllabus nodes to deck titles.
+- **Deduplication of Formula Box**: Section 5 (generic formula presets) is hidden when `stage1MainSection === 'flashcards'` so admins are never presented with redundant inputs.
+- **Stage 2 Real-Subject Isolation**: In Stage 2 Question Studio, Step 2 dynamically lists unique syllabus subjects from existing database decks (`🌐 All Decks` + `📖 [Subject]` pills). Step 3 dropdown options are grouped strictly by authentic syllabus subject headers.
+
+---
+
+### `FlashcardDualControlDeckStudio` (Stage 1 Dual-Control Deck Generation Architecture)
+
+File: `src/components/admin/AIQuestionStudio.tsx` (lines 4152–4305, 4730–4745)
+Last updated: September 13, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Background** | `bg-gradient-to-br from-purple-50/70 via-white to-pink-50/50 dark:from-slate-800/90 dark:via-slate-850 dark:to-slate-800/90` (Section container), `bg-white dark:bg-slate-900` (Inactive mode cards & manual deck count panel), `bg-purple-600/10` (Active mode card) |
+| **Border** | `border border-purple-200/80 dark:border-purple-800/50` (Section container), `border-purple-200/50 dark:border-purple-800/40` (Sub-divider), `border-purple-500 dark:border-purple-400` (Active mode card), `border-slate-200 dark:border-slate-800` (Inactive mode cards) |
+| **Border radius** | `rounded-2xl` (Section container), `rounded-xl` (Mode cards & custom count panel), `rounded-lg` (Count pills & input), `rounded-full` (Check icon & stage badges) |
+| **Text — primary** | `text-xs font-black text-slate-900 dark:text-white` (Header titles & mode titles), `text-slate-900 dark:text-white` (Count values) |
+| **Text — secondary** | `text-[11px] text-slate-500 dark:text-slate-400` (Subtitle descriptions), `text-[11px] text-slate-600 dark:text-slate-400` (Mode card copy) |
+| **Spacing** | `p-4 sm:p-5 space-y-4` (Section container), `p-3.5` (Mode cards), `p-3 space-y-2.5` (Manual count panel), `px-3 py-1` (Quick count pills), `gap-3` (Mode grid) |
+| **Hover state** | `hover:border-purple-300`, `hover:bg-purple-50 dark:hover:bg-purple-950/40` (Count pills), `hover:bg-purple-700` (Stage 2 transfer CTA) |
+| **Shadow** | `shadow-xs` (Section & mode cards), `shadow-2xs` (Quick pills), `ring-2 ring-purple-500/30` (Active mode card) |
+| **Accent usage** | `purple-600` (Theme anchor, active pills, check circles, transfer CTA), `emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300` (100% Coverage badge), `cyan-100 dark:bg-cyan-950/80 text-cyan-800 dark:text-cyan-300` (Custom target badge) |
+
+**Pattern notes:**
+- **Dual-Control Architecture**: Completely decouples automated complete-syllabus extraction from manual count limits. Admins can either let AI extract 100% of all syllabus nodes matching their placeholder token (default, zero syllabus gaps) or explicitly constrain to `[3, 5, 8, 10, 15, 20, 30]` or custom numeric deck limits.
+- **Stage 1 to Stage 2 Routing CTA**: Each generated deck card in the Stage 1 Review Board features a prominent 1-click action button: `Generate Flashcards (Stage 2) →` (`bg-purple-600 hover:bg-purple-700 text-white shadow-purple-600/20`). Clicking immediately pre-loads the deck name, destination type (`flashcards`), and stage into Stage 2 for instant card generation.
+- **Educational Workflow Callout**: Integrates an informational callout (`bg-purple-100/60 dark:bg-purple-950/40 border-purple-200/80 text-purple-900 dark:text-purple-200`) explicitly guiding administrators on the two-phase pipeline (Phase 1: Deck names from syllabus; Phase 2: Card authoring per deck).
+
+---
+
+### `ActiveRecallCardReviewStudio` (Minimal 2-Sided Active Recall Card Studio & Review Grid)
+
+File: `src/components/admin/AIQuestionStudio.tsx` (lines 6593–6605, 6872–6918)
+Last updated: September 13, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Background** | `bg-white dark:bg-slate-900` (Front face trigger container & editing areas), `bg-purple-50/70 dark:bg-purple-950/40` (Back face crisp answer container), `bg-slate-50 dark:bg-slate-800` (Inline editing input/textarea), `bg-gradient-to-br from-purple-50/80 via-white to-indigo-50/50 dark:from-slate-800/90 dark:via-slate-850 dark:to-slate-800/90` (Natural Density Step 4 & 5 cards) |
+| **Border** | `border border-slate-200 dark:border-slate-700/80` (Front face container), `border border-purple-200/80 dark:border-purple-800/60` (Back face container & Step 4/5 volume panels), `border-purple-100 dark:border-purple-900/60` (Answer preview card), `border-purple-300 dark:border-purple-700` (Editing border) |
+| **Border radius** | `rounded-xl` (Front face & back face containers), `rounded-2xl` (Volume & Cognitive Distillation panels), `rounded-lg` (Answer display card & textareas), `rounded-full` (Target recall micro-badge & Archetype pills) |
+| **Text — primary** | `text-sm font-bold text-slate-900 dark:text-white leading-relaxed` (Front face recall prompt), `text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100` (Back face direct answer) |
+| **Text — secondary** | `text-[10px] font-black uppercase tracking-wider text-purple-700 dark:text-purple-300` (Front face label), `text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400` (Back face label) |
+| **Spacing** | `p-3.5 space-y-1.5` (Front & back containers), `p-4 space-y-3.5` (Volume & Distillation panels), `p-3` (Rendered answer card), `p-2.5` (Editing textarea), `space-y-3 pt-1` (Card body stack) |
+| **Hover state** | `hover:text-brand-600 hover:bg-slate-200 dark:hover:bg-slate-700` (Edit action button), `hover:bg-rose-50 dark:hover:bg-rose-950` (Delete action button), `hover:border-purple-400` (Mode cards) |
+| **Shadow** | `shadow-2xs` (Face containers & answer preview), `shadow-xs` (Volume panels) |
+| **Accent usage** | `purple-600` / `purple-700` (Recall trigger branding & active mode pill), `emerald-600` / `emerald-700` (Direct answer badge & icon), `bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border-emerald-300` (Target Recall micro-pill), Archetype chips (`purple-100` STATUTORY, `blue-100` THRESHOLD, `amber-100` EXCEPTION, `emerald-100` CHRONOLOGY, `rose-100` CONFUSING PAIR, `indigo-100` CONCEPT) |
+
+**Pattern notes:**
+- **Two-Sided Active Recall Architecture**: Replaces the 4-choice MCQ options grid, diagrams, and long essay explanations with an elevated two-sided active recall card interface.
+- **Front Face (Recall Trigger)**: Features a concise trigger question (< 15 words) formatted for fast cognitive recall, complete with inline KaTeX math rendering via `<MathTextRenderer />`.
+- **Back Face (Direct Crisp Answer)**: Displays a short, high-retention answer (< 15 words) styled with an emerald `Target Recall` micro-badge, avoiding explanatory clutter or bullet point overload.
+- **Inline Live Editing**: Provides in-place `<textarea>` inputs for both the front trigger and back answer with instantaneous hot-reloading of KaTeX preview formulas.
+- **Cognitive Distillation & Archetype Badges**: Cards are generated through 5 cognitive memorization archetypes (`⚡ STATUTORY`, `🔢 THRESHOLD`, `⚠️ EXCEPTION`, `📅 CHRONOLOGY`, `🔄 CONFUSING PAIR`, `🎯 HIGH-YIELD FACT`). Each card displays its classified archetype chip in the review header.
+- **Natural Density Sizing**: Step 4 provides a default "🎯 Auto (Natural Density)" volume selector that stops once genuine memory anchors in the syllabus scope are extracted, eliminating filler padding.
+- **1-Click Atomic Publishing**: Direct publishing pipeline inserting cards atomically into the Supabase `flashcards` table bound to `deck_id` with `deck_title`, `front_text`, `back_text`, and `sort_order`.
+
+---
+
+### `Stage1SubjectGroupedReviewBoard` (Hierarchical Curriculum Subject Folder Review Board)
+
+File: `src/components/admin/AIQuestionStudio.tsx` (lines 4820–4950)
+Last updated: September 13, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Background** | `bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm` (Subject Folder container), `bg-purple-50/70 dark:bg-purple-950/40` (Subject Folder header bar), `bg-white dark:bg-slate-900` (Sub-subject deck cards) |
+| **Border** | `border border-purple-200/80 dark:border-purple-800/60` (Subject Folder container), `border-b border-purple-100 dark:border-purple-900/50` (Header separator), `border-purple-500 ring-2 ring-purple-500/20` (Selected deck card), `border-slate-200 dark:border-slate-700/80` (Unselected deck card) |
+| **Border radius** | `rounded-2xl` (Subject Folder container), `rounded-xl` (Deck item cards), `rounded-full` (Subject badge & counter chips), `rounded-lg` (Action buttons) |
+| **Text — primary** | `text-sm font-black text-slate-900 dark:text-white` (Curriculum Subject title), `text-xs font-bold text-slate-900 dark:text-white` (Sub-subject deck name) |
+| **Text — secondary** | `text-[11px] font-bold text-purple-700 dark:text-purple-300` (Subject folder label), `text-[10px] text-slate-500 dark:text-slate-400` (Card counter / deck metadata) |
+| **Spacing** | `p-4 sm:p-5 space-y-3` (Folder container), `px-4 py-3` (Folder header banner), `p-3.5 space-y-2.5` (Deck cards), `gap-3` (Sub-subject grid) |
+| **Hover state** | `hover:border-purple-300 dark:hover:border-purple-700` (Deck card hover), `hover:bg-purple-100 dark:hover:bg-purple-900/40` (Select all folder toggle) |
+| **Shadow** | `shadow-xs` (Folder container), `shadow-2xs` (Deck cards) |
+| **Accent usage** | `purple-600` / `purple-700` (Subject theme anchor, batch checkmark indicators, "Select All in Subject" button), `emerald-600` (Saved state badge) |
+
+**Pattern notes:**
+- **Hierarchical Subject-Folder Layout**: In Stage 1 Review Board for flashcards, deck items are organized under authentic `📖 Curriculum Subject Folder: [Subject Name]` parent headers instead of a flat unorganized list.
+- **Subject-Level Batch Actions**: Each folder header provides an instant "Select All Decks" / "Deselect" toggle that controls all child sub-subject decks belonging to that subject.
+- **Visual Subject -> Sub-subject Alignment**: Explicitly shows the academic hierarchy (`Subject -> Sub-subject`) so the administrator can verify syllabus structure and coverage before saving or moving to Stage 2.
+
+---
+
+### `ExamStageTabBar` (Glassmorphic Examination Stage Selector Pill Bar)
+
+File: `src/App.tsx` (line ~10073–10148)
+Last updated: September 13, 2026
+
+| Property | Class / Implementation |
+| :--- | :--- |
+| **Background** | `bg-white/90 dark:bg-[#0B1528]/90 backdrop-blur-md` (outer glass shell), `bg-slate-100/90 dark:bg-[#060B16]` (segmented controller track), `bg-white dark:bg-brand-600` (active segment animated pill via Framer Motion `layoutId`) |
+| **Border** | `border border-slate-200/80 dark:border-slate-800` (outer shell), `border border-slate-200/60 dark:border-slate-800/80` (track), `border border-slate-200/80 dark:border-brand-500/50` (active segment pill) |
+| **Border radius** | `rounded-2xl` (outer glass shell), `rounded-xl` (segmented track), `rounded-lg` (individual stage buttons) |
+| **Text — primary** | `text-xs sm:text-sm font-black` on stage button labels; active: `text-brand-700 dark:text-white`; inactive: `text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200` |
+| **Text — secondary** | `text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider` (header label), `text-[10px] font-bold text-slate-400 dark:text-slate-500` (stage count label) |
+| **Spacing** | `p-2 sm:p-2.5` (outer shell padding), `px-2 py-1.5 mb-1.5` (header row), `p-1` (track), `py-2 sm:py-2.5 px-3` (individual stage buttons) |
+| **Hover state** | `hover:text-slate-900 dark:hover:text-slate-200` (inactive buttons — text-only transition, no background shift) |
+| **Shadow** | `shadow-sm` (outer glass shell and active segment pill) |
+| **Accent usage** | `bg-brand-500 animate-pulse` (pulse indicator dot), `bg-brand-50 dark:bg-white/20 text-brand-700 dark:text-white border border-brand-200/60 dark:border-white/10` (active stage count chip), `bg-slate-200/80 dark:bg-slate-800 text-slate-500 dark:text-slate-400` (inactive count chip) |
+
+**Pattern notes:**
+- **Framer Motion Shared-Layout Pill**: The active stage highlight uses `<motion.div layoutId="activeExamStageSegment">` with `type: "spring", stiffness: 450, damping: 35` — this creates a fluid shared-layout pill that animates between stage buttons without hard re-mounts.
+- **Adaptive Grid vs Scroll**: For ≤3 stages: `grid grid-flow-col auto-cols-fr gap-1.5` (full-width balanced grid). For 4+ stages: `flex items-center gap-1.5 overflow-x-auto no-scrollbar` (horizontal scroll). The choice is made inline via `cn()`.
+- **Real-time Stage Item Counts**: Each stage pill badge shows the number of mock tests and question banks filtered for that stage using live computed counts. Badge is hidden when count is 0.
+- **Conditional Render Guard**: Only renders when `currentExam.stages.length > 1 && !currentExam.stages.includes('Single Stage')`. Single-stage exams never display this bar.
+- **URL Sync**: Stage selection calls `handleStageSelect(st)` which writes `?stage=...` to the URL via `replaceState` for deep-linkable sharing.
+- **Dark mode anchor**: Uses `dark:bg-[#0B1528]` and `dark:bg-[#060B16]` (hardcoded deep-sapphire hex) — these are intentional brand dark tokens, not design system violations.
+
+---
+
+### `AdminExamStagePicker` (Multi-Select Examination Stages Hierarchy Pill Selector)
+
+File: `src/AdminPanel.tsx` (line ~3407–3469)
+Last updated: September 13, 2026
+
+| Property | Class / Implementation |
+| :--- | :--- |
+| **Background** | `bg-slate-100/70 dark:bg-slate-800/50` (section container), `bg-white dark:bg-slate-900` (status badge), `bg-brand-600` (selected pill), `bg-white dark:bg-slate-900` (unselected pill) |
+| **Border** | `border border-slate-200/80 dark:border-slate-700` (section container), `border border-slate-200 dark:border-slate-700` (status badge), `border-brand-700` (selected pill with `shadow-md shadow-brand-500/20`), `border-slate-200 dark:border-slate-700 hover:border-brand-400` (unselected pill) |
+| **Border radius** | `rounded-3xl` (section container), `rounded-xl` (individual stage pills), `rounded-lg` (status badge, Clear All button) |
+| **Text — primary** | `text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider` (section heading), `text-xs font-bold text-white` (selected pill label), `text-xs font-bold text-slate-700 dark:text-slate-300` (unselected pill label) |
+| **Text — secondary** | `text-xs text-slate-500 dark:text-slate-400` (section description), `text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-300` (status badge text) |
+| **Spacing** | `p-5 space-y-3.5 mt-2` (section container), `flex flex-wrap gap-2 pt-1` (pill grid), `px-3.5 py-1.5` (individual pills) |
+| **Hover state** | `hover:border-brand-400 hover:text-brand-600` (unselected pills), `hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40` (Clear All button) |
+| **Shadow** | `shadow-xs` (pills baseline), `shadow-md shadow-brand-500/20` (selected pill elevation) |
+| **Accent usage** | `bg-brand-600 border-brand-700` (selected pill), `bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 border-brand-200 dark:border-brand-800` (section icon box), `text-rose-500 hover:text-rose-600` (Clear All) |
+
+**Pattern notes:**
+- **Single Stage Mutual Exclusion**: Selecting "Single Stage" clears all other stages and locks the exam into unified display mode. Selecting any named stage auto-removes "Single Stage" from the array.
+- **Status Badge Auto-Label**: Header badge auto-switches between `⚡ Unified Mode` (0 stages or Single Stage only) and `🏆 N Stages Active` (multiple named stages). The `Clear All` button only appears when there are active selections.
+- **Check / Dot Indicator**: Selected pills display a `<Check className="w-3.5 h-3.5 stroke-[3]" />` icon. Unselected pills display a `<span className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />` neutral dot.
+- **Section Width**: `md:col-span-2` — occupies full width of a 2-column form grid, making it visually prominent as a key configuration section.
+- **Icon Box**: Section identity uses a `w-8 h-8 rounded-xl` icon container with the `<Layers />` icon — consistent with other admin form section headers in this project.
+
+---
+
+### `FlashcardBulkActionDock` (Floating Executive Bulk Selection Dock)
+
+File: `src/components/admin/AdminFlashcardsManager.tsx`
+Last updated: September 13, 2026
+
+| Property | Class / Implementation |
+| :--- | :--- |
+| **Background** | `bg-slate-900/95 backdrop-blur-md` (dock shell), `bg-brand-500` (count badge), `bg-rose-600 hover:bg-rose-500` (delete button) |
+| **Border** | `border border-slate-700/80` (dock shell), `border-slate-700` (divider `h-4 w-px`) |
+| **Border radius** | `rounded-2xl` (dock shell), `rounded-full` (count badge), `rounded-xl` (delete button) |
+| **Text — primary** | `font-extrabold text-white` (selected count title), `font-mono text-xs font-black text-white` (badge number) |
+| **Text — secondary** | `text-slate-400 font-medium` (total cards caption), `text-slate-300 hover:text-white font-medium hover:underline` (toggle link) |
+| **Spacing** | `fixed bottom-6 left-1/2 -translate-x-1/2 z-40 px-5 py-3 gap-4` |
+| **Hover state** | `hover:text-white hover:underline` (Select/Deselect All), `hover:text-slate-200` (Cancel), `hover:bg-rose-500 active:bg-rose-700` (Delete) |
+| **Shadow** | `shadow-2xl` (floating elevation), `shadow-md shadow-rose-600/30` (destructive button) |
+| **Accent usage** | Sapphire `bg-brand-500` for affirmative counter; Rose `bg-rose-600` for destructive confirmation |
+
+**Pattern notes:**
+- **Dynamic Mounting**: Renders exclusively when `selectedDeckIds.size > 0`. Animated smoothly with `animate-in fade-in slide-in-from-bottom-4 duration-200`.
+- **Card Impact Preview**: Directly calculates and displays total cascading child cards (`selectedDecksCardCount`) so administrators have full visibility before deleting.
+- **Card Selection Ring**: Selected deck cards dynamically switch from `border-slate-200` to `border-brand-500 bg-brand-50/15 ring-2 ring-brand-500/20` with a brand-filled checkbox `<Check className="w-3.5 h-3.5 stroke-[3]" />`.
+- **Safety Dialog**: Deleting triggers a modal previewing all selected deck titles, subjects, and card counts before invoking `examService.bulkDeleteFlashcardDecks`.
+
+---
+
+### `ExamDetailFlashcardDeckCard` (Exam Details Flashcard Deck Card)
+
+File: `src/App.tsx#L11882-L11930`
+Last updated: September 24, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Background** | `bg-white dark:bg-slate-900` (card surface), `bg-purple-50 dark:bg-purple-950/60` (subject pill), `bg-purple-600 hover:bg-purple-700` (action button) |
+| **Border** | `border border-slate-200/80 dark:border-slate-800` (card container), `border border-purple-200 dark:border-purple-800` (subject pill), `border-t border-slate-100 dark:border-slate-800/80` (card footer divider) |
+| **Border radius** | `rounded-[2rem]` (card container), `rounded-full` (subject badge), `rounded-xl` (study button) |
+| **Text — primary** | `font-extrabold text-base sm:text-lg text-slate-900 dark:text-white` (deck title) |
+| **Text — secondary** | `text-xs text-slate-500 dark:text-slate-400 line-clamp-2` (description), `text-xs font-bold text-slate-400 font-mono` (card count), `text-[10px] font-black uppercase tracking-wider text-purple-700 dark:text-purple-300` (subject tag) |
+| **Spacing** | `p-5 sm:p-6` (inner card padding), `space-y-3` (body content stack), `pt-4 mt-4` (footer divider spacing), `gap-4 sm:gap-5` (grid gap) |
+| **Hover state** | `hover:shadow-xl hover:-translate-y-1 transition-all duration-300` (card lift), `group-hover:text-purple-600 dark:group-hover:text-purple-400` (title highlight), `hover:bg-purple-700 active:scale-95` (button press) |
+| **Shadow** | `shadow-sm hover:shadow-xl` (card elevation), `shadow-sm` (study button) |
+| **Accent usage** | Purple domain branding (`bg-purple-600`, `text-purple-700`, `text-purple-500` clock icon) matching Spaced Repetition Flashcards identity across the platform |
+
+**Pattern notes:**
+- **Zero Raw Hex Standard**: Formally bound to design system tokens `dark:bg-slate-900` and `dark:border-slate-800` (raw hex `#0B1528` eliminated).
+- **Asynchronous Card Hydration**: The `Study Deck` button lazily queries `examService.getFlashcardsByDeckId(deck.id)` on tap, dynamically populates `examDeckCards`, and renders the full 3D `FlashcardStudyModal` overlay.
+- **Responsive 3-Column Card Grid**: Built with `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5` for clean breathing room on mobile viewports and balanced density on widescreen desktops.
+- **Card Truncation Guards**: Title uses `line-clamp-1` and description uses `line-clamp-2 leading-relaxed` so cards maintain uniform height regardless of description length.
+
+---
+
+### `ExamDetailFlashcardHeroBanner` (Spaced Repetition Memory Engine Hero & Empty-State Banner)
+
+File: `src/App.tsx#L11838-L11880`
+Last updated: September 24, 2026
+
+| Property | Class |
+| :--- | :--- |
+| **Background** | `bg-gradient-to-br from-purple-900/10 via-white to-indigo-900/10 dark:from-slate-950 dark:via-slate-900 dark:to-purple-950/40` (banner surface), `bg-purple-100/80 dark:bg-purple-950/80` (eyebrow badge), `bg-white/80 dark:bg-slate-800/80` (feature chips), `bg-purple-600 hover:bg-purple-700` (CTA button) |
+| **Border** | `border border-purple-200/80 dark:border-purple-900/40` (banner shell), `border border-purple-200 dark:border-purple-800` (eyebrow badge), `border border-slate-200/60 dark:border-slate-700` (feature chips) |
+| **Border radius** | `rounded-3xl` (outer container), `rounded-full` (eyebrow pill), `rounded-lg` (feature chips), `rounded-2xl` (CTA button) |
+| **Text — primary** | `text-lg sm:text-xl font-black text-slate-900 dark:text-white leading-tight` (hero headline) |
+| **Text — secondary** | `text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium leading-relaxed` (description), `text-[10px] font-bold text-slate-600 dark:text-slate-300` (feature chip text) |
+| **Spacing** | `p-5 sm:p-7` (banner padding), `space-y-3` (text column), `gap-6` (flex layout), `gap-2 pt-1` (feature chip cluster) |
+| **Hover state** | `hover:bg-purple-700 active:scale-95 transition-all` (CTA button) |
+| **Shadow** | `shadow-sm` (outer banner), `shadow-md shadow-purple-600/20` (CTA button) |
+| **Accent usage** | Subtle ambient watermark `Sparkles` icon (`opacity-5 dark:opacity-10`), purple badge with micro-icon, vibrant purple CTA |
+
+**Pattern notes:**
+- **Zero Raw Hex Standard**: Converted to semantic tokens `dark:from-slate-950` and `dark:via-slate-900` (raw hex `#0B1528` eliminated).
+- **Empty-State Conversion Anchor**: Appears when no flashcards have been generated yet for the current exam or stage, guiding students directly to the `/flashcards` hub with exam and stage URL parameters pre-populated.
+- **Ambient Watermark**: Uses an absolute positioned `Sparkles` icon in `-right-6 -bottom-6 w-44 h-44 pointer-events-none` with low opacity (`opacity-5 dark:opacity-10`) to provide high-end depth without distracting from typography.
+
+---
+
+### `DailyCurrentAffairsVisualSlide` (1080x1080 High-Impact Graphic Slide Engine)
+
+File: [`automations/ca_renderer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/ca_renderer.py)
+Last updated: September 24, 2026
+
+| Property | Class / Token |
+| :--- | :--- |
+| **Canvas Background** | `#0B0F19` to `#040814` adaptive deep canvas with 7-day layout variants (dot matrix, line grid, ambient halo glow, offset frame, ribbon, tech blueprint, executive gold rim) |
+| **Main Card Container** | Glassmorphic shell (`rgba(17, 24, 39, 0.85)` / `#1E293B`), `backdrop-filter: blur(24px)`, `border: 1.5px solid {border_color}`, `border-radius: 20px-32px`, `padding: 48px`, `box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 40px {glow_color}` |
+| **Category Pill Badge** | `padding: 12px 28px; border-radius: 30px; font-weight: 800; font-size: 19px; letter-spacing: 1px; text-transform: uppercase; background: {badge_bg}; color: #FFFFFF; box-shadow: 0 4px 20px {glow_color};` |
+| **Headline Typography** | `font-family: 'Plus Jakarta Sans', sans-serif; font-size: 44px; font-weight: 800; line-height: 1.25; color: #FFFFFF; margin-bottom: 32px; letter-spacing: -0.5px;` |
+| **Highlight Bullets** | `font-size: 24px; line-height: 1.52; color: #E2E8F0; font-weight: 500; gap: 20px;` with custom dot `►` (`#FFD166`, `15px`) and bold anchor keypoints `<b>` in `#FFD166` |
+| **Exam Takeaway Box** | `background: rgba(255, 255, 255, 0.05); border-left: 5px solid {primary_color}; border-radius: 14px; padding: 16px 22px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); backdrop-filter: blur(10px); margin-top: 26px;` |
+| **Takeaway Badge** | `background: rgba(255, 209, 102, 0.16); color: #FFD166; border: 1px solid rgba(255, 209, 102, 0.35); padding: 3px 10px; border-radius: 6px; font-size: 13px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase;` |
+| **Takeaway Text** | `font-size: 21px; line-height: 1.48; color: #F8FAFC; font-weight: 500;` |
+| **Footer Brand Stamp** | `border-top: 1px solid rgba(255, 255, 255, 0.12); padding-top: 24px;` with Indigo-Cyan gradient brand icon (`36x36px`, `rounded-10px`), domain `odishaexamprep.in` (`font-size: 20px; font-weight: 700; color: #F8FAFC`), and verified tag (`font-size: 19px; font-weight: 600; color: #94A3B8;`) |
+
+**Pattern notes:**
+- **Dynamic 9-Palette Category Theme Engine**: Automatically assigns high-contrast color palettes (Crimson Red, Royal Indigo, Emerald Green, Cyan Blue, Amber Gold, Electric Purple, Deep Orange, Mint Teal, Sapphire Blue) based on intelligent keyword matching (`KEYWORD_COLOR_MAP`).
+- **7-Day Dynamic Layout Rotation**: Rotates layout backgrounds, card borders, and ambient lighting across the 7 days of the week (`LAYOUT_VARIANTS[day_of_week]`) preventing audience visual fatigue on Telegram/Instagram/LinkedIn.
+- **Exam Focus & Static Takeaway Anchor**: Dedicated takeaway container prevents bottom card void, emphasizing high-yield exam takeaways (articles, headquarters, dates, constitutional provisions).
+- **Golden Keypoint Label Anchors (`#FFD166`)**: Highlights leading structural phrases in bullets (`<b>`) using `#FFD166` gold for instant visual hierarchy and rapid scanning.
+- **Zero Raw Emojis in Badges**: Category badges are strictly formatted as uppercase clean pill labels without emojis, preserving an executive, authoritative government exam aesthetic.
+
+---
+
+### `AdminAIFailoverTelegramAlert` (Autonomous AI Failover Real-Time Admin Telemetry Alert)
+
+File: [`automations/shared/telegram.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/telegram.py)
+Last updated: September 24, 2026
+
+| Property | Class / Implementation |
+| :--- | :--- |
+| **Alert Header** | `🚨 <b>AI FAILOVER ALERT — Fallback Model Engaged</b>` (High-priority alert banner) |
+| **Engine Identifier** | `⚙️ <b>Engine:</b> <code>{engine}</code>` (Monospace semantic token tag) |
+| **Timestamp Badge** | `🕒 <b>Timestamp:</b> {now_str}` (`%d-%b-%Y %H:%M:%S` standardized format) |
+| **Error Code Container** | `❌ <b>Primary AI (Gemini) Error:</b>\n<code>{error_snippet}</code>` (300-char truncated codeblock capturing HTTP 429/503/timeout) |
+| **Engaged Fallback AI** | `🔄 <b>Engaged Fallback AI:</b>\n<code>{fallback_model}</code>` (Monospace model slug, e.g. `nvidia/nemotron-4-340b-instruct`) |
+| **Task Context Line** | `📌 <b>Task Context:</b> {context_topic[:150]}` (150-char sanitised headline/prompt preview) |
+| **Notice Footer** | `<i>💡 Notice: Fallback AI was utilized to preserve pipeline continuity. Check Google AI Studio quota / rate limits.</i>` |
+| **Delivery Medium** | Direct Telegram Bot API (`https://api.telegram.org/bot{TOKEN}/sendMessage`) with `parse_mode: "HTML"`, `disable_web_page_preview: True`, `timeout: 15s` |
+
+**Pattern notes:**
+- **Zero Raw Hex Colors**: Rendered natively via Telegram HTML markup with semantic font emphasis (`<b>`, `<i>`, `<code>`).
+- **Immediate Push Delivery**: Dispatched the exact moment all Gemini models (`gemini-3.5-flash`, `gemini-3.5-flash-lite`, `gemini-3.6-flash`) fail or exhaust rate limits, before invoking the secondary fallback model.
+- **Fail-Safe String Sanitization**: Error messages and context topics are sliced (`[:300]` and `[:150]`) and HTML entities escaped to prevent Telegram parse errors from aborting the failover notification.
+- **Pipeline Non-Blocking**: Dispatched within a 15s timeout with silent exception trapping so an alert network issue never halts background content publishing.
+
+---
+
+### `AdminAutomationExecutionReport` (End-to-End Automation Pipeline Admin Execution Report)
+
+File: [`automations/shared/telegram.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/telegram.py)
+Last updated: September 24, 2026
+
+| Property | Class / Implementation |
+| :--- | :--- |
+| **Report Header** | `🗃️ <b>{engine_name} Execution Report</b>` (Title-cased engine title) |
+| **Content Title** | `📝 <b>Title:</b> {title}` (Sanitized notification or article title) |
+| **Target Board / Exam** | `🏢 <b>Board / Exam:</b> {org_or_exam}` (Verified board name, e.g. OPSC / OSSSC) |
+| **Live Portal URL** | `🌐 <b>Website Link:</b> {target_url}` (Direct clickable URL) |
+| **AI Model Telemetry** | Primary: `🤖 <b>AI Model:</b> ✅ PRIMARY — <code>{model}</code>`<br>Fallback: `🔄 <b>AI Model:</b> ⚠️ FALLBACK — <code>{model}</code>` |
+| **Multi-Channel Audit** | `📢 <b>Telegram Channel:</b> Published to Channel ✅`<br>`🟢 <b>WhatsApp Channel:</b> Published to Channel ✅`<br>`🔴 <b>YouTube Community:</b> Success ✅` |
+| **Pipeline Status Badge** | `✅ <b>Status:</b> SUCCESS` / `⚠️ <b>CONTENT SKIPPED / NOTICE</b>` / `❌ <b>AUTOMATION FAILED</b>` |
+| **Runner Queue Metrics** | `⏱️ <b>Automation Run Time:</b> {mins}m {secs}s`<br>`⏳ <b>Runner Queue Status:</b> 0s (Instant Execution ✅)` or `⚠️ Delayed by Xm Ys in runner queue` |
+| **Delivery Medium** | Direct Telegram Bot API (`https://api.telegram.org/bot{TOKEN}/sendMessage`) with `parse_mode: "HTML"`, `disable_web_page_preview: False`, fallback to plain text on HTML parse error |
+
+**Pattern notes:**
+- **Zero Raw Hex Colors**: Rendered via native Telegram HTML tags (`<b>`, `<code>`, `<i>`).
+- **Comprehensive Delivery Audit**: Confirms multi-channel publication (Telegram, WhatsApp Channel via Green API, YouTube Community Post via Playwright) in a single unified message.
+- **Queue Latency Detection**: Compares `GITHUB_RUN_STARTED_AT` with execution start time to instantly alert admin when GitHub Actions runner queues are congested (> 15s delay).
+- **Plain-Text Fallback Safety**: If Telegram API rejects malformed HTML tags from external scrape snippets, automatically strips HTML tags (`re.sub(r'<[^>]+>', '', msg)`) and retries instantly to guarantee admin receipt.
+
+---
+
+### `ZeroRepeatBatchRunnerToolbar` (Multi-Batch Review & 1-Click Publishing Toolbar)
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx)
+Last updated: September 24, 2026
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | `bg-white dark:bg-slate-900`, `bg-slate-100 dark:bg-slate-800` (inactive tab), `bg-black/20` (count pill) |
+| Border           | `border border-slate-200 dark:border-slate-700` |
+| Border radius    | `rounded-2xl` (container), `rounded-xl` (tabs & buttons), `rounded-full` (pills) |
+| Text — primary   | `text-slate-900 dark:text-slate-100`, `text-white` (active tabs & publish button) |
+| Text — secondary | `text-slate-500 dark:text-slate-400`, `text-slate-600 dark:text-slate-300` |
+| Spacing          | `p-3.5`, `px-3 py-1.5`, `px-3.5 py-1.5`, `gap-3`, `gap-1.5` |
+| Hover state      | `hover:bg-slate-200 dark:hover:bg-slate-700`, `hover:bg-emerald-500` |
+| Shadow           | `shadow-sm`, `shadow-xs` |
+| Accent usage     | `bg-brand-600`, `bg-indigo-600`, `bg-emerald-600`, `text-emerald-400`, `text-sky-400` |
+
+**Pattern notes:**
+- **Batch Granularity Control**: Supports viewing all batches together or inspecting one batch in isolation.
+- **1-Click Batch Target Publishing**: When filtering to a single batch (e.g. Batch 2), the publish button shifts from "Publish All" to "Publish Batch 2 (5 Qs)", cleanly slicing questions without touching other unreviewed batches.
+- **Continuous SortOrder Display**: Real-time counter reflects `existingCount + idx + 1` sequential sort orders, ensuring no UI confusion about numbering collisions.
+
+---
+
+### `ActiveRecallFlashcardReviewCard` (AI Flashcard Batch Review Card)
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx)
+Last updated: September 24, 2026
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | `bg-slate-50/80 dark:bg-slate-800/50` (container), `bg-white dark:bg-slate-900` (front face & answer box), `bg-purple-50/70 dark:bg-purple-950/40` (back face) |
+| Border           | `border border-slate-200 dark:border-slate-700`, `border-purple-200/80 dark:border-purple-800/60` |
+| Border radius    | `rounded-2xl` (card), `rounded-xl` (faces & index badge), `rounded-full` (archetype badges) |
+| Text — primary   | `text-slate-900 dark:text-slate-100` |
+| Text — secondary | `text-slate-700 dark:text-slate-300`, `text-slate-500 dark:text-slate-400` |
+| Spacing          | `p-5` (card), `p-3.5` (faces), `p-3` (answer box), `space-y-4`, `space-y-1.5` |
+| Hover state      | `hover:border-purple-400 dark:hover:border-purple-600 transition-all` |
+| Shadow           | `shadow-2xs`, `shadow-sm` |
+| Accent usage     | `bg-brand-600` (index), `bg-purple-100 dark:bg-purple-950/80` (statutory), `bg-blue-100` (threshold), `bg-amber-100` (exception), `bg-emerald-100` (chronology), `bg-rose-100` (confusing pair) |
+
+**Pattern notes:**
+- **2-Sided Active Recall Architecture**: Strictly differentiates the Front Trigger (Clean White / Dark Slate) from the Back Target Answer (Subtle Purple Tint / Emerald Header).
+- **In-Place KaTeX Math Support**: Both front prompt and back answer render through `<MathTextRenderer text={...} />`.
+- **Cognitive Archetype Visual Hierarchy**: Employs distinct color-coded semantic pills for instant cognitive categorization.
+
+---
+
+### `ZeroRepeatBatchMultiplierControls` (Questions & Batches Multiplier Control Suite)
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx)
+Last updated: September 24, 2026
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | `bg-white dark:bg-slate-900` (inputs & inactive presets), `bg-indigo-50/90 dark:bg-indigo-950/40` (target summary badge), `bg-indigo-600` (active preset) |
+| Border           | `border border-slate-200 dark:border-slate-700`, `border-indigo-200 dark:border-indigo-800/80`, `border-slate-300 dark:border-slate-600` (inputs) |
+| Border radius    | `rounded-2xl` (container), `rounded-xl` (presets, inputs & summary badge) |
+| Text — primary   | `text-slate-900 dark:text-white`, `text-indigo-700 dark:text-indigo-300` |
+| Text — secondary | `text-slate-700 dark:text-slate-300`, `text-slate-500 dark:text-slate-400`, `text-slate-600 dark:text-slate-300` |
+| Spacing          | `p-4` (container), `py-1.5 px-2.5` (presets/inputs), `p-2` (summary badge), `gap-1.5`, `gap-2`, `mb-2` |
+| Hover state      | `hover:border-indigo-500 transition-all` |
+| Shadow           | `shadow-sm`, `shadow-xs` |
+| Accent usage     | `bg-indigo-600`, `text-indigo-600 dark:text-indigo-400`, `underline decoration-indigo-500` |
+
+**Pattern notes:**
+- **Synchronized Multiplier Formula**: Displays real-time multiplication: `{stage2QuestionCount} Qs × {stage2BatchCount} Batches = {total} Total Qs` with an underlined indigo total accent.
+- **Dual-Input Mode**: Quick presets `[1, 2, 3, 4, 5, 10]` alongside a bounded numeric input (`min={1} max={20}`) for custom batch scaling.
+- **Design System Token Integrity**: Uses only semantic tokens (`bg-indigo-50`, `dark:bg-slate-900`, `border-slate-200`, etc.), with zero raw hex codes.
+
+---
+
+### `ActiveRecallMemoryVolumeSuite` (Active Recall Flashcard Memory Volume & Natural Density Sizing Suite)
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx)
+Last updated: September 24, 2026
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | `bg-purple-600 text-white` (active mode card & active cap pill), `bg-white dark:bg-slate-900` (inactive cards & pills), `bg-purple-100 dark:bg-purple-950` (mode badges & footer pill) |
+| Border           | `border-purple-600`, `border-purple-200/80 dark:border-purple-800/50`, `border-purple-200/60 dark:border-purple-800/40` |
+| Border radius    | `rounded-xl` (mode cards & cap pills), `rounded-md` / `rounded-full` (status badges & counter circle) |
+| Text — primary   | `text-white` (active state), `text-purple-900 dark:text-purple-300` (header label), `text-purple-700 dark:text-purple-300` |
+| Text — secondary | `text-purple-100` (active description), `text-slate-500 dark:text-slate-400`, `text-slate-700 dark:text-slate-300` |
+| Spacing          | `p-3` (mode cards), `py-1.5` (cap pills), `gap-2` (grid), `gap-1.5` (pill row), `mb-3`, `pt-2.5` |
+| Hover state      | `hover:border-purple-400 transition-all cursor-pointer` |
+| Shadow           | `shadow-sm`, `ring-2 ring-purple-500/30` |
+| Accent usage     | `bg-purple-600`, `text-purple-600`, `bg-purple-100 dark:bg-purple-950` |
+
+---
+
+### `ActiveRecallMultiDeckPipelineCard` (Multi-Deck Stage 2 Generation Pipeline Card)
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L7010-L7062)
+Last updated: September 25, 2026
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | `bg-slate-900/60` (default queued), `bg-brand-500/10` (active runner), `bg-emerald-500/5` (completed), `bg-rose-500/5` (failed) |
+| Border           | `border-slate-800` (default), `border-brand-500/40` (active), `border-emerald-500/30` (completed), `border-rose-500/30` (failed) |
+| Border radius    | `rounded-xl` (container card), `rounded-full` (status badges), `rounded` (micro-step pills) |
+| Text — primary   | `text-slate-200` (deck title), `text-emerald-300` (saved count), `text-brand-300` (active batch) |
+| Text — secondary | `text-slate-400`, `text-slate-500` (sub-subject hierarchy), `text-slate-600` (pipeline arrows) |
+| Spacing          | `p-3` (card padding), `space-y-2`, `gap-2` (header row), `gap-1` (micro-indicator row), `pt-1` (step divider) |
+| Hover state      | Transition-all subtle border response |
+| Shadow           | `shadow-sm shadow-brand-500/10` (active runner state) |
+---
+
+### `AIStage2QuestionReviewCard` (Multi-Stage MCQ Question Review Card)
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L7604-L7820)
+Last updated: September 25, 2026
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | `bg-slate-50/80 dark:bg-slate-800/50` (card container), `bg-emerald-50 dark:bg-emerald-950/60` (correct option), `bg-white dark:bg-slate-900` (distractor option), `bg-slate-100/60 dark:bg-slate-800/40` (explanation box) |
+| Border           | `border-slate-200 dark:border-slate-700` (container), `border-emerald-500` (correct option), `border-slate-200 dark:border-slate-700` (distractors), `border-slate-200/60 dark:border-slate-700/60` (explanation) |
+| Border radius    | `rounded-2xl` (outer card), `rounded-xl` (options, question badge & explanation), `rounded-lg` (letter badges A-D), `rounded-full` (topic & status pills) |
+| Text — primary   | `text-slate-900 dark:text-white` (question stem & explanation header), `text-emerald-900 dark:text-emerald-200 font-bold` (correct option) |
+| Text — secondary | `text-slate-700 dark:text-slate-300` (distractors), `text-slate-600 dark:text-slate-400` (explanation body) |
+| Spacing          | `p-5` (card padding), `p-3` (options & explanation), `space-y-4` (card body), `gap-2.5` (2-column options grid), `gap-2` (header badges) |
+| Hover state      | `hover:border-brand-500` (in edit mode), `cursor-pointer` |
+| Shadow           | `shadow-sm` (question index badge & correct option) |
+| Accent usage     | `bg-brand-600 text-white` (index badge), `bg-emerald-600 text-white` (correct letter pill), `bg-emerald-500/20 text-emerald-300` (consensus badge) |
+
+**Pattern notes:**
+- **2-Column Responsive Option Layout:** 4 options are displayed in a responsive 2-column grid (`grid grid-cols-1 sm:grid-cols-2 gap-2.5`), with clear uppercase letter pills (A, B, C, D).
+- **Verified Correct Answer Highlighting:** The correct answer automatically receives an emerald background tint (`bg-emerald-50 dark:bg-emerald-950/60`), green border (`border-emerald-500`), bold font weight, and an emerald check icon.
+- **Enterprise Quality Badges:** Displays batch number (`Batch N`), topic/syllabus slice, difficulty level (`EASY`, `MEDIUM`, `HARD`), consensus verification status (`Consensus Verified`), and syllabus grounding score (`% Syllabus Grounded`).
+- **LaTeX Math Support:** Stems, options, and explanations are parsed with `MathTextRenderer` for clean standard rendering of equations and plain units.
+
+---
+
+### `SubcategoryCurriculumFilterBar` (Dynamic Stage 1 Subcategory Target Selector)
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L4070-L4112)
+Last updated: September 25, 2026
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | Container: `bg-slate-50 dark:bg-slate-800/50`. Active button: `bg-brand-600 text-white`. Inactive button: `bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300`. Inactive tag: `bg-slate-100 dark:bg-slate-700`. Active tag: `bg-white/20 text-white`. |
+| Border           | Container: `border border-slate-200 dark:border-slate-700/80`. Active button: `border-brand-600`. Inactive button: `border-slate-200 dark:border-slate-700`. |
+| Border radius    | Container: `rounded-2xl`. Buttons: `rounded-xl`. Tag badges: `rounded`. |
+| Text — primary   | Active: `text-white font-bold`. Inactive: `text-slate-700 dark:text-slate-300 font-bold`. Label: `text-xs font-bold text-slate-700 dark:text-slate-300`. |
+| Text — secondary | Inactive tag: `text-slate-500 dark:text-slate-400 font-bold uppercase text-[9px]`. |
+| Spacing          | Container: `p-4 space-y-2.5`. Buttons: `px-3 py-1.5 gap-1.5`. Tag badges: `px-1.5 py-0.5`. Button group: `flex flex-wrap gap-2`. |
+| Hover state      | Inactive button: `hover:bg-slate-100 dark:hover:bg-slate-700 transition-all cursor-pointer`. |
+| Shadow           | Active button: `shadow-xs`. |
+| Accent usage     | `bg-brand-600 text-white` (active primary brand highlight). |
+
+**Pattern notes:**
+- **Dynamic Curriculum Section Awareness**: Dynamically presents the relevant subcategories for the selected parent section (e.g. Mock Tests $\rightarrow$ Full Length, Sectional, PYQ Papers, Daily Benchmarks).
+- **Naming Pattern & Count Auto-Sync**: Selecting a subcategory pill automatically syncs default generation counts (e.g. 10 for Full Mock / PYQ, 8 for Daily/Weekly Benchmark) and loads the corresponding naming preset pattern (`#[01-10]`, `#[01-08]`).
+- **Design System Token Integrity**: Uses only semantic tokens (`bg-brand-600`, `dark:bg-slate-800/50`, `border-slate-200 dark:border-slate-700/80`), with zero raw hex codes.
+
+---
+
+### `SectionalCurriculumCardSelector` (4-Section Curriculum Card Selector)
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L3969-L4065)
+Last updated: September 25, 2026
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | Inactive card: `bg-slate-50/70 dark:bg-slate-800/40`. Practice Test Active: `bg-indigo-500/10`. Mock Test Active: `bg-brand-500/10`. Question Bank Active: `bg-emerald-500/10`. Flashcards Active: `bg-purple-500/10`. All-Inclusive Active: `bg-gradient-to-br from-amber-500/10 via-brand-500/10 to-transparent`. Inactive icon box: `bg-white dark:bg-slate-800`. Active icon box: Section accent solid background (`bg-indigo-600`, `bg-brand-600`, etc.) `text-white`. |
+| Border           | Inactive: `border border-slate-200 dark:border-slate-800`. Active: Accent border (`border-indigo-500/60`, `border-brand-500/60`, `border-emerald-500/60`, etc.) with `ring-2 ring-indigo-500/30`. |
+| Border radius    | Container cards: `rounded-2xl`. Icon boxes: `rounded-xl`. Tier badges: `rounded-full`. |
+| Text — primary   | `font-bold text-xs sm:text-sm text-slate-900 dark:text-white leading-snug`. |
+| Text — secondary | `text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed`. Tier badge: `text-[9px] font-black uppercase px-2 py-0.5`. |
+| Spacing          | Cards: `p-3.5 sm:p-4 gap-3`. Grid: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3`. Icon box: `w-8 h-8`. |
+| Hover state      | Inactive: `hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100/60 dark:hover:bg-slate-800/80 transition-all cursor-pointer`. |
+| Shadow           | Active state: `shadow-md`. |
+| Accent usage     | `bg-indigo-600 text-white` (Practice Test), `bg-brand-600 text-white` (Mock Test), `bg-emerald-600 text-white` (Question Bank), `bg-purple-600 text-white` (Flashcards). |
+
+**Pattern notes:**
+- **Dynamic Exam Defaults Auto-Switching**: Selecting `practice_test` automatically syncs the duration and total marks to 30 mins / 30 marks (speed & drill rhythm) with 0 negative marking, whereas selecting `mock_test` syncs to 120 mins / 100 marks (official examination simulation).
+- **Responsive 4-Tier Grid**: Adapts cleanly from single-column on mobile (`grid-cols-1`) to 2 columns on tablet (`sm:grid-cols-2`) and 4 columns on desktop (`lg:grid-cols-4`).
+- **Zero Raw Hex**: All accents and rings leverage project Tailwind semantic tokens.
+
+
+
+
+
+---
+
+### MockTestSubcategoryPillBar
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L4070-L4112)
+Last updated: September 25, 2026
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | Container panel: `bg-slate-50 dark:bg-slate-800/50`. Active pill: `bg-brand-600`. Inactive pill: `bg-white dark:bg-slate-800`. Active badge chip: `bg-white/20`. Inactive badge chip: `bg-slate-100 dark:bg-slate-700`. |
+| Border           | Container panel: `border border-slate-200 dark:border-slate-700/80`. Active pill: `border-brand-600`. Inactive pill: `border-slate-200 dark:border-slate-700`. |
+| Border radius    | Container panel: `rounded-2xl`. Pill buttons: `rounded-xl`. Badge chips inside pills: `rounded` (bare, no suffix = `rounded-sm`). |
+| Text — primary   | Active pill label: `text-white`. Inactive pill label: `text-slate-700 dark:text-slate-300`. Both: `text-xs font-bold`. |
+| Text — secondary | Badge chip text (active): `text-[9px] text-white font-bold uppercase`. Badge chip text (inactive): `text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase`. Section label: `text-xs font-bold text-slate-700 dark:text-slate-300`. |
+| Spacing          | Container: `p-4 space-y-2.5`. Pill row: `flex flex-wrap gap-2`. Pill padding: `px-3 py-1.5`. Pill inner gap: `gap-1.5`. Badge chip: `px-1.5 py-0.5`. |
+| Hover state      | Inactive pill: `hover:bg-slate-100 dark:hover:bg-slate-700 transition-all cursor-pointer`. Active pill: no hover override (stays brand-600). |
+| Shadow           | Active pill: `shadow-xs`. |
+| Accent usage     | Active pill accent: `bg-brand-600 text-white border-brand-600`. Shared across all 4 subcategories — brand is the single accent for this component (no per-subcategory accent splitting unlike `SectionalCurriculumCardSelector`). |
+
+**Pattern notes:**
+- **4 Mock Test subcategory pills in fixed order**: `full-length` (Full-Length Mock Tests · "Most Popular"), `sectional` (Sectional Tests · "Recommended"), `pyq` (Official PYQ Tests · "High Yield"), `daily` (Daily/Weekly Benchmark · "Consistency"). Do not reorder.
+- **Single accent throughout**: Unlike `SectionalCurriculumCardSelector` which uses per-section accent colors (indigo, brand, emerald, purple), this component uses **brand-600 exclusively** for the active state across all 4 subcategory options.
+- **Template auto-sync on selection**: On pill click, the component calls `SECTION_NAMING_PRESETS[stage1MainSection]` to find the matched preset and auto-sets `stage1NamingPattern`. The naming templates are:
+  - `full-length` → `Full Mock Test #[01-10]`
+  - `sectional` → `[Subject] Sectional Test #[01-05]`
+  - `pyq` → `Official PYQ Paper #[01-10]`
+  - `daily` → `Weekly Benchmark Test #[01-08]`
+- **Count auto-reset**: On subcategory switch, if `sub.id === 'all'` → `stage1Count = 8`, otherwise → `stage1Count = 5`.
+- **Generator downstream effect**: The selected `stage1SubCategory` string is forwarded as `subCategory` to `generateExamQuestions` in `serverAiGenerator.ts`, which routes to whole-syllabus mode for `full-length`, `pyq`, and `daily`, and to chapter-locked mode for `sectional`.
+- **Zero raw hex**: All colors use design system tokens — `brand-600` for mock test accent, `slate-*` for neutrals.
 

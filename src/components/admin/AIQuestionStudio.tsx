@@ -55,7 +55,9 @@ import {
   Cpu,
   Terminal,
   StopCircle,
-  Search
+  Search,
+  Cloud,
+  Loader2
 } from 'lucide-react';
 import { Exam, MockTest, QuestionBank, examService } from '../../lib/examService';
 import { cacheService } from '../../lib/cacheService';
@@ -65,6 +67,7 @@ import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
 import { supabase } from '../../lib/supabase';
 import { parseSyllabusHierarchy } from '../../lib/syllabusParser';
+import type { FlashcardDeck, Flashcard } from '../../lib/srsEngine';
 
 export interface QueueFeedEvent {
   id: string;
@@ -233,7 +236,7 @@ export interface SubCategoryItem {
 }
 
 export interface CurriculumSectionItem {
-  id: 'all_sections' | 'practice_test' | 'mock_test' | 'question_bank';
+  id: 'all_sections' | 'practice_test' | 'mock_test' | 'question_bank' | 'flashcards';
   name: string;
   shortName: string;
   badge: string;
@@ -246,14 +249,14 @@ export interface CurriculumSectionItem {
 export const CURRICULUM_SECTIONS: CurriculumSectionItem[] = [
   {
     id: 'all_sections',
-    name: 'All-Inclusive 3-Section Curriculum Suite',
+    name: 'All-Inclusive 4-Section Curriculum Suite',
     shortName: 'Full Suite (1-Click)',
-    badge: '12-Tier Architecture',
-    desc: 'Simultaneously architect balanced tests across Practice Tests, Mock Tests, and Question Banks based on syllabus.',
+    badge: '16-Tier Architecture',
+    desc: 'Simultaneously architect balanced tests across Practice Tests, Mock Tests, Question Banks, and Flashcards based on syllabus.',
     icon: Sparkles,
     accent: 'amber',
     subcategories: [
-      { id: 'all', name: 'All 3 Sections (Practice + Mock + Banks)', tag: '1-Click Suite', desc: 'Generates balanced test coverage across all 12 subcategories.' }
+      { id: 'all', name: 'All 4 Sections (Practice + Mock + Banks + Flashcards)', tag: '1-Click Suite', desc: 'Generates balanced coverage across all curriculum subcategories.' }
     ]
   },
   {
@@ -300,6 +303,16 @@ export const CURRICULUM_SECTIONS: CurriculumSectionItem[] = [
       { id: 'revision-sets', name: 'Last-Minute Revision Sets', tag: 'Formula Booster', desc: 'Compact formula & key concept quick summaries.' },
       { id: 'pyq-collections', name: 'PYQ Question Archives', tag: 'Multi-Year Archives', desc: 'Multi-year previous paper archives with complete solutions.' },
     ]
+  },
+  {
+    id: 'flashcards',
+    name: 'Section 4: Active Recall Flashcards (Smart SRS)',
+    shortName: 'Flashcards',
+    badge: 'Step 4 Active Recall',
+    desc: 'Spaced repetition flashcard decks auto-generated directly from syllabus hierarchy placeholders.',
+    icon: Layers,
+    accent: 'purple',
+    subcategories: []
   }
 ];
 
@@ -402,13 +415,50 @@ export const SECTION_NAMING_PRESETS: Record<string, NamingPreset[]> = {
       description: 'Regular benchmark test e.g. "Weekly Benchmark Test #01"'
     }
   ],
+  flashcards: [
+    {
+      id: 'sub-chap',
+      name: '[Sub-Subject] · [Chapter]',
+      badge: 'Recommended',
+      template: '[Sub-Subject] · [Chapter]',
+      description: 'Granular chapter active recall deck prefixed by sub-subject'
+    },
+    {
+      id: 'subj-sub-chap',
+      name: '[Subject]: [Sub-Subject] - [Chapter]',
+      badge: '3-Tier',
+      template: '[Subject]: [Sub-Subject] - [Chapter]',
+      description: 'Full 3-tier hierarchy: Subject, Sub-Subject & Chapter'
+    },
+    {
+      id: 'subj-chap',
+      name: '[Subject] · [Chapter]',
+      badge: 'Subject & Chapter',
+      template: '[Subject] · [Chapter]',
+      description: 'Direct subject and chapter recall deck'
+    },
+    {
+      id: 'chap-only',
+      name: '[Chapter]',
+      badge: 'Topic Only',
+      template: '[Chapter]',
+      description: 'Clean topic/chapter title extracted directly from syllabus'
+    },
+    {
+      id: 'sub-only',
+      name: '[Sub-Subject]',
+      badge: 'Sub-Subject Only',
+      template: '[Sub-Subject]',
+      description: 'Deck for each sub-subject / unit from syllabus'
+    }
+  ],
   all_sections: [
     {
       id: 'all',
-      name: 'All 3 Sections (Practice + Mock + Banks)',
+      name: 'All 4 Sections (Practice + Mock + Banks + Flashcards)',
       badge: '1-Click Suite',
       template: '[Chapter] Set',
-      description: 'Balanced tests across all 12 subcategories'
+      description: 'Balanced tests & cards across all subcategories'
     }
   ]
 };
@@ -420,6 +470,28 @@ export interface AIQuestionStudioProps {
   onRefreshCatalog: () => void;
   preselectedExamId?: string;
   preselectedTestId?: string;
+}
+
+/**
+ * Safely extracts the examination stage for a MockTest or QuestionBank.
+ * Checks direct property, JSON seriesId, or JSON tagline.
+ */
+export function getItemStage(item: any): string {
+  if (!item) return '';
+  if (item.stage) return String(item.stage).trim();
+  if (item.seriesId && typeof item.seriesId === 'string' && item.seriesId.startsWith('{')) {
+    try {
+      const parsed = JSON.parse(item.seriesId);
+      if (parsed && parsed.stage) return String(parsed.stage).trim();
+    } catch {}
+  }
+  if (item.tagline && typeof item.tagline === 'string' && item.tagline.startsWith('{')) {
+    try {
+      const parsed = JSON.parse(item.tagline);
+      if (parsed && parsed.stage) return String(parsed.stage).trim();
+    } catch {}
+  }
+  return '';
 }
 
 export function AIQuestionStudio({
@@ -478,6 +550,30 @@ export function AIQuestionStudio({
   const [selectedExamId, setSelectedExamId] = useState<string>(preselectedExamId || exams[0]?.id || '');
   const selectedExam = useMemo(() => exams.find(e => e.id === selectedExamId), [exams, selectedExamId]);
 
+  // Extract configured multi-stages for selected target exam
+  const examConfiguredStages = useMemo(() => {
+    if (!selectedExam || !Array.isArray(selectedExam.stages)) return [];
+    return selectedExam.stages.filter(s => s && s.trim() && s.trim() !== 'Single Stage');
+  }, [selectedExam]);
+
+  // Active Target Examination Stage (e.g. "Prelims", "Mains", or "" for All Stages / General)
+  const [selectedExamStage, setSelectedExamStage] = useState<string>('');
+
+  // Reactive Auto-load: When selectedExam or its stages update in real time, auto-sync selectedExamStage
+  useEffect(() => {
+    if (examConfiguredStages.length > 0) {
+      setSelectedExamStage(prev => (prev && examConfiguredStages.includes(prev)) ? prev : examConfiguredStages[0]);
+    } else {
+      setSelectedExamStage('');
+    }
+    setStage2StageFilter('all');
+    setMultiBankStageFilter('all');
+  }, [examConfiguredStages]);
+
+  // Stage 2 & Multi-Bank Stage Filter State
+  const [stage2StageFilter, setStage2StageFilter] = useState<string>('all');
+  const [multiBankStageFilter, setMultiBankStageFilter] = useState<string>('all');
+
   // Dual-Anchor Governance Suite: Section 1 (Syllabus & PYQ Blueprint) & Section 2 (Directives & Rules)
   const [isGovernanceExpanded, setIsGovernanceExpanded] = useState<boolean>(true);
   const [selectedSyllabusPreset, setSelectedSyllabusPreset] = useState<string>('opsc-cgl-prelims');
@@ -497,9 +593,9 @@ export function AIQuestionStudio({
   const directivesFileInputRef = useRef<HTMLInputElement>(null);
 
   // -------------------------------------------------------------
-  // STAGE 1: 3-Section x 4-Subcategory Curriculum Architect State
+  // STAGE 1: 4-Section x 4-Subcategory Curriculum Architect State
   // -------------------------------------------------------------
-  const [stage1MainSection, setStage1MainSection] = useState<'all_sections' | 'practice_test' | 'mock_test' | 'question_bank'>('all_sections');
+  const [stage1MainSection, setStage1MainSection] = useState<'all_sections' | 'practice_test' | 'mock_test' | 'question_bank' | 'flashcards'>('all_sections');
   const [stage1SubCategory, setStage1SubCategory] = useState<string>('all');
   const [stage1Count, setStage1Count] = useState<number>(12);
   const [stage1SubjectFocus, setStage1SubjectFocus] = useState<string>('Comprehensive Full Syllabus');
@@ -507,6 +603,21 @@ export function AIQuestionStudio({
   const [selectedNamingPresetId, setSelectedNamingPresetId] = useState<string>('default_all');
   const [stage1NamingPattern, setStage1NamingPattern] = useState<string>(() => SECTION_NAMING_PRESETS.all_sections[0]?.template || '');
   const [isGeneratingStage1, setIsGeneratingStage1] = useState(false);
+
+  // Flashcards state in AI Studio
+  const [flashcardDecks, setFlashcardDecks] = useState<FlashcardDeck[]>([]);
+
+  const loadFlashcardDecks = async () => {
+    try {
+      const data = await examService.getAllFlashcardDecks(undefined, true);
+      setFlashcardDecks(data || []);
+    } catch {}
+  };
+
+  useEffect(() => {
+    loadFlashcardDecks();
+  }, []);
+
   const [generatedStructures, setGeneratedStructures] = useState<any[]>(() => {
     try {
       const saved = sessionStorage.getItem('oep_ai_studio_structures');
@@ -558,12 +669,15 @@ export function AIQuestionStudio({
   // -------------------------------------------------------------
   // STAGE 2: Questions Generator State
   // -------------------------------------------------------------
-  const [stage2TargetType, setStage2TargetType] = useState<'mock_test' | 'practice_test' | 'question_bank'>('mock_test');
+  const [stage2TargetType, setStage2TargetType] = useState<'mock_test' | 'practice_test' | 'question_bank' | 'flashcards'>('mock_test');
   const [stage2SubCategory, setStage2SubCategory] = useState<string>('all');
   const [stage2SelectedTestId, setStage2SelectedTestId] = useState<string>(preselectedTestId || '');
   const [stage2TestTitle, setStage2TestTitle] = useState<string>('');
   const [stage2Subject, setStage2Subject] = useState<string>('Comprehensive Full Syllabus (All Subjects Balanced)');
+  const [stage2SubSubject, setStage2SubSubject] = useState<string>('');
+  const [stage2Chapter, setStage2Chapter] = useState<string>('');
   const [stage2QuestionCount, setStage2QuestionCount] = useState<number>(5);
+  const [stage2NaturalDensity, setStage2NaturalDensity] = useState<boolean>(true);
   const [stage2BatchCount, setStage2BatchCount] = useState<number>(1);
   const [currentRunningBatch, setCurrentRunningBatch] = useState<number>(1);
   const [isBatchRunnerActive, setIsBatchRunnerActive] = useState<boolean>(false);
@@ -773,6 +887,21 @@ export function AIQuestionStudio({
     return { fullLength, sectional, pyq, daily };
   }, [examMockTests]);
 
+  // Flashcard Decks for selected exam and stage
+  const examFlashcardDecks = useMemo(() => {
+    return flashcardDecks.filter(d => {
+      const matchesExam = !d.exam_id || d.exam_id === selectedExamId || d.exam_id === 'all';
+      if (!matchesExam) return false;
+      if (stage2StageFilter !== 'all') {
+        const itemStage = d.stage || 'All Stages';
+        if (itemStage !== 'All Stages' && itemStage.toLowerCase() !== stage2StageFilter.toLowerCase()) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [flashcardDecks, selectedExamId, stage2StageFilter]);
+
   // Currently selected database item
   const selectedItem = useMemo(() => {
     if (!stage2SelectedTestId) return null;
@@ -782,8 +911,11 @@ export function AIQuestionStudio({
     if (stage2TargetType === 'practice_test') {
       return examPracticeSets.find(b => b.id === stage2SelectedTestId) || null;
     }
+    if (stage2TargetType === 'flashcards') {
+      return examFlashcardDecks.find(d => d.id === stage2SelectedTestId) || null;
+    }
     return examQuestionBanks.find(b => b.id === stage2SelectedTestId) || null;
-  }, [stage2SelectedTestId, stage2TargetType, examMockTests, examPracticeSets, examQuestionBanks]);
+  }, [stage2SelectedTestId, stage2TargetType, examMockTests, examPracticeSets, examQuestionBanks, examFlashcardDecks]);
 
   // Sync selected exam if prop changes
   useEffect(() => {
@@ -800,8 +932,24 @@ export function AIQuestionStudio({
       if (matchedMock) {
         setStage2TargetType('mock_test');
         setStage2TestTitle(matchedMock.title);
+        const stage = getItemStage(matchedMock);
+        if (stage && stage !== 'All Stages') {
+          setSelectedExamStage(stage);
+          setStage2StageFilter(stage);
+        }
         if (/full mock|full-length|pyq paper/i.test(matchedMock.title)) {
           setStage2Subject('Comprehensive Full Syllabus (All Subjects Balanced)');
+        } else {
+          let parsedSubject = '';
+          if (matchedMock.seriesId) {
+            try {
+              if (matchedMock.seriesId.startsWith('{')) {
+                parsedSubject = JSON.parse(matchedMock.seriesId).subject || '';
+              }
+            } catch {}
+          }
+          const cleanSubject = parsedSubject || matchedMock.title.replace(/^Sectional:\s*/i, '').replace(/^Paper\s*-\s*\w+[:\s]*/i, '');
+          setStage2Subject(cleanSubject);
         }
       } else {
         const matchedBank = questionBanks.find(b => b.id === preselectedTestId);
@@ -809,11 +957,28 @@ export function AIQuestionStudio({
           const isPractice = (matchedBank.target_mode || 'both') === 'practice' || matchedBank.hasPracticeMode;
           setStage2TargetType(isPractice ? 'practice_test' : 'question_bank');
           setStage2TestTitle(matchedBank.title);
+          const stage = getItemStage(matchedBank);
+          if (stage && stage !== 'All Stages') {
+            setSelectedExamStage(stage);
+            setStage2StageFilter(stage);
+          }
           setStage2Subject(matchedBank.tagline?.replace(/^Subject:\s*/i, '') || matchedBank.type || matchedBank.title || 'Comprehensive Full Syllabus (All Subjects Balanced)');
+        } else {
+          const matchedDeck = flashcardDecks.find(d => d.id === preselectedTestId);
+          if (matchedDeck) {
+            setStage2TargetType('flashcards');
+            setStage2TestTitle(matchedDeck.title);
+            const stage = getItemStage(matchedDeck);
+            if (stage && stage !== 'All Stages') {
+              setSelectedExamStage(stage);
+              setStage2StageFilter(stage);
+            }
+            setStage2Subject(matchedDeck.subject || matchedDeck.title);
+          }
         }
       }
     }
-  }, [preselectedTestId, mockTests, questionBanks]);
+  }, [preselectedTestId, mockTests, questionBanks, flashcardDecks]);
 
   // Save custom API key locally with strict precedence & auto-switch model provider
   const handleSaveApiKey = (val: string) => {
@@ -973,15 +1138,22 @@ export function AIQuestionStudio({
     };
   }, [apiKey, customBaseUrl]);
 
-  // Automatically switch syllabus & directives per exam with sticky memory
+  const [isSavingSyllabusToCloud, setIsSavingSyllabusToCloud] = useState(false);
+
+  // Automatically switch syllabus & directives per exam & stage with sticky memory & cloud sync
   useEffect(() => {
     if (!selectedExamId) return;
 
-    const savedSyllabus = localStorage.getItem(`oep_syllabus_${selectedExamId}`);
-    const savedDirectives = localStorage.getItem(`oep_directives_${selectedExamId}`);
+    let isMounted = true;
+    const currentStageKey = selectedExamStage || 'All Stages';
 
-    if (savedSyllabus) {
-      setSyllabusMarkdown(savedSyllabus);
+    // 1. Instant optimistic load from stage-specific local cache
+    const savedStageSyllabus = localStorage.getItem(`oep_syllabus_${selectedExamId}_${currentStageKey}`);
+    const savedGlobalSyllabus = localStorage.getItem(`oep_syllabus_${selectedExamId}`);
+    const initialSyllabus = savedStageSyllabus || savedGlobalSyllabus;
+
+    if (initialSyllabus) {
+      setSyllabusMarkdown(initialSyllabus);
     } else {
       // Smart default based on exam name
       const name = (selectedExam?.name || '').toLowerCase();
@@ -1000,18 +1172,43 @@ export function AIQuestionStudio({
       }
     }
 
-    if (savedDirectives) {
-      setDirectivesMarkdown(savedDirectives);
+    const savedStageDirectives = localStorage.getItem(`oep_directives_${selectedExamId}_${currentStageKey}`);
+    const savedGlobalDirectives = localStorage.getItem(`oep_directives_${selectedExamId}`);
+    const initialDirectives = savedStageDirectives || savedGlobalDirectives;
+
+    if (initialDirectives) {
+      setDirectivesMarkdown(initialDirectives);
     } else {
       setSelectedDirectivesPreset('standard-state-mcq');
       setDirectivesMarkdown(DIRECTIVES_PRESETS['standard-state-mcq'].markdown);
     }
-  }, [selectedExamId, selectedExam]);
 
-  // Update handlers with automatic per-exam sticky localStorage caching
+    // 2. Fetch authoritative cloud syllabus from Supabase
+    examService.getExamSyllabus(selectedExamId, currentStageKey).then(cloud => {
+      if (!isMounted || !cloud) return;
+      if (cloud.syllabus_markdown) {
+        setSyllabusMarkdown(cloud.syllabus_markdown);
+        localStorage.setItem(`oep_syllabus_${selectedExamId}_${currentStageKey}`, cloud.syllabus_markdown);
+      }
+      if (cloud.directives_markdown) {
+        setDirectivesMarkdown(cloud.directives_markdown);
+        localStorage.setItem(`oep_directives_${selectedExamId}_${currentStageKey}`, cloud.directives_markdown);
+      }
+    }).catch(err => {
+      console.warn(`[AIStudio] Cloud syllabus fetch warning:`, err);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedExamId, selectedExamStage, selectedExam]);
+
+  // Update handlers with automatic per-stage sticky localStorage caching
   const handleUpdateSyllabus = (val: string) => {
     setSyllabusMarkdown(val);
     if (selectedExamId) {
+      const currentStageKey = selectedExamStage || 'All Stages';
+      localStorage.setItem(`oep_syllabus_${selectedExamId}_${currentStageKey}`, val);
       localStorage.setItem(`oep_syllabus_${selectedExamId}`, val);
     }
   };
@@ -1019,8 +1216,45 @@ export function AIQuestionStudio({
   const handleUpdateDirectives = (val: string) => {
     setDirectivesMarkdown(val);
     if (selectedExamId) {
+      const currentStageKey = selectedExamStage || 'All Stages';
+      localStorage.setItem(`oep_directives_${selectedExamId}_${currentStageKey}`, val);
       localStorage.setItem(`oep_directives_${selectedExamId}`, val);
     }
+  };
+
+  // Explicit Save to Cloud Database
+  const handleSaveSyllabusToCloud = async () => {
+    if (!selectedExamId) {
+      toast.error('No exam selected to save syllabus.');
+      return;
+    }
+    const stageToSave = selectedExamStage || 'All Stages';
+    setIsSavingSyllabusToCloud(true);
+    try {
+      await examService.saveExamSyllabus(selectedExamId, stageToSave, syllabusMarkdown, directivesMarkdown);
+      localStorage.setItem(`oep_syllabus_${selectedExamId}_${stageToSave}`, syllabusMarkdown);
+      if (directivesMarkdown) {
+        localStorage.setItem(`oep_directives_${selectedExamId}_${stageToSave}`, directivesMarkdown);
+      }
+      toast.success(`✅ Saved "${stageToSave}" syllabus to Cloud Database!`);
+    } catch (err: any) {
+      console.error('Failed to save syllabus to cloud:', err);
+      toast.error('Failed to save syllabus: ' + (err.message || 'Network error'));
+    } finally {
+      setIsSavingSyllabusToCloud(false);
+    }
+  };
+
+  const handleStageTabSwitch = (newStage: string) => {
+    // 1. Cache current stage draft to avoid loss
+    const currentStageKey = selectedExamStage || 'All Stages';
+    localStorage.setItem(`oep_syllabus_${selectedExamId}_${currentStageKey}`, syllabusMarkdown);
+    if (directivesMarkdown) {
+      localStorage.setItem(`oep_directives_${selectedExamId}_${currentStageKey}`, directivesMarkdown);
+    }
+
+    // 2. Set new stage - triggers the useEffect to load that stage's syllabus
+    setSelectedExamStage(newStage);
   };
 
   const handleSelectSyllabusPreset = (presetKey: string) => {
@@ -1231,9 +1465,10 @@ export function AIQuestionStudio({
         body: JSON.stringify({
           examId: selectedExamId,
           examName: selectedExam?.name || selectedExamId,
+          stage: selectedExamStage || undefined,
           mainSection: stage1MainSection,
           subCategory: stage1SubCategory,
-          targetType: stage1MainSection === 'question_bank' ? 'question_bank' : 'mock_test',
+          targetType: stage1MainSection === 'flashcards' ? 'flashcards' : (stage1MainSection === 'question_bank' ? 'question_bank' : 'mock_test'),
           autoCalibrate: isAutoCalibrate,
           count: isAutoCalibrate ? undefined : stage1Count,
           subjectFocus: (isAutoCalibrate || !stage1SubjectFocus.trim() || stage1SubjectFocus === 'Comprehensive Full Syllabus') ? undefined : stage1SubjectFocus.trim(),
@@ -1401,10 +1636,13 @@ export function AIQuestionStudio({
       let mockCount = 0;
       let practiceCount = 0;
       let bankCount = 0;
+      let flashcardDeckCount = 0;
+      let flashcardsGeneratedCount = 0;
       let duplicateCount = 0;
 
       // Track in-batch unique keys: "targetTable_targetCategory_normalizedTitle"
       const seenBatchKeys = new Set<string>();
+      const flashcardDecksToInsert: any[] = [];
 
       // Category-scoped counters for Mock Tests & Question Banks
       const mockCategoryCounters: Record<string, number> = {};
@@ -1416,7 +1654,39 @@ export function AIQuestionStudio({
         if (!rawTitle) continue;
         const normalizedTitle = rawTitle.toLowerCase();
 
-        if (item.targetTable === 'mockTests') {
+        if (item.targetTable === 'flashcardDecks') {
+          // Section 4: Flashcard Decks table (Batch for atomic bulk insertion)
+          const batchKey = `fc_${normalizedTitle}`;
+          if (seenBatchKeys.has(batchKey)) {
+            duplicateCount++;
+            continue;
+          }
+          seenBatchKeys.add(batchKey);
+
+          // Check if identical deck title already exists for this exam
+          const alreadyExists = flashcardDecks.some(
+            d => (d.exam_id === selectedExamId || d.exam_id === 'all') && (d.title || '').trim().toLowerCase() === normalizedTitle
+          );
+          if (alreadyExists) {
+            duplicateCount++;
+            continue;
+          }
+
+          const assignedStage = item.stage || selectedExamStage || 'All Stages';
+          flashcardDecksToInsert.push({
+            exam_id: selectedExamId,
+            subject: item.subject || 'General Studies',
+            sub_subject: item.subSubject || undefined,
+            chapter: item.chapter || undefined,
+            stage: assignedStage,
+            title: rawTitle,
+            description: item.description || `High-yield active recall flashcard deck for ${rawTitle}.`,
+            icon: 'Layers',
+            card_count: 0,
+            is_premium: true,
+            sort_order: i
+          });
+        } else if (item.targetTable === 'mockTests') {
           // Section 2: Mock Tests table (seriesId JSON)
           const targetCategory = item.subCategory || 'full-length';
           const batchKey = `mock_${targetCategory}_${normalizedTitle}`;
@@ -1461,9 +1731,11 @@ export function AIQuestionStudio({
           mockCategoryCounters[targetCategory]++;
           const assignedSortOrder = mockCategoryCounters[targetCategory];
 
+          const assignedStage = item.stage || selectedExamStage || null;
           const seriesData = JSON.stringify({
             examId: selectedExamId,
             category: targetCategory,
+            stage: assignedStage,
             isPremium: true
           });
 
@@ -1520,18 +1792,27 @@ export function AIQuestionStudio({
           bankCategoryCounters[bankKey]++;
           const assignedSortOrder = bankCategoryCounters[bankKey];
 
+          const assignedStage = item.stage || selectedExamStage || '';
+          const descriptiveTagline = (() => {
+            const parts: string[] = [];
+            if (item.paper) parts.push(`Paper: ${item.paper}`);
+            if (item.subject) parts.push(`Subject: ${item.subject}`);
+            if (item.subSubject) parts.push(item.subSubject);
+            return parts.join(' | ');
+          })();
+
+          const metaTaglineObj = {
+            text: descriptiveTagline,
+            subject: item.subject || '',
+            stage: assignedStage
+          };
+
           await examService.createQuestionBank({
             title: rawTitle,
             examId: selectedExamId,
             type: targetCategory,
             target_mode: targetMode,
-            tagline: (() => {
-              const parts: string[] = [];
-              if (item.paper) parts.push(`Paper: ${item.paper}`);
-              if (item.subject) parts.push(`Subject: ${item.subject}`);
-              if (item.subSubject) parts.push(item.subSubject);
-              return parts.join(' | ');
-            })(),
+            tagline: JSON.stringify(metaTaglineObj),
             image: '',
             questionCount: 0,
             hasPracticeMode: targetMode === 'practice' || targetMode === 'both',
@@ -1547,12 +1828,19 @@ export function AIQuestionStudio({
         }
       }
 
-      const totalSaved = mockCount + practiceCount + bankCount;
+      // Atomically insert all flashcard decks in a single lightning-fast database transaction
+      if (flashcardDecksToInsert.length > 0) {
+        const insertedDecks = await examService.bulkAddFlashcardDecks(flashcardDecksToInsert);
+        flashcardDeckCount += (insertedDecks?.length || flashcardDecksToInsert.length);
+      }
+
+      const totalSaved = mockCount + practiceCount + bankCount + flashcardDeckCount;
       if (totalSaved > 0) {
         const parts: string[] = [];
         if (mockCount > 0) parts.push(`${mockCount} Mock Test${mockCount > 1 ? 's' : ''}`);
         if (practiceCount > 0) parts.push(`${practiceCount} Practice Set${practiceCount > 1 ? 's' : ''}`);
         if (bankCount > 0) parts.push(`${bankCount} Question Bank${bankCount > 1 ? 's' : ''}`);
+        if (flashcardDeckCount > 0) parts.push(`${flashcardDeckCount} Flashcard Deck${flashcardDeckCount > 1 ? 's' : ''}${flashcardsGeneratedCount > 0 ? ` (${flashcardsGeneratedCount} Cards Generated)` : ''}`);
         
         const dupMsg = duplicateCount > 0 ? ` (${duplicateCount} duplicate${duplicateCount > 1 ? 's' : ''} skipped)` : '';
         toast.success(`Successfully saved ${parts.join(', ')} to respective sections!${dupMsg}`);
@@ -1563,6 +1851,7 @@ export function AIQuestionStudio({
       }
 
       onRefreshCatalog();
+      loadFlashcardDecks();
       // Remove saved items from review list
       setGeneratedStructures(prev => prev.filter((_, idx) => !selectedStructureIndices.has(idx)));
       setSelectedStructureIndices(new Set());
@@ -1579,27 +1868,46 @@ export function AIQuestionStudio({
     
     const itemIsMock = item.mainSection === 'mock_test' || item.targetTable === 'mockTests';
     const itemIsPractice = item.mainSection === 'practice_test' || item.targetMode === 'practice';
+    const itemIsFlashcard = item.mainSection === 'flashcards' || item.targetTable === 'flashcardDecks';
 
     if (itemIsMock) {
       setStage2TargetType('mock_test');
     } else if (itemIsPractice) {
       setStage2TargetType('practice_test');
+    } else if (itemIsFlashcard) {
+      setStage2TargetType('flashcards');
+      const matchedDeck = examFlashcardDecks.find(d => (d.title || '').trim().toLowerCase() === item.title.trim().toLowerCase());
+      if (matchedDeck) {
+        setStage2SelectedTestId(matchedDeck.id);
+      }
     } else {
       setStage2TargetType('question_bank');
     }
 
+    if (item.stage) {
+      setSelectedExamStage(item.stage);
+      setStage2StageFilter(item.stage);
+      setMultiBankStageFilter(item.stage);
+    }
+
     if (item.subCategory === 'full-length' || item.subCategory === 'pyq' || /full mock|full-length|pyq paper/i.test(item.title)) {
       setStage2Subject('Comprehensive Full Syllabus (All Subjects Balanced)');
+      setStage2SubSubject('');
+      setStage2Chapter('');
     } else {
       setStage2Subject(item.subject || item.chapter || 'Comprehensive Full Syllabus (All Subjects Balanced)');
+      setStage2SubSubject(item.subSubject || '');
+      setStage2Chapter(item.chapter || '');
     }
 
     if (item.questionCountTarget && item.questionCountTarget > 0) {
       setStage2QuestionCount(item.questionCountTarget);
+    } else if (itemIsFlashcard) {
+      setStage2QuestionCount(10);
     }
 
     handleSwitchStage('stage2_questions');
-    toast.success(`Loaded "${item.title}" into Stage 2 Question Paper Studio!`);
+    toast.success(itemIsFlashcard ? `Loaded "${item.title}" into Stage 2 Flashcard Studio!` : `Loaded "${item.title}" into Stage 2 Question Paper Studio!`);
   };
 
   // -------------------------------------------------------------
@@ -1609,18 +1917,114 @@ export function AIQuestionStudio({
     activeTitle: string,
     batchNum: number,
     existingStems: string[],
-    isMultiBankQueue: boolean = false
+    isMultiBankQueue: boolean = false,
+    overrideStage?: string,
+    overrideSubject?: string,
+    overrideSubSubject?: string,
+    overrideChapter?: string,
+    overrideSubCategory?: string
   ): Promise<any[]> => {
+    const resolvedStage = overrideStage || (selectedItem ? getItemStage(selectedItem) : '') || selectedExamStage || undefined;
     const headers = await getAdminAuthHeaders();
+
+    // Resolve stage-specific syllabus if target stage differs from active state
+    let effectiveSyllabus = syllabusMarkdown;
+    if (resolvedStage && resolvedStage !== selectedExamStage && selectedExamId) {
+      const stageCached = localStorage.getItem(`oep_syllabus_${selectedExamId}_${resolvedStage}`);
+      if (stageCached) {
+        effectiveSyllabus = stageCached;
+      } else {
+        try {
+          const dbSyllabus = await examService.getExamSyllabus(selectedExamId, resolvedStage);
+          if (dbSyllabus?.syllabus_markdown) {
+            effectiveSyllabus = dbSyllabus.syllabus_markdown;
+            localStorage.setItem(`oep_syllabus_${selectedExamId}_${resolvedStage}`, effectiveSyllabus);
+          }
+        } catch (e) {
+          console.warn('[effectiveSyllabus] Failed to fetch remote stage syllabus:', e);
+        }
+      }
+    }
+
+    // Active Recall Flashcards Mode
+    if (stage2TargetType === 'flashcards') {
+      const timeStr = new Date().toLocaleTimeString();
+      const densityLabel = stage2NaturalDensity
+        ? (stage2QuestionCount > 0 ? `Natural Density (≤${stage2QuestionCount} Cap)` : 'Natural Density (Auto Sizing)')
+        : `${stage2QuestionCount} Cards`;
+      setTelemetryLogs(prev => [...prev.slice(-30), `[${timeStr}] Generating active recall flashcards (${densityLabel}) for "${activeTitle}"...`]);
+      setTelemetryEvent({
+        stageId: 'GENERATION',
+        stageName: 'Active Recall Flashcard Generation',
+        stageIndex: 3,
+        totalStages: 5,
+        currentCount: (batchNum - 1) * (stage2QuestionCount || 10),
+        totalCount: (stage2QuestionCount || 10) * stage2BatchCount,
+        percent: 60,
+        message: `Distilling high-yield flashcards (${densityLabel}) for "${activeTitle}"...`,
+        log: `Requesting flashcards (${densityLabel}) from AI engine.`
+      });
+
+      const fcRes = await fetch('/api/admin/ai/generate-flashcards', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          examId: selectedExamId,
+          examName: selectedExam?.name || selectedExamId,
+          stage: resolvedStage,
+          deckTitle: activeTitle,
+          subject: overrideSubject || stage2Subject,
+          subSubject: overrideSubSubject !== undefined ? overrideSubSubject : (stage2SubSubject || undefined),
+          chapter: overrideChapter !== undefined ? overrideChapter : (stage2Chapter || undefined),
+          syllabusMarkdown: effectiveSyllabus,
+          cardCount: stage2NaturalDensity && stage2QuestionCount === 0 ? 0 : stage2QuestionCount,
+          naturalDensity: stage2NaturalDensity,
+          apiKey: apiKey || undefined,
+          model: selectedModel,
+          baseUrl: customBaseUrl || undefined,
+          alreadyGeneratedStems: existingStems,
+          batchNumber: batchNum
+        })
+      });
+      const fcData = await fcRes.json().catch(() => ({}));
+      if (!fcRes.ok || !fcData.data) {
+        throw new Error(fcData.error || `Failed to generate flashcards for batch ${batchNum}.`);
+      }
+      const cards = (fcData.data || []).map((c: any, i: number) => ({
+        id: `fc_${Date.now()}_${batchNum}_${i}`,
+        questionText: c.front_text,
+        explanation: c.back_text + (c.key_points && c.key_points.length > 0 ? `\n\n📌 Key Takeaways:\n• ` + c.key_points.join('\n• ') : ''),
+        options: c.key_points && c.key_points.length > 0 ? c.key_points : [c.back_text],
+        correctAnswerIndex: 0,
+        difficulty: 'medium',
+        front_text: c.front_text,
+        back_text: c.back_text,
+        archetype: c.archetype || 'CONCEPT',
+        key_points: c.key_points || [],
+        batchNumber: batchNum
+      }));
+
+      setGenerationProgress({
+        current: batchNum * stage2QuestionCount,
+        total: stage2QuestionCount * stage2BatchCount
+      });
+
+      return cards;
+    }
+
     const res = await fetch('/api/admin/ai/generate-questions-stream', {
       method: 'POST',
       headers,
       body: JSON.stringify({
         examId: selectedExamId,
         examName: selectedExam?.name || selectedExamId,
+        stage: resolvedStage,
         testTitle: activeTitle,
-        subject: stage2Subject,
-        syllabusMarkdown,
+        subject: overrideSubject || stage2Subject,
+        subSubject: overrideSubSubject !== undefined ? overrideSubSubject : (stage2SubSubject || undefined),
+        chapter: overrideChapter !== undefined ? overrideChapter : (stage2Chapter || undefined),
+        subCategory: overrideSubCategory || (selectedItem as any)?.type || (stage2SubCategory !== 'all' ? stage2SubCategory : undefined),
+        syllabusMarkdown: effectiveSyllabus,
         directivesMarkdown,
         difficulty: stage2Difficulty,
         questionCount: stage2QuestionCount,
@@ -1729,9 +2133,13 @@ export function AIQuestionStudio({
       body: JSON.stringify({
         examId: selectedExamId,
         examName: selectedExam?.name || selectedExamId,
+        stage: resolvedStage,
         testTitle: activeTitle,
-        subject: stage2Subject,
-        syllabusMarkdown,
+        subject: overrideSubject || stage2Subject,
+        subSubject: overrideSubSubject !== undefined ? overrideSubSubject : (stage2SubSubject || undefined),
+        chapter: overrideChapter !== undefined ? overrideChapter : (stage2Chapter || undefined),
+        subCategory: overrideSubCategory || (selectedItem as any)?.type || (stage2SubCategory !== 'all' ? stage2SubCategory : undefined),
+        syllabusMarkdown: effectiveSyllabus,
         directivesMarkdown,
         difficulty: stage2Difficulty,
         questionCount: stage2QuestionCount,
@@ -1756,6 +2164,8 @@ export function AIQuestionStudio({
         ? examMockTests.find(t => t.id === stage2SelectedTestId)?.title 
         : stage2TargetType === 'practice_test'
         ? examPracticeSets.find(b => b.id === stage2SelectedTestId)?.title
+        : stage2TargetType === 'flashcards'
+        ? examFlashcardDecks.find(d => d.id === stage2SelectedTestId)?.title
         : examQuestionBanks.find(b => b.id === stage2SelectedTestId)?.title
     );
 
@@ -1789,6 +2199,52 @@ export function AIQuestionStudio({
     let accumulated: any[] = [];
     let completedBatches = 0;
 
+    // Pre-fetch existing stems from database for this bank/test so Batch 1 never repeats past questions
+    let existingDbStems: string[] = [];
+    try {
+      if (stage2TargetType === 'flashcards') {
+        let targetDeckId = stage2SelectedTestId;
+        if (!targetDeckId) {
+          const existingDeck = examFlashcardDecks.find(d => d.title.toLowerCase() === activeTitle.toLowerCase());
+          if (existingDeck) targetDeckId = existingDeck.id;
+        }
+        if (targetDeckId) {
+          const existingCards = await examService.getFlashcardsByDeckId(targetDeckId);
+          if (Array.isArray(existingCards)) {
+            existingDbStems = existingCards.map(c => c.front_text).filter(Boolean);
+          }
+        }
+      } else if (stage2TargetType === 'mock_test' && stage2SelectedTestId) {
+        const existingQs = await examService.getQuestionsForMockTest(stage2SelectedTestId);
+        if (Array.isArray(existingQs)) {
+          existingDbStems = existingQs.map(q => q.questionText).filter(Boolean);
+        }
+      } else if (stage2SelectedTestId) {
+        const existingQs = await examService.getQuestionsForQuestionBank(stage2SelectedTestId, activeTitle, selectedExamId);
+        if (Array.isArray(existingQs)) {
+          existingDbStems = existingQs.map(q => q.questionText).filter(Boolean);
+        }
+      } else {
+        const matchingBank = [...examQuestionBanks, ...examPracticeSets].find(
+          b => b.title.toLowerCase() === activeTitle.toLowerCase()
+        );
+        if (matchingBank) {
+          const existingQs = await examService.getQuestionsForQuestionBank(matchingBank.id, matchingBank.title, selectedExamId);
+          if (Array.isArray(existingQs)) {
+            existingDbStems = existingQs.map(q => q.questionText).filter(Boolean);
+          }
+        }
+      }
+      if (existingDbStems.length > 0) {
+        setTelemetryLogs(prev => [
+          ...prev.slice(-30),
+          `🛡️ Loaded ${existingDbStems.length} existing question stems from database to ensure 0% duplicate generation.`
+        ]);
+      }
+    } catch (e) {
+      console.warn('Could not pre-fetch existing stems for single generation:', e);
+    }
+
     try {
       for (let b = 1; b <= stage2BatchCount; b++) {
         if (stopBatchRunnerRef.current) {
@@ -1796,9 +2252,39 @@ export function AIQuestionStudio({
           break;
         }
 
-        setCurrentRunningBatch(b);
-        const existingStems = accumulated.map(q => q.questionText);
-        const batchQs = await generateSingleBatch(activeTitle, b, existingStems);
+        let batchQs: any[] = [];
+        let batchSuccess = false;
+        let batchRetryCount = 0;
+        let lastBatchError = '';
+
+        while (batchRetryCount < 3 && !batchSuccess && !stopBatchRunnerRef.current) {
+          try {
+            setCurrentRunningBatch(b);
+            const existingStems = [
+              ...existingDbStems,
+              ...accumulated.map(q => q.questionText).filter(Boolean)
+            ];
+            const singleSubCat = (selectedItem as any)?.type || (stage2SubCategory !== 'all' ? stage2SubCategory : undefined);
+            batchQs = await generateSingleBatch(activeTitle, b, existingStems, false, undefined, undefined, undefined, undefined, singleSubCat);
+            batchSuccess = true;
+          } catch (err: any) {
+            batchRetryCount++;
+            lastBatchError = err.message || `Batch ${b} generation attempt failed`;
+            console.warn(`[Batch ${b} Retry ${batchRetryCount}/3]:`, lastBatchError);
+            if (batchRetryCount < 3 && !stopBatchRunnerRef.current) {
+              setTelemetryLogs(prev => [
+                ...prev.slice(-30),
+                `⚠️ Batch ${b} transient retry (${batchRetryCount}/3) in ${(1200 * batchRetryCount) / 1000}s...`
+              ]);
+              await new Promise(res => setTimeout(res, 1200 * batchRetryCount));
+            }
+          }
+        }
+
+        if (!batchSuccess) {
+          toast.error(`❌ Batch ${b}/${stage2BatchCount} failed: ${lastBatchError}. Preserving generated questions.`);
+          break;
+        }
 
         // Deduplicate against accumulated questions
         const existingSet = new Set(accumulated.map(q => (q.questionText || '').trim()));
@@ -1813,8 +2299,8 @@ export function AIQuestionStudio({
         }
 
         if (b < stage2BatchCount && !stopBatchRunnerRef.current) {
-          // Micro-pause (400ms) between batches to allow UI to breathe
-          await new Promise(resolve => setTimeout(resolve, 400));
+          // Micro-pause (500ms) between batches to prevent rate limit saturation
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
       }
 
@@ -1855,14 +2341,23 @@ export function AIQuestionStudio({
   };
 
   const handleRunMultiBankQueue = async () => {
+    const isFlashcards = stage2TargetType === 'flashcards';
+    const nounSingular = isFlashcards ? 'Deck' : 'Bank';
+    const nounPlural = isFlashcards ? 'Decks' : 'Banks';
+    const unitPlural = isFlashcards ? 'Cards' : 'Qs';
+
     if (selectedMultiBankIds.length === 0) {
-      toast.error('Please select at least one Question Bank for the queue.');
+      toast.error(`Please select at least one ${nounSingular} for the queue.`);
       return;
     }
 
-    const banksToProcess = questionBanks.filter(b => selectedMultiBankIds.includes(b.id || ''));
+    const pool = isFlashcards 
+      ? examFlashcardDecks 
+      : (stage2TargetType === 'practice_test' ? examPracticeSets : (stage2TargetType === 'mock_test' ? examMockTests : questionBanks));
+
+    const banksToProcess = pool.filter(b => selectedMultiBankIds.includes(b.id || ''));
     if (banksToProcess.length === 0) {
-      toast.error('Selected banks could not be resolved.');
+      toast.error(`Selected ${nounPlural.toLowerCase()} could not be resolved.`);
       return;
     }
 
@@ -1887,17 +2382,21 @@ export function AIQuestionStudio({
         status: 'queued', 
         count: 0,
         step: 'waiting',
-        stepDetail: 'Queued in pipeline',
+        stepDetail: isFlashcards ? 'Queued in flashcard pipeline' : 'Queued in pipeline',
         totalBatches: stage2BatchCount 
       };
     });
     setMultiBankQueueStatus(initialStatus);
 
+    const densitySummary = isFlashcards && stage2NaturalDensity
+      ? (stage2QuestionCount > 0 ? `Natural Density [≤${stage2QuestionCount} Cap]` : 'Autonomous Natural Density [Syllabus-Driven]')
+      : `${qsPerBank} ${unitPlural} each`;
+
     appendQueueFeedEvent(
       'system',
       'Queue Controller',
       'queue_init',
-      `🚀 Initialized Multi-Bank Queue Runner for ${banksToProcess.length} banks (${qsPerBank} Qs each • ${stage2BatchCount} batches • Total: ${grandTotalQs} Qs).`,
+      `🚀 Initialized Multi-${nounSingular} Queue Runner for ${banksToProcess.length} ${nounPlural.toLowerCase()} (${densitySummary} • ${stage2BatchCount} ${stage2BatchCount > 1 ? 'batches' : 'pass'}).`,
       { totalBatches: stage2BatchCount, questionCount: grandTotalQs }
     );
 
@@ -1911,9 +2410,9 @@ export function AIQuestionStudio({
             'system',
             'Queue Controller',
             'queue_stopped',
-            `⏹️ Queue Runner paused by admin after completing ${successfullyCompletedBanks} banks.`
+            `⏹️ Queue Runner paused by admin after completing ${successfullyCompletedBanks} ${nounPlural.toLowerCase()}.`
           );
-          toast(`Queue Runner stopped by user after ${successfullyCompletedBanks} banks.`, { icon: 'ℹ️' });
+          toast(`Queue Runner stopped by user after ${successfullyCompletedBanks} ${nounPlural.toLowerCase()}.`, { icon: 'ℹ️' });
           break;
         }
 
@@ -1921,44 +2420,60 @@ export function AIQuestionStudio({
         const currentBankId = currentBank.id || '';
         setCurrentQueueIndex(i);
 
-        // Update status of this bank to 'running'
+        // Update status of this item to 'running'
         setMultiBankQueueStatus(prev => ({
           ...prev,
           [currentBankId]: { 
             status: 'running', 
             count: 0,
             step: 'grounding',
-            stepDetail: 'Analyzing syllabus & pre-fetching stems...',
+            stepDetail: isFlashcards ? 'Analyzing syllabus & existing flashcards...' : 'Analyzing syllabus & pre-fetching stems...',
             totalBatches: stage2BatchCount,
             currentBatch: 1
           }
         }));
 
+        const bankTargetLabel = isFlashcards && stage2NaturalDensity
+          ? (stage2QuestionCount > 0 ? `Natural Density • ≤${stage2QuestionCount} cards ceiling` : 'Natural Density • autonomous syllabus capacity')
+          : `Target: ${qsPerBank} ${unitPlural} across ${stage2BatchCount} batches`;
+
         appendQueueFeedEvent(
           currentBankId,
           currentBank.title,
           'bank_start',
-          `📦 [Bank ${i + 1}/${banksToProcess.length}] Starting "${currentBank.title}" (Target: ${qsPerBank} Qs across ${stage2BatchCount} batches)...`,
+          `📦 [${nounSingular} ${i + 1}/${banksToProcess.length}] Starting "${currentBank.title}" (${bankTargetLabel})...`,
           { totalBatches: stage2BatchCount, questionCount: qsPerBank }
         );
 
         setTelemetryLogs(prev => [
           ...prev.slice(-40),
-          `[${new Date().toLocaleTimeString()}] [Queue ${i + 1}/${banksToProcess.length}] Starting "${currentBank.title}" (${qsPerBank} Qs across ${stage2BatchCount} batches)...`
+          `[${new Date().toLocaleTimeString()}] [Queue ${i + 1}/${banksToProcess.length}] Starting "${currentBank.title}" (${bankTargetLabel})...`
         ]);
 
-        // 1. Fetch existing question stems strictly for this bank to prevent duplicate concepts
+        // 1. Fetch existing stems strictly for this bank/deck/mock test to prevent duplicate concepts
         let existingBankStems: string[] = [];
         try {
-          const existingQs = await examService.getQuestionsForQuestionBank(currentBankId, currentBank.title, selectedExamId);
-          if (Array.isArray(existingQs)) {
-            existingBankStems = existingQs.map(q => q.questionText).filter(Boolean);
+          if (isFlashcards) {
+            const existingCards = await examService.getFlashcardsByDeckId(currentBankId);
+            if (Array.isArray(existingCards)) {
+              existingBankStems = existingCards.map(c => c.front_text).filter(Boolean);
+            }
+          } else if (stage2TargetType === 'mock_test') {
+            const existingQs = await examService.getQuestionsForMockTest(currentBankId);
+            if (Array.isArray(existingQs)) {
+              existingBankStems = existingQs.map(q => q.questionText).filter(Boolean);
+            }
+          } else {
+            const existingQs = await examService.getQuestionsForQuestionBank(currentBankId, currentBank.title, selectedExamId);
+            if (Array.isArray(existingQs)) {
+              existingBankStems = existingQs.map(q => q.questionText).filter(Boolean);
+            }
           }
         } catch (e) {
-          console.warn('Could not fetch existing stems for bank:', currentBank.title, e);
+          console.warn(`Could not fetch existing stems for ${nounSingular}:`, currentBank.title, e);
         }
 
-        // 2. Generate questions across the configured number of batches for this bank
+        // 2. Generate cards/questions across the configured number of batches for this bank/deck
         let bankAccumulatedQuestions: any[] = [];
         let bankGenerationFailed = false;
         let bankErrorMessage = '';
@@ -1978,28 +2493,37 @@ export function AIQuestionStudio({
             }
           }));
 
+          const batchGenLabel = isFlashcards && stage2NaturalDensity
+            ? (stage2QuestionCount > 0 ? `Natural Density • ≤${stage2QuestionCount} cards ceiling` : 'Natural Density • dynamic distillation')
+            : `${stage2QuestionCount} ${unitPlural}`;
+
           appendQueueFeedEvent(
             currentBankId,
             currentBank.title,
             'batch_gen',
-            `⚡ [Bank ${i + 1}/${banksToProcess.length}] Generating Batch ${b}/${stage2BatchCount} (${stage2QuestionCount} Qs) for "${currentBank.title}"...`,
+            `⚡ [${nounSingular} ${i + 1}/${banksToProcess.length}] Distilling factual anchors for "${currentBank.title}" (${batchGenLabel})...`,
             { batchNum: b, totalBatches: stage2BatchCount }
           );
 
-          const combinedExistingStems = [
-            ...existingBankStems,
-            ...bankAccumulatedQuestions.map(q => q.questionText)
-          ];
+          const combinedExistingStems = isFlashcards
+            ? [
+                ...existingBankStems,
+                ...bankAccumulatedQuestions.map(q => q.front_text || q.questionText)
+              ]
+            : [
+                ...existingBankStems,
+                ...bankAccumulatedQuestions.map(q => q.questionText)
+              ];
 
           setTelemetryEvent({
             stageId: 'GROUNDING',
-            stageName: `Bank ${i + 1}/${banksToProcess.length}: ${currentBank.title}`,
+            stageName: `${nounSingular} ${i + 1}/${banksToProcess.length}: ${currentBank.title}`,
             stageIndex: i + 1,
             totalStages: banksToProcess.length,
             currentCount: totalUploadedAcrossQueue + bankAccumulatedQuestions.length,
             totalCount: grandTotalQs,
             percent: Math.round(((totalUploadedAcrossQueue + bankAccumulatedQuestions.length) / grandTotalQs) * 100),
-            message: `[Bank ${i + 1}/${banksToProcess.length}] Generating Batch ${b}/${stage2BatchCount} for "${currentBank.title}"...`,
+            message: `[${nounSingular} ${i + 1}/${banksToProcess.length}] Generating Batch ${b}/${stage2BatchCount} for "${currentBank.title}"...`,
             log: `Generating Batch ${b} for "${currentBank.title}".`
           });
 
@@ -2010,7 +2534,34 @@ export function AIQuestionStudio({
 
           while (retryCount < 3 && !batchSuccess && !stopQueueRunnerRef.current) {
             try {
-              batchQuestions = await generateSingleBatch(currentBank.title, b, combinedExistingStems, true);
+              const bankStage = getItemStage(currentBank) || selectedExamStage || undefined;
+              let bankSubject = (currentBank as any).subject || undefined;
+              if (!bankSubject && (currentBank as any).tagline && typeof (currentBank as any).tagline === 'string' && (currentBank as any).tagline.startsWith('{')) {
+                try {
+                  const parsed = JSON.parse((currentBank as any).tagline);
+                  if (parsed && parsed.subject) bankSubject = parsed.subject;
+                } catch {}
+              }
+              if (!bankSubject && (currentBank as any).seriesId && typeof (currentBank as any).seriesId === 'string' && (currentBank as any).seriesId.startsWith('{')) {
+                try {
+                  const parsed = JSON.parse((currentBank as any).seriesId);
+                  if (parsed && parsed.subject) bankSubject = parsed.subject;
+                } catch {}
+              }
+              const bankSubSubject = (currentBank as any).sub_subject || undefined;
+              const bankChapter = (currentBank as any).chapter || undefined;
+              const bankSubCategory = (currentBank as any).type || (stage2SubCategory !== 'all' ? stage2SubCategory : undefined);
+              batchQuestions = await generateSingleBatch(
+                currentBank.title,
+                b,
+                combinedExistingStems,
+                true,
+                bankStage,
+                bankSubject,
+                bankSubSubject,
+                bankChapter,
+                bankSubCategory
+              );
               batchSuccess = true;
             } catch (err: any) {
               retryCount++;
@@ -2026,9 +2577,15 @@ export function AIQuestionStudio({
 
           if (bankGenerationFailed) break;
 
-          // Deduplicate within bank
-          const existingSet = new Set(bankAccumulatedQuestions.map((q: any) => (q.questionText || '').trim()));
-          const unique = batchQuestions.filter(q => !existingSet.has((q.questionText || '').trim()));
+          // Deduplicate within bank/deck
+          const existingSet = new Set(
+            bankAccumulatedQuestions.map((q: any) => 
+              isFlashcards ? (q.front_text || q.questionText || '').trim() : (q.questionText || '').trim()
+            )
+          );
+          const unique = batchQuestions.filter(q => 
+            !existingSet.has((isFlashcards ? (q.front_text || q.questionText || '') : (q.questionText || '')).trim())
+          );
           bankAccumulatedQuestions = [...bankAccumulatedQuestions, ...unique];
 
           setMultiBankQueueStatus(prev => ({
@@ -2037,7 +2594,7 @@ export function AIQuestionStudio({
               ...prev[currentBankId],
               status: 'running', 
               count: bankAccumulatedQuestions.length,
-              stepDetail: `Batch ${b}/${stage2BatchCount} verified (${bankAccumulatedQuestions.length}/${qsPerBank} Qs)`
+              stepDetail: `Batch ${b}/${stage2BatchCount} verified (${bankAccumulatedQuestions.length}/${qsPerBank} ${unitPlural})`
             }
           }));
 
@@ -2045,7 +2602,7 @@ export function AIQuestionStudio({
             currentBankId,
             currentBank.title,
             'batch_done',
-            `✓ [Bank ${i + 1}/${banksToProcess.length}] Batch ${b}/${stage2BatchCount} verified (${batchQuestions.length} Qs valid). Bank total: ${bankAccumulatedQuestions.length}/${qsPerBank} Qs.`,
+            `✓ [${nounSingular} ${i + 1}/${banksToProcess.length}] Batch ${b}/${stage2BatchCount} verified (${batchQuestions.length} ${unitPlural} valid). ${nounSingular} total: ${bankAccumulatedQuestions.length}/${qsPerBank} ${unitPlural}.`,
             { batchNum: b, totalBatches: stage2BatchCount, questionCount: bankAccumulatedQuestions.length }
           );
 
@@ -2073,20 +2630,22 @@ export function AIQuestionStudio({
             currentBankId,
             currentBank.title,
             'bank_failed',
-            `❌ [Bank ${i + 1}/${banksToProcess.length}] Failed on "${currentBank.title}": ${bankErrorMessage}`
+            `❌ [${nounSingular} ${i + 1}/${banksToProcess.length}] Failed on "${currentBank.title}": ${bankErrorMessage}`
           );
-          toast.error(`❌ Bank "${currentBank.title}" failed: ${bankErrorMessage}`);
-          continue; // Move to next bank without halting entire queue
+          toast.error(`❌ ${nounSingular} "${currentBank.title}" failed: ${bankErrorMessage}`);
+          continue; // Move to next item without halting entire queue
         }
 
-        // 3. Verification & Direct Auto-Publish to Database strictly for this bank
+        // 3. Verification & Direct Auto-Publish to Database strictly for this bank/deck
         if (bankAccumulatedQuestions.length > 0) {
           setMultiBankQueueStatus(prev => ({
             ...prev,
             [currentBankId]: {
               ...prev[currentBankId],
               step: 'publishing',
-              stepDetail: `Writing ${bankAccumulatedQuestions.length} questions to database...`
+              stepDetail: isFlashcards
+                ? `Writing ${bankAccumulatedQuestions.length} cards to flashcard deck...`
+                : `Writing ${bankAccumulatedQuestions.length} questions to database...`
             }
           }));
 
@@ -2094,7 +2653,7 @@ export function AIQuestionStudio({
             currentBankId,
             currentBank.title,
             'publishing',
-            `💾 [Bank ${i + 1}/${banksToProcess.length}] Direct-publishing ${bankAccumulatedQuestions.length} questions into "${currentBank.title}"...`,
+            `💾 [${nounSingular} ${i + 1}/${banksToProcess.length}] Direct-publishing ${bankAccumulatedQuestions.length} ${unitPlural.toLowerCase()} into "${currentBank.title}"...`,
             { questionCount: bankAccumulatedQuestions.length }
           );
 
@@ -2106,89 +2665,154 @@ export function AIQuestionStudio({
             currentCount: totalUploadedAcrossQueue + bankAccumulatedQuestions.length,
             totalCount: grandTotalQs,
             percent: Math.round(((totalUploadedAcrossQueue + bankAccumulatedQuestions.length) / grandTotalQs) * 100),
-            message: `Publishing ${bankAccumulatedQuestions.length} questions directly to "${currentBank.title}"...`,
-            log: `Directly writing questions to database for "${currentBank.title}".`
+            message: `Publishing ${bankAccumulatedQuestions.length} ${unitPlural.toLowerCase()} directly to "${currentBank.title}"...`,
+            log: `Directly writing ${unitPlural.toLowerCase()} to database for "${currentBank.title}".`
           });
 
-          // Strict verification: all items belong strictly to currentBank.title and selectedExamId
-          const payloads = bankAccumulatedQuestions.map((q, qIdx) => ({
-            examId: selectedExamId,
-            topic: currentBank.title,
-            difficulty: q.difficulty || stage2Difficulty || 'hard',
-            questionText: q.questionText,
-            options: q.options,
-            correctAnswerIndex: q.correctAnswerIndex,
-            explanation: q.explanation || '',
-            diagram: q.diagram || null,
-            sortOrder: (existingBankStems.length || 0) + qIdx + 1
-          }));
+          if (isFlashcards) {
+            const targetDeck = examFlashcardDecks.find(d => d.id === currentBankId);
+            const existingCount = targetDeck?.card_count || existingBankStems.length || 0;
 
-          const headers = await getAdminAuthHeaders();
-          const pubRes = await fetch('/api/admin/questions/bulk', {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({ questions: payloads })
-          });
+            const flashcardPayloads = bankAccumulatedQuestions.map((q, idx) => ({
+              deck_id: currentBankId,
+              front_text: q.front_text || q.questionText || '',
+              back_text: q.back_text || q.explanation || (q.options ? q.options[q.correctAnswerIndex] : '') || '',
+              key_points: q.key_points || [],
+              sort_order: existingCount + idx + 1
+            }));
 
-          if (!pubRes.ok) {
-            const pubErr = await pubRes.json().catch(() => ({}));
-            throw new Error(pubErr.error || `Failed to write questions for "${currentBank.title}".`);
-          }
+            await examService.bulkAddFlashcards(currentBankId, flashcardPayloads);
 
-          // 4. Update Bank Question Count locally & invalidate catalog caches
-          const newTotalCount = (currentBank.questionCount || 0) + payloads.length;
-          currentBank.questionCount = newTotalCount;
-          currentBank.practiceQuestionCount = newTotalCount;
-          setBankCountOverrides(prev => ({ ...prev, [currentBankId]: newTotalCount }));
-          await examService.updateQuestionBank(currentBankId, {
-            questionCount: newTotalCount
-          }).catch(console.error);
+            const newTotalCount = existingCount + flashcardPayloads.length;
+            if (targetDeck) targetDeck.card_count = newTotalCount;
+            setBankCountOverrides(prev => ({ ...prev, [currentBankId]: newTotalCount }));
 
-          cacheService.clear('all_question_banks');
-          cacheService.clear('topic_counts');
-          try {
-            sessionStorage.removeItem('oep_admin_catalog_cache_v2');
-          } catch {}
+            await loadFlashcardDecks();
+            try { onRefreshCatalog(); } catch (e) {}
 
-          totalUploadedAcrossQueue += payloads.length;
-          successfullyCompletedBanks++;
+            totalUploadedAcrossQueue += flashcardPayloads.length;
+            successfullyCompletedBanks++;
 
-          setMultiBankQueueStatus(prev => ({
-            ...prev,
-            [currentBankId]: { 
-              status: 'completed', 
-              count: payloads.length,
-              step: 'completed',
-              stepDetail: `Published ${payloads.length} Qs • Total: ${newTotalCount}`
+            setMultiBankQueueStatus(prev => ({
+              ...prev,
+              [currentBankId]: { 
+                status: 'completed', 
+                count: flashcardPayloads.length,
+                step: 'completed',
+                stepDetail: `Published ${flashcardPayloads.length} Cards • Total: ${newTotalCount}`
+              }
+            }));
+
+            appendQueueFeedEvent(
+              currentBankId,
+              currentBank.title,
+              'bank_done',
+              `✅ [Deck ${i + 1}/${banksToProcess.length}] Successfully published ${flashcardPayloads.length} flashcards into "${currentBank.title}"! Deck counter updated to ${newTotalCount}. In-memory batch purged.`,
+              { questionCount: flashcardPayloads.length }
+            );
+
+            toast.success(`✅ Saved ${flashcardPayloads.length} Cards into "${currentBank.title}" (${i + 1}/${banksToProcess.length})`);
+            setTelemetryLogs(prev => [
+              ...prev.slice(-40),
+              `[${new Date().toLocaleTimeString()}] ✅ Successfully published ${flashcardPayloads.length} flashcards into "${currentBank.title}".`
+            ]);
+
+            // Clean up in-memory questions for this deck before proceeding
+            bankAccumulatedQuestions = [];
+          } else {
+            // Strict verification: all items belong strictly to current target and selectedExamId
+            const isMockTest = stage2TargetType === 'mock_test';
+            const targetTopic = isMockTest ? `mockTest__${currentBankId}` : currentBank.title;
+
+            const payloads = bankAccumulatedQuestions.map((q, qIdx) => ({
+              examId: selectedExamId,
+              topic: targetTopic,
+              difficulty: q.difficulty || stage2Difficulty || 'hard',
+              questionText: q.questionText,
+              options: q.options,
+              correctAnswerIndex: q.correctAnswerIndex,
+              explanation: q.explanation || '',
+              diagram: q.diagram || null,
+              sortOrder: (existingBankStems.length || 0) + qIdx + 1
+            }));
+
+            const headers = await getAdminAuthHeaders();
+            const pubRes = await fetch('/api/admin/questions/bulk', {
+              method: 'POST',
+              headers,
+              body: JSON.stringify({ questions: payloads })
+            });
+
+            if (!pubRes.ok) {
+              const pubErr = await pubRes.json().catch(() => ({}));
+              throw new Error(pubErr.error || `Failed to write questions for "${currentBank.title}".`);
             }
-          }));
 
-          appendQueueFeedEvent(
-            currentBankId,
-            currentBank.title,
-            'bank_done',
-            `✅ [Bank ${i + 1}/${banksToProcess.length}] Successfully published ${payloads.length} questions into "${currentBank.title}"! Bank counter updated to ${newTotalCount}. In-memory batch purged.`,
-            { questionCount: payloads.length }
-          );
+            // Update Target Question Count locally & invalidate catalog caches
+            const newTotalCount = ((currentBank as any)._questionCount || (currentBank as any).questionCount || 0) + payloads.length;
+            setBankCountOverrides(prev => ({ ...prev, [currentBankId]: newTotalCount }));
 
-          toast.success(`✅ Saved ${payloads.length} Qs into "${currentBank.title}" (${i + 1}/${banksToProcess.length})`);
-          setTelemetryLogs(prev => [
-            ...prev.slice(-40),
-            `[${new Date().toLocaleTimeString()}] ✅ Successfully published ${payloads.length} questions into "${currentBank.title}".`
-          ]);
+            if (isMockTest) {
+              (currentBank as any)._questionCount = newTotalCount;
+              (currentBank as any).totalQuestions = newTotalCount;
+              await examService.updateMockTest(currentBankId, {
+                totalMarks: newTotalCount * 2
+              } as any).catch(console.error);
+              cacheService.clear('all_mock_tests_lite');
+            } else {
+              (currentBank as any).questionCount = newTotalCount;
+              (currentBank as any).practiceQuestionCount = newTotalCount;
+              await examService.updateQuestionBank(currentBankId, {
+                questionCount: newTotalCount
+              }).catch(console.error);
+              cacheService.clear('all_question_banks');
+            }
 
-          // Clean up in-memory questions for this bank before proceeding
-          bankAccumulatedQuestions = [];
+            cacheService.clear('topic_counts');
+            try {
+              sessionStorage.removeItem('oep_admin_catalog_cache_v2');
+            } catch {}
+
+            totalUploadedAcrossQueue += payloads.length;
+            successfullyCompletedBanks++;
+
+            setMultiBankQueueStatus(prev => ({
+              ...prev,
+              [currentBankId]: { 
+                status: 'completed', 
+                count: payloads.length,
+                step: 'completed',
+                stepDetail: `Published ${payloads.length} Qs • Total: ${newTotalCount}`
+              }
+            }));
+
+            appendQueueFeedEvent(
+              currentBankId,
+              currentBank.title,
+              'bank_done',
+              `✅ [Bank ${i + 1}/${banksToProcess.length}] Successfully published ${payloads.length} questions into "${currentBank.title}"! Bank counter updated to ${newTotalCount}. In-memory batch purged.`,
+              { questionCount: payloads.length }
+            );
+
+            toast.success(`✅ Saved ${payloads.length} Qs into "${currentBank.title}" (${i + 1}/${banksToProcess.length})`);
+            setTelemetryLogs(prev => [
+              ...prev.slice(-40),
+              `[${new Date().toLocaleTimeString()}] ✅ Successfully published ${payloads.length} questions into "${currentBank.title}".`
+            ]);
+
+            // Clean up in-memory questions for this bank before proceeding
+            bankAccumulatedQuestions = [];
+          }
         }
 
-        // Micro-pause (600ms) between banks & advance notice
+        // Micro-pause (600ms) between items & advance notice
         if (i < banksToProcess.length - 1 && !stopQueueRunnerRef.current) {
           const nextBank = banksToProcess[i + 1];
           appendQueueFeedEvent(
             nextBank.id || '',
             nextBank.title,
             'advancing',
-            `➡️ Bank ${i + 1}/${banksToProcess.length} completed. Advancing to Bank ${i + 2}/${banksToProcess.length}: "${nextBank.title}"...`
+            `➡️ ${nounSingular} ${i + 1}/${banksToProcess.length} completed. Advancing to ${nounSingular} ${i + 2}/${banksToProcess.length}: "${nextBank.title}"...`
           );
           await new Promise(res => setTimeout(res, 600));
         }
@@ -2202,9 +2826,9 @@ export function AIQuestionStudio({
           'system',
           'Queue Controller',
           'queue_complete',
-          `🎉 Multi-Bank Pipeline Complete: ${successfullyCompletedBanks} of ${banksToProcess.length} banks successfully published (${totalUploadedAcrossQueue} total questions added) in ${Math.floor(durationSec / 60)}m ${durationSec % 60}s.`
+          `🎉 Multi-${nounSingular} Pipeline Complete: ${successfullyCompletedBanks} of ${banksToProcess.length} ${nounPlural.toLowerCase()} successfully published (${totalUploadedAcrossQueue} total ${unitPlural.toLowerCase()} added) in ${Math.floor(durationSec / 60)}m ${durationSec % 60}s.`
         );
-        toast.success(`🎉 Multi-Bank Queue Runner finished! Published ${totalUploadedAcrossQueue} questions across ${successfullyCompletedBanks} question banks!`);
+        toast.success(`🎉 Multi-${nounSingular} Queue Runner finished! Published ${totalUploadedAcrossQueue} ${unitPlural.toLowerCase()} across ${successfullyCompletedBanks} ${nounPlural.toLowerCase()}!`);
       }
 
       setQueueExecutionSummary({
@@ -2216,7 +2840,7 @@ export function AIQuestionStudio({
         durationSeconds: durationSec
       });
     } catch (err: any) {
-      console.error('[Multi-Bank Queue Runner Fatal Error]', err);
+      console.error(`[Multi-${nounSingular} Queue Runner Fatal Error]`, err);
       appendQueueFeedEvent(
         'system',
         'Queue Controller',
@@ -2293,8 +2917,74 @@ export function AIQuestionStudio({
         ? examMockTests.find(t => t.id === stage2SelectedTestId)?.title
         : stage2TargetType === 'practice_test'
         ? examPracticeSets.find(b => b.id === stage2SelectedTestId)?.title
+        : stage2TargetType === 'flashcards'
+        ? examFlashcardDecks.find(d => d.id === stage2SelectedTestId)?.title
         : examQuestionBanks.find(b => b.id === stage2SelectedTestId)?.title
     ) || 'Target Test';
+
+    // Active Recall Flashcards Mode: Publish directly to flashcard_decks & flashcards
+    if (stage2TargetType === 'flashcards') {
+      setIsPublishingQuestions(true);
+      try {
+        let targetDeckId = stage2SelectedTestId;
+        if (!targetDeckId) {
+          const existingDeck = examFlashcardDecks.find(d => d.title.toLowerCase() === activeTitle.toLowerCase());
+          if (existingDeck) {
+            targetDeckId = existingDeck.id;
+          } else {
+            const newDeck = await examService.addFlashcardDeck({
+              title: activeTitle,
+              exam_id: selectedExamId,
+              stage: selectedExamStage || 'All Stages',
+              subject: stage2Subject || '',
+              sub_subject: stage2SubSubject || undefined,
+              chapter: stage2Chapter || undefined,
+              description: `Active recall flashcard deck for ${activeTitle}`,
+              is_premium: true,
+              card_count: 0
+            });
+            targetDeckId = newDeck.id;
+          }
+        }
+
+        const targetDeck = examFlashcardDecks.find(d => d.id === targetDeckId);
+        let existingCount = targetDeck?.card_count || 0;
+        try {
+          const liveCards = await examService.getFlashcardsByDeckId(targetDeckId);
+          if (Array.isArray(liveCards)) {
+            existingCount = liveCards.length;
+          }
+        } catch {}
+
+        const flashcardPayloads = questionsToPublish.map((q, idx) => ({
+          deck_id: targetDeckId,
+          front_text: q.front_text || q.questionText || '',
+          back_text: q.back_text || q.explanation || (q.options ? q.options[q.correctAnswerIndex] : '') || '',
+          key_points: q.key_points || [],
+          sort_order: existingCount + idx + 1
+        }));
+
+        await examService.bulkAddFlashcards(targetDeckId, flashcardPayloads);
+
+        if (typeof targetBatch === 'number') {
+          toast.success(`Published Batch ${targetBatch} (${flashcardPayloads.length} Flashcards) to "${activeTitle}"!`);
+          setGeneratedQuestions(prev => prev.filter(q => (q.batchNumber || 1) !== targetBatch));
+          setSelectedBatchFilter(prev => prev === targetBatch ? 'all' : prev);
+        } else {
+          toast.success(`Published ${flashcardPayloads.length} flashcards directly to deck "${activeTitle}"!`);
+          setGeneratedQuestions([]);
+          setSelectedBatchFilter('all');
+        }
+
+        await loadFlashcardDecks();
+        await onRefreshCatalog();
+      } catch (err: any) {
+        toast.error(err.message || 'Failed to publish flashcards.');
+      } finally {
+        setIsPublishingQuestions(false);
+      }
+      return;
+    }
 
     let targetTopic = '';
 
@@ -2311,6 +3001,7 @@ export function AIQuestionStudio({
           const seriesData = JSON.stringify({
             examId: selectedExamId,
             category: 'Full-Length Mock',
+            stage: selectedExamStage || null,
             isPremium: true
           });
           const newTest = await examService.createMockTest({
@@ -2337,11 +3028,17 @@ export function AIQuestionStudio({
         // Check if bank exists in this mode, if not create
         const existingBank = scopedBanks.find(b => b.title.toLowerCase() === activeTitle.toLowerCase());
         if (!existingBank) {
+          const metaTagline = JSON.stringify({
+            text: stage2Subject || '',
+            stage: selectedExamStage || '',
+            subject: stage2Subject || ''
+          });
           await examService.createQuestionBank({
             title: activeTitle,
             examId: selectedExamId,
             type: stage2Subject || 'topic-wise',
             target_mode: isPractice ? 'practice' : 'bank',
+            tagline: metaTagline,
             hasPracticeMode: isPractice,
             questionCount: questionsToPublish.length,
             isPremium: true,
@@ -2353,6 +3050,21 @@ export function AIQuestionStudio({
 
     setIsPublishingQuestions(true);
     try {
+      // Determine existing question count so sortOrder does not collide and appends sequentially
+      let existingCount = 0;
+      try {
+        if (stage2TargetType === 'mock_test') {
+          const mockId = targetTopic.replace(/^mockTest__/, '');
+          const existingQs = await examService.getQuestionsForMockTest(mockId);
+          existingCount = Array.isArray(existingQs) ? existingQs.length : 0;
+        } else {
+          const existingQs = await examService.getQuestionsForQuestionBank(stage2SelectedTestId || targetTopic, targetTopic, selectedExamId);
+          existingCount = Array.isArray(existingQs) ? existingQs.length : 0;
+        }
+      } catch (cntErr) {
+        console.warn('Could not determine existing question count for sortOrder offset:', cntErr);
+      }
+
       const headers = await getAdminAuthHeaders();
       const payloads = questionsToPublish.map((q, idx) => ({
         examId: selectedExamId,
@@ -2363,7 +3075,7 @@ export function AIQuestionStudio({
         correctAnswerIndex: q.correctAnswerIndex,
         explanation: q.explanation || '',
         diagram: q.diagram || null,
-        sortOrder: idx + 1
+        sortOrder: existingCount + idx + 1
       }));
 
       const res = await fetch('/api/admin/questions/bulk', {
@@ -2741,8 +3453,8 @@ export function AIQuestionStudio({
             </div>
           </div>
 
-          {/* Exam Selector & Drawer Toggle in a clean single aligned flex row */}
-          <div className="flex items-center gap-2.5 shrink-0">
+          {/* Exam Selector, Stage Selector & Drawer Toggle */}
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-slate-500 dark:text-slate-400 shrink-0">Target Exam:</span>
               <select
@@ -2757,6 +3469,29 @@ export function AIQuestionStudio({
                 ))}
               </select>
             </div>
+
+            {examConfiguredStages.length > 0 && (
+              <div className="flex items-center gap-1.5 bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/80 rounded-xl px-2.5 py-1">
+                <span className="text-xs font-black text-purple-900 dark:text-purple-300 shrink-0 flex items-center gap-1">
+                  <span>🎯 Stage:</span>
+                </span>
+                <select
+                  value={selectedExamStage}
+                  onChange={e => {
+                    const st = e.target.value;
+                    setSelectedExamStage(st);
+                    setStage2StageFilter(st || 'all');
+                    setMultiBankStageFilter(st || 'all');
+                  }}
+                  className="bg-transparent border-0 text-xs font-black text-purple-950 dark:text-purple-200 focus:ring-0 outline-none py-1 cursor-pointer"
+                >
+                  <option value="">🌐 All Stages / General</option>
+                  {examConfiguredStages.map(st => (
+                    <option key={st} value={st}>📍 {st}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <button
               onClick={() => setIsGovernanceExpanded(!isGovernanceExpanded)}
@@ -2797,6 +3532,15 @@ export function AIQuestionStudio({
                   {/* Standardized Action Toolbar */}
                   <div className="flex items-center gap-1 shrink-0">
                     <button
+                      onClick={handleSaveSyllabusToCloud}
+                      disabled={isSavingSyllabusToCloud}
+                      title="Save this stage's syllabus permanently to Cloud Database"
+                      className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-cyan-600 hover:bg-cyan-700 text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                    >
+                      {isSavingSyllabusToCloud ? <Loader2 className="w-3 h-3 animate-spin" /> : <Cloud className="w-3 h-3" />}
+                      <span className="hidden sm:inline">{isSavingSyllabusToCloud ? 'Saving...' : 'Save Cloud'}</span>
+                    </button>
+                    <button
                       onClick={() => syllabusFileInputRef.current?.click()}
                       title="Upload .md, .txt, or .json syllabus file"
                       className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
@@ -2822,12 +3566,49 @@ export function AIQuestionStudio({
                   </div>
                 </div>
 
-                {/* Track 2: Single-Line Subtitle */}
+                {/* Track 2: Multi-Stage Syllabus Tabs (if multi-stage exam) */}
+                {examConfiguredStages.length > 0 && (
+                  <div className="flex items-center gap-1 p-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto no-scrollbar">
+                    <span className="text-[10px] font-black uppercase text-slate-400 px-2 shrink-0">Stage:</span>
+                    {examConfiguredStages.map((st: string) => {
+                      const isCurrent = selectedExamStage === st;
+                      return (
+                        <button
+                          key={st}
+                          type="button"
+                          onClick={() => handleStageTabSwitch(st)}
+                          className={cn(
+                            "px-2.5 py-1 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer",
+                            isCurrent
+                              ? "bg-cyan-600 text-white font-black shadow-xs"
+                              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                          )}
+                        >
+                          {st}
+                        </button>
+                      );
+                    })}
+                    <button
+                      type="button"
+                      onClick={() => handleStageTabSwitch('')}
+                      className={cn(
+                        "px-2.5 py-1 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer",
+                        !selectedExamStage || selectedExamStage === 'All Stages'
+                          ? "bg-cyan-600 text-white font-black shadow-xs"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      )}
+                    >
+                      All Stages (Unified)
+                    </button>
+                  </div>
+                )}
+
+                {/* Track 3: Single-Line Subtitle */}
                 <p className="text-xs text-slate-500 dark:text-slate-400 truncate leading-none">
-                  Official exam curriculum topics, units, and previous year question hints.
+                  Official exam curriculum topics, units, and previous year question hints for {selectedExamStage ? `"${selectedExamStage}"` : 'all stages'}.
                 </p>
 
-                {/* Track 3: Preset Dropdown */}
+                {/* Track 4: Preset Dropdown */}
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block leading-none">
                     Official Blueprint Preset:
@@ -2845,7 +3626,7 @@ export function AIQuestionStudio({
                   </select>
                 </div>
 
-                {/* Track 4: Textarea Editor */}
+                {/* Track 5: Textarea Editor */}
                 <textarea
                   value={syllabusMarkdown}
                   onChange={(e) => handleUpdateSyllabus(e.target.value)}
@@ -2855,11 +3636,17 @@ export function AIQuestionStudio({
                 />
               </div>
 
-              {/* Track 5: Card Footer Stats */}
+              {/* Track 6: Card Footer Stats */}
               <div className="flex items-center justify-between pt-2 text-[11px] font-medium text-slate-500 dark:text-slate-400 border-t border-slate-200/70 dark:border-slate-700/60">
                 <div className="flex items-center gap-1.5 truncate">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
-                  <span className="truncate">Auto-saved for <strong>{selectedExam?.name || 'this exam'}</strong></span>
+                  <span className="truncate">
+                    Stage: <strong className="text-cyan-600 dark:text-cyan-400 font-black">{selectedExamStage || 'All Stages (Unified)'}</strong>
+                  </span>
+                  <span className="text-slate-400 hidden sm:inline">•</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold hidden sm:inline-flex items-center gap-0.5">
+                    <Cloud className="w-3 h-3" /> Cloud-Sync Active
+                  </span>
                 </div>
                 <span className="font-mono shrink-0 ml-2">{syllabusStats.words} words • {syllabusStats.lines} lines</span>
               </div>
@@ -2961,6 +3748,73 @@ export function AIQuestionStudio({
           </div>
         )}
       </div>
+
+      {/* ─────────────────────────────────────────────────────────────
+          ACTIVE EXAMINATION STAGE BANNER (Shown if exam has multi-stages)
+      ───────────────────────────────────────────────────────────── */}
+      {examConfiguredStages.length > 0 && (
+        <div className="bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-brand-500/10 border border-purple-200 dark:border-purple-800/70 rounded-2xl p-3.5 sm:p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs animate-in fade-in duration-200">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center font-black text-sm shadow-sm shrink-0">
+              🎯
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-black text-purple-950 dark:text-purple-200 uppercase tracking-wider">
+                  Active Examination Stage:
+                </span>
+                <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-purple-600 text-white shadow-xs">
+                  {selectedExamStage ? `📍 ${selectedExamStage}` : '🌐 All Stages / General (Unified)'}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">
+                Tests and questions generated will be tagged with this stage and reactively filtered in student portals.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedExamStage('');
+                setStage2StageFilter('all');
+                setMultiBankStageFilter('all');
+              }}
+              className={cn(
+                "px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border",
+                !selectedExamStage
+                  ? "bg-purple-600 text-white border-purple-600 shadow-xs"
+                  : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50"
+              )}
+            >
+              🌐 All Stages
+            </button>
+            {examConfiguredStages.map(st => {
+              const isActive = selectedExamStage === st;
+              return (
+                <button
+                  key={st}
+                  type="button"
+                  onClick={() => {
+                    setSelectedExamStage(st);
+                    setStage2StageFilter(st);
+                    setMultiBankStageFilter(st);
+                  }}
+                  className={cn(
+                    "px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border flex items-center gap-1",
+                    isActive
+                      ? "bg-purple-600 text-white border-purple-600 shadow-xs"
+                      : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50"
+                  )}
+                >
+                  <span>📍 {st}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ─────────────────────────────────────────────────────────────
           3. WORKFLOW STEPPER & STAGE SELECTOR TABS BAR (Pinned Anchor)
@@ -3095,7 +3949,7 @@ export function AIQuestionStudio({
                   Stage 1: Curriculum Test Suite Architect
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Generate syllabus-grounded test series across Practice Tests, Mock Tests, and Question Banks for <strong>{selectedExam?.name || 'Selected Exam'}</strong>.
+                  Generate syllabus-grounded test series across Practice Tests, Mock Tests, and Question Banks for <strong>{selectedExam?.name || 'Selected Exam'}</strong>{selectedExamStage ? <span className="ml-1.5 px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 font-black text-[10px] border border-purple-200 dark:border-purple-800">📍 {selectedExamStage} Stage</span> : ''}.
                 </p>
               </div>
             </div>
@@ -3143,12 +3997,18 @@ export function AIQuestionStudio({
                           setMockQuestionCount(100);
                         }
                       }
-                      const presets = SECTION_NAMING_PRESETS[sec.id] || [];
-                      const def = presets[0];
-                      if (def) {
-                        setStage1SubCategory(def.id);
-                        setSelectedNamingPresetId(def.id);
-                        setStage1NamingPattern(def.template);
+                      if (sec.id === 'flashcards') {
+                        setStage1SubCategory('all');
+                        setSelectedNamingPresetId('sub-chap');
+                        setStage1NamingPattern('[Sub-Subject] · [Chapter]');
+                      } else {
+                        const presets = SECTION_NAMING_PRESETS[sec.id] || [];
+                        const def = presets[0];
+                        if (def) {
+                          setStage1SubCategory(def.id);
+                          setSelectedNamingPresetId(def.id);
+                          setStage1NamingPattern(def.template);
+                        }
                       }
                     }}
                     className={cn(
@@ -3160,6 +4020,8 @@ export function AIQuestionStudio({
                           ? "bg-indigo-500/10 border-indigo-500/60 ring-2 ring-indigo-500/30 shadow-md"
                           : sec.id === 'mock_test'
                           ? "bg-brand-500/10 border-brand-500/60 ring-2 ring-brand-500/30 shadow-md"
+                          : sec.id === 'flashcards'
+                          ? "bg-purple-500/10 border-purple-500/60 ring-2 ring-purple-500/30 shadow-md"
                           : "bg-emerald-500/10 border-emerald-500/60 ring-2 ring-emerald-500/30 shadow-md"
                         : "bg-slate-50/70 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100/60 dark:hover:bg-slate-800/80"
                     )}
@@ -3175,6 +4037,8 @@ export function AIQuestionStudio({
                               ? "bg-indigo-600 text-white"
                               : sec.id === 'mock_test'
                               ? "bg-brand-600 text-white"
+                              : sec.id === 'flashcards'
+                              ? "bg-purple-600 text-white"
                               : "bg-emerald-600 text-white"
                             : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
                         )}>
@@ -3202,8 +4066,8 @@ export function AIQuestionStudio({
             </div>
           </div>
 
-          {/* Section 2: Subcategory Pills (When a specific section is chosen) */}
-          {stage1MainSection !== 'all_sections' && (
+          {/* Section 2: Subcategory Pills (Mock Tests, Practice Tests, Question Banks) */}
+          {stage1MainSection !== 'all_sections' && stage1MainSection !== 'flashcards' && (
             <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-2xl space-y-2.5">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
                 Target Subcategory in {CURRICULUM_SECTIONS.find(s => s.id === stage1MainSection)?.shortName}:
@@ -3248,87 +4112,208 @@ export function AIQuestionStudio({
             </div>
           )}
 
-          {/* Section 3: AI Syllabus Auto-Calibration & Coverage Intelligence */}
-          <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-4 sm:p-5 space-y-3.5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0 mt-0.5">
-                  <Bot className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs font-black text-slate-900 dark:text-white">
-                      AI Syllabus Deconstruction & Coverage Calibration
-                    </span>
-                    <span className={cn(
-                      "text-[10px] font-black uppercase px-2 py-0.5 rounded-full border",
-                      isAutoCalibrate
-                        ? "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800"
-                        : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600"
-                    )}>
-                      {isAutoCalibrate ? '✨ 100% Curriculum Coverage Active' : '⚙️ Fixed Count Mode'}
-                    </span>
+          {/* Section 2 (Flashcards Mode): Single Syllabus Topic Placeholder Input */}
+          {stage1MainSection === 'flashcards' && (
+            <div className="p-4 sm:p-5 bg-gradient-to-br from-purple-50/70 via-white to-pink-50/40 dark:from-slate-800/90 dark:via-slate-850 dark:to-slate-800/90 border border-purple-200/80 dark:border-purple-800/60 rounded-2xl space-y-3.5 shadow-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Layers className="w-4 h-4" />
                   </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-                    {isAutoCalibrate
-                      ? `AI automatically analyzes all subjects, units, and chapters from your uploaded syllabus and determines the exact test count needed to eliminate syllabus gaps.`
-                      : `Fixed set count mode active. AI will generate exactly ${stage1Count} tests according to your manual constraint.`}
-                  </p>
+                  <div>
+                    <h4 className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-2">
+                      Syllabus Topic Placeholder (Deck Name Generator)
+                      <span className="text-[10px] font-bold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-950/80 border border-purple-200 dark:border-purple-800 px-2 py-0.5 rounded-full">
+                        Direct Syllabus Extraction
+                      </span>
+                    </h4>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      Flashcards do not use test categories. Provide a placeholder for the subject or sub-subject below — AI will deconstruct each topic directly from your syllabus, and then create flashcards under that specific topic.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Hierarchy Level Quick Selector */}
+                <div className="flex items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded-xl border border-purple-200/70 dark:border-purple-800/60 self-start sm:self-auto shrink-0 shadow-2xs">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 px-1.5">Hierarchy:</span>
+                  {[
+                    { id: 'subsubject', label: '[Sub-Subject]', template: '[Sub-Subject] · [Chapter]' },
+                    { id: 'subject', label: '[Subject]', template: '[Subject]: [Sub-Subject] - [Chapter]' },
+                    { id: 'chapter', label: '[Chapter]', template: '[Chapter]' }
+                  ].map(tier => (
+                    <button
+                      key={tier.id}
+                      type="button"
+                      onClick={() => {
+                        setStage1NamingPattern(tier.template);
+                        toast.success(`Set placeholder pattern to ${tier.template}`);
+                      }}
+                      className={cn(
+                        "px-2.5 py-1 rounded-lg font-bold text-[10px] transition-all cursor-pointer",
+                        stage1NamingPattern.includes(tier.label)
+                          ? "bg-purple-600 text-white shadow-2xs"
+                          : "text-slate-600 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-purple-950/40"
+                      )}
+                    >
+                      {tier.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {/* Mode Switcher Toggle */}
-              <button
-                type="button"
-                onClick={() => setIsAutoCalibrate(!isAutoCalibrate)}
-                className={cn(
-                  "px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border shrink-0",
-                  isAutoCalibrate
-                    ? "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"
-                    : "bg-cyan-600 text-white border-cyan-600 shadow-xs"
-                )}
-              >
-                <Sliders className="w-3.5 h-3.5" />
-                <span>{isAutoCalibrate ? 'Customize Count' : 'Return to Auto-Calibrate'}</span>
-              </button>
-            </div>
-
-            {/* If Manual Override is toggled on: show manual quantity selector */}
-            {!isAutoCalibrate && (
-              <div className="pt-3 border-t border-slate-200 dark:border-slate-700/60 grid grid-cols-1 sm:grid-cols-3 gap-3 animate-in fade-in duration-200">
-                <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                    Manual Fixed Set Count:
+              {/* Single Placeholder Pattern Input & Clickable Token Chips */}
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                    <span>Active Placeholder Pattern:</span>
                   </label>
-                  <select
-                    value={stage1Count}
-                    onChange={e => setStage1Count(Number(e.target.value))}
-                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-cyan-500 outline-none"
-                  >
-                    <option value="3">3 Targeted Sets</option>
-                    <option value="5">5 Sets</option>
-                    <option value="8">8 Sets</option>
-                    <option value="10">10 Sets</option>
-                    <option value="12">12 Sets</option>
-                    <option value="15">15 Sets</option>
-                    <option value="20">20 Sets</option>
-                  </select>
+                  <div className="flex items-center gap-1 flex-wrap">
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500">Insert placeholder:</span>
+                    {['[Subject]', '[Sub-Subject]', '[Chapter]', '[Topic]', '[Paper]'].map(tag => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => {
+                          setStage1NamingPattern(prev => prev ? `${prev} ${tag}` : tag);
+                        }}
+                        className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/60 transition-colors cursor-pointer shadow-2xs"
+                      >
+                        +{tag}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="space-y-1 sm:col-span-2">
-                  <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                    Optional Scope Filter (Leave empty for complete syllabus):
-                  </label>
+
+                <div className="relative">
                   <input
                     type="text"
-                    value={stage1SubjectFocus}
-                    onChange={e => setStage1SubjectFocus(e.target.value)}
-                    placeholder="e.g. Only Anatomy & Physiology, or Clinical Nursing..."
-                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 dark:text-white focus:ring-2 focus:ring-cyan-500 outline-none"
+                    value={stage1NamingPattern}
+                    onChange={e => setStage1NamingPattern(e.target.value)}
+                    placeholder="e.g. [Sub-Subject] · [Chapter] or [Subject]: [Sub-Subject] - [Chapter]"
+                    className="w-full bg-white dark:bg-slate-900 border-2 border-purple-300/80 dark:border-purple-700/80 rounded-xl px-3.5 py-2.5 text-xs font-mono font-black text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
                   />
+                  {stage1NamingPattern && (
+                    <button
+                      type="button"
+                      onClick={() => setStage1NamingPattern('[Sub-Subject] · [Chapter]')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+
+                {/* Quick 1-Click Hierarchy Formats */}
+                <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">Quick Formats:</span>
+                  {[
+                    { label: '[Sub-Subject] · [Chapter]', desc: 'Granular Chapter under Sub-Subject' },
+                    { label: '[Subject]: [Sub-Subject] - [Chapter]', desc: 'Complete 3-Tier Hierarchy' },
+                    { label: '[Subject] · [Chapter]', desc: 'Subject with Chapter Topic' },
+                    { label: '[Chapter]', desc: 'Topic / Chapter Only' }
+                  ].map(fmt => (
+                    <button
+                      key={fmt.label}
+                      type="button"
+                      onClick={() => setStage1NamingPattern(fmt.label)}
+                      className={cn(
+                        "px-2 py-0.5 rounded-lg text-[10px] font-medium border transition-all cursor-pointer",
+                        stage1NamingPattern === fmt.label
+                          ? "bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-700 font-bold"
+                          : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50"
+                      )}
+                    >
+                      {fmt.label}
+                    </button>
+                  ))}
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* Section 3: AI Syllabus Auto-Calibration & Coverage Intelligence (Mock, Practice, Question Banks) */}
+          {stage1MainSection !== 'flashcards' && (
+            <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-4 sm:p-5 space-y-3.5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0 mt-0.5">
+                    <Bot className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-black text-slate-900 dark:text-white">
+                        AI Syllabus Deconstruction & Coverage Calibration
+                      </span>
+                      <span className={cn(
+                        "text-[10px] font-black uppercase px-2 py-0.5 rounded-full border",
+                        isAutoCalibrate
+                          ? "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800"
+                          : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600"
+                      )}>
+                        {isAutoCalibrate ? '✨ 100% Curriculum Coverage Active' : '⚙️ Fixed Count Mode'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                      {isAutoCalibrate
+                        ? `AI automatically analyzes all subjects, units, and chapters from your uploaded syllabus and determines the exact test count needed to eliminate syllabus gaps.`
+                        : `Fixed set count mode active. AI will generate exactly ${stage1Count} tests according to your manual constraint.`}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Mode Switcher Toggle */}
+                <button
+                  type="button"
+                  onClick={() => setIsAutoCalibrate(!isAutoCalibrate)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border shrink-0",
+                    isAutoCalibrate
+                      ? "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"
+                      : "bg-cyan-600 text-white border-cyan-600 shadow-xs"
+                  )}
+                >
+                  <Sliders className="w-3.5 h-3.5" />
+                  <span>{isAutoCalibrate ? 'Customize Count' : 'Return to Auto-Calibrate'}</span>
+                </button>
+              </div>
+
+              {/* If Manual Override is toggled on: show manual quantity selector */}
+              {!isAutoCalibrate && (
+                <div className="pt-3 border-t border-slate-200 dark:border-slate-700/60 grid grid-cols-1 sm:grid-cols-3 gap-3 animate-in fade-in duration-200">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                      Manual Fixed Set Count:
+                    </label>
+                    <select
+                      value={stage1Count}
+                      onChange={e => setStage1Count(Number(e.target.value))}
+                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-cyan-500 outline-none"
+                    >
+                      <option value="3">3 Targeted Sets</option>
+                      <option value="5">5 Sets</option>
+                      <option value="8">8 Sets</option>
+                      <option value="10">10 Sets</option>
+                      <option value="12">12 Sets</option>
+                      <option value="15">15 Sets</option>
+                      <option value="20">20 Sets</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1 sm:col-span-2">
+                    <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                      Optional Scope Filter (Leave empty for complete syllabus):
+                    </label>
+                    <input
+                      type="text"
+                      value={stage1SubjectFocus}
+                      onChange={e => setStage1SubjectFocus(e.target.value)}
+                      placeholder="e.g. Only Anatomy & Physiology, or Clinical Nursing..."
+                      className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 dark:text-white focus:ring-2 focus:ring-cyan-500 outline-none"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Section 4: Custom Test Rules & Scoring Scheme (Mock & Practice Tests) */}
           {(stage1MainSection === 'mock_test' || stage1MainSection === 'practice_test' || stage1MainSection === 'all_sections') && (
@@ -3576,133 +4561,304 @@ export function AIQuestionStudio({
             </div>
           )}
 
-          {/* Section 5: Title Generation Formula & Presets */}
-          <div className="bg-gradient-to-br from-indigo-50/60 via-white to-brand-50/60 dark:from-slate-800/80 dark:via-slate-850 dark:to-slate-800/80 border border-indigo-200/70 dark:border-indigo-800/40 rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                  <Sparkles className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-2">
-                    Title Naming Formula & Presets
-                    <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-800 px-2 py-0.5 rounded-full">
-                      Auto-Standardized
-                    </span>
-                  </h4>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Choose a pre-tested naming preset or customize the pattern below. Use <code className="text-indigo-600 dark:text-indigo-400 font-mono text-[10px] bg-indigo-50 dark:bg-indigo-950/80 px-1 py-0.5 rounded">[Subject]</code> for main paper/discipline header, and <code className="text-indigo-600 dark:text-indigo-400 font-mono text-[10px] bg-indigo-50 dark:bg-indigo-950/80 px-1 py-0.5 rounded">[Sub-Subject]</code> or <code className="text-indigo-600 dark:text-indigo-400 font-mono text-[10px] bg-indigo-50 dark:bg-indigo-950/80 px-1 py-0.5 rounded">[Chapter]</code> for specific granular topics. You can also type custom text freely.
-                  </p>
-                </div>
-              </div>
-
-              {stage1NamingPattern && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const presets = SECTION_NAMING_PRESETS[stage1MainSection] || [];
-                    const def = presets[0];
-                    if (def) {
-                      setSelectedNamingPresetId(def.id);
-                      setStage1NamingPattern(def.template);
-                      toast.success('↺ Reset to recommended default preset');
-                    }
-                  }}
-                  className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-1 cursor-pointer shrink-0"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  <span>Reset to Default</span>
-                </button>
-              )}
-            </div>
-
-            {/* Quick Preset Selector Pills */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                1-Click Naming Presets:
-              </label>
-              <div className="flex flex-wrap gap-1.5">
-                {(SECTION_NAMING_PRESETS[stage1MainSection] || []).map(preset => {
-                  const isActive = selectedNamingPresetId === preset.id;
-                  return (
-                    <button
-                      key={preset.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedNamingPresetId(preset.id);
-                        setStage1NamingPattern(preset.template);
-                        if (preset.id !== 'all') {
-                          setStage1SubCategory(preset.id);
-                        }
-                      }}
-                      className={cn(
-                        "px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border shadow-2xs",
-                        isActive
-                          ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
-                          : "bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
-                      )}
-                      title={preset.description}
-                    >
-                      <span>{preset.name}</span>
-                      <span className={cn(
-                        "text-[9px] px-1 py-0.5 rounded font-bold uppercase",
-                        isActive ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
-                      )}>
-                        {preset.badge}
+          {/* Section 4.1: Flashcards Dual-Control Deck Generation Architecture */}
+          {stage1MainSection === 'flashcards' && (
+            <div className="bg-gradient-to-br from-purple-50/70 via-white to-pink-50/50 dark:from-slate-800/90 dark:via-slate-850 dark:to-slate-800/90 border border-purple-200/80 dark:border-purple-800/50 rounded-2xl p-4 sm:p-5 space-y-4 shadow-xs transition-all">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-purple-200/50 dark:border-purple-800/40">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Layers className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-2">
+                      Active Recall Flashcard Decks Configuration
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border text-purple-700 dark:text-purple-400 bg-purple-100/80 dark:bg-purple-950/80 border-purple-300 dark:border-purple-800">
+                        Step 1: Deck Naming & Extraction
                       </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+                    </h4>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      Dual-control generator: extract 100% of all syllabus topics matching your placeholder pattern, or define a custom deck count limit.
+                    </p>
+                  </div>
+                </div>
 
-            {/* Editable Custom Formula Input */}
-            <div className="space-y-1.5 pt-1">
-              <div className="flex items-center justify-between">
-                <label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  Active Formula Pattern (Editable):
-                </label>
-                <div className="flex items-center gap-1 flex-wrap">
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500">Insert tag:</span>
-                  {['[Paper]', '[Subject]', '[Sub-Subject]', '[Unit]', '[Chapter]', '#[01-10]'].map(tag => (
-                    <button
-                      key={tag}
-                      type="button"
-                      onClick={() => {
-                        setStage1NamingPattern(prev => (prev ? `${prev} ${tag}` : tag));
-                        setSelectedNamingPresetId('custom');
-                      }}
-                      className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-mono text-[10px] font-semibold transition-all cursor-pointer border border-slate-200 dark:border-slate-700"
-                    >
-                      {tag}
-                    </button>
-                  ))}
+                {/* Status Badges */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-2.5 py-1 rounded-xl border border-purple-300/80 dark:border-purple-800/80 bg-purple-100/80 dark:bg-purple-950/80 text-purple-900 dark:text-purple-300 text-[10px] font-bold">
+                    🎯 Stage: <strong>{selectedExamStage || 'All Stages'}</strong>
+                  </span>
+                  <span className={cn(
+                    "px-2.5 py-1 rounded-xl border text-[10px] font-bold",
+                    isAutoCalibrate
+                      ? "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800"
+                      : "bg-cyan-100 dark:bg-cyan-950/80 text-cyan-800 dark:text-cyan-300 border-cyan-300 dark:border-cyan-800"
+                  )}>
+                    {isAutoCalibrate ? '✨ 100% Syllabus Coverage' : `⚙️ Custom Target: ${stage1Count} Decks`}
+                  </span>
                 </div>
               </div>
-              <input
-                type="text"
-                value={stage1NamingPattern}
-                onChange={e => {
-                  setStage1NamingPattern(e.target.value);
-                  setSelectedNamingPresetId('custom');
-                }}
-                placeholder='e.g. "[Subject]: [Sub-Subject] Sectional Test #[01-05]" or "[Unit] - [Chapter] Question Bank"'
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs font-mono font-semibold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
-              />
+
+              {/* Dual Control Switcher: Automatic vs Custom Count */}
+              <div className="space-y-3 pt-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Mode 1: Auto (All Syllabus Topics) */}
+                  <button
+                    type="button"
+                    onClick={() => setIsAutoCalibrate(true)}
+                    className={cn(
+                      "p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between relative",
+                      isAutoCalibrate
+                        ? "bg-purple-600/10 border-purple-500 dark:border-purple-400 ring-2 ring-purple-500/30 shadow-xs"
+                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-purple-300 opacity-80"
+                    )}
+                  >
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">✨</span>
+                        <span className="text-xs font-black text-slate-900 dark:text-white">
+                          Auto-Detect All Topics (Recommended)
+                        </span>
+                      </div>
+                      {isAutoCalibrate && (
+                        <span className="w-4 h-4 rounded-full bg-purple-600 text-white flex items-center justify-center text-[10px]">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                      AI parses the syllabus hierarchy matching your placeholder pattern (e.g. <code>{stage1NamingPattern || '[Sub-Subject]'}</code>). Generates a deck name for <strong>every single subject or sub-subject</strong> with zero syllabus gaps.
+                    </p>
+                  </button>
+
+                  {/* Mode 2: Custom Count (Manual Limit) */}
+                  <button
+                    type="button"
+                    onClick={() => setIsAutoCalibrate(false)}
+                    className={cn(
+                      "p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between relative",
+                      !isAutoCalibrate
+                        ? "bg-purple-600/10 border-purple-500 dark:border-purple-400 ring-2 ring-purple-500/30 shadow-xs"
+                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-purple-300 opacity-80"
+                    )}
+                  >
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">⚙️</span>
+                        <span className="text-xs font-black text-slate-900 dark:text-white">
+                          Custom Deck Count (Manual Limit)
+                        </span>
+                      </div>
+                      {!isAutoCalibrate && (
+                        <span className="w-4 h-4 rounded-full bg-purple-600 text-white flex items-center justify-center text-[10px]">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                      Override complete syllabus extraction to generate an exact specified number of flashcard decks (e.g. 5, 10, or 20 top-yield decks).
+                    </p>
+                  </button>
+                </div>
+
+                {/* When Manual Custom Count is selected: show pill selector & input */}
+                {!isAutoCalibrate && (
+                  <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-purple-200/80 dark:border-purple-800/60 space-y-2.5 animate-in fade-in duration-150">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[10px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                        <Sliders className="w-3.5 h-3.5 text-purple-600" />
+                        Exact Decks to Generate:
+                      </label>
+                      <span className="text-xs font-black font-mono text-purple-700 dark:text-purple-300">
+                        {stage1Count} Decks
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {[3, 5, 8, 10, 15, 20, 30].map(cnt => (
+                        <button
+                          key={cnt}
+                          type="button"
+                          onClick={() => setStage1Count(cnt)}
+                          className={cn(
+                            "px-3 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer",
+                            stage1Count === cnt
+                              ? "bg-purple-600 text-white border-purple-600 shadow-2xs"
+                              : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-purple-50 dark:hover:bg-purple-950/40"
+                          )}
+                        >
+                          {cnt} Decks {cnt === 10 ? '(Recommended)' : ''}
+                        </button>
+                      ))}
+                      <div className="flex items-center gap-1 ml-auto">
+                        <span className="text-[10px] font-bold text-slate-400">Custom:</span>
+                        <input
+                          type="number"
+                          min={1}
+                          max={100}
+                          value={stage1Count}
+                          onChange={e => setStage1Count(Math.max(1, Math.min(100, parseInt(e.target.value) || 1)))}
+                          className="w-16 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-2 py-0.5 text-xs font-bold text-center text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-purple-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Workflow Architecture Clarification Callout */}
+                <div className="p-3 rounded-xl bg-purple-100/60 dark:bg-purple-950/40 border border-purple-200/80 dark:border-purple-800/50 flex items-start gap-2 text-[11px] text-purple-900 dark:text-purple-200">
+                  <span className="text-sm shrink-0 mt-0.5">💡</span>
+                  <div>
+                    <strong>Two-Stage Architecture:</strong> After generating and saving your deck names here, click <strong>"Generate Flashcards (Stage 2) →"</strong> on any deck card below. In Stage 2, you'll specify the exact card count (e.g. 10 cards) to author ultra-crisp active recall questions and direct answers for that deck.
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Section 5: Title Generation Formula & Presets (Hidden for Flashcards since dedicated Syllabus Topic Placeholder is provided in Section 2) */}
+          {stage1MainSection !== 'flashcards' && (
+            <div className="bg-gradient-to-br from-indigo-50/60 via-white to-brand-50/60 dark:from-slate-800/80 dark:via-slate-850 dark:to-slate-800/80 border border-indigo-200/70 dark:border-indigo-800/40 rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-2">
+                      Title Naming Formula & Presets
+                      <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-800 px-2 py-0.5 rounded-full">
+                        Auto-Standardized
+                      </span>
+                    </h4>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      Choose a pre-tested naming preset or customize the pattern below. Use <code className="text-indigo-600 dark:text-indigo-400 font-mono text-[10px] bg-indigo-50 dark:bg-indigo-950/80 px-1 py-0.5 rounded">[Subject]</code> for main paper/discipline header, and <code className="text-indigo-600 dark:text-indigo-400 font-mono text-[10px] bg-indigo-50 dark:bg-indigo-950/80 px-1 py-0.5 rounded">[Sub-Subject]</code> or <code className="text-indigo-600 dark:text-indigo-400 font-mono text-[10px] bg-indigo-50 dark:bg-indigo-950/80 px-1 py-0.5 rounded">[Chapter]</code> for specific granular topics. You can also type custom text freely.
+                    </p>
+                  </div>
+                </div>
+
+                {stage1NamingPattern && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const presets = SECTION_NAMING_PRESETS[stage1MainSection] || [];
+                      const def = presets[0];
+                      if (def) {
+                        setSelectedNamingPresetId(def.id);
+                        setStage1NamingPattern(def.template);
+                        toast.success('↺ Reset to recommended default preset');
+                      }
+                    }}
+                    className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-1 cursor-pointer shrink-0"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Reset to Default</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Quick Preset Selector Pills */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  1-Click Naming Presets:
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {(SECTION_NAMING_PRESETS[stage1MainSection] || []).map(preset => {
+                    const isActive = selectedNamingPresetId === preset.id;
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedNamingPresetId(preset.id);
+                          setStage1NamingPattern(preset.template);
+                          if (preset.id !== 'all') {
+                            setStage1SubCategory(preset.id);
+                          }
+                        }}
+                        className={cn(
+                          "px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border shadow-2xs",
+                          isActive
+                            ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+                            : "bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
+                        )}
+                        title={preset.description}
+                      >
+                        <span>{preset.name}</span>
+                        <span className={cn(
+                          "text-[9px] px-1 py-0.5 rounded font-bold uppercase",
+                          isActive ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
+                        )}>
+                          {preset.badge}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Editable Custom Formula Input */}
+              <div className="space-y-1.5 pt-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Active Formula Pattern (Editable):
+                  </label>
+                  <div className="flex items-center gap-1 flex-wrap">
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500">Insert tag:</span>
+                    {(examConfiguredStages.length > 0
+                      ? ['[Stage]', '[Paper]', '[Subject]', '[Sub-Subject]', '[Unit]', '[Chapter]', '#[01-10]']
+                      : ['[Paper]', '[Subject]', '[Sub-Subject]', '[Unit]', '[Chapter]', '#[01-10]']
+                    ).map(tag => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => {
+                          setStage1NamingPattern(prev => (prev ? `${prev} ${tag}` : tag));
+                          setSelectedNamingPresetId('custom');
+                        }}
+                        className={cn(
+                          "px-1.5 py-0.5 rounded font-mono text-[10px] font-semibold transition-all cursor-pointer border",
+                          tag === '[Stage]'
+                            ? "bg-purple-100 dark:bg-purple-950/80 hover:bg-purple-200 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-700 font-bold"
+                            : "bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border-slate-200 dark:border-slate-700"
+                        )}
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <input
+                  type="text"
+                  value={stage1NamingPattern}
+                  onChange={e => {
+                    setStage1NamingPattern(e.target.value);
+                    setSelectedNamingPresetId('custom');
+                  }}
+                  placeholder='e.g. "[Subject]: [Sub-Subject] Sectional Test #[01-05]" or "[Unit] - [Chapter] Question Bank"'
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs font-mono font-semibold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                />
+              </div>
+            </div>
+          )}
 
           {/* Primary Action CTA */}
           <button
             onClick={handleGenerateStructure}
             disabled={isGeneratingStage1}
-            className="w-full py-3.5 bg-gradient-to-r from-cyan-600 via-brand-600 to-indigo-600 hover:from-cyan-700 hover:to-indigo-700 text-white font-black rounded-xl text-sm shadow-md shadow-brand-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+            className={cn(
+              "w-full py-3.5 font-black rounded-xl text-sm shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 text-white",
+              stage1MainSection === 'flashcards'
+                ? "bg-gradient-to-r from-purple-600 via-indigo-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 shadow-purple-500/20"
+                : "bg-gradient-to-r from-cyan-600 via-brand-600 to-indigo-600 hover:from-cyan-700 hover:to-indigo-700 shadow-brand-500/20"
+            )}
           >
             {isGeneratingStage1 ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin" />
                 <span>
-                  {isAutoCalibrate
+                  {stage1MainSection === 'flashcards'
+                    ? `Deconstructing Syllabus & Generating Flashcard Decks with AI...`
+                    : isAutoCalibrate
                     ? `Deconstructing Syllabus & Auto-Architecting Test Suite with AI...`
                     : `Architecting ${stage1Count} Curriculum Test Structures with AI...`}
                 </span>
@@ -3711,7 +4867,11 @@ export function AIQuestionStudio({
               <>
                 <Sparkles className="w-4 h-4 text-amber-300" />
                 <span>
-                  {isAutoCalibrate
+                  {stage1MainSection === 'flashcards'
+                    ? (isAutoCalibrate
+                        ? `Auto-Architect 100% Curriculum Flashcard Decks from Syllabus`
+                        : `Architect ${stage1Count} Flashcard Decks from Syllabus`)
+                    : isAutoCalibrate
                     ? `Auto-Architect 100% Curriculum Test Suite from Syllabus`
                     : `Architect ${stage1Count} ${stage1MainSection === 'all_sections' ? 'Curriculum Suite Tests' : CURRICULUM_SECTIONS.find(s => s.id === stage1MainSection)?.shortName}`}
                 </span>
@@ -3864,7 +5024,8 @@ export function AIQuestionStudio({
               <div className="flex flex-wrap items-center justify-between gap-2.5 pb-2">
                 <div className="flex flex-wrap items-center gap-1.5">
                   {[
-                    { id: 'all', label: 'All Tests', count: generatedStructures.length, icon: Layers },
+                    { id: 'all', label: 'All Types', count: generatedStructures.length, icon: Layers },
+                    { id: 'flashcards', label: 'Flashcards', count: generatedStructures.filter(s => s.mainSection === 'flashcards' || s.targetTable === 'flashcardDecks').length, icon: Layers },
                     { id: 'practice_test', label: 'Practice Tests', count: generatedStructures.filter(s => s.mainSection === 'practice_test').length, icon: Dumbbell },
                     { id: 'mock_test', label: 'Mock Tests', count: generatedStructures.filter(s => s.mainSection === 'mock_test').length, icon: Award },
                     { id: 'question_bank', label: 'Question Banks', count: generatedStructures.filter(s => s.mainSection === 'question_bank').length, icon: BookMarked },
@@ -3899,171 +5060,288 @@ export function AIQuestionStudio({
                 </div>
               </div>
 
-              {/* Generated Cards Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {generatedStructures
+              {/* Generated Cards Display: Hierarchical Subject Grouping for Flashcards, Flat Grid for other sections */}
+              {(() => {
+                const visibleStructures = generatedStructures
                   .map((item, originalIdx) => ({ item, originalIdx }))
                   .filter(({ item }) => {
-                    if (reviewFilterSection !== 'all' && item.mainSection !== reviewFilterSection) return false;
+                    if (reviewFilterSection !== 'all') {
+                      if (reviewFilterSection === 'flashcards') {
+                        return item.mainSection === 'flashcards' || item.targetTable === 'flashcardDecks';
+                      }
+                      return item.mainSection === reviewFilterSection;
+                    }
                     return true;
-                  })
-                  .map(({ item, originalIdx }) => {
-                    const isSelected = selectedStructureIndices.has(originalIdx);
-                    const isEditing = editingTitleIndex === originalIdx;
+                  });
 
-                    const isPractice = item.mainSection === 'practice_test';
-                    const isMock = item.mainSection === 'mock_test';
-                    const isBank = item.mainSection === 'question_bank';
+                const isFlashcardView = reviewFilterSection === 'flashcards' || (reviewFilterSection === 'all' && stage1MainSection === 'flashcards');
 
-                    return (
-                      <div
-                        key={originalIdx}
-                        className={cn(
-                          "p-4 rounded-2xl border transition-all space-y-3 relative flex flex-col justify-between",
-                          isSelected
-                            ? "bg-white dark:bg-slate-800/80 border-slate-300 dark:border-slate-600 shadow-xs ring-1 ring-brand-500/20"
-                            : "bg-slate-50/50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 opacity-70"
-                        )}
-                      >
-                        <div className="space-y-2.5">
-                          {/* Top Badges & Selection Checkbox */}
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex items-center gap-2 flex-wrap min-w-0">
-                              <button
-                                onClick={() => handleToggleSelectStructure(originalIdx)}
-                                className="text-slate-400 hover:text-brand-500 transition-colors cursor-pointer"
-                              >
-                                {isSelected ? (
-                                  <CheckSquare className="w-5 h-5 text-brand-600 dark:text-brand-400" />
-                                ) : (
-                                  <Square className="w-5 h-5 text-slate-300 dark:text-slate-600" />
-                                )}
-                              </button>
+                const renderStructureCard = ({ item, originalIdx }: { item: any; originalIdx: number }) => {
+                  const isSelected = selectedStructureIndices.has(originalIdx);
+                  const isEditing = editingTitleIndex === originalIdx;
 
-                              {/* Section Badge */}
-                              <span className={cn(
-                                "text-[9px] font-black uppercase px-2 py-0.5 rounded-full border shrink-0",
-                                isPractice
-                                  ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800"
-                                  : isMock
-                                  ? "bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 border-brand-200 dark:border-brand-800"
-                                  : "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
-                              )}>
-                                {isPractice ? 'Practice Test' : isMock ? 'Mock Test' : 'Question Bank'}
-                              </span>
+                  const isPractice = item.mainSection === 'practice_test';
+                  const isMock = item.mainSection === 'mock_test';
+                  const isBank = item.mainSection === 'question_bank';
+                  const isFlashcard = item.mainSection === 'flashcards' || item.targetTable === 'flashcardDecks';
 
-                              {/* Subcategory Badge */}
-                              <span className="text-[9px] font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded-full shrink-0">
-                                {item.subCategoryTitle || item.subCategory}
-                              </span>
-
-                              {/* Destination Table Tag */}
-                              <span className="text-[9px] font-mono text-slate-400 dark:text-slate-500">
-                                → {item.targetTable}{item.targetMode ? ` (${item.targetMode})` : ''}
-                              </span>
-                            </div>
-
-                            {/* Quick Action: Load to Stage 2 */}
+                  return (
+                    <div
+                      key={originalIdx}
+                      className={cn(
+                        "p-4 rounded-2xl border transition-all space-y-3 relative flex flex-col justify-between",
+                        isSelected
+                          ? "bg-white dark:bg-slate-800/80 border-slate-300 dark:border-slate-600 shadow-xs ring-1 ring-brand-500/20"
+                          : "bg-slate-50/50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 opacity-70"
+                      )}
+                    >
+                      <div className="space-y-2.5">
+                        {/* Top Badges & Selection Checkbox */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2 flex-wrap min-w-0">
                             <button
-                              onClick={() => handleTransferToStage2(item)}
-                              title="Load into Stage 2 Question Paper Studio"
-                              className="px-2 py-1 bg-brand-50 hover:bg-brand-600 text-brand-600 hover:text-white dark:bg-brand-950/60 dark:text-brand-300 rounded-lg text-xs font-bold transition-all flex items-center gap-1 shrink-0 cursor-pointer shadow-xs"
+                              onClick={() => handleToggleSelectStructure(originalIdx)}
+                              className="text-slate-400 hover:text-brand-500 transition-colors cursor-pointer"
                             >
-                              <Wand2 className="w-3 h-3" />
-                              <span className="hidden sm:inline">Stage 2</span>
-                            </button>
-                          </div>
-
-                          {/* Title with Inline Editing */}
-                          <div>
-                            {isEditing ? (
-                              <div className="flex items-center gap-1.5">
-                                <input
-                                  type="text"
-                                  value={editingTitleValue}
-                                  onChange={e => setEditingTitleValue(e.target.value)}
-                                  onKeyDown={e => {
-                                    if (e.key === 'Enter') handleSaveEditedTitle(originalIdx);
-                                    if (e.key === 'Escape') setEditingTitleIndex(null);
-                                  }}
-                                  className="w-full bg-white dark:bg-slate-900 border border-brand-500 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-900 dark:text-white focus:outline-none"
-                                  autoFocus
-                                />
-                                <button
-                                  onClick={() => handleSaveEditedTitle(originalIdx)}
-                                  className="p-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold cursor-pointer"
-                                >
-                                  <Check className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-1.5 group/title">
-                                <h4 className="font-bold text-sm text-slate-900 dark:text-white leading-snug">
-                                  {item.title}
-                                </h4>
-                                <button
-                                  onClick={() => handleStartEditTitle(originalIdx, item.title)}
-                                  title="Edit test title"
-                                  className="opacity-0 group-hover/title:opacity-100 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-opacity cursor-pointer p-0.5"
-                                >
-                                  <Edit3 className="w-3 h-3" />
-                                </button>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Description */}
-                          <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                            {item.description}
-                          </p>
-
-                          {/* Topics Covered Chips */}
-                          {item.topicsCovered && item.topicsCovered.length > 0 && (
-                            <div className="flex flex-wrap gap-1 pt-1">
-                              {item.topicsCovered.slice(0, 4).map((top: string, ti: number) => (
-                                <span
-                                  key={ti}
-                                  className="text-[9.5px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded border border-slate-200/50 dark:border-slate-700/50"
-                                >
-                                  {top}
-                                </span>
-                              ))}
-                              {item.topicsCovered.length > 4 && (
-                                <span className="text-[9px] text-slate-400 font-mono">
-                                  +{item.topicsCovered.length - 4} more
-                                </span>
+                              {isSelected ? (
+                                <CheckSquare className="w-5 h-5 text-brand-600 dark:text-brand-400" />
+                              ) : (
+                                <Square className="w-5 h-5 text-slate-300 dark:text-slate-600" />
                               )}
+                            </button>
+
+                            {/* Section Badge */}
+                            <span className={cn(
+                              "text-[9px] font-black uppercase px-2 py-0.5 rounded-full border shrink-0",
+                              isFlashcard
+                                ? "bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800"
+                                : isPractice
+                                ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800"
+                                : isMock
+                                ? "bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 border-brand-200 dark:border-brand-800"
+                                : "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
+                            )}>
+                              {isFlashcard ? 'Flashcard Deck' : isPractice ? 'Practice Test' : isMock ? 'Mock Test' : 'Question Bank'}
+                            </span>
+
+                            {/* Stage Badge if assigned */}
+                            {item.stage && (
+                              <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full border shrink-0 bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 flex items-center gap-0.5">
+                                📍 {item.stage}
+                              </span>
+                            )}
+
+                            {/* Subcategory Badge */}
+                            <span className="text-[9px] font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded-full shrink-0">
+                              {item.subCategoryTitle || item.subCategory}
+                            </span>
+
+                            {/* Destination Table Tag */}
+                            <span className="text-[9px] font-mono text-slate-400 dark:text-slate-500">
+                              → {item.targetTable}{item.targetMode ? ` (${item.targetMode})` : ''}
+                            </span>
+                          </div>
+
+                          {/* Quick Action: Load to Stage 2 */}
+                          <button
+                            onClick={() => handleTransferToStage2(item)}
+                            title={isFlashcard ? "Author Flashcards for this Deck in Stage 2" : "Load into Stage 2 Question Paper Studio"}
+                            className={cn(
+                              "px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs",
+                              isFlashcard
+                                ? "bg-purple-600 hover:bg-purple-700 text-white shadow-purple-600/20"
+                                : "bg-brand-50 hover:bg-brand-600 text-brand-600 hover:text-white dark:bg-brand-950/60 dark:text-brand-300"
+                            )}
+                          >
+                            {isFlashcard ? <Sparkles className="w-3 h-3" /> : <Wand2 className="w-3 h-3" />}
+                            <span>{isFlashcard ? 'Generate Flashcards (Stage 2) →' : 'Stage 2'}</span>
+                          </button>
+                        </div>
+
+                        {/* Title with Inline Editing */}
+                        <div>
+                          {isEditing ? (
+                            <div className="flex items-center gap-1.5">
+                              <input
+                                type="text"
+                                value={editingTitleValue}
+                                onChange={e => setEditingTitleValue(e.target.value)}
+                                onKeyDown={e => {
+                                  if (e.key === 'Enter') handleSaveEditedTitle(originalIdx);
+                                  if (e.key === 'Escape') setEditingTitleIndex(null);
+                                }}
+                                className="w-full bg-white dark:bg-slate-900 border border-brand-500 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-900 dark:text-white focus:outline-none"
+                                autoFocus
+                              />
+                              <button
+                                onClick={() => handleSaveEditedTitle(originalIdx)}
+                                className="p-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold cursor-pointer"
+                              >
+                                <Check className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1.5 group/title">
+                              <h4 className="font-bold text-sm text-slate-900 dark:text-white leading-snug">
+                                {item.title}
+                              </h4>
+                              <button
+                                onClick={() => handleStartEditTitle(originalIdx, item.title)}
+                                title="Edit test title"
+                                className="opacity-0 group-hover/title:opacity-100 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-opacity cursor-pointer p-0.5"
+                              >
+                                <Edit3 className="w-3 h-3" />
+                              </button>
                             </div>
                           )}
                         </div>
 
-                        {/* Card Metadata Footer */}
-                        <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 dark:border-slate-700/60 text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                          <div className="flex items-center gap-3">
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-slate-400" /> {item.durationMinutes}m
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Award className="w-3 h-3 text-slate-400" /> {item.totalMarks} Marks
-                            </span>
-                            {item.negativeMarking > 0 ? (
-                              <span className="flex items-center gap-1 text-rose-500 dark:text-rose-400 font-bold">
-                                <Target className="w-3 h-3" /> -{item.negativeMarking}
+                        {/* Description */}
+                        <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                          {item.description}
+                        </p>
+
+                        {/* Topics Covered Chips */}
+                        {item.topicsCovered && item.topicsCovered.length > 0 && (
+                          <div className="flex flex-wrap gap-1 pt-1">
+                            {item.topicsCovered.slice(0, 4).map((top: string, ti: number) => (
+                              <span
+                                key={ti}
+                                className="text-[9.5px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded border border-slate-200/50 dark:border-slate-700/50"
+                              >
+                                {top}
                               </span>
-                            ) : (
-                              <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
-                                <Target className="w-3 h-3" /> No Penalty
+                            ))}
+                            {item.topicsCovered.length > 4 && (
+                              <span className="text-[9px] text-slate-400 font-mono">
+                                +{item.topicsCovered.length - 4} more
                               </span>
                             )}
                           </div>
-                          <span className="font-bold text-slate-700 dark:text-slate-300">
-                            {item.subject}
-                          </span>
-                        </div>
+                        )}
                       </div>
-                    );
-                  })}
-              </div>
+
+                      {/* Card Metadata Footer */}
+                      <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 dark:border-slate-700/60 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                        <div className="flex items-center gap-3">
+                          {isFlashcard ? (
+                            <span className="flex items-center gap-1 font-bold text-purple-700 dark:text-purple-300">
+                              <Sparkles className="w-3 h-3 text-purple-600" /> Active Recall Deck
+                            </span>
+                          ) : (
+                            <>
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3 h-3 text-slate-400" /> {item.durationMinutes}m
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Award className="w-3 h-3 text-slate-400" /> {item.totalMarks} Marks
+                              </span>
+                              {item.negativeMarking > 0 ? (
+                                <span className="flex items-center gap-1 text-rose-500 dark:text-rose-400 font-bold">
+                                  <Target className="w-3 h-3" /> -{item.negativeMarking}
+                                </span>
+                              ) : (
+                                <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
+                                  <Target className="w-3 h-3" /> No Penalty
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </div>
+                        <span className="font-bold text-slate-700 dark:text-slate-300">
+                          {item.subject}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                };
+
+                if (isFlashcardView) {
+                  // Group items by academic subject
+                  const subjectMap = new Map<string, Array<{ item: any; originalIdx: number }>>();
+                  for (const entry of visibleStructures) {
+                    const subj = entry.item.subject || 'General Studies';
+                    if (!subjectMap.has(subj)) subjectMap.set(subj, []);
+                    subjectMap.get(subj)!.push(entry);
+                  }
+                  const subjectGroups = Array.from(subjectMap.entries());
+
+                  return (
+                    <div className="space-y-6">
+                      {subjectGroups.map(([subjectName, deckEntries]) => {
+                        const allSelectedInSubj = deckEntries.every(e => selectedStructureIndices.has(e.originalIdx));
+                        const someSelectedInSubj = deckEntries.some(e => selectedStructureIndices.has(e.originalIdx));
+
+                        return (
+                          <div
+                            key={subjectName}
+                            className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-purple-50/60 via-white to-pink-50/30 dark:from-slate-800/60 dark:via-slate-850 dark:to-slate-800/60 border border-purple-200/80 dark:border-purple-800/60 space-y-4 shadow-xs"
+                          >
+                            {/* Subject Folder Header Banner */}
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-purple-200/50 dark:border-purple-800/40">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+                                  <BookOpen className="w-4 h-4" />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-950/80 border border-purple-200 dark:border-purple-800 px-2 py-0.5 rounded-full">
+                                      Curriculum Subject Folder
+                                    </span>
+                                    <h4 className="text-sm font-black text-slate-900 dark:text-white">
+                                      {subjectName}
+                                    </h4>
+                                  </div>
+                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                    {deckEntries.length} Sub-Subject Flashcard {deckEntries.length === 1 ? 'Deck' : 'Decks'} aligned under this academic subject
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Quick Select/Deselect All in Subject */}
+                              <div className="flex items-center gap-2 self-start sm:self-auto">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedStructureIndices(prev => {
+                                      const next = new Set(prev);
+                                      deckEntries.forEach(e => {
+                                        if (allSelectedInSubj) next.delete(e.originalIdx);
+                                        else next.add(e.originalIdx);
+                                      });
+                                      return next;
+                                    });
+                                  }}
+                                  className={cn(
+                                    "px-3 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer",
+                                    allSelectedInSubj
+                                      ? "bg-purple-600 text-white border-purple-600 shadow-2xs"
+                                      : "bg-white dark:bg-slate-850 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 hover:bg-purple-50 dark:hover:bg-purple-950/40"
+                                  )}
+                                >
+                                  {allSelectedInSubj ? '✓ All Decks Selected' : someSelectedInSubj ? 'Select All Decks' : 'Select Subject Decks'}
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Sub-Subject Decks Grid */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                              {deckEntries.map(entry => renderStructureCard(entry))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                }
+
+                // Standard flat grid for non-flashcards sections
+                return (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {visibleStructures.map(entry => renderStructureCard(entry))}
+                  </div>
+                );
+              })()}
             </div>
           )}
         </div>
@@ -4112,7 +5390,7 @@ export function AIQuestionStudio({
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {[
                   {
                     id: 'mock_test' as const,
@@ -4134,6 +5412,13 @@ export function AIQuestionStudio({
                     desc: 'High-yield topic vault & 10-year PYQ archives',
                     icon: BookOpen,
                     color: 'from-emerald-500/10 to-teal-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
+                  },
+                  {
+                    id: 'flashcards' as const,
+                    title: 'Flashcards',
+                    desc: 'Active recall spaced-repetition cards & key points',
+                    icon: Layers,
+                    color: 'from-purple-500/10 to-pink-500/10 border-purple-500/30 text-purple-700 dark:text-purple-300'
                   }
                 ].map(typeItem => {
                   const isSelected = stage2TargetType === typeItem.id;
@@ -4186,10 +5471,10 @@ export function AIQuestionStudio({
               <div className="flex items-center justify-between">
                 <label className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                   <span className="w-5 h-5 rounded-full bg-brand-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">2</span>
-                  Filter by Subcategory & Format
+                  {stage2TargetType === 'flashcards' ? 'Filter by Deck Subject' : 'Filter by Subcategory & Format'}
                 </label>
                 <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                  Refines List in Step 3
+                  {stage2TargetType === 'flashcards' ? 'Isolates Decks by Subject' : 'Refines List in Step 3'}
                 </span>
               </div>
 
@@ -4209,6 +5494,15 @@ export function AIQuestionStudio({
                       { id: 'exam-focused', label: '💎 High-Yield Topic Banks', count: categorizedPracticeSets.examFocused.length },
                       { id: 'revision-sets', label: '⚡ Daily Speed & Accuracy Quizzes', count: categorizedPracticeSets.revisionSets.length },
                       { id: 'pyq-collections', label: '📜 Topic-Wise Solved PYQs', count: categorizedPracticeSets.pyqCollections.length }
+                    ]
+                  : stage2TargetType === 'flashcards'
+                  ? [
+                      { id: 'all', label: '🌐 All Subjects', count: examFlashcardDecks.length },
+                      ...Array.from(new Set(examFlashcardDecks.map(d => d.subject || 'General Studies').filter(Boolean))).map(subj => ({
+                        id: subj,
+                        label: `📖 ${subj}`,
+                        count: examFlashcardDecks.filter(d => (d.subject || 'General Studies') === subj).length
+                      }))
                     ]
                   : [
                       { id: 'all', label: '🌐 All Question Banks', count: examQuestionBanks.length },
@@ -4264,7 +5558,7 @@ export function AIQuestionStudio({
                         : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                     )}
                   >
-                    <span>🎯 Single Target Bank</span>
+                    <span>🎯 {stage2TargetType === 'flashcards' ? 'Single Target Deck' : 'Single Target Bank'}</span>
                   </button>
                   <button
                     type="button"
@@ -4276,7 +5570,7 @@ export function AIQuestionStudio({
                         : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                     )}
                   >
-                    <span>⚡ Multi-Bank Queue Runner</span>
+                    <span>⚡ {stage2TargetType === 'flashcards' ? 'Multi-Deck Queue Runner' : 'Multi-Bank Queue Runner'}</span>
                     {selectedMultiBankIds.length > 0 && (
                       <span className="px-1.5 py-0.5 rounded-md text-[10px] bg-white/20 text-white font-extrabold">
                         {selectedMultiBankIds.length}
@@ -4289,30 +5583,60 @@ export function AIQuestionStudio({
               {stage2TargetMode === 'multi_bank' ? (
                 <div className="space-y-4 pt-1">
                   {(() => {
+                    const isMock = stage2TargetType === 'mock_test';
                     const isPractice = stage2TargetType === 'practice_test';
-                    const catObj = isPractice ? categorizedPracticeSets : categorizedQuestionBanks;
-                    const basePool = isPractice ? examPracticeSets : examQuestionBanks;
+                    const isFlashcard = stage2TargetType === 'flashcards';
+                    const catObj = isMock ? categorizedMockTests : isPractice ? categorizedPracticeSets : categorizedQuestionBanks;
+                    const basePool = isFlashcard ? examFlashcardDecks : isMock ? examMockTests : isPractice ? examPracticeSets : examQuestionBanks;
 
                     let scopedPool = basePool;
-                    let activeCategoryLabel = isPractice ? 'All Practice Sets' : 'All Question Banks';
+                    let activeCategoryLabel = isFlashcard ? 'All Flashcard Decks' : isMock ? 'All Mock Tests' : isPractice ? 'All Practice Sets' : 'All Question Banks';
 
-                    if (stage2SubCategory === 'topic-wise') {
-                      scopedPool = catObj.topicWise;
+                    if (isFlashcard) {
+                      if (stage2SubCategory && stage2SubCategory !== 'all') {
+                        scopedPool = basePool.filter(d => (d.subject || 'General Studies') === stage2SubCategory);
+                        activeCategoryLabel = `📖 ${stage2SubCategory} Decks`;
+                      }
+                    } else if (isMock) {
+                      if (stage2SubCategory === 'full-length') {
+                        scopedPool = (catObj as typeof categorizedMockTests).fullLength;
+                        activeCategoryLabel = '🏆 Full-Length Mock Tests';
+                      } else if (stage2SubCategory === 'sectional') {
+                        scopedPool = (catObj as typeof categorizedMockTests).sectional;
+                        activeCategoryLabel = '📑 Sectional Tests';
+                      } else if (stage2SubCategory === 'pyq') {
+                        scopedPool = (catObj as typeof categorizedMockTests).pyq;
+                        activeCategoryLabel = '⏳ Official PYQ Tests';
+                      } else if (stage2SubCategory === 'daily') {
+                        scopedPool = (catObj as typeof categorizedMockTests).daily;
+                        activeCategoryLabel = '📈 Daily / Weekly Benchmark Tests';
+                      }
+                    } else if (stage2SubCategory === 'topic-wise') {
+                      scopedPool = (catObj as typeof categorizedQuestionBanks).topicWise;
                       activeCategoryLabel = isPractice ? '📖 Chapter-Wise Practice' : '📚 Topic-Wise Question Bank';
                     } else if (stage2SubCategory === 'exam-focused') {
-                      scopedPool = catObj.examFocused;
+                      scopedPool = (catObj as typeof categorizedQuestionBanks).examFocused;
                       activeCategoryLabel = isPractice ? '💎 High-Yield Topic Banks' : '💎 Exam-Focused High Yield';
                     } else if (stage2SubCategory === 'revision-sets') {
-                      scopedPool = catObj.revisionSets;
+                      scopedPool = (catObj as typeof categorizedQuestionBanks).revisionSets;
                       activeCategoryLabel = isPractice ? '⚡ Daily Speed & Accuracy Quizzes' : '⚡ Last-Minute Revision Sets';
                     } else if (stage2SubCategory === 'pyq-collections') {
-                      scopedPool = catObj.pyqCollections;
+                      scopedPool = (catObj as typeof categorizedQuestionBanks).pyqCollections;
                       activeCategoryLabel = isPractice ? '📜 Topic-Wise Solved PYQs' : '📜 PYQ Question Archives';
                     }
 
                     const getBankCount = (b: any) => {
+                      if (isFlashcard) {
+                        if (typeof bankCountOverrides[b.id] === 'number') {
+                          return bankCountOverrides[b.id];
+                        }
+                        return b.card_count ?? 0;
+                      }
                       if (typeof bankCountOverrides[b.id] === 'number') {
                         return bankCountOverrides[b.id];
+                      }
+                      if (isMock) {
+                        return b._questionCount ?? b.questionCount ?? b.totalQuestions ?? 0;
                       }
                       if (typeof b.practiceQuestionCount === 'number' && b.practiceQuestionCount > 0) {
                         return b.practiceQuestionCount;
@@ -4325,14 +5649,22 @@ export function AIQuestionStudio({
                     const emptyCount = emptyBanks.length;
                     const populatedCount = populatedBanks.length;
 
+                    const unitLabel = isFlashcard ? 'Cards' : 'Qs';
+                    const nounLabel = isFlashcard ? 'decks' : isMock ? 'mock tests' : 'banks';
+                    const nounCapital = isFlashcard ? 'Decks' : isMock ? 'Mock Tests' : 'Banks';
+
                     const filteredBanks = scopedPool.filter(b => {
                       const count = getBankCount(b);
                       if (multiBankQuestionCountFilter === 'empty' && count > 0) return false;
                       if (multiBankQuestionCountFilter === 'populated' && count === 0) return false;
+                      if (multiBankStageFilter !== 'all') {
+                        const st = getItemStage(b);
+                        if (st && st.toLowerCase() !== multiBankStageFilter.toLowerCase()) return false;
+                      }
                       if (multiBankSearchQuery.trim()) {
                         const q = multiBankSearchQuery.toLowerCase();
                         const titleMatch = (b.title || '').toLowerCase().includes(q);
-                        const subjMatch = (b.tagline || '').toLowerCase().includes(q);
+                        const subjMatch = (b.tagline || b.subject || '').toLowerCase().includes(q);
                         return titleMatch || subjMatch;
                       }
                       return true;
@@ -4357,12 +5689,12 @@ export function AIQuestionStudio({
                             {emptyCount > 0 ? (
                               <span className="px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-extrabold text-[10.5px] border border-amber-300/60 dark:border-amber-800 flex items-center gap-1">
                                 <AlertTriangle className="w-3 h-3 text-amber-600 shrink-0" />
-                                <span>{emptyCount} banks have 0 questions</span>
+                                <span>{emptyCount} {nounLabel} have 0 {unitLabel.toLowerCase()}</span>
                               </span>
                             ) : (
                               <span className="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-extrabold text-[10.5px] border border-emerald-300/60 dark:border-emerald-800 flex items-center gap-1">
                                 <Check className="w-3 h-3 text-emerald-600 shrink-0" />
-                                <span>All banks populated</span>
+                                <span>All {nounLabel} populated</span>
                               </span>
                             )}
                           </div>
@@ -4372,7 +5704,7 @@ export function AIQuestionStudio({
                               onClick={() => setStage2SubCategory('all')}
                               className="text-[11px] font-bold text-brand-600 hover:text-brand-700 dark:text-brand-400 hover:underline cursor-pointer shrink-0"
                             >
-                              Show All Categories
+                              Show All {isFlashcard ? 'Subjects' : 'Categories'}
                             </button>
                           ) : (
                             <span className="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium shrink-0">
@@ -4404,7 +5736,7 @@ export function AIQuestionStudio({
                             )}
                           </div>
 
-                          {/* Question Count Status Filters */}
+                          {/* Question/Card Count Status Filters */}
                           <div className="flex items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-700 shrink-0 overflow-x-auto">
                             <button
                               type="button"
@@ -4428,7 +5760,7 @@ export function AIQuestionStudio({
                                     : "text-slate-600 hover:text-slate-900"
                               )}
                             >
-                              <span>⚠️ Needs Qs / 0 Qs</span>
+                              <span>⚠️ Needs {unitLabel} / 0 {unitLabel}</span>
                               <span className={cn(
                                 "px-1.5 py-0.2 rounded-md text-[10px] font-black",
                                 multiBankQuestionCountFilter === 'empty' ? "bg-white/20 text-white" : "bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300"
@@ -4448,6 +5780,36 @@ export function AIQuestionStudio({
                             </button>
                           </div>
 
+                          {/* Stage Filters (if exam has stages) */}
+                          {examConfiguredStages.length > 0 && (
+                            <div className="flex items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-700 shrink-0 overflow-x-auto">
+                              <span className="text-[10px] font-black uppercase text-purple-700 dark:text-purple-300 px-1.5 shrink-0">Stage:</span>
+                              <button
+                                type="button"
+                                onClick={() => setMultiBankStageFilter('all')}
+                                className={cn(
+                                  "px-2 py-0.5 rounded-lg text-[10.5px] font-black transition-all cursor-pointer whitespace-nowrap",
+                                  multiBankStageFilter === 'all' ? "bg-purple-600 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
+                                )}
+                              >
+                                All
+                              </button>
+                              {examConfiguredStages.map(st => (
+                                <button
+                                  key={st}
+                                  type="button"
+                                  onClick={() => setMultiBankStageFilter(st)}
+                                  className={cn(
+                                    "px-2 py-0.5 rounded-lg text-[10.5px] font-black transition-all cursor-pointer whitespace-nowrap",
+                                    multiBankStageFilter === st ? "bg-purple-600 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
+                                  )}
+                                >
+                                  📍 {st}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
                           {/* Quick Selection Actions */}
                           <div className="flex items-center gap-2 shrink-0 flex-wrap">
                             <button
@@ -4456,7 +5818,7 @@ export function AIQuestionStudio({
                               onClick={() => {
                                 const emptyIds = emptyBanks.map(b => b.id);
                                 setSelectedMultiBankIds(emptyIds);
-                                toast.success(`⚡ Selected all ${emptyIds.length} empty banks in ${activeCategoryLabel}`);
+                                toast.success(`⚡ Selected all ${emptyIds.length} empty ${nounLabel} in ${activeCategoryLabel}`);
                               }}
                               className={cn(
                                 "px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer",
@@ -4464,10 +5826,10 @@ export function AIQuestionStudio({
                                   ? "bg-amber-500 hover:bg-amber-600 text-white shadow-xs"
                                   : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 opacity-60"
                               )}
-                              title={emptyCount > 0 ? "Select all banks with 0 questions in this category" : "No empty banks in this category"}
+                              title={emptyCount > 0 ? `Select all ${nounLabel} with 0 ${unitLabel.toLowerCase()} in this category` : `No empty ${nounLabel} in this category`}
                             >
                               <Zap className="w-3.5 h-3.5 fill-current" />
-                              <span>Select 0-Q Banks ({emptyCount})</span>
+                              <span>Select 0-{unitLabel} {nounCapital} ({emptyCount})</span>
                             </button>
                             <button
                               type="button"
@@ -4497,9 +5859,9 @@ export function AIQuestionStudio({
                         <div className="max-h-72 overflow-y-auto pr-1 space-y-2 scrollbar-thin">
                           {filteredBanks.length === 0 ? (
                             <div className="p-8 text-center text-xs font-semibold text-slate-400 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1">
-                              <div>No question banks match the selected category & filter criteria.</div>
+                              <div>No {nounLabel} match the selected category & filter criteria.</div>
                               <div className="text-[11px] text-brand-600">
-                                Try changing the Question Count filter above or selecting a different subcategory in Step 2.
+                                Try changing the Question/Card Count filter above or selecting a different {isFlashcard ? 'subject' : 'subcategory'} in Step 2.
                               </div>
                             </div>
                           ) : (
@@ -4544,6 +5906,11 @@ export function AIQuestionStudio({
                                         )}>
                                           {bank.title}
                                         </h5>
+                                        {getItemStage(bank) && (
+                                          <span className="px-1.5 py-0.2 rounded text-[9.5px] font-black bg-purple-100 text-purple-800 dark:bg-purple-950/80 dark:text-purple-300 border border-purple-200 dark:border-purple-800 shrink-0">
+                                            📍 {getItemStage(bank)}
+                                          </span>
+                                        )}
                                         {isZero && (
                                           <span className="px-1.5 py-0.2 rounded text-[9.5px] font-black bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 shrink-0">
                                             Empty
@@ -4551,13 +5918,21 @@ export function AIQuestionStudio({
                                         )}
                                       </div>
                                       <div className="flex items-center gap-2 mt-0.5 text-[10.5px]">
-                                        <span className="text-slate-400">
-                                          {(bank.target_mode || 'both') === 'practice' ? '🎯 Practice Set' : (bank.target_mode || 'both') === 'bank' ? '📦 Question Bank' : '🌟 Both'}
-                                        </span>
-                                        {bank.type && (
+                                        {isFlashcard ? (
+                                          <span className="text-slate-400">
+                                            🎴 Flashcard Deck • {bank.subject || 'General Studies'}{bank.chapter ? ` • ${bank.chapter}` : ''}
+                                          </span>
+                                        ) : (
                                           <>
-                                            <span className="text-slate-300 dark:text-slate-600">•</span>
-                                            <span className="text-slate-500 capitalize">{bank.type.replace('-', ' ')}</span>
+                                            <span className="text-slate-400">
+                                              {(bank.target_mode || 'both') === 'practice' ? '🎯 Practice Set' : (bank.target_mode || 'both') === 'bank' ? '📦 Question Bank' : '🌟 Both'}
+                                            </span>
+                                            {bank.type && (
+                                              <>
+                                                <span className="text-slate-300 dark:text-slate-600">•</span>
+                                                <span className="text-slate-500 capitalize">{bank.type.replace('-', ' ')}</span>
+                                              </>
+                                            )}
                                           </>
                                         )}
                                       </div>
@@ -4573,18 +5948,18 @@ export function AIQuestionStudio({
                                         qStatus.status === 'failed' ? "bg-rose-100 text-rose-800 border border-rose-300" :
                                         "bg-slate-100 text-slate-700"
                                       )}>
-                                        {qStatus.status === 'completed' ? `✓ Uploaded (${qStatus.count} Qs)` :
-                                         qStatus.status === 'running' ? `⚡ Generating (${qStatus.count} Qs)...` :
+                                        {qStatus.status === 'completed' ? `✓ Uploaded (${qStatus.count} ${unitLabel})` :
+                                         qStatus.status === 'running' ? `⚡ Generating (${qStatus.count} ${unitLabel})...` :
                                          qStatus.status === 'failed' ? '❌ Failed' : '⏳ Queued'}
                                       </span>
                                     ) : isZero ? (
                                       <span className="px-2.5 py-1 rounded-lg text-[10.5px] font-black bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300/80 dark:border-amber-800 flex items-center gap-1">
                                         <AlertTriangle className="w-3 h-3 text-amber-600" />
-                                        <span>0 Qs • Empty</span>
+                                        <span>0 {unitLabel} • Empty</span>
                                       </span>
                                     ) : (
                                       <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                                        📦 {currentCount} Qs
+                                        {isFlashcard ? '🎴' : '📦'} {currentCount} {unitLabel}
                                       </span>
                                     )}
                                   </div>
@@ -4598,18 +5973,18 @@ export function AIQuestionStudio({
                         <div className="p-3.5 rounded-xl bg-gradient-to-r from-brand-500/10 via-indigo-500/10 to-transparent border border-brand-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                           <div className="space-y-0.5">
                             <div className="flex items-center gap-2 font-black text-brand-900 dark:text-brand-200">
-                              <span>📊 Multi-Bank Queue Target:</span>
+                              <span>📊 Multi-{isFlashcard ? 'Deck' : 'Bank'} Queue Target:</span>
                               <span className="px-2 py-0.5 rounded-md bg-brand-600 text-white text-[11px] font-black">
-                                {selectedMultiBankIds.length} Banks Selected
+                                {selectedMultiBankIds.length} {nounCapital} Selected
                               </span>
                             </div>
                             <p className="text-[11px] text-slate-600 dark:text-slate-400">
-                              {stage2QuestionCount} Qs/batch × {stage2BatchCount} batches = <strong className="text-slate-900 dark:text-white font-black">{qsPerBank} Qs/Bank</strong> • Grand Total: <strong className="text-brand-600 font-black">{grandTotal} Questions</strong>
+                              {stage2QuestionCount} {unitLabel}/batch × {stage2BatchCount} batches = <strong className="text-slate-900 dark:text-white font-black">{qsPerBank} {unitLabel}/{isFlashcard ? 'Deck' : 'Bank'}</strong> • Grand Total: <strong className="text-brand-600 font-black">{grandTotal} {isFlashcard ? 'Cards' : 'Questions'}</strong>
                             </p>
                           </div>
                           <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold">
                             <CheckCircle className="w-4 h-4 shrink-0" />
-                            <span>Direct auto-publish into each bank record upon batch completion</span>
+                            <span>Direct auto-publish into each {isFlashcard ? 'deck' : 'bank'} record upon batch completion</span>
                           </div>
                         </div>
                       </div>
@@ -4618,7 +5993,7 @@ export function AIQuestionStudio({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
                       Select target test or question bank from the list:
                     </span>
@@ -4630,6 +6005,40 @@ export function AIQuestionStudio({
                         : `${examQuestionBanks.length} Question Banks Available`}
                     </span>
                   </div>
+
+                  {/* Stage Filter Pills if exam has configured stages */}
+                  {examConfiguredStages.length > 0 && (
+                    <div className="flex items-center gap-1.5 flex-wrap p-1.5 bg-slate-100 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-1.5">
+                        Filter by Stage:
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setStage2StageFilter('all')}
+                        className={`px-2.5 py-1 text-[11px] font-black rounded-lg transition-all ${
+                          stage2StageFilter === 'all'
+                            ? 'bg-brand-600 text-white shadow-xs'
+                            : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        All Stages
+                      </button>
+                      {examConfiguredStages.map(st => (
+                        <button
+                          key={st}
+                          type="button"
+                          onClick={() => setStage2StageFilter(st)}
+                          className={`px-2.5 py-1 text-[11px] font-black rounded-lg transition-all ${
+                            stage2StageFilter.toLowerCase() === st.toLowerCase()
+                              ? 'bg-brand-600 text-white shadow-xs'
+                              : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700'
+                          }`}
+                        >
+                          {st}
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
                   {/* Aggregated Dropdown with Subcategory Grouping */}
                   <div className="space-y-1.5">
@@ -4650,6 +6059,11 @@ export function AIQuestionStudio({
                       const matched = examMockTests.find(t => t.id === id);
                       if (matched) {
                         setStage2TestTitle(matched.title);
+                        const itemStage = getItemStage(matched);
+                        if (itemStage && itemStage !== 'All Stages') {
+                          setSelectedExamStage(itemStage);
+                          setStage2StageFilter(itemStage);
+                        }
                         if (/full mock|full-length|pyq paper|benchmark/i.test(matched.title)) {
                           setStage2Subject('Comprehensive Full Syllabus (All Subjects Balanced)');
                         } else {
@@ -4669,6 +6083,11 @@ export function AIQuestionStudio({
                       const matched = examPracticeSets.find(b => b.id === id);
                       if (matched) {
                         setStage2TestTitle(matched.title);
+                        const itemStage = getItemStage(matched);
+                        if (itemStage && itemStage !== 'All Stages') {
+                          setSelectedExamStage(itemStage);
+                          setStage2StageFilter(itemStage);
+                        }
                         let subj = '';
                         if (matched.tagline) {
                           try {
@@ -4678,10 +6097,42 @@ export function AIQuestionStudio({
                         if (!subj) subj = matched.subject || matched.tagline?.replace(/^Subject:\s*/i, '') || '';
                         setStage2Subject(subj && subj !== matched.title ? `${subj} • ${matched.title}` : matched.title);
                       }
+                    } else if (stage2TargetType === 'flashcards') {
+                      const matched = examFlashcardDecks.find(d => d.id === id);
+                      if (matched) {
+                        setStage2TestTitle(matched.title);
+                        setStage2Subject(matched.subject || matched.title);
+                        if (matched.sub_subject || matched.chapter) {
+                          setStage2SubSubject(matched.sub_subject || matched.title);
+                          setStage2Chapter(matched.chapter || '');
+                        } else if (matched.title.includes(' · ')) {
+                          const parts = matched.title.split(' · ');
+                          setStage2SubSubject(parts[0].trim());
+                          setStage2Chapter(parts[1]?.trim() || '');
+                        } else if (matched.title.includes(':')) {
+                          const parts = matched.title.split(':');
+                          setStage2Subject(parts[0].trim());
+                          setStage2SubSubject(parts[1]?.trim() || '');
+                          setStage2Chapter('');
+                        } else {
+                          setStage2SubSubject(matched.title);
+                          setStage2Chapter('');
+                        }
+                        const itemStage = getItemStage(matched);
+                        if (itemStage && itemStage !== 'All Stages') {
+                          setSelectedExamStage(itemStage);
+                          setStage2StageFilter(itemStage);
+                        }
+                      }
                     } else {
                       const matched = examQuestionBanks.find(b => b.id === id);
                       if (matched) {
                         setStage2TestTitle(matched.title);
+                        const itemStage = getItemStage(matched);
+                        if (itemStage && itemStage !== 'All Stages') {
+                          setSelectedExamStage(itemStage);
+                          setStage2StageFilter(itemStage);
+                        }
                         let subj = '';
                         if (matched.tagline) {
                           try {
@@ -4695,142 +6146,208 @@ export function AIQuestionStudio({
                   }}
                   className="w-full bg-white dark:bg-slate-900 border-2 border-brand-500/30 rounded-xl px-3.5 py-3 text-xs font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none"
                 >
-                  <option value="">-- Click to Select an Existing {stage2TargetType === 'mock_test' ? 'Mock Test' : stage2TargetType === 'practice_test' ? 'Practice Set' : 'Question Bank'} --</option>
+                  <option value="">-- Click to Select an Existing {stage2TargetType === 'mock_test' ? 'Mock Test' : stage2TargetType === 'practice_test' ? 'Practice Set' : stage2TargetType === 'flashcards' ? 'Flashcard Deck' : 'Question Bank'} --</option>
 
                   {/* QUESTION BANK MODE: Grouped by 4 Exact Subcategories */}
-                  {stage2TargetType === 'question_bank' && (
-                    <>
-                      {(stage2SubCategory === 'all' || stage2SubCategory === 'topic-wise') && categorizedQuestionBanks.topicWise.length > 0 && (
-                        <optgroup label={`📚 Topic-Wise Question Bank (${categorizedQuestionBanks.topicWise.length} Sets)`}>
-                          {categorizedQuestionBanks.topicWise.map(b => (
-                            <option key={b.id} value={b.id}>
-                              {b.title} ({b.questionCount || 0} Qs)
-                            </option>
-                          ))}
-                        </optgroup>
-                      )}
+                  {stage2TargetType === 'question_bank' && (() => {
+                    const filterByStage = (items: any[]) => items.filter(b => {
+                      if (stage2StageFilter === 'all') return true;
+                      const st = getItemStage(b);
+                      return !st || st.toLowerCase() === stage2StageFilter.toLowerCase();
+                    });
+                    const tw = filterByStage(categorizedQuestionBanks.topicWise);
+                    const ef = filterByStage(categorizedQuestionBanks.examFocused);
+                    const rs = filterByStage(categorizedQuestionBanks.revisionSets);
+                    const pq = filterByStage(categorizedQuestionBanks.pyqCollections);
 
-                      {(stage2SubCategory === 'all' || stage2SubCategory === 'exam-focused') && categorizedQuestionBanks.examFocused.length > 0 && (
-                        <optgroup label={`💎 Exam-Focused High Yield (${categorizedQuestionBanks.examFocused.length} Sets)`}>
-                          {categorizedQuestionBanks.examFocused.map(b => (
-                            <option key={b.id} value={b.id}>
-                              {b.title} ({b.questionCount || 0} Qs)
-                            </option>
-                          ))}
-                        </optgroup>
-                      )}
+                    return (
+                      <>
+                        {(stage2SubCategory === 'all' || stage2SubCategory === 'topic-wise') && tw.length > 0 && (
+                          <optgroup label={`📚 Topic-Wise Question Bank (${tw.length} Sets)`}>
+                            {tw.map(b => (
+                              <option key={b.id} value={b.id}>
+                                {getItemStage(b) ? `[${getItemStage(b)}] ` : ''}{b.title} ({b.questionCount || 0} Qs)
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
 
-                      {(stage2SubCategory === 'all' || stage2SubCategory === 'revision-sets') && categorizedQuestionBanks.revisionSets.length > 0 && (
-                        <optgroup label={`⚡ Last-Minute Revision Sets (${categorizedQuestionBanks.revisionSets.length} Sets)`}>
-                          {categorizedQuestionBanks.revisionSets.map(b => (
-                            <option key={b.id} value={b.id}>
-                              {b.title} ({b.questionCount || 0} Qs)
-                            </option>
-                          ))}
-                        </optgroup>
-                      )}
+                        {(stage2SubCategory === 'all' || stage2SubCategory === 'exam-focused') && ef.length > 0 && (
+                          <optgroup label={`💎 Exam-Focused High Yield (${ef.length} Sets)`}>
+                            {ef.map(b => (
+                              <option key={b.id} value={b.id}>
+                                {getItemStage(b) ? `[${getItemStage(b)}] ` : ''}{b.title} ({b.questionCount || 0} Qs)
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
 
-                      {(stage2SubCategory === 'all' || stage2SubCategory === 'pyq-collections') && categorizedQuestionBanks.pyqCollections.length > 0 && (
-                        <optgroup label={`📜 PYQ Question Archives (${categorizedQuestionBanks.pyqCollections.length} Sets)`}>
-                          {categorizedQuestionBanks.pyqCollections.map(b => (
-                            <option key={b.id} value={b.id}>
-                              {b.title} ({b.questionCount || 0} Qs)
-                            </option>
-                          ))}
-                        </optgroup>
-                      )}
-                    </>
-                  )}
+                        {(stage2SubCategory === 'all' || stage2SubCategory === 'revision-sets') && rs.length > 0 && (
+                          <optgroup label={`⚡ Last-Minute Revision Sets (${rs.length} Sets)`}>
+                            {rs.map(b => (
+                              <option key={b.id} value={b.id}>
+                                {getItemStage(b) ? `[${getItemStage(b)}] ` : ''}{b.title} ({b.questionCount || 0} Qs)
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
+
+                        {(stage2SubCategory === 'all' || stage2SubCategory === 'pyq-collections') && pq.length > 0 && (
+                          <optgroup label={`📜 PYQ Question Archives (${pq.length} Sets)`}>
+                            {pq.map(b => (
+                              <option key={b.id} value={b.id}>
+                                {getItemStage(b) ? `[${getItemStage(b)}] ` : ''}{b.title} ({b.questionCount || 0} Qs)
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
+                      </>
+                    );
+                  })()}
 
                   {/* PRACTICE TEST MODE: Grouped by 4 Exact Subcategories */}
-                  {stage2TargetType === 'practice_test' && (
-                    <>
-                      {(stage2SubCategory === 'all' || stage2SubCategory === 'topic-wise') && categorizedPracticeSets.topicWise.length > 0 && (
-                        <optgroup label={`📖 Chapter-Wise Practice (${categorizedPracticeSets.topicWise.length} Sets)`}>
-                          {categorizedPracticeSets.topicWise.map(b => (
-                            <option key={b.id} value={b.id}>
-                              {b.title} ({b.questionCount || 0} Qs)
-                            </option>
-                          ))}
-                        </optgroup>
-                      )}
+                  {stage2TargetType === 'practice_test' && (() => {
+                    const filterByStage = (items: any[]) => items.filter(b => {
+                      if (stage2StageFilter === 'all') return true;
+                      const st = getItemStage(b);
+                      return !st || st.toLowerCase() === stage2StageFilter.toLowerCase();
+                    });
+                    const tw = filterByStage(categorizedPracticeSets.topicWise);
+                    const ef = filterByStage(categorizedPracticeSets.examFocused);
+                    const rs = filterByStage(categorizedPracticeSets.revisionSets);
+                    const pq = filterByStage(categorizedPracticeSets.pyqCollections);
 
-                      {(stage2SubCategory === 'all' || stage2SubCategory === 'exam-focused') && categorizedPracticeSets.examFocused.length > 0 && (
-                        <optgroup label={`💎 High-Yield Topic Banks (${categorizedPracticeSets.examFocused.length} Sets)`}>
-                          {categorizedPracticeSets.examFocused.map(b => (
-                            <option key={b.id} value={b.id}>
-                              {b.title} ({b.questionCount || 0} Qs)
-                            </option>
-                          ))}
-                        </optgroup>
-                      )}
+                    return (
+                      <>
+                        {(stage2SubCategory === 'all' || stage2SubCategory === 'topic-wise') && tw.length > 0 && (
+                          <optgroup label={`📖 Chapter-Wise Practice (${tw.length} Sets)`}>
+                            {tw.map(b => (
+                              <option key={b.id} value={b.id}>
+                                {getItemStage(b) ? `[${getItemStage(b)}] ` : ''}{b.title} ({b.questionCount || 0} Qs)
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
 
-                      {(stage2SubCategory === 'all' || stage2SubCategory === 'revision-sets') && categorizedPracticeSets.revisionSets.length > 0 && (
-                        <optgroup label={`⚡ Daily Speed & Accuracy Quizzes (${categorizedPracticeSets.revisionSets.length} Sets)`}>
-                          {categorizedPracticeSets.revisionSets.map(b => (
-                            <option key={b.id} value={b.id}>
-                              {b.title} ({b.questionCount || 0} Qs)
-                            </option>
-                          ))}
-                        </optgroup>
-                      )}
+                        {(stage2SubCategory === 'all' || stage2SubCategory === 'exam-focused') && ef.length > 0 && (
+                          <optgroup label={`💎 High-Yield Topic Banks (${ef.length} Sets)`}>
+                            {ef.map(b => (
+                              <option key={b.id} value={b.id}>
+                                {getItemStage(b) ? `[${getItemStage(b)}] ` : ''}{b.title} ({b.questionCount || 0} Qs)
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
 
-                      {(stage2SubCategory === 'all' || stage2SubCategory === 'pyq-collections') && categorizedPracticeSets.pyqCollections.length > 0 && (
-                        <optgroup label={`📜 Topic-Wise Solved PYQs (${categorizedPracticeSets.pyqCollections.length} Sets)`}>
-                          {categorizedPracticeSets.pyqCollections.map(b => (
-                            <option key={b.id} value={b.id}>
-                              {b.title} ({b.questionCount || 0} Qs)
-                            </option>
-                          ))}
-                        </optgroup>
-                      )}
-                    </>
-                  )}
+                        {(stage2SubCategory === 'all' || stage2SubCategory === 'revision-sets') && rs.length > 0 && (
+                          <optgroup label={`⚡ Daily Speed & Accuracy Quizzes (${rs.length} Sets)`}>
+                            {rs.map(b => (
+                              <option key={b.id} value={b.id}>
+                                {getItemStage(b) ? `[${getItemStage(b)}] ` : ''}{b.title} ({b.questionCount || 0} Qs)
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
+
+                        {(stage2SubCategory === 'all' || stage2SubCategory === 'pyq-collections') && pq.length > 0 && (
+                          <optgroup label={`📜 Topic-Wise Solved PYQs (${pq.length} Sets)`}>
+                            {pq.map(b => (
+                              <option key={b.id} value={b.id}>
+                                {getItemStage(b) ? `[${getItemStage(b)}] ` : ''}{b.title} ({b.questionCount || 0} Qs)
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
+                      </>
+                    );
+                  })()}
 
                   {/* MOCK TEST MODE: Grouped by 4 Exact Subcategories */}
-                  {stage2TargetType === 'mock_test' && (
-                    <>
-                      {(stage2SubCategory === 'all' || stage2SubCategory === 'full-length') && categorizedMockTests.fullLength.length > 0 && (
-                        <optgroup label={`🏆 Full-Length Mock Tests (${categorizedMockTests.fullLength.length} Tests)`}>
-                          {categorizedMockTests.fullLength.map(t => (
-                            <option key={t.id} value={t.id}>
-                              {t.title} ({t._questionCount || 0} Qs)
-                            </option>
-                          ))}
-                        </optgroup>
-                      )}
+                  {stage2TargetType === 'mock_test' && (() => {
+                    const filterByStage = (items: any[]) => items.filter(t => {
+                      if (stage2StageFilter === 'all') return true;
+                      const st = getItemStage(t);
+                      return !st || st.toLowerCase() === stage2StageFilter.toLowerCase();
+                    });
+                    const fl = filterByStage(categorizedMockTests.fullLength);
+                    const sec = filterByStage(categorizedMockTests.sectional);
+                    const pq = filterByStage(categorizedMockTests.pyq);
+                    const dl = filterByStage(categorizedMockTests.daily);
 
-                      {(stage2SubCategory === 'all' || stage2SubCategory === 'sectional') && categorizedMockTests.sectional.length > 0 && (
-                        <optgroup label={`📑 Sectional Tests (${categorizedMockTests.sectional.length} Tests)`}>
-                          {categorizedMockTests.sectional.map(t => (
-                            <option key={t.id} value={t.id}>
-                              {t.title} ({t._questionCount || 0} Qs)
-                            </option>
-                          ))}
-                        </optgroup>
-                      )}
+                    return (
+                      <>
+                        {(stage2SubCategory === 'all' || stage2SubCategory === 'full-length') && fl.length > 0 && (
+                          <optgroup label={`🏆 Full-Length Mock Tests (${fl.length} Tests)`}>
+                            {fl.map(t => (
+                              <option key={t.id} value={t.id}>
+                                {getItemStage(t) ? `[${getItemStage(t)}] ` : ''}{t.title} ({t._questionCount || 0} Qs)
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
 
-                      {(stage2SubCategory === 'all' || stage2SubCategory === 'pyq') && categorizedMockTests.pyq.length > 0 && (
-                        <optgroup label={`⏳ Official PYQ Tests (${categorizedMockTests.pyq.length} Tests)`}>
-                          {categorizedMockTests.pyq.map(t => (
-                            <option key={t.id} value={t.id}>
-                              {t.title} ({t._questionCount || 0} Qs)
-                            </option>
-                          ))}
-                        </optgroup>
-                      )}
+                        {(stage2SubCategory === 'all' || stage2SubCategory === 'sectional') && sec.length > 0 && (
+                          <optgroup label={`📑 Sectional Tests (${sec.length} Tests)`}>
+                            {sec.map(t => (
+                              <option key={t.id} value={t.id}>
+                                {getItemStage(t) ? `[${getItemStage(t)}] ` : ''}{t.title} ({t._questionCount || 0} Qs)
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
 
-                      {(stage2SubCategory === 'all' || stage2SubCategory === 'daily') && categorizedMockTests.daily.length > 0 && (
-                        <optgroup label={`📈 Daily / Weekly Benchmark Tests (${categorizedMockTests.daily.length} Tests)`}>
-                          {categorizedMockTests.daily.map(t => (
-                            <option key={t.id} value={t.id}>
-                              {t.title} ({t._questionCount || 0} Qs)
-                            </option>
-                          ))}
-                        </optgroup>
-                      )}
-                    </>
-                  )}
+                        {(stage2SubCategory === 'all' || stage2SubCategory === 'pyq') && pq.length > 0 && (
+                          <optgroup label={`⏳ Official PYQ Tests (${pq.length} Tests)`}>
+                            {pq.map(t => (
+                              <option key={t.id} value={t.id}>
+                                {getItemStage(t) ? `[${getItemStage(t)}] ` : ''}{t.title} ({t._questionCount || 0} Qs)
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
+
+                        {(stage2SubCategory === 'all' || stage2SubCategory === 'daily') && dl.length > 0 && (
+                          <optgroup label={`📈 Daily / Weekly Benchmark Tests (${dl.length} Tests)`}>
+                            {dl.map(t => (
+                              <option key={t.id} value={t.id}>
+                                {getItemStage(t) ? `[${getItemStage(t)}] ` : ''}{t.title} ({t._questionCount || 0} Qs)
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
+                      </>
+                    );
+                  })()}
+
+                  {/* FLASHCARD DECK MODE: Grouped by Real Subject / Syllabus Hierarchy */}
+                  {stage2TargetType === 'flashcards' && (() => {
+                    const filterByStage = (items: FlashcardDeck[]) => items.filter(d => {
+                      if (stage2StageFilter === 'all') return true;
+                      const st = d.stage || getItemStage(d);
+                      return !st || st.toLowerCase() === 'all stages' || st.toLowerCase() === stage2StageFilter.toLowerCase();
+                    });
+                    const filteredDecks = filterByStage(examFlashcardDecks);
+                    const subjects = Array.from(new Set(filteredDecks.map(d => d.subject || 'General Studies')));
+
+                    return (
+                      <>
+                        {subjects.map(subj => {
+                          const decksInSubj = filteredDecks.filter(d => (d.subject || 'General Studies') === subj);
+                          if (stage2SubCategory !== 'all' && stage2SubCategory !== subj) return null;
+                          if (decksInSubj.length === 0) return null;
+                          return (
+                            <optgroup key={subj} label={`📖 ${subj} (${decksInSubj.length} Decks)`}>
+                              {decksInSubj.map(d => (
+                                <option key={d.id} value={d.id}>
+                                  {d.stage && d.stage !== 'All Stages' ? `[${d.stage}] ` : ''}{d.title} ({d.card_count || 0} Cards)
+                                </option>
+                              ))}
+                            </optgroup>
+                          );
+                        })}
+                      </>
+                    );
+                  })()}
                 </select>
               </div>
 
@@ -4853,8 +6370,16 @@ export function AIQuestionStudio({
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
+                      {getItemStage(selectedItem) && (
+                        <span className="text-xs font-black px-2.5 py-1 rounded-full bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300 border border-brand-300 dark:border-brand-700 flex items-center gap-1">
+                          <Layers className="w-3 h-3" />
+                          {getItemStage(selectedItem)}
+                        </span>
+                      )}
                       <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                        {selectedItem._questionCount ?? selectedItem.questionCount ?? 0} Existing Questions
+                        {stage2TargetType === 'flashcards'
+                          ? `${selectedItem.card_count ?? 0} Existing Flashcards`
+                          : `${selectedItem._questionCount ?? selectedItem.questionCount ?? 0} Existing Questions`}
                       </span>
                     </div>
                   </div>
@@ -4881,14 +6406,65 @@ export function AIQuestionStudio({
             </div>
           )}
               {(() => {
-                const cleanSub = (stage2Subject || 'Comprehensive Full Syllabus').trim();
+                const isFlashcards = stage2TargetType === 'flashcards';
+                const isMultiRunner = stage2TargetMode === 'multi_bank';
+
+                if (isMultiRunner && isFlashcards) {
+                  return (
+                    <div className="p-3 rounded-xl border flex items-center justify-between gap-3 text-xs transition-all shadow-2xs mt-2 bg-indigo-500/10 border-indigo-500/30 text-indigo-950 dark:text-indigo-200">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-white shrink-0 shadow-xs bg-indigo-600">
+                          <Target className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <div className="font-black text-xs flex items-center gap-2">
+                            <span>🎯 Strict Per-Deck Subject & Syllabus Lock Mode</span>
+                            <span className="text-[9px] font-bold px-2 py-0.5 rounded-full border bg-indigo-100 dark:bg-indigo-950 border-indigo-300 dark:border-indigo-800 text-indigo-800 dark:text-indigo-300">
+                              100% Placeholder & Topic Lock
+                            </span>
+                          </div>
+                          <p className="text-[10.5px] opacity-80 mt-0.5">
+                            Every deck in the queue will be generated individually and strictly mapped to its designated syllabus module, subject, and sub-subject. Zero cross-topic leakage.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (isMultiRunner) {
+                  return (
+                    <div className="p-3 rounded-xl border flex items-center justify-between gap-3 text-xs transition-all shadow-2xs mt-2 bg-indigo-500/10 border-indigo-500/30 text-indigo-950 dark:text-indigo-200">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-white shrink-0 shadow-xs bg-indigo-600">
+                          <Target className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <div className="font-black text-xs flex items-center gap-2">
+                            <span>🎯 Strict Sequential Bank Isolation Mode</span>
+                            <span className="text-[9px] font-bold px-2 py-0.5 rounded-full border bg-indigo-100 dark:bg-indigo-950 border-indigo-300 dark:border-indigo-800 text-indigo-800 dark:text-indigo-300">
+                              Per-Bank Topic Lock
+                            </span>
+                          </div>
+                          <p className="text-[10.5px] opacity-80 mt-0.5">
+                            Each question bank in the queue is generated individually, strictly isolated to its own title, subject, and chapter.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                const cleanSub = (stage2Subject || (isFlashcards ? 'Selected Subject' : 'Comprehensive Full Syllabus')).trim();
                 const cleanT = (stage2TestTitle || '').trim();
                 const isFull = 
-                  !cleanSub || 
-                  cleanSub.toLowerCase() === 'all subjects' || 
-                  cleanSub.toLowerCase().includes('comprehensive') || 
-                  cleanSub.toLowerCase() === 'full syllabus' || 
-                  (/full mock|full-length|pyq paper|benchmark/i.test(cleanT) && (!cleanSub || cleanSub.toLowerCase() === 'all subjects'));
+                  !isFlashcards && (
+                    !cleanSub || 
+                    cleanSub.toLowerCase() === 'all subjects' || 
+                    cleanSub.toLowerCase().includes('comprehensive') || 
+                    cleanSub.toLowerCase() === 'full syllabus' || 
+                    (/full mock|full-length|pyq paper|benchmark/i.test(cleanT) && (!cleanSub || cleanSub.toLowerCase() === 'all subjects'))
+                  );
 
                 return (
                   <div className={cn(
@@ -4919,7 +6495,7 @@ export function AIQuestionStudio({
                         <p className="text-[10.5px] opacity-80 mt-0.5">
                           {isFull 
                             ? 'Questions will be sampled proportionally across all syllabus papers & units with zero chapter bias.'
-                            : `100% of questions will be strictly locked to "${cleanSub}". Unrelated subjects will be filtered out.`}
+                            : `${isFlashcards ? '100% of flashcards' : '100% of questions'} will be strictly locked to "${cleanSub}". Unrelated subjects will be filtered out.`}
                         </p>
                       </div>
                     </div>
@@ -4931,193 +6507,363 @@ export function AIQuestionStudio({
             {/* STEP 4 & 5 GRID: QUESTION COUNT & COGNITIVE DIFFICULTY */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               
-              {/* STEP 4: QUESTION & BATCH SPECIFICATION */}
-              <div className="space-y-3.5 p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
-                <div>
-                  {/* Questions per Batch */}
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                      <span className="w-5 h-5 rounded-full bg-brand-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">4</span>
-                      Questions per Batch
-                    </label>
-                    <span className="text-xs font-bold text-brand-600 dark:text-brand-400">
-                      {stage2QuestionCount} Qs / Batch
-                    </span>
-                  </div>
-
-                  {/* Preset Pills for Questions per Batch */}
-                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 mb-2">
-                    {[5, 10, 15, 20, 25, 50].map(cnt => (
-                      <button
-                        key={cnt}
-                        type="button"
-                        onClick={() => setStage2QuestionCount(cnt)}
-                        className={cn(
-                          "py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
-                          stage2QuestionCount === cnt
-                            ? "bg-brand-600 text-white shadow-sm"
-                            : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-brand-500"
-                        )}
-                      >
-                        {cnt} Qs
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Custom Questions per Batch Input */}
-                  <div className="flex items-center gap-2 mb-1">
-                    <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Custom Qs / Batch:</label>
-                    <input
-                      type="number"
-                      min={1}
-                      max={50}
-                      value={stage2QuestionCount}
-                      onChange={e => setStage2QuestionCount(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
-                      className="w-20 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-900 dark:text-white text-center focus:ring-1 focus:ring-brand-500 outline-none"
-                    />
-                  </div>
-
-                  {/* Number of Batches (Sequential Auto-Runner) */}
-                  <div className="pt-2.5 mt-2.5 border-t border-slate-200 dark:border-slate-700">
+              {/* STEP 4: QUESTION & BATCH SPECIFICATION OR FLASHCARD VOLUME */}
+              {stage2TargetType === 'flashcards' ? (
+                <div className="space-y-3.5 p-4 rounded-2xl bg-gradient-to-br from-purple-50/80 via-white to-indigo-50/50 dark:from-slate-800/90 dark:via-slate-850 dark:to-slate-800/90 border border-purple-200/80 dark:border-purple-800/60 flex flex-col justify-between shadow-xs">
+                  <div>
                     <div className="flex items-center justify-between mb-2">
-                      <label className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                        <Layers className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-                        Number of Batches (Auto-Runner)
+                      <label className="text-xs font-black uppercase tracking-wider text-purple-900 dark:text-purple-300 flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-full bg-purple-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">4</span>
+                        Active Recall Memory Volume
                       </label>
-                      <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
-                        {stage2BatchCount} {stage2BatchCount === 1 ? 'Batch' : 'Batches'}
+                      <span className="text-xs font-black text-purple-700 dark:text-purple-300 flex items-center gap-1">
+                        {stage2NaturalDensity
+                          ? (stage2QuestionCount === 0 ? '🎯 Natural Density (Auto Sizing)' : `🎯 Natural Density (≤${stage2QuestionCount} Cap)`)
+                          : `Max Cap: ${stage2QuestionCount} Cards`}
                       </span>
                     </div>
 
-                    {/* Batch Presets */}
-                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 mb-2">
-                      {[1, 2, 3, 4, 5, 10].map(bc => (
+                    {/* Mode Cards: Natural Density (Adaptive) vs Manual Cap Limit */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStage2NaturalDensity(true);
+                          setStage2QuestionCount(0);
+                        }}
+                        className={cn(
+                          "p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between",
+                          stage2NaturalDensity
+                            ? "bg-purple-600 text-white border-purple-600 shadow-sm ring-2 ring-purple-500/30"
+                            : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-purple-200/80 dark:border-purple-800/50 hover:border-purple-400"
+                        )}
+                      >
+                        <div className="flex items-center justify-between w-full mb-1">
+                          <span className="text-xs font-black flex items-center gap-1.5">
+                            <span>🎯 Natural Density</span>
+                          </span>
+                          <span className={cn(
+                            "text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md",
+                            stage2NaturalDensity ? "bg-white/20 text-white" : "bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300"
+                          )}>
+                            Recommended
+                          </span>
+                        </div>
+                        <p className={cn("text-[10px] leading-relaxed", stage2NaturalDensity ? "text-purple-100" : "text-slate-500 dark:text-slate-400")}>
+                          Extracts authentic memory pain points sized to syllabus factual richness without padding filler.
+                        </p>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStage2NaturalDensity(false);
+                          if (stage2QuestionCount === 0) setStage2QuestionCount(20);
+                        }}
+                        className={cn(
+                          "p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between",
+                          !stage2NaturalDensity
+                            ? "bg-purple-600 text-white border-purple-600 shadow-sm ring-2 ring-purple-500/30"
+                            : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-purple-200/80 dark:border-purple-800/50 hover:border-purple-400"
+                        )}
+                      >
+                        <div className="flex items-center justify-between w-full mb-1">
+                          <span className="text-xs font-black flex items-center gap-1.5">
+                            <span>⚙️ Max Cap Limit</span>
+                          </span>
+                          <span className={cn(
+                            "text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md",
+                            !stage2NaturalDensity ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                          )}>
+                            Manual
+                          </span>
+                        </div>
+                        <p className={cn("text-[10px] leading-relaxed", !stage2NaturalDensity ? "text-purple-100" : "text-slate-500 dark:text-slate-400")}>
+                          Forces card extraction to a fixed strict quota (5, 10, 15, 20, 30 cards).
+                        </p>
+                      </button>
+                    </div>
+
+                    {/* Quick Cap / Ceiling Pills */}
+                    <div className="grid grid-cols-5 gap-1.5 mb-2">
+                      {(stage2NaturalDensity ? [0, 10, 15, 20, 30] : [5, 10, 15, 20, 30]).map(cnt => (
                         <button
-                          key={bc}
+                          key={cnt}
                           type="button"
-                          onClick={() => setStage2BatchCount(bc)}
+                          onClick={() => {
+                            setStage2QuestionCount(cnt);
+                          }}
                           className={cn(
-                            "py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
-                            stage2BatchCount === bc
-                              ? "bg-indigo-600 text-white shadow-sm"
-                              : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-indigo-500"
+                            "py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer text-center",
+                            stage2QuestionCount === cnt
+                              ? "bg-purple-600 text-white shadow-sm"
+                              : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-purple-200 dark:border-purple-800/60 hover:border-purple-400"
                           )}
                         >
-                          {bc} {bc === 1 ? 'Batch' : 'Batches'}
+                          {stage2NaturalDensity
+                            ? (cnt === 0 ? '✨ Auto' : `≤ ${cnt} Cap`)
+                            : `${cnt} Cards`}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-2.5 border-t border-purple-200/60 dark:border-purple-800/40 text-[11px] text-purple-800 dark:text-purple-300 flex items-center justify-between font-bold">
+                    <div className="flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                      <span>
+                        {stage2NaturalDensity
+                          ? (stage2QuestionCount === 0
+                              ? 'Natural Density: 100% Dynamic syllabus distillation (Each deck sized by its own factual density)'
+                              : `Natural Density: Dynamic distillation (Each deck sized by syllabus, capped at ≤ ${stage2QuestionCount} cards ceiling)`)
+                          : `Strict Target: Enforces exactly ${stage2QuestionCount} cards with auto-top-up`}
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300">
+                      {stage2NaturalDensity ? (stage2QuestionCount === 0 ? 'Auto Density' : `≤${stage2QuestionCount} Ceiling`) : 'Fixed Quota'}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3.5 p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
+                  <div>
+                    {/* Questions per Batch */}
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-full bg-brand-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">4</span>
+                        Questions per Batch
+                      </label>
+                      <span className="text-xs font-bold text-brand-600 dark:text-brand-400">
+                        {stage2QuestionCount} Qs / Batch
+                      </span>
+                    </div>
+
+                    {/* Preset Pills for Questions per Batch */}
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 mb-2">
+                      {[5, 10, 15, 20, 25, 50].map(cnt => (
+                        <button
+                          key={cnt}
+                          type="button"
+                          onClick={() => setStage2QuestionCount(cnt)}
+                          className={cn(
+                            "py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                            stage2QuestionCount === cnt
+                              ? "bg-brand-600 text-white shadow-sm"
+                              : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-brand-500"
+                          )}
+                        >
+                          {cnt} Qs
                         </button>
                       ))}
                     </div>
 
-                    {/* Custom Batches Input */}
-                    <div className="flex items-center gap-2 mb-2">
-                      <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Custom Batches:</label>
+                    {/* Custom Questions per Batch Input */}
+                    <div className="flex items-center gap-2 mb-1">
+                      <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Custom Qs / Batch:</label>
                       <input
                         type="number"
                         min={1}
-                        max={20}
-                        value={stage2BatchCount}
-                        onChange={e => setStage2BatchCount(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)))}
-                        className="w-20 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-900 dark:text-white text-center focus:ring-1 focus:ring-indigo-500 outline-none"
+                        max={50}
+                        value={stage2QuestionCount}
+                        onChange={e => setStage2QuestionCount(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
+                        className="w-20 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-900 dark:text-white text-center focus:ring-1 focus:ring-brand-500 outline-none"
                       />
                     </div>
 
-                    {/* Live Total Badge */}
-                    <div className="p-2 rounded-xl bg-indigo-50/90 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/80 flex items-center justify-between text-xs">
-                      <span className="text-slate-600 dark:text-slate-300 font-medium">
-                        Total Output Target:
-                      </span>
-                      <span className="font-black text-indigo-700 dark:text-indigo-300">
-                        {stage2QuestionCount} Qs × {stage2BatchCount} {stage2BatchCount === 1 ? 'Batch' : 'Batches'} = <span className="underline decoration-indigo-500 font-black">{stage2QuestionCount * stage2BatchCount} Total Qs</span>
-                      </span>
+                    {/* Number of Batches (Sequential Auto-Runner) */}
+                    <div className="pt-2.5 mt-2.5 border-t border-slate-200 dark:border-slate-700">
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                          <Layers className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                          Number of Batches (Auto-Runner)
+                        </label>
+                        <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                          {stage2BatchCount} {stage2BatchCount === 1 ? 'Batch' : 'Batches'}
+                        </span>
+                      </div>
+
+                      {/* Batch Presets */}
+                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 mb-2">
+                        {[1, 2, 3, 4, 5, 10].map(bc => (
+                          <button
+                            key={bc}
+                            type="button"
+                            onClick={() => setStage2BatchCount(bc)}
+                            className={cn(
+                              "py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                              stage2BatchCount === bc
+                                ? "bg-indigo-600 text-white shadow-sm"
+                                : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-indigo-500"
+                            )}
+                          >
+                            {bc} {bc === 1 ? 'Batch' : 'Batches'}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Custom Batches Input */}
+                      <div className="flex items-center gap-2 mb-2">
+                        <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Custom Batches:</label>
+                        <input
+                          type="number"
+                          min={1}
+                          max={20}
+                          value={stage2BatchCount}
+                          onChange={e => setStage2BatchCount(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)))}
+                          className="w-20 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-900 dark:text-white text-center focus:ring-1 focus:ring-indigo-500 outline-none"
+                        />
+                      </div>
+
+                      {/* Live Total Badge */}
+                      <div className="p-2 rounded-xl bg-indigo-50/90 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/80 flex items-center justify-between text-xs">
+                        <span className="text-slate-600 dark:text-slate-300 font-medium">
+                          Total Output Target:
+                        </span>
+                        <span className="font-black text-indigo-700 dark:text-indigo-300">
+                          {stage2QuestionCount} Qs × {stage2BatchCount} {stage2BatchCount === 1 ? 'Batch' : 'Batches'} = <span className="underline decoration-indigo-500 font-black">{stage2QuestionCount * stage2BatchCount} Total Qs</span>
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
-                  <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 dark:text-slate-300">
-                    <input
-                      type="checkbox"
-                      checked={stage2IncludeDiagrams}
-                      onChange={e => setStage2IncludeDiagrams(e.target.checked)}
-                      className="w-4 h-4 rounded text-brand-600 focus:ring-brand-500"
-                    />
-                    Include Diagrams (Geometric, Venn & Charts)
-                  </label>
-                </div>
-              </div>
-
-              {/* STEP 5: COGNITIVE DIFFICULTY LEVEL */}
-              <div className="space-y-3 p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                      <span className="w-5 h-5 rounded-full bg-brand-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">5</span>
-                      Cognitive Difficulty Level
+                  <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+                    <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 dark:text-slate-300">
+                      <input
+                        type="checkbox"
+                        checked={stage2IncludeDiagrams}
+                        onChange={e => setStage2IncludeDiagrams(e.target.checked)}
+                        className="w-4 h-4 rounded text-brand-600 focus:ring-brand-500"
+                      />
+                      Include Diagrams (Geometric, Venn & Charts)
                     </label>
-                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                      Prompt Calibration
-                    </span>
-                  </div>
-
-                  {/* 3 Difficulty Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    {[
-                      {
-                        id: 'easy' as const,
-                        label: 'Simple / Foundational',
-                        badge: '🟢 Simple',
-                        desc: 'Direct facts, basic formulas & core definitions.',
-                        activeClass: 'bg-emerald-500/10 border-emerald-500 text-emerald-950 dark:text-emerald-200 ring-2 ring-emerald-500/20'
-                      },
-                      {
-                        id: 'medium' as const,
-                        label: 'Moderate / Standard',
-                        badge: '🟡 Moderate',
-                        desc: '2-step reasoning & typical OSSC/OSSSC standard.',
-                        activeClass: 'bg-amber-500/10 border-amber-500 text-amber-950 dark:text-amber-200 ring-2 ring-amber-500/20'
-                      },
-                      {
-                        id: 'hard' as const,
-                        label: 'Advanced / Rigorous',
-                        badge: '🔴 Advanced',
-                        desc: 'Multi-statement assertion, deep LaTeX & OPSC rigor.',
-                        activeClass: 'bg-rose-500/10 border-rose-500 text-rose-950 dark:text-rose-200 ring-2 ring-rose-500/20'
-                      }
-                    ].map(diff => {
-                      const isDiffActive = stage2Difficulty === diff.id || (diff.id === 'hard' && stage2Difficulty === 'advanced_exam_standard');
-                      return (
-                        <button
-                          key={diff.id}
-                          type="button"
-                          onClick={() => setStage2Difficulty(diff.id)}
-                          className={cn(
-                            "p-3 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer",
-                            isDiffActive
-                              ? diff.activeClass
-                              : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 opacity-70 hover:opacity-100"
-                          )}
-                        >
-                          <div>
-                            <span className="text-[10px] font-black uppercase tracking-wider block mb-1">
-                              {diff.badge}
-                            </span>
-                            <h5 className="text-xs font-black text-slate-900 dark:text-white">
-                              {diff.label}
-                            </h5>
-                            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-tight">
-                              {diff.desc}
-                            </p>
-                          </div>
-                        </button>
-                      );
-                    })}
                   </div>
                 </div>
+              )}
 
-                <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Enforces 4 options per MCQ, step-by-step rationale, and LaTeX math formatting.
+              {/* STEP 5: COGNITIVE DIFFICULTY LEVEL OR FLASHCARD PEDAGOGY */}
+              {stage2TargetType === 'flashcards' ? (
+                <div className="space-y-3 p-4 rounded-2xl bg-gradient-to-br from-purple-50/80 via-white to-violet-50/50 dark:from-slate-800/90 dark:via-slate-850 dark:to-slate-800/90 border border-purple-200/80 dark:border-purple-800/60 flex flex-col justify-between shadow-xs">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-xs font-black uppercase tracking-wider text-purple-900 dark:text-purple-300 flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-full bg-purple-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">5</span>
+                        Cognitive Distillation Engine
+                      </label>
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-purple-200/70 dark:bg-purple-900/60 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-700">
+                        ⚡ 5 Memory Archetypes
+                      </span>
+                    </div>
+
+                    <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-purple-200 dark:border-purple-800/60 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">🎯</span>
+                        <h5 className="text-xs font-black text-slate-900 dark:text-white">
+                          High-Yield Memory Pain Points Only
+                        </h5>
+                      </div>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Eliminates generic textbook fluff and trivial elementary facts. Employs 4 negative filters to isolate atomic trigger-answer pairs (&lt; 15 words).
+                      </p>
+
+                      {/* 5 Cognitive Archetypes Showcase */}
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                          ⚡ Statutory Articles
+                        </span>
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                          🔢 Quorums & Tenures
+                        </span>
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                          ⚠️ Provisos & Exceptions
+                        </span>
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                          📅 Landmark Years
+                        </span>
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+                          🔄 Confusing Pairs
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-[11px] font-bold text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                    <span>Strict anti-hallucination boundary: Locked solely to the scoped syllabus section.</span>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="space-y-3 p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-full bg-brand-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">5</span>
+                        Cognitive Difficulty Level
+                      </label>
+                      <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                        Prompt Calibration
+                      </span>
+                    </div>
+
+                    {/* 3 Difficulty Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {[
+                        {
+                          id: 'easy' as const,
+                          label: 'Simple / Foundational',
+                          badge: '🟢 Simple',
+                          desc: 'Direct facts, basic formulas & core definitions.',
+                          activeClass: 'bg-emerald-500/10 border-emerald-500 text-emerald-950 dark:text-emerald-200 ring-2 ring-emerald-500/20'
+                        },
+                        {
+                          id: 'medium' as const,
+                          label: 'Moderate / Standard',
+                          badge: '🟡 Moderate',
+                          desc: '2-step reasoning & typical OSSC/OSSSC standard.',
+                          activeClass: 'bg-amber-500/10 border-amber-500 text-amber-950 dark:text-amber-200 ring-2 ring-amber-500/20'
+                        },
+                        {
+                          id: 'hard' as const,
+                          label: 'Advanced / Rigorous',
+                          badge: '🔴 Advanced',
+                          desc: 'Multi-statement assertion, deep LaTeX & OPSC rigor.',
+                          activeClass: 'bg-rose-500/10 border-rose-500 text-rose-950 dark:text-rose-200 ring-2 ring-rose-500/20'
+                        }
+                      ].map(diff => {
+                        const isDiffActive = stage2Difficulty === diff.id || (diff.id === 'hard' && stage2Difficulty === 'advanced_exam_standard');
+                        return (
+                          <button
+                            key={diff.id}
+                            type="button"
+                            onClick={() => setStage2Difficulty(diff.id)}
+                            className={cn(
+                              "p-3 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer",
+                              isDiffActive
+                                ? diff.activeClass
+                                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 opacity-70 hover:opacity-100"
+                            )}
+                          >
+                            <div>
+                              <span className="text-[10px] font-black uppercase tracking-wider block mb-1">
+                                {diff.badge}
+                              </span>
+                              <h5 className="text-xs font-black text-slate-900 dark:text-white">
+                                {diff.label}
+                              </h5>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-tight">
+                                {diff.desc}
+                              </p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Enforces 4 options per MCQ, step-by-step rationale, and LaTeX math formatting.
+                  </div>
+                </div>
+              )}
 
             </div>
 
@@ -5147,10 +6893,11 @@ export function AIQuestionStudio({
                     </div>
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="text-sm font-black text-white tracking-wide">
-                          {isQueueRunnerActive 
-                            ? "Multi-Bank Sequential Auto-Runner & Direct Publisher"
-                            : "Multi-Bank Pipeline Finished — Execution Feed & Audit Trail"}
+                        <h4 className="text-sm font-black text-white flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                          {stage2TargetType === 'flashcards'
+                            ? (isQueueRunnerActive ? "Multi-Deck Pipeline Running — Live Telemetry" : "Multi-Deck Pipeline Finished — Execution Feed & Audit Trail")
+                            : (isQueueRunnerActive ? "Multi-Bank Pipeline Running — Live Telemetry" : "Multi-Bank Pipeline Finished — Execution Feed & Audit Trail")}
                         </h4>
                         <span className={cn(
                           "text-[10px] font-black uppercase px-2 py-0.5 rounded-full border",
@@ -5163,10 +6910,10 @@ export function AIQuestionStudio({
                       </div>
                       <p className="text-xs text-slate-400 mt-0.5">
                         {isQueueRunnerActive
-                          ? `Processing Bank ${currentQueueIndex + 1} of ${selectedMultiBankIds.length} ("${questionBanks.find(b => b.id === selectedMultiBankIds[currentQueueIndex])?.title || 'Current Bank'}" • Batch ${currentRunningBatch}/${stage2BatchCount})`
+                          ? `Processing ${stage2TargetType === 'flashcards' ? 'Deck' : 'Bank'} ${currentQueueIndex + 1} of ${selectedMultiBankIds.length} ("${(stage2TargetType === 'flashcards' ? examFlashcardDecks.find(d => d.id === selectedMultiBankIds[currentQueueIndex])?.title : questionBanks.find(b => b.id === selectedMultiBankIds[currentQueueIndex])?.title) || (stage2TargetType === 'flashcards' ? 'Current Deck' : 'Current Bank')}" • Batch ${currentRunningBatch}/${stage2BatchCount})`
                           : queueExecutionSummary 
-                            ? `All ${queueExecutionSummary.completedBanks} of ${queueExecutionSummary.totalBanks} question banks published (${queueExecutionSummary.totalQuestions} questions uploaded) in ${Math.floor(queueExecutionSummary.durationSeconds / 60)}m ${queueExecutionSummary.durationSeconds % 60}s.`
-                            : "Multi-bank execution completed."}
+                            ? `All ${queueExecutionSummary.completedBanks} of ${queueExecutionSummary.totalBanks} ${stage2TargetType === 'flashcards' ? 'flashcard decks' : 'question banks'} published (${queueExecutionSummary.totalQuestions} ${stage2TargetType === 'flashcards' ? 'cards' : 'questions'} uploaded) in ${Math.floor(queueExecutionSummary.durationSeconds / 60)}m ${queueExecutionSummary.durationSeconds % 60}s.`
+                            : `${stage2TargetType === 'flashcards' ? 'Multi-deck' : 'Multi-bank'} execution completed.`}
                       </p>
                     </div>
                   </div>
@@ -5177,13 +6924,13 @@ export function AIQuestionStudio({
                         type="button"
                         onClick={() => {
                           stopQueueRunnerRef.current = true;
-                          toast('Multi-Bank Queue will pause after current bank finishes.', { icon: 'ℹ️' });
+                          toast(`${stage2TargetType === 'flashcards' ? 'Multi-Deck' : 'Multi-Bank'} Queue will pause after current ${stage2TargetType === 'flashcards' ? 'deck' : 'bank'} finishes.`, { icon: 'ℹ️' });
                         }}
                         className="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
-                        title="Stop running further banks in queue"
+                        title={`Stop running further ${stage2TargetType === 'flashcards' ? 'decks' : 'banks'} in queue`}
                       >
                         <StopCircle className="w-3.5 h-3.5" />
-                        <span>Stop After Bank {currentQueueIndex + 1}</span>
+                        <span>Stop After {stage2TargetType === 'flashcards' ? 'Deck' : 'Bank'} {currentQueueIndex + 1}</span>
                       </button>
                     )}
 
@@ -5223,18 +6970,23 @@ export function AIQuestionStudio({
                   <div className="flex items-center justify-between text-xs font-bold text-slate-300">
                     <span className="flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                      Sequential Bank Pipeline ({selectedMultiBankIds.length} Banks)
+                      Sequential {stage2TargetType === 'flashcards' ? 'Deck' : 'Bank'} Pipeline ({selectedMultiBankIds.length} {stage2TargetType === 'flashcards' ? 'Decks' : 'Banks'})
                     </span>
                     <span className="text-slate-400 text-[11px] font-mono">
                       {isQueueRunnerActive 
-                        ? `Bank ${currentQueueIndex + 1} of ${selectedMultiBankIds.length} in progress` 
-                        : 'All banks processed'}
+                        ? `${stage2TargetType === 'flashcards' ? 'Deck' : 'Bank'} ${currentQueueIndex + 1} of ${selectedMultiBankIds.length} in progress` 
+                        : `All ${stage2TargetType === 'flashcards' ? 'decks' : 'banks'} processed`}
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto pr-1 scrollbar-thin">
                     {selectedMultiBankIds.map((bankId, bIdx) => {
-                      const bank = questionBanks.find(b => b.id === bankId);
+                      const isFlashcard = stage2TargetType === 'flashcards';
+                      const bank = isFlashcard
+                        ? examFlashcardDecks.find(d => d.id === bankId)
+                        : (stage2TargetType === 'practice_test'
+                            ? examPracticeSets.find(b => b.id === bankId)
+                            : questionBanks.find(b => b.id === bankId));
                       const qStatus = multiBankQueueStatus[bankId];
                       const isCurrent = isQueueRunnerActive && currentQueueIndex === bIdx;
                       const isDone = qStatus?.status === 'completed';
@@ -5264,11 +7016,13 @@ export function AIQuestionStudio({
                                 {isDone ? <Check className="w-3.5 h-3.5" /> : bIdx + 1}
                               </span>
                               <div className="min-w-0">
-                                <h5 className="text-xs font-bold text-white truncate" title={bank?.title || 'Bank'}>
-                                  {bank?.title || 'Bank'}
+                                <h5 className="text-xs font-bold text-white truncate" title={bank?.title || (isFlashcard ? 'Deck' : 'Bank')}>
+                                  {bank?.title || (isFlashcard ? 'Deck' : 'Bank')}
                                 </h5>
                                 <p className="text-[10px] text-slate-400 truncate">
-                                  {bank?.tagline || 'Question Bank'}
+                                  {isFlashcard 
+                                    ? ((bank as any)?.subject || 'Flashcard Deck') + ((bank as any)?.sub_subject ? ` • ${(bank as any).sub_subject}` : '')
+                                    : (bank?.tagline || 'Question Bank')}
                                 </p>
                               </div>
                             </div>
@@ -5280,7 +7034,7 @@ export function AIQuestionStudio({
                               isFailed && "bg-rose-500/20 text-rose-300 border border-rose-500/30",
                               isQueued && "bg-slate-800 text-slate-400"
                             )}>
-                              {isDone ? `✅ Saved ${qStatus?.count || 0} Qs` : isCurrent ? `⚡ Batch ${currentRunningBatch}/${stage2BatchCount}` : isFailed ? 'Failed' : 'Queued'}
+                              {isDone ? `✅ Saved ${qStatus?.count || 0} ${isFlashcard ? 'Cards' : 'Qs'}` : isCurrent ? `⚡ Batch ${currentRunningBatch}/${stage2BatchCount}` : isFailed ? 'Failed' : 'Queued'}
                             </span>
                           </div>
 
@@ -5297,7 +7051,11 @@ export function AIQuestionStudio({
                               "px-1.5 py-0.5 rounded",
                               isDone ? "text-emerald-400 bg-emerald-500/10 font-bold" : isCurrent ? "text-brand-300 bg-brand-500/20 font-bold animate-pulse" : "text-slate-600"
                             )}>
-                              2. Generate ({qStatus?.count || stage2QuestionCount * stage2BatchCount} Qs)
+                              {isDone
+                                ? `2. Generated (${qStatus?.count} ${isFlashcard ? 'Cards' : 'Qs'})`
+                                : isFlashcard && stage2NaturalDensity
+                                ? `2. Natural Density (${stage2QuestionCount > 0 ? `≤${stage2QuestionCount} Cards` : 'Auto'})`
+                                : `2. Generate (${stage2QuestionCount * stage2BatchCount} ${isFlashcard ? 'Cards' : 'Qs'})`}
                             </span>
                             <span className="text-slate-600">→</span>
                             <span className={cn(
@@ -5569,6 +7327,8 @@ export function AIQuestionStudio({
                   "w-full py-4 font-black rounded-2xl text-sm shadow-xl flex items-center justify-center gap-2 transition-all cursor-pointer",
                   selectedMultiBankIds.length === 0
                     ? "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-300 dark:border-slate-700 cursor-not-allowed shadow-none"
+                    : stage2TargetType === 'flashcards'
+                    ? "bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-700 hover:to-indigo-800 text-white shadow-purple-500/25 disabled:opacity-50"
                     : "bg-gradient-to-r from-brand-600 via-indigo-600 to-brand-700 hover:from-brand-700 hover:to-indigo-800 text-white shadow-brand-500/25 disabled:opacity-50"
                 )}
               >
@@ -5576,19 +7336,27 @@ export function AIQuestionStudio({
                   <>
                     <RefreshCw className="w-4 h-4 animate-spin" />
                     <span>
-                      Running Bank {currentQueueIndex + 1} of {selectedMultiBankIds.length} (Batch {currentRunningBatch}/{stage2BatchCount} • {telemetryEvent ? `${telemetryEvent.percent}%` : 'In Progress'})...
+                      Running {stage2TargetType === 'flashcards' ? 'Deck' : 'Bank'} {currentQueueIndex + 1} of {selectedMultiBankIds.length} (Batch {currentRunningBatch}/{stage2BatchCount} • {telemetryEvent ? `${telemetryEvent.percent}%` : 'In Progress'})...
                     </span>
                   </>
                 ) : selectedMultiBankIds.length === 0 ? (
                   <>
                     <AlertCircle className="w-4 h-4 text-amber-500" />
-                    <span>Select at least 1 Question Bank above to start Multi-Bank Auto-Runner</span>
+                    <span>Select at least 1 {stage2TargetType === 'flashcards' ? 'Flashcard Deck' : 'Question Bank'} above to start {stage2TargetType === 'flashcards' ? 'Multi-Deck' : 'Multi-Bank'} Auto-Runner</span>
                   </>
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4 text-amber-300" />
                     <span>
-                      🚀 Run Multi-Bank Auto-Runner ({selectedMultiBankIds.length} Banks • {stage2QuestionCount * stage2BatchCount} Qs/Bank • {selectedMultiBankIds.length * stage2QuestionCount * stage2BatchCount} Total Qs)
+                      {stage2TargetType === 'flashcards' ? (
+                        stage2NaturalDensity ? (
+                          `🚀 Run Multi-Deck Pipeline (${selectedMultiBankIds.length} Decks • Natural Density ${stage2QuestionCount > 0 ? `[≤${stage2QuestionCount} Cap]` : '[Auto Sizing]'})`
+                        ) : (
+                          `🚀 Run Multi-Deck Pipeline (${selectedMultiBankIds.length} Decks • ${stage2QuestionCount} Cards/Deck • ${selectedMultiBankIds.length * stage2QuestionCount} Total Cards)`
+                        )
+                      ) : (
+                        `🚀 Run Multi-Bank Auto-Runner (${selectedMultiBankIds.length} Banks • ${stage2QuestionCount * stage2BatchCount} Qs/Bank • ${selectedMultiBankIds.length * stage2QuestionCount * stage2BatchCount} Total Qs)`
+                      )}
                     </span>
                   </>
                 )}
@@ -5598,7 +7366,12 @@ export function AIQuestionStudio({
                 type="button"
                 onClick={handleGenerateQuestions}
                 disabled={isGeneratingQuestions}
-                className="w-full py-4 bg-brand-600 hover:bg-brand-700 text-white font-black rounded-2xl text-sm shadow-xl shadow-brand-500/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
+                className={cn(
+                  "w-full py-4 text-white font-black rounded-2xl text-sm shadow-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer",
+                  stage2TargetType === 'flashcards'
+                    ? "bg-purple-600 hover:bg-purple-700 shadow-purple-600/25"
+                    : "bg-brand-600 hover:bg-brand-700 shadow-brand-500/25"
+                )}
               >
                 {isGeneratingQuestions ? (
                   <>
@@ -5610,10 +7383,20 @@ export function AIQuestionStudio({
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4 text-amber-300" />
-                    {stage2BatchCount > 1 ? (
-                      `🚀 Run Multi-Batch Auto-Runner (${stage2BatchCount} Batches • ${stage2QuestionCount * stage2BatchCount} Total Questions) for "${stage2TestTitle || 'Target Test'}"`
+                    {stage2TargetType === 'flashcards' ? (
+                      stage2BatchCount > 1
+                        ? `🚀 Run Multi-Batch Flashcard Runner (${stage2BatchCount} Batches • ${stage2QuestionCount > 0 ? `${stage2QuestionCount * stage2BatchCount} Max Cards` : 'Dynamic Density'}) for "${stage2TestTitle || 'Selected Deck'}"`
+                        : (stage2NaturalDensity
+                            ? (stage2QuestionCount === 0
+                                ? `✨ Auto-Extract High-Yield Cards (Natural Density) for "${stage2TestTitle || 'Selected Deck'}"`
+                                : `✨ Auto-Extract High-Yield Cards (Natural Density • ≤${stage2QuestionCount} Cap) for "${stage2TestTitle || 'Selected Deck'}"`)
+                            : `✨ Generate exactly ${stage2QuestionCount} High-Yield Cards for "${stage2TestTitle || 'Selected Deck'}"`)
                     ) : (
-                      `Generate ${stage2QuestionCount} Questions (${stage2Difficulty === 'easy' ? 'Simple' : stage2Difficulty === 'medium' ? 'Moderate' : 'Advanced'}) for "${stage2TestTitle || 'Target Test'}"`
+                      stage2BatchCount > 1 ? (
+                        `🚀 Run Multi-Batch Auto-Runner (${stage2BatchCount} Batches • ${stage2QuestionCount * stage2BatchCount} Total Questions) for "${stage2TestTitle || 'Target Test'}"`
+                      ) : (
+                        `Generate ${stage2QuestionCount} Questions (${stage2Difficulty === 'easy' ? 'Simple' : stage2Difficulty === 'medium' ? 'Moderate' : 'Advanced'}) for "${stage2TestTitle || 'Target Test'}"`
+                      )
                     )}
                   </>
                 )}
@@ -5843,9 +7626,28 @@ export function AIQuestionStudio({
                             <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
                               {q.topic || stage2Subject || 'General Studies'}
                             </span>
-                            <span className="text-[11px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300">
-                              {q.difficulty}
-                            </span>
+                            {stage2TargetType === 'flashcards' ? (
+                              <span className={cn(
+                                "text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border flex items-center gap-1",
+                                q.archetype === 'STATUTORY' && "bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-800",
+                                q.archetype === 'THRESHOLD' && "bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800",
+                                q.archetype === 'EXCEPTION' && "bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800",
+                                q.archetype === 'CHRONOLOGY' && "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800",
+                                q.archetype === 'CONFUSING_PAIR' && "bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-800",
+                                (!q.archetype || q.archetype === 'CONCEPT') && "bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300 border-indigo-300 dark:border-indigo-800"
+                              )}>
+                                {q.archetype === 'STATUTORY' && '⚡ STATUTORY'}
+                                {q.archetype === 'THRESHOLD' && '🔢 THRESHOLD'}
+                                {q.archetype === 'EXCEPTION' && '⚠️ EXCEPTION'}
+                                {q.archetype === 'CHRONOLOGY' && '📅 CHRONOLOGY'}
+                                {q.archetype === 'CONFUSING_PAIR' && '🔄 CONFUSING PAIR'}
+                                {(!q.archetype || q.archetype === 'CONCEPT') && '🎯 HIGH-YIELD FACT'}
+                              </span>
+                            ) : (
+                              <span className="text-[11px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300">
+                                {q.difficulty}
+                              </span>
+                            )}
                             {q.audit?.consensusMatch ? (
                               <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 flex items-center gap-1">
                                 <ShieldCheck className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
@@ -5882,90 +7684,145 @@ export function AIQuestionStudio({
                         </div>
                       </div>
 
-                      {/* Question Text */}
-                      {isEditing ? (
-                        <textarea
-                          value={q.questionText}
-                          onChange={e => handleUpdateQuestion(qIdx, 'questionText', e.target.value)}
-                          rows={3}
-                          className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl p-3 text-sm text-slate-900 dark:text-white font-mono"
-                        />
-                      ) : (
-                        <div className="text-sm font-semibold text-slate-900 dark:text-white leading-relaxed">
-                          <MathTextRenderer text={q.questionText} />
-                        </div>
-                      )}
+                      {/* Flashcard vs MCQ Content Body */}
+                      {stage2TargetType === 'flashcards' ? (
+                        <div className="space-y-3 pt-1">
+                          {/* Front Face: Trigger Recall Question */}
+                          <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700/80 space-y-1.5 shadow-2xs">
+                            <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
+                              <Target className="w-3.5 h-3.5 text-purple-600" />
+                              Recall Trigger (Front Face):
+                            </span>
+                            {isEditing ? (
+                              <textarea
+                                value={q.front_text || q.questionText}
+                                onChange={e => handleUpdateQuestion(qIdx, 'front_text', e.target.value)}
+                                rows={2}
+                                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white font-bold outline-none focus:ring-1 focus:ring-purple-500"
+                              />
+                            ) : (
+                              <div className="text-sm font-bold text-slate-900 dark:text-white leading-relaxed">
+                                <MathTextRenderer text={q.front_text || q.questionText} />
+                              </div>
+                            )}
+                          </div>
 
-                      {/* Diagram (if present) */}
-                      {q.diagram && (
-                        <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 max-w-sm">
-                          <span className="text-[10px] font-bold text-slate-400 block mb-1">Generated Dynamic Diagram:</span>
-                          <UniversalMathDiagramEngine data={q.diagram} />
-                        </div>
-                      )}
-
-                      {/* Options Grid */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        {(Array.isArray(q.options) ? q.options : []).map((opt: string, optIdx: number) => {
-                          const isCorrect = q.correctAnswerIndex === optIdx;
-
-                          return (
-                            <div
-                              key={optIdx}
-                              onClick={() => isEditing && handleUpdateQuestion(qIdx, 'correctAnswerIndex', optIdx)}
-                              className={cn(
-                                "p-3 rounded-xl border text-xs sm:text-sm font-medium flex items-center gap-3 transition-all",
-                                isCorrect
-                                  ? "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 text-emerald-900 dark:text-emerald-200 font-bold shadow-sm"
-                                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300",
-                                isEditing && "cursor-pointer hover:border-brand-500"
-                              )}
-                            >
-                              <span className={cn(
-                                "w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0",
-                                isCorrect ? "bg-emerald-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-                              )}>
-                                {String.fromCharCode(65 + optIdx)}
+                          {/* Back Face: Direct Crisp Answer */}
+                          <div className="p-3.5 rounded-xl bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200/80 dark:border-purple-800/60 space-y-1.5 shadow-2xs">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                                Direct Crisp Answer (Back Face):
                               </span>
+                              <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                                Target Recall
+                              </span>
+                            </div>
+                            {isEditing ? (
+                              <textarea
+                                value={q.back_text || q.explanation}
+                                onChange={e => handleUpdateQuestion(qIdx, 'back_text', e.target.value)}
+                                rows={2}
+                                className="w-full bg-white dark:bg-slate-900 border border-purple-300 dark:border-purple-700 rounded-lg p-2.5 text-xs text-slate-900 dark:text-white font-medium outline-none focus:ring-1 focus:ring-purple-500"
+                              />
+                            ) : (
+                              <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 p-3 rounded-lg border border-purple-100 dark:border-purple-900/60 shadow-2xs">
+                                <MathTextRenderer text={q.back_text || q.explanation} />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="space-y-3">
+                            {/* Question Text for MCQs */}
+                            {isEditing ? (
+                              <textarea
+                                value={q.questionText}
+                                onChange={e => handleUpdateQuestion(qIdx, 'questionText', e.target.value)}
+                                rows={3}
+                                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl p-3 text-sm text-slate-900 dark:text-white font-mono"
+                              />
+                            ) : (
+                              <div className="text-sm font-semibold text-slate-900 dark:text-white leading-relaxed">
+                                <MathTextRenderer text={q.questionText} />
+                              </div>
+                            )}
 
+                            {/* Diagram (if present) */}
+                            {q.diagram && (
+                              <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 max-w-sm">
+                                <span className="text-[10px] font-bold text-slate-400 block mb-1">Generated Dynamic Diagram:</span>
+                                <UniversalMathDiagramEngine data={q.diagram} />
+                              </div>
+                            )}
+
+                            {/* Options Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                              {(Array.isArray(q.options) ? q.options : []).map((opt: string, optIdx: number) => {
+                                const isCorrect = q.correctAnswerIndex === optIdx;
+
+                                return (
+                                  <div
+                                    key={optIdx}
+                                    onClick={() => isEditing && handleUpdateQuestion(qIdx, 'correctAnswerIndex', optIdx)}
+                                    className={cn(
+                                      "p-3 rounded-xl border text-xs sm:text-sm font-medium flex items-center gap-3 transition-all",
+                                      isCorrect
+                                        ? "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 text-emerald-900 dark:text-emerald-200 font-bold shadow-sm"
+                                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300",
+                                      isEditing && "cursor-pointer hover:border-brand-500"
+                                    )}
+                                  >
+                                    <span className={cn(
+                                      "w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0",
+                                      isCorrect ? "bg-emerald-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                                    )}>
+                                      {String.fromCharCode(65 + optIdx)}
+                                    </span>
+
+                                    {isEditing ? (
+                                      <input
+                                        type="text"
+                                        value={opt}
+                                        onChange={e => handleUpdateOption(qIdx, optIdx, e.target.value)}
+                                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-white"
+                                      />
+                                    ) : (
+                                      <div className="flex-1">
+                                        <MathTextRenderer text={opt} />
+                                      </div>
+                                    )}
+
+                                    {isCorrect && (
+                                      <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Explanation */}
+                          <div className="p-3 bg-slate-100/60 dark:bg-slate-800/40 rounded-xl border border-slate-200/60 dark:border-slate-700/60 text-xs text-slate-600 dark:text-slate-300 space-y-2">
+                            <div>
+                              <span className="font-bold text-slate-800 dark:text-white block mb-1">
+                                💡 Step-by-Step Explanation:
+                              </span>
                               {isEditing ? (
-                                <input
-                                  type="text"
-                                  value={opt}
-                                  onChange={e => handleUpdateOption(qIdx, optIdx, e.target.value)}
-                                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-900 dark:text-white"
+                                <textarea
+                                  value={q.explanation}
+                                  onChange={e => handleUpdateQuestion(qIdx, 'explanation', e.target.value)}
+                                  rows={2}
+                                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg p-2 text-xs text-slate-900 dark:text-white font-mono"
                                 />
                               ) : (
-                                <div className="flex-1">
-                                  <MathTextRenderer text={opt} />
-                                </div>
-                              )}
-
-                              {isCorrect && (
-                                <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                <MathTextRenderer text={q.explanation} />
                               )}
                             </div>
-                          );
-                        })}
-                      </div>
-
-                      {/* Explanation */}
-                      <div className="p-3 bg-slate-100/60 dark:bg-slate-800/40 rounded-xl border border-slate-200/60 dark:border-slate-700/60 text-xs text-slate-600 dark:text-slate-300 space-y-2">
-                        <div>
-                          <span className="font-bold text-slate-800 dark:text-white block mb-1">
-                            💡 Step-by-Step Explanation:
-                          </span>
-                          {isEditing ? (
-                            <textarea
-                              value={q.explanation}
-                              onChange={e => handleUpdateQuestion(qIdx, 'explanation', e.target.value)}
-                              rows={2}
-                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg p-2 text-xs text-slate-900 dark:text-white font-mono"
-                            />
-                          ) : (
-                            <MathTextRenderer text={q.explanation} />
-                          )}
-                        </div>
+                          </div>
+                        </>
+                      )}
 
                         {/* Auditor Verification Notes */}
                         {q.audit?.auditNotes && (
@@ -5978,7 +7835,6 @@ export function AIQuestionStudio({
                           </div>
                         )}
                       </div>
-                    </div>
                   );
                 });
               })()}

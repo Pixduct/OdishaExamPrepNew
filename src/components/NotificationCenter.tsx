@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, CheckCheck, Clock, Award, FileText, Target, Sparkles, ChevronRight, X } from 'lucide-react';
+import { Bell, CheckCheck, Clock, Award, FileText, Target, Sparkles, ChevronRight, X, Megaphone } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { isAuthenticExam, examService } from '../lib/examService';
 
 interface NotificationItem {
   id: string;
-  type: 'new_exam' | 'new_test' | 'new_bank' | 'scheduled_live' | 'scheduled_upcoming';
+  type: 'new_exam' | 'new_test' | 'new_bank' | 'scheduled_live' | 'scheduled_upcoming' | 'exam_notice';
   title: string;
   message: string;
   timestamp: string;
   itemData: any;
-  actionType: 'exam' | 'test' | 'bank' | 'none';
+  actionType: 'exam' | 'test' | 'bank' | 'blog' | 'none';
   isLive?: boolean;
   scheduledAt?: string;
 }
@@ -19,18 +20,22 @@ interface NotificationCenterProps {
   exams: any[];
   mockTests: any[];
   dynamicQuestionBanks: Record<string, any[]>;
+  blogs?: any[];
   onViewExam: (examId: string) => void;
   onLaunchMockTest: (test: any) => void;
   onLaunchBank: (bank: any) => void;
+  onViewBlog?: (blogId: string) => void;
 }
 
 export const NotificationCenter: React.FC<NotificationCenterProps> = ({
   exams = [],
   mockTests = [],
   dynamicQuestionBanks = {},
+  blogs,
   onViewExam,
   onLaunchMockTest,
   onLaunchBank,
+  onViewBlog,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [readIds, setReadIds] = useState<string[]>(() => {
@@ -64,6 +69,22 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
       localStorage.setItem('oep_cleared_notifications', JSON.stringify(clearedIds));
     } catch (e) {}
   }, [clearedIds]);
+
+  const [liveBlogs, setLiveBlogs] = useState<any[]>(blogs || []);
+
+  useEffect(() => {
+    if (blogs && blogs.length > 0) {
+      setLiveBlogs(blogs);
+      return;
+    }
+    let isMounted = true;
+    examService.getAllBlogs().then((fetched) => {
+      if (isMounted && Array.isArray(fetched)) {
+        setLiveBlogs(fetched);
+      }
+    }).catch(() => {});
+    return () => { isMounted = false; };
+  }, [blogs]);
 
   // Generate dynamic notification list from active database items
   const notifications = useMemo(() => {
@@ -151,14 +172,8 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
         });
       });
 
-    // 3. Newly Added Exams (excluding system settings & URL rows)
-    const validExams = exams.filter((e: any) => 
-      e &&
-      e.category !== 'blog' && 
-      e.category !== 'system' && 
-      !(e.name || '').startsWith('SYSTEM_SETTINGS_') && 
-      !(e.name || '').startsWith('http')
-    );
+    // 3. Newly Added Exams (excluding current affairs, blogs, system settings & URL rows)
+    const validExams = exams.filter(isAuthenticExam);
 
     validExams.forEach((exam: any) => {
       list.push({
@@ -172,15 +187,32 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
       });
     });
 
+    // 4. Official Exam Notifications & Updates
+    (liveBlogs || []).slice(0, 15).forEach((blog: any) => {
+      const text = ((blog.name || '') + ' ' + (blog.keywords || '') + ' ' + (blog.metaDescription || '')).toLowerCase();
+      const isOfficialNotice = text.includes('notification') || text.includes('admit') || text.includes('date') || text.includes('schedule') || text.includes('result') || text.includes('recruitment') || text.includes('correction') || text.includes('answer key');
+      list.push({
+        id: `notice_${blog.id}`,
+        type: 'exam_notice',
+        title: blog.name || 'Official Exam Update',
+        message: isOfficialNotice
+          ? 'Official recruitment milestone / schedule released. Click to read verified notification intelligence.'
+          : 'New exam preparation article & syllabus guide published.',
+        timestamp: blog.examDate || blog.createdAt || new Date().toISOString(),
+        itemData: blog,
+        actionType: 'blog',
+      });
+    });
+
     // Sort: LIVE scheduled tests always pinned first, then rest by timestamp descending
     const liveItems = list.filter(n => n.type === 'scheduled_live');
     const otherItems = list
       .filter(n => n.type !== 'scheduled_live')
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-      .slice(0, 20);
+      .slice(0, 25);
 
     return [...liveItems, ...otherItems];
-  }, [exams, mockTests, dynamicQuestionBanks]);
+  }, [exams, mockTests, dynamicQuestionBanks, liveBlogs]);
 
   const visibleNotifications = useMemo(() => {
     return notifications.filter(n => !clearedIds.includes(n.id));
@@ -218,6 +250,12 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
       const hasPdfs = Array.isArray(bank.pdfLinks) ? bank.pdfLinks.length > 0 : !!bank.pdfUrl;
       if (!hasQuestions && !hasPdfs) return;
       onLaunchBank(bank);
+    } else if (item.actionType === 'blog') {
+      if (onViewBlog) {
+        onViewBlog(item.itemData.id);
+      } else {
+        window.location.href = `/blog/${item.itemData.id}`;
+      }
     }
   };
 
@@ -297,6 +335,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                     const isRead = readIds.includes(item.id);
                     const isLiveNow = item.type === 'scheduled_live';
                     const isUpcoming = item.type === 'scheduled_upcoming';
+                    const isNotice = item.type === 'exam_notice';
                     return (
                       <div
                         key={item.id}
@@ -307,9 +346,11 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                             ? "bg-amber-50/60 hover:bg-amber-50 border-l-amber-500 cursor-pointer"
                             : isUpcoming
                               ? "bg-slate-50/50 border-l-slate-200 cursor-default opacity-80"
-                              : isRead
-                                ? "bg-transparent hover:bg-white/40 border-l-transparent hover:border-l-brand-500/40 cursor-pointer"
-                                : "bg-brand-500/[0.02] hover:bg-brand-500/[0.05] border-l-brand-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] cursor-pointer"
+                              : isNotice
+                                ? "bg-rose-500/[0.03] hover:bg-rose-500/[0.06] border-l-rose-500 cursor-pointer"
+                                : isRead
+                                  ? "bg-transparent hover:bg-white/40 border-l-transparent hover:border-l-brand-500/40 cursor-pointer"
+                                  : "bg-brand-500/[0.02] hover:bg-brand-500/[0.05] border-l-brand-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] cursor-pointer"
                         )}
                       >
                         <div
@@ -319,15 +360,19 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                               ? "bg-gradient-to-br from-amber-500 to-orange-500 shadow-md shadow-amber-500/25 animate-pulse"
                               : isUpcoming
                                 ? "bg-gradient-to-br from-slate-400 to-slate-500 shadow-sm"
-                                : item.type === 'new_exam'
-                                  ? "bg-gradient-to-br from-indigo-500 to-purple-500 shadow-md shadow-indigo-500/15"
-                                  : item.type === 'new_test'
-                                    ? "bg-gradient-to-br from-blue-500 to-cyan-500 shadow-md shadow-blue-500/15"
-                                    : "bg-gradient-to-br from-emerald-500 to-teal-500 shadow-md shadow-emerald-500/15"
+                                : isNotice
+                                  ? "bg-gradient-to-br from-rose-500 to-amber-500 shadow-md shadow-rose-500/20"
+                                  : item.type === 'new_exam'
+                                    ? "bg-gradient-to-br from-indigo-500 to-purple-500 shadow-md shadow-indigo-500/15"
+                                    : item.type === 'new_test'
+                                      ? "bg-gradient-to-br from-blue-500 to-cyan-500 shadow-md shadow-blue-500/15"
+                                      : "bg-gradient-to-br from-emerald-500 to-teal-500 shadow-md shadow-emerald-500/15"
                           )}
                         >
                           {(isLiveNow || isUpcoming) ? (
                             <Clock className="w-4 h-4" />
+                          ) : isNotice ? (
+                            <Megaphone className="w-4 h-4" />
                           ) : item.type === 'new_exam' ? (
                             <Award className="w-4 h-4" />
                           ) : item.type === 'new_test' ? (
@@ -341,7 +386,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                           <div className="flex items-center justify-between gap-1 mb-0.5">
                             <h5 className={cn(
                               "font-extrabold text-xs truncate transition-colors",
-                              isLiveNow ? "text-amber-900 group-hover:text-amber-700" : "text-slate-900 group-hover:text-brand-600"
+                              isLiveNow ? "text-amber-900 group-hover:text-amber-700" : isNotice ? "text-slate-900 group-hover:text-rose-600" : "text-slate-900 group-hover:text-brand-600"
                             )}>
                               {item.title}
                             </h5>
@@ -354,13 +399,17 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                               <span className="px-1.5 py-0.5 bg-slate-200 text-slate-600 text-[9px] font-black rounded uppercase tracking-wide shrink-0">
                                 SOON
                               </span>
+                            ) : isNotice ? (
+                              <span className="px-1.5 py-0.5 bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 text-[9px] font-black rounded uppercase tracking-wide shrink-0 border border-rose-200 dark:border-rose-800/60">
+                                NOTICE
+                              </span>
                             ) : !isRead ? (
                               <span className="w-2 h-2 rounded-full bg-brand-500 shrink-0 animate-pulse" />
                             ) : null}
                           </div>
                           <p className={cn(
                             "text-[11px] font-semibold leading-snug line-clamp-2 transition-colors",
-                            isLiveNow ? "text-amber-700 group-hover:text-amber-800" : "text-slate-500 group-hover:text-slate-600"
+                            isLiveNow ? "text-amber-700 group-hover:text-amber-800" : isNotice ? "text-slate-600 group-hover:text-rose-700" : "text-slate-500 group-hover:text-slate-600"
                           )}>
                             {item.message}
                           </p>

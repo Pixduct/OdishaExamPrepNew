@@ -48,8 +48,7 @@ export default function BlogList() {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const exams = await examService.getAllExams();
-        const blogItems = exams.filter(e => e.category === 'blog');
+        const blogItems = await examService.getAllBlogs();
         
         // Sort blogs by date descending, fallback to creation
         const sortedBlogs = [...blogItems].sort((a, b) => {

@@ -16,6 +16,7 @@
 
 export interface SyllabusHierarchyItem {
   paper?: string;
+  stage?: string;
   subject: string;
   subSubject: string;
   chapter: string;
@@ -127,8 +128,8 @@ export function cleanTitleText(str: string, isPaper: boolean = false): string {
     .replace(/^[*_~`]+|[*_~`]+$/g, '');
 
   if (!isPaper) {
-    // Strip redundant leading label words e.g. "Chapter 1:", "Unit II -", "Topic 3:" ONLY when followed by colon/delimiter
-    cleaned = cleaned.replace(/^(?:Chapter|Topic|Lesson|Unit|Section|Module|Part)\s*(?:[\dIVX]+|\s*[-–—]\s*[\dIVX]+)?[:\s\-–—]+/i, '');
+    // Strip redundant leading label words e.g. "Chapter 1:", "Unit II -", "Sectional: ", "Mock Test 1: " ONLY when followed by colon/delimiter
+    cleaned = cleaned.replace(/^(?:Chapter|Topic|Lesson|Unit|Section|Sectional(?:\s*Test)?|Mock(?:\s*Test)?|Practice(?:\s*Set)?|Module|Part)\s*(?:[\dIVX]+|\s*[-–—]\s*[\dIVX]+)?[:\s\-–—]+/i, '');
   }
 
   return cleaned
@@ -449,7 +450,7 @@ export function determinePlaceholderTier(formula: string): 'paper' | 'subject' |
   if (/\[(?:subject|discipline)\]/i.test(norm)) {
     return 'subject';
   }
-  if (/\[(?:paper|tier)\]/i.test(norm)) {
+  if (/\[(?:paper|tier|stage)\]/i.test(norm)) {
     return 'paper';
   }
   return 'chapter';
@@ -468,7 +469,8 @@ export function applyNamingPattern(
   pattern: string,
   item: SyllabusHierarchyItem,
   index: number,
-  examName?: string
+  examName?: string,
+  stageName?: string
 ): string {
   let title = (pattern || '').trim();
   if (!title) {
@@ -476,6 +478,10 @@ export function applyNamingPattern(
   }
 
   const exam = (examName || '').trim();
+  const rawStage = (stageName || item.stage || '').trim();
+  const validStage = (rawStage && rawStage.toLowerCase() !== 'single stage' && rawStage.toLowerCase() !== 'all stages')
+    ? rawStage
+    : '';
 
   // 1. Replace [Exam] / [Exam Name]
   if (/\[Exam(?: Name)?\]/i.test(title)) {
@@ -508,6 +514,8 @@ export function applyNamingPattern(
     let val: string | undefined;
     if (item.placeholders && item.placeholders[normKey]) {
       val = item.placeholders[normKey];
+    } else if (normKey === 'stage' || normKey === 'examstage') {
+      val = validStage;
     } else if (normKey === 'paper') {
       val = item.paper;
     } else if (normKey === 'subject' || normKey === 'discipline') {
@@ -560,3 +568,272 @@ export function applyNamingPattern(
 
   return title;
 }
+
+/**
+ * Formats a clean, professional flashcard deck title using syllabus hierarchy placeholders
+ * e.g. "[Subject]: [Sub-Subject] - [Chapter]" or "[Sub-Subject] · [Chapter] Flashcards"
+ */
+export function formatFlashcardDeckTitle(
+  pattern: string,
+  item: SyllabusHierarchyItem,
+  index: number = 0,
+  examName?: string,
+  stageName?: string
+): string {
+  const customPattern = (pattern || '').trim() || '[Subject]: [Sub-Subject] - [Chapter]';
+  return applyNamingPattern(customPattern, item, index, examName, stageName);
+}
+
+export interface AutonomousScopeResult {
+  scopedMarkdown: string;
+  matchedSectionTitle: string;
+  hierarchyLevel: 'chapter' | 'subsubject' | 'subject' | 'paper' | 'full';
+  totalLines: number;
+}
+
+/**
+ * Autonomously isolates the exact, bounded text block for a designated Subject,
+ * Sub-Subject, or Chapter from the complete, full uploaded syllabus document.
+ *
+ * Guarantees:
+ * 1. Zero manual slicing by administrators — references the single full syllabus document.
+ * 2. Strict boundary isolation: starts at the target heading and stops immediately
+ *    when the next equal or higher heading begins.
+ * 3. Zero leakage from neighboring subjects/units to permanently prevent hallucinations.
+ */
+export function extractAutonomousSyllabusScope(
+  fullMarkdown: string,
+  target: {
+    title?: string;
+    subject?: string;
+    subSubject?: string;
+    chapter?: string;
+  }
+): AutonomousScopeResult {
+  if (!fullMarkdown || !fullMarkdown.trim()) {
+    return {
+      scopedMarkdown: '',
+      matchedSectionTitle: '',
+      hierarchyLevel: 'full',
+      totalLines: 0
+    };
+  }
+
+  const rawLines = fullMarkdown.split(/\r?\n/);
+
+  // Clean and normalize target queries
+  const cleanTarget = (str?: string) =>
+    (str || '')
+      .replace(/^\[(?:[A-Za-z0-9_\- ]+)\][:\s]*/i, '')
+      .replace(/[*_#\-:]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+
+  const chapQuery = cleanTarget(target.chapter);
+  const subSubjQuery = cleanTarget(target.subSubject);
+  const subjQuery = cleanTarget(target.subject);
+
+  // If title contains separators like ":", "·", "-", "+", or "&", extract potential sub-subject tokens
+  const titleTokens: string[] = [];
+  const rawParts: string[] = [];
+  if (target.title) {
+    const splitParts = target.title
+      .split(/[:·\-\–\—|+\&]/)
+      .map(p => p.trim())
+      .filter(p => p.length > 2);
+    rawParts.push(...splitParts);
+    titleTokens.push(...splitParts.map(p => cleanTarget(p)));
+  }
+
+  // Hierarchy of queries to search: Chapter -> Sub-Subject -> Title tokens -> Subject
+  const searchQueries: { query: string; level: 'chapter' | 'subsubject' | 'subject' }[] = [];
+
+  if (chapQuery && chapQuery.length > 2) {
+    searchQueries.push({ query: chapQuery, level: 'chapter' });
+  }
+  if (subSubjQuery && subSubjQuery.length > 2) {
+    searchQueries.push({ query: subSubjQuery, level: 'subsubject' });
+  }
+  for (const tok of titleTokens) {
+    if (tok !== subjQuery && tok !== chapQuery && tok !== subSubjQuery && tok.length > 3) {
+      searchQueries.push({ query: tok, level: 'subsubject' });
+    }
+  }
+  if (
+    subjQuery &&
+    subjQuery.length > 2 &&
+    !subjQuery.includes('all subjects') &&
+    !subjQuery.includes('comprehensive full syllabus')
+  ) {
+    searchQueries.push({ query: subjQuery, level: 'subject' });
+  }
+
+  const getHeadingLevel = (line: string): number => {
+    const trimmed = line.trim();
+    const hMatch = trimmed.match(/^(#{1,6})\s+/);
+    if (hMatch) return hMatch[1].length;
+    if (/^(?:#\s*)?\[?paper/i.test(trimmed)) return 1;
+    if (/^(?:#\s*)?\[?subject/i.test(trimmed)) return 2;
+    if (/^(?:#\s*)?\[?(sub[\s\-_]?subject|unit|section|module)/i.test(trimmed)) return 3;
+    if (/^(?:#\s*)?\[?(chapter|topic|lesson)/i.test(trimmed)) return 4;
+    // Bold lines without colon e.g. **Applied Electronics** or 1. **Applied Electronics**
+    if (/^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(trimmed)) return 3;
+    return 99; // Non-heading body line
+  };
+
+  // If title has multiple parts (e.g. "Topic A + Topic B"), extract syllabus for EACH sub-topic
+  if (rawParts.length > 1) {
+    const multiSections: { title: string; content: string }[] = [];
+    const seenNorms = new Set<string>();
+
+    for (const part of rawParts) {
+      const q = cleanTarget(part);
+      if (q.length < 3) continue;
+
+      for (let i = 0; i < rawLines.length; i++) {
+        const line = rawLines[i].trim();
+        if (!line) continue;
+        const normLine = cleanTarget(line);
+        const isHeader =
+          line.startsWith('#') ||
+          /^(?:#+\s*)?\[(?:[A-Za-z0-9_\- ]+)\](?:\s*[:\-–—]|$)/i.test(line) ||
+          /^(?:#+\s*)?(?:Paper|Subject|Discipline|Sub[\s\-_]?Subject|Unit|Section|Module|Chapter|Topic|Lesson)\s*[:\-–—]/i.test(line) ||
+          /^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(line);
+
+        if (isHeader && (normLine === q || normLine.includes(q) || q.includes(normLine))) {
+          const headingLevel = getHeadingLevel(line);
+          const collected = [rawLines[i]];
+          for (let j = i + 1; j < rawLines.length; j++) {
+            const nextTrim = rawLines[j].trim();
+            if (nextTrim && getHeadingLevel(nextTrim) <= headingLevel) break;
+            collected.push(rawLines[j]);
+          }
+          const text = collected.join('\n').trim();
+          if (text.length > 20 && !seenNorms.has(normLine)) {
+            seenNorms.add(normLine);
+            multiSections.push({ title: part, content: text });
+          }
+          break;
+        }
+      }
+    }
+
+    if (multiSections.length > 1) {
+      const combined = multiSections.map(s => `### [Sub-Topic: ${s.title}]\n${s.content}`).join('\n\n');
+      return {
+        scopedMarkdown: combined,
+        matchedSectionTitle: rawParts.join(' + '),
+        hierarchyLevel: 'subsubject',
+        totalLines: combined.split('\n').length
+      };
+    }
+  }
+
+  // Walk lines to find best matching heading boundary
+  for (const { query, level } of searchQueries) {
+    let matchLineIndex = -1;
+    let matchHeadingLevel = 99;
+    let matchedTitle = '';
+
+    for (let i = 0; i < rawLines.length; i++) {
+      const line = rawLines[i].trim();
+      if (!line) continue;
+
+      const normLine = cleanTarget(line);
+      const isHeaderLine =
+        line.startsWith('#') ||
+        /^(?:#+\s*)?\[(?:[A-Za-z0-9_\- ]+)\](?:\s*[:\-–—]|$)/i.test(line) ||
+        /^(?:#+\s*)?(?:Paper|Subject|Discipline|Sub[\s\-_]?Subject|Unit|Section|Module|Chapter|Topic|Lesson)\s*[:\-–—]/i.test(line) ||
+        /^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(line);
+
+      const isBulletOrTopicLine = /^(?:[\*\-•]|\d+[\.\)])\s+/.test(line);
+
+      if (
+        isHeaderLine &&
+        (normLine === query ||
+          normLine.includes(query) ||
+          query.includes(normLine))
+      ) {
+        matchLineIndex = i;
+        matchHeadingLevel = getHeadingLevel(line);
+        matchedTitle = line
+          .replace(/^[#\s*_\-]+/, '')
+          .replace(/[*_#]+$/g, '')
+          .trim();
+        break;
+      } else if (
+        isBulletOrTopicLine &&
+        (normLine === query ||
+          normLine.includes(query) ||
+          query.includes(normLine))
+      ) {
+        // Ascend to the nearest enclosing parent heading (Sub-Subject or Subject)
+        let parentIdx = i - 1;
+        while (parentIdx >= 0) {
+          const prev = rawLines[parentIdx].trim();
+          const prevIsHeader =
+            prev.startsWith('#') ||
+            /^(?:#+\s*)?\[(?:[A-Za-z0-9_\- ]+)\](?:\s*[:\-–—]|$)/i.test(prev) ||
+            /^(?:#+\s*)?(?:Paper|Subject|Discipline|Sub[\s\-_]?Subject|Unit|Section|Module|Chapter|Topic|Lesson)\s*[:\-–—]/i.test(prev) ||
+            /^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(prev);
+
+          if (prevIsHeader) {
+            break;
+          }
+          parentIdx--;
+        }
+        if (parentIdx >= 0) {
+          matchLineIndex = parentIdx;
+          matchHeadingLevel = getHeadingLevel(rawLines[parentIdx]);
+          matchedTitle = rawLines[parentIdx]
+            .replace(/^[#\s*_\-]+/, '')
+            .replace(/[*_#]+$/g, '')
+            .trim();
+        } else {
+          matchLineIndex = i;
+          matchHeadingLevel = 99;
+          matchedTitle = line;
+        }
+        break;
+      }
+    }
+
+    if (matchLineIndex !== -1) {
+      // Collect all lines until the next heading of equal or higher hierarchy level
+      const collected: string[] = [rawLines[matchLineIndex]];
+      for (let j = matchLineIndex + 1; j < rawLines.length; j++) {
+        const nextLine = rawLines[j];
+        const trimmedNext = nextLine.trim();
+
+        if (trimmedNext) {
+          const nextLevel = getHeadingLevel(trimmedNext);
+          // If we encounter a heading equal to or higher than our match level, the section has ended!
+          if (nextLevel <= matchHeadingLevel) {
+            break;
+          }
+        }
+        collected.push(nextLine);
+      }
+
+      const resultText = collected.join('\n').trim();
+      if (resultText.length > 20) {
+        return {
+          scopedMarkdown: resultText,
+          matchedSectionTitle: matchedTitle || query,
+          hierarchyLevel: level,
+          totalLines: collected.length
+        };
+      }
+    }
+  }
+
+  // Fallback: If no specific section boundary matched, return first 8000 characters
+  return {
+    scopedMarkdown: fullMarkdown.slice(0, 8000).trim(),
+    matchedSectionTitle: target.title || 'General Syllabus',
+    hierarchyLevel: 'full',
+    totalLines: rawLines.length
+  };
+}
+

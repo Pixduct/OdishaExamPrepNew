@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { isAuthenticExam } from './examService';
 
 export interface ActiveExamContext {
   activeExamId: string;
@@ -29,8 +30,8 @@ export const buildCategorizedExamsFromDb = (dbExams: any[] = []): CategorizedExa
 
   const categoryMap = new Map<string, CategorizedExams>();
 
-  // Filter out system and blog categories
-  const validExams = dbExams.filter(e => e.category !== 'blog' && e.category !== 'system' && !(e.name || '').startsWith('SYSTEM_SETTINGS_'));
+  // Filter strictly for authentic academic competitive exams (excluding current affairs, blogs, system)
+  const validExams = dbExams.filter(isAuthenticExam);
 
   validExams.forEach(exam => {
     const rawCategory = exam.category || 'General Competitive Exams';

@@ -4,7 +4,7 @@ import DOMPurify from 'dompurify';
 import { toast } from 'react-hot-toast';
 import { cn } from '../lib/utils';
 import { useAuth } from '../lib/AuthContext';
-import { examService } from '../lib/examService';
+import { examService, isAuthenticExam } from '../lib/examService';
 import { activityTracker } from '../lib/activityTracker';
 import {
   X,
@@ -159,7 +159,7 @@ const parseQuestionBankPrice = (tagline: string): number | undefined => {
    Build a grounded system prompt from live data
 ───────────────────────────────────────────── */
 function buildSystemPrompt(data: LiveSiteData | null, userName: string, activeTab?: string): string {
-  const filteredExams = data?.exams.filter(e => e.category !== 'blog' && e.category !== 'system' && !e.name.startsWith('SYSTEM_')) ?? [];
+  const filteredExams = data?.exams.filter(isAuthenticExam) ?? [];
   const popularExams = filteredExams.filter(e => e.category === 'popular');
   const upcomingExams = filteredExams.filter(e => e.category === 'upcoming');
   const allExamNames = filteredExams.map(e => e.name);
@@ -1614,7 +1614,7 @@ const StickyAICompanion: React.FC<StickyAICompanionProps> = ({
       }
 
       const mappedExams = examsProp
-        .filter((e: any) => e.category !== 'blog' && e.category !== 'system' && !e.name.startsWith('SYSTEM_'))
+        .filter(isAuthenticExam)
         .map((e: any) => ({
           id: e.id || e.name,
           name: e.name,
@@ -1680,7 +1680,7 @@ const StickyAICompanion: React.FC<StickyAICompanionProps> = ({
       ]);
 
       const mappedExams = exams
-        .filter((e: any) => e.category !== 'blog' && e.category !== 'system' && !e.name.startsWith('SYSTEM_'))
+        .filter(isAuthenticExam)
         .map((e: any) => ({
           id: e.id,
           name: e.name,

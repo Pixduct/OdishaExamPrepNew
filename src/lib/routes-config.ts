@@ -9,7 +9,8 @@ export const ROUTE_PATHS = {
   CURRENT_AFFAIRS: '/current-affairs',
   ADMIN: '/admin',
   NOT_FOUND: '/404',
-  EXAM_DETAIL: '/exams/:examId'
+  EXAM_DETAIL: '/exams/:examId',
+  FLASHCARDS: '/flashcards'
 } as const;
 
 export const ROUTE_LIST = Object.values(ROUTE_PATHS) as string[];

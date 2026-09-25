@@ -91,7 +91,7 @@ import { useActiveExamContext } from './lib/activeExamStore';
 import { ActiveExamContextBar } from './components/ActiveExamContextBar';
 import { useTheme } from './lib/themeStore';
 // instantQuestionCompiler loaded dynamically
-import { examService } from './lib/examService';
+import { examService, isAuthenticExam } from './lib/examService';
 import { ThemeToggle } from './components/ThemeToggle';
 import { LanguageToggle } from './components/LanguageToggle';
 import { useLanguage, toOdiaDigits } from './lib/LanguageContext';
@@ -357,6 +357,8 @@ const YouTubeCarousel = React.lazy(() => import('./components/YouTubeCarousel'))
 const BlogList = React.lazy(() => import('./pages/BlogList'));
 const BlogPost = React.lazy(() => import('./pages/BlogPost'));
 const CurrentAffairsPage = React.lazy(() => import('./pages/CurrentAffairs').then(m => ({ default: m.CurrentAffairsPage })));
+const FlashcardsHub = React.lazy(() => import('./pages/FlashcardsHub').then(m => ({ default: m.FlashcardsHub })));
+const FlashcardStudyModal = React.lazy(() => import('./components/flashcards/FlashcardStudyModal').then(m => ({ default: m.FlashcardStudyModal })));
 const AiMentor = React.lazy(() => import('./pages/AiMentor'));
 import { ROUTE_PATHS } from './lib/routes-config';
 const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage'));
@@ -1822,6 +1824,7 @@ export const Footer = () => {
             <ul className={cn("font-bold text-slate-300", isMobile ? "space-y-2.5" : "space-y-4")}>
               {[
                 { to: "/current-affairs", label: t('nav.currentAffairs', 'Daily Current Affairs'), icon: Globe },
+                { to: "/flashcards", label: "Active Recall Flashcards", icon: Layers },
                 { to: "/blog", label: t('nav.blog', 'Official Blog'), icon: BookOpen },
                 { to: "/privacy-policy", label: t('footer.privacyPolicy', 'Privacy Policy'), icon: ShieldCheck },
                 { to: "/terms-of-service", label: t('footer.termsOfService', 'Terms'), icon: Scale },
@@ -2270,6 +2273,7 @@ export const Navbar = ({
                   onViewExam={(examId) => window.dispatchEvent(new CustomEvent('oep-view-exam', { detail: examId }))}
                   onLaunchMockTest={(test: any) => window.dispatchEvent(new CustomEvent('oep-launch-mock-test', { detail: test }))}
                   onLaunchBank={(bank: any) => window.dispatchEvent(new CustomEvent('oep-launch-bank', { detail: bank }))}
+                  onViewBlog={(blogId) => navigate(`/blog/${blogId}`)}
                 />
 
                 <button
@@ -4074,6 +4078,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
   const adminQs = bank.questionCount || bank.question_count || 0;
   const arrayQs = Array.isArray(bank.questions) ? bank.questions.length : (Array.isArray(bank.questionsData) ? bank.questionsData.length : 0);
   const totalQs = actualQs > 0 ? actualQs : (adminQs > 0 ? adminQs : (parsedPdfQs > 0 ? parsedPdfQs : (arrayQs > 0 ? arrayQs : 0)));
+  const isEmpty = totalQs === 0;
 
   const currentQuestionIndex = incompleteAct ? ((incompleteAct.metadata?.currentQuestionIndex || 0) + 1) : 0;
   const progressPercent = totalQs > 0 ? Math.min(100, Math.round((currentQuestionIndex / totalQs) * 100)) : 0;
@@ -4089,15 +4094,17 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
             "p-4 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center justify-between gap-4 transition-all duration-300 relative overflow-hidden text-slate-900 dark:text-white cv-card-auto",
             isScheduledUpcoming
               ? "border-amber-200 dark:border-amber-800 bg-amber-50/20 dark:bg-amber-950/20 cursor-not-allowed opacity-90"
-              : isCompleted
-                ? "border-emerald-250 dark:border-emerald-800 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.04)] active:border-emerald-350 cursor-pointer"
-                : isInProgress
-                  ? "border-amber-255 dark:border-amber-800 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.04)] active:border-amber-360 cursor-pointer"
-                  : isLocked
-                    ? "border-amber-200/80 dark:border-amber-800/80 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.08)] active:border-amber-400 cursor-pointer"
-                    : isPremiumUnlocked
-                      ? "border-emerald-200/80 dark:border-emerald-800/80 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.06)] active:border-emerald-400 cursor-pointer"
-                      : "border-slate-100 dark:border-slate-800 shadow-[0_4px_16px_-4px_rgba(79,70,229,0.03)] active:border-brand-300 cursor-pointer"
+              : isEmpty
+                ? "border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40 cursor-pointer"
+                : isCompleted
+                  ? "border-emerald-250 dark:border-emerald-800 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.04)] active:border-emerald-350 cursor-pointer"
+                  : isInProgress
+                    ? "border-amber-255 dark:border-amber-800 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.04)] active:border-amber-360 cursor-pointer"
+                    : isLocked
+                      ? "border-amber-200/80 dark:border-amber-800/80 shadow-[0_4px_16px_-4px_rgba(245,158,11,0.08)] active:border-amber-400 cursor-pointer"
+                      : isPremiumUnlocked
+                        ? "border-emerald-200/80 dark:border-emerald-800/80 shadow-[0_4px_16px_-4px_rgba(16,185,129,0.06)] active:border-emerald-400 cursor-pointer"
+                        : "border-slate-100 dark:border-slate-800 shadow-[0_4px_16px_-4px_rgba(79,70,229,0.03)] active:border-brand-300 cursor-pointer"
           )}
         >
           <div className="flex items-center gap-3.5 min-w-0 flex-1 pl-1">
@@ -4105,18 +4112,22 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
               "w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border relative",
               isScheduledUpcoming
                 ? "bg-amber-50 border-amber-200 text-amber-700"
-                : isCompleted
-                  ? "bg-emerald-50/60 border-emerald-100/30 text-emerald-600"
-                  : isInProgress
-                    ? "bg-amber-50/60 border-amber-100/30 text-amber-600"
-                    : isLocked
-                      ? "bg-amber-50/80 border-amber-200 text-amber-700"
-                      : isPremiumUnlocked
-                        ? "bg-emerald-50/60 border-emerald-100/30 text-emerald-600"
-                        : "bg-indigo-50/60 border-indigo-100/30 text-indigo-650"
+                : isEmpty
+                  ? "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500"
+                  : isCompleted
+                    ? "bg-emerald-50/60 border-emerald-100/30 text-emerald-600"
+                    : isInProgress
+                      ? "bg-amber-50/60 border-amber-100/30 text-amber-600"
+                      : isLocked
+                        ? "bg-amber-50/80 border-amber-200 text-amber-700"
+                        : isPremiumUnlocked
+                          ? "bg-emerald-50/60 border-emerald-100/30 text-emerald-600"
+                          : "bg-indigo-50/60 border-indigo-100/30 text-indigo-650"
             )}>
               {isScheduledUpcoming ? (
                 <Calendar className="w-5 h-5" />
+              ) : isEmpty ? (
+                <Clock className="w-5 h-5" />
               ) : isCompleted ? (
                 <CheckCircle2 className="w-5 h-5 relative z-10" />
               ) : isInProgress ? (
@@ -4133,6 +4144,8 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
                 <h4 className="font-extrabold text-[13.5px] text-slate-900 dark:text-white tracking-tight leading-snug line-clamp-2 uppercase pr-2">{mainTitle}</h4>
                 {isScheduledUpcoming ? (
                   <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[8.5px] font-black rounded border border-amber-200 dark:border-amber-800 uppercase tracking-wider shrink-0">📅 UPCOMING</span>
+                ) : isEmpty ? (
+                  <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[8.5px] font-black rounded border border-slate-200 dark:border-slate-700 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><Clock className="w-2.5 h-2.5 text-slate-400" /> CURATION PENDING</span>
                 ) : isCompleted ? (
                   <span className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[8.5px] font-black rounded border border-emerald-100/60 dark:border-emerald-800 uppercase tracking-wider shrink-0 flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" /> {t('exams.cardActions.retake', 'COMPLETED')}</span>
                 ) : isInProgress ? (
@@ -4148,10 +4161,14 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
                   <span className="px-1.5 py-0.5 bg-brand-50 dark:bg-indigo-950/60 text-brand-700 dark:text-indigo-300 text-[8.5px] font-black rounded border border-brand-100/60 dark:border-indigo-800 uppercase tracking-wider shrink-0">SET {suffix}</span>
                 )}
               </div>
-              {totalQs > 0 && (
+              {totalQs > 0 ? (
                 <div className="flex items-center gap-2 mt-2 text-[10px] font-extrabold text-slate-555 dark:text-slate-300 flex-wrap">
                   <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-0.5 rounded-lg border border-slate-100/60 dark:border-slate-700/60"><FileText className="w-3 h-3 text-slate-400" /> {t('exams.details.questions', `${totalQs} Questions`, { count: totalQs })}</span>
                   <span className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/80 px-2 py-0.5 rounded-lg border border-slate-100/60 dark:border-slate-700/60"><Clock className="w-3.5 h-3.5 text-slate-400" /> {t('exams.details.duration', `${totalQs} Mins`, { mins: totalQs })}</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 mt-2 text-[10px] font-extrabold text-amber-700 dark:text-amber-400 flex-wrap">
+                  <span className="flex items-center gap-1 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-lg border border-amber-200/60 dark:border-amber-800/60 font-semibold"><AlertCircle className="w-3 h-3 text-amber-500" /> Questions in Preparation</span>
                 </div>
               )}
             </div>
@@ -4160,6 +4177,8 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
           <div className="w-8 h-8 rounded-full border flex items-center justify-center shrink-0 shadow-2xs">
             {isScheduledUpcoming ? (
               <Lock className="w-3.5 h-3.5 text-amber-600" />
+            ) : isEmpty ? (
+              <Clock className="w-3.5 h-3.5 text-slate-400" />
             ) : isCompleted ? (
               <RotateCw className="w-3.5 h-3.5 text-emerald-600" />
             ) : isInProgress ? (
@@ -4203,7 +4222,7 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
     >
       <DynamicVectorCard
         roundedClass="rounded-[1.5rem]"
-        glowColor={isLocked ? "rgba(245, 158, 11, 0.28)" : "rgba(99, 102, 241, 0.28)"}
+        glowColor={isLocked ? "rgba(245, 158, 11, 0.28)" : isEmpty ? "rgba(148, 163, 184, 0.15)" : "rgba(99, 102, 241, 0.28)"}
         className="w-full h-full cv-card-auto"
         onClick={() => { if (!isScheduledUpcoming) handleStartDirectPractice(effectiveBank); }}
       >
@@ -4212,13 +4231,15 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
             "p-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-200/80 dark:border-indigo-500/20 shadow-lg shadow-slate-200/30 dark:shadow-indigo-950/20 rounded-[1.5rem] transition-all duration-300 flex flex-col justify-between gap-6 relative overflow-hidden h-full text-slate-900 dark:text-white cv-card-auto",
             isScheduledUpcoming
               ? "border-amber-200 dark:border-amber-800 cursor-not-allowed"
-              : isCompleted
-                ? "border-emerald-200 dark:border-emerald-800 cursor-pointer"
-                : isInProgress
-                  ? "border-amber-250 dark:border-amber-800 cursor-pointer"
-                  : isLocked
-                    ? "border-amber-200 dark:border-amber-800/60 hover:border-amber-400 cursor-pointer"
-                    : "border-slate-200 dark:border-indigo-500/20 cursor-pointer"
+              : isEmpty
+                ? "border-slate-200/80 dark:border-slate-800 cursor-pointer hover:border-slate-300 dark:hover:border-slate-700"
+                : isCompleted
+                  ? "border-emerald-200 dark:border-emerald-800 cursor-pointer"
+                  : isInProgress
+                    ? "border-amber-250 dark:border-amber-800 cursor-pointer"
+                    : isLocked
+                      ? "border-amber-200 dark:border-amber-800/60 hover:border-amber-400 cursor-pointer"
+                      : "border-slate-200 dark:border-indigo-500/20 cursor-pointer"
           )}
         >
           <div className="flex items-start justify-between relative z-10 w-full">
@@ -4227,18 +4248,22 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
                 "w-14 h-14 rounded-xl flex items-center justify-center shrink-0 shadow-md text-white transition-transform relative mt-0.5",
                 isScheduledUpcoming
                   ? "bg-amber-500"
-                  : isCompleted 
-                    ? "bg-gradient-to-br from-emerald-500 to-teal-600" 
-                    : isInProgress
-                      ? "bg-gradient-to-br from-amber-400 to-orange-500 animate-pulse"
-                      : isLocked
-                        ? "bg-gradient-to-br from-amber-500 to-orange-600"
-                        : isPremiumUnlocked
-                          ? "bg-gradient-to-br from-emerald-500 to-teal-600"
-                          : "bg-gradient-to-br from-brand-500 to-indigo-600"
+                  : isEmpty
+                    ? "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 shadow-xs"
+                    : isCompleted 
+                      ? "bg-gradient-to-br from-emerald-500 to-teal-600" 
+                      : isInProgress
+                        ? "bg-gradient-to-br from-amber-400 to-orange-500 animate-pulse"
+                        : isLocked
+                          ? "bg-gradient-to-br from-amber-500 to-orange-600"
+                          : isPremiumUnlocked
+                            ? "bg-gradient-to-br from-emerald-500 to-teal-600"
+                            : "bg-gradient-to-br from-brand-500 to-indigo-600"
               )}>
                 {isScheduledUpcoming ? (
                   <Calendar className="w-6 h-6" />
+                ) : isEmpty ? (
+                  <Clock className="w-6 h-6" />
                 ) : isCompleted ? (
                   <CheckCircle2 className="w-6 h-6" />
                 ) : isInProgress ? (
@@ -4262,12 +4287,16 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
                     <span className="text-[10px] font-black text-emerald-800 uppercase tracking-widest bg-emerald-100 px-2.5 py-0.5 rounded border border-emerald-200 flex items-center gap-1 animate-pulse">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> {t('exams.cardActions.liveNow', 'LIVE NOW')}
                     </span>
+                  ) : isEmpty ? (
+                    <span className="text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-slate-400" /> CURATION PENDING
+                    </span>
                   ) : isCompleted ? (
                     <span className="text-[10px] font-black text-emerald-800 uppercase tracking-widest bg-emerald-100 px-2.5 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3 text-emerald-600" /> COMPLETED
                     </span>
                   ) : isInProgress ? (
-                    <span className="text-[10px] font-black text-amber-800 uppercase tracking-widest bg-amber-100 px-2.5 py-0.5 rounded border border-amber-200 flex items-center gap-1 animate-pulse">
+                    <span className="text-[10px] font-black text-amber-800 uppercase tracking-widest bg-amber-100 px-2.5 py-0.5 rounded border border-emerald-200 flex items-center gap-1 animate-pulse">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" /> IN PROGRESS ({progressPercent}%)
                     </span>
                   ) : isLocked ? (
@@ -4299,6 +4328,14 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
               </div>
               <div className="flex items-center justify-between text-[11px] font-semibold text-amber-800 pt-0.5">
                 <span>Scheduled for {countdown.formattedScheduledDate}</span>
+              </div>
+            </div>
+          ) : isEmpty ? (
+            <div className="space-y-4 flex-1 relative z-10 pt-2 text-left">
+              <div className="flex gap-4 text-xs font-bold text-amber-700 dark:text-amber-400 flex-wrap">
+                <span className="flex items-center gap-1 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded-lg border border-amber-200/80 dark:border-amber-800/60 font-semibold">
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-500"/> Questions in Preparation
+                </span>
               </div>
             </div>
           ) : (
@@ -4365,6 +4402,20 @@ const ScheduledPracticeBankCard = React.memo(({ bank, hasAccessTo, activities, h
                 <Play className="w-4 h-4 fill-white/20" /> {t('exams.cardActions.resume', 'Resume')} ({progressPercent}%)
               </Button>
             </div>
+          ) : isEmpty ? (
+            <Button 
+              variant="outline"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleStartDirectPractice(effectiveBank);
+              }}
+              className="w-full h-[48px] rounded-xl font-bold text-xs sm:text-sm relative z-10 transition-all border-slate-200/90 dark:border-slate-700 text-slate-600 dark:text-slate-400 bg-slate-50/80 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer mt-auto"
+            >
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                <Clock className="w-4 h-4 text-slate-400" />
+                <span>Questions Coming Soon</span>
+              </span>
+            </Button>
           ) : (
             <Button 
               variant={isLocked ? "outline" : "primary"}
@@ -5503,6 +5554,29 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       window.history.replaceState(null, '', newRelativePathQuery);
     } catch (e) {}
   };
+
+  // Stage-Specific Syllabus View State for Student Portal
+  const [showStageSyllabus, setShowStageSyllabus] = useState(false);
+  const [stageSyllabusData, setStageSyllabusData] = useState<{ syllabus_markdown?: string } | null>(null);
+  const [isLoadingStageSyllabus, setIsLoadingStageSyllabus] = useState(false);
+
+  useEffect(() => {
+    if (!selectedExam) {
+      setStageSyllabusData(null);
+      return;
+    }
+    let isSubscribed = true;
+    setIsLoadingStageSyllabus(true);
+    examService.getExamSyllabus(selectedExam, activeStage).then(data => {
+      if (isSubscribed) {
+        setStageSyllabusData(data);
+        setIsLoadingStageSyllabus(false);
+      }
+    }).catch(() => {
+      if (isSubscribed) setIsLoadingStageSyllabus(false);
+    });
+    return () => { isSubscribed = false; };
+  }, [selectedExam, activeStage]);
 
   const setSelectedExam = (val: string | null) => {
     if (val === null) {
@@ -7543,9 +7617,25 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
   const [activeTab, setActiveTab] = useState<'popular' | 'upcoming'>('upcoming');
   const [showPracticeConfig, setShowPracticeConfig] = useState<boolean>(false);
   const [selectedBankType, setSelectedBankType] = useState<string | null>(() => sessionStorage.getItem('oep_selectedBankType') || null);
-  const [mobileExamTab, setMobileExamTab] = useState<'learn' | 'practice' | 'mock'>(() => {
-    return (sessionStorage.getItem('oep_mobileExamTab') as 'learn' | 'practice' | 'mock') || 'practice';
+  const [mobileExamTab, setMobileExamTab] = useState<'learn' | 'practice' | 'mock' | 'flashcards'>(() => {
+    return (sessionStorage.getItem('oep_mobileExamTab') as 'learn' | 'practice' | 'mock' | 'flashcards') || 'practice';
   });
+
+  // --- Exam Flashcard Decks state ---
+  const [examFlashcardDecks, setExamFlashcardDecks] = useState<any[]>([]);
+  const [activeExamDeck, setActiveExamDeck] = useState<any | null>(null);
+  const [examDeckCards, setExamDeckCards] = useState<any[]>([]);
+  const [isExamFlashcardModalOpen, setIsExamFlashcardModalOpen] = useState(false);
+  const [userFlashcardProgressMap, setUserFlashcardProgressMap] = useState<Record<string, any>>({});
+
+  const displayedFlashcardDecks = useMemo(() => {
+    return examFlashcardDecks.filter(deck => {
+      if (activeStage && deck.stage && deck.stage !== 'All Stages' && deck.stage.toLowerCase() !== activeStage.toLowerCase()) {
+        return false;
+      }
+      return true;
+    });
+  }, [examFlashcardDecks, activeStage]);
 
   useEffect(() => {
     sessionStorage.setItem('oep_mobileExamTab', mobileExamTab);
@@ -7592,6 +7682,25 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       markCategoryAsViewed('mock', selectedMockCategory);
     }
   }, [selectedMockCategory, markCategoryAsViewed]);
+
+  useEffect(() => {
+    if (!selectedExam) {
+      setExamFlashcardDecks([]);
+      return;
+    }
+    let isCurrent = true;
+    examService.getAllFlashcardDecks(selectedExam).then(decks => {
+      if (isCurrent) setExamFlashcardDecks(decks || []);
+    }).catch(() => {});
+
+    if (user?.id) {
+      examService.getUserFlashcardProgress(user.id).then(prog => {
+        if (isCurrent) setUserFlashcardProgressMap(prog || {});
+      }).catch(() => {});
+    }
+
+    return () => { isCurrent = false; };
+  }, [selectedExam, user]);
 
   // Helper to determine if a specific category has new unread content
   const hasNewUnreadContent = useCallback((tabName: 'bank' | 'practice' | 'mock', categoryId: string): boolean => {
@@ -7722,7 +7831,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     setSelectedPracticeSubject('All');
   }, [selectedPracticeCategory]);
   const actualExams = useMemo(() => {
-    return exams.filter(e => !e.is_archived && e.category !== 'blog' && e.category !== 'system' && !(e.name || '').startsWith('SYSTEM_SETTINGS_'));
+    return exams.filter(isAuthenticExam);
   }, [exams]);
 
   useEffect(() => {
@@ -8230,16 +8339,40 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           if (topicBank && Array.isArray(topicBank.questions) && topicBank.questions.length > 0) {
             finalTest.questions = topicBank.questions.slice(0, targetCount);
           } else {
-            const { getInstantQuestionsForTopic } = await import('./lib/instantQuestionCompiler');
-            const instantQs = getInstantQuestionsForTopic(cleanTopic, targetCount);
-            finalTest.questions = instantQs.map(q => ({
-              id: q.id,
-              questionText: q.questionText,
-              options: q.options,
-              correctAnswerIndex: q.correctAnswerIndex,
-              explanation: q.explanation || 'No explanation provided.'
-            }));
+            if (topicBank?.id && !topicBank.id.startsWith('practice-')) {
+              try {
+                const dbQs = await examService.getQuestionsForQuestionBank(topicBank.id, topicBank.title || cleanTopic, testExamId || selectedExam);
+                if (dbQs && dbQs.length > 0) {
+                  finalTest.questions = dbQs.slice(0, targetCount > 0 ? targetCount : dbQs.length);
+                }
+              } catch (e) {
+                console.warn("Failed to fetch questions from DB in handleStartTest:", e);
+              }
+            }
+
+            if (!finalTest.questions || finalTest.questions.length === 0) {
+              const { getInstantQuestionsForTopic } = await import('./lib/instantQuestionCompiler');
+              const instantQs = getInstantQuestionsForTopic(cleanTopic, targetCount);
+              if (instantQs && instantQs.length > 0) {
+                finalTest.questions = instantQs.map(q => ({
+                  id: q.id,
+                  questionText: q.questionText,
+                  options: q.options,
+                  correctAnswerIndex: q.correctAnswerIndex,
+                  explanation: q.explanation || 'No explanation provided.'
+                }));
+              }
+            }
           }
+
+          if (!finalTest.questions || finalTest.questions.length === 0) {
+            showPremiumAlert(
+              "Questions In Curation",
+              `No questions have been configured for "${cleanTopic}" yet. Please check back soon or try another test.`
+            );
+            return;
+          }
+
           finalTest.totalQuestions = finalTest.questions.length;
           finalTest.totalMarks = finalTest.totalMarks || finalTest.questions.length;
         }
@@ -8462,13 +8595,13 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
       let finalQuestions: any[] = [];
 
-      if (Array.isArray(topicBank?.questions) && topicBank.questions.length >= targetCount) {
-        finalQuestions = topicBank.questions.slice(0, targetCount);
+      if (Array.isArray(topicBank?.questions) && topicBank.questions.length > 0) {
+        finalQuestions = topicBank.questions.slice(0, targetCount > 0 ? targetCount : topicBank.questions.length);
       } else if (topicBank?.id && !topicBank.id.startsWith('practice-') && !topicBank.id.startsWith('bank-topic-')) {
         try {
-          const dbQuestions = await examService.getQuestionsForQuestionBank(topicBank.id, bankTopicName, effectiveExamId);
+          const dbQuestions = await examService.getQuestionsForQuestionBank(topicBank.id, topicBank.title || bankTopicName, effectiveExamId);
           if (dbQuestions && dbQuestions.length > 0) {
-            finalQuestions = dbQuestions.slice(0, targetCount);
+            finalQuestions = dbQuestions.slice(0, targetCount > 0 ? targetCount : dbQuestions.length);
           }
         } catch (e) {
           console.warn("Failed to fetch questions from DB for bank:", e);
@@ -8476,16 +8609,34 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       }
 
       if (finalQuestions.length === 0) {
-        // Fast instant question retrieval (<10ms) with exact target question count
+        // Fast instant question retrieval (<10ms) with exact target question count if topic is supported
         const { getInstantQuestionsForTopic } = await import('./lib/instantQuestionCompiler');
-        const instantQs = getInstantQuestionsForTopic(bankTopicName, targetCount);
-        finalQuestions = instantQs.map(q => ({
-          id: q.id,
-          questionText: q.questionText,
-          options: q.options,
-          correctAnswerIndex: q.correctAnswerIndex,
-          explanation: q.explanation
-        }));
+        const instantQs = getInstantQuestionsForTopic(bankTopicName, targetCount > 0 ? targetCount : 15);
+        if (instantQs && instantQs.length > 0) {
+          finalQuestions = instantQs.map(q => ({
+            id: q.id,
+            questionText: q.questionText,
+            options: q.options,
+            correctAnswerIndex: q.correctAnswerIndex,
+            explanation: q.explanation
+          }));
+        }
+      }
+
+      if (finalQuestions.length === 0) {
+        setLoadingPractice(false);
+        if (isAdmin) {
+          showPremiumAlert(
+            "Questions In Curation",
+            `No questions have been published for "${bankTopicName}" yet. As an administrator, you can generate authentic questions for this module in AI Question Studio (Stage 2) or upload them via the Admin Panel.`
+          );
+        } else {
+          showPremiumAlert(
+            "Questions Coming Soon",
+            `Practice questions for "${bankTopicName}" are currently being prepared by our academic team according to the latest syllabus. Please check back soon or practice other available topics.`
+          );
+        }
+        return;
       }
 
       const practiceTest = {
@@ -8858,7 +9009,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
         <PurchasesView 
           user={user} 
           profile={profile}
-          exams={exams.filter(e => e.category !== 'blog' && e.category !== 'system' && !(e.name || '').startsWith('SYSTEM_SETTINGS_'))}
+          exams={exams.filter(isAuthenticExam)}
           mockTests={mockTests}
           testSeries={testSeries}
           dynamicQuestionBanks={dynamicQuestionBanks}
@@ -9540,7 +9691,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       // target_mode filter: 'practice' items are ONLY for Practice Mode (Step 2), not Step 1
       const mode = item.target_mode || 'both';
       if (mode === 'practice') return false;
-      if (activeStage && item.stage && item.stage !== 'All Stages' && item.stage !== activeStage) return false;
+      if (activeStage && item.stage && item.stage !== 'All Stages' && item.stage.toLowerCase() !== activeStage.toLowerCase()) return false;
       return true;
     });
     const bankTitle = selectedBankType.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
@@ -10066,17 +10217,29 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               )}>
                 {currentExam.stages.map((st: string) => {
                   const isSelected = activeStage === st;
-                  // Compute total mock tests + question banks matching this stage
-                  const stageTestCount = (mockTests || []).filter((mt: any) => {
+                  // Compute total mock tests + question banks + flashcards matching this stage
+                  const stageMockCount = (mockTests || []).filter((mt: any) => {
                     if (mt.is_archived && !hasAccessTo(mt.id, selectedExam)) return false;
                     try {
                       const cfg = typeof mt.seriesId === 'string' ? JSON.parse(mt.seriesId) : (mt.seriesId || {});
                       if (cfg.examId !== selectedExam && mt.examId !== selectedExam) return false;
-                      return !mt.stage || mt.stage === st || mt.stage === 'All Stages';
+                      return !mt.stage || mt.stage === 'All Stages' || mt.stage.toLowerCase() === st.toLowerCase();
                     } catch (e) {
-                      return mt.examId === selectedExam && (!mt.stage || mt.stage === st);
+                      return mt.examId === selectedExam && (!mt.stage || mt.stage === 'All Stages' || mt.stage.toLowerCase() === st.toLowerCase());
                     }
                   }).length;
+
+                  const stageBanksCount = Object.values(dynamicQuestionBanks || {}).flat().filter((b: any) => {
+                    if (b.is_archived && !hasAccessTo(b.id, selectedExam)) return false;
+                    if (b.examId !== selectedExam) return false;
+                    return !b.stage || b.stage === 'All Stages' || b.stage.toLowerCase() === st.toLowerCase();
+                  }).length;
+
+                  const stageDecksCount = (examFlashcardDecks || []).filter((d: any) => {
+                    return !d.stage || d.stage === 'All Stages' || d.stage.toLowerCase() === st.toLowerCase();
+                  }).length;
+
+                  const stageTestCount = stageMockCount + stageBanksCount + stageDecksCount;
 
                   return (
                     <button
@@ -10118,63 +10281,139 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
           </div>
         )}
 
+        {/* Stage-Specific Syllabus & Topic Blueprint Section */}
+        <div className="mb-6 sm:mb-8 animate-in fade-in slide-in-from-top-1 duration-200">
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-50/60 via-indigo-50/40 to-purple-50/30 dark:from-[#0B1528] dark:to-[#060B16] border border-blue-200/70 dark:border-blue-900/40 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-600/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-black shrink-0">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
+                      Official {activeStage ? `${activeStage} ` : ''}Syllabus & Blueprint
+                    </h3>
+                    {activeStage && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-blue-200 border border-blue-200/80 dark:border-blue-800 shrink-0">
+                        🎯 {activeStage} Scoped
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Official curriculum, marks weightage, and topic blueprints verified for {activeStage || currentExam?.name || 'this exam'}.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowStageSyllabus(!showStageSyllabus)}
+                className="px-3.5 py-2 rounded-xl text-xs font-black bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all shadow-xs cursor-pointer self-start sm:self-center shrink-0"
+              >
+                {showStageSyllabus ? <ChevronUp className="w-4 h-4 text-blue-500" /> : <ChevronDown className="w-4 h-4 text-blue-500" />}
+                <span>{showStageSyllabus ? 'Hide Syllabus' : 'View Stage Syllabus'}</span>
+              </button>
+            </div>
+
+            {showStageSyllabus && (
+              <div className="mt-4 pt-4 border-t border-slate-200/80 dark:border-slate-800/80 animate-in fade-in duration-200">
+                {isLoadingStageSyllabus ? (
+                  <div className="py-8 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                    Loading official {activeStage || 'exam'} syllabus...
+                  </div>
+                ) : stageSyllabusData?.syllabus_markdown ? (
+                  <div className="prose prose-sm dark:prose-invert max-w-none text-xs leading-relaxed max-h-96 overflow-y-auto pr-2 bg-white/70 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200/60 dark:border-slate-800/60 font-sans">
+                    <MathTextRenderer text={stageSyllabusData.syllabus_markdown} />
+                  </div>
+                ) : (
+                  <div className="py-6 text-center text-xs text-slate-500 dark:text-slate-400 bg-white/40 dark:bg-slate-900/40 rounded-xl p-4 border border-dashed border-slate-200 dark:border-slate-800">
+                    Official syllabus document for {activeStage ? `"${activeStage}"` : 'this exam'} is being compiled by our academic committee. All practice tests and decks above are active.
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
           {/* Mobile Premium Segmented Tab Switcher */}
           {isMobile && (
-            <div className="sticky top-16 z-20 -mx-4 px-4 py-2.5 bg-slate-50/95 dark:bg-[#060B16]/95 backdrop-blur-md mt-1">
-              <div className="flex bg-slate-100 dark:bg-[#0B1528] p-1 rounded-xl relative shadow-inner border border-slate-200/80 dark:border-slate-800">
+            <div className="sticky top-16 z-20 -mx-4 px-3 py-2 bg-slate-50/95 dark:bg-[#060B16]/95 backdrop-blur-md mt-1 border-b border-slate-200/50 dark:border-slate-800/60 shadow-xs">
+              <div className="grid grid-cols-4 bg-slate-200/70 dark:bg-[#0B1528] p-1 rounded-2xl relative shadow-inner border border-slate-200/80 dark:border-slate-800 gap-1">
                 <button
                   type="button"
                   onClick={() => setMobileExamTab('practice')}
                   className={cn(
-                    "flex-grow flex-shrink-0 flex-1 py-2 text-[11px] font-black rounded-lg transition-all flex items-center justify-center gap-1.5 relative cursor-pointer",
-                    mobileExamTab === 'practice' ? "text-indigo-700 dark:text-blue-400 font-extrabold" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                    "py-2 px-1 text-[11px] font-black rounded-xl transition-all flex flex-col items-center justify-center gap-1 relative cursor-pointer select-none",
+                    mobileExamTab === 'practice' ? "text-indigo-600 dark:text-blue-400 font-black shadow-xs" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                   )}
                 >
                   {mobileExamTab === 'practice' && (
                     <motion.div
                       layoutId="mobileActiveSubTabIndicator"
-                      className="absolute inset-0 bg-white dark:bg-[#060B16] rounded-lg shadow-sm border border-slate-200/50 dark:border-blue-500/30 z-0"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      className="absolute inset-0 bg-white dark:bg-[#060B16] rounded-xl shadow-xs border border-slate-200/70 dark:border-blue-500/30 z-0"
+                      transition={{ type: "spring", stiffness: 450, damping: 35 }}
                     />
                   )}
-                  <Dumbbell className="w-3.5 h-3.5 relative z-10" />
-                  <span className="relative z-10">{t('exams.gateway.quickPills.practiceTests', 'Practice Tests')}</span>
+                  <Dumbbell className={cn("w-3.5 h-3.5 relative z-10 transition-transform", mobileExamTab === 'practice' && "scale-110 text-indigo-600 dark:text-blue-400")} />
+                  <span className="relative z-10 truncate leading-none tracking-tight">Practice</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setMobileExamTab('mock')}
                   className={cn(
-                    "flex-grow flex-shrink-0 flex-1 py-2 text-[11px] font-black rounded-lg transition-all flex items-center justify-center gap-1.5 relative cursor-pointer",
-                    mobileExamTab === 'mock' ? "text-amber-700 dark:text-amber-300 font-extrabold" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                    "py-2 px-1 text-[11px] font-black rounded-xl transition-all flex flex-col items-center justify-center gap-1 relative cursor-pointer select-none",
+                    mobileExamTab === 'mock' ? "text-amber-600 dark:text-amber-300 font-black shadow-xs" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                   )}
                 >
                   {mobileExamTab === 'mock' && (
                     <motion.div
                       layoutId="mobileActiveSubTabIndicator"
-                      className="absolute inset-0 bg-white dark:bg-[#060B16] rounded-lg shadow-sm border border-slate-200/50 dark:border-amber-500/30 z-0"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      className="absolute inset-0 bg-white dark:bg-[#060B16] rounded-xl shadow-xs border border-slate-200/70 dark:border-amber-500/30 z-0"
+                      transition={{ type: "spring", stiffness: 450, damping: 35 }}
                     />
                   )}
-                  <Award className="w-3.5 h-3.5 relative z-10" />
-                  <span className="relative z-10">{t('exams.gateway.quickPills.mockTests', 'Mock Tests')}</span>
+                  <Award className={cn("w-3.5 h-3.5 relative z-10 transition-transform", mobileExamTab === 'mock' && "scale-110 text-amber-600 dark:text-amber-300")} />
+                  <span className="relative z-10 truncate leading-none tracking-tight">Mock Tests</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setMobileExamTab('learn')}
                   className={cn(
-                    "flex-grow flex-shrink-0 flex-1 py-2 text-[11px] font-black rounded-lg transition-all flex items-center justify-center gap-1.5 relative cursor-pointer",
-                    mobileExamTab === 'learn' ? "text-brand-700 dark:text-emerald-400 font-extrabold" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                    "py-2 px-1 text-[11px] font-black rounded-xl transition-all flex flex-col items-center justify-center gap-1 relative cursor-pointer select-none",
+                    mobileExamTab === 'learn' ? "text-brand-600 dark:text-emerald-400 font-black shadow-xs" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                   )}
                 >
                   {mobileExamTab === 'learn' && (
                     <motion.div
                       layoutId="mobileActiveSubTabIndicator"
-                      className="absolute inset-0 bg-white dark:bg-[#060B16] rounded-lg shadow-sm border border-slate-200/50 dark:border-emerald-500/30 z-0"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      className="absolute inset-0 bg-white dark:bg-[#060B16] rounded-xl shadow-xs border border-slate-200/70 dark:border-emerald-500/30 z-0"
+                      transition={{ type: "spring", stiffness: 450, damping: 35 }}
                     />
                   )}
-                  <Layers className="w-3.5 h-3.5 relative z-10" />
-                  <span className="relative z-10">{t('exams.gateway.quickPills.questionBank', 'Question Bank')}</span>
+                  <Layers className={cn("w-3.5 h-3.5 relative z-10 transition-transform", mobileExamTab === 'learn' && "scale-110 text-brand-600 dark:text-emerald-400")} />
+                  <span className="relative z-10 truncate leading-none tracking-tight">Q-Banks</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMobileExamTab('flashcards')}
+                  className={cn(
+                    "py-2 px-1 text-[11px] font-black rounded-xl transition-all flex flex-col items-center justify-center gap-1 relative cursor-pointer select-none",
+                    mobileExamTab === 'flashcards' ? "text-purple-600 dark:text-purple-300 font-black shadow-xs" : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                  )}
+                >
+                  {mobileExamTab === 'flashcards' && (
+                    <motion.div
+                      layoutId="mobileActiveSubTabIndicator"
+                      className="absolute inset-0 bg-white dark:bg-[#060B16] rounded-xl shadow-xs border border-slate-200/70 dark:border-purple-500/30 z-0"
+                      transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                    />
+                  )}
+                  <div className="relative">
+                    <Sparkles className={cn("w-3.5 h-3.5 relative z-10 transition-transform", mobileExamTab === 'flashcards' && "scale-110 text-purple-600 dark:text-purple-300")} />
+                    <span className="absolute -top-1 -right-1.5 w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
+                  </div>
+                  <span className="relative z-10 truncate leading-none tracking-tight">Flashcards</span>
                 </button>
               </div>
             </div>
@@ -10189,12 +10428,12 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             const cfg = typeof mt.seriesId === 'string' ? JSON.parse(mt.seriesId) : (mt.seriesId || {});
             const matchesExam = cfg.examId === selectedExam || mt.examId === selectedExam;
             if (!matchesExam) return false;
-            if (activeStage && mt.stage && mt.stage !== 'All Stages' && mt.stage !== activeStage) return false;
+            if (activeStage && mt.stage && mt.stage !== 'All Stages' && mt.stage.toLowerCase() !== activeStage.toLowerCase()) return false;
             return true;
           } catch(e) { 
             const matchesExam = mt.examId === selectedExam;
             if (!matchesExam) return false;
-            if (activeStage && mt.stage && mt.stage !== 'All Stages' && mt.stage !== activeStage) return false;
+            if (activeStage && mt.stage && mt.stage !== 'All Stages' && mt.stage.toLowerCase() !== activeStage.toLowerCase()) return false;
             return true;
           }
         });
@@ -10820,7 +11059,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       if (b.examId !== selectedExam) return false;
                       const mode = b.target_mode || 'both';
                       if (mode === 'bank') return false;
-                      if (activeStage && b.stage && b.stage !== 'All Stages' && b.stage !== activeStage) return false;
+                      if (activeStage && b.stage && b.stage !== 'All Stages' && b.stage.toLowerCase() !== activeStage.toLowerCase()) return false;
                       return true;
                     }).length;
 
@@ -10981,7 +11220,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       // target_mode filter: 'bank' items are ONLY for Step 1 PDF store, NOT Practice Mode
                       const mode = item.target_mode || 'both';
                       if (mode === 'bank') return false;
-                      if (activeStage && item.stage && item.stage !== 'All Stages' && item.stage !== activeStage) return false;
+                      if (activeStage && item.stage && item.stage !== 'All Stages' && item.stage.toLowerCase() !== activeStage.toLowerCase()) return false;
                       return true;
                     });
 
@@ -11139,7 +11378,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     try {
                       const cfg = JSON.parse(mt.seriesId);
                       if (cfg.examId !== selectedExam || cfg.category !== test.id) return false;
-                      if (activeStage && mt.stage && mt.stage !== 'All Stages' && mt.stage !== activeStage) return false;
+                      if (activeStage && mt.stage && mt.stage !== 'All Stages' && mt.stage.toLowerCase() !== activeStage.toLowerCase()) return false;
                       return true;
                     } catch (e) {
                       return false;
@@ -11297,7 +11536,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   try {
                     const cfg = JSON.parse(mt.seriesId);
                     if (cfg.examId !== selectedExam || cfg.category !== selectedMockCategory) return false;
-                    if (activeStage && mt.stage && mt.stage !== 'All Stages' && mt.stage !== activeStage) return false;
+                    if (activeStage && mt.stage && mt.stage !== 'All Stages' && mt.stage.toLowerCase() !== activeStage.toLowerCase()) return false;
                     return true;
                   } catch(e) { return false; }
                 });
@@ -11480,7 +11719,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                 if (b.examId !== selectedExam) return false;
                 const mode = b.target_mode || 'both';
                 if (mode === 'practice') return false;
-                if (activeStage && b.stage && b.stage !== 'All Stages' && b.stage !== activeStage) return false;
+                if (activeStage && b.stage && b.stage !== 'All Stages' && b.stage.toLowerCase() !== activeStage.toLowerCase()) return false;
                 return true;
               }).length;
 
@@ -11566,6 +11805,150 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             })}
           </motion.div>
         </section>
+      )}
+
+      {/* Section 4: Active Recall Flashcards (Smart SRS) */}
+      {(!isMobile || mobileExamTab === 'flashcards') && (
+        <section id="flashcards-section" className="space-y-4 sm:space-y-6 scroll-mt-24 pt-6 border-t border-slate-200/60 dark:border-slate-800">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 bg-purple-50 dark:bg-purple-950/70 rounded-xl sm:rounded-2xl flex items-center justify-center border border-purple-200/80 dark:border-purple-800 shrink-0 mt-0.5 text-purple-600 dark:text-purple-400">
+                <Sparkles className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+              </div>
+              <div className="space-y-1 min-w-0 flex-1">
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest">
+                  <Sparkles className="w-2.5 h-2.5" /> Step 4 · Active Recall Flashcards
+                </div>
+                <h2 className="text-lg sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                  High-Yield Flashcards (Smart SRS)
+                </h2>
+                <p className="text-slate-500 dark:text-slate-400 font-medium text-xs sm:text-sm leading-relaxed">
+                  Scientifically scheduled 3D flip cards to memorize facts, dates, articles, and formulas.
+                </p>
+              </div>
+            </div>
+
+            <Link
+              to={`/flashcards?exam=${selectedExam}${activeStage ? `&stage=${encodeURIComponent(activeStage)}` : ''}`}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800/80 hover:bg-purple-100 transition-all shrink-0"
+            >
+              View All Decks <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {displayedFlashcardDecks.length === 0 ? (
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-900/10 via-white to-indigo-900/10 dark:from-slate-950 dark:via-slate-900 dark:to-purple-950/40 border border-purple-200/80 dark:border-purple-900/40 shadow-sm p-5 sm:p-7">
+              {/* Background decorative watermark */}
+              <div className="absolute -right-6 -bottom-6 w-44 h-44 pointer-events-none opacity-5 dark:opacity-10">
+                <Sparkles className="w-full h-full text-purple-600 dark:text-purple-400" />
+              </div>
+
+              <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div className="space-y-3 max-w-xl">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-purple-100/80 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                    <Sparkles className="w-3 h-3 text-purple-600" />
+                    Spaced Repetition Memory Engine
+                  </div>
+                  <h4 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white leading-tight">
+                    Smart Active Recall Decks for {currentExam?.name || 'this Exam'} {activeStage ? `(${activeStage})` : ''}
+                  </h4>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                    Boost retention by 95% using scheduled 3D flip cards covering high-yield Odisha GK, Polity articles, History events, and Formulas.
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700 text-slate-600 dark:text-slate-300">
+                      ⚡ 3D Flip Cards
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700 text-slate-600 dark:text-slate-300">
+                      🧠 SM-2 Algorithm
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700 text-slate-600 dark:text-slate-300">
+                      ⏱️ 5-10 min/day
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto shrink-0">
+                  <Link
+                    to={`/flashcards?exam=${selectedExam}${activeStage ? `&stage=${encodeURIComponent(activeStage)}` : ''}`}
+                    className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-xs font-black bg-purple-600 hover:bg-purple-700 text-white shadow-md shadow-purple-600/20 transition-all active:scale-95 cursor-pointer"
+                  >
+                    <Layers className="w-4 h-4" /> Explore Flashcards Hub <ChevronRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+              {displayedFlashcardDecks.map(deck => (
+                <div
+                  key={deck.id}
+                  className="group relative flex flex-col justify-between p-5 sm:p-6 rounded-[2rem] bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800">
+                        {deck.subject}
+                      </span>
+                      <span className="text-xs font-bold text-slate-400 font-mono">
+                        {deck.card_count || 0} Cards
+                      </span>
+                    </div>
+
+                    <h4 className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white line-clamp-1 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                      {deck.title}
+                    </h4>
+
+                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                      {deck.description || `Master key ${deck.subject} facts with active recall.`}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800/80 mt-4 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
+                      <Clock className="w-3.5 h-3.5 text-purple-500" />
+                      <span>~5-10 min</span>
+                    </div>
+
+                    <button
+                      onClick={async () => {
+                        setActiveExamDeck(deck);
+                        try {
+                          const cards = await examService.getFlashcardsByDeckId(deck.id);
+                          setExamDeckCards(cards);
+                          setIsExamFlashcardModalOpen(true);
+                        } catch (err) {
+                          console.error("Failed to fetch cards:", err);
+                        }
+                      }}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black bg-purple-600 hover:bg-purple-700 text-white shadow-sm transition-all active:scale-95 cursor-pointer"
+                    >
+                      <Play className="w-3 h-3 fill-white" />
+                      Study Deck
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* Active Exam Flashcard Study Modal */}
+      {activeExamDeck && (
+        <React.Suspense fallback={null}>
+          <FlashcardStudyModal
+            isOpen={isExamFlashcardModalOpen}
+            onClose={() => setIsExamFlashcardModalOpen(false)}
+            deck={activeExamDeck}
+            cards={examDeckCards}
+            initialProgressMap={userFlashcardProgressMap}
+            onProgressUpdated={(deckId, updated) => {
+              setUserFlashcardProgressMap(prev => ({ ...prev, ...updated }));
+            }}
+          />
+        </React.Suspense>
       )}
 
       {/* Common View Elements */}
@@ -12036,7 +12419,7 @@ const ExamDetailPage = () => {
         initial={false}
         animate={{ y: isBottomNavVisible ? 0 : '100%' }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="bg-white/92 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/30 dark:border-slate-700/60 sm:glass sm:border-t sm:border-white/25 border-x-transparent border-b-transparent px-2 sm:px-8 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:py-4 flex justify-around items-center fixed bottom-0 left-0 right-0 z-30 rounded-t-[2rem] shadow-[0_-10px_35px_rgba(0,0,0,0.06)] dark:shadow-slate-950/60"
+        className="md:hidden bg-white/92 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/30 dark:border-slate-700/60 sm:glass sm:border-t sm:border-white/25 border-x-transparent border-b-transparent px-2 sm:px-8 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:py-4 flex justify-around items-center fixed bottom-0 left-0 right-0 z-30 rounded-t-[2rem] shadow-[0_-10px_35px_rgba(0,0,0,0.06)] dark:shadow-slate-950/60"
       >
         <button 
           type="button"
@@ -12612,7 +12995,7 @@ function AppContent() {
             initial={false}
             animate={{ y: isBottomNavVisible ? 0 : '100%' }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="bg-white/92 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/30 dark:border-slate-700/60 sm:glass sm:border-t sm:border-white/25 border-x-transparent border-b-transparent px-2 sm:px-8 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:py-4 flex justify-around items-center fixed bottom-0 left-0 right-0 z-30 rounded-t-[2rem] shadow-[0_-10px_35px_rgba(0,0,0,0.06)] dark:shadow-slate-950/60"
+            className="md:hidden bg-white/92 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/30 dark:border-slate-700/60 sm:glass sm:border-t sm:border-white/25 border-x-transparent border-b-transparent px-2 sm:px-8 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:py-4 flex justify-around items-center fixed bottom-0 left-0 right-0 z-30 rounded-t-[2rem] shadow-[0_-10px_35px_rgba(0,0,0,0.06)] dark:shadow-slate-950/60"
           >
             {/* Hide Navigation Toggle Tab */}
             <button 
@@ -12734,6 +13117,7 @@ function AppContent() {
         <Route path={ROUTE_PATHS.BLOG_DETAIL} element={<BlogPost />} />
         <Route path="/blog/preview/:id" element={<BlogPost />} />
         <Route path={ROUTE_PATHS.CURRENT_AFFAIRS} element={<CurrentAffairsPage />} />
+        <Route path={ROUTE_PATHS.FLASHCARDS} element={<FlashcardsHub />} />
         <Route 
           path={ROUTE_PATHS.ADMIN} 
           element={
@@ -12792,7 +13176,7 @@ function AppContent() {
                   initial={false}
                   animate={{ y: isBottomNavVisible ? 0 : '100%' }}
                   transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  className="bg-white/92 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/30 dark:border-slate-700/60 sm:glass sm:border-t sm:border-white/25 border-x-transparent border-b-transparent px-2 sm:px-8 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:py-4 flex justify-around items-center fixed bottom-0 left-0 right-0 z-30 rounded-t-[2rem] shadow-[0_-10px_35px_rgba(0,0,0,0.06)] dark:shadow-slate-950/60"
+                  className="md:hidden bg-white/92 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/30 dark:border-slate-700/60 sm:glass sm:border-t sm:border-white/25 border-x-transparent border-b-transparent px-2 sm:px-8 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:py-4 flex justify-around items-center fixed bottom-0 left-0 right-0 z-30 rounded-t-[2rem] shadow-[0_-10px_35px_rgba(0,0,0,0.06)] dark:shadow-slate-950/60"
                 >
                   {/* Hide Navigation Toggle Tab */}
                   <button 

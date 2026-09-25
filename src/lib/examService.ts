@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { cacheService } from './cacheService';
+import type { Flashcard, FlashcardDeck, UserCardProgress } from './srsEngine';
 
 const inFlightPromises = new Map<string, Promise<any>>();
 
@@ -71,7 +72,7 @@ async function checkSchemaHasDiagram(): Promise<boolean> {
   return schemaHasDiagram;
 }
 
-async function callAdminDbProxy(table: string, action: 'insert' | 'update' | 'delete', payload?: any, id?: string, filters?: any) {
+async function callAdminDbProxy(table: string, action: 'insert' | 'update' | 'delete' | 'upsert', payload?: any, id?: string, filters?: any, onConflict?: string) {
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token;
   if (!token) {
@@ -84,7 +85,7 @@ async function callAdminDbProxy(table: string, action: 'insert' | 'update' | 'de
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({ action, payload, id, filters })
+    body: JSON.stringify({ action, payload, id, filters, onConflict })
   });
 
   const data = await res.json();
@@ -247,7 +248,7 @@ export interface Exam {
   name: string;
   description: string;
   icon: string;
-  category: 'popular' | 'upcoming' | 'blog' | 'system';
+  category: 'popular' | 'upcoming' | 'blog' | 'system' | 'current_affairs';
   examDate?: string;
   targetExamId?: string;
   metaTitle?: string;
@@ -261,6 +262,39 @@ export interface Exam {
   originalPrice?: number;
   pricingConfig?: ExamPricingConfig;
   stages?: string[];
+}
+
+export interface ExamSyllabus {
+  id?: string;
+  exam_id: string;
+  stage: string;
+  syllabus_markdown: string;
+  directives_markdown?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+/**
+ * Authoritative predicate to determine if a record represents an authentic academic competitive examination
+ * (e.g. OPSC, OSSC, OSSSC) rather than an editorial article, daily current affairs digest, or system configuration object.
+ */
+export function isAuthenticExam(item: any): boolean {
+  if (!item || item.is_archived) return false;
+  const cat = (item.category || '').toLowerCase().trim();
+  const name = (item.name || '').trim();
+  if (
+    cat === 'current_affairs' ||
+    cat === 'current-affairs' ||
+    cat === 'blog' ||
+    cat === 'system' ||
+    name.startsWith('SYSTEM_SETTINGS_') ||
+    name.startsWith('SYSTEM_') ||
+    name.startsWith('http://') ||
+    name.startsWith('https://')
+  ) {
+    return false;
+  }
+  return true;
 }
 
 export interface QuestionBank {
@@ -867,18 +901,22 @@ export const examService = {
     return data?.[0] || data;
   },
 
-  async getAllExams(forceFresh: boolean = false) {
+  async getAllExams(forceFresh: boolean = false, includeAllCategories: boolean = false) {
+    const cacheKey = includeAllCategories ? 'all_exams_raw' : 'all_exams';
     if (forceFresh) {
-      cacheService.clear('all_exams');
-      inFlightPromises.delete('all_exams');
+      cacheService.clear(cacheKey);
+      inFlightPromises.delete(cacheKey);
     }
-    return fetchWithInFlightDeduplication('all_exams', async () => {
+    return fetchWithInFlightDeduplication(cacheKey, async () => {
       const { data, error } = await supabase
         .from('exams')
         .select('*')
         .order('sortOrder', { ascending: true });
       if (error) throw error;
-      const exams = ((data || []) as any[]).filter(ex => !ex.is_archived);
+      const rawList = (data || []) as any[];
+      const exams = includeAllCategories
+        ? rawList.filter(ex => !ex.is_archived)
+        : rawList.filter(isAuthenticExam);
       return exams.map(ex => {
         let metaObj: any = {};
         let cleanDesc = ex.description || '';
@@ -910,6 +948,37 @@ export const examService = {
             allAccessPrice: Number(metaObj.allAccessPrice ?? 199),
             allAccessOriginalPrice: Number(metaObj.allAccessOriginalPrice ?? 999)
           }
+        } as Exam;
+      });
+    });
+  },
+
+  async getAllBlogs(forceFresh: boolean = false) {
+    if (forceFresh) {
+      cacheService.clear('all_blogs');
+      inFlightPromises.delete('all_blogs');
+    }
+    return fetchWithInFlightDeduplication('all_blogs', async () => {
+      const { data, error } = await supabase
+        .from('exams')
+        .select('*')
+        .eq('category', 'blog')
+        .order('createdAt', { ascending: false });
+      if (error) throw error;
+      const blogs = ((data || []) as any[]).filter(ex => !ex.is_archived);
+      return blogs.map(ex => {
+        let metaObj: any = {};
+        let cleanDesc = ex.description || '';
+        if (typeof ex.description === 'string' && ex.description.startsWith('JSON_METADATA_')) {
+          try {
+            metaObj = JSON.parse(ex.description.replace('JSON_METADATA_', ''));
+            cleanDesc = metaObj.description || '';
+          } catch (e) {}
+        }
+        return {
+          ...ex,
+          description: cleanDesc,
+          rawDescription: ex.description,
         } as Exam;
       });
     });
@@ -1133,6 +1202,8 @@ export const examService = {
             .rpc('get_question_topic_counts');
 
           const topicCounts: Record<string, number> = {};
+          const normKey = (str: string) => str.toLowerCase().replace(/[\s\-_—–:()]+/g, '').replace(/(practicesession)+$/g, '').trim();
+
           if (!rpcErr && Array.isArray(topicData)) {
             topicData.forEach((row: { topic: string; question_count: number | string }) => {
               if (row.topic) {
@@ -1142,6 +1213,8 @@ export const examService = {
                 topicCounts[row.topic.trim().toLowerCase()] = cnt;
                 const clean = row.topic.toLowerCase().replace(/(\s*-\s*practice session)+$/gi, '').trim();
                 topicCounts[clean] = cnt;
+                const nk = normKey(row.topic);
+                if (nk) topicCounts[nk] = cnt;
               }
             });
           }
@@ -1149,8 +1222,10 @@ export const examService = {
           banks.forEach((b) => {
             const rawTitle = b.title || '';
             const cleanTitle = rawTitle.toLowerCase().replace(/(\s*-\s*practice session)+$/gi, '').trim();
+            const nkRaw = normKey(rawTitle);
+            const nkClean = normKey(cleanTitle);
 
-            let resolvedCount = topicCounts[b.id] || topicCounts[rawTitle] || topicCounts[rawTitle.trim()] || topicCounts[rawTitle.trim().toLowerCase()] || topicCounts[cleanTitle] || 0;
+            let resolvedCount = topicCounts[b.id] || topicCounts[rawTitle] || topicCounts[rawTitle.trim()] || topicCounts[rawTitle.trim().toLowerCase()] || topicCounts[cleanTitle] || topicCounts[nkRaw] || topicCounts[nkClean] || 0;
 
             // Fallback: embedded questionsData in pdfUrl column
             if (resolvedCount === 0 && b.pdfUrl && typeof b.pdfUrl === 'string' && b.pdfUrl.startsWith('{')) {
@@ -1268,51 +1343,436 @@ export const examService = {
 
   async getQuestionsForQuestionBank(bankId: string, bankTitle?: string, examId?: string): Promise<Question[]> {
     try {
-      // 1. Try to fetch from questions table matching topic = bankTitle or topic = bankId
-      let query = supabase
-        .from('questions')
-        .select('id, examId, topic, difficulty, questionText, options, correctAnswerIndex, explanation, diagram, sortOrder');
-
-      if (bankTitle) {
-        query = query.eq('topic', bankTitle);
-      } else if (bankId) {
-        query = query.eq('topic', bankId);
-      }
-
-      if (examId) {
-        query = query.eq('examId', examId);
-      }
-
-      const { data, error } = await query.order('sortOrder', { ascending: true, nullsFirst: false });
-      if (!error && data && data.length > 0) {
-        return data;
-      }
-
-      // 2. If empty and bankId is present, check questionBanks table for embedded pdfUrl or questions
+      // 1. Collect all potential topic candidates
+      const topicCandidates = new Set<string>();
       if (bankId) {
-        const { data: bankData } = await supabase
-          .from('questionBanks')
-          .select('pdfUrl')
-          .eq('id', bankId)
-          .single();
+        topicCandidates.add(bankId);
+      }
+      if (bankTitle) {
+        topicCandidates.add(bankTitle);
+        topicCandidates.add(bankTitle.trim());
+        const stripped = bankTitle.replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
+        topicCandidates.add(stripped);
+        topicCandidates.add(`${stripped} - Practice Session`);
+      }
 
-        if (bankData?.pdfUrl) {
-          try {
-            const parsed = JSON.parse(bankData.pdfUrl);
-            if (Array.isArray(parsed) && parsed.length > 0 && (parsed[0].questionText || parsed[0].question)) {
-              return parsed;
-            }
-            if (parsed.questionsData && Array.isArray(parsed.questionsData)) {
-              return parsed.questionsData;
-            }
-          } catch (e) {}
+      const candidateList = Array.from(topicCandidates).filter(Boolean);
+
+      // 1a. Try matching with candidate list and examId if provided
+      if (candidateList.length > 0) {
+        let query = supabase
+          .from('questions')
+          .select('id, examId, topic, difficulty, questionText, options, correctAnswerIndex, explanation, diagram, sortOrder')
+          .in('topic', candidateList);
+
+        if (examId) {
+          query = query.eq('examId', examId);
+        }
+
+        const { data, error } = await query.order('sortOrder', { ascending: true, nullsFirst: false });
+        if (!error && data && data.length > 0) {
+          return data;
+        }
+
+        // 1b. If examId filter yielded nothing, retry without examId (in case questions were saved with different or omitted examId)
+        if (examId) {
+          const { data: noExamData, error: noExamErr } = await supabase
+            .from('questions')
+            .select('id, examId, topic, difficulty, questionText, options, correctAnswerIndex, explanation, diagram, sortOrder')
+            .in('topic', candidateList)
+            .order('sortOrder', { ascending: true, nullsFirst: false });
+
+          if (!noExamErr && noExamData && noExamData.length > 0) {
+            return noExamData;
+          }
         }
       }
 
-      return data || [];
+      // 2. Check questionBanks table for embedded pdfUrl or questions array
+      if (bankId) {
+        const { data: bankData } = await supabase
+          .from('questionBanks')
+          .select('pdfUrl, questions')
+          .eq('id', bankId)
+          .single();
+
+        if (bankData) {
+          if (Array.isArray(bankData.questions) && bankData.questions.length > 0) {
+            return bankData.questions;
+          }
+          if (bankData.pdfUrl) {
+            try {
+              const parsed = JSON.parse(bankData.pdfUrl);
+              if (Array.isArray(parsed) && parsed.length > 0 && (parsed[0].questionText || parsed[0].question)) {
+                return parsed;
+              }
+              if (parsed.questionsData && Array.isArray(parsed.questionsData)) {
+                return parsed.questionsData;
+              }
+            } catch (e) {}
+          }
+        }
+      }
+
+      // 3. Fallback: ilike match on topic if title is sufficiently descriptive
+      if (bankTitle) {
+        const clean = bankTitle.replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
+        if (clean.length > 3) {
+          let ilikeQuery = supabase
+            .from('questions')
+            .select('id, examId, topic, difficulty, questionText, options, correctAnswerIndex, explanation, diagram, sortOrder')
+            .ilike('topic', `%${clean}%`);
+          if (examId) {
+            ilikeQuery = ilikeQuery.eq('examId', examId);
+          }
+          const { data: ilikeData, error: ilikeErr } = await ilikeQuery.order('sortOrder', { ascending: true, nullsFirst: false }).limit(200);
+          if (!ilikeErr && ilikeData && ilikeData.length > 0) {
+            return ilikeData;
+          }
+        }
+      }
+
+      return [];
     } catch (err) {
       console.error("Error in getQuestionsForQuestionBank:", err);
       return [];
     }
+  },
+
+  // --- Flashcard Decks & Cards Service ---
+  async getAllFlashcardDecks(examId?: string, forceFresh: boolean = false): Promise<FlashcardDeck[]> {
+    const cacheKey = examId ? `flashcard_decks_${examId}` : 'all_flashcard_decks';
+    if (!forceFresh) {
+      const cached = cacheService.get<FlashcardDeck[]>(cacheKey);
+      if (cached) return cached;
+    }
+
+    try {
+      let query = supabase
+        .from('flashcard_decks')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false });
+
+      if (examId) {
+        query = query.eq('exam_id', examId);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      const decks = data || [];
+      cacheService.set(cacheKey, decks);
+      return decks;
+    } catch (err) {
+      console.error("Failed to fetch flashcard decks:", err);
+      return [];
+    }
+  },
+
+  async getFlashcardsByDeckId(deckId: string): Promise<Flashcard[]> {
+    try {
+      const { data, error } = await supabase
+        .from('flashcards')
+        .select('*')
+        .eq('deck_id', deckId)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    } catch (err) {
+      console.error("Failed to fetch flashcards for deck:", deckId, err);
+      return [];
+    }
+  },
+
+  async getUserFlashcardProgress(userId: string, deckId?: string): Promise<Record<string, UserCardProgress>> {
+    if (!userId) return {};
+    try {
+      let query = supabase
+        .from('user_flashcard_progress')
+        .select('*')
+        .eq('user_id', userId);
+
+      if (deckId) {
+        query = query.eq('deck_id', deckId);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      const map: Record<string, UserCardProgress> = {};
+      (data || []).forEach((row: any) => {
+        map[row.card_id] = row;
+      });
+      return map;
+    } catch (err) {
+      console.error("Failed to fetch user flashcard progress:", err);
+      return {};
+    }
+  },
+
+  async saveUserCardProgress(progress: UserCardProgress): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('user_flashcard_progress')
+        .upsert({
+          user_id: progress.user_id,
+          card_id: progress.card_id,
+          deck_id: progress.deck_id,
+          state: progress.state,
+          ease_factor: progress.ease_factor,
+          interval_days: progress.interval_days,
+          repetitions: progress.repetitions,
+          lapses: progress.lapses,
+          due_date: progress.due_date,
+          last_reviewed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,card_id'
+        });
+
+      if (error) throw error;
+    } catch (err) {
+      console.error("Failed to save user card progress to Supabase:", err);
+    }
+  },
+
+  async addFlashcardDeck(deck: Partial<FlashcardDeck>): Promise<FlashcardDeck> {
+    const data = await callAdminDbProxy('flashcard_decks', 'insert', deck);
+    cacheService.clear('all_flashcard_decks');
+    if (deck.exam_id) cacheService.clear(`flashcard_decks_${deck.exam_id}`);
+    try {
+      if (typeof sessionStorage !== 'undefined') {
+        Object.keys(sessionStorage).forEach(k => {
+          if (k.startsWith('oep_cache_flashcard_decks')) sessionStorage.removeItem(k);
+        });
+      }
+    } catch (e) {}
+    return data?.[0] || data;
+  },
+
+  async bulkAddFlashcardDecks(decks: Partial<FlashcardDeck>[]): Promise<FlashcardDeck[]> {
+    if (!decks || decks.length === 0) return [];
+    const data = await callAdminDbProxy('flashcard_decks', 'insert', decks);
+    cacheService.clear('all_flashcard_decks');
+    const examIds = new Set(decks.map(d => d.exam_id).filter(Boolean));
+    examIds.forEach(id => cacheService.clear(`flashcard_decks_${id}`));
+    try {
+      if (typeof sessionStorage !== 'undefined') {
+        Object.keys(sessionStorage).forEach(k => {
+          if (k.startsWith('oep_cache_flashcard_decks')) sessionStorage.removeItem(k);
+        });
+      }
+    } catch (e) {}
+    return Array.isArray(data) ? data : (data ? [data] : []);
+  },
+
+  async updateFlashcardDeck(id: string, updates: Partial<FlashcardDeck>): Promise<FlashcardDeck> {
+    const data = await callAdminDbProxy('flashcard_decks', 'update', updates, id);
+    cacheService.clear('all_flashcard_decks');
+    if (updates.exam_id) cacheService.clear(`flashcard_decks_${updates.exam_id}`);
+    try {
+      if (typeof sessionStorage !== 'undefined') {
+        Object.keys(sessionStorage).forEach(k => {
+          if (k.startsWith('oep_cache_flashcard_decks')) sessionStorage.removeItem(k);
+        });
+      }
+    } catch (e) {}
+    return data?.[0] || data;
+  },
+
+  async deleteFlashcardDeck(id: string): Promise<boolean> {
+    await callAdminDbProxy('flashcard_decks', 'delete', undefined, id);
+    cacheService.clear('all_flashcard_decks');
+    try {
+      if (typeof sessionStorage !== 'undefined') {
+        Object.keys(sessionStorage).forEach(k => {
+          if (k.startsWith('oep_cache_flashcard_decks')) sessionStorage.removeItem(k);
+        });
+      }
+    } catch (e) {}
+    return true;
+  },
+
+  async bulkDeleteFlashcardDecks(ids: string[]): Promise<boolean> {
+    if (!ids || ids.length === 0) return true;
+    await callAdminDbProxy('flashcard_decks', 'delete', undefined, undefined, {
+      id: { op: 'in', val: ids }
+    });
+    cacheService.clear('all_flashcard_decks');
+    try {
+      if (typeof sessionStorage !== 'undefined') {
+        Object.keys(sessionStorage).forEach(k => {
+          if (k.startsWith('oep_cache_flashcard_decks')) sessionStorage.removeItem(k);
+        });
+      }
+    } catch (e) {}
+    return true;
+  },
+
+  async bulkAddFlashcards(deckId: string, cards: Partial<Flashcard>[]): Promise<Flashcard[]> {
+    const payload = cards.map((c, i) => ({
+      deck_id: deckId,
+      front_text: c.front_text,
+      back_text: c.back_text,
+      key_points: c.key_points || [],
+      diagram: c.diagram || null,
+      sort_order: c.sort_order ?? i
+    }));
+    const data = await callAdminDbProxy('flashcards', 'insert', payload);
+    const { count } = await supabase.from('flashcards').select('*', { count: 'exact', head: true }).eq('deck_id', deckId);
+    if (typeof count === 'number') {
+      await callAdminDbProxy('flashcard_decks', 'update', { card_count: count }, deckId);
+      cacheService.clear('all_flashcard_decks');
+      try {
+        if (typeof sessionStorage !== 'undefined') {
+          Object.keys(sessionStorage).forEach(k => {
+            if (k.startsWith('oep_cache_flashcard_decks')) sessionStorage.removeItem(k);
+          });
+        }
+      } catch (e) {}
+    }
+    return data || [];
+  },
+
+  async deleteFlashcard(cardId: string, deckId?: string): Promise<boolean> {
+    await callAdminDbProxy('flashcards', 'delete', undefined, cardId);
+    if (deckId) {
+      const { count } = await supabase.from('flashcards').select('*', { count: 'exact', head: true }).eq('deck_id', deckId);
+      if (typeof count === 'number') {
+        await callAdminDbProxy('flashcard_decks', 'update', { card_count: count }, deckId);
+        cacheService.clear('all_flashcard_decks');
+        try {
+          if (typeof sessionStorage !== 'undefined') {
+            Object.keys(sessionStorage).forEach(k => {
+              if (k.startsWith('oep_cache_flashcard_decks')) sessionStorage.removeItem(k);
+            });
+          }
+        } catch (e) {}
+      }
+    }
+    return true;
+  },
+
+  async bulkDeleteFlashcards(cardIds: string[], deckId?: string): Promise<boolean> {
+    if (!cardIds || cardIds.length === 0) return true;
+    await callAdminDbProxy('flashcards', 'delete', undefined, undefined, {
+      id: { op: 'in', val: cardIds }
+    });
+    if (deckId) {
+      const { count } = await supabase.from('flashcards').select('*', { count: 'exact', head: true }).eq('deck_id', deckId);
+      if (typeof count === 'number') {
+        await callAdminDbProxy('flashcard_decks', 'update', { card_count: count }, deckId);
+        cacheService.clear('all_flashcard_decks');
+        try {
+          if (typeof sessionStorage !== 'undefined') {
+            Object.keys(sessionStorage).forEach(k => {
+              if (k.startsWith('oep_cache_flashcard_decks')) sessionStorage.removeItem(k);
+            });
+          }
+        } catch (e) {}
+      }
+    }
+    return true;
+  },
+
+  async updateFlashcard(cardId: string, updates: Partial<Flashcard>): Promise<Flashcard> {
+    const data = await callAdminDbProxy('flashcards', 'update', updates, cardId);
+    return data?.[0] || data;
+  },
+
+  // --- Exam Syllabi (Stage-Segregated) ---
+  async getExamSyllabus(examId: string, stage?: string): Promise<ExamSyllabus | null> {
+    if (!examId) return null;
+    const cleanStage = (stage || '').trim();
+    const cacheKey = `syllabus_${examId}_${cleanStage || 'all'}`;
+
+    return fetchWithInFlightDeduplication(cacheKey, async () => {
+      let query = supabase
+        .from('exam_syllabi')
+        .select('*')
+        .eq('exam_id', examId);
+
+      if (cleanStage) {
+        query = query.ilike('stage', cleanStage);
+      }
+
+      const { data, error } = await query;
+      if (error) {
+        console.warn(`[getExamSyllabus] Error for ${examId} ${cleanStage}:`, error.message);
+        return null;
+      }
+
+      if (data && data.length > 0) {
+        return data[0] as ExamSyllabus;
+      }
+
+      // Fallback: If specific stage requested was not found, check for 'All Stages', 'Single Stage', or 'General'
+      if (cleanStage) {
+        const { data: fallback } = await supabase
+          .from('exam_syllabi')
+          .select('*')
+          .eq('exam_id', examId)
+          .in('stage', ['All Stages', 'Single Stage', 'General']);
+        if (fallback && fallback.length > 0) {
+          return fallback[0] as ExamSyllabus;
+        }
+      }
+
+      return null;
+    });
+  },
+
+  async getAllExamSyllabi(examId: string): Promise<ExamSyllabus[]> {
+    if (!examId) return [];
+    const cacheKey = `all_syllabi_${examId}`;
+    return fetchWithInFlightDeduplication(cacheKey, async () => {
+      const { data, error } = await supabase
+        .from('exam_syllabi')
+        .select('*')
+        .eq('exam_id', examId)
+        .order('stage', { ascending: true });
+      if (error) {
+        console.warn(`[getAllExamSyllabi] Error for ${examId}:`, error.message);
+        return [];
+      }
+      return (data || []) as ExamSyllabus[];
+    });
+  },
+
+  async saveExamSyllabus(examId: string, stage: string, syllabusMarkdown: string, directivesMarkdown?: string): Promise<ExamSyllabus> {
+    const cleanStage = (stage || 'All Stages').trim();
+    const payload = {
+      exam_id: examId,
+      stage: cleanStage,
+      syllabus_markdown: syllabusMarkdown || '',
+      directives_markdown: directivesMarkdown || '',
+      updated_at: new Date().toISOString()
+    };
+
+    const result = await callAdminDbProxy('exam_syllabi', 'upsert', payload, undefined, undefined, 'exam_id,stage');
+
+    cacheService.clear(`syllabus_${examId}_${cleanStage}`);
+    cacheService.clear(`syllabus_${examId}_all`);
+    cacheService.clear(`all_syllabi_${examId}`);
+    try {
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem(`oep_cache_syllabus_${examId}_${cleanStage}`);
+        sessionStorage.removeItem(`oep_cache_syllabus_${examId}_all`);
+      }
+    } catch (e) {}
+
+    return (Array.isArray(result) ? result[0] : result) as ExamSyllabus;
+  },
+
+  async deleteExamSyllabus(examId: string, stage: string): Promise<boolean> {
+    const cleanStage = (stage || '').trim();
+    await callAdminDbProxy('exam_syllabi', 'delete', undefined, undefined, {
+      exam_id: { op: 'eq', val: examId },
+      stage: { op: 'eq', val: cleanStage }
+    });
+    cacheService.clear(`syllabus_${examId}_${cleanStage}`);
+    cacheService.clear(`all_syllabi_${examId}`);
+    return true;
   }
 };

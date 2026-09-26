@@ -4253,6 +4253,7 @@ Last updated: September 25, 2026
 | **Inline Highlight Badge** | `.bullet-badge: display: inline-flex; align-items: center; background: rgba(255, 255, 255, 0.12); color: {accent_color}; border: 1px solid rgba(255, 255, 255, 0.22); padding: 3px 10px; border-radius: 8px; font-size: 14px; font-weight: 900; letter-spacing: 0.8px; text-transform: uppercase; margin-right: 10px;` |
 | **Official Portal Ribbon** | `.official-portal-strip: background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(14px); border: 1.5px solid rgba(255, 255, 255, 0.16); border-radius: 16px; padding: 13px 22px; label: 18px; link: 20px bold sky-blue` — Backed by `SourceValidator` sovereign government TLD recognition (`.gov.in`, `.nic.in`, `.res.in`) |
 | **Footer Branding** | `.website-text: font-size: 21px; font-weight: 800; color: #FFFFFF;`, `.verified-pill: background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.5); color: #6EE7B7; font-size: 15px; font-weight: 800;` |
+| **Multi-Platform Visual Dispatch** | Automatic resolution in `post_exam_update_to_youtube` checking `slide_image_path` / `cover_image`. Activates single-image Community dropzone upload with DOM session verification (`button#avatar-btn`), scoped dropzone file input (`ytd-commentbox input[type='file']`), and JavaScript evaluate clicks. |
 
 **Pattern notes:**
 - **Zero-Overlap Grid Guarantee**: Using CSS Grid `grid-template-columns: 1fr auto 1fr` guarantees that the center board pill can never visually collide with or obscure the category badge or date tag, even if the organization name is long.
@@ -4262,6 +4263,8 @@ Last updated: September 25, 2026
 - **Adaptive Free-Space Distribution**: Replacing plain list tags with `flex: 1; justify-content: space-evenly;` glass cards ensures that whether a post has 2, 3, or 4 takeaways, the canvas is utilized symmetrically with zero gaping voids.
 - **Canvas-Scale Hierarchy**: Because 1080x1080 renders at ~380px on mobile screens, text sizes are scaled proportionally (headlines: 34px–42px, body: 21px–22px, metrics: 21px) to guarantee readability without ocular strain.
 - **Factual Integrity Guardrail**: Vacancy metrics and milestone dates are validated against raw official notice text before rendering; non-verified counts are replaced with standardized official portal link fallbacks to prevent misleading aspirants.
+- **Zero-Drop Visual Dispatch**: Visual card renders are automatically coupled to both Telegram `sendPhoto`, WhatsApp image upload, and YouTube Community image post dropzones, guaranteeing that social updates never degrade to unadorned plain text.
+- **Concurrent Git Sync Resilience**: History persistence in GitHub Actions workflows leverages a 5-attempt retry loop with `-X theirs` rebase auto-resolution, completely preventing runner failures due to concurrent JSON ledger commits.
 
 ---
 

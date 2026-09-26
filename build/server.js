@@ -576,8 +576,87 @@ function extractSyllabusContents(scopedMarkdown) {
   }
   return contents;
 }
+function computeQuestionNaturalDensity(scopedMarkdown, ceiling) {
+  const contentItems = extractSyllabusContents(scopedMarkdown);
+  let conceptPointCount = 0;
+  for (const item of contentItems) {
+    conceptPointCount += 1;
+    const colonIdx = item.indexOf(":");
+    const listPart = colonIdx !== -1 ? item.slice(colonIdx + 1) : item;
+    const commaSegments = listPart.split(/,\s+/).filter((s) => s.trim().length > 3);
+    if (commaSegments.length > 1) {
+      conceptPointCount += Math.min(commaSegments.length - 1, 4);
+    }
+    const semiSegments = item.split(/;\s+/).filter((s) => s.trim().length > 4);
+    if (semiSegments.length > 1) {
+      conceptPointCount += semiSegments.length - 1;
+    }
+  }
+  if (conceptPointCount === 0) {
+    const nonHeadingLines = scopedMarkdown.split(/\r?\n/).map((l) => l.trim()).filter((l) => l.length > 10 && !/^#{1,6}\s/.test(l) && !isStructuralMetaText(l));
+    conceptPointCount = Math.min(nonHeadingLines.length, 10);
+  }
+  const rawCapacity = Math.max(5, Math.min(conceptPointCount * 2, 50));
+  const naturalCount = ceiling && ceiling > 0 ? Math.min(rawCapacity, ceiling) : rawCapacity;
+  return { contentItems, naturalCount };
+}
 
 // src/lib/serverAiGenerator.ts
+var PYQ_SECTION_MARKER = "### REFERENCE PYQ BENCHMARK (EXAM DNA)";
+var DIRECTIVES_SECTION_MARKER = "### CUSTOM GENERATION DIRECTIVES";
+function extractPYQAndDirectives(compoundText) {
+  if (!compoundText)
+    return { pyqs: "", directives: "" };
+  if (compoundText.includes(PYQ_SECTION_MARKER)) {
+    const parts = compoundText.split(DIRECTIVES_SECTION_MARKER);
+    const pyqPart = parts[0].replace(PYQ_SECTION_MARKER, "").trim();
+    const dirPart = parts[1] ? parts[1].trim() : "";
+    return { pyqs: pyqPart, directives: dirPart };
+  }
+  const trimmed = compoundText.trim();
+  if (/^(?:Q\d+|1[.)]|Question\s*\d+)/i.test(trimmed)) {
+    return { pyqs: trimmed, directives: "" };
+  }
+  return { pyqs: "", directives: compoundText };
+}
+function parseReferencePYQs(rawText) {
+  if (!rawText || !rawText.trim()) {
+    return { pyqs: [], stems: [], count: 0, formattedExemplars: "" };
+  }
+  const cleaned = rawText.trim();
+  const delimiterRegex = /(?:^|\n+)(?:(?:Q(?:uestion)?\.?\s*\d+[:.)]?)|(?:\(?\d+\)[:.]))\s*/gi;
+  const splitChunks = cleaned.split(delimiterRegex).map((s) => s.trim()).filter((s) => s.length > 15);
+  let questions = [];
+  if (splitChunks.length >= 2) {
+    questions = splitChunks.map((chunk) => {
+      const lines = chunk.split("\n").map((l) => l.trim()).filter(Boolean);
+      const stem = lines[0] || chunk.slice(0, 120);
+      return {
+        stem: stem.replace(/^[:.)\s]+/, "").trim(),
+        fullText: chunk
+      };
+    });
+  } else {
+    const blocks = cleaned.split(/\n{2,}/).map((b) => b.trim()).filter((b) => b.length > 25);
+    questions = blocks.map((block) => {
+      const firstLine = block.split("\n")[0].trim();
+      return {
+        stem: firstLine.replace(/^[:.)\s]+/, "").trim(),
+        fullText: block
+      };
+    });
+  }
+  questions = questions.filter((q) => q.stem.length > 8 && q.fullText.length > 18);
+  const stems = questions.map((q) => q.stem);
+  const exemplars = questions.slice(0, 4).map((q, idx) => `[Authentic Past Question ${idx + 1}]:
+${q.fullText}`).join("\n\n");
+  return {
+    pyqs: questions,
+    stems,
+    count: questions.length,
+    formattedExemplars: exemplars
+  };
+}
 function safeEscapeLatex(str) {
   if (!str)
     return "";
@@ -1837,6 +1916,43 @@ If the syllabus blueprint contains multiple sub-topics, bullet points, or concep
     diffLabel = "ADVANCED / ANALYTICAL RIGOR";
     defaultJsonDiff = "hard";
   }
+  let difficultyDirective = "";
+  if (reqDiff === "easy") {
+    difficultyDirective = `
+COGNITIVE DIFFICULTY SPECIFICATION: SIMPLE / FOUNDATIONAL
+- PEDAGOGICAL TARGET: Direct factual recall, fundamental definitions, and core governing principles.
+- QUESTION STEM ARCHITECTURE: Clean, direct, single-sentence questions (e.g., "Which Article guarantees...", "What is the SI unit of...", "Under the Factories Act, what is the minimum...").
+- STRICT CONSTRAINTS:
+  * NEVER use complex multi-statement lists ("Consider the following statements: 1, 2, 3... Which is correct?").
+  * NEVER use Assertion-Reason formats.
+  * Direct 1-step retrieval of essential knowledge that every candidate must know.
+  * Distractors must be plausible, authentic alternatives from the same domain.`;
+  } else if (reqDiff === "medium") {
+    difficultyDirective = `
+COGNITIVE DIFFICULTY SPECIFICATION: MODERATE / STANDARD (OSSC / OSSSC Standard)
+- PEDAGOGICAL TARGET: 2-step reasoning, intermediate conceptual application, and standard calculation problems.
+- QUESTION STEM ARCHITECTURE: Questions requiring the candidate to combine two facts, apply a formula to given parameters, contrast two related concepts, or identify exceptions (e.g., "Which of the following rights is available to foreigners but NOT under Article 19?", "A centrifugal pump operates at... What is the manometric head?").
+- STRICT CONSTRAINTS:
+  * Emphasize 2-step logical deduction or practical numerical calculations.
+  * Maintain clean, accessible stems without convoluted multi-nested statement matrices.
+  * Distractors should model common computational errors, parameter mix-ups, or standard candidate misconceptions.`;
+  } else {
+    difficultyDirective = `
+COGNITIVE DIFFICULTY SPECIFICATION: ADVANCED / RIGOROUS (OPSC / OAS Prelims Standard)
+- PEDAGOGICAL TARGET: High-order cognitive evaluation, multi-statement analysis, landmark case laws, nuanced statutory provisos, and rank-determining discriminators.
+- QUESTION STEM ARCHITECTURE: 
+  * Heavy emphasis on Multi-Statement Evaluation:
+    "Consider the following statements regarding X:
+    1. Statement 1...
+    2. Statement 2...
+    3. Statement 3...
+    Which of the statements given above is/are correct?"
+  * Assertion (A) and Reason (R) frameworks.
+  * Deep mathematical derivations with rigorous LaTeX formatting ($...$), boundary conditions, and subtle exceptions.
+- STRICT CONSTRAINTS:
+  * At least 50% to 70% of questions MUST use multi-statement Roman numeral format or multi-factor analytical evaluation.
+  * Distractors must be sophisticated traps designed around subtle distinctions, inverted conditions, or landmark judicial rulings.`;
+  }
   const systemPrompt = `You are a Senior Question Paper Setter for Odisha Competitive Exams (OPSC/OSSC/OSSSC).
 ${isNaturalDensityMode ? `MAXIMIZE EXAM QUESTION YIELD & BREADTH (HIGH-UTILITY ONLY):
 Generate the maximized natural volume of ${diffLabel} MCQs (minimum 5 Qs floor${ceilingCap ? `, upper ceiling limit \u2264 ${ceilingCap} Qs` : ""}) strictly for: "${cleanTitle}".
@@ -1848,6 +1964,7 @@ CRITICAL QUALITY FILTER: Zero low-utility fluff. Every question must be genuinel
 ${mainSectionDirective ? `
 ${mainSectionDirective}
 ` : ""}
+${difficultyDirective}
 ${scopeDirectives}
 ${stageDirective ? `
 ${stageDirective}
@@ -1928,6 +2045,14 @@ JSON OUTPUT SCHEMA:
     return isFullLengthSyllabus ? wholeSyllabusQuotas[0]?.name || "General Syllabus" : cleanTitle;
   };
   const isParallelApplicable = !isNaturalDensityMode && subParts.length <= 1 && totalQuestions >= 20 && !req.model?.startsWith("gemini");
+  const compoundDirectives = extractPYQAndDirectives(req.directivesMarkdown);
+  const rawReferencePYQs = (req.referencePYQs || compoundDirectives.pyqs || "").trim();
+  const effectiveCustomDirectives = (compoundDirectives.directives || "").trim();
+  const parsedPYQs = parseReferencePYQs(rawReferencePYQs);
+  const combinedExistingStems = [
+    ...req.existingQuestionStems || [],
+    ...parsedPYQs.stems
+  ];
   let accumulatedQuestions = [];
   if (isParallelApplicable) {
     const count1 = Math.ceil(totalQuestions / 2);
@@ -1945,17 +2070,23 @@ JSON OUTPUT SCHEMA:
       message: `Running 2 concurrent worker threads (${count1} + ${count2} questions) on high-speed cluster...`,
       log: `[Stage 2/5] Dual-Thread Parallel Splitter launched: Thread 1 (${count1} Qs) + Thread 2 (${count2} Qs) via ${req.model || "openai/gpt-oss-20b"}.`
     });
-    const existingStemsNotice = req.existingQuestionStems && req.existingQuestionStems.length > 0 ? `
-PREVIOUSLY GENERATED / EXISTING QUESTIONS (DO NOT DUPLICATE THESE CONCEPTS):
-${req.existingQuestionStems.slice(-25).map((s) => `- ${s.slice(0, 90)}`).join("\n")}
+    const existingStemsNotice = combinedExistingStems.length > 0 ? `
+PREVIOUSLY GENERATED / EXISTING QUESTIONS & REFERENCE PYQS (DO NOT DUPLICATE THESE CONCEPTS OR STEMS):
+${combinedExistingStems.slice(-35).map((s) => `- ${s.slice(0, 90)}`).join("\n")}
 ` : "";
     const userPrompt1 = `Generate exactly ${count1} ${diffLabel} MCQs for "${cleanTitle}".
 Focus: Core Fundamental Principles, Standard Terminology, Key Metrics & Water/Syllabus Standards.${existingStemsNotice}
-${req.directivesMarkdown ? `DIRECTIVES: ${req.directivesMarkdown.slice(0, 500)}` : ""}
+${parsedPYQs.count > 0 ? `EXAM BENCHMARK (MATCH THIS LEVEL & TONE, DO NOT COPY):
+${parsedPYQs.formattedExemplars.slice(0, 1e3)}
+` : ""}
+${effectiveCustomDirectives ? `DIRECTIVES: ${effectiveCustomDirectives.slice(0, 1500)}` : ""}
 Output ONLY the raw JSON array of ${count1} question objects.`;
     const userPrompt2 = `Generate exactly ${count2} ${diffLabel} MCQs for "${cleanTitle}".
 Focus: Practical Applications, Problem Solving, Diagnostic Calculations, Breeding/Disease Management & Case Scenarios.${existingStemsNotice}
-${req.directivesMarkdown ? `DIRECTIVES: ${req.directivesMarkdown.slice(0, 500)}` : ""}
+${parsedPYQs.count > 0 ? `EXAM BENCHMARK (MATCH THIS LEVEL & TONE, DO NOT COPY):
+${parsedPYQs.formattedExemplars.slice(0, 1e3)}
+` : ""}
+${effectiveCustomDirectives ? `DIRECTIVES: ${effectiveCustomDirectives.slice(0, 1500)}` : ""}
 Output ONLY the raw JSON array of ${count2} question objects.`;
     const parseAndValidateBatch = (rawJson) => {
       const parsed = extractAndParseJSON(rawJson);
@@ -2042,12 +2173,14 @@ Output ONLY the raw JSON array of ${count2} question objects.`;
       currentCount: 0,
       totalCount: isNaturalDensityMode ? ceilingCap || 25 : totalQuestions,
       percent: 30,
-      message: `Synthesizing ${isNaturalDensityMode ? ceilingCap ? `up to \u2264${ceilingCap}` : "maximized natural volume of" : totalQuestions} questions for "${cleanTitle}"...`,
-      log: `[Stage 2/5] Synthesizing ${isNaturalDensityMode ? ceilingCap ? `up to \u2264${ceilingCap}` : "maximized natural volume of" : totalQuestions} questions via ${req.model || "meta/llama-3.2-11b-vision-instruct"}.`
+      message: `Synthesizing ${isNaturalDensityMode ? ceilingCap ? `up to \u2264${ceilingCap}` : "maximized natural volume of" : totalQuestions} questions for "${cleanTitle}"${req.thematicFocus ? ` [Focus: ${req.thematicFocus}]` : ""}...`,
+      log: `[Stage 2/5] Synthesizing ${isNaturalDensityMode ? ceilingCap ? `up to \u2264${ceilingCap}` : "maximized natural volume of" : totalQuestions} questions via ${req.model || "meta/llama-3.2-11b-vision-instruct"}${req.thematicFocus ? ` [Focus: ${req.thematicFocus}]` : ""}.`
     });
     const userPrompt = `Generate ${isNaturalDensityMode ? `the MAXIMIZED natural volume of distinct, high-caliber ${diffLabel} MCQs (minimum 5 Qs floor${ceilingCap ? `, maximum ceiling \u2264 ${ceilingCap} Qs` : ", aim for 15 to 25 Qs on dense topics, 8 to 12 Qs on compact topics"})` : `exactly ${totalQuestions} ${diffLabel} MCQs`} for:
 Test Title: "${cleanTitle}" | Exam: "${req.examName || req.examId}" | Scope: "${isFullLengthSyllabus ? "Comprehensive Full Syllabus" : cleanTitle}"
-${req.includeDiagrams ? "Include geometric/Venn diagram specs where relevant." : "Text and LaTeX math only."}
+${req.thematicFocus ? `PEDAGOGICAL BATCH THEMATIC FOCUS:
+This micro-batch MUST focus specifically on: "${req.thematicFocus}". Target questions directly exploring this cognitive dimension.
+` : ""}${req.includeDiagrams ? "Include geometric/Venn diagram specs where relevant." : "Text and LaTeX math only."}
 ${subParts.length > 1 ? `EQUAL ALLOCATION MANDATE: Questions MUST be strictly divided across all constituent sub-topics: ${subParts.map((sp) => `"${sp}"`).join(", ")}. Set topic: "[Sub-topic name]" in JSON for each item.
 ` : ""}
 ${isFullLengthSyllabus && wholeSyllabusQuotas.length > 1 ? `WHOLE SYLLABUS EQUAL ALLOCATION MANDATE: Questions MUST be strictly divided across all constituent sections: ${wholeSyllabusQuotas.map((sq) => `"${sq.name}" (${sq.quota} Qs)`).join(", ")}. Set topic: "[Section name]" in JSON for each item.
@@ -2058,20 +2191,31 @@ ${chapterContents.map((c, i) => `  ${i + 1}. ${c}`).join("\n")}
 COMPREHENSIVE BREADTH MANDATE:
 Systematically generate questions covering ALL of the detected topic anchors above, plus any additional formulas, operating parameters, and mechanisms implied by the syllabus text below. For each question, set "topic" in the JSON to the specific content item tested.
 ` : ""}
-${req.existingQuestionStems && req.existingQuestionStems.length > 0 ? `
-PREVIOUSLY GENERATED / EXISTING QUESTIONS (DO NOT DUPLICATE THESE CONCEPTS):
-${req.existingQuestionStems.slice(-60).map((s) => `- ${s.slice(0, 90)}`).join("\n")}
+${parsedPYQs.count > 0 ? `AUTHENTIC EXAM BOARD BENCHMARK & CALIBRATION (${parsedPYQs.count} Authentic Reference Questions Provided):
+The following sample questions are AUTHENTIC previous year examination questions from this exam board:
+
+${parsedPYQs.formattedExemplars}
+
+EXAM CALIBRATION & SIBLING SYNTHESIS MANDATE:
+1. EXAM DNA REPLICATION: Analyze the exact question architecture above\u2014its linguistic phrasing, calculation depth, and distractor mechanics. Synthesize questions for the target syllabus topics that match this EXACT examination standard and difficulty.
+2. SIBLING CREATION / ANTI-LEAKAGE: Do NOT copy the sample questions above verbatim. Formulate fresh, original questions testing syllabus concepts with identical exam-level sophistication.
+
+` : ""}
+${combinedExistingStems.length > 0 ? `
+PREVIOUSLY GENERATED / EXISTING QUESTIONS & REFERENCE PYQS (DO NOT DUPLICATE THESE CONCEPTS OR STEMS):
+${combinedExistingStems.slice(-70).map((s) => `- ${s.slice(0, 90)}`).join("\n")}
 ` : ""}
 SYLLABUS BLUEPRINT:
 ${syllabusContext}
 
 ${subCategoryDirective ? `${subCategoryDirective}
-` : ""}${req.directivesMarkdown ? `ADMIN DIRECTIVES & CUSTOM ALLOCATION (HIGHEST PRIORITY):
-${req.directivesMarkdown.slice(0, 800)}
+` : ""}${effectiveCustomDirectives ? `ADMIN DIRECTIVES & CUSTOM ALLOCATION (HIGHEST PRIORITY):
+${effectiveCustomDirectives.slice(0, 2500)}
 Follow any custom subject distribution or quotas specified by the admin above with top priority.
 ` : ""}Keep each explanation concise (1-2 sentences).
 Output ONLY the raw JSON array of question objects.`;
-    const expectedTokens = isNaturalDensityMode ? 8192 : Math.max(totalQuestions * 450, 2048);
+    const tokenMultiplier = reqDiff === "easy" ? 350 : reqDiff === "medium" ? 480 : 750;
+    const expectedTokens = isNaturalDensityMode ? 8192 : Math.max(totalQuestions * tokenMultiplier, 3e3);
     const rawJson = await queryAIModel(systemPrompt, userPrompt, {
       apiKey: req.apiKey,
       model: req.model,
@@ -2939,6 +3083,114 @@ Output strictly a valid JSON array of ${missingCount} flashcard objects matching
   }
   const effectiveLimit = ceilingCap || fixedCardCount || MIN_FLASHCARDS_PER_DECK;
   return deduplicatedCards.slice(0, Math.max(effectiveLimit, MIN_FLASHCARDS_PER_DECK));
+}
+function buildDeterministicCurriculumPlan(syllabusMarkdown, testTitle, ceilingCap) {
+  const density = computeQuestionNaturalDensity(syllabusMarkdown || testTitle || "", ceilingCap);
+  const effectiveLimit = ceilingCap && ceilingCap > 0 ? ceilingCap : 25;
+  const totalQuestions = Math.min(density.naturalCount, effectiveLimit);
+  let batchCount = Math.max(1, Math.min(6, Math.ceil(totalQuestions / 4)));
+  const basePerBatch = Math.floor(totalQuestions / batchCount);
+  let remainder = totalQuestions % batchCount;
+  const defaultThemes = [
+    "Core Principles, Definitions & Fundamental Concepts",
+    "Formula Applications, Quantitative Relations & Problem Solving",
+    "Real-World Scenarios, Diagnostic Traps & Case Analysis",
+    "Comparative Mechanisms, Assertion-Reasoning & Multi-Statement Evaluation",
+    "Synthesis, Integrated Concepts & Edge Case Scenarios",
+    "Comprehensive Mastery & Applied Edge Scenarios"
+  ];
+  const batches = [];
+  for (let i = 1; i <= batchCount; i++) {
+    const qCount = basePerBatch + (remainder > 0 ? 1 : 0);
+    if (remainder > 0)
+      remainder--;
+    batches.push({
+      batchNumber: i,
+      questionCount: qCount,
+      thematicFocus: defaultThemes[i - 1] || `In-depth Concepts & Application Part ${i}`
+    });
+  }
+  return {
+    totalQuestions,
+    batchCount,
+    batches,
+    reasoning: `Syllabus density analysis identified ${density.contentItems.length} concept points. Organically sized ${totalQuestions} questions into ${batchCount} focused micro-batches (3-5 Qs/batch) to ensure high cognitive depth and zero attention fatigue.`
+  };
+}
+async function planAutonomousQuestionCurriculum(req) {
+  const fallback = buildDeterministicCurriculumPlan(req.syllabusMarkdown, req.testTitle, req.ceilingCap);
+  if (!req.syllabusMarkdown || req.syllabusMarkdown.trim().length < 20) {
+    return fallback;
+  }
+  try {
+    const systemPrompt = `You are a Lead Pedagogical Exam Architect for competitive examinations.
+Your task is to analyze the syllabus content of a test module, evaluate its conceptual density, calculate the optimal natural question capacity, and decompose that capacity into focused micro-batches (ideally 3 to 5 questions per batch, max 5 batches).
+
+By keeping each batch small (3-5 questions), the question generator maintains maximum cognitive attention, deep distractors, and rich explanations without fatigue.
+
+You MUST respond ONLY with a valid JSON object matching this schema:
+{
+  "totalQuestions": <number between 5 and 30>,
+  "batchCount": <number between 1 and 5>,
+  "batches": [
+    {
+      "batchNumber": 1,
+      "questionCount": <number of questions, 3 to 6>,
+      "thematicFocus": "<clear pedagogical angle, e.g. 'Foundations, Definitions & Fundamental Laws'>"
+    }
+  ],
+  "reasoning": "<1-2 sentences explaining why this capacity and batch breakdown was chosen>"
+}`;
+    const userPrompt = `MODULE / TEST TITLE: "${req.testTitle}"
+SUBJECT: "${req.subject || "General"}"
+CHAPTER: "${req.chapter || req.testTitle}"
+${req.subCategory ? `SUB-CATEGORY: "${req.subCategory}"` : ""}
+${req.ceilingCap && req.ceilingCap > 0 ? `MAX CEILING CAP: \u2264 ${req.ceilingCap} Questions` : "UNCONSTRAINED NATURAL DENSITY (Determine optimal capacity organically)"}
+
+SYLLABUS CONTENT:
+${req.syllabusMarkdown.slice(0, 3e3)}
+
+Analyze the concept breadth, determine total authentic question capacity (minimum 5, maximum ${req.ceilingCap && req.ceilingCap > 0 ? req.ceilingCap : 30}), and decompose into optimal micro-batches (3-5 Qs per batch, max 5 batches). Output raw JSON only.`;
+    const rawResponse = await queryAIModel(
+      systemPrompt,
+      userPrompt,
+      {
+        apiKey: req.apiKey,
+        model: req.model,
+        baseUrl: req.baseUrl,
+        temperature: 0.2,
+        maxOutputTokens: 1e3
+      }
+    );
+    const cleaned = rawResponse.replace(/```(?:json)?/gi, "").replace(/```/g, "").trim();
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      if (typeof parsed.totalQuestions === "number" && parsed.totalQuestions >= 3 && Array.isArray(parsed.batches) && parsed.batches.length > 0) {
+        let computedTotal = 0;
+        const validBatches = [];
+        for (let i = 0; i < Math.min(parsed.batches.length, 5); i++) {
+          const b = parsed.batches[i];
+          const qCount = Math.max(1, Math.min(10, Number(b.questionCount) || 4));
+          computedTotal += qCount;
+          validBatches.push({
+            batchNumber: i + 1,
+            questionCount: qCount,
+            thematicFocus: String(b.thematicFocus || `Topic Coverage Part ${i + 1}`).trim()
+          });
+        }
+        return {
+          totalQuestions: parsed.totalQuestions || computedTotal,
+          batchCount: validBatches.length,
+          batches: validBatches,
+          reasoning: String(parsed.reasoning || fallback.reasoning).trim()
+        };
+      }
+    }
+  } catch (err) {
+    console.warn("[planAutonomousQuestionCurriculum] LLM planner failed or timed out; using deterministic fallback:", err);
+  }
+  return fallback;
 }
 
 // server.ts
@@ -4240,6 +4492,7 @@ async function startServer() {
         subCategory,
         syllabusMarkdown,
         directivesMarkdown,
+        referencePYQs,
         difficulty,
         questionCount,
         naturalDensity,
@@ -4290,6 +4543,7 @@ async function startServer() {
         subCategory,
         syllabusMarkdown,
         directivesMarkdown,
+        referencePYQs: referencePYQs ? String(referencePYQs).trim() : void 0,
         difficulty: difficulty || "hard",
         questionCount: Number(questionCount) || 10,
         naturalDensity: Boolean(naturalDensity),
@@ -4303,7 +4557,8 @@ async function startServer() {
           ...existingStems,
           ...Array.isArray(req.body.alreadyGeneratedStems) ? req.body.alreadyGeneratedStems : []
         ],
-        batchNumber: req.body.batchNumber ? Number(req.body.batchNumber) : void 0
+        batchNumber: req.body.batchNumber ? Number(req.body.batchNumber) : void 0,
+        thematicFocus: req.body.thematicFocus ? String(req.body.thematicFocus).trim() : void 0
       });
       res.json({ success: true, count: questions.length, data: questions });
     } catch (err) {
@@ -4339,6 +4594,7 @@ data: ${JSON.stringify(payload)}
         subCategory,
         syllabusMarkdown,
         directivesMarkdown,
+        referencePYQs,
         difficulty,
         questionCount,
         naturalDensity,
@@ -4391,6 +4647,7 @@ data: ${JSON.stringify(payload)}
           subCategory,
           syllabusMarkdown,
           directivesMarkdown,
+          referencePYQs: referencePYQs ? String(referencePYQs).trim() : void 0,
           difficulty: difficulty || "hard",
           questionCount: Number(questionCount) || 10,
           naturalDensity: Boolean(naturalDensity),
@@ -4404,7 +4661,8 @@ data: ${JSON.stringify(payload)}
             ...existingStems,
             ...Array.isArray(req.body.alreadyGeneratedStems) ? req.body.alreadyGeneratedStems : []
           ],
-          batchNumber: req.body.batchNumber ? Number(req.body.batchNumber) : void 0
+          batchNumber: req.body.batchNumber ? Number(req.body.batchNumber) : void 0,
+          thematicFocus: req.body.thematicFocus ? String(req.body.thematicFocus).trim() : void 0
         },
         (progressEvent) => {
           sendEvent("progress", progressEvent);
@@ -4416,6 +4674,38 @@ data: ${JSON.stringify(payload)}
       console.error("[Admin AI Questions Stream Error]", err);
       sendEvent("error", { error: err.message || "Failed to generate questions with AI" });
       res.end();
+    }
+  });
+  app.post("/api/admin/ai/plan-curriculum", requireAdmin, async (req, res) => {
+    try {
+      const {
+        syllabusMarkdown,
+        testTitle,
+        subject,
+        chapter,
+        subCategory,
+        ceilingCap,
+        difficulty,
+        apiKey,
+        model,
+        baseUrl
+      } = req.body;
+      const plan = await planAutonomousQuestionCurriculum({
+        syllabusMarkdown,
+        testTitle: testTitle || "Subject Test",
+        subject,
+        chapter,
+        subCategory,
+        ceilingCap: ceilingCap !== void 0 && ceilingCap !== null ? Number(ceilingCap) : void 0,
+        difficulty,
+        apiKey,
+        model,
+        baseUrl
+      });
+      res.json({ success: true, data: plan });
+    } catch (err) {
+      console.error("[Admin AI Plan Curriculum Error]", err);
+      res.status(500).json({ error: err.message || "Failed to plan autonomous curriculum" });
     }
   });
   app.post("/api/admin/ai/audit-questions", requireAdmin, async (req, res) => {

@@ -1,3 +1,158 @@
+- [x] ⚡ Question Bank Authentic Category Audit & AI Studio Unified Visibility Suite (`src/components/admin/AIQuestionStudio.tsx`, `src/AdminPanel.tsx`, `questionBanks` Supabase Table):
+  1. **Audit & Preservation of Authentic User-Named Collections**:
+     - Completed comprehensive audit of user-created banks for OPSC AAE (`6813624a-d56d-4b07-8845-d6d47444c41f`): confirmed 56 distinct items across all 4 authentic categories.
+     - Confirmed and protected all 24 `⚡ Last-Minute Revision Sets` and all 4 `📜 PYQ Question Archives` (`target_mode: 'bank'`).
+     - Confirmed and protected all 24 `📚 Topic-Wise / Chapter-Wise` and all 4 `💎 Exam-Focused High Yield` sets (`target_mode: 'practice'`).
+     - Fixed single categorization anomaly on *Fluid Mechanics* (`a326618b-52f1-4657-a84d-cd353f774ccd`) from `topic-wise` to `revision-sets`, ensuring an exact 24/24 match with the 24 syllabus chapters.
+  2. **AI Question Studio 3-Mode Filter & Category Parity (`src/components/admin/AIQuestionStudio.tsx`)**:
+     - Resolved the root cause of the AI Studio vs Admin Panel discrepancy: AI Studio was hard-filtering by `target_mode !== 'practice'`, hiding the 28 practice items and displaying only 1 Topic-Wise and 0 Exam-Focused banks.
+     - Introduced `stage2BankModeFilter: 'all' | 'bank' | 'practice'` (defaulting to `'all'`), allowing AI Studio to view and target all 56 banks across all 4 categories without artificial restrictions.
+     - Added 3-button mode switcher in Step 2: `🌟 All Items (56)` | `📦 Question Banks (28)` | `🎯 Practice Sets (28)`.
+     - Harmonized all 4 category pill and dropdown optgroup labels to match the Admin Panel exactly:
+       * 🌐 All Content Banks: 56
+       * 📚 Topic-Wise / Chapter-Wise: 24
+       * 💎 Exam-Focused High Yield: 4
+       * ⚡ Last-Minute Revision Sets: 24
+       * 📜 PYQ Question Archives: 4
+     - Updated question publishing target resolver to check both scoped banks and `questionBanks` fallback by ID, ensuring seamless question generation into any of the 56 banks.
+  3. **Admin Panel Batch Category Reclassification Action (`src/AdminPanel.tsx`)**:
+     - Built `handleApplyBatchCategory` and added a floating `📁 Move Category...` dropdown inside the bottom batch selection toolbar.
+     - Hardened `resetStickyBulkData` so `defCat` defaults cleanly to `'topic-wise'` rather than inheriting an active filter tab.
+  4. **Build & Verification**:
+     - Frontend Vite build succeeded in 19.20s (exit code 0); Server esbuild bundle succeeded in 126ms (exit code 0).
+
+- [x] ⚡ Fleet-Wide Cognitive AI Upgrade & Zero-Hallucination Integrity Suite (`breaking_engine.py`, `ca_website_publisher.py`, `mcq_engine.py`, `engagement_engine.py`, `seo_blog_engine.py`, `exam_update_engine.py`):
+  1. **Zero-Hallucination Grounding & 35,000 Character Context Window (`breaking_engine.py` & `exam_update_engine.py`)**:
+     - Removed legacy `[:4000]` character slicing, expanding input buffer to 35,000 characters so multi-page official recruitment notices and vacancy matrices are inspected across all pages.
+     - Enforced strict Zero-Hallucination Grounding: all advertisement numbers, vacancies, and dates must be extracted verbatim; if unverified or missing, outputs "Refer to Official Notice PDF" / "Check Official Schedule" fail-closed.
+     - Expanded output tokens to 3,000 for Gemini and NVIDIA NIM.
+     - Added robust token sanitization in `clean_utf8_text` stripping unrendered template placeholders and JS artifacts (`[object Object]`, `undefined`, `[Topic]`).
+  2. **8,192 Token Headroom & Distractor Trap Engineering (`ca_website_publisher.py`)**:
+     - Expanded Gemini output tokens to 8,192 and NVIDIA NIM to 4,096 to prevent mid-article truncation on 1,500+ word deep-dive current affairs articles.
+     - Upgraded system prompt to require up to 5 high-yield MCQs per article with pedagogical distractor traps (neighboring years/articles, adjacent ministries, candidate misconceptions) and 2-part explanations.
+  3. **Autonomous Question Setter Fallback & Anti-Leakage Deduplication (`mcq_engine.py`)**:
+     - Built autonomous question generator fallback when Google Sheet queue has no pending items or is unavailable.
+     - Integrated anti-leakage stem checking using Jaccard word-overlap similarity (>0.55 threshold) against `published_history.json`.
+     - Automatically persists autonomous questions to `published_history.json` and supports 1080x1080 visual card rendering and dispatch.
+  4. **Active Recall Revision Traps (`engagement_engine.py`)**:
+     - Upgraded prompt to focus on Active Recall syllabus traps across all 7 rotation domains rather than generic motivation or trivia.
+     - Required 2-part explanation: *Why the correct option is right* + *Why the trap option is wrong*.
+  5. **Official Scales of Pay Grounding (`seo_blog_engine.py`)**:
+     - Anchored salary profile masterclasses in the official *Odisha Revised Scales of Pay (ORSP) Rules, 2017* (Level-9, Level-10, Level-12 Pay Matrices).
+     - Expanded Gemini output token budget to 8,192 for exhaustive 1,500–2,200 word articles with structured HTML tables.
+  6. **Automated Verification & Pass Rate**:
+     - Executed end-to-end verification suite `scratch/test_fleet_cognitive_upgrade.py`: 100% PASS RATE across all 6 engines.
+     - Pushed to remote repository `Pixduct/odisha-mcq-engine` main (`5c9a1a5`).
+
+- [x] ⚡ YouTube Community Automation Resilience & Session Authentication Hardening (`automations/post_ca_to_youtube.py`, `automations/post_exam_to_youtube.py`, `automations/post_to_youtube.py`):
+  1. **10-Image Carousel Support (Full Slide Multi-Upload)**:
+     - Updated carousel ceiling to 10 images matching YouTube's updated Community post limit. Tested and verified full 6-slide multi-image upload publishing cleanly together.
+  2. **Accurate Session Authentication & Early Exit Detection**:
+     - Replaced brittle URL checks (`"accounts.google.com" in page.url` never triggered on public YouTube channels) with DOM checks detecting active Sign-In buttons (`a[aria-label*='Sign in']`, `ytd-button-renderer:has-text('Sign in')`) and user avatars (`button#avatar-btn`).
+     - Added graceful early exit with actionable guidance (`Refresh YT_STATE_BASE64 via extract_yt_cookies.py`) if session cookies expire, cutting unauthenticated execution delay from 45s down to 5s.
+  3. **Search Bar Input Disambiguation**:
+     - Scoped dropzone file input selectors exclusively to `ytd-commentbox input[type='file']`, `#creation-box input[type='file']`, and explicitly excluded `.ytSearchboxComponentHiddenFileInput`, resolving `Non-multiple file input can only accept single file` crashes.
+  4. **Composer Interaction Hardening & Modal Dismissal**:
+     - Added `dismiss_dialogs(page)` to dismiss cookie consent dialogs and overlay banners.
+     - Employed resilient JavaScript evaluate clicks (`evaluate("el => el.click()")`) and enabled state polling for `#post-button` to bypass Polymer shadow DOM pointer-event interception.
+  5. **Live Remote Runner Verification (`Pixduct/odisha-mcq-engine` run `36225701427`)**:
+     - Current Affairs automation ran cleanly in 1m57s with Telegram media group publication and graceful, non-crashing YouTube session status reporting.
+
+- [x] ⚡ Cognitive Multi-Domain Current Affairs Intelligence Engine & Full-Payload Synthesis (`automations/ca_scraper.py`, `automations/ca_formatter.py`, `automations/ca_publisher.py`):
+  1. **Cognitive Multi-Domain Decomposition & Natural Sizing Mandate (`ca_formatter.py`)**:
+     - Upgraded system prompt and user prompt to emulate senior UPSC/OPSC current affairs editors, enforcing a mandatory 5 to 7 high-impact slide volume (minimum 5 required).
+     - Decomposes daily affairs across 6 core competitive exam pillars: Odisha State Affairs (1–2), National Polity & Governance (1–2), Economy & Banking (1), Science & Defense (1), Sports & Awards (1), and International Relations (1).
+     - Eliminated artificial `[:4000]` character payload slicing, expanding context window to 30,000 characters so the model sees all 35–40 candidate items simultaneously.
+     - Expanded output tokens to 8,192 (Gemini) and 4,000 (NVIDIA NIM/DeepSeek) with response JSON schemas guaranteeing zero introductory chat text.
+  2. **Feed Health Overhaul & High-Volume Regional Integrations (`ca_scraper.py`)**:
+     - Purged dead and 404/500 RSS endpoints (`sambadenglish.com/feed/`, `ommcomnews.com/feed`, `airnews`).
+     - Integrated authoritative, high-volume Odisha portals: `Odisha Bytes` (177 KB live feed), `Pragativadi` (18 KB live feed), `OrissaPOST` (105 KB live feed), and Google News Odisha Governance topics.
+     - Added targeted Google News topic feeds for National Polity, Economy & RBI, Science & Defense, Sports & Awards, and World Diplomacy.
+     - Upgraded candidate assembly into 6 distinct multi-domain buckets with graceful fallback date tagging for unparseable feed headers.
+  3. **Publishing Quorum & Scoped Deduplication (`ca_publisher.py`)**:
+     - Scoped database deduplication exclusively to `Current Affairs` category, eliminating false-positive collisions with evergreen static blog posts.
+     - Tuned `MIN_SLIDES_TO_POST = 2` to prevent starving social channels on light news cycles while maintaining high editorial standards.
+  4. **Verification & Testing (`scratch/test_ca_cognitive_pipeline.py`)**:
+     - Scraped 383 raw items across 40 unified domain candidates in 22.77s.
+     - Generated 6 comprehensive slides with 100% domain representation (Odisha PACS, Puri Temple Portal, RBI Repo Rate, ICG QUAD Mission, India-US Yudh Abhyas, and Asian Games Women's Kabaddi Gold).
+     - Verified zero drops through date verification and quality validation gates.
+     - Rendered 1080x1080 slide image via Playwright cleanly.
+
+- [x] ⚡ Reference PYQ Exam Calibration Engine & Dual-Mode Part 2 Suite (`src/lib/serverAiGenerator.ts`, `server.ts`, `src/components/admin/AIQuestionStudio.tsx`):
+  1. **Few-Shot In-Context Grounding & Exam DNA Calibration (`serverAiGenerator.ts`)**:
+     - Implemented `parseReferencePYQs`, `extractPYQAndDirectives`, and `combinePYQAndDirectives`: parses 3–15 authentic previous year questions, isolates question stems, and formats structured few-shot exemplars for prompt injection.
+     - Automatically registers all supplied reference PYQ stems into `combinedExistingStems`, guaranteeing the model never duplicates past exam questions.
+     - Injects `AUTHENTIC EXAM BOARD BENCHMARK & CALIBRATION` few-shot guidance with explicit sibling synthesis and anti-leakage mandates.
+     - Expanded custom admin directives character limit from 800 to 2,500 characters.
+  2. **Backward-Compatible Single-Column Storage Partition**:
+     - Partitioned storage inside `exam_syllabi.directives_markdown` using `### REFERENCE PYQ BENCHMARK (EXAM DNA)` and `### CUSTOM GENERATION DIRECTIVES`, preserving 100% backward compatibility with zero database schema migrations or Supabase downtime.
+  3. **Dual-Mode Part 2 UI Suite (`AIQuestionStudio.tsx`)**:
+     - Added tab switcher: `🎯 Reference PYQs (Style Benchmark)` and `⚙️ Custom Directives (Advanced)`.
+     - Live badge indicator: `⚡ X Authentic PYQ Exemplars Detected • Calibrating Exam Style` or graceful indicator when 0 PYQs provided.
+     - Added 1-click `⚡ Sample Format` helper to pre-populate standard competitive exam question structures.
+     - Updated HTML5 file upload reader and clipboard paste handlers to route into active tab.
+  4. **Verification & Testing**:
+     - Automated test suite `scratch/test_pyq_calibration_suite.ts` passed all 4 tests: parsing, compound storage round-trip, graceful fallback with 0 PYQs, and calibrated sibling generation with 0% stem duplication.
+     - Both `npm run build:frontend` (54.06s) and `npm run build:server` (59ms) build with exit code 0.
+
+- [x] ⚡ Autonomous LLM Pedagogical Curriculum Planner & Auto-Batch Decomposition (`src/lib/serverAiGenerator.ts`, `server.ts`, `src/components/admin/AIQuestionStudio.tsx`):
+  1. **Author LLM Reasoning Architecture (`serverAiGenerator.ts`)**:
+     - Implemented `planAutonomousQuestionCurriculum` & `buildDeterministicCurriculumPlan`: mimics ChatGPT / Gemini author reasoning to examine the chapter syllabus, analyze conceptual depth, determine natural question volume, and autonomously decompose into focused micro-batches (3–5 questions per burst).
+     - Each micro-batch receives a dedicated pedagogical thematic angle (e.g., *Core Principles & Definitions*, *Formula Applications & Numerical Solving*, *Real-World Diagnostic Traps*, *Multi-Statement Roman Numeral Evaluations*).
+     - Clamps single-chapter natural capacity to 25 questions by default (unless an explicit ceiling cap is passed) so that LLM attention headroom stays laser-focused with ~700+ tokens per question.
+     - Added robust fallback: if network or API keys are unavailable, `buildDeterministicCurriculumPlan` mathematically derives the optimal 3–5 Qs micro-batch layout instantly without freezing.
+  2. **Dedicated Backend API Route (`server.ts`)**:
+     - Added authenticated route `POST /api/admin/ai/plan-curriculum` with `requireAdmin` guard.
+     - Extended `generateExamQuestions` and streaming endpoint to accept and inject `thematicFocus` directly into the generation prompt.
+  3. **Stage 2 Studio UI & Auto-Runner Integration (`AIQuestionStudio.tsx`)**:
+     - Added `🤖 AI Auto-Decide` toggle button in Step 4 *Number of Batches (Auto-Runner)* selector (active by default in Natural Density mode).
+     - Added live badge displaying the pedagogical reasoning breakdown and total output projection.
+     - Upgraded both Single-Bank and Multi-Bank Queue Runners to invoke the curriculum planner, streaming live reasoning into the telemetry monitor, and executing micro-batches with sequential zero-repeat deduplication.
+  4. **Verification**:
+     - Automated test suite `scratch/test_ai_curriculum_planner.ts` passed all 4 test cases (compact, dense, capped, and fallback).
+     - Both `npm run build:frontend` and `npm run build:server` build with exit code 0.
+
+- [x] ⚡ Tri-Level Cognitive Difficulty Calibration & Senior QA Web Benchmark Suite (`src/lib/serverAiGenerator.ts`, `scratch/test_difficulty_levels_qa.ts`):
+  1. **Strict Tri-Level Pedagogical Architecture (`serverAiGenerator.ts`)**:
+     - **Simple / Foundational (`easy`)**: Enforces clean, direct, 1-step factual questions (definitions, SI units, fundamental statutory articles). Banned multi-statement Roman numerals and Assertion-Reason formats.
+     - **Moderate / Standard (`medium`)**: Enforces 2-step reasoning, intermediate conceptual applications, standard formulas, and OSSC/OSSSC competitive exam patterns.
+     - **Advanced / Rigorous (`hard`)**: Enforces high-order cognitive evaluation, multi-statement Roman numeral matrices ("Consider statements 1, 2, 3..."), landmark case laws, subtle statutory exceptions, and OPSC / UPSC rigor.
+     - Scaled `expectedTokens` dynamically (`easy: 350`, `medium: 480`, `hard: 750` tokens per question) to eliminate mid-stream truncation on long multi-statement stems.
+  2. **Senior QA End-to-End Comparative Verification (`scratch/test_difficulty_levels_qa.ts`)**:
+     - Audited all three levels against live AI generation on the exact same syllabus topic:
+       * **Simple**: Avg stem length 85 chars, 100% direct 1-sentence questions, 0 multi-statement.
+       * **Moderate**: Avg stem length 121 chars, 70% 2-step applied questions, 0 multi-statement.
+       * **Advanced**: Avg stem length 462 chars (5x longer!), 70% multi-statement Roman numeral questions, 30% complex doctrine/case law discriminators.
+     - `npm run build:frontend` (Vite) and `npm run build:server` (esbuild) passed with exit code 0.
+
+- [x] ⚡ Dual-Layer Future-Proof Cascade Deletion & PostgreSQL Triggers Across Banks, Practice Sets & Mock Tests (`src/lib/examService.ts`, `src/AdminPanel.tsx`, PostgreSQL Triggers):
+  1. **PostgreSQL Database-Level Cascade Triggers (100% Future-Proof Guarantee)**:
+     - Installed `trg_mock_tests_cascade_delete` on `"mockTests"`: automatically deletes all questions in `questions` matching `'mockTest__' || OLD.id` or `OLD.id` whenever any mock test row is deleted.
+     - Installed `trg_question_banks_cascade_delete` on `"questionBanks"`: automatically cascades question deletion across `OLD.id`, `'bank__' || OLD.id`, and canonical title variants (`title`, `trim(title)`, `clean_title`, `clean_title || ' - Practice Session'`) under `OLD."examId"`, while resetting surviving sibling counters to `0`.
+     - Installed `trg_exams_cascade_delete` on `"exams"`: cascades full deletion across questions, mock tests, question banks, flashcard decks, and exam syllabi.
+  2. **Application Layer Mock Test Deletion & 1-Click Clear Questions (`examService.ts`, `AdminPanel.tsx`)**:
+     - Overhauled `deleteMockTest(id)`: deletes all associated question candidate keys (`mockTest__${id}`, `${id}`, `mocktest__${id}`) and flushes all caches.
+     - Implemented `clearQuestionsForMockTest(id)`: purges questions without deleting the mock test configuration card.
+     - Extended 1-click `Eraser` action button in `AdminPanel.tsx` to Mock Tests (`['banks', 'practice', 'tests']`) in both table rows and drag-and-drop reorder cards.
+
+- [x] ⚡ Surgical Database Trash Cleanup, Cascade Question Deletion & Bank Question Counter Reset (`src/lib/examService.ts`, `src/AdminPanel.tsx`, `src/components/admin/AIQuestionStudio.tsx`):
+  1. **Purged Idle Trash & Redundant Rows from Supabase**:
+     - Identified that Supabase Storage contains 0 buckets and 0 files (PDFs/images link externally to CDN); database consumption was strictly PostgreSQL disk storage.
+     - Executed surgical cleanup via Supabase SQL: safely purged 714 true orphaned questions lingering from deleted legacy topics without touching any active bank/mock tests (`remaining_orphans = 0`).
+     - Deduplicated 116 redundant rows in `questionBanks` via window partition preserving newest populated entries (`remaining_duplicates = 0`).
+     - Checked soft-deleted entries (`is_archived = true`): strictly preserved records referenced in student purchases (`user_purchases`) to guarantee zero disruption to student access history.
+  2. **True Cascade Deletion Protocol (`examService.ts`)**:
+     - Overhauled `deleteQuestionBank(id)`: eliminated the blocking sibling bank check that was preventing question deletion whenever a bank shared a title with a practice test or duplicate stub.
+     - Questions matching any canonical topic variant (`rawTitle`, `rawTitle.trim()`, `cleanTitle`, `cleanTitle - Practice Session`, `id`, `bank__${id}`) are now systematically cascade-deleted from `questions`.
+     - Automatically resets `questionCount: 0` on any surviving sibling bank sharing the same title.
+     - Added `clearQuestionsForBank(id)` service function for 1-click question reset without deleting the bank record.
+     - Invalided cache keys (`all_question_banks`, `topic_counts`, `oep_admin_catalog_cache_v2`).
+  3. **Admin Panel UI & 1-Click Clear Questions (`AdminPanel.tsx`)**:
+     - Removed silent downgrade of `target_mode: 'both'` to `'practice'` on bank deletion; triggers true cascade delete.
+     - Added 1-click `Clear Questions` button (`Eraser` icon) in both table rows and reorder cards with confirmation prompt.
+  4. **AI Question Studio Zero-Count Detection (`AIQuestionStudio.tsx`)**:
+     - Fixed `getBankCount` to strictly respect `0` counts rather than falling back to stale legacy values.
+
 - [x] ⚡ LLM-Driven Cognitive Syllabus Comprehension & Natural Density Flashcard Sizing (`src/lib/serverAiGenerator.ts`, `scratch/test_llm_cognitive_density_e2e.ts`):
   1. **Replacement of Deterministic Regex Math with LLM Cognitive Comprehension**:
      - Removed rigid JavaScript regex comma/colon counters and quota divisions that were previously constraining Gemini to artificial card counts.
@@ -89,6 +244,21 @@
      - `npx tsc --noEmit`: 0 errors.
      - `npm run build`: Code 0.
 
+- [x] ⚡ Fleet-Wide Automation Audit, Cross-Engine Visual Hardening, Git Sync Crash Resolution & Live Multi-Platform Broadcast Verification (`automations/`, `.github/workflows/`):
+  1. **Cross-Engine UI & Text-Collision Hardening**:
+     - Hardened `template_alert.html` top-bar header to 3-column CSS Grid (`grid-template-columns: 1fr auto 1fr`), guaranteeing symmetric balance and zero overlap between the category pill, central logo, and recruitment board tag.
+     - Hardened `template_mcq.html` exam pill with `max-width: 480px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;`, preventing horizontal collision against the OdishaExamPrep brand badge on long exam titles.
+     - Hardened `ca_renderer.py` category badge with `max-width: 550px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;` to ensure long sub-categories never clip against borders.
+     - Hardened `breaking_engine.py` fallback notice extraction: removed hardcoded `"Refer to Official Notice"` / `"Check Official Portal"` boilerplate strings, deduplicated recruitment authority parenthetical strings, and integrated `is_valid_metric()`.
+     - Hardened `post_exam_to_youtube.py`: corrected official link extraction (`article_data.get("official_link")`), mapped `article_data.get("bullets")`, dynamically injected 20-category header emojis, and scrubbed metric boilerplate.
+  2. **GitHub Actions Workflow Git Sync Crash Fix (Commit `8e58248`)**:
+     - Diagnosed and eliminated git sync crash (`exit code 128: error: cannot pull with rebase: You have unstaged changes`) across all 7 automated workflows (`exam_update_cron.yml`, `daily_mcq.yml`, `blog_cron.yml`, `daily_ca.yml`, `daily_ca_website.yml`, `engagement_engine.yml`, `notice_scraper.yml`).
+     - Added `seen_notices.json` to `git add` and added `--autostash` to `git pull --rebase origin main` so concurrent history mutations never crash the runner.
+  3. **Fleet-Wide Test Suite & Remote Verification**:
+     - Ran `scratch/test_fleet_wide_audit.py`: 100% pass across YouTube caption generation and Breaking Engine card rendering.
+     - Triggered & verified live GitHub Actions run for **Daily MCQ Engine** (`36132224990`): Completed with **`✓ SUCCESS`** in 1m48s. Verified Playwright card generation, Telegram native quiz poll dispatch, and Telegram admin telemetry.
+     - Triggered & verified live GitHub Actions run for **Exam Update Engine (Engine 1)** (`36131390159`): Completed with **`✓ SUCCESS`** in 13m52s. Scraped across all state and central portals, tracked 42 notice entries, executed clean rebase push (`8e58248..9b06a40`), and sent admin status notifications.
+
 - [x] ⚡ Senior Automation QA Audit & Overhaul — Exam Notification Engine & Visual Card Rendering Pipeline (`automations/exam_card_renderer.py`, `automations/exam_update_engine.py`, `automations/breaking_engine.py`, `automations/shared/telegram.py`):
   1. **Unification of Complete 20-Category Taxonomy**:
      - Upgraded `exam_card_renderer.py` and `breaking_engine.py` to share the exact 20-category classification config with dedicated themes, badge text, gradients, and bullet icons.
@@ -105,6 +275,24 @@
   5. **Remote Runner Deployment & End-to-End Verification**:
      - Committed and pushed commit `731dd97` to `https://github.com/Pixduct/odisha-mcq-engine.git` (`origin/main`), ensuring remote GitHub Actions cron runners and Render webhook services execute the updated pipeline.
      - Executed verification suite (`scratch/test_exam_notification_fixes.py` & `scratch/test_telegram_captions.py`): Verified 100% pass across SSB Odisha Librarian (Correction Window) and ISRO JPA (Objection Window) scenarios with zero collision and zero boilerplate leaks.
+
+- [x] ⚡ Senior Automation QA Audit & Fleet-Wide Hardening — YouTube Publisher, Breaking Engine, MCQ Engine & CA Renderer (`post_exam_to_youtube.py`, `breaking_engine.py`, `templates/template_alert.html`, `templates/template_mcq.html`, `ca_renderer.py`):
+  1. **YouTube Community Publisher Overhaul (`post_exam_to_youtube.py`)**:
+     - Resolved official link field name mismatch: Checked `article_data.get("official_link")` before fallbacks, eliminating the bug where non-OSSC/central exam updates erroneously linked to `ossc.gov.in`.
+     - Resolved highlights extraction: Mapped `article_data.get("bullets")` so exam takeaways and key pointers are properly displayed in YouTube posts.
+     - Dynamic 20-category header: Replaced static `"🚨 OFFICIAL EXAM NOTIFICATION RELEASED!"` with dynamic scenario badge (e.g. `🚨 ✏️ CORRECTION WINDOW OPEN!`, `🚨 📝 OBJECTION WINDOW OPEN!`).
+     - Added `is_valid_metric()` sanitization for `vacancies`, `dates`, and `exam_schedule`.
+  2. **Breaking Engine Standalone Caption & Fallback Hardening (`breaking_engine.py`)**:
+     - Upgraded `build_standalone_caption` with `is_valid_metric()` to filter boilerplate phrases.
+     - Deduplicated recruitment authority display (prevented repetitive strings like `OSSC (OSSC)`).
+     - Removed hardcoded `"Refer to Official Notice"` and `"Check Official Portal"` from `fallback_parse_notice`.
+  3. **Zero-Overlap Template Alignments (`template_alert.html`, `template_mcq.html`, `ca_renderer.py`)**:
+     - Upgraded `template_alert.html` `.top-bar` to `grid-template-columns: 1fr auto 1fr;` to match `exam_card_renderer.py`.
+     - Clamped `.exam-badge` in `template_mcq.html` with `max-width: 480px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;` preventing header collisions when target exams are long.
+     - Clamped `.category-badge` in `ca_renderer.py` with `max-width: 550px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;`.
+  4. **Verification & Remote Push**:
+     - Verified via `scratch/test_fleet_wide_audit.py` (100% pass across YouTube formatting and Breaking Engine rendering).
+     - Committed and pushed commit `217d9a2` to `origin/main` (`https://github.com/Pixduct/odisha-mcq-engine.git`).
 
   1. **Mock Test Subcategory Directive Coverage**:
      - All 4 subcategories (`full-length`, `sectional`, `pyq`, `daily`) are fully wired into `generateExamQuestions` and routed through the whole-syllabus detection pipeline.

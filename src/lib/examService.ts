@@ -807,6 +807,8 @@ export const examService = {
   async deleteMockTest(id: string) {
     cacheService.clear('all_mock_tests_lite');
     cacheService.clear('topic_counts');
+    try { sessionStorage.removeItem('oep_admin_catalog_cache_v2'); } catch(e) {}
+
     // Check if mock test is purchased
     const { data: purchaseCount } = await supabase
       .from('user_purchases')
@@ -814,16 +816,35 @@ export const examService = {
       .eq('product_id', id);
 
     if (purchaseCount && purchaseCount.length > 0) {
-      // Soft delete
+      // Soft delete to protect student purchase history
       console.log(`Mock test ${id} has active user purchases. Archiving to protect access.`);
       await callAdminDbProxy('mockTests', 'update', { is_archived: true }, id);
     } else {
-      // Hard delete: delete associated questions first
-      await callAdminDbProxy('questions', 'delete', undefined, undefined, { topic: { op: 'eq', val: `mockTest__${id}` } });
+      // Hard delete: delete associated questions first across all topic key variations
+      const candidateTopics = [`mockTest__${id}`, id, `mocktest__${id}`];
+      await callAdminDbProxy('questions', 'delete', undefined, undefined, { 
+        topic: { op: 'in', val: candidateTopics } 
+      });
       await callAdminDbProxy('mockTests', 'delete', undefined, id);
     }
     cacheService.clear('all_mock_tests_lite');
     cacheService.clear('topic_counts');
+    try { sessionStorage.removeItem('oep_admin_catalog_cache_v2'); } catch(e) {}
+  },
+
+  async clearQuestionsForMockTest(id: string) {
+    cacheService.clear('all_mock_tests_lite');
+    cacheService.clear('topic_counts');
+    try { sessionStorage.removeItem('oep_admin_catalog_cache_v2'); } catch(e) {}
+
+    const candidateTopics = [`mockTest__${id}`, id, `mocktest__${id}`];
+    await callAdminDbProxy('questions', 'delete', undefined, undefined, { 
+      topic: { op: 'in', val: candidateTopics } 
+    });
+
+    cacheService.clear('all_mock_tests_lite');
+    cacheService.clear('topic_counts');
+    try { sessionStorage.removeItem('oep_admin_catalog_cache_v2'); } catch(e) {}
   },
 
   async updateMockTest(id: string, updates: Partial<MockTest>) {
@@ -1269,6 +1290,8 @@ export const examService = {
   async deleteQuestionBank(id: string) {
     cacheService.clear('all_question_banks');
     cacheService.clear('topic_counts');
+    try { sessionStorage.removeItem('oep_admin_catalog_cache_v2'); } catch(e) {}
+
     // Check if question bank is purchased
     const { data: purchaseCount } = await supabase
       .from('user_purchases')
@@ -1281,14 +1304,35 @@ export const examService = {
       await callAdminDbProxy('questionBanks', 'update', { is_archived: true }, id);
     } else {
       try {
-        // Fetch bank to get its title and target_mode
+        // Fetch bank to get its title and examId
         const { data: bank } = await supabase
           .from('questionBanks')
           .select('title, examId, target_mode')
           .eq('id', id)
           .single();
+
         if (bank && bank.title) {
-          // Check if any other Question Bank or Practice Set shares this topic
+          const rawTitle = bank.title;
+          const cleanTitle = rawTitle.replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
+          const candidateTopics = Array.from(new Set([
+            rawTitle,
+            rawTitle.trim(),
+            cleanTitle,
+            `${cleanTitle} - Practice Session`,
+            id,
+            `bank__${id}`
+          ])).filter(Boolean);
+
+          // Unconditionally delete questions associated with this bank/topic for this exam
+          await callAdminDbProxy('questions', 'delete', undefined, undefined, {
+            topic: { op: 'in', val: candidateTopics },
+            examId: { op: 'eq', val: bank.examId }
+          });
+          await callAdminDbProxy('questions', 'delete', undefined, undefined, {
+            topic: { op: 'in', val: [id, `bank__${id}`] }
+          });
+
+          // If any sibling banks exist (e.g. practice mode counterpart or duplicates), reset their questionCount to 0
           const { data: siblingBanks } = await supabase
             .from('questionBanks')
             .select('id')
@@ -1296,21 +1340,78 @@ export const examService = {
             .eq('examId', bank.examId)
             .neq('id', id);
 
-          // ONLY delete questions from questions table if NO other bank or practice test shares this topic
-          if (!siblingBanks || siblingBanks.length === 0) {
-            await callAdminDbProxy('questions', 'delete', undefined, undefined, {
-              topic: { op: 'eq', val: bank.title },
-              examId: { op: 'eq', val: bank.examId }
-            });
+          if (siblingBanks && siblingBanks.length > 0) {
+            for (const sib of siblingBanks) {
+              await callAdminDbProxy('questionBanks', 'update', { questionCount: 0 }, sib.id);
+            }
           }
         }
       } catch (err) {
-        console.error("Failed to safely handle questions associated with deleted bank:", err);
+        console.error("Failed to safely cascade delete questions for bank:", err);
       }
       await callAdminDbProxy('questionBanks', 'delete', undefined, id);
     }
     cacheService.clear('all_question_banks');
     cacheService.clear('topic_counts');
+    try { sessionStorage.removeItem('oep_admin_catalog_cache_v2'); } catch(e) {}
+  },
+
+  async clearQuestionsForBank(id: string) {
+    cacheService.clear('all_question_banks');
+    cacheService.clear('topic_counts');
+    try { sessionStorage.removeItem('oep_admin_catalog_cache_v2'); } catch(e) {}
+
+    try {
+      const { data: bank } = await supabase
+        .from('questionBanks')
+        .select('title, examId')
+        .eq('id', id)
+        .single();
+
+      if (bank && bank.title) {
+        const rawTitle = bank.title;
+        const cleanTitle = rawTitle.replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
+        const candidateTopics = Array.from(new Set([
+          rawTitle,
+          rawTitle.trim(),
+          cleanTitle,
+          `${cleanTitle} - Practice Session`,
+          id,
+          `bank__${id}`
+        ])).filter(Boolean);
+
+        // Delete all questions belonging to this topic/bank
+        await callAdminDbProxy('questions', 'delete', undefined, undefined, {
+          topic: { op: 'in', val: candidateTopics },
+          examId: { op: 'eq', val: bank.examId }
+        });
+        await callAdminDbProxy('questions', 'delete', undefined, undefined, {
+          topic: { op: 'in', val: [id, `bank__${id}`] }
+        });
+
+        // Reset question count on this bank and any siblings sharing the title
+        const { data: matchingBanks } = await supabase
+          .from('questionBanks')
+          .select('id')
+          .eq('title', bank.title)
+          .eq('examId', bank.examId);
+
+        if (matchingBanks && matchingBanks.length > 0) {
+          for (const mb of matchingBanks) {
+            await callAdminDbProxy('questionBanks', 'update', { questionCount: 0 }, mb.id);
+          }
+        } else {
+          await callAdminDbProxy('questionBanks', 'update', { questionCount: 0 }, id);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to clear questions for bank:", err);
+      throw err;
+    }
+
+    cacheService.clear('all_question_banks');
+    cacheService.clear('topic_counts');
+    try { sessionStorage.removeItem('oep_admin_catalog_cache_v2'); } catch(e) {}
   },
 
   async updateQuestionBank(id: string, updates: Partial<QuestionBank>) {

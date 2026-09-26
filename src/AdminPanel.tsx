@@ -40,7 +40,9 @@ import {
   Bot,
   Wand2,
   Lock,
-  Unlock
+  Unlock,
+  Eraser,
+  FolderSync
 } from 'lucide-react';
 import { Reorder } from 'framer-motion';
 import { examService, clearCatalogCache, Question, TestSeries, MockTest, Exam, EXAM_STAGES } from './lib/examService';
@@ -868,7 +870,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     if (tab === 'banks' || tab === 'practice') defExam = selectedExamIdForBanks || '';
     else if (tab === 'tests') defExam = selectedExamIdForTests || '';
 
-    let defCat = tab === 'tests' ? (selectedCategoryForTests || 'full-length') : ((bankFilter !== 'all' ? bankFilter : 'topic-wise') || 'topic-wise');
+    let defCat = tab === 'tests' ? (selectedCategoryForTests || 'full-length') : 'topic-wise';
     let defMode: 'bank' | 'practice' | 'both' = tab === 'practice' ? 'practice' : 'bank';
 
     setBulkGlobalExamId(defExam);
@@ -1934,20 +1936,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     else if (activeTab === 'series') setSeries(prev => prev.filter(s => s.id !== id));
     else if (activeTab === 'tests') setMockTests(prev => prev.filter(t => t.id !== id));
     else if (activeTab === 'exams' || activeTab === 'blogs') setExams(prev => prev.filter(ex => ex.id !== id));
-    else if (activeTab === 'banks') {
-      const target = banks.find(b => b.id === id);
-      if (target && target.target_mode === 'both') {
-        setBanks(prev => prev.map(b => b.id === id ? { ...b, target_mode: 'practice' } : b));
-      } else {
-        setBanks(prev => prev.filter(b => b.id !== id));
-      }
-    } else if (activeTab === 'practice') {
-      const target = banks.find(b => b.id === id);
-      if (target && target.target_mode === 'both') {
-        setBanks(prev => prev.map(b => b.id === id ? { ...b, target_mode: 'bank' } : b));
-      } else {
-        setBanks(prev => prev.filter(b => b.id !== id));
-      }
+    else if (activeTab === 'banks' || activeTab === 'practice') {
+      setBanks(prev => prev.filter(b => b.id !== id));
     }
 
     try {
@@ -1955,20 +1945,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       else if (activeTab === 'series') await examService.deleteTestSeries(id);
       else if (activeTab === 'tests') await examService.deleteMockTest(id);
       else if (activeTab === 'exams' || activeTab === 'blogs') await examService.deleteExam(id);
-      else if (activeTab === 'banks') {
-        const target = banks.find(b => b.id === id);
-        if (target && target.target_mode === 'both') {
-          await examService.updateQuestionBank(id, { target_mode: 'practice' });
-        } else {
-          await examService.deleteQuestionBank(id);
-        }
-      } else if (activeTab === 'practice') {
-        const target = banks.find(b => b.id === id);
-        if (target && target.target_mode === 'both') {
-          await examService.updateQuestionBank(id, { target_mode: 'bank' });
-        } else {
-          await examService.deleteQuestionBank(id);
-        }
+      else if (activeTab === 'banks' || activeTab === 'practice') {
+        await examService.deleteQuestionBank(id);
       }
       
       // Fetch data in the background to ensure consistency, without blocking the UI
@@ -1978,6 +1956,32 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       console.error("Delete Error:", error);
       // If error occurs, re-fetch to restore the item in the UI
       fetchData();
+    }
+  };
+
+  const handleClearQuestions = async (item: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const qCount = item._questionCount || item.practiceQuestionCount || item.questionCount || 0;
+    const itemLabel = activeTab === 'tests' ? 'mock test' : activeTab === 'practice' ? 'practice set' : 'question bank';
+    const confirmMsg = `Are you sure you want to clear all ${qCount} questions from "${item.title}"?\n\nThe ${itemLabel} card will remain intact, but all its questions will be permanently removed from the database and its counter reset to 0.`;
+    if (!confirm(confirmMsg)) return;
+
+    try {
+      setLoading(true);
+      if (activeTab === 'tests') {
+        await examService.clearQuestionsForMockTest(item.id);
+        setMockTests(prev => prev.map(t => t.id === item.id ? { ...t, _questionCount: 0 } : t));
+      } else {
+        await examService.clearQuestionsForBank(item.id);
+        setBanks(prev => prev.map(b => (b.id === item.id || b.title === item.title) ? { ...b, questionCount: 0, practiceQuestionCount: 0 } : b));
+      }
+      alert(`✅ Successfully cleared questions for "${item.title}". Count reset to 0.`);
+      await fetchData();
+    } catch (err: any) {
+      console.error("Clear questions error:", err);
+      alert('Failed to clear questions: ' + (err.message || err));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -2721,6 +2725,81 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     } catch (err: any) {
       console.error('Batch status update failed:', err);
       alert('Error updating items: ' + (err.message || err));
+    } finally {
+      setIsApplyingBatchMonetize(false);
+      setLoading(false);
+      fetchData();
+    }
+  };
+
+  const handleApplyBatchCategory = async (targetCategory: string) => {
+    if (selectedItemIds.size === 0) return;
+    if (!['banks', 'practice', 'tests'].includes(activeTab)) return;
+
+    const selectedItems = items.filter(it => selectedItemIds.has(it.id));
+    if (selectedItems.length === 0) return;
+
+    const total = selectedItems.length;
+    const catLabels: Record<string, string> = {
+      'topic-wise': 'Topic-Wise / Chapter-Wise',
+      'exam-focused': 'Exam-Focused High Yield',
+      'revision-sets': 'Revision Sets & Quizzes',
+      'pyq-collections': 'PYQ Collections & Archives',
+      'full-length': 'Full-Length Mock Tests',
+      'sectional': 'Sectional Tests',
+      'pyq': 'Official PYQ Tests',
+      'daily': 'Daily / Weekly Tests',
+    };
+    const targetLabel = catLabels[targetCategory] || targetCategory;
+
+    if (!confirm(`Reclassify all ${total} selected items to category "${targetLabel}"?`)) return;
+
+    setIsApplyingBatchMonetize(true);
+    setLoading(true);
+
+    try {
+      const updates: Promise<any>[] = [];
+
+      selectedItems.forEach(item => {
+        if (activeTab === 'banks' || activeTab === 'practice') {
+          updates.push(examService.updateQuestionBank(item.id, { type: targetCategory } as any));
+        } else if (activeTab === 'tests') {
+          let mockConfig: any = { examId: item.examId, category: targetCategory };
+          if (item.seriesId) {
+            try {
+              if (typeof item.seriesId === 'string' && item.seriesId.startsWith('{')) {
+                mockConfig = { ...JSON.parse(item.seriesId), category: targetCategory };
+              }
+            } catch (e) {}
+          }
+          const updatedSeriesId = JSON.stringify(mockConfig);
+          updates.push(examService.updateMockTest(item.id, { seriesId: updatedSeriesId, category: targetCategory } as any));
+        }
+      });
+
+      await Promise.all(updates);
+
+      // Optimistically update local state
+      if (activeTab === 'banks' || activeTab === 'practice') {
+        setBanks(prev => {
+          const next = prev.map(b => selectedItemIds.has(b.id) ? { ...b, type: targetCategory } : b);
+          saveAdminCatalogCache({ bks: next });
+          return next;
+        });
+      } else if (activeTab === 'tests') {
+        setMockTests(prev => {
+          const next = prev.map(t => selectedItemIds.has(t.id) ? { ...t, category: targetCategory } : t);
+          saveAdminCatalogCache({ ts: next });
+          return next;
+        });
+      }
+
+      setSelectedItemIds(new Set());
+      try { clearCatalogCache(); } catch(e) {}
+      alert(`✅ Successfully reclassified ${total} items to "${targetLabel}".`);
+    } catch (err: any) {
+      console.error('Batch category reclassification failed:', err);
+      alert('Error updating categories: ' + (err.message || err));
     } finally {
       setIsApplyingBatchMonetize(false);
       setLoading(false);
@@ -5223,12 +5302,23 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
             <button 
               onClick={(e) => handleEditClick(item, e)}
               className="p-2.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all"
+              title="Edit details"
             >
               <Edit2 className="w-5 h-5" />
             </button>
+            {['banks', 'practice', 'tests'].includes(activeTab) && (
+              <button 
+                onClick={(e) => handleClearQuestions(item, e)}
+                className="p-2.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all"
+                title="Clear Questions (Reset to 0 Qs)"
+              >
+                <Eraser className="w-5 h-5" />
+              </button>
+            )}
             <button 
               onClick={(e) => handleDelete(item.id, e)}
               className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+              title="Delete Permanently"
             >
               <Trash2 className="w-5 h-5" />
             </button>
@@ -5429,16 +5519,13 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                             
                             try {
                                 const promises = items.map((item: any) => {
-                                  if (activeTab === 'practice') {
-                                    if (item.target_mode === 'both') return examService.updateQuestionBank(item.id, { target_mode: 'bank' });
-                                    return examService.deleteQuestionBank(item.id);
-                                  } else {
-                                    if (item.target_mode === 'both') return examService.updateQuestionBank(item.id, { target_mode: 'practice' });
+                                  if (activeTab === 'practice' || activeTab === 'banks') {
                                     return examService.deleteQuestionBank(item.id);
                                   }
+                                  return Promise.resolve();
                                 });
                                 await Promise.all(promises);
-                                alert(`Successfully processed ${items.length} ${itemLabel}.`);
+                                alert(`Successfully deleted ${items.length} ${itemLabel}.`);
                                 fetchData();
                             } catch(e: any) {
                                 alert(`Failed to delete some or all items: ${e.message}`);
@@ -5484,18 +5571,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                     else if (activeTab === 'series') setSeries(prev => prev.filter(s => !selectedItemIds.has(s.id)));
                     else if (activeTab === 'tests') setMockTests(prev => prev.filter(t => !selectedItemIds.has(t.id)));
                     else if (activeTab === 'exams' || activeTab === 'blogs') setExams(prev => prev.filter(ex => !selectedItemIds.has(ex.id)));
-                    else if (activeTab === 'banks') {
-                      setBanks(prev => prev.map(b => {
-                        if (!selectedItemIds.has(b.id)) return b;
-                        if (b.target_mode === 'both') return { ...b, target_mode: 'practice' };
-                        return null as any;
-                      }).filter(Boolean));
-                    } else if (activeTab === 'practice') {
-                      setBanks(prev => prev.map(b => {
-                        if (!selectedItemIds.has(b.id)) return b;
-                        if (b.target_mode === 'both') return { ...b, target_mode: 'bank' };
-                        return null as any;
-                      }).filter(Boolean));
+                    else if (activeTab === 'banks' || activeTab === 'practice') {
+                      setBanks(prev => prev.filter(b => !selectedItemIds.has(b.id)));
                     }
                     
                     setSelectedItemIds(new Set());
@@ -5506,18 +5583,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                         if (activeTab === 'series') return examService.deleteTestSeries(id);
                         if (activeTab === 'tests') return examService.deleteMockTest(id);
                         if (activeTab === 'exams' || activeTab === 'blogs') return examService.deleteExam(id);
-                        if (activeTab === 'banks') {
-                          const target = banks.find(b => b.id === id);
-                          if (target && target.target_mode === 'both') {
-                            return examService.updateQuestionBank(id, { target_mode: 'practice' });
-                          }
-                          return examService.deleteQuestionBank(id);
-                        }
-                        if (activeTab === 'practice') {
-                          const target = banks.find(b => b.id === id);
-                          if (target && target.target_mode === 'both') {
-                            return examService.updateQuestionBank(id, { target_mode: 'bank' });
-                          }
+                        if (activeTab === 'banks' || activeTab === 'practice') {
                           return examService.deleteQuestionBank(id);
                         }
                         return Promise.resolve();
@@ -9094,6 +9160,15 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                    <GripVertical className="w-5 h-5" />
                                  </div>
                                  <button onClick={(e) => handleEditClick(item, e)} className="p-2.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all"><Edit2 className="w-5 h-5" /></button>
+                                 {['banks', 'practice', 'tests'].includes(activeTab) && (
+                                   <button 
+                                     onClick={(e) => handleClearQuestions(item, e)} 
+                                     className="p-2.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all"
+                                     title="Clear Questions (Reset to 0 Qs)"
+                                   >
+                                     <Eraser className="w-5 h-5" />
+                                   </button>
+                                 )}
                                  <button onClick={(e) => handleDelete(item.id, e)} className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"><Trash2 className="w-5 h-5" /></button>
                               </div>
                            </div>
@@ -10397,6 +10472,42 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                 <Unlock className="w-3.5 h-3.5" />
                 <span>Make Free Demo</span>
               </button>
+
+              {/* Category Quick Move dropdown */}
+              <div className="relative inline-flex items-center shrink-0">
+                <select
+                  disabled={isApplyingBatchMonetize}
+                  defaultValue=""
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      handleApplyBatchCategory(e.target.value);
+                      e.target.value = "";
+                    }
+                  }}
+                  className="px-3 py-2 bg-indigo-600/90 hover:bg-indigo-500 text-white rounded-xl text-xs font-black transition-all shadow-md flex items-center gap-1.5 active:scale-95 cursor-pointer disabled:opacity-50 appearance-none pr-7 border border-indigo-400/40"
+                >
+                  <option value="" disabled className="bg-slate-900 text-slate-300">📁 Move Category...</option>
+                  {(activeTab === 'tests'
+                    ? [
+                        { value: 'full-length', label: '🏆 Full-Length Mock' },
+                        { value: 'sectional', label: '📑 Sectional Test' },
+                        { value: 'pyq', label: '⏳ Official PYQ' },
+                        { value: 'daily', label: '📈 Daily / Weekly' },
+                      ]
+                    : [
+                        { value: 'topic-wise', label: '📚 Topic-Wise / Chapter-Wise' },
+                        { value: 'exam-focused', label: '💎 Exam-Focused High Yield' },
+                        { value: 'revision-sets', label: '⚡ Revision Sets & Quizzes' },
+                        { value: 'pyq-collections', label: '📜 PYQ Collections & Archives' },
+                      ]
+                  ).map(opt => (
+                    <option key={opt.value} value={opt.value} className="bg-slate-900 text-white font-bold">
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-3.5 h-3.5 text-white/80 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
 
               <button
                 type="button"

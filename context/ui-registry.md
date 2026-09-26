@@ -18,12 +18,17 @@ Before creating any new component, developers and AI agents MUST consult this re
 ## Component Index
 
 | Component Name | Category | File Path | Variants | Used By | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- |
+| **`ReferencePYQExamCalibrationSuite`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx) | Dual-Mode Part 2 Suite (Reference PYQs vs Custom Directives). Ingests 3–15 authentic past exam questions as few-shot benchmarks, automatically blacklists PYQ stems for 0% duplicate collision, extracts exam board DNA (phrasing, calculation depth, distractor traps), graceful fallback with 0 PYQs, and backward-compatible single-column persistence | AIQuestionStudio.tsx (Part 2) | Active |
+| **`AutonomousCurriculumAutoBatchSuite`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx) | 2-Stage Pedagogical Curriculum Planner & Auto-Batch Decomposition suite. Computes syllabus density capacity, slices questions into focused micro-batches (3–5 Qs each) with dedicated thematic angles, live telemetry reasoning badge, and `🤖 Auto` toggle | AIQuestionStudio.tsx (Step 4 & Multi-Bank Queue) | Active |
+| **`CognitiveDifficultyLevelSelector`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L6912-L6975) | 3-Card Tri-Level Difficulty Selector (Simple / Foundational, Moderate / Standard, Advanced / Rigorous), ring indicators, Bloom's cognitive depth mapping | AIQuestionStudio.tsx (Stage 2) | Active |
+| **`QuestionBankClearQuestionsAction`** | Admin / Management | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx) | 1-Click Question Purge Action (`Eraser` icon) for Question Banks & Practice Sets. Resets `questionCount: 0`, purges all associated questions from Supabase across all topic key variants, invalidates caches | AdminPanel.tsx (Bank & Practice Rows, Reorder Items) | Active |
 | **`AdminAIFailoverTelegramAlert`** | Notification / Telemetry | [`automations/shared/telegram.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/telegram.py) | High-Priority HTML Telegram Failover Alert, Error Code Isolation, Primary Gemini Exhaustion Trace, Engaged Fallback Badge | automations/ (All 6 Engines) | Active |
 | **`AdminAutomationExecutionReport`** | Notification / Telemetry | [`automations/shared/telegram.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/telegram.py) | Full Engine Status DM, Primary/Fallback Model Tag, Public Broadcast Verification, Runner Queue Delay Telemetry | automations/ (All 6 Engines) | Active |
 | **`DailyCurrentAffairsVisualSlide`** | Graphic / Social Card | [`automations/ca_renderer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/ca_renderer.py) | Dynamic 9-Palette Category Pills, 7 Day-of-Week Layout Variants, Exam Takeaway Card & Golden Highlight Anchors | automations/ca_formatter.py, automations/ca_publisher.py | Active |
-| **`DailyMcqGraphicCardAndPollEngine`** | Graphic / Quiz Poll | [`automations/mcq_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/mcq_engine.py) & [`automations/templates/template_mcq.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/templates/template_mcq.html) | 1080x1080 MCQ Graphic, Native Quiz Poll with 100-char option clamping, Question Stem Auto-Healing & Visual Card Fallback | automations/mcq_engine.py | Active |
-| **`ExamNotificationVisualCardAndTopBar`** | Graphic / Social Card | [`automations/exam_card_renderer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/exam_card_renderer.py) & [`automations/templates/template_alert.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/templates/template_alert.html) | 1080x1080 Visual Card, 3-Column CSS Grid Top-Bar, Board Acronym Normalization, 22-char Truncation, Adaptive Vertical Space Distribution, Glass Highlight Cards with Accent Pill Chips & Scaled Typography | automations/exam_update_engine.py, automations/breaking_engine.py | Active |
+| **`YouTubeCommunityCarouselPublisher`** | Media / Social Automation | [`automations/post_ca_to_youtube.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/post_ca_to_youtube.py) & [`automations/post_exam_to_youtube.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/post_exam_to_youtube.py) | 10-Slide Image Carousel Dropzone Publisher with DOM avatar authentication verification, Polymer JS evaluate clicks, header search box file input exclusion, and 1-click desktop session refresher | automations/ca_publisher.py, automations/breaking_engine.py | Active |
+| **`FleetCognitiveAIIntegrityFramework`** | AI / Automation / Integrity | [`automations/shared/ai_parser.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/ai_parser.py) | Fleet-wide cognitive reasoning standard across all 6 running AI automations (`breaking_engine.py`, `ca_website_publisher.py`, `mcq_engine.py`, `engagement_engine.py`, `seo_blog_engine.py`, `exam_update_engine.py`). Enforces strict Zero-Hallucination Grounding, 35,000-char ingestion context, 8,192 token output headroom, Pedagogical Distractor Engineering, ORSP Rules 2017 pay matrix alignment, and unrendered template token sanitization | All Automations Fleet | Active |
+| **`DailyMcqGraphicCardAndPollEngine`** | Graphic / Quiz Poll | [`automations/mcq_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/mcq_engine.py) & [`automations/templates/template_mcq.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/templates/template_mcq.html) | 1080x1080 MCQ Graphic, Native Quiz Poll with 100-char option clamping, Question Stem Auto-Healing, Ellipsis badge clamping (`max-width: 480px`), Visual Card Fallback, Autonomous Syllabus Question Fallback with Jaccard Anti-Leakage (>0.55 similarity check against `published_history.json`) | automations/mcq_engine.py | Active |
+| **`ExamNotificationVisualCardAndTopBar`** | Graphic / Social Card | [`automations/exam_card_renderer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/exam_card_renderer.py) & [`automations/templates/template_alert.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/templates/template_alert.html) | 1080x1080 Visual Card, 3-Column CSS Grid Top-Bar (`grid-template-columns: 1fr auto 1fr`), Board Acronym Normalization, 22-char Truncation, Adaptive Vertical Space Distribution, Glass Highlight Cards with Accent Pill Chips & Scaled Typography | automations/exam_update_engine.py, automations/breaking_engine.py | Active |
 | **`ExamDetailFlashcardDeckCard`** | Study / Flashcards | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L11882-L11930) | Responsive 3-Column Deck Card Grid, Subject Tag, Duration Pill, Async Card Fetcher & Modal Study Trigger | App.tsx (Exam Detail Step 3) | Active |
 | **`ExamDetailFlashcardHeroBanner`** | Study / Hero Banner | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx#L11838-L11880) | Ambient Watermark Gradient Banner, 3-Feature Chip Grid, 1-Click Flashcards Hub Router, Zero-Deck Empty State | App.tsx (Exam Detail Step 3) | Active |
 | **`ExamStageSyllabusCard`** | Study / Stage Syllabus | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) | Reactive Stage Syllabus Viewer, Auto-syncs with active exam stage, MathTextRenderer markdown parser, Stage Scoped Badge, Expand/Collapse Accordion | App.tsx (Exam Details) | Active |
@@ -4205,12 +4210,12 @@ Last updated: August 29, 2026
 ### `DailyMcqGraphicCardAndPollEngine`
 
 File: [`automations/mcq_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/mcq_engine.py), [`automations/templates/template_mcq.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/templates/template_mcq.html)
-Last updated: September 24, 2026
+Last updated: September 25, 2026
 
 | Property | Class / Token |
 | :--- | :--- |
 | **Card Canvas** | `1080px x 1080px` High-Density Square Canvas with `#0F172A` Deep Slate base, radial indigo/blue ambient glow spheres |
-| **Header Badge** | Brand emblem (`linear-gradient(135deg, #6366F1 0%, #3B82F6 100%)`) + Target Exam pill (`rgba(99, 102, 241, 0.15)`, `#818CF8`) |
+| **Header Badge** | Brand emblem (`linear-gradient(135deg, #6366F1 0%, #3B82F6 100%)`) + Target Exam pill (`rgba(99, 102, 241, 0.15)`, `#818CF8`, `border: 1px solid rgba(99, 102, 241, 0.3)`) with strict horizontal boundary clamping (`max-width: 480px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;`) |
 | **Question Shell** | `rgba(30, 41, 59, 0.75)` with `backdrop-filter: blur(16px)`, `border: 1px solid rgba(255, 255, 255, 0.12)`, `border-radius: 24px`, `font-size: 34px` bold |
 | **Option Cards** | `rgba(30, 41, 59, 0.5)` with `border-radius: 18px`, `option-letter` circular pill (`rgba(255, 255, 255, 0.06)`), `font-size: 24px` |
 | **Footer Strip** | Official URL banner (`https://www.odishaexamprep.in/`), Live Test & PDF badges |
@@ -4221,6 +4226,7 @@ Last updated: September 24, 2026
 | **Conditional Sheet Status** | Updates Google Sheet row to `'Published'` only if Telegram or YouTube success is confirmed; marks `'Failed - Retry'` otherwise and exits with `sys.exit(1)` |
 
 **Pattern notes:**
+- **Zero-Overlap Pill Boundary**: The target exam pill is clamped to `max-width: 480px` with ellipsis overflow, preventing long competitive examination titles from overlapping with or crushing the brand emblem in 1080x1080 graphic renders.
 - **Zero-Drop Guarantee**: The visual card fallback ensures questions are always delivered to the public channel even if Telegram API poll validation rejects a rare format.
 - **Queue Integrity**: No question is ever consumed as `'Published'` unless it was physically broadcast to students.
 
@@ -5173,14 +5179,14 @@ Last updated: September 24, 2026
 
 ### `DailyCurrentAffairsVisualSlide` (1080x1080 High-Impact Graphic Slide Engine)
 
-File: [`automations/ca_renderer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/ca_renderer.py)
-Last updated: September 24, 2026
+File: [`automations/ca_renderer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/ca_renderer.py), [`automations/ca_formatter.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/ca_formatter.py)
+Last updated: September 26, 2026
 
 | Property | Class / Token |
 | :--- | :--- |
 | **Canvas Background** | `#0B0F19` to `#040814` adaptive deep canvas with 7-day layout variants (dot matrix, line grid, ambient halo glow, offset frame, ribbon, tech blueprint, executive gold rim) |
 | **Main Card Container** | Glassmorphic shell (`rgba(17, 24, 39, 0.85)` / `#1E293B`), `backdrop-filter: blur(24px)`, `border: 1.5px solid {border_color}`, `border-radius: 20px-32px`, `padding: 48px`, `box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 40px {glow_color}` |
-| **Category Pill Badge** | `padding: 12px 28px; border-radius: 30px; font-weight: 800; font-size: 19px; letter-spacing: 1px; text-transform: uppercase; background: {badge_bg}; color: #FFFFFF; box-shadow: 0 4px 20px {glow_color};` |
+| **Category Pill Badge** | `padding: 12px 28px; border-radius: 30px; font-weight: 800; font-size: 19px; letter-spacing: 1px; text-transform: uppercase; background: {badge_bg}; color: #FFFFFF; box-shadow: 0 4px 20px {glow_color}; max-width: 550px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;` |
 | **Headline Typography** | `font-family: 'Plus Jakarta Sans', sans-serif; font-size: 44px; font-weight: 800; line-height: 1.25; color: #FFFFFF; margin-bottom: 32px; letter-spacing: -0.5px;` |
 | **Highlight Bullets** | `font-size: 24px; line-height: 1.52; color: #E2E8F0; font-weight: 500; gap: 20px;` with custom dot `►` (`#FFD166`, `15px`) and bold anchor keypoints `<b>` in `#FFD166` |
 | **Exam Takeaway Box** | `background: rgba(255, 255, 255, 0.05); border-left: 5px solid {primary_color}; border-radius: 14px; padding: 16px 22px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); backdrop-filter: blur(10px); margin-top: 26px;` |
@@ -5189,11 +5195,37 @@ Last updated: September 24, 2026
 | **Footer Brand Stamp** | `border-top: 1px solid rgba(255, 255, 255, 0.12); padding-top: 24px;` with Indigo-Cyan gradient brand icon (`36x36px`, `rounded-10px`), domain `odishaexamprep.in` (`font-size: 20px; font-weight: 700; color: #F8FAFC`), and verified tag (`font-size: 19px; font-weight: 600; color: #94A3B8;`) |
 
 **Pattern notes:**
+- **Cognitive 6-Pillar Quorum Mandate**: Synthesizes 5 to 7 slides per edition distributed across 6 pillars: Odisha State Affairs (1–2), National Polity & Governance (1–2), Economy & Banking (1), Science & Defense (1), Sports & Awards (1), and International Relations (1).
+- **Category Pill Ellipsis Guard**: Category pill width is clamped with `max-width: 550px; text-overflow: ellipsis;` to guarantee lengthy sub-categories never break past the card border or wrap awkwardly.
 - **Dynamic 9-Palette Category Theme Engine**: Automatically assigns high-contrast color palettes (Crimson Red, Royal Indigo, Emerald Green, Cyan Blue, Amber Gold, Electric Purple, Deep Orange, Mint Teal, Sapphire Blue) based on intelligent keyword matching (`KEYWORD_COLOR_MAP`).
 - **7-Day Dynamic Layout Rotation**: Rotates layout backgrounds, card borders, and ambient lighting across the 7 days of the week (`LAYOUT_VARIANTS[day_of_week]`) preventing audience visual fatigue on Telegram/Instagram/LinkedIn.
 - **Exam Focus & Static Takeaway Anchor**: Dedicated takeaway container prevents bottom card void, emphasizing high-yield exam takeaways (articles, headquarters, dates, constitutional provisions).
 - **Golden Keypoint Label Anchors (`#FFD166`)**: Highlights leading structural phrases in bullets (`<b>`) using `#FFD166` gold for instant visual hierarchy and rapid scanning.
 - **Zero Raw Emojis in Badges**: Category badges are strictly formatted as uppercase clean pill labels without emojis, preserving an executive, authoritative government exam aesthetic.
+
+---
+
+### `YouTubeCommunityCarouselPublisher` (YouTube Community Multi-Image Visual Carousel Engine)
+
+File: [`automations/post_ca_to_youtube.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/post_ca_to_youtube.py), [`automations/post_exam_to_youtube.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/post_exam_to_youtube.py), [`automations/extract_yt_cookies.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/extract_yt_cookies.py)  
+Last updated: September 26, 2026
+
+| Property | Implementation / Specification |
+| :--- | :--- |
+| **Carousel Capacity** | Up to **10 slides** (`valid_images = valid_images[:10]`), full multi-image carousel upload |
+| **Dropzone Selector** | Scoped strictly to post composer: `ytd-commentbox input[type='file'], #creation-box input[type='file'], input[type='file'][multiple]:not(.ytSearchboxComponentHiddenFileInput)` |
+| **Search Bar Disambiguation** | Explicitly excludes `.ytSearchboxComponentHiddenFileInput` to prevent collision with header voice/image search input |
+| **Authentication Verification** | Real-time DOM avatar check (`button#avatar-btn`, `#avatar-btn`) and unauthenticated sign-in button detection (`a[aria-label*='Sign in']`) |
+| **Composer Actionability** | Resilient JavaScript evaluate clicks (`placeholder.evaluate("el => el.click()")`, `post_btn.evaluate("el => el.click()")`) |
+| **Dialog Management** | `dismiss_dialogs(page)` dismissing cookie consent modals and got-it overlay banners |
+| **Upload Throttle** | Dynamic upload render wait (`10000ms`), enabling complete thumbnail pre-rendering prior to post submission |
+| **Session Refresher** | 1-Click interactive session tool ([`refresh_youtube.bat`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/refresh_youtube.bat)) auto-syncing `YT_STATE_BASE64` & `YOUTUBE_STORAGE_STATE` to GitHub Secrets |
+
+**Pattern notes:**
+- **Zero Truncation of Slide Volume**: Matches YouTube's official 10-image maximum ceiling, guaranteeing that all 5, 6, 7, or up to 10 generated slides publish together in a single carousel.
+- **Strict Anti-Crash Selector Scoping**: The YouTube masthead header search bar embeds a hidden single-file input for Google Lens image search. All automation dropzone selectors MUST filter `:not(.ytSearchboxComponentHiddenFileInput)`.
+- **Accurate Auth Diagnostics**: Never check `"accounts.google.com"` in URL on channel pages (YouTube serves public pages to logged-out users with a sign-in button). Always check for DOM avatar or sign-in buttons.
+- **Cross-Platform CTA Balance**: Captions promote Telegram and the official exam portal on YouTube, while Telegram captions promote YouTube video classes.
 
 ---
 
@@ -5559,3 +5591,133 @@ Last updated: September 25, 2026
 - **Domain Identity Colors**: Each target type receives a distinct domain accent color and icon (`Award` for Mock Tests, `Zap` for Practice Tests, `BookOpen` for Question Bank, `Layers` for Flashcards) with subtle tinted background gradients (`from-*/10 to-*/10`) upon selection.
 - **State Clearing Guarantee**: Clicking any card immediately switches `stage2TargetType`, auto-resets `stage2SubCategory` to `'all'`, and clears `stage2SelectedTestId` to prevent cross-section contamination.
 - **Zero Raw Hex**: All colors use design system tokens (`brand-600`, `amber-500`, `blue-500`, `emerald-500`, `purple-500`, `slate-*`).
+
+---
+
+### QuestionBankClearQuestionsAction
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L5227-L5235)
+Last updated: September 26, 2026
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | Default: transparent. Hover: `hover:bg-amber-50 dark:hover:bg-amber-950/20` |
+| Border           | none |
+| Border radius    | `rounded-xl` |
+| Text — primary   | Icon: `w-5 h-5` |
+| Text — secondary | Text/icon base: `text-slate-400 dark:text-slate-500` |
+| Spacing          | Padding: `p-2.5` |
+| Hover state      | `hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-all` |
+| Shadow           | none |
+| Accent usage     | `amber-600` (warning/caution destructive reset indicator) |
+
+**Pattern notes:**
+- **Surgical Question Reset**: Placed between `Edit` (`hover:text-brand-600 hover:bg-brand-50`) and `Delete` (`hover:text-red-600 hover:bg-red-50`), providing a 1-click option to purge all questions from a bank or practice test without deleting the metadata card.
+- **Amber Warning Palette**: Uses `amber-600` / `amber-50` to clearly signal an action that resets content counters to zero without hard-deleting the container entity itself.
+- **Unified Action Row**: Maintains identical sizing (`p-2.5 rounded-xl`), icon dimensions (`w-5 h-5`), and transition behavior across both the primary desktop table row (`<td>`) and the mobile-friendly drag-and-drop `Reorder.Item` card view.
+- **Zero Raw Hex**: Strictly adheres to Tailwind design tokens with dark-mode compatibility.
+
+---
+
+### CognitiveDifficultyLevelSelector
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L6912-L6975)
+Last updated: September 26, 2026
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | Container: `bg-slate-50/90 dark:bg-slate-800/50`. Inactive cards: `bg-white dark:bg-slate-900`. Active cards: Simple: `bg-emerald-500/10`, Moderate: `bg-amber-500/10`, Advanced: `bg-rose-500/10`. Step badge: `bg-brand-600`. |
+| Border           | Container: `border border-slate-200 dark:border-slate-700`. Inactive cards: `border border-slate-200 dark:border-slate-700`. Active cards: Simple: `border-emerald-500 ring-2 ring-emerald-500/20`, Moderate: `border-amber-500 ring-2 ring-amber-500/20`, Advanced: `border-rose-500 ring-2 ring-rose-500/20`. |
+| Border radius    | Container: `rounded-2xl`. Cards: `rounded-xl`. Step badge: `rounded-full` (`w-5 h-5`). |
+| Text — primary   | Card title: `text-xs font-black text-slate-900 dark:text-white`. Badges: `text-[10px] font-black uppercase tracking-wider`. Step label: `text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300`. Step number: `text-[11px] font-black text-white`. |
+| Text — secondary | Card description: `text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-tight`. Subtitle: `text-[11px] font-bold text-slate-500 dark:text-slate-400`. Footer note: `text-[11px] text-slate-500 dark:text-slate-400`. |
+| Spacing          | Container: `p-4 space-y-3`. Grid: `grid grid-cols-1 sm:grid-cols-3 gap-2`. Card: `p-3 flex flex-col justify-between`. Header row: `mb-2`. |
+| Hover state      | Inactive cards: `opacity-70 hover:opacity-100 transition-all cursor-pointer`. |
+| Shadow           | none / subtle container border. |
+| Accent usage     | `emerald-500` (Simple / Foundational), `amber-500` (Moderate / Standard), `rose-500` (Advanced / Rigorous), `brand-600` (Step indicator). |
+
+**Pattern notes:**
+- **Tri-Level Cognitive Calibration**: Calibrates the LLM system prompt for the desired depth: Simple (direct 1-sentence facts/definitions, bans Roman numerals), Moderate (2-step application & OSSC standard), and Advanced (multi-statement Roman numeral evaluation & OPSC rigor).
+- **Distinct Domain Palettes**: Emerald for foundational clarity, Amber for moderate analytical balance, and Rose for high-order rank-determining rigor.
+- **Dynamic Headroom Coordination**: Integrates directly with `expectedTokens` scaling (`easy: 350`, `medium: 480`, `hard: 750` tokens per question) to eliminate mid-stream generation truncation on dense multi-statement stems.
+- **Zero Raw Hex**: All colors use design system tokens (`emerald-*`, `amber-*`, `rose-*`, `brand-600`, `slate-*`).
+
+---
+
+### AutonomousCurriculumAutoBatchSuite
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L6780-L7010)
+Last updated: September 26, 2026
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | Container: `bg-white dark:bg-slate-900`. Active Auto button: `bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-500/30`. Inactive buttons: `bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300`. Summary Badge: `bg-indigo-50/90 dark:bg-indigo-950/40`. |
+| Border           | Inactive buttons: `border border-slate-200 dark:border-slate-700`. Summary badge: `border border-indigo-200 dark:border-indigo-800/80`. Top separator: `border-t border-slate-200 dark:border-slate-700`. |
+| Border radius    | Buttons: `rounded-xl`. Live Badge: `rounded-xl`. Inputs: `rounded-xl`. |
+| Text — primary   | Section Label: `text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300`. Active badge: `text-xs font-bold text-indigo-600 dark:text-indigo-400`. Presets: `text-xs font-bold`. |
+| Text — secondary | Badge description: `text-[10px] text-slate-500 dark:text-slate-400 font-normal`. Target label: `text-slate-600 dark:text-slate-300 font-medium`. |
+| Spacing          | Grid: `grid gap-1.5 mb-2`. Badge container: `p-2.5 flex items-center justify-between text-xs`. Section top: `pt-2.5 mt-2.5`. |
+| Hover state      | Inactive buttons: `hover:border-indigo-500 transition-all cursor-pointer`. |
+| Shadow           | `shadow-sm` on active selected pill. |
+| Accent usage     | `indigo-600` (Batch accent theme), `amber-300` / `amber-400` (AI Sparkles icon indicator). |
+
+**Pattern notes:**
+- **Author LLM Reasoning Integration**: Couples with `planAutonomousQuestionCurriculum` to evaluate syllabus density and slice questions into 3–5 Qs micro-batches, preventing LLM attention decay.
+- **Adaptive Preset Grid**: Switches dynamically between `grid-cols-4 sm:grid-cols-7` (when `stage2QuestionNaturalDensity` is active, revealing the `🤖 Auto` pill) and `grid-cols-3 sm:grid-cols-6` (in manual quota mode).
+- **Persistent Manual Override**: Clicking any preset `[1, 2, 3, 4, 5, 10]` or typing a custom number smoothly deactivates auto-mode without resetting other form states.
+- **Zero Raw Hex**: Strictly utilizes Tailwind CSS design tokens (`indigo-600`, `indigo-500/30`, `slate-700`, `slate-300`, `amber-300`).
+
+---
+
+### ReferencePYQExamCalibrationSuite
+
+File: [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx#L3865-L3970)
+Last updated: September 26, 2026
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | Container: `bg-slate-50/80 dark:bg-slate-800/40`. Tab container: `bg-slate-100/90 dark:bg-slate-900/60`. Active tab: `bg-white dark:bg-slate-800`. Textarea: `bg-white dark:bg-slate-900`. Action buttons: `bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700`. Sample format: `bg-amber-500/10 hover:bg-amber-500/20`. |
+| Border           | Container: `border border-slate-200 dark:border-slate-700/80`. Tab container: `border border-slate-200/80 dark:border-slate-700`. Active tab: `border border-slate-200/80 dark:border-slate-700`. Textarea: `border border-slate-200 dark:border-slate-700`. Sample format: `border border-amber-500/30`. Action buttons: `border border-slate-200 dark:border-slate-700`. |
+| Border radius    | Container: `rounded-2xl`. Tab container: `rounded-xl`. Tab buttons: `rounded-lg`. Textarea: `rounded-xl`. Select: `rounded-xl`. Action buttons: `rounded-lg`. Badges: `rounded-full` / `rounded`. |
+| Text — primary   | Title: `text-sm font-black text-slate-900 dark:text-white`. Active tab: `text-xs font-bold text-brand-600 dark:text-brand-400`. Textarea: `text-xs font-mono text-slate-800 dark:text-slate-200`. |
+| Text — secondary | Subtitle: `text-xs text-slate-500 dark:text-slate-400`. Inactive tab: `text-xs font-bold text-slate-600 dark:text-slate-400`. Footer stats: `text-[11px] font-medium text-slate-500 dark:text-slate-400`. |
+| Spacing          | Card: `p-4 sm:p-5 space-y-3.5`. Tabs: `p-1 gap-1.5`. Textarea: `p-3.5`. Action toolbar: `gap-1`. |
+| Hover state      | Inactive tabs: `hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer`. Buttons: `hover:bg-slate-100 dark:hover:bg-slate-700 transition-all cursor-pointer`. |
+| Shadow           | Textarea: `shadow-inner`. Buttons & Active Tab: `shadow-xs`. |
+| Accent usage     | `brand-500` / `brand-600` (Core identity & active tabs), `amber-500` (Sample format button & warnings), `emerald-500` (Active PYQ detection pulse dot). |
+
+**Pattern notes:**
+- **Dual-Mode Benchmark Architecture**: Transforms Part 2 into a tabbed interface separating authentic few-shot exemplars (`🎯 Reference PYQs`) from abstract rules (`⚙️ Custom Directives`).
+- **Exam DNA Calibration**: Extracts linguistic tone, calculation depth, and distractor traps from 3–15 sample questions and applies the style universally across all syllabus chapters.
+- **Graceful Fallback**: Operates with 100% standard functionality when 0 PYQs are provided.
+- **Zero-Migration Single-Column Persistence**: Partitions inside `exam_syllabi.directives_markdown` via markdown section markers (`### REFERENCE PYQ BENCHMARK (EXAM DNA)` and `### CUSTOM GENERATION DIRECTIVES`).
+- **Zero Raw Hex**: Strictly follows Tailwind CSS design tokens with full dark-mode support.
+
+---
+
+### FleetCognitiveAIIntegrityFramework
+
+File: [`automations/shared/ai_parser.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/ai_parser.py), [`automations/breaking_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/breaking_engine.py), [`automations/ca_website_publisher.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/ca_website_publisher.py), [`automations/mcq_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/mcq_engine.py), [`automations/engagement_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/engagement_engine.py), [`automations/seo_blog_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/seo_blog_engine.py), [`automations/exam_update_engine.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/exam_update_engine.py)
+Last updated: September 26, 2026
+
+| Property         | Class / Specification |
+| ---------------- | --------------------- |
+| Background       | Dark mode social canvas (`#0F172A` deep slate, `#0B0F19` obsidian), translucent glass cards (`rgba(255, 255, 255, 0.04)` to `rgba(255, 255, 255, 0.08)`) with `backdrop-filter: blur(12px)` |
+| Border           | Glass card borders: `1px solid rgba(255, 255, 255, 0.12)`, active accent border-left: `5px solid {accent_color}` |
+| Border radius    | Canvas card containers: `24px` (`rounded-3xl`), highlight bullets: `16px` (`rounded-2xl`), badges and chips: `8px` to `12px` (`rounded-lg` / `rounded-xl`) |
+| Text — primary   | Font: Outfit / Plus Jakarta Sans, `text-white` / `#FFFFFF` (`font-weight: 800-900`), sanitized UTF-8 strings |
+| Text — secondary | Font: Inter / Plus Jakarta Sans, `text-slate-300` / `#94A3B8` (`font-weight: 500-600`), statutory act & exam board references |
+| Spacing          | Canvas padding: `48px`, stat grid gap: `16px`, highlight bullets gap: `10px` to `12px`, 3-column top bar gap: `16px` |
+| Hover state      | Social card static render / web preview interactive transitions (`transition-all duration-200`) |
+| Shadow           | `box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2)` on glass highlight cards |
+| Accent usage     | `brand-500` / `#2563EB`, `emerald-500` / `#10B981` (Verified / Correct), `amber-500` / `#F59E0B` (Important Dates / Deadlines), `rose-500` / `#EF4444` (Critical Alert / Trap Warning) |
+
+**Pattern notes:**
+- **Zero-Hallucination Grounding Standard**: Ingests up to 35,000 characters from official recruitment notices and vacancy matrices (pages 1–5). Mandates verbatim extraction of advertisement numbers, vacancy figures, and exam dates. If details are not explicitly detailed in the source PDF, enforces fail-closed text: `"Refer to Official Notice PDF"` or `"To Be Intimated Later"`.
+- **Pedagogical Distractor Traps & High-Yield MCQs**: Generates up to 5 self-test MCQs per Current Affairs article. Distractors are systematically engineered using adjacent constitutional articles, neighboring ministries, or candidate misconceptions. Every question requires a 2-part explanation: *Why the right answer is right* + *Why the trap option is wrong*.
+- **Autonomous Question Setter Fallback**: In `mcq_engine.py`, automatically triggers high-standard syllabus question generation when Google Sheet queues are depleted or unauthenticated. Questions are vetted against `published_history.json` using Jaccard word-overlap similarity (>0.50 threshold) to guarantee 0% duplicate leakage.
+- **Stem Auto-Healing**: In `normalize_and_heal_mcq`, detects split question stems where trailing auxiliary/linking verbs (`"are"`, `"is"`, `"under"`) or colons (`":"`) spilled into Option A. Merges the clause into the stem and re-aligns option indices with 100% fidelity.
+- **Official ORSP Rules 2017 Grounding**: In `seo_blog_engine.py`, all career profile blogs ground remuneration in official Odisha Revised Scales of Pay (ORSP) Rules, 2017 (Level-9: ₹35,400–₹1,12,400; Level-10: ₹44,900–₹1,42,400; Level-12: ₹56,100–₹1,77,500 Pay Matrices, DA @ 50%+, HRA @ 18%/9%).
+- **8,192 Token Generation Headroom**: Prevents mid-stream truncation on deep-dive current affairs articles and comprehensive 2,000-word career masterclasses.
+- **Strict Template Token Sanitization**: Automatically scrubs corrupt sequences, `[object Object]`, `undefined`, and unrendered placeholders (`[Topic]`, `[District]`, `[Category]`) before rendering or social dispatch.
+

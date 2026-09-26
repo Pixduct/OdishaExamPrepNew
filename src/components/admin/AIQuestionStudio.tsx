@@ -67,6 +67,11 @@ import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
 import { supabase } from '../../lib/supabase';
 import { parseSyllabusHierarchy } from '../../lib/syllabusParser';
+import { 
+  parseReferencePYQs, 
+  extractPYQAndDirectives, 
+  combinePYQAndDirectives 
+} from '../../lib/serverAiGenerator';
 import type { FlashcardDeck, Flashcard } from '../../lib/srsEngine';
 
 export interface QueueFeedEvent {
@@ -227,6 +232,26 @@ const DIRECTIVES_PRESETS: Record<string, { label: string; markdown: string }> = 
 3. **Rigorous Explanatory Dissection**: Detail the veracity of Assertion (A), the veracity of Reason (R), and whether an explicit causal link exists.`
   }
 };
+
+// Built-in Standard Competitive PYQ Sample Template
+const DEFAULT_PYQ_TEMPLATE = `1. In a steady laminar flow through a circular pipe of diameter D, the maximum velocity occurs at the centerline and is equal to:
+(a) Equal to the average velocity
+(b) 1.5 times the average velocity
+(c) 2.0 times the average velocity
+(d) 2.5 times the average velocity
+
+2. Which of the following statements regarding the Darcy-Weisbach friction factor (f) is correct for laminar flow?
+(a) f is proportional to Reynolds number
+(b) f = 64 / Re
+(c) f depends on relative pipe roughness (ε/D)
+(d) f = 16 / Re
+
+3. An emergency valve closure in a long pipeline causes a pressure rise known as water hammer. According to the Joukowsky equation, the maximum pressure surge ΔP is given by:
+(a) ΔP = ρ × c × v
+(b) ΔP = c² / (2g)
+(c) ΔP = v² / (2g)
+(d) ΔP = ρ × g × h`;
+
 
 export interface SubCategoryItem {
   id: string;
@@ -583,9 +608,19 @@ export function AIQuestionStudio({
   });
 
   const [selectedDirectivesPreset, setSelectedDirectivesPreset] = useState<string>('standard-state-mcq');
+  const [part2Tab, setPart2Tab] = useState<'pyqs' | 'directives'>('pyqs');
+  const [referencePYQs, setReferencePYQs] = useState<string>(() => {
+    const examId = preselectedExamId || exams[0]?.id || '';
+    const saved = localStorage.getItem(`oep_directives_${examId}`) || '';
+    return extractPYQAndDirectives(saved).pyqs;
+  });
   const [directivesMarkdown, setDirectivesMarkdown] = useState<string>(() => {
     const examId = preselectedExamId || exams[0]?.id || '';
-    return localStorage.getItem(`oep_directives_${examId}`) || DIRECTIVES_PRESETS['standard-state-mcq']?.markdown || '';
+    const saved = localStorage.getItem(`oep_directives_${examId}`);
+    if (saved) {
+      return extractPYQAndDirectives(saved).directives;
+    }
+    return DIRECTIVES_PRESETS['standard-state-mcq']?.markdown || '';
   });
 
   // Hidden File Input Refs for 1-click .md/.txt/.json uploads
@@ -681,6 +716,7 @@ export function AIQuestionStudio({
   const [stage2QuestionNaturalDensity, setStage2QuestionNaturalDensity] = useState<boolean>(false); // Natural Density for QB/PT/Mock questions
   const [stage2QuestionCeiling, setStage2QuestionCeiling] = useState<number>(0); // 0 = fully auto when natural density ON
   const [stage2BatchCount, setStage2BatchCount] = useState<number>(1);
+  const [stage2AutoBatch, setStage2AutoBatch] = useState<boolean>(true); // When true, AI dynamically plans batch count & micro-batch sizing
   const [currentRunningBatch, setCurrentRunningBatch] = useState<number>(1);
   const [isBatchRunnerActive, setIsBatchRunnerActive] = useState<boolean>(false);
   const [selectedBatchFilter, setSelectedBatchFilter] = useState<number | 'all'>('all');
@@ -693,6 +729,7 @@ export function AIQuestionStudio({
   const [selectedMultiBankIds, setSelectedMultiBankIds] = useState<string[]>([]);
   const [multiBankSearchQuery, setMultiBankSearchQuery] = useState<string>('');
   const [multiBankFilterType, setMultiBankFilterType] = useState<'all' | 'bank' | 'practice'>('all');
+  const [stage2BankModeFilter, setStage2BankModeFilter] = useState<'all' | 'bank' | 'practice'>('all');
   const [multiBankQuestionCountFilter, setMultiBankQuestionCountFilter] = useState<'all' | 'empty' | 'populated'>('all');
   const [bankCountOverrides, setBankCountOverrides] = useState<Record<string, number>>({});
   const [multiBankQueueStatus, setMultiBankQueueStatus] = useState<Record<string, MultiBankStatusEntry>>({});
@@ -835,12 +872,24 @@ export function AIQuestionStudio({
   }, [mockTests, selectedExamId]);
 
   const examPracticeSets = useMemo(() => {
-    return questionBanks.filter(b => b.examId === selectedExamId && (b.target_mode || 'both') !== 'bank');
-  }, [questionBanks, selectedExamId]);
+    if (stage2BankModeFilter === 'bank') {
+      return questionBanks.filter(b => b.examId === selectedExamId && (b.target_mode || 'both') !== 'practice');
+    }
+    if (stage2BankModeFilter === 'practice') {
+      return questionBanks.filter(b => b.examId === selectedExamId && (b.target_mode || 'both') !== 'bank');
+    }
+    return questionBanks.filter(b => b.examId === selectedExamId);
+  }, [questionBanks, selectedExamId, stage2BankModeFilter]);
 
   const examQuestionBanks = useMemo(() => {
-    return questionBanks.filter(b => b.examId === selectedExamId && (b.target_mode || 'both') !== 'practice');
-  }, [questionBanks, selectedExamId]);
+    if (stage2BankModeFilter === 'bank') {
+      return questionBanks.filter(b => b.examId === selectedExamId && (b.target_mode || 'both') !== 'practice');
+    }
+    if (stage2BankModeFilter === 'practice') {
+      return questionBanks.filter(b => b.examId === selectedExamId && (b.target_mode || 'both') !== 'bank');
+    }
+    return questionBanks.filter(b => b.examId === selectedExamId);
+  }, [questionBanks, selectedExamId, stage2BankModeFilter]);
 
   // Categorize Question Banks into the 4 EXACT original subcategories
   const categorizedQuestionBanks = useMemo(() => {
@@ -925,6 +974,21 @@ export function AIQuestionStudio({
       setSelectedExamId(preselectedExamId);
     }
   }, [preselectedExamId]);
+
+  // Auto-clear stale target selection when exam changes to prevent cross-exam contamination
+  useEffect(() => {
+    if (stage2SelectedTestId && !preselectedTestId) {
+      const belongs = 
+        examMockTests.some(t => t.id === stage2SelectedTestId) ||
+        examQuestionBanks.some(b => b.id === stage2SelectedTestId) ||
+        examFlashcardDecks.some(d => d.id === stage2SelectedTestId);
+      if (!belongs) {
+        setStage2SelectedTestId('');
+        setStage2TestTitle('');
+        setSelectedMultiBankIds([]);
+      }
+    }
+  }, [selectedExamId, examMockTests, examQuestionBanks, examFlashcardDecks, stage2SelectedTestId, preselectedTestId]);
 
   // Sync test selection if preselectedTestId is provided
   useEffect(() => {
@@ -1179,9 +1243,12 @@ export function AIQuestionStudio({
     const initialDirectives = savedStageDirectives || savedGlobalDirectives;
 
     if (initialDirectives) {
-      setDirectivesMarkdown(initialDirectives);
+      const extracted = extractPYQAndDirectives(initialDirectives);
+      setReferencePYQs(extracted.pyqs);
+      setDirectivesMarkdown(extracted.directives || DIRECTIVES_PRESETS['standard-state-mcq'].markdown);
     } else {
       setSelectedDirectivesPreset('standard-state-mcq');
+      setReferencePYQs('');
       setDirectivesMarkdown(DIRECTIVES_PRESETS['standard-state-mcq'].markdown);
     }
 
@@ -1193,7 +1260,9 @@ export function AIQuestionStudio({
         localStorage.setItem(`oep_syllabus_${selectedExamId}_${currentStageKey}`, cloud.syllabus_markdown);
       }
       if (cloud.directives_markdown) {
-        setDirectivesMarkdown(cloud.directives_markdown);
+        const extracted = extractPYQAndDirectives(cloud.directives_markdown);
+        setReferencePYQs(extracted.pyqs);
+        setDirectivesMarkdown(extracted.directives);
         localStorage.setItem(`oep_directives_${selectedExamId}_${currentStageKey}`, cloud.directives_markdown);
       }
     }).catch(err => {
@@ -1215,13 +1284,29 @@ export function AIQuestionStudio({
     }
   };
 
+  const handleUpdateReferencePYQs = (val: string) => {
+    setReferencePYQs(val);
+    if (selectedExamId) {
+      const currentStageKey = selectedExamStage || 'All Stages';
+      const combined = combinePYQAndDirectives(val, directivesMarkdown);
+      localStorage.setItem(`oep_directives_${selectedExamId}_${currentStageKey}`, combined);
+      localStorage.setItem(`oep_directives_${selectedExamId}`, combined);
+    }
+  };
+
   const handleUpdateDirectives = (val: string) => {
     setDirectivesMarkdown(val);
     if (selectedExamId) {
       const currentStageKey = selectedExamStage || 'All Stages';
-      localStorage.setItem(`oep_directives_${selectedExamId}_${currentStageKey}`, val);
-      localStorage.setItem(`oep_directives_${selectedExamId}`, val);
+      const combined = combinePYQAndDirectives(referencePYQs, val);
+      localStorage.setItem(`oep_directives_${selectedExamId}_${currentStageKey}`, combined);
+      localStorage.setItem(`oep_directives_${selectedExamId}`, combined);
     }
+  };
+
+  const handleLoadSamplePYQTemplate = () => {
+    handleUpdateReferencePYQs(DEFAULT_PYQ_TEMPLATE);
+    toast.success('Loaded sample PYQ benchmark format!');
   };
 
   // Explicit Save to Cloud Database
@@ -1233,12 +1318,13 @@ export function AIQuestionStudio({
     const stageToSave = selectedExamStage || 'All Stages';
     setIsSavingSyllabusToCloud(true);
     try {
-      await examService.saveExamSyllabus(selectedExamId, stageToSave, syllabusMarkdown, directivesMarkdown);
+      const combined = combinePYQAndDirectives(referencePYQs, directivesMarkdown);
+      await examService.saveExamSyllabus(selectedExamId, stageToSave, syllabusMarkdown, combined);
       localStorage.setItem(`oep_syllabus_${selectedExamId}_${stageToSave}`, syllabusMarkdown);
-      if (directivesMarkdown) {
-        localStorage.setItem(`oep_directives_${selectedExamId}_${stageToSave}`, directivesMarkdown);
+      if (combined) {
+        localStorage.setItem(`oep_directives_${selectedExamId}_${stageToSave}`, combined);
       }
-      toast.success(`✅ Saved "${stageToSave}" syllabus to Cloud Database!`);
+      toast.success(`✅ Saved "${stageToSave}" syllabus & PYQ benchmark to Cloud Database!`);
     } catch (err: any) {
       console.error('Failed to save syllabus to cloud:', err);
       toast.error('Failed to save syllabus: ' + (err.message || 'Network error'));
@@ -1251,8 +1337,9 @@ export function AIQuestionStudio({
     // 1. Cache current stage draft to avoid loss
     const currentStageKey = selectedExamStage || 'All Stages';
     localStorage.setItem(`oep_syllabus_${selectedExamId}_${currentStageKey}`, syllabusMarkdown);
-    if (directivesMarkdown) {
-      localStorage.setItem(`oep_directives_${selectedExamId}_${currentStageKey}`, directivesMarkdown);
+    const combined = combinePYQAndDirectives(referencePYQs, directivesMarkdown);
+    if (combined) {
+      localStorage.setItem(`oep_directives_${selectedExamId}_${currentStageKey}`, combined);
     }
 
     // 2. Set new stage - triggers the useEffect to load that stage's syllabus
@@ -1293,8 +1380,13 @@ export function AIQuestionStudio({
           handleUpdateSyllabus(content);
           toast.success(`Loaded "${file.name}" into Syllabus & PYQ Blueprint!`);
         } else {
-          handleUpdateDirectives(content);
-          toast.success(`Loaded "${file.name}" into Generation Directives!`);
+          if (part2Tab === 'pyqs') {
+            handleUpdateReferencePYQs(content);
+            toast.success(`Loaded "${file.name}" into Reference PYQ Benchmark!`);
+          } else {
+            handleUpdateDirectives(content);
+            toast.success(`Loaded "${file.name}" into Generation Directives!`);
+          }
         }
       }
     };
@@ -1335,8 +1427,13 @@ export function AIQuestionStudio({
         handleUpdateSyllabus(text);
         toast.success('Pasted clipboard into Syllabus & PYQ Blueprint!');
       } else {
-        handleUpdateDirectives(text);
-        toast.success('Pasted clipboard into Generation Directives!');
+        if (part2Tab === 'pyqs') {
+          handleUpdateReferencePYQs(text);
+          toast.success('Pasted clipboard into Reference PYQ Benchmark!');
+        } else {
+          handleUpdateDirectives(text);
+          toast.success('Pasted clipboard into Generation Directives!');
+        }
       }
     } catch {
       toast.error('Clipboard access denied. Please paste directly into the editor.');
@@ -1357,6 +1454,11 @@ export function AIQuestionStudio({
     const lines = trimmed ? trimmed.split('\n').length : 0;
     return { words, lines };
   }, [directivesMarkdown]);
+
+  const pyqAnalysis = useMemo(() => {
+    return parseReferencePYQs(referencePYQs);
+  }, [referencePYQs]);
+  const detectedPYQCount = pyqAnalysis.count;
 
   // Extract structured syllabus topics from syllabusMarkdown for Stage 2 topic picker
   const parsedSyllabusTopics = useMemo(() => {
@@ -1924,7 +2026,9 @@ export function AIQuestionStudio({
     overrideSubject?: string,
     overrideSubSubject?: string,
     overrideChapter?: string,
-    overrideSubCategory?: string
+    overrideSubCategory?: string,
+    customQuestionCount?: number,
+    thematicFocus?: string
   ): Promise<any[]> => {
     const resolvedStage = overrideStage || (selectedItem ? getItemStage(selectedItem) : '') || selectedExamStage || undefined;
     const headers = await getAdminAuthHeaders();
@@ -2029,16 +2133,20 @@ export function AIQuestionStudio({
         subCategory: overrideSubCategory || (selectedItem as any)?.type || (stage2SubCategory !== 'all' ? stage2SubCategory : undefined),
         syllabusMarkdown: effectiveSyllabus,
         directivesMarkdown,
+        referencePYQs: referencePYQs.trim() || undefined,
         difficulty: stage2Difficulty,
-        questionCount: stage2QuestionNaturalDensity ? (stage2QuestionCeiling > 0 ? stage2QuestionCeiling : 25) : stage2QuestionCount,
-        naturalDensity: stage2QuestionNaturalDensity,
+        questionCount: customQuestionCount !== undefined
+          ? customQuestionCount
+          : (stage2QuestionNaturalDensity ? (stage2QuestionCeiling > 0 ? stage2QuestionCeiling : 25) : stage2QuestionCount),
+        naturalDensity: customQuestionCount !== undefined ? false : stage2QuestionNaturalDensity,
         questionCeiling: stage2QuestionNaturalDensity ? stage2QuestionCeiling : undefined,
         includeDiagrams: stage2IncludeDiagrams,
         apiKey: apiKey || undefined,
         model: selectedModel,
         baseUrl: customBaseUrl || undefined,
         alreadyGeneratedStems: existingStems,
-        batchNumber: batchNum
+        batchNumber: batchNum,
+        thematicFocus: thematicFocus || undefined
       })
     });
 
@@ -2147,6 +2255,7 @@ export function AIQuestionStudio({
         subCategory: overrideSubCategory || (selectedItem as any)?.type || (stage2SubCategory !== 'all' ? stage2SubCategory : undefined),
         syllabusMarkdown: effectiveSyllabus,
         directivesMarkdown,
+        referencePYQs: referencePYQs.trim() || undefined,
         difficulty: stage2Difficulty,
         questionCount: stage2QuestionNaturalDensity ? (stage2QuestionCeiling > 0 ? stage2QuestionCeiling : 25) : stage2QuestionCount,
         naturalDensity: stage2QuestionNaturalDensity,
@@ -2253,12 +2362,79 @@ export function AIQuestionStudio({
       console.warn('Could not pre-fetch existing stems for single generation:', e);
     }
 
+    // -------------------------------------------------------------
+    // STAGE 1: AI PEDAGOGICAL CURRICULUM PLANNING (Auto-Batch Mode)
+    // -------------------------------------------------------------
+    let plannedBatches: { batchNumber: number; questionCount: number; thematicFocus: string }[] = [];
+    let effectiveBatchCount = stage2BatchCount;
+    let effectiveTotalExpected = stage2QuestionCount * stage2BatchCount;
+
+    if (stage2QuestionNaturalDensity && stage2AutoBatch && stage2TargetType !== 'flashcards') {
+      const planTime = new Date().toLocaleTimeString();
+      setTelemetryLogs(prev => [
+        ...prev.slice(-30),
+        `[${planTime}] 🧠 [AI Pedagogical Architect] Sizing curriculum & planning optimal micro-batches for "${activeTitle}"...`
+      ]);
+      setTelemetryEvent({
+        stageId: 'GROUNDING',
+        stageName: 'AI Pedagogical Curriculum Planning',
+        stageIndex: 1,
+        totalStages: 5,
+        currentCount: 0,
+        totalCount: stage2QuestionCeiling > 0 ? stage2QuestionCeiling : 25,
+        percent: 12,
+        message: `Reasoning curriculum density & decomposing micro-batches for "${activeTitle}"...`,
+        log: `[Stage 1/5] Pedagogical Architect analyzing syllabus scope for "${activeTitle}".`
+      });
+
+      try {
+        const planRes = await fetch('/api/admin/ai/plan-curriculum', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            syllabusMarkdown,
+            testTitle: activeTitle,
+            subject: stage2Subject,
+            chapter: stage2Chapter,
+            subCategory: (selectedItem as any)?.type || (stage2SubCategory !== 'all' ? stage2SubCategory : undefined),
+            ceilingCap: stage2QuestionCeiling > 0 ? stage2QuestionCeiling : undefined,
+            difficulty: stage2Difficulty,
+            apiKey: apiKey || undefined,
+            model: selectedModel,
+            baseUrl: customBaseUrl || undefined
+          })
+        });
+
+        if (planRes.ok) {
+          const planData = await planRes.json();
+          if (planData?.data?.batches && planData.data.batches.length > 0) {
+            plannedBatches = planData.data.batches;
+            effectiveBatchCount = plannedBatches.length;
+            effectiveTotalExpected = planData.data.totalQuestions || plannedBatches.reduce((sum: number, b: any) => sum + b.questionCount, 0);
+            setTelemetryLogs(prev => [
+              ...prev.slice(-30),
+              `🎯 [AI Curriculum Plan] ${effectiveTotalExpected} Questions planned across ${effectiveBatchCount} focused micro-batches: ${planData.data.reasoning || ''}`
+            ]);
+            toast.success(`🧠 AI planned ${effectiveTotalExpected} Qs across ${effectiveBatchCount} micro-batches!`);
+          }
+        }
+      } catch (planErr) {
+        console.warn('[handleGenerateQuestions] Curriculum plan request failed:', planErr);
+      }
+    }
+
+    setIsBatchRunnerActive(effectiveBatchCount > 1);
+    setGenerationProgress({ current: 0, total: effectiveTotalExpected });
+
     try {
-      for (let b = 1; b <= stage2BatchCount; b++) {
+      for (let b = 1; b <= effectiveBatchCount; b++) {
         if (stopBatchRunnerRef.current) {
           toast(`Auto-Runner stopped by user after Batch ${b - 1}.`, { icon: 'ℹ️' });
           break;
         }
+
+        const batchTargetQs = plannedBatches[b - 1]?.questionCount;
+        const batchTheme = plannedBatches[b - 1]?.thematicFocus;
 
         let batchQs: any[] = [];
         let batchSuccess = false;
@@ -2273,7 +2449,19 @@ export function AIQuestionStudio({
               ...accumulated.map(q => q.questionText).filter(Boolean)
             ];
             const singleSubCat = (selectedItem as any)?.type || (stage2SubCategory !== 'all' ? stage2SubCategory : undefined);
-            batchQs = await generateSingleBatch(activeTitle, b, existingStems, false, undefined, undefined, undefined, undefined, singleSubCat);
+            batchQs = await generateSingleBatch(
+              activeTitle,
+              b,
+              existingStems,
+              false,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              singleSubCat,
+              batchTargetQs,
+              batchTheme
+            );
             batchSuccess = true;
           } catch (err: any) {
             batchRetryCount++;
@@ -2290,7 +2478,7 @@ export function AIQuestionStudio({
         }
 
         if (!batchSuccess) {
-          toast.error(`❌ Batch ${b}/${stage2BatchCount} failed: ${lastBatchError}. Preserving generated questions.`);
+          toast.error(`❌ Batch ${b}/${effectiveBatchCount} failed: ${lastBatchError}. Preserving generated questions.`);
           break;
         }
 
@@ -2302,11 +2490,11 @@ export function AIQuestionStudio({
         setGeneratedQuestions([...accumulated]);
         completedBatches = b;
 
-        if (stage2BatchCount > 1) {
-          toast.success(`✅ Batch ${b}/${stage2BatchCount} complete (+${uniqueBatchQs.length} Qs, Total: ${accumulated.length})`);
+        if (effectiveBatchCount > 1) {
+          toast.success(`✅ Batch ${b}/${effectiveBatchCount} complete (+${uniqueBatchQs.length} Qs, Total: ${accumulated.length})`);
         }
 
-        if (b < stage2BatchCount && !stopBatchRunnerRef.current) {
+        if (b < effectiveBatchCount && !stopBatchRunnerRef.current) {
           // Micro-pause (500ms) between batches to prevent rate limit saturation
           await new Promise(resolve => setTimeout(resolve, 500));
         }
@@ -2486,7 +2674,48 @@ export function AIQuestionStudio({
         let bankGenerationFailed = false;
         let bankErrorMessage = '';
 
-        for (let b = 1; b <= stage2BatchCount; b++) {
+        // Plan curriculum if in natural density + auto batch mode for this bank
+        let bankPlannedBatches: { batchNumber: number; questionCount: number; thematicFocus: string }[] = [];
+        let bankRunBatches = stage2BatchCount;
+
+        if (!isFlashcards && stage2QuestionNaturalDensity && stage2AutoBatch) {
+          try {
+            const bankSubCategory = (currentBank as any).type || (stage2SubCategory !== 'all' ? stage2SubCategory : undefined);
+            const planRes = await fetch('/api/admin/ai/plan-curriculum', {
+              method: 'POST',
+              headers,
+              body: JSON.stringify({
+                syllabusMarkdown,
+                testTitle: currentBank.title,
+                subject: (currentBank as any).subject || stage2Subject,
+                chapter: (currentBank as any).chapter || stage2Chapter,
+                subCategory: bankSubCategory,
+                ceilingCap: stage2QuestionCeiling > 0 ? stage2QuestionCeiling : undefined,
+                difficulty: stage2Difficulty,
+                apiKey: apiKey || undefined,
+                model: selectedModel,
+                baseUrl: customBaseUrl || undefined
+              })
+            });
+            if (planRes.ok) {
+              const planData = await planRes.json();
+              if (planData?.data?.batches && planData.data.batches.length > 0) {
+                bankPlannedBatches = planData.data.batches;
+                bankRunBatches = bankPlannedBatches.length;
+                appendQueueFeedEvent(
+                  currentBankId,
+                  currentBank.title,
+                  'audit_verified',
+                  `🧠 AI Architect planned ${planData.data.totalQuestions} Qs across ${bankRunBatches} focused micro-batches: ${planData.data.reasoning || ''}`
+                );
+              }
+            }
+          } catch (e) {
+            console.warn(`[Queue Runner] Curriculum plan fallback for ${currentBank.title}:`, e);
+          }
+        }
+
+        for (let b = 1; b <= bankRunBatches; b++) {
           if (stopQueueRunnerRef.current) break;
 
           setCurrentRunningBatch(b);
@@ -2495,22 +2724,22 @@ export function AIQuestionStudio({
             [currentBankId]: {
               ...prev[currentBankId],
               step: 'generating',
-              stepDetail: `Generating Batch ${b} of ${stage2BatchCount}...`,
+              stepDetail: `Generating Batch ${b} of ${bankRunBatches}...`,
               currentBatch: b,
-              totalBatches: stage2BatchCount
+              totalBatches: bankRunBatches
             }
           }));
 
           const batchGenLabel = isFlashcards && stage2NaturalDensity
             ? (stage2QuestionCount > 0 ? `Natural Density • ≤${stage2QuestionCount} cards ceiling` : 'Natural Density • dynamic distillation')
-            : `${stage2QuestionCount} ${unitPlural}`;
+            : (bankPlannedBatches[b - 1]?.questionCount ? `${bankPlannedBatches[b - 1].questionCount} Qs (Focus: ${bankPlannedBatches[b - 1].thematicFocus})` : `${stage2QuestionCount} ${unitPlural}`);
 
           appendQueueFeedEvent(
             currentBankId,
             currentBank.title,
             'batch_gen',
             `⚡ [${nounSingular} ${i + 1}/${banksToProcess.length}] Distilling factual anchors for "${currentBank.title}" (${batchGenLabel})...`,
-            { batchNum: b, totalBatches: stage2BatchCount }
+            { batchNum: b, totalBatches: bankRunBatches }
           );
 
           const combinedExistingStems = isFlashcards
@@ -2531,7 +2760,7 @@ export function AIQuestionStudio({
             currentCount: totalUploadedAcrossQueue + bankAccumulatedQuestions.length,
             totalCount: grandTotalQs,
             percent: Math.round(((totalUploadedAcrossQueue + bankAccumulatedQuestions.length) / grandTotalQs) * 100),
-            message: `[${nounSingular} ${i + 1}/${banksToProcess.length}] Generating Batch ${b}/${stage2BatchCount} for "${currentBank.title}"...`,
+            message: `[${nounSingular} ${i + 1}/${banksToProcess.length}] Generating Batch ${b}/${bankRunBatches} for "${currentBank.title}"...`,
             log: `Generating Batch ${b} for "${currentBank.title}".`
           });
 
@@ -2559,6 +2788,8 @@ export function AIQuestionStudio({
               const bankSubSubject = (currentBank as any).sub_subject || undefined;
               const bankChapter = (currentBank as any).chapter || undefined;
               const bankSubCategory = (currentBank as any).type || (stage2SubCategory !== 'all' ? stage2SubCategory : undefined);
+              const batchTargetQs = bankPlannedBatches[b - 1]?.questionCount;
+              const batchTheme = bankPlannedBatches[b - 1]?.thematicFocus;
               batchQuestions = await generateSingleBatch(
                 currentBank.title,
                 b,
@@ -2568,7 +2799,9 @@ export function AIQuestionStudio({
                 bankSubject,
                 bankSubSubject,
                 bankChapter,
-                bankSubCategory
+                bankSubCategory,
+                batchTargetQs,
+                batchTheme
               );
               batchSuccess = true;
             } catch (err: any) {
@@ -2602,7 +2835,7 @@ export function AIQuestionStudio({
               ...prev[currentBankId],
               status: 'running', 
               count: bankAccumulatedQuestions.length,
-              stepDetail: `Batch ${b}/${stage2BatchCount} verified (${bankAccumulatedQuestions.length}/${qsPerBank} ${unitPlural})`
+              stepDetail: `Batch ${b}/${bankRunBatches} verified (${bankAccumulatedQuestions.length}/${qsPerBank} ${unitPlural})`
             }
           }));
 
@@ -2610,11 +2843,11 @@ export function AIQuestionStudio({
             currentBankId,
             currentBank.title,
             'batch_done',
-            `✓ [${nounSingular} ${i + 1}/${banksToProcess.length}] Batch ${b}/${stage2BatchCount} verified (${batchQuestions.length} ${unitPlural} valid). ${nounSingular} total: ${bankAccumulatedQuestions.length}/${qsPerBank} ${unitPlural}.`,
-            { batchNum: b, totalBatches: stage2BatchCount, questionCount: bankAccumulatedQuestions.length }
+            `✓ [${nounSingular} ${i + 1}/${banksToProcess.length}] Batch ${b}/${bankRunBatches} verified (${batchQuestions.length} ${unitPlural} valid). ${nounSingular} total: ${bankAccumulatedQuestions.length}/${qsPerBank} ${unitPlural}.`,
+            { batchNum: b, totalBatches: bankRunBatches, questionCount: bankAccumulatedQuestions.length }
           );
 
-          if (b < stage2BatchCount && !stopQueueRunnerRef.current) {
+          if (b < bankRunBatches && !stopQueueRunnerRef.current) {
             await new Promise(res => setTimeout(res, 400));
           }
         }
@@ -3025,11 +3258,11 @@ export function AIQuestionStudio({
       }
     } else {
       // Question Bank or Practice Test
-      const isPractice = stage2TargetType === 'practice_test';
+      const isPractice = stage2TargetType === 'practice_test' || stage2BankModeFilter === 'practice';
       const scopedBanks = isPractice ? examPracticeSets : examQuestionBanks;
 
       if (stage2SelectedTestId) {
-        const bank = scopedBanks.find(b => b.id === stage2SelectedTestId);
+        const bank = scopedBanks.find(b => b.id === stage2SelectedTestId) || questionBanks.find(b => b.id === stage2SelectedTestId);
         targetTopic = bank?.title || stage2SelectedTestId;
       } else {
         targetTopic = activeTitle;
@@ -3041,11 +3274,18 @@ export function AIQuestionStudio({
             stage: selectedExamStage || '',
             subject: stage2Subject || ''
           });
+          const validCategory = ['topic-wise', 'exam-focused', 'revision-sets', 'pyq-collections'].includes(stage2SubCategory)
+            ? stage2SubCategory
+            : 'topic-wise';
+          const assignedTargetMode = isPractice
+            ? 'practice'
+            : (stage2BankModeFilter === 'bank' || validCategory === 'revision-sets' || validCategory === 'pyq-collections' ? 'bank' : 'practice');
+
           await examService.createQuestionBank({
             title: activeTitle,
             examId: selectedExamId,
-            type: stage2Subject || 'topic-wise',
-            target_mode: isPractice ? 'practice' : 'bank',
+            type: validCategory,
+            target_mode: assignedTargetMode,
             tagline: metaTagline,
             hasPracticeMode: isPractice,
             questionCount: questionsToPublish.length,
@@ -3661,7 +3901,7 @@ export function AIQuestionStudio({
             </div>
 
             {/* ─────────────────────────────────────────────────────────────
-                PART 2: PEDAGOGICAL GENERATION DIRECTIVES (THE "HOW")
+                PART 2: EXAM BENCHMARK & PEDAGOGICAL DIRECTIVES (THE "HOW")
             ───────────────────────────────────────────────────────────── */}
             <div className="bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-3.5">
               <div className="space-y-3.5">
@@ -3669,12 +3909,12 @@ export function AIQuestionStudio({
                 <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-slate-200/70 dark:border-slate-700/60">
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div className="w-8 h-8 rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center font-bold shrink-0">
-                      <Sliders className="w-4 h-4" />
+                      {part2Tab === 'pyqs' ? <Target className="w-4 h-4" /> : <Sliders className="w-4 h-4" />}
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
                         <h3 className="text-sm font-black text-slate-900 dark:text-white truncate">
-                          Part 2: Generation Directives & Rules
+                          {part2Tab === 'pyqs' ? 'Part 2: Reference PYQ Benchmark' : 'Part 2: Generation Directives & Rules'}
                         </h3>
                         <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-brand-500/10 text-brand-600 dark:text-brand-300 border border-brand-500/20 shrink-0">
                           The "How"
@@ -3685,15 +3925,28 @@ export function AIQuestionStudio({
 
                   {/* Standardized Action Toolbar */}
                   <div className="flex items-center gap-1 shrink-0">
+                    {part2Tab === 'pyqs' && (
+                      <button
+                        type="button"
+                        onClick={handleLoadSamplePYQTemplate}
+                        title="Load standard competitive PYQ sample format"
+                        className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 flex items-center gap-1 transition-all cursor-pointer shadow-xs"
+                      >
+                        <Zap className="w-3 h-3 text-amber-500" />
+                        <span className="hidden sm:inline">Sample Format</span>
+                      </button>
+                    )}
                     <button
+                      type="button"
                       onClick={() => directivesFileInputRef.current?.click()}
-                      title="Upload .md, .txt, or .json rules file"
+                      title={`Upload .md, .txt, or .json ${part2Tab === 'pyqs' ? 'PYQ' : 'rules'} file`}
                       className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
                     >
                       <Upload className="w-3 h-3 text-brand-500" />
                       <span>Upload</span>
                     </button>
                     <button
+                      type="button"
                       onClick={() => handlePasteTo('directives')}
                       title="Paste text from clipboard"
                       className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
@@ -3702,8 +3955,9 @@ export function AIQuestionStudio({
                       <span>Paste</span>
                     </button>
                     <button
-                      onClick={() => handleExportMarkdown(directivesMarkdown, `${selectedExam?.name || 'exam'}-directives.md`)}
-                      title="Download rules as .md file"
+                      type="button"
+                      onClick={() => handleExportMarkdown(part2Tab === 'pyqs' ? referencePYQs : directivesMarkdown, `${selectedExam?.name || 'exam'}-${part2Tab}.md`)}
+                      title={`Download ${part2Tab === 'pyqs' ? 'PYQs' : 'rules'} as .md file`}
                       className="p-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 flex items-center justify-center transition-all cursor-pointer shadow-xs"
                     >
                       <Download className="w-3.5 h-3.5 text-slate-500" />
@@ -3711,46 +3965,116 @@ export function AIQuestionStudio({
                   </div>
                 </div>
 
-                {/* Track 2: Single-Line Subtitle */}
-                <p className="text-xs text-slate-500 dark:text-slate-400 truncate leading-none">
-                  Difficulty standards, multi-statement options, LaTeX math, and diagram rules.
-                </p>
-
-                {/* Track 3: Preset Dropdown */}
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block leading-none">
-                    Paper-Setting Rule Rubric:
-                  </label>
-                  <select
-                    value={selectedDirectivesPreset}
-                    onChange={(e) => handleSelectDirectivesPreset(e.target.value)}
-                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none h-9.5 shadow-xs"
+                {/* Track 1.5: Dual-Mode Tabs */}
+                <div className="flex items-center gap-1.5 p-1 bg-slate-100/90 dark:bg-slate-900/60 rounded-xl border border-slate-200/80 dark:border-slate-700">
+                  <button
+                    type="button"
+                    onClick={() => setPart2Tab('pyqs')}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      part2Tab === 'pyqs'
+                        ? 'bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-xs border border-slate-200/80 dark:border-slate-700'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
                   >
-                    {Object.entries(DIRECTIVES_PRESETS).map(([key, item]) => (
-                      <option key={key} value={key}>
-                        {item.label}
-                      </option>
-                    ))}
-                  </select>
+                    <Target className="w-3.5 h-3.5" />
+                    <span>Reference PYQs (Style Benchmark)</span>
+                    {detectedPYQCount > 0 && (
+                      <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-black bg-brand-500/15 text-brand-600 dark:text-brand-300">
+                        {detectedPYQCount}
+                      </span>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPart2Tab('directives')}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      part2Tab === 'directives'
+                        ? 'bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-xs border border-slate-200/80 dark:border-slate-700'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    <Sliders className="w-3.5 h-3.5" />
+                    <span>Custom Directives (Advanced)</span>
+                  </button>
                 </div>
 
-                {/* Track 4: Textarea Editor */}
-                <textarea
-                  value={directivesMarkdown}
-                  onChange={(e) => handleUpdateDirectives(e.target.value)}
-                  rows={8}
-                  placeholder="Enter or upload strict paper-setter instructions, cognitive difficulty rules, LaTeX math directives, or distractor standards..."
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 text-xs text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-brand-500 outline-none font-mono leading-relaxed resize-y shadow-inner"
-                />
+                {/* Track 2 & 3: Context-Specific Body */}
+                {part2Tab === 'pyqs' ? (
+                  <>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                      Provide 3 to 15 authentic past exam questions (PYQs). The AI distills the exam board's structural DNA (phrasing, calculation depth, and distractor traps) to calibrate question rigor across all chapters.
+                    </p>
+
+                    {/* Reference PYQs Textarea */}
+                    <textarea
+                      value={referencePYQs}
+                      onChange={(e) => handleUpdateReferencePYQs(e.target.value)}
+                      rows={8}
+                      placeholder={`Paste 3 to 15 authentic Previous Year Questions (PYQs) for this exam:
+1. In a steady laminar flow through a pipe, the maximum velocity is:
+(a) Equal to average velocity  (b) 2 times average velocity...
+
+2. Which equation determines head loss due to friction?
+(a) Darcy-Weisbach  (b) Bernoulli...
+
+The AI extracts this exam board's signature style and matches it without duplicating these questions!`}
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 text-xs text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-brand-500 outline-none font-mono leading-relaxed resize-y shadow-inner"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate leading-none">
+                      Difficulty standards, multi-statement options, LaTeX math, and diagram rules.
+                    </p>
+
+                    {/* Preset Dropdown */}
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block leading-none">
+                        Paper-Setting Rule Rubric:
+                      </label>
+                      <select
+                        value={selectedDirectivesPreset}
+                        onChange={(e) => handleSelectDirectivesPreset(e.target.value)}
+                        className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none h-9.5 shadow-xs"
+                      >
+                        {Object.entries(DIRECTIVES_PRESETS).map(([key, item]) => (
+                          <option key={key} value={key}>
+                            {item.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Directives Textarea */}
+                    <textarea
+                      value={directivesMarkdown}
+                      onChange={(e) => handleUpdateDirectives(e.target.value)}
+                      rows={8}
+                      placeholder="Enter or upload strict paper-setter instructions, cognitive difficulty rules, LaTeX math directives, or distractor standards..."
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 text-xs text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-brand-500 outline-none font-mono leading-relaxed resize-y shadow-inner"
+                    />
+                  </>
+                )}
               </div>
 
               {/* Track 5: Card Footer Stats */}
               <div className="flex items-center justify-between pt-2 text-[11px] font-medium text-slate-500 dark:text-slate-400 border-t border-slate-200/70 dark:border-slate-700/60">
                 <div className="flex items-center gap-1.5 truncate">
-                  <span className="w-2 h-2 rounded-full bg-brand-500 shrink-0"></span>
-                  <span className="truncate">Strict AI Constraint Active</span>
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${part2Tab === 'pyqs' && detectedPYQCount > 0 ? 'bg-emerald-500' : 'bg-brand-500'}`}></span>
+                  <span className="truncate">
+                    {part2Tab === 'pyqs'
+                      ? (detectedPYQCount > 0
+                          ? `⚡ ${detectedPYQCount} Authentic PYQ Exemplars Detected • Calibrating Exam Style`
+                          : '○ Optional Style Benchmark (0 PYQs — standard syllabus generation active)')
+                      : 'Strict AI Constraint Active'}
+                  </span>
                 </div>
-                <span className="font-mono shrink-0 ml-2">{directivesStats.words} words • {directivesStats.lines} lines</span>
+                <span className="font-mono shrink-0 ml-2">
+                  {part2Tab === 'pyqs'
+                    ? `${detectedPYQCount} PYQ items`
+                    : `${directivesStats.words} words • ${directivesStats.lines} lines`}
+                </span>
               </div>
             </div>
           </div>
@@ -5475,8 +5799,8 @@ export function AIQuestionStudio({
             </div>
 
             {/* STEP 2: SUBCATEGORY / CLASSIFICATION FILTER */}
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between">
+            <div className="space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <label className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                   <span className="w-5 h-5 rounded-full bg-brand-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">2</span>
                   {stage2TargetType === 'flashcards' ? 'Filter by Deck Subject' : 'Filter by Subcategory & Format'}
@@ -5486,6 +5810,83 @@ export function AIQuestionStudio({
                 </span>
               </div>
 
+              {/* Mode Toggle for Question Bank / Practice Sets: All (56) | Question Banks (28) | Practice Sets (28) */}
+              {(stage2TargetType === 'question_bank' || stage2TargetType === 'practice_test') && (() => {
+                const totalAll = questionBanks.filter(b => b.examId === selectedExamId).length;
+                const totalBanks = questionBanks.filter(b => b.examId === selectedExamId && (b.target_mode || 'both') !== 'practice').length;
+                const totalPractice = questionBanks.filter(b => b.examId === selectedExamId && (b.target_mode || 'both') !== 'bank').length;
+
+                return (
+                  <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 w-fit">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStage2BankModeFilter('all');
+                        setStage2SubCategory('all');
+                      }}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5",
+                        stage2BankModeFilter === 'all'
+                          ? "bg-white dark:bg-slate-900 text-brand-600 dark:text-brand-400 shadow-2xs font-black"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                      )}
+                    >
+                      <span>🌟 All Items</span>
+                      <span className={cn(
+                        "px-1.5 py-0.5 rounded-md text-[10px] font-black",
+                        stage2BankModeFilter === 'all' ? "bg-brand-50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300" : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
+                      )}>
+                        {totalAll}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStage2BankModeFilter('bank');
+                        setStage2SubCategory('all');
+                      }}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5",
+                        stage2BankModeFilter === 'bank'
+                          ? "bg-white dark:bg-slate-900 text-brand-600 dark:text-brand-400 shadow-2xs font-black"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                      )}
+                    >
+                      <span>📦 Question Banks</span>
+                      <span className={cn(
+                        "px-1.5 py-0.5 rounded-md text-[10px] font-black",
+                        stage2BankModeFilter === 'bank' ? "bg-brand-50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300" : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
+                      )}>
+                        {totalBanks}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStage2BankModeFilter('practice');
+                        setStage2SubCategory('all');
+                      }}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5",
+                        stage2BankModeFilter === 'practice'
+                          ? "bg-white dark:bg-slate-900 text-brand-600 dark:text-brand-400 shadow-2xs font-black"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                      )}
+                    >
+                      <span>🎯 Practice Sets</span>
+                      <span className={cn(
+                        "px-1.5 py-0.5 rounded-md text-[10px] font-black",
+                        stage2BankModeFilter === 'practice' ? "bg-brand-50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300" : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
+                      )}>
+                        {totalPractice}
+                      </span>
+                    </button>
+                  </div>
+                );
+              })()}
+
               <div className="flex flex-wrap gap-2">
                 {(stage2TargetType === 'mock_test'
                   ? [
@@ -5494,14 +5895,6 @@ export function AIQuestionStudio({
                       { id: 'sectional', label: '📑 Sectional Tests', count: categorizedMockTests.sectional.length },
                       { id: 'pyq', label: '⏳ Official PYQ Tests', count: categorizedMockTests.pyq.length },
                       { id: 'daily', label: '📈 Daily / Weekly Benchmark Tests', count: categorizedMockTests.daily.length }
-                    ]
-                  : stage2TargetType === 'practice_test'
-                  ? [
-                      { id: 'all', label: '🌐 All Practice Sets', count: examPracticeSets.length },
-                      { id: 'topic-wise', label: '📖 Chapter-Wise Practice', count: categorizedPracticeSets.topicWise.length },
-                      { id: 'exam-focused', label: '💎 High-Yield Topic Banks', count: categorizedPracticeSets.examFocused.length },
-                      { id: 'revision-sets', label: '⚡ Daily Speed & Accuracy Quizzes', count: categorizedPracticeSets.revisionSets.length },
-                      { id: 'pyq-collections', label: '📜 Topic-Wise Solved PYQs', count: categorizedPracticeSets.pyqCollections.length }
                     ]
                   : stage2TargetType === 'flashcards'
                   ? [
@@ -5513,8 +5906,12 @@ export function AIQuestionStudio({
                       }))
                     ]
                   : [
-                      { id: 'all', label: '🌐 All Question Banks', count: examQuestionBanks.length },
-                      { id: 'topic-wise', label: '📚 Topic-Wise Question Bank', count: categorizedQuestionBanks.topicWise.length },
+                      { 
+                        id: 'all', 
+                        label: stage2BankModeFilter === 'bank' ? '🌐 All Question Banks' : stage2BankModeFilter === 'practice' ? '🌐 All Practice Sets' : '🌐 All Content Banks', 
+                        count: examQuestionBanks.length 
+                      },
+                      { id: 'topic-wise', label: '📚 Topic-Wise / Chapter-Wise', count: categorizedQuestionBanks.topicWise.length },
                       { id: 'exam-focused', label: '💎 Exam-Focused High Yield', count: categorizedQuestionBanks.examFocused.length },
                       { id: 'revision-sets', label: '⚡ Last-Minute Revision Sets', count: categorizedQuestionBanks.revisionSets.length },
                       { id: 'pyq-collections', label: '📜 PYQ Question Archives', count: categorizedQuestionBanks.pyqCollections.length }
@@ -5621,7 +6018,7 @@ export function AIQuestionStudio({
                       }
                     } else if (stage2SubCategory === 'topic-wise') {
                       scopedPool = (catObj as typeof categorizedQuestionBanks).topicWise;
-                      activeCategoryLabel = isPractice ? '📖 Chapter-Wise Practice' : '📚 Topic-Wise Question Bank';
+                      activeCategoryLabel = isPractice ? '📖 Chapter-Wise Practice' : '📚 Topic-Wise / Chapter-Wise';
                     } else if (stage2SubCategory === 'exam-focused') {
                       scopedPool = (catObj as typeof categorizedQuestionBanks).examFocused;
                       activeCategoryLabel = isPractice ? '💎 High-Yield Topic Banks' : '💎 Exam-Focused High Yield';
@@ -5646,7 +6043,7 @@ export function AIQuestionStudio({
                       if (isMock) {
                         return b._questionCount ?? b.questionCount ?? b.totalQuestions ?? 0;
                       }
-                      if (typeof b.practiceQuestionCount === 'number' && b.practiceQuestionCount > 0) {
+                      if (typeof b.practiceQuestionCount === 'number') {
                         return b.practiceQuestionCount;
                       }
                       return b.questionCount ?? 0;
@@ -6171,7 +6568,7 @@ export function AIQuestionStudio({
                     return (
                       <>
                         {(stage2SubCategory === 'all' || stage2SubCategory === 'topic-wise') && tw.length > 0 && (
-                          <optgroup label={`📚 Topic-Wise Question Bank (${tw.length} Sets)`}>
+                          <optgroup label={`📚 Topic-Wise / Chapter-Wise (${tw.length} Sets)`}>
                             {tw.map(b => (
                               <option key={b.id} value={b.id}>
                                 {getItemStage(b) ? `[${getItemStage(b)}] ` : ''}{b.title} ({b.questionCount || 0} Qs)
@@ -6228,7 +6625,7 @@ export function AIQuestionStudio({
                     return (
                       <>
                         {(stage2SubCategory === 'all' || stage2SubCategory === 'topic-wise') && tw.length > 0 && (
-                          <optgroup label={`📖 Chapter-Wise Practice (${tw.length} Sets)`}>
+                          <optgroup label={`📚 Topic-Wise / Chapter Practice (${tw.length} Sets)`}>
                             {tw.map(b => (
                               <option key={b.id} value={b.id}>
                                 {getItemStage(b) ? `[${getItemStage(b)}] ` : ''}{b.title} ({b.questionCount || 0} Qs)
@@ -6238,7 +6635,7 @@ export function AIQuestionStudio({
                         )}
 
                         {(stage2SubCategory === 'all' || stage2SubCategory === 'exam-focused') && ef.length > 0 && (
-                          <optgroup label={`💎 High-Yield Topic Banks (${ef.length} Sets)`}>
+                          <optgroup label={`💎 Exam-Focused High Yield (${ef.length} Sets)`}>
                             {ef.map(b => (
                               <option key={b.id} value={b.id}>
                                 {getItemStage(b) ? `[${getItemStage(b)}] ` : ''}{b.title} ({b.questionCount || 0} Qs)
@@ -6248,7 +6645,7 @@ export function AIQuestionStudio({
                         )}
 
                         {(stage2SubCategory === 'all' || stage2SubCategory === 'revision-sets') && rs.length > 0 && (
-                          <optgroup label={`⚡ Daily Speed & Accuracy Quizzes (${rs.length} Sets)`}>
+                          <optgroup label={`⚡ Last-Minute Revision Sets (${rs.length} Sets)`}>
                             {rs.map(b => (
                               <option key={b.id} value={b.id}>
                                 {getItemStage(b) ? `[${getItemStage(b)}] ` : ''}{b.title} ({b.questionCount || 0} Qs)
@@ -6258,7 +6655,7 @@ export function AIQuestionStudio({
                         )}
 
                         {(stage2SubCategory === 'all' || stage2SubCategory === 'pyq-collections') && pq.length > 0 && (
-                          <optgroup label={`📜 Topic-Wise Solved PYQs (${pq.length} Sets)`}>
+                          <optgroup label={`📜 PYQ Question Archives (${pq.length} Sets)`}>
                             {pq.map(b => (
                               <option key={b.id} value={b.id}>
                                 {getItemStage(b) ? `[${getItemStage(b)}] ` : ''}{b.title} ({b.questionCount || 0} Qs)
@@ -6654,6 +7051,7 @@ export function AIQuestionStudio({
                         type="button"
                         onClick={() => {
                           setStage2QuestionNaturalDensity(true);
+                          setStage2AutoBatch(true);
                         }}
                         className={cn(
                           "p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between",
@@ -6682,6 +7080,7 @@ export function AIQuestionStudio({
                         type="button"
                         onClick={() => {
                           setStage2QuestionNaturalDensity(false);
+                          setStage2AutoBatch(false);
                         }}
                         className={cn(
                           "p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between",
@@ -6787,20 +7186,38 @@ export function AIQuestionStudio({
                           Number of Batches (Auto-Runner)
                         </label>
                         <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
-                          {stage2BatchCount} {stage2BatchCount === 1 ? 'Batch' : 'Batches'}
+                          {stage2QuestionNaturalDensity && stage2AutoBatch ? '🤖 AI Auto-Decide (Active)' : `${stage2BatchCount} ${stage2BatchCount === 1 ? 'Batch' : 'Batches'}`}
                         </span>
                       </div>
 
                       {/* Batch Presets */}
-                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 mb-2">
+                      <div className={cn("grid gap-1.5 mb-2", stage2QuestionNaturalDensity ? "grid-cols-4 sm:grid-cols-7" : "grid-cols-3 sm:grid-cols-6")}>
+                        {stage2QuestionNaturalDensity && (
+                          <button
+                            type="button"
+                            onClick={() => setStage2AutoBatch(true)}
+                            className={cn(
+                              "py-1.5 px-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1",
+                              stage2AutoBatch
+                                ? "bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-500/30"
+                                : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-indigo-500"
+                            )}
+                          >
+                            <Sparkles className="w-3 h-3 text-amber-300" />
+                            🤖 Auto
+                          </button>
+                        )}
                         {[1, 2, 3, 4, 5, 10].map(bc => (
                           <button
                             key={bc}
                             type="button"
-                            onClick={() => setStage2BatchCount(bc)}
+                            onClick={() => {
+                              setStage2AutoBatch(false);
+                              setStage2BatchCount(bc);
+                            }}
                             className={cn(
                               "py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
-                              stage2BatchCount === bc
+                              !stage2AutoBatch && stage2BatchCount === bc
                                 ? "bg-indigo-600 text-white shadow-sm"
                                 : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-indigo-500"
                             )}
@@ -6818,7 +7235,10 @@ export function AIQuestionStudio({
                           min={1}
                           max={20}
                           value={stage2BatchCount}
-                          onChange={e => setStage2BatchCount(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)))}
+                          onChange={e => {
+                            setStage2AutoBatch(false);
+                            setStage2BatchCount(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)));
+                          }}
                           className="w-20 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-900 dark:text-white text-center focus:ring-1 focus:ring-indigo-500 outline-none"
                         />
                       </div>
@@ -6830,9 +7250,21 @@ export function AIQuestionStudio({
                         </span>
                         <span className="font-black text-indigo-700 dark:text-indigo-300">
                           {stage2QuestionNaturalDensity ? (
-                            <span>
-                              {stage2QuestionCeiling === 0 ? 'Auto Density' : `≤${stage2QuestionCeiling} Cap`} × {stage2BatchCount} {stage2BatchCount === 1 ? 'Batch' : 'Batches'} = <span className="underline decoration-indigo-500 font-black">{stage2QuestionCeiling > 0 ? `≤${stage2QuestionCeiling * stage2BatchCount} Max Qs` : 'Syllabus-Sized Qs'}</span>
-                            </span>
+                            stage2AutoBatch ? (
+                              <div className="flex flex-col items-end text-right">
+                                <span className="font-black text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                                  <Sparkles className="w-3 h-3 text-amber-400 animate-pulse" />
+                                  <span>🤖 AI Pedagogical Plan (Active)</span>
+                                </span>
+                                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">
+                                  Organically sizes total volume & decomposes into 3–5 Qs micro-batches
+                                </span>
+                              </div>
+                            ) : (
+                              <span>
+                                {stage2QuestionCeiling === 0 ? 'Auto Density' : `≤${stage2QuestionCeiling} Cap`} × {stage2BatchCount} {stage2BatchCount === 1 ? 'Batch' : 'Batches'} = <span className="underline decoration-indigo-500 font-black">{stage2QuestionCeiling > 0 ? `≤${stage2QuestionCeiling * stage2BatchCount} Max Qs` : 'Syllabus-Sized Qs'}</span>
+                              </span>
+                            )
                           ) : (
                             <span>
                               {stage2QuestionCount} Qs × {stage2BatchCount} {stage2BatchCount === 1 ? 'Batch' : 'Batches'} = <span className="underline decoration-indigo-500 font-black">{stage2QuestionCount * stage2BatchCount} Total Qs</span>

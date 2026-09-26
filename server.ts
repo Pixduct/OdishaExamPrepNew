@@ -8,7 +8,7 @@ import crypto from "crypto";
 import webpush from "web-push";
 import { createClient } from "@supabase/supabase-js";
 import { ROUTE_LIST } from "./src/lib/routes-config";
-import { generateExamStructure, generateExamQuestions, queryAIModel, refineTestTitles, auditAndVerifyQuestions, generateFlashcardsContent } from "./src/lib/serverAiGenerator";
+import { generateExamStructure, generateExamQuestions, queryAIModel, refineTestTitles, auditAndVerifyQuestions, generateFlashcardsContent, planAutonomousQuestionCurriculum } from "./src/lib/serverAiGenerator";
 
 // Server reloaded with universal multi-provider AI key router: 2026-09-09T11:09:00
 const __filename = fileURLToPath(import.meta.url);
@@ -1730,6 +1730,7 @@ async function startServer() {
         subCategory,
         syllabusMarkdown, 
         directivesMarkdown,
+        referencePYQs,
         difficulty, 
         questionCount, 
         naturalDensity,
@@ -1788,6 +1789,7 @@ async function startServer() {
         subCategory,
         syllabusMarkdown,
         directivesMarkdown,
+        referencePYQs: referencePYQs ? String(referencePYQs).trim() : undefined,
         difficulty: difficulty || 'hard',
         questionCount: Number(questionCount) || 10,
         naturalDensity: Boolean(naturalDensity),
@@ -1801,7 +1803,8 @@ async function startServer() {
           ...existingStems,
           ...(Array.isArray(req.body.alreadyGeneratedStems) ? req.body.alreadyGeneratedStems : [])
         ],
-        batchNumber: req.body.batchNumber ? Number(req.body.batchNumber) : undefined
+        batchNumber: req.body.batchNumber ? Number(req.body.batchNumber) : undefined,
+        thematicFocus: req.body.thematicFocus ? String(req.body.thematicFocus).trim() : undefined
       });
 
       res.json({ success: true, count: questions.length, data: questions });
@@ -1840,6 +1843,7 @@ async function startServer() {
         subCategory,
         syllabusMarkdown, 
         directivesMarkdown,
+        referencePYQs,
         difficulty, 
         questionCount, 
         naturalDensity,
@@ -1900,6 +1904,7 @@ async function startServer() {
           subCategory,
           syllabusMarkdown,
           directivesMarkdown,
+          referencePYQs: referencePYQs ? String(referencePYQs).trim() : undefined,
           difficulty: difficulty || 'hard',
           questionCount: Number(questionCount) || 10,
           naturalDensity: Boolean(naturalDensity),
@@ -1913,7 +1918,8 @@ async function startServer() {
             ...existingStems,
             ...(Array.isArray(req.body.alreadyGeneratedStems) ? req.body.alreadyGeneratedStems : [])
           ],
-          batchNumber: req.body.batchNumber ? Number(req.body.batchNumber) : undefined
+          batchNumber: req.body.batchNumber ? Number(req.body.batchNumber) : undefined,
+          thematicFocus: req.body.thematicFocus ? String(req.body.thematicFocus).trim() : undefined
         },
         (progressEvent) => {
           sendEvent("progress", progressEvent);
@@ -1926,6 +1932,42 @@ async function startServer() {
       console.error("[Admin AI Questions Stream Error]", err);
       sendEvent("error", { error: err.message || "Failed to generate questions with AI" });
       res.end();
+    }
+  });
+
+  // Admin AI Studio: Stage 2 Autonomous Pedagogical Curriculum Planner & Auto-Batch Decomposition
+  app.post("/api/admin/ai/plan-curriculum", requireAdmin, async (req, res) => {
+    try {
+      const {
+        syllabusMarkdown,
+        testTitle,
+        subject,
+        chapter,
+        subCategory,
+        ceilingCap,
+        difficulty,
+        apiKey,
+        model,
+        baseUrl
+      } = req.body;
+
+      const plan = await planAutonomousQuestionCurriculum({
+        syllabusMarkdown,
+        testTitle: testTitle || 'Subject Test',
+        subject,
+        chapter,
+        subCategory,
+        ceilingCap: ceilingCap !== undefined && ceilingCap !== null ? Number(ceilingCap) : undefined,
+        difficulty,
+        apiKey,
+        model,
+        baseUrl
+      });
+
+      res.json({ success: true, data: plan });
+    } catch (err: any) {
+      console.error("[Admin AI Plan Curriculum Error]", err);
+      res.status(500).json({ error: err.message || "Failed to plan autonomous curriculum" });
     }
   });
 

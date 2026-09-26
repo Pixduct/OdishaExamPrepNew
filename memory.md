@@ -1,64 +1,57 @@
-# Memory — Comprehensive Odisha & Central Exam Coverage & Real-Time Notification Pipeline
+# Memory — Cognitive Multi-Domain Current Affairs Engine & YouTube Community 10-Slide Carousel Resilience
 
-Last updated: September 25, 2026, 14:45 IST
+Last updated: September 26, 2026, 18:33 IST
 
 ## What was built
 
-1. **Comprehensive 54-Authority Portal & Whitelist Alignment**:
-   - `exam_registry.json`: Synchronized 54 nodal authorities (20 Odisha State boards + 34 Central Government entities) covering small to mega exams.
-   - `automations/config/trusted_sources.json`: Added 18 missing official domains (DSE Odisha, India Post, KVS, NVS, EMRS, Army, Navy, Air Force, Coast Guard, CTET, CSIR, NIELIT, DTET, OSCSC, CHSE).
-   - `automations/shared/source_validator.py`: Upgraded `SourceValidator.is_official_domain` to recognize sovereign Indian government suffixes (`.gov.in`, `.nic.in`, `.res.in`), preventing legitimate sub-district/board notices from being dropped.
-   - `automations/exam_update_engine.py`: Verified `DIRECT_PORTAL_MAP` covers 100% (54/54) of registered recruitment portals with zero unmapped boards.
+1. **Cognitive Multi-Domain Current Affairs Intelligence Engine**:
+   - Upgraded [`automations/ca_scraper.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/ca_scraper.py): Replaced dead 404/500 RSS endpoints (`sambadenglish`, `ommcomnews`, `airnews`) with high-volume authoritative feeds (`Odisha Bytes`, `Pragativadi`, `OrissaPOST`, and targeted Google News RSS topics), ingesting 380+ items per run across 6 core exam pillars.
+   - Upgraded [`automations/ca_formatter.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/ca_formatter.py): Enforced 6-pillar syllabus decomposition (Odisha Regional, National Polity & Governance, Economy & Banking, Science & Defense, Sports & Awards, and International Relations). Sized context window to 30,000 characters and 8,192 output tokens to eliminate payload starvation, and enforced mandatory 5 to 7 high-impact slides with `EXAM FOCUS & STATIC TAKEAWAY` callouts linking events to statutory/constitutional articles.
+   - Upgraded [`automations/ca_publisher.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/ca_publisher.py): Scoped deduplication database checks exclusively to `Current Affairs` category, eliminating false-positive collisions with evergreen static blog posts.
 
-2. **Universal 54-Board Acronym Extraction & Word Boundary Clamping (`automations/breaking_engine.py`)**:
-   - Expanded `extract_board_info` from an incomplete 19-board hardcoded list to cover all 54 nodal authorities with correct short acronyms and official domains.
-   - Enforced regex word boundaries (`\b`) on short acronyms (`\blic\b`, `\bfci\b`, `\baai\b`, `\brbi\b`, `\bsbi\b`, `\bssc\b`, etc.), eliminating false-positive matches (e.g. `applications` previously matching `lic`).
+2. **Full 10-Slide YouTube Community Carousel Support**:
+   - Upgraded [`automations/post_ca_to_youtube.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/post_ca_to_youtube.py): Expanded carousel limit from legacy 5 images to YouTube's full 10-image ceiling (`valid_images[:10]`). All 6 generated slides are now published together in a single carousel.
+   - Disambiguated dropzone selectors by strictly excluding the YouTube masthead search bar voice/image input (`:not(.ytSearchboxComponentHiddenFileInput)`), resolving `Non-multiple file input can only accept single file` exceptions.
+   - Replaced brittle URL checks (`"accounts.google.com" in page.url`) with real-time DOM checks for user avatar (`button#avatar-btn`) and unauthenticated sign-in banners (`a[aria-label*='Sign in']`).
+   - Integrated `dismiss_dialogs(page)` and Polymer JavaScript evaluate clicks (`placeholder.evaluate("el => el.click()")`, `post_btn.evaluate("el => el.click()")`) to bypass overlay dialogs and shadow DOM pointer-event blocks.
 
-3. **20-Category Classification Precision & Prioritization (`automations/breaking_engine.py`)**:
-   - Prioritized high-urgency windows in classification logic: Objection Window before Answer Key, Final Answer Key before Provisional, Exam City Intimation slip before Exam Date, Corrigendum before Advt, and Advt Release before Application Start.
-   - Expanded regex tokens for Exam City Intimation (`examination city`, `city allotment`, `intimation slip`).
+3. **1-Click YouTube Session Auto-Refresher Tool**:
+   - Upgraded [`automations/extract_yt_cookies.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/extract_yt_cookies.py) and created [`refresh_youtube.bat`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/refresh_youtube.bat).
+   - Launches interactive visible Chrome, detects authenticated YouTube Studio dashboard automatically, captures fresh cookies to `yt_state.json`, and auto-syncs `YT_STATE_BASE64` and `YOUTUBE_STORAGE_STATE` to GitHub Secrets (`Pixduct/odisha-mcq-engine`) via GitHub CLI.
 
-4. **1080x1080 Visual Alert Card Engine (`automations/exam_card_renderer.py`, `automations/templates/template_alert.html`)**:
-   - Upgraded top-bar to a 3-column CSS Grid (`grid-template-columns: auto 1fr auto;`) with board tag clamping ($\le 22$ chars) to eliminate badge collision with category badges.
-   - Replaced plain bullet lists with self-distributing Glass Highlight Cards (`flex: 1; justify-content: space-evenly;`) to eliminate vertical voids.
-   - Scaled typography for mobile legibility (34px–42px headlines, 21px–22px body, 30px stat icons).
+4. **Synchronized Hardening Across Fleet**:
+   - Applied identical authentication detection, composer validation, and scoped file input handlers to [`automations/post_exam_to_youtube.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/post_exam_to_youtube.py) and [`automations/post_to_youtube.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/post_to_youtube.py).
 
-5. **Automated Senior QA Test Suite & Quality Verification (`scratch/senior_qa_exam_notification_audit.py`)**:
-   - Module 1 (Authority & Portal Coverage): 5/5 PASSED.
-   - Module 2 (20-Category Universal Classification): 21/21 PASSED.
-   - Module 3 (Anti-Noise & Anti-Hallucination Guardrails): 8/8 PASSED (Tenders, DPC promotions, deputations, and expired dates deterministically rejected; genuine vacancies preserved, hallucinated counts sanitized).
-   - Module 4 (End-to-End Scenarios & Playwright Card Rendering): 16/16 PASSED (District Courts, ISRO IPRC, Odisha Fire Service, SSC CGL).
-   - Total Suite: **50/50 Tests Passed (100.0%)** in 9.42s.
-   - TypeScript compilation (`npx tsc --noEmit`): 0 errors.
-
-6. **Documentation & Registry Imprints**:
-   - Updated `context/progress-tracker.md` with complete audit details.
-   - Imprinted `ExamNotificationVisualCardAndTopBar` in `context/ui-registry.md`.
+5. **Design System & Documentation Updates**:
+   - Imprinted `YouTubeCommunityCarouselPublisher` into [`context/ui-registry.md`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/context/ui-registry.md).
+   - Updated [`context/progress-tracker.md`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/context/progress-tracker.md).
 
 ## Decisions made
 
-- **Sovereign Indian Government TLD Recognition**: Recognizing `.gov.in`, `.nic.in`, and `.res.in` in `SourceValidator` guarantees future district courts, municipal bodies, or newly created board websites are never rejected, while maintaining strict defense against third-party aggregators.
-- **Strict Word-Boundary Token Matching**: Short acronyms (2–3 characters) must always use `\b` regex boundaries to avoid inadvertent substring matches in general prose.
-- **Classification Specificity Hierarchy**: Specific lifecycle phases (Objection Window, Corrigendum, City Intimation) take precedence over generic parent phases (Answer Key, Exam Date, Application Notice).
-- **Anti-Hallucination Vacancy Grounding**: If AI outputs a vacancy number not present in raw official source text, it is deterministically stripped and replaced with `"Refer to Official Notification PDF"`.
+- **Full 10-Slide Multi-Upload**: Updated YouTube Community posting limit to 10 images matching YouTube's updated platform specifications, ensuring no slides are ever discarded.
+- **Search Bar Input Exclusion**: Dropzone selectors strictly filter `:not(.ytSearchboxComponentHiddenFileInput)` to prevent selecting YouTube's top navigation image search box.
+- **DOM-Based Auth Verification**: Checking for `button#avatar-btn` and absence of `a[aria-label*='Sign in']` provides 100% reliable session verification on public YouTube channels.
+- **Automated GitHub CLI Secret Sync**: Rather than manual copy-pasting, `extract_yt_cookies.py` pushes updated Base64 session cookies directly to GitHub Secrets using `gh secret set`.
 
 ## Problems solved
 
-- Fixed 18 missing official domains in `trusted_sources.json`.
-- Fixed defect where 35/54 authorities fell back to generic "RECRUITMENT BOARD" in breaking alert cards.
-- Fixed top-bar collision defect where long board names occluded category pills.
-- Eliminated dead empty voids in 1080x1080 cards via adaptive glassmorphic highlight cards.
+- **News Starvation & False Skips**: Solved by expanding context budget to 30,000 characters and adding high-volume regional RSS endpoints (380+ articles ingested per run).
+- **Missing 6th Slide on YouTube**: Solved by removing legacy 5-image clamp and expanding to 10 slides.
+- **Playwright Timeout & Single-File Crash**: Solved by scoping dropzone file inputs, using JS evaluate clicks, and auto-dismissing cookie/dialog overlays.
+- **Expired YouTube Session Cookies**: Solved by refreshing cookies via `refresh_youtube.bat` and auto-syncing secrets to GitHub Actions.
 
 ## Current state
 
-- All 54 recruitment boards (Odisha & Central) are 100% covered and mapped.
-- Real-time notification ingestion, classification, anti-hallucination sanitization, card rendering, and Telegram caption generation pass all 50 automated tests.
-- Codebase is clean, TypeScript compiles with 0 errors.
+- All automations tested and verified:
+  - Local verification: Published 6-image carousel to YouTube Community in 11 seconds.
+  - Remote verification (GitHub Actions run `36226720105`): Published multi-slide album to Telegram, media broadcast to WhatsApp, and 6-card carousel to YouTube Community in 3m 8s.
+  - Dispatched execution status notification to Admin Telegram DM.
+- All code committed and pushed to `main` on `Pixduct/odisha-mcq-engine`.
 
 ## Next session starts with
 
-- Confirm with user the next feature priority from `context/build-plan.md` or next operational workflow to execute.
+- Monitor daily scheduled automation runs or proceed with any frontend feature requests.
 
 ## Open questions
 
-- None. All 50 QA assertions and rendering stress scenarios are 100% verified and green.
+- None. All features and automations are production-ready and fully operational.

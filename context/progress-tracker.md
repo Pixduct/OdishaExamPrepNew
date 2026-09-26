@@ -1,3 +1,17 @@
+- [x] ⚡ Exam Update Engine Multi-Platform Social Dispatch & Workflow Resilience Hardening (`post_exam_to_youtube.py`, `exam_update_engine.py`, `shared/whatsapp.py`, `.github/workflows/*.yml`):
+  1. **YouTube Community Visual Card Attachment Fix**:
+     - Resolved root cause of text-only YouTube Community posts: `exam_update_engine.py` omitted `image_path` in line 1058, and `post_exam_to_youtube.py` lacked fallback extraction from `article_data`.
+     - Added robust fallback in `post_exam_update_to_youtube` checking `article_data.get("slide_image_path") or article_data.get("cover_image")`, and explicitly passed `image_path` from `exam_update_engine.py`.
+     - Validated that 1080x1080 visual cards trigger image dropzone uploads automatically.
+  2. **Git History Sync & Workflow Failure Elimination**:
+     - Resolved root cause of Telegram Admin Bot `FAILURE` alerts: concurrent GitHub runner pushes caused merge conflicts on `published_image_history.json` during `git pull --rebase`.
+     - Upgraded all 7 workflow files (`exam_update_cron.yml`, `daily_ca.yml`, `daily_ca_website.yml`, `daily_mcq.yml`, `engagement_engine.yml`, `blog_cron.yml`, `notice_scraper.yml`) with a 5-attempt conflict-resilient loop (`git pull --rebase -X theirs --autostash origin main || (git rebase --abort && git pull -X ours origin main --no-edit)`).
+  3. **WhatsApp Channel vs Group Diagnostics**:
+     - Enhanced `shared/whatsapp.py` with automatic destination type detection and explicit logging (`Channel (@newsletter)` vs `Group (@g.us)`).
+  4. **Verification & Authenticity Audit**:
+     - Fully verified authenticity of the Odisha High Court Junior Grade Typist DEO Result 2026 (Advt 01/2026, Notice No. 311 on `orissahighcourt.nic.in`).
+     - Executed verification test suite `test_exam_engine_fixes.py` with 100% pass rate. Committed and pushed to `Pixduct/odisha-mcq-engine` main (`6515328`).
+
 - [x] ⚡ Question Bank Authentic Category Audit & AI Studio Unified Visibility Suite (`src/components/admin/AIQuestionStudio.tsx`, `src/AdminPanel.tsx`, `questionBanks` Supabase Table):
   1. **Audit & Preservation of Authentic User-Named Collections**:
      - Completed comprehensive audit of user-created banks for OPSC AAE (`6813624a-d56d-4b07-8845-d6d47444c41f`): confirmed 56 distinct items across all 4 authentic categories.

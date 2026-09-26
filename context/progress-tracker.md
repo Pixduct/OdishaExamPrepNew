@@ -1,4 +1,20 @@
-- [x] ⚡ Exam Update Engine Multi-Platform Social Dispatch & Workflow Resilience Hardening (`post_exam_to_youtube.py`, `exam_update_engine.py`, `shared/whatsapp.py`, `.github/workflows/*.yml`):
+- [x] ⚡ Intelligent Context-Aware Gemini Imagen Image Generation & Zero-Stock-Photo Architecture (`automations/shared/imagen_generator.py`, `automations/shared/exam_logo_registry.py`, `automations/exam_update_engine.py`, `automations/ca_website_publisher.py`, `automations/shared/drive_image_sanitizer.py`):
+  1. **Root Cause Analysis of Clashing Stock Photos**:
+     - Identified that `shared/pexels_image_fetcher.py` queried Pexels with generic keywords, pulling unrelated Western classroom/teacher stock photos (e.g. African American teacher pointing at a blackboard) for official Odisha High Court and state recruitment notices.
+  2. **Intelligent AI Art Director Reasoning (Gemini 3.8 Flash)**:
+     - Built `synthesize_ai_art_prompt` in `automations/shared/imagen_generator.py` using `models/gemini-3.8-flash` and `models/gemini-flash-latest`.
+     - Analyzes article title, examination commission, category, and context summary to synthesize culturally authentic, dignified Indian administrative and judicial visual concepts (16:9 widescreen, cinematic lighting, editorial documentary photography).
+     - Enforces strict negative constraints: strictly bans western classrooms, green chalkboards, graduation caps, children, cartoons, anime, 3D renders, and garbled text.
+  3. **Gemini Imagen & Multimodal Image Generation Pipeline**:
+     - Wired direct image generation requests to Google Gemini image models (`gemini-3.1-flash-image` and `gemini-2.5-flash-image`).
+     - Decodes base64 payload into `public/blog_covers/{slug}.jpg` and supports automatic upload to Supabase CDN (`blog-covers` bucket).
+  4. **High Court of Orissa Branding & High-Resolution Vector Fallback**:
+     - Added dedicated `HIGH COURT` theme in `automations/shared/exam_logo_registry.py` (Midnight Judicial Navy `#0F172A`, Bronze Gold `#D97706`, and `⚖️` insignia).
+     - When Google AI Studio billing is not yet activated on the API key (quota limit: 0 on free tier), gracefully falls back to generating a razor-sharp, official board-branded 1200x630 vector banner with 0 stock photo tropes.
+  5. **Fleet-Wide Integration Across All Publishing Automations**:
+     - Upgraded `exam_update_engine.py`, `ca_website_publisher.py`, and `shared/drive_image_sanitizer.py` to route all blog and social image generation through `generate_blog_imagen_banner`.
+     - Verified end-to-end with unit test suite `scratch/test_imagen_integration.py` (5/5 tests passing in 34.8s).
+
   1. **YouTube Community Visual Card Attachment Fix**:
      - Resolved root cause of text-only YouTube Community posts: `exam_update_engine.py` omitted `image_path` in line 1058, and `post_exam_to_youtube.py` lacked fallback extraction from `article_data`.
      - Added robust fallback in `post_exam_update_to_youtube` checking `article_data.get("slide_image_path") or article_data.get("cover_image")`, and explicitly passed `image_path` from `exam_update_engine.py`.
@@ -11,6 +27,24 @@
   4. **Verification & Authenticity Audit**:
      - Fully verified authenticity of the Odisha High Court Junior Grade Typist DEO Result 2026 (Advt 01/2026, Notice No. 311 on `orissahighcourt.nic.in`).
      - Executed verification test suite `test_exam_engine_fixes.py` with 100% pass rate. Committed and pushed to `Pixduct/odisha-mcq-engine` main (`6515328`).
+
+- [x] ⚡ Lingering Question Storage Audit, Permanent Database Purge & Studio Purge Actions Suite (`src/components/admin/AIQuestionStudio.tsx`, `src/AdminPanel.tsx`, `src/lib/examService.ts`, Supabase `questions` & `questionBanks`):
+  1. **Root Cause Analysis of Lingering Questions & "Populated" Status**:
+     - Identified that the morning database cleanup only purged "orphan questions" (questions whose `topic` had no active bank or mock test). Because the OPSC AAE question banks were active in `questionBanks`, their 437 questions were never deleted.
+     - Those 437 questions were temporarily hidden in AI Studio due to the legacy `target_mode !== 'practice'` filter bug. Once the mode filter was unified to show all 56 banks in the previous turn, the 23 populated practice sets became visible again with `20 Qs` badges.
+  2. **Permanent Database Purge & Counter Synchronization**:
+     - Permanently deleted all 437 lingering questions from the Supabase `questions` table for OPSC AAE (`6813624a-d56d-4b07-8845-d6d47444c41f`).
+     - Reset `questionCount: 0` on all 56 question banks for OPSC AAE in the `questionBanks` table.
+     - Verified audit state: `remaining_questions = 0`, `populated_banks = 0`, all 24 Topic-Wise banks now show `0 Qs • Empty`.
+  3. **Client Cache Invalidation (`ADMIN_CACHE_KEY = 'oep_admin_catalog_cache_v3'`)**:
+     - Bumped cache key to `v3` and added automatic purge of legacy `v1` and `v2` session caches on page load, eliminating stale browser cache retention.
+  4. **Direct In-Studio Purge Action Tools**:
+     - Added a dedicated `🗑️ Purge Qs ({selectedCount})` button in Multi-Bank Queue Runner allowing 1-click batch purging of questions directly from AI Studio.
+     - Added a `🗑️ Clear Qs` button in Single Target Mode cards for instant 1-click question purging on any individual bank.
+     - Automatically updates `bankCountOverrides` in local state so the UI turns to `0 Qs • Empty` immediately without requiring a page reload.
+  5. **Build & QA Verification**:
+     - Frontend Vite build succeeded in 36.49s (exit code 0); Server esbuild bundle succeeded in 111ms (exit code 0).
+     - Verified clean zero state via automated script: 0 questions remaining in Supabase.
 
 - [x] ⚡ Question Bank Authentic Category Audit & AI Studio Unified Visibility Suite (`src/components/admin/AIQuestionStudio.tsx`, `src/AdminPanel.tsx`, `questionBanks` Supabase Table):
   1. **Audit & Preservation of Authentic User-Named Collections**:

@@ -6248,14 +6248,53 @@ The AI extracts this exam board's signature style and matches it without duplica
                               ✓ Select All Filtered ({filteredBanks.length})
                             </button>
                             {selectedMultiBankIds.length > 0 && (
-                              <button
-                                type="button"
-                                disabled={isQueueRunnerActive}
-                                onClick={() => setSelectedMultiBankIds([])}
-                                className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 rounded-xl text-xs font-black transition-all cursor-pointer"
-                              >
-                                Clear ({selectedMultiBankIds.length})
-                              </button>
+                              <>
+                                <button
+                                  type="button"
+                                  disabled={isQueueRunnerActive}
+                                  onClick={async () => {
+                                    const selectedBanks = scopedPool.filter(b => selectedMultiBankIds.includes(b.id));
+                                    const totalQCount = selectedBanks.reduce((sum, b) => sum + getBankCount(b), 0);
+                                    const confirmMsg = `Are you sure you want to permanently clear all ${totalQCount} ${unitLabel.toLowerCase()} from the ${selectedBanks.length} selected ${nounLabel}?\n\nThe bank records will remain intact, all questions will be permanently deleted from the database, and their counters will reset to 0.`;
+                                    if (!confirm(confirmMsg)) return;
+
+                                    try {
+                                      const toastId = toast.loading(`Clearing questions for ${selectedBanks.length} ${nounLabel}...`);
+                                      for (const b of selectedBanks) {
+                                        if (isMock) {
+                                          await examService.clearQuestionsForMockTest(b.id);
+                                        } else {
+                                          await examService.clearQuestionsForBank(b.id);
+                                        }
+                                      }
+                                      setBankCountOverrides(prev => {
+                                        const next = { ...prev };
+                                        selectedBanks.forEach(b => { next[b.id] = 0; });
+                                        return next;
+                                      });
+                                      setSelectedMultiBankIds([]);
+                                      toast.dismiss(toastId);
+                                      toast.success(`✅ Successfully cleared questions for ${selectedBanks.length} ${nounLabel}. Counters reset to 0.`);
+                                      if (onRefreshCatalog) onRefreshCatalog();
+                                    } catch (err: any) {
+                                      toast.error(`Error clearing questions: ${err.message || err}`);
+                                    }
+                                  }}
+                                  className="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 rounded-xl text-xs font-black transition-all border border-rose-200 dark:border-rose-800 flex items-center gap-1.5 cursor-pointer"
+                                  title="Permanently delete all questions and reset counter to 0 for selected banks"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                                  <span>Purge Qs ({selectedMultiBankIds.length})</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={isQueueRunnerActive}
+                                  onClick={() => setSelectedMultiBankIds([])}
+                                  className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 rounded-xl text-xs font-black transition-all cursor-pointer"
+                                >
+                                  Clear ({selectedMultiBankIds.length})
+                                </button>
+                              </>
                             )}
                           </div>
                         </div>
@@ -6786,6 +6825,32 @@ The AI extracts this exam board's signature style and matches it without duplica
                           ? `${selectedItem.card_count ?? 0} Existing Flashcards`
                           : `${selectedItem._questionCount ?? selectedItem.questionCount ?? 0} Existing Questions`}
                       </span>
+                      {((stage2TargetType === 'flashcards' ? (selectedItem.card_count ?? 0) : (selectedItem._questionCount ?? selectedItem.questionCount ?? 0)) > 0) && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const count = stage2TargetType === 'flashcards' ? selectedItem.card_count : (selectedItem._questionCount ?? selectedItem.questionCount ?? 0);
+                            if (!confirm(`Are you sure you want to permanently clear all ${count} items from "${selectedItem.title}"?\n\nThe record will remain intact, all questions will be permanently deleted from the database, and the count will reset to 0.`)) return;
+                            try {
+                              if (stage2TargetType === 'mock_test') {
+                                await examService.clearQuestionsForMockTest(selectedItem.id);
+                              } else {
+                                await examService.clearQuestionsForBank(selectedItem.id);
+                              }
+                              setBankCountOverrides(prev => ({ ...prev, [selectedItem.id]: 0 }));
+                              toast.success(`✅ Successfully cleared questions for "${selectedItem.title}". Count reset to 0.`);
+                              if (onRefreshCatalog) onRefreshCatalog();
+                            } catch (e: any) {
+                              toast.error(`Error clearing: ${e.message || e}`);
+                            }
+                          }}
+                          className="text-xs font-black px-2.5 py-1 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800 flex items-center gap-1 cursor-pointer transition-all"
+                          title="Purge all questions for this item"
+                        >
+                          <Trash2 className="w-3 h-3 text-rose-600" />
+                          <span>Clear Qs</span>
+                        </button>
+                      )}
                     </div>
                   </div>
 

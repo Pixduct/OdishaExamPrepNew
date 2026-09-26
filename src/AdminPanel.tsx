@@ -447,12 +447,15 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const [bulkFileContent, setBulkFileContent] = useState('');
   const [bulkFileNames, setBulkFileNames] = useState<string[]>([]);
   // SWR Admin Catalog Cache Helper with Cache Versioning
-  const ADMIN_CACHE_KEY = 'oep_admin_catalog_cache_v2';
+  const ADMIN_CACHE_KEY = 'oep_admin_catalog_cache_v3';
   const getAdminCatalogCache = () => {
     if (typeof window === 'undefined') return null;
     try {
-      // Clear legacy unversioned cache if present
-      try { sessionStorage.removeItem('oep_admin_catalog_cache'); } catch(e) {}
+      // Clear legacy unversioned and v2 caches if present
+      try { 
+        sessionStorage.removeItem('oep_admin_catalog_cache'); 
+        sessionStorage.removeItem('oep_admin_catalog_cache_v2'); 
+      } catch(e) {}
       const raw = sessionStorage.getItem(ADMIN_CACHE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);

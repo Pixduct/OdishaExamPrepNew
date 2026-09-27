@@ -22,5 +22,9 @@ export function getDirectImageUrl(url: string) {
       return `https://drive.google.com/thumbnail?id=${openMatch[1]}&sz=w1000-h800`;
     }
   }
+  // Strict Zero-Stock-Photo Guard: Disallow generic Pexels stock photos from ever rendering
+  if (url.includes('pexels.com')) {
+    return '/blog_covers/banner_general_strategy_update.png';
+  }
   return url;
 }

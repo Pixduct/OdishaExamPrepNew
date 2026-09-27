@@ -29,47 +29,36 @@ export interface CurrentAffairsItem {
  * Smart Real Image Resolver: Guarantees 100% accurate, non-broken, real topic images for every Current Affairs article.
  */
 export function getSmartRealImage(title: string, category: string, rawUrl?: string): string {
-  const t = (title || '').toLowerCase();
-
-  if (t.includes('chilika') || t.includes('wetland') || t.includes('lagoon') || t.includes('dolphin') || t.includes('nalabana')) {
-    return 'https://images.pexels.com/photos/1486976/pexels-photo-1486976.jpeg?auto=compress&cs=tinysrgb&w=1200';
-  }
-  if (t.includes('subhadra') || t.includes('cabinet') || t.includes('samagra bikas') || t.includes('secretariat') || t.includes('panchayat') || t.includes('odisha government')) {
-    return 'https://images.pexels.com/photos/2047905/pexels-photo-2047905.jpeg?auto=compress&cs=tinysrgb&w=1200';
-  }
-  if (t.includes('isro') || t.includes('gaganyaan') || t.includes('rocket') || t.includes('space') || t.includes('chandrayaan')) {
-    return 'https://images.pexels.com/photos/2156/sky-space-rocket-start.jpg?auto=compress&cs=tinysrgb&w=1200';
-  }
-  if (t.includes('rbi') || t.includes('repo rate') || t.includes('monetary') || t.includes('bank') || t.includes('inflation')) {
-    return 'https://images.pexels.com/photos/5905712/pexels-photo-5905712.jpeg?auto=compress&cs=tinysrgb&w=1200';
-  }
-  if (t.includes('puri') || t.includes('jagannath') || t.includes('konark') || t.includes('lingaraj') || t.includes('temple')) {
-    return 'https://images.pexels.com/photos/2161467/pexels-photo-2161467.jpeg?auto=compress&cs=tinysrgb&w=1200';
-  }
-  if (t.includes('surya ghar') || t.includes('solar') || t.includes('renewable') || t.includes('electricity')) {
-    return 'https://images.pexels.com/photos/356036/pexels-photo-356036.jpeg?auto=compress&cs=tinysrgb&w=1200';
-  }
-  if (t.includes('ai') || t.includes('governance') || t.includes('summit') || t.includes('digital')) {
-    return 'https://images.pexels.com/photos/3184325/pexels-photo-3184325.jpeg?auto=compress&cs=tinysrgb&w=1200';
-  }
-  if (t.includes('ocean') || t.includes('treaty') || t.includes('marine')) {
-    return 'https://images.pexels.com/photos/1001682/pexels-photo-1001682.jpeg?auto=compress&cs=tinysrgb&w=1200';
-  }
-
-  // Check if rawUrl is a valid non-blocked Pexels URL
-  if (rawUrl && rawUrl.includes('pexels.com') && !rawUrl.includes('5905709') && !rawUrl.includes('upload.wikimedia.org')) {
+  // If rawUrl is already an official local or Supabase CDN cover, preserve it
+  if (rawUrl && !rawUrl.includes('pexels.com') && (rawUrl.startsWith('http') || rawUrl.startsWith('/'))) {
     return rawUrl;
   }
 
-  // Fallback by Category
+  const t = (title || '').toLowerCase();
   const c = (category || '').toLowerCase();
-  if (c.includes('odisha')) {
-    return 'https://images.pexels.com/photos/2047905/pexels-photo-2047905.jpeg?auto=compress&cs=tinysrgb&w=1200';
-  } else if (c.includes('world')) {
-    return 'https://images.pexels.com/photos/3184325/pexels-photo-3184325.jpeg?auto=compress&cs=tinysrgb&w=1200';
+
+  if (t.includes('high court') || t.includes('court') || t.includes('judiciary') || t.includes('legal')) {
+    return '/blog_covers/banner_high_court_odisha-high-court-typist-deo-result-2026-official-.png';
+  }
+  if (t.includes('opsc') || t.includes('aso') || t.includes('civil services')) {
+    return '/blog_covers/banner_opsc_odisha-gk-500-mcq-blueprint.png';
+  }
+  if (t.includes('osssc') || t.includes('amin') || t.includes('ri')) {
+    return '/blog_covers/banner_osssc_osssc-cre-qa-verify.png';
+  }
+  if (t.includes('police') || t.includes('constable') || t.includes('sub-inspector')) {
+    return '/blog_covers/banner_odisha_police_police-constable-no-key.png';
+  }
+  if (t.includes('bank') || t.includes('sbi') || t.includes('ibps') || t.includes('rbi')) {
+    return '/blog_covers/banner_banking_sbi-junior-associates-customer-support-sales.png';
   }
 
-  return 'https://images.pexels.com/photos/5905712/pexels-photo-5905712.jpeg?auto=compress&cs=tinysrgb&w=1200';
+  // Fallback by Category
+  if (c.includes('odisha') || t.includes('odisha') || t.includes('cabinet')) {
+    return '/blog_covers/banner_general_strategy_odisha-cabinet-approves-new-industrial-policy-2026.png';
+  }
+
+  return '/blog_covers/banner_general_strategy_update.png';
 }
 
 export const FALLBACK_CURRENT_AFFAIRS: CurrentAffairsItem[] = [

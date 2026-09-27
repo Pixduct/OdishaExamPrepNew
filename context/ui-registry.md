@@ -503,6 +503,37 @@ import { UniversalMathDiagramEngine } from '../components/UniversalMathDiagramEn
 
 ---
 
+### `ExecutiveGraphicCardGenerator`
+
+- **File Path:** [`automations/shared/imagen_generator.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/imagen_generator.py) & [`automations/shared/exam_logo_registry.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/exam_logo_registry.py)
+- **Category:** Media / Automation / AI
+- **Purpose:** High-resolution 1200x675 executive graphic card generator for blog covers and Open Graph social sharing cards. Intelligently parses article context using Gemini 3.5 Flash Lite (with algorithmic fallback) to produce clean titles, executive summaries, and 3 structured key points micro-cards.
+- **Dependencies:** `Pillow` (`PIL.Image`, `PIL.ImageDraw`, `PIL.ImageFont`, `PIL.ImageFilter`), `requests`, `google-genai` / Gemini REST API.
+- **Last Updated:** September 27, 2026
+
+| Property | Class / Token / Specification |
+| :--- | :--- |
+| **Canvas Background** | `RGB(10, 15, 28)` (`#0A0F1C` Deep Obsidian Midnight Slate) |
+| **Ambient Mesh Glows** | Radial blurred spheres: Royal Blue `rgba(37, 99, 235, 0.45)`, Teal `rgba(20, 184, 166, 0.25)`, Amber `rgba(245, 158, 11, 0.3)` |
+| **Card Frame Container** | `RoundedRect(pad=40, radius=24, fill=rgba(15, 23, 42, 0.92), outline=rgba(255, 255, 255, 0.11))` |
+| **Top Sheen Highlight** | `Line(pad+24, pad+1, width-pad-24, pad+1, fill=rgba(255, 255, 255, 0.25))` |
+| **Authority Board Pill** | `RoundedRect(radius=14, fill=rgba(30, 41, 59, 0.9), outline=theme['accent'])` + glowing dot indicator `●` |
+| **Category Status Badge** | `RoundedRect(radius=14, fill=theme['badge_bg'], outline=rgba(255, 255, 255, 0.35))` |
+| **Text — Headline** | Segoe UI Bold / Arial Bold, 38px, `#FFFFFF`, max 2 lines, clean line breaks |
+| **Text — Summary** | Segoe UI / Arial Regular, 18px, `#94A3B8` (Slate-400), max 2 lines |
+| **Key Points Grid** | 3 Cards (328x138px, gap 36px), fill `rgba(30, 41, 59, 0.75)`, border `#334155` |
+| **Key Points Accents** | Card 1: Blue `#3B82F6`, Card 2: Emerald `#10B981`, Card 3: Amber `#F59E0B` |
+| **Footer Bar** | Slate separator line + `OdishaExamPrep Official Portal • https://www.odishaexamprep.in` |
+| **Verified Seal Indicator** | Glowing vector emerald dot `●` + `100% Verified Official State Notice` (`#34D399` bold) |
+
+**Pattern notes:**
+- **Zero Diffusion Distortions**: Completely eliminates AI image model generation errors (no distorted faces, no warped columns, no cavernous rooms).
+- **Executive Graphic Card Standard**: Standardized at 1200x675 (16:9) aspect ratio, ensuring unified Open Graph visual consistency across all blog hero headers and social sharing previews.
+- **Cross-Platform Font Safety**: Font resolution dynamically checks Segoe UI Bold/Regular on Windows and DejaVu/Liberation/FreeSans on Linux GitHub Actions runners. Vector ellipses are used for status and badge dots to prevent missing font glyph boxes (`□`).
+- **Structured Content Model**: Content is partitioned into 4 distinct visual tiers: Authority & Badge (top), Headline & Context Summary (middle), 3 Metric Highlights (lower-middle), and Verified Official Seal (bottom).
+
+---
+
 ### 4. `StickyAICompanion`
 - **File Path:** [`src/components/StickyAICompanion.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/StickyAICompanion.tsx)
 - **Category:** AI Assistant

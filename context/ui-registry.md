@@ -18,6 +18,433 @@ Before creating any new component, developers and AI agents MUST consult this re
 ## Component Index
 
 | Component Name | Category | File Path | Variants | Used By | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **`VirtualOfficeAgentSimulationSuite`** | Media / Studio / Simulation | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | High-DPI 60fps Three.js WebGL 3D virtual office simulation for 7 autonomous background automation engines (Bikram, Chhabi, Dipti, Priyanka, Subham, Trupti, Manas). Features living 3D humanoids with desynchronized burst-typing, dual-screen gaze shifting, overhead stretches, espresso sipping, live backend automation feed (`/api/automation/live-feed`), War Room All-Hands standup debriefs with conversational head-turning, Café peer banter, and autonomous agency roaming loops | Standalone Tool, `AdminPanel.tsx` header, `App.tsx` global shortcut | Active |
+| **`VirtualOfficeSpeechBubbleSprite`** | Media / 3D UI / Overlay | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | 3D billboarding floating speech bubble CanvasTexture sprite with rounded callout tail, dark obsidian backdrop, emerald speaker badge, and real-time standup debrief text | `public/virtual-office.html` (`createSpeechBubbleSprite`) | Active |
+| **`VirtualOfficeTelemetryBottomTicker`**| HUD / Overlay | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | Viewport-fixed bottom telemetry HUD pill with pulsing emerald status beacon, live Telegram bot logs, Supabase latency, and keyboard/mouse orbit guide | `public/virtual-office.html` (`#ticker-bar`) | Active |
+| **`VirtualOfficeLiveTelemetryCard`** | HUD / Telemetry / Overlay | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | 320px glassmorphic operational inspector HUD card (`#agent-tooltip`) displaying real-time script tags, current active pipeline task, live notice/question metrics, Supabase DB latency, and monospaced terminal command stream | `public/virtual-office.html` (`#agent-tooltip`) | Active |
+| **`VirtualOffice3DDeskNameplate`** | 3D UI / Billboarding Sprite | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | Permanent 3D billboarding glassmorphic workstation nameplate sprite (`512x160` CanvasTexture) hovering at `y=6.1` above monitors. Displays avatar, uppercase bold name, live operational status beacon (`● RUNNING` / `○ STANDBY`), script tag, and last run timestamp with 0 occlusion | `public/virtual-office.html` (`createAgentNameplate`) | Active |
+| **`VirtualOfficeFleetRosterBar`** | HUD / Navigation / Matrix | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | Permanent 2D viewport-fixed executive fleet roster matrix bar (`#agent-roster-bar`) at `top: 3.8rem`. Displays all 7 agent chips with live status indicators, clickable for camera focus & dossier | `public/virtual-office.html` (`#agent-roster-bar`) | Active |
+| **`VirtualOfficeBiophilicZenAtrium`** | Media / 3D Environment / Wellness | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | Authentic Japanese biophilic sanctuary with procedural raked basalt karesansui gravel (`TextureGen.createZenSand()`), concentric ripple patterns around a carved granite Tsukubai water basin with realistic bamboo spout (*kakei*) pouring a stream, S-curved flagstone stepping path with 0 collision, sculpted black pine bonsai, weeping ficus cloud canopies, jointed bamboo canes, and teakwood park bench | `public/virtual-office.html` (`buildZenAtriumProps`, `updateAutonomousAgency`) | Active |
+| **`VirtualOfficeAILabSuite`** | Media / 3D Environment / Research | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | Deep learning research suite with polished dark slate flooring, 3 liquid-cooled 42U server racks flush on north wall (`z = -32`) with status LED ladders & blue floor glow, separate diagnostic workstation console at `x: -20, z: -22`, task stool, 8-unit open promenade entryway eliminating beam obstruction, and central dark granite pedestal with 3D neural visualizer (`x: -10, z: -21`) with 10+ units of clear floor space | `public/virtual-office.html` (`buildAILabProps`, `updateAutonomousAgency`) | Active |
+| **`VirtualOfficeMediaStudioSuite`** | Media / 3D Environment / Broadcast | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | YouTube Live broadcast suite with dedicated ribbed soundproof studio carpet (`TextureGen.createStudioCarpet()`), 3D beveled hexagonal acoustic pyramidal wall tiles with amber backlighting, curved broadcast console at `z = -28`, presenter chair behind desk at `z = -30.5` facing forward, 4K broadcast camera on tripod in front at `z = -23.5` facing presenter, and 45° key-light softbox ring light | `public/virtual-office.html` (`buildMediaStudioProps`, `updateAutonomousAgency`) | Active |
+| **`VirtualOfficeFounderExecutiveSuite`** | Media / 3D Environment / Executive | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | C-suite executive office with luxury obsidian herringbone wool area rug (`TextureGen.createExecutiveRug()`) with brushed brass border, cantilevered walnut desk at `z = -23` with 4+ units of swivel clearance, credenza flush to wall at `z = -31`, brass gooseneck banker lamp with glowing emerald shade, corner Fiddle-Leaf Fig tree, and twin cognac leather guest armchairs flanking a low round walnut table | `public/virtual-office.html` (`buildFounderSuiteProps`, `updateAutonomousAgency`) | Active |
+| **`VirtualOfficeWaypointNavigationAndActivityKinematics`** | Locomotion / Kinematics / Navigation | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | Full office topological waypoint corridor graph (`calculateOfficePath`), calm natural walking speed (`3.5 units/sec`), shortest-arc angular steering, and room-specific activity micro-gestures (coffee sipping, zen deep breathing, console diagnostic typing, presenter 4K camera gestures) | `public/virtual-office.html` (`calculateOfficePath`, `updateActivityMicroBehaviors`, `updateWalkingAgents`) | Active |
+| **`VirtualOfficeTelegramReportsAndCloudDispatcher`** | Telemetry / Operations / Cloud Dispatch | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) & [`server.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/server.ts) | Real GitHub Actions cloud automation dispatcher (`POST /api/automation/dispatch`) wired to "⚡ Force Run Engine Now", 1:1 agent-to-engine alignment across all 7 workflows, and live Telegram Bot live reports & dispatch console (`#telegram-overlay`, `GET /api/automation/today-reports`) displaying authentic execution notifications, exam alerts, and current affairs digests | `public/virtual-office.html` (`#telegram-overlay`, `#manual-dispatch-btn`), `server.ts` | Active |
+| **`VirtualOfficeRiggedHumanoidModelEngine`** | 3D Graphics / Avatar / Rigged GLTF Model | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | Production-grade 3D rigged humanoid agent engine. Replaces uncanny primitive box-and-sphere mannequins with 7 distinct CC0 1.0 Quaternius rigged human models (`office-seok.glb`, `office-jun.glb`, `office-ara.glb`, `office-mira.glb`, `office-chan.glb`, `office-haena.glb`, `office-woojin.glb`). Features continuous organic skin topologies, tailored executive business wear (suits, suspenders, blouses, lab coats, vests), realistic hairstyles, accessories (glasses, headsets, boom mics, backpacks), real skeletal rigs, and Three.js `AnimationMixer` playback for natural seated postures, standing idle, and walking cycles | `public/virtual-office.html` (`preloadAgentModels`, `createAgentAvatar`, `applyAvatarPosture`), `build/virtual-office.html` | Active |
+| **`ExamAlertCardOfficialSourceStrip`** | Media / Graphic Card / Authority Seal | [`automations/exam_card_renderer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/exam_card_renderer.py) | 1080x1080 visual alert card footer strip (`.official-portal-strip`) featuring dark obsidian glassmorphism, verified cyan domain pill (`.portal-link`), and strict domain resolution sanitizer (`resolve_clean_display_domain`) eliminating script postback leaks | `exam_card_renderer.py`, `exam_update_engine.py`, `breaking_engine.py` | Active |
+| **`VirtualOfficeExecutiveCommandHeader`** | HUD / Navigation / Executive Header | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | Sleek 48px executive 3-column Grid mission control bar (`display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.75rem;`). Pinned Left Pillar for Brand Identity (`🏢 OdishaExamPrep` + `Operations Deck`), mathematically Centered Pillar for live Fleet Telemetry (`● 7 Standby`, `Tasks: 490`, `IST Clock`), and pinned Right Pillar for Action & Utility controls (`All Hands`, `Coffee`, `Desks`, `Reports`, `🔊` / `🔇`, `⛶`). Zero off-screen overflow, 16px right margin, Service Worker cache bypass | Standalone Tool, `public/virtual-office.html`, `build/virtual-office.html` | Active |
+
+### ExamAlertCardOfficialSourceStrip
+
+File: [`automations/exam_card_renderer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/exam_card_renderer.py)
+Last updated: 2026-09-29
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | `rgba(0, 0, 0, 0.55)` with `backdrop-filter: blur(14px)` (`.official-portal-strip`) |
+| **Border** | `1.5px solid rgba(255, 255, 255, 0.16)` (`.official-portal-strip`) |
+| **Border radius** | `16px` (`.official-portal-strip`) |
+| **Text — primary** | `#38BDF8` (`.portal-link`), `font-size: 20px`, `font-weight: 800`, `letter-spacing: 0.6px` |
+| **Text — secondary** | `#94A3B8` (`.portal-label`), `font-size: 18px`, `font-weight: 700`, `display: flex; align-items: center; gap: 8px` |
+| **Spacing** | `padding: 13px 22px; margin-top: 6px;`, `display: flex; align-items: center; justify-content: space-between;` |
+| **Hover state** | Static image card rendering (Playwright 1080x1080 viewport, `device_scale_factor: 2`) |
+| **Shadow** | `0 4px 20px rgba(0, 0, 0, 0.35)` |
+| **Accent usage** | Cyan `#38BDF8` domain host typography, `🌐` globe icon prefix |
+
+**Pattern notes:**
+- **Sanitized Authority Domain Contract**: Rendered exclusively via `resolve_clean_display_domain(official_link, org_name, board_short)`. Guarantees clean authoritative domain presentation (e.g., `ossc.gov.in`, `opsc.gov.in`, `orissahighcourt.nic.in`).
+- **Zero Script & Leak Tolerance**: Under zero conditions will raw ASP.NET JavaScript execution triggers (`javascript:__doPostBack(...)`), URI schemes, anchors, or tracking parameters ever leak into visual graphics.
+- **Fallthrough Protection**: Non-standard or broken client-side triggers safely fallback to verified official sovereign/statutory portals registered in `BOARD_OFFICIAL_DOMAINS`.
+
+### VirtualOfficeExecutiveCommandHeader
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) & [`build/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/build/virtual-office.html)
+Last updated: 2026-09-29
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | `rgba(11, 17, 32, 0.96)` with `backdrop-filter: blur(20px)` and `-webkit-backdrop-filter: blur(20px)` |
+| **Border** | `border-bottom: 1px solid rgba(255, 255, 255, 0.08)` (header), `border: 1px solid rgba(255, 255, 255, 0.1)` (`.btn`), `border: 1px solid rgba(255, 255, 255, 0.08)` (`.stat-pill`) |
+| **Border radius** | `0` (header container), `8px` (`.brand-logo-badge`), `6px` (`.btn`, `.stat-pill`), `4px` (`.deck-badge`), `50%` (`.live-pulse`), `999px` (floating docks) |
+| **Text — primary** | `var(--text-main)` / `#F8FAFC`, `0.88rem` font weight 800 (brand), `0.67rem` font weight 700 (buttons) |
+| **Text — secondary** | `var(--text-muted)` / `#94A3B8`, `0.65rem` font weight 700 (labels) |
+| **Spacing** | `height: 48px`, `padding: 0 1rem;`, `gap: 0.75rem` (grid columns), `gap: 0.30rem` to `0.35rem` (clusters), `padding: 0.22rem 0.50rem` (`.btn`), `28px x 28px` (`.btn-icon`) |
+| **Hover state** | `.btn:hover`: `background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.22); transform: translateY(-1px);` |
+| **Shadow** | `0 4px 20px rgba(0, 0, 0, 0.5)` (header), `0 0 14px rgba(59, 130, 246, 0.35)` (brand badge), `0 0 8px var(--brand-emerald)` (pulse beacon) |
+| **Accent usage** | Cyan (`#38BDF8` badge & clock), Emerald (`#10B981` pulse & `#34D399` task count), Amber (`linear-gradient` `.btn-bell`), Purple (`linear-gradient` `.btn-coffee`), Blue (`linear-gradient` `.brand-logo-badge`) |
+
+**Pattern notes:**
+- **3-Column Mission Control Grid**: Architecture `display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.75rem;` establishes three distinct pillars: pinned Left Brand, mathematically Centered Telemetry, and pinned Right Controls (16px edge padding).
+- **Zero Right-Side Overflow**: Eradicated flex `margin-left: auto;` displacement. Controls remain accessible on all viewports from 800px to 4K displays.
+- **Offline Cache Bypass**: Standalone studio tools (`/virtual-office.html`, `/office`) are explicitly bypassed in `public/sw.js` and `build/sw.js` (`oep-pwa-v13`) to prevent stale cached HTML.
+- **100% SHA-256 Parity**: Validated byte parity between `public/virtual-office.html` and `build/virtual-office.html`.
+
+### VirtualOfficeRiggedHumanoidModelEngine
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) & [`build/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/build/virtual-office.html)
+Last updated: 2026-09-29
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Model Format / Rigs** | 7 CC0 1.0 Rigged Humanoid GLTF/GLB models vendored locally in `public/models/agents/` and `build/models/agents/` |
+| **Loaders** | Three.js r128 `GLTFLoader.js` & `SkeletonUtils.js` vendored locally in `public/vendor/` and `build/vendor/` (0 CDN runtime dependencies) |
+| **Animations** | Skeletal `AnimationMixer` with skinned mesh tracks: `sit`, `idle`, `walk` with seamless crossfades and per-model scale calibration (`scale = 2.7`) |
+| **Postures Supported** | `SEATED_DESK`, `SEATED_WARROOM` (root `y=0.55`), `SEATED_BARSTOOL` (`y=0.85`), `SEATED_STOOL` (`y=0.75`), `SEATED_STUDIO` (`y=0.60`), `SEATED_BENCH` / `SEATED_GUEST` (`y=0.28`), `SEATED_SOFA` (`y=0.20`), `WALKING` (`y=0`), `STANDING` / `WINDOW_GAZE` (`y=0`) |
+| **Orientation Standard** | GLTF humanoid forward facing `+Z` (`rotY = 0` at desk faces monitors at `+Z` with back against chair backrest at `-Z`; corridor steering `Math.atan2(dx, dz)`) |
+| **Shadows & Materials** | SkinnedMesh traversal with `castShadow = true`, `receiveShadow = true`, and organic PBR standard shading |
+| **Interactive state / Hitbox**| Dedicated raycast hitbox (`BoxGeometry(3.5, 5.5, 3.5)`), cursor pointer on hover, click triggers camera focus & opens comprehensive agent dossier modal |
+| **Teleport & Preload** | `preloadAgentModels(callback)` caches 7 GLB scenes in memory before building desks; uses `SkeletonUtils.clone()` for isolated bone hierarchies |
+
+**Pattern notes:**
+- **Zero External CDN Dependencies**: 100% self-contained offline architecture. Both the Three.js loaders and all 7 CC0 GLB character models are vendored locally within the repository under `public/vendor/`, `build/vendor/`, `public/models/agents/`, and `build/models/agents/`.
+- **Eradication of Uncanny Primitive Shapes**: Replaced sphere-head/box-torso mannequins with authentic rigged humans possessing natural proportions, organic facial sculpts, detailed hairstyles, clothing folds, realistic hands, and leather footwear.
+- **Dynamic Posture Alignment Engine**: `applyAvatarPosture(avatarGroup, postureType)` automatically calculates exact vertical root offsets, plays appropriate skeletal actions (`sit` / `idle` / `walk`), and aligns characters with Herman Miller desk chairs, Chesterfield lounge sofas, and café barstools.
+- **Orientation & Seat Height Calibration**: Rigged humanoids follow forward `+Z`. Seating coordinates are calibrated: North-facing seating (into desks, bar counters, diagnostic screens, and park benches) requires `rotY = Math.PI`, whereas South-facing seating (executive desk chair, lounge sofa, media presenter) uses `rotY = 0`. Vertical heights explicitly align buttocks to physical cushions (`0.85` for barstools, `0.75` for task stools, `0.60` for presenter chairs, `0.55` for office chairs, `0.28` for benches/armchairs, `0.20` for low sofas) with synchronized breathing loop offsets.
+- **100% SHA-256 Parity**: Strict byte-for-byte match maintained between `public/virtual-office.html` and `build/virtual-office.html`.
+
+### VirtualOfficeTelegramReportsAndCloudDispatcher
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) & [`server.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/server.ts)
+Last updated: 2026-09-28
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | `#0B1120` with `backdrop-filter: blur(14px)`, feed radial glow `radial-gradient(circle at top right, rgba(14, 165, 233, 0.04), transparent 60%)` |
+| **Border** | `1px solid rgba(56, 189, 248, 0.25)` container; `border-left: 3px solid #0088CC` for Telegram message bubbles |
+| **Border radius** | `24px` for modal card; `999px` for category filter pills; `14px` for message bubbles; `8px` for action links |
+| **Text — primary** | `#F8FAFC` (`Plus Jakarta Sans` / `Inter`, weight 700 / 800) |
+| **Text — secondary**| `#94A3B8` (slate-400), `#64748B` (slate-500), `#38BDF8` (sky-400) |
+| **Spacing** | Header `1.1rem 1.4rem`, feed `1.2rem`, message bubbles `1rem 1.15rem`, action pills `0.28rem 0.65rem` |
+| **Hover state** | `border-color: rgba(56, 189, 248, 0.4)`, `transform: translateY(-1px)`, button background `#0088CC` |
+| **Shadow** | `0 30px 80px rgba(0, 0, 0, 0.95), 0 0 45px rgba(36, 161, 222, 0.25)` |
+| **Accent usage** | Telegram blue (`#0088CC`), Cyber sky (`#38BDF8`), Emerald success (`#10B981`), Amber running (`#F59E0B`), Rose error (`#EF4444`) |
+
+**Pattern notes:**
+Full-stack operational bridge between Three.js Virtual Office and GitHub Actions CI/CD workflows:
+- Backend: `POST /api/automation/dispatch` executes `gh workflow run <file> --repo Pixduct/odisha-mcq-engine` with local python fallback. `GET /api/automation/today-reports` aggregates GitHub runs, exam notices, and Telegram broadcast messages into an authenticated Telegram bot feed with non-blocking background cache warming and guaranteed fallbacks for sub-5ms latency.
+- Frontend: "⚡ Force Run Engine Now" initiates real cloud workflow execution, updates button states (`⏳ Dispatching...` -> `🚀 Queued on GitHub (Runner Active)` -> `⚡ Force Run Engine Now`), streams real-time execution logs into agent dossier telemetry box.
+- Genuine GitHub Workflow Titles: Configured 3D workstation nameplates, overhead speech bubbles, and inspector tooltips to strictly display the genuine GitHub Actions workflow names (`Recruitment Portal Notice Scraper`, `Exam Update Engine (Engine 1)`, `Daily MCQ Engine`, `Daily Current Affairs Engine`, `Strategic Evergreen Blog Engine (Engine 2)`, `Strategic Engagement Engine`, `Daily Current Affairs Website Publisher`).
+- Translation Guard: Added `class="notranslate" translate="no"` to all modals and tooltips to prevent browser machine translation from mangling technical terminology.
+- "📱 Telegram Reports": Dedicated slide-out Telegram-style console with category filter tabs, live bot indicator, HTML notification bubbles, direct GitHub Actions log inspection links, and one-click re-run buttons.
+
+### VirtualOfficeGenuineAgentDossierModal
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) (`#dossier-card`, `openDossier`)
+Last updated: 2026-09-28
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | `rgba(15, 23, 42, 0.96)` with `backdrop-filter: blur(20px)` and radial ambient glow |
+| **Border** | `1px solid rgba(56, 189, 248, 0.25)` |
+| **Border radius** | `24px` modal dialog; `14px` info grid cells; `12px` monospaced telemetry terminal box; `10px` dispatch button |
+| **Text — primary** | `#FFFFFF` (`Plus Jakarta Sans`, weight 800 for name, 700 for headings) |
+| **Text — secondary**| `#94A3B8` (slate-400), `#38BDF8` (sky-400), `#10B981` (emerald-400) |
+| **Spacing** | Modal padding `2.2rem 2.4rem`; info grid gap `1.2rem`; telemetry terminal padding `1rem` |
+| **Hover state** | Force run button: `background: #1D4ED8`, `box-shadow: 0 0 25px rgba(56, 189, 248, 0.5)`, `transform: translateY(-1px)` |
+| **Shadow** | `0 35px 80px rgba(0, 0, 0, 0.9), 0 0 50px rgba(14, 165, 233, 0.2)` |
+| **Accent usage** | Cyber sky (`#38BDF8`), Emerald active (`#10B981`), Cobalt action (`#2563EB`), Close amber (`#F59E0B`) |
+
+**Pattern notes:**
+- Strict GitHub Actions Workflow Binding: Displays exact workflow file (`daily_ca_website.yml`, `exam_update_cron.yml`, etc.) and executive title.
+- Real-time Telemetry: Injects live runner metrics, timestamp, and status directly into the monospaced terminal viewport.
+- 1-Click Cloud Execution: "⚡ Force Run Engine Now" initiates authenticated `gh workflow run` dispatch with instant spinner and success states.
+
+### VirtualOfficeWaypointNavigationAndActivityKinematics
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) (`calculateOfficePath`, `updateActivityMicroBehaviors`, `updateWalkingAgents`)
+Last updated: 2026-09-28
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Corridor Network** | Topological waypoint network: Bullpen front aisle (`z = 10.5`), middle aisle (`z = 22.0`), North 8-unit doorway (`x = -27.5, z = 8.0`), East 8-unit doorway (`x = -9.0, z = 24.5`), central promenade (`x = -8.0, z = 5.5`), Northern grand hallway (`z = -10.0`), room thresholds (Zen `(0, 6.5)`, AI Lab `(-15.5, -10.0)`, Media Studio `(0, -10.0)`, Café `(22.5, -10.0)`, Founder `(38.0, -10.0)`) |
+| **Walking Speed** | `3.5 units/sec` calm office locomotion (replacing `12.0 units/sec` robotic sprint) |
+| **Stride Cadence** | `7.5 * delta` stride frequency with synchronized trailing knee flexion (`-0.75 * legSwing`), arm counter-swing (`0.55 * legSwing`), and vertical gait bobbing (`0.14`) |
+| **Steering Physics** | Shortest-arc angular slerp/lerp with wrap-around (`diff * Math.min(1.0, delta * 7.5)`), eliminating instantaneous 180° snap pivots |
+| **Activity Micro-Gestures** | 1. Café: periodic espresso sipping (right arm raises cup to visor, head tilts back) & marble counter resting. 2. Zen Atrium: meditative breathing (spine expansion `Math.sin(time*1.5)*0.04`, lap hands, slow water basin gaze). 3. AI Lab: forward lean, diagnostic keyboard parameter typing, visualizer gaze. 4. Media Studio: presenter gestures directed at 4K camera. 5. Founder Suite: executive armchair lean & conversational head turns |
+| **Obstacle Avoidance** | 100% collision-free: 0 clipping through desks, chairs, monitors, glass walls, water basin, or camera tripod |
+| **Parity** | 100% byte parity between `public/virtual-office.html` and `build/virtual-office.html` |
+
+
+### VirtualOfficeAgentSimulationSuite
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) & [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx#L5379-L5391)
+Last updated: 2026-09-27
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | Pure procedural Three.js WebGL 3D Scene: Twilight sky dome (`#060B18`) with 32 exterior 3D skyscraper towers with glowing window matrices, polished travertine stone floor (`#E2E8F0`), Bullpen high-pile woven carpet (`#1E293B`), chevron herringbone French oak parquet in Café (`#8B5A2B`), high-density raised slate floor in Vault (`#0B1120`), dark obsidian carpet in War Room (`#0F172A`), polished dark granite in AI Lab (`#070B14`), soundproof studio carpet in Media Suite (`#18181B`), smoked walnut in Founder Suite (`#1C1917`), and river pebble bed in Zen Atrium (`#292524`) |
+| **Border** | `rgba(255, 255, 255, 0.12)` subtle / `rgba(59, 130, 246, 0.4)` accent glass / `#1E293B` structural aluminum mullions |
+| **Border radius** | `rounded-xl` (10px–12px) for HUD pills & buttons; `rounded-2xl` (24px) for dossier cards; `rounded-full` (999px) for room jump navigation bar |
+| **Text — primary** | `#F8FAFC` (`Plus Jakarta Sans` font-black / 900 / 800) |
+| **Text — secondary**| `#94A3B8` (slate-400), `#64748B` (slate-500), `#CBD5E1` (slate-300) |
+| **Spacing** | padding `0.35rem 0.85rem` for HUD pills, `1.5rem 1.75rem` for dossier |
+| **Hover state** | `rgba(255, 255, 255, 0.12)`, `border-white/25`, `translateY(-1px)` |
+| **Shadow** | Real-time WebGL PCFSoftShadowMap: Directional moonlight shadows (`#E0F2FE`), warm 3000K point lights above workstations (`#FBBF24`), cyan/emerald server room lights (`#38BDF8`, `#10B981`), amber lounge illumination (`#F59E0B`), and violet AI lab glow (`#A855F7`) |
+| **Accent usage** | Honey-oak (`#D4A373`), warm cognac leather (`#B45309`), polished walnut (`#5C3317`), Calacatta marble (`#F8FAFC`), `supabase` emerald (`#10B981`), `GitHub` cyan (`#38BDF8`), and status indicators (Green=Active `#10B981`, Amber=Busy `#F59E0B`, Purple=Break `#A855F7`, Gray=Offline `#94A3B8`) |
+
+**Pattern notes:**
+Full Three.js WebGL 3D Architectural Living Operations Headquarters (`public/virtual-office.html` & `build/virtual-office.html`).
+Vendored Three.js r128 and OrbitControls in `public/vendor/` for 100% offline stability without external network latency.
+Strict zero-static-image compliance: all textures (wood parquet, travertine, server blades, world map telemetry, syntax code) are generated dynamically via procedural CanvasTextures.
+Expanded 8-Room Corporate Penthouse Campus:
+- **Core Engineering Bullpen**: 7 honey-oak beveled desks angled at 30° toward the front isometric camera, steel legs, Herman Miller Aeron-style mesh chairs, mechanical RGB keyboards, optical mice, coffee mugs, and dual curved displays showing live animated scrolling code and telemetry.
+- **Supabase & GitHub Vault (Fixed & Glowing)**: Double-sided front-facing illuminated headers (`⚡ SUPABASE CLUSTER` in emerald `#10B981`, `🐙 GITHUB ACTIONS CI/CD` in cyan `#38BDF8`), 14 blade unit shelves with active real-time blinking LED status arrays, transparent tempered glass doors with chrome handles, under-cabinet floor wash lights, and brass bollards with neon barrier lines.
+- **Executive Café & Espresso Lounge**: Calacatta gold marble island with fluted walnut base and brass footrail, 3 Scandinavian barstools, prosumer chrome Italian espresso machine with stacked ceramic cups and active 3D animated rising steam particles, double-door stainless fridge with handles, water dispenser station with active 3D rising air bubbles in blue carboy, luxury Cognac Chesterfield leather sofa with rolled arms and button-tufted cushions, and round travertine coffee table with smoked glass top.
+- **War Room Strategy Boardroom**: 85" Ultra-HD video wall with real-time animated radar sweeps from Bhubaneswar and live exam throughput graph, boat-shaped walnut conference table, open glowing aluminum laptops, and 8 executive leather chairs.
+- **AI Neural Research Lab**: Liquid-cooled GPU racks with neon cooling lines, central rotating 3D holographic syllabus visualizer cube, and orbiting neon torus ring.
+- **Media Studio & YouTube Live Broadcast Suite**: Acoustic foam pyramid wall panels, ring light, boom microphone, multi-cam streaming desk.
+- **Founder / Chief Architect Executive Suite**: Cantilevered smoked oak & brass executive desk, high-back leather swivel chair, panoramic skyline view, private credenza.
+- **Biophilic Zen Garden & Wellness Atrium**: Stone planter box, potted monstera and ficus plants, river pebble bed, recessed warm uplights.
+- **Seated Living 3D Humanoid Avatars & Realistic Desk Postures**: 7 expressive characters with styled hair geometry, glasses/headphones/caps, crisp attire, articulated arms with forward ergonomic angles, desynchronized burst typing cadence with pauses/thinking intervals, screen gaze shifting between curved dual monitors, physical overhead stretches, realistic coffee mug sipping, and organic breathing.
+- **Real-Time Live Automation Feed & Autonomous Agency**: Connected directly to `/api/automation/live-feed` pulling genuine metrics from `automations/seen_notices.json`, `automations/history/telegram_sent_history.json`, `automations/published_ca_history.json`, and Supabase. Agents autonomously walk to the Server Vault or Café when idle. In War Room All-Hands mode, agents conduct structured, turn-taking standup debriefs with conversational head-turning towards the active speaker.
+- **Dynamic Walking Kinematics & Interactive Pathfinding**: Clicking "All Hands", "Coffee Break", or "Back to Desks" triggers full procedural walking animations (leg swing, trailing knee flexion, arm swing, vertical body bounce) along the travertine corridor to assign seats in the War Room, Café Lounge, or Bullpen desks.
+- **Interactive OrbitControls & Navigation**: Smooth 3D tilt, pan, and zoom, 1-click "Reset 3D View" button, and quick-focus room jump pills (`[Bullpen]`, `[Vault]`, `[Café]`, `[War Room]`, `[AI Lab]`, `[Media Studio]`, `[Founder Suite]`, `[Zen Atrium]`).
+### VirtualOfficeSpeechBubbleSprite
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html)
+Last updated: 2026-09-27
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | High-DPI procedural 2D Canvas: Dark obsidian callout box `rgba(15, 23, 42, 0.94)` with downward indicator pointer tail |
+| **Border** | `2px solid rgba(56, 189, 248, 0.65)` cyber cyan accent line |
+| **Border radius** | `18px` clamped rounded callout corners |
+| **Text — primary** | `#FFFFFF` (`Inter`, `Plus Jakarta Sans` 600 weight, 18px-22px canvas font) |
+| **Text — secondary**| `#38BDF8` (speaker name badge header), `#10B981` (automation metric tag) |
+| **Spacing** | Canvas internal padding `16px 22px` |
+| **Hover state** | None (3D world-space billboard sprite tracked over character head) |
+| **Shadow** | Canvas `shadowBlur: 16`, `shadowColor: rgba(0, 0, 0, 0.7)` |
+| **Accent usage** | Cyan (`#38BDF8`), Emerald (`#10B981`), Amber (`#F59E0B`) |
+
+**Pattern notes:**
+Rendered as a `THREE.Sprite` with `THREE.SpriteMaterial` set to `depthTest: false` and `renderOrder: 999` so speech bubbles remain visible above furniture and character hair geometry without occlusion. Auto-orients to camera billboard. Scaled dynamically (`scale.set(10.5, 5.25, 1)`) and positioned at `head.y + 4.2`.
+
+### VirtualOfficeTelemetryBottomTicker
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html)
+Last updated: 2026-09-27
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | `rgba(15, 23, 42, 0.88)` (slate-900 / obsidian glass) with `backdrop-blur-md` |
+| **Border** | `1px solid rgba(255, 255, 255, 0.12)` subtle glass |
+| **Border radius** | `rounded-full` (999px pill) |
+| **Text — primary** | `#CBD5E1` (slate-300 regular 12px) |
+| **Text — secondary**| `#94A3B8` (slate-400 font-mono 11px) |
+| **Spacing** | `px-4 py-2` (horizontal 1rem, vertical 0.5rem), `gap-3` |
+| **Hover state** | `border-white/20` transition |
+| **Shadow** | `0 10px 30px rgba(0, 0, 0, 0.5)` deep drop shadow |
+| **Accent usage** | Status beacon emerald (`#10B981`) with `animate-pulse` |
+
+**Pattern notes:**
+Fixed viewport overlay at bottom center (`bottom: 1.25rem; left: 50%; transform: translateX(-50%)`). Divided into two responsive segments: (Left) Live streaming log ticker connected to `/api/automation/live-feed`, and (Right) 3D camera mouse interaction reminder badge (`Left-Click: Orbit • Right-Click: Pan • Scroll: Zoom`).
+
+### VirtualOfficeLiveTelemetryCard
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html)
+Last updated: 2026-09-27
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | `rgba(11, 17, 32, 0.96)` (midnight obsidian glass) with `backdrop-filter: blur(20px)` |
+| **Border** | `1px solid rgba(56, 189, 248, 0.45)` (cyber-sky accent border) |
+| **Border radius** | `rounded-xl` (`14px`) |
+| **Text — primary** | `#F8FAFC` (`Plus Jakarta Sans`, 800 weight, 0.88rem) |
+| **Text — secondary**| `#94A3B8` (role, 0.68rem), `#E2E8F0` (task desc, 0.72rem), `#64748B` (chip label, 0.56rem) |
+| **Spacing** | Card padding `0.85rem 1rem`, header gap `0.65rem`, pipeline box padding `0.5rem 0.65rem`, chip padding `0.3rem 0.45rem` |
+| **Hover state** | Fixed floating inspector card positioned dynamically 18px above agent workstation with safe viewport flip |
+| **Shadow** | `0 20px 45px rgba(0, 0, 0, 0.85), 0 0 25px rgba(56, 189, 248, 0.2)` deep elevation |
+| **Accent usage** | Cyber sky (`#38BDF8`), Emerald green status beacon (`#34D399` / `rgba(16, 185, 129, 0.15)`), Amber script tag (`#FDE68A` in `JetBrains Mono`), Terminal stream obsidian slate (`#070B14`) |
+
+**Pattern notes:**
+### VirtualOffice3DDeskNameplate
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html)
+Last updated: 2026-09-28
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | `rgba(7, 12, 24, 0.96)` (dark obsidian canvas) with `24px` rounded corners |
+| **Border** | `3.5px solid rgba(56, 189, 248, 0.5)` (standby) / `#10B981` (running) |
+| **Border radius** | `24px` rounded rectangular container |
+| **Text — primary** | `#FFFFFF` (`Plus Jakarta Sans`, 900 weight, 38px canvas font) |
+| **Text — secondary**| `#38BDF8` (script tag, 23px font-mono), `#CBD5E1` (status detail, 20px) |
+| **Spacing** | Canvas internal dimensions `512x160`, left avatar offset `64px`, text left offset `124px` |
+| **Hover state** | Permanent 3D billboard sprite hovering at `y=6.1` above monitors (zero hover required) |
+| **Shadow** | Subtle canvas drop shadow around avatar and name |
+| **Accent usage** | Cyan (`#38BDF8`), Emerald (`#10B981`, `#34D399`), Slate (`#94A3B8`) |
+
+**Pattern notes:**
+Permanent 3D billboarding nameplate sprite mounted at world `y = 6.1` above each bullpen workstation. Rendered with `depthTest: false` and `renderOrder: 850` so that each agent's identity and operational status are permanently visible without hovering.
+
+### VirtualOfficeFleetRosterBar
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html)
+Last updated: 2026-09-28
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | `rgba(11, 17, 32, 0.94)` (midnight glass) with `backdrop-filter: blur(20px)` |
+| **Border** | `1px solid rgba(56, 189, 248, 0.35)` |
+| **Border radius** | `rounded-full` (999px pill) |
+| **Text — primary** | `#F8FAFC` (`Plus Jakarta Sans`, 700 weight, 0.68rem) |
+| **Text — secondary**| `#38BDF8` (roster label, 0.62rem font-extrabold uppercase) |
+| **Spacing** | Container padding `0.28rem 0.65rem`, chip gap `0.35rem`, chip padding `3px 8px` |
+| **Hover state** | `background: rgba(56, 189, 248, 0.18)`, `border-color: rgba(56, 189, 248, 0.5)`, `translateY(-1px)` |
+| **Shadow** | `0 10px 30px rgba(0, 0, 0, 0.75), 0 0 15px rgba(56, 189, 248, 0.12)` |
+| **Accent usage** | Cyan (`#38BDF8`), Emerald (`#34D399`), Slate (`#94A3B8`) |
+
+**Pattern notes:**
+Viewport-fixed top matrix bar positioned at `top: 3.8rem; left: 50%; transform: translateX(-50%)`. Displays all 7 agent chips with live status pills (`● RUNNING`, `● ONLINE`, `○ STANDBY`), allowing immediate single-glance team auditing. Clicking any chip navigates the camera to that agent's desk.
+
+### VirtualOfficeBiophilicZenAtrium
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) (`buildZenAtriumProps`)
+Last updated: 2026-09-28
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | Procedural raked basalt karesansui gravel bed (`TextureGen.createZenSand()`) with concentric ripple grooves around basin, Japanese dark slate perimeter curbing (`13.2x0.45x13.2`, `#1E293B`), natural flagstone S-curved stepped path (`#334155`) |
+| **Border** | Dark slate curbing chamfer with recessed warm perimeter LED groove (`#FBBF24`), carved granite basin rim |
+| **Border radius** | `rounded-none` (crisp slate curbing and stepped flagstone tiles) / `rounded-full` (carved circular granite basin) |
+| **Text — primary** | Thought bubble billboarding sprite: `#FFFFFF` (`Plus Jakarta Sans` 700) |
+| **Text — secondary**| Activity label: `#38BDF8` (`RESTING`), `#10B981` (`MINDFULNESS`) |
+| **Spacing** | Atrium footprint `14x14`, teakwood bench at `(0, 0, 3.5)` facing North toward water basin at `(0, 0, -1.2)`. 2 discrete seating slots: Slot A `(-1.3, 0, 3.3)` & Slot B `(1.3, 0, 3.3)`, S-curved flagstone path with 0 collision |
+| **Hover state** | Cursor pointer on bench & plants; camera tween focus via room jump pill `[Zen Atrium]` |
+| **Shadow** | WebGL PCFSoftShadowMap casting from four 3000K warm mini-ground uplights (`#FBBF24`, intensity 0.85, radius 9) and soft overhead ambient glow |
+| **Accent usage** | Emerald & jade foliage (`#15803D`, `#22C55E`, `#16A34A`), warm honey teakwood (`#B45309`), ripple cyan (`#38BDF8`), raked sand basalt (`#1E293B`) |
+
+**Pattern notes:**
+Authentic Japanese biophilic wellness sanctuary providing restorative counterbalance to the high-density bullpen. Standby agents autonomously route via central corridor waypoints ($X \in [-8, 8]$) to sit on the slatted teakwood park bench (`SEATED_BENCH` posture with relaxed torso incline and hands on lap). The bench is physically oriented North toward the water basin, with the rear posts and backrest slats at $+Z = +0.5$ (South). Divided into two discrete slots (`x = -1.3` and `x = +1.3`) tracked by the dynamic occupancy engine, allowing two agents to sit side-by-side with zero overlap. Features procedural karesansui raked sand, carved Tsukubai granite water basin with authentic bamboo spout (*kakei*) pouring an active stream, 3 animated concentric ripple rings, and 4 botanical species.
+
+### VirtualOfficeAILabSuite
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) (`buildAILabProps`)
+Last updated: 2026-09-28
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | Polished dark slate floor (`#0F172A`, roughness 0.2, metalness 0.8), matte server chassis (`#0F172A`) |
+| **Border** | 42U server rack framing with chrome handles (`#E2E8F0`), neon illuminated status ladders (`#10B981`, `#38BDF8`, `#EF4444`) |
+| **Border radius** | `rounded-lg` server chassis corners, `rounded-full` circular task stool, circular dark granite pedestal base, and orbiting electron rings |
+| **Text — primary** | Diagnostic screen CanvasTexture: `#38BDF8` (Odia NLP Loss Convergence Header, 18px bold) |
+| **Text — secondary**| Screen metric readouts: `#10B981` (learning rate `2e-5`, epoch progress), `#A855F7` (token attention 4x4 matrix) |
+| **Spacing** | 3 server racks flush on north wall at `z = -32`, separate diagnostic workstation at `x: -20, z: -22` angled `rotY = -0.12`, single-occupant task stool at `x: -20, z: -19.5` facing north, central holographic pedestal at `x: -10, z: -21` with 10+ units of clear floor space, wide 8-unit entrance doorway at `x = -16` |
+| **Hover state** | Clickable console and neural visualizer; camera focus via `[AI Lab]` jump pill |
+| **Shadow** | Server rack cyan floor wash, screen face emissive lighting, pulsing violet visualizer spot (`#A855F7`) |
+| **Accent usage** | Cyan cooling conduits & floor wash (`#38BDF8`), neural violet (`#A855F7`), emerald converge line (`#10B981`), royal blue stool cushion (`#0284C7`) |
+
+**Pattern notes:**
+Dedicated high-performance compute zone for neural network training and Odia NLP fine-tuning. Completely overhauled for zero geometry clipping: 3 server racks mounted flush against the north wall, diagnostic console placed independently on the west wall, and the holographic pedestal centered in the east bay with 10+ units of open walking clearance. The diagnostic console task stool is strictly locked to 1 single occupant in the dynamic reservation registry. Standby agents visit autonomously in the `SEATED_STOOL` posture.
+
+### VirtualOfficeMediaStudioSuite
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) (`buildMediaStudioProps`)
+Last updated: 2026-09-28
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | Procedural ribbed soundproof studio carpet (`TextureGen.createStudioCarpet()`, `#141416`, `w: 16, d: 18`), 3D beveled hexagonal pyramidal acoustic tiles with warm amber studio backlighting (`#F59E0B`) |
+| **Border** | Matte black studio console edges (`#09090B`), chrome tripod legs (`#E2E8F0`), acoustic wall frame (`#1E293B`) |
+| **Border radius** | 3D beveled pyramidal relief hexagons on back wall, `rounded-xl` curved broadcast desk edge |
+| **Text — primary**| Broadcast screen CanvasTexture: `#F8FAFC` (Remotion Timeline & Render Pipeline header) |
+| **Text — secondary**| Timeline track labels: `#F59E0B` (audio stems), `#38BDF8` (video tracks), `#10B981` (VU meter peaks) |
+| **Spacing** | Broadcast console at `x: 0, z: -28`, presenter swivel chair behind desk at `z = -30.0` facing forward (`rotY = Math.PI`), 4K broadcast camera on tripod in front at `z = -23.5` facing presenter (`rotY = Math.PI`), softbox ring light on left key angle at 45° (`x: -3.6, z: -25.0`) |
+| **Hover state** | Interactive studio elements; 1-click camera framing via `[Media Studio]` jump pill |
+| **Shadow** | Directional 5600K studio softbox ring light (`#F8FAFC`, intensity 1.2), warm amber rim backlighting (`#F59E0B`) |
+| **Accent usage** | Live broadcast red (`#EF4444` tally light), Remotion amber (`#F59E0B`), cyber cyan (`#38BDF8`), studio chrome (`#E2E8F0`) |
+
+**Pattern notes:**
+Production and streaming environment for YouTube Live exam analysis and automated video rendering. Full real-world directional staging: presenter chair sits behind the broadcast desk facing forward (`rotY = Math.PI`), the 4K broadcast camera on heavy studio tripod faces directly toward the presenter from the front walkway, and the key-light softbox ring light illuminates the desk from a 45° angle. Strictly limited to 1 single occupant in the dynamic reservation registry. Standby agents visit autonomously in `SEATED_STUDIO` posture.
+
+### VirtualOfficeFounderExecutiveSuite
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) (`buildFounderSuiteProps`)
+Last updated: 2026-09-28
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | Luxury obsidian herringbone wool area rug (`TextureGen.createExecutiveRug()`, `w: 11.5, d: 17`) with brushed brass border, hand-scraped smoked walnut plank flooring (`#1C1917`) |
+| **Border** | Brushed brass edge channel trim (`#D97706`), beveled smoked walnut desk perimeter |
+| **Border radius** | `rounded-2xl` Scandinavian leather armchairs, `rounded-xl` credenza, gently curved 38" ultrawide display |
+| **Text — primary** | Executive screen CanvasTexture: `#FFFFFF` (2026 OdishaExamPrep Strategic Release Horizon header) |
+| **Text — secondary**| Strategic roadmap milestones: `#F59E0B` (Q1-Q4 roadmap chips), `#10B981` (DAU & conversion KPI cards) |
+| **Spacing** | Cantilevered walnut desk at `x: 41.5, z: -23`, credenza pushed flush to north wall at `z = -31` (over 4 units of open swivel space behind chair), two cognac leather guest armchairs at `x: 38.5` and `x: 44.5`, `z = -18` angled inward facing North toward the desk (`rotY = 0.22` and `-0.22`) flanking low round walnut coffee table |
+| **Hover state** | Clickable suite elements; 1-click camera framing via `[Founder Suite]` jump pill |
+| **Shadow** | Warm 2700K banker lamp illumination (`#FDE68A`), skyline moonlight directional wash |
+| **Accent usage** | Brushed brass (`#D97706`), warm cognac leather (`#B45309`), banker emerald glass (`#047857`), bulb warm glow (`#FEF08A`), milestone gold (`#F59E0B`) |
+
+**Pattern notes:**
+Architectural executive office situated at the panoramic northeast corner of the penthouse floorplate. Fully restructured for spaciousness and human hospitality: generous 4+ unit swivel clearance behind the executive chair, floating credenza flush to the north wall, and twin cognac leather guest armchairs facing North toward the founder's desk (`rotY = 0.22` and `-0.22`) flanking a low round walnut coffee table. Features 2 discrete guest slots tracked by the dynamic reservation registry. Standby agents visit autonomously in `SEATED_GUEST` posture.
+
+| **`VirtualOfficeWorkstationMicroPill`** | Media / Studio / Simulation | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | Collision-free floating micro-capsule nameplate badge for autonomous workstations. Displays `🟢 [Name]` (height 14px, width ~48px) with drop shadow, expanding dynamically to full title and mandate on hover or active task execution, with staggered vertical positions ensuring 0 badge overlap | `public/virtual-office.html` (`drawDeskBadge`) | Active |
+
+### VirtualOfficeWorkstationMicroPill
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html#L3132-L3180)
+Last updated: 2026-09-27
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | `rgba(15, 23, 42, 0.88)` (normal) / `rgba(30, 41, 59, 0.96)` (hover) / `rgba(15, 23, 42, 0.98)` (active execution) |
+| **Border** | `0.9px solid rgba(255, 255, 255, 0.16)` (normal) / `1.4px solid #38BDF8` (hover) / `1.4px solid #10B981` (active) |
+| **Border radius** | Clamped `bh / 2` (`7px`, pill capsule geometry) |
+| **Text — primary** | `#F8FAFC` (normal) / `#38BDF8` (hover) / `#34D399` (active) (`font: 700 7.2px Plus Jakarta Sans`) |
+| **Text — secondary**| Status indicator dot with breathing glow ring (`#10B981` active, `#F59E0B` busy, `#A855F7` break, `#6366F1` meeting) |
+| **Spacing** | Height `14px`, width `textWidth + 17px` (dynamic compact micro-pill) |
+| **Hover state** | Expands dynamically from name-only micro-pill to full role title with cyan border glow |
+| **Shadow** | `rgba(0, 0, 0, 0.45)` crisp drop shadow offset `(1, 1.5)` |
+| **Accent usage** | `#38BDF8` cyan hover, `#10B981` emerald active, `#A855F7` purple break |
+
+**Pattern notes:**
+Guarantees zero badge collision across densely populated workstation clusters. Micro-pill footprint reduces visual clutter by 70%, keeping dual monitors and human avatars visible at all times while maintaining instantaneous status readability.
+
+| **`VirtualOfficeSpeechBubble`** | Media / Studio / Simulation | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | Obsidian glassmorphic dialogue card overlay for autonomous agents (`💬 ...`). Features blurred obsidian glass styling (`rgba(15, 23, 42, 0.94)`), cyan glow border, bottom anchor beak pointer, and automatic entrance pop-in and exit fade-out animations | `public/virtual-office.html` (`spawnSpeechBubble`) | Active |
+
+### VirtualOfficeSpeechBubble
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html#L313-L354)
+Last updated: 2026-09-27
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | `rgba(15, 23, 42, 0.94)` (slate-900 obsidian glass with `backdrop-filter: blur(12px)`) |
+| **Border** | `1px solid rgba(56, 189, 248, 0.45)` (cyan ambient glass glow) |
+| **Border radius** | `rounded-lg` (`10px`) with CSS pseudo-element bottom triangle beak |
+| **Text — primary** | `#F8FAFC` (`slate-50`, font-semibold / 600, `0.7rem`, line-height `1.38`) |
+| **Text — secondary**| `#38BDF8` (speech icon `💬`) |
+| **Spacing** | padding `0.4rem 0.8rem`, max-width `220px` |
+| **Hover state** | `pointer-events: none` (ambient non-blocking HUD layer) |
+| **Shadow** | `0 10px 30px rgba(0, 0, 0, 0.75), 0 0 18px rgba(56, 189, 248, 0.22)` |
+| **Accent usage** | `cyan` (`#38BDF8`), dark slate |
+
+**Pattern notes:**
+High-tech obsidian HUD dialogue card used to broadcast agent notifications, task completions, and collaborative dialogue without obscuring neighboring workstations or breaking visual immersion.
+
+| **`VirtualOfficeThoughtBubble`** | Media / Studio / Simulation | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | Cognitive reasoning thought popup overlay for autonomous agents (`💭 ...`). Features blurred obsidian glass styling, delicate cyan border, bottom anchor beak pointer, and automatic entrance pop-in and exit fade-out animations | `public/virtual-office.html` (`OfficeConversationDirector`, `triggerSoloThought`) | Active |
+
+### VirtualOfficeThoughtBubble
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html#L355-L386)
+Last updated: 2026-09-27
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | `rgba(15, 23, 42, 0.96)` (slate-900 obsidian glass with `backdrop-filter: blur(8px)`) |
+| **Border** | `1px solid rgba(59, 130, 246, 0.45)` (brand-blue subtle glass glow) |
+| **Border radius** | `rounded-xl` (`12px`) with CSS pseudo-element bottom triangle beak |
+| **Text — primary** | `#93C5FD` (`blue-300`, font-bold / 700, `0.68rem`, line-height `1.35`) |
+| **Text — secondary**| N/A |
+| **Spacing** | padding `0.4rem 0.8rem`, max-width `240px` |
+| **Hover state** | `pointer-events: none` (ambient non-blocking HUD layer) |
+| **Shadow** | `0 8px 24px rgba(0, 0, 0, 0.6), 0 0 16px rgba(59, 130, 246, 0.25)` |
+| **Accent usage** | `brand-blue` (`#3B82F6` / `#93C5FD`), cyan ambient glow |
+
+**Pattern notes:**
+Dedicated micro-HUD element used to convey internal AI reasoning loops before or during task execution. Centered horizontally with `-50%` transform above the agent's head at `dy - 48px`. Animates in with `pop-in 0.3s cubic-bezier(0.16, 1, 0.3, 1)` and fades out after 2.6s, with guaranteed DOM cleanup at 4.2s. Prevents overlapping with speech bubbles by reserving thought channels during collaborative dialogue steps.
+
+
 | **`ExecutiveGraphicCardGenerator`** | Media / Automation / AI | [`automations/shared/imagen_generator.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/imagen_generator.py) & [`automations/shared/exam_logo_registry.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/shared/exam_logo_registry.py) | 1200x675 Executive Graphic Card Architecture. Features deep obsidian slate canvas (#0A0F1C), soft blurred ambient radial glows, glassmorphic card container with top border highlight, official board authority pill with glowing indicator dot, category badge, clean headline typography, 2-line executive summary, and 3 structured micro-cards (blue, emerald, amber accent strips). Zero diffusion distortions, zero stock photos, and zero broken font glyphs | `exam_update_engine.py`, `ca_website_publisher.py`, `seo_blog_engine.py`, `drive_image_sanitizer.py` | Active |
 | **`ReferencePYQExamCalibrationSuite`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx) | Dual-Mode Part 2 Suite (Reference PYQs vs Custom Directives). Ingests 3–15 authentic past exam questions as few-shot benchmarks, automatically blacklists PYQ stems for 0% duplicate collision, extracts exam board DNA (phrasing, calculation depth, distractor traps), graceful fallback with 0 PYQs, and backward-compatible single-column persistence | AIQuestionStudio.tsx (Part 2) | Active |
 | **`AutonomousCurriculumAutoBatchSuite`** | Admin / AI Studio | [`src/components/admin/AIQuestionStudio.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/admin/AIQuestionStudio.tsx) | 2-Stage Pedagogical Curriculum Planner & Auto-Batch Decomposition suite. Computes syllabus density capacity, slices questions into focused micro-batches (3–5 Qs each) with dedicated thematic angles, live telemetry reasoning badge, and `🤖 Auto` toggle | AIQuestionStudio.tsx (Step 4 & Multi-Bank Queue) | Active |

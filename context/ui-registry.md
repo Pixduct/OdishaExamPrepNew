@@ -43,6 +43,28 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`VirtualOfficeWarRoomDebriefTable`** | UI / Table / Glassmorphism | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | High-contrast glassmorphic table for tabular debrief analytics (`.debrief-table`). Features obsidian backdrop (`rgba(0, 0, 0, 0.35)`), cyan headers (`#38BDF8`), subtle borders (`rgba(255, 255, 255, 0.1)`), and zebra hover rows | `public/virtual-office.html` (`formatDebriefMarkdown`), `build/virtual-office.html` | Active |
 | **`VirtualOfficeExecutiveCommandHeader`** | HUD / Navigation / Executive Header | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | Sleek 48px executive 3-column Grid mission control bar (`display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.75rem;`). Pinned Left Pillar for Brand Identity (`🏢 OdishaExamPrep` + `Operations Deck`), mathematically Centered Pillar for live Fleet Telemetry (`● 7 Standby`, `Tasks: 490`, `IST Clock`), and pinned Right Pillar for Action & Utility controls (`All Hands`, `Coffee`, `Desks`, `Reports`, `🔊` / `🔇`, `⛶`). Zero off-screen overflow, 16px right margin, Service Worker cache bypass | Standalone Tool, `public/virtual-office.html`, `build/virtual-office.html` | Active |
 
+### VirtualOfficeCafeLoungeSuite
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) & [`build/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/build/virtual-office.html)
+Last updated: 2026-09-30
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background / Materials** | Polished Calacatta Gold marble (`#FDFBF7`), beveled Roman travertine (`#E8DEC8`), fluted Italian walnut (`#3E2723`), brushed stainless steel (`#CBD5E1`), polished chrome (`#F1F5F9`), cognac aniline leather (`#9A3412`), and dark mocha tufted leather (`#451A03`) |
+| **Border / Trim** | Architectural satin brass ferrules (`#D97706`), chrome boiler guardrails, obsidian gasket reveals (`#020617`), and fluted ceramic planter rim (`#FDFBF7`) |
+| **Border radius / Geometries** | Beveled box chamfers (`0.35` travertine slab), cylinder turnings (walnut legs), torus footrests (`0.68` radius), and rounded pill cushions |
+| **Lighting / Emissive Accents** | Warm undercounter LED bar (`#FDE68A`, `intensity: 1.8`, `distance: 14`), glowing cyan refrigerator dispenser readout (`#38BDF8`), hot red (`#EF4444`) & cold cyan (`#0284C7`) water taps, and amber portal sign typography (`#F59E0B`) |
+| **Seating Ergonomics & Direction** | Barstools at $Z = -25.2$ facing North (`rotY = Math.PI`), Chesterfield sofa at $Z = -13.5$ facing North (`rotY = Math.PI`), Left armchair at $X = 13.8$ facing East (`rotY = Math.PI / 2`), Right armchair at $X = 31.2$ facing West (`rotY = -Math.PI / 2`) |
+| **Spatial Spacing & Clearances** | $> 4.0$ units unobstructed promenade from South entrance architrave ($Z = -8.0$), $0.55$-unit legroom between sofa and coffee table, $> 5.3$ units open walking aisle to barstools |
+| **Interactive States** | Raycast hover selection, tooltip inspection card, and autonomous agency roaming slots (`CAFE_ESPRESSO` & `CAFE_SOFA_LOUNGE`) |
+| **Floor Anchoring** | High-pile slate wool area rug (`#1E293B`, $19.0 \times 12.0$) centered at $(22.5, 0.02, -16.5)$ anchoring sofa, table, and both armchairs |
+
+**Pattern notes:**
+- **Strict Coordinate & Heading Trigonometry**: In Three.js simulation space, $+Z$ is South ($\text{rotY} = 0$), $-Z$ is North ($\text{rotY} = \pi$), $+X$ is East ($\text{rotY} = \pi/2$), and $-X$ is West ($\text{rotY} = -\pi/2$). Barstools and sofas facing the room or counters must use $\text{rotY} = \pi$ to prevent occupants from facing into backrests or turning away from interactive furniture.
+- **Doorway Promenade Clearance**: Lounge suites placed near entry portals must preserve $\ge 4.0$ units of open walkway between the door threshold and the nearest furniture backrest to prevent spatial bottlenecks.
+- **Symmetrical Conversation Inward Angling**: Flanking club armchairs must be oriented inward facing the central coffee table ($+90^\circ$ and $-90^\circ$ relative to room heading) to create a natural executive conversation circle.
+- **Dual-File Synchronization**: Every update to `public/virtual-office.html` must be accompanied by an identical update to `build/virtual-office.html` verified via SHA-256 byte parity.
+
 ### AdminYouTubeCarouselToggle
 
 File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx)

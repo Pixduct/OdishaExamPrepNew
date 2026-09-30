@@ -1,0 +1,2135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OdishaExamPrep — Operations Deck (Autonomous Agent Simulation)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-space: #060913;
+      --bg-header: rgba(10, 15, 28, 0.98);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(59, 130, 246, 0.4);
+      --brand-blue: #38BDF8;
+      --brand-emerald: #34D399;
+      --brand-amber: #F59E0B;
+      --brand-purple: #A855F7;
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --text-dim: #64748B;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-space);
+      color: var(--text-main);
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* TOP COMMAND BAR (100% Matching Reference Image) */
+    header {
+      height: 44px;
+      padding: 0 1.25rem;
+      background: var(--bg-header);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 40;
+      flex-shrink: 0;
+    }
+
+    .brand-cluster {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .brand-logo-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #1E3A8A, #3B82F6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .brand-titles h1 {
+      font-size: 0.88rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      line-height: 1.1;
+    }
+
+    .brand-titles h1 span {
+      color: #38BDF8;
+      font-weight: 700;
+    }
+
+    .brand-titles p {
+      font-size: 0.58rem;
+      color: #64748B;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      line-height: 1;
+      margin-top: 1px;
+    }
+
+    .telemetry-cluster {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .stat-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0.22rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      backdrop-filter: blur(12px);
+      color: #94A3B8;
+    }
+
+    .stat-pill strong {
+      color: #FFFFFF;
+      font-weight: 700;
+    }
+
+    .live-pulse {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background-color: #34D399;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #34D399;
+      animation: pulse-ring 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse-ring {
+      0% { transform: scale(0.9); opacity: 0.8; }
+      50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 14px #34D399; }
+      100% { transform: scale(0.9); opacity: 0.8; }
+    }
+
+    .clock-pill {
+      font-family: 'JetBrains Mono', monospace;
+      color: #F8FAFC;
+      background: rgba(15, 23, 42, 0.8);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .controls-cluster {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      padding: 0.32rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn-bell {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      color: #FDE68A;
+    }
+    .btn-bell:hover {
+      background: rgba(245, 158, 11, 0.3);
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-coffee {
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      color: #E9D5FF;
+    }
+    .btn-coffee:hover {
+      background: rgba(168, 85, 247, 0.3);
+      box-shadow: 0 0 14px rgba(168, 85, 247, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-work {
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.5);
+      color: #93C5FD;
+    }
+    .btn-work:hover {
+      background: rgba(59, 130, 246, 0.3);
+      box-shadow: 0 0 14px rgba(59, 130, 246, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-sound, .btn-fullscreen {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #F8FAFC;
+    }
+    .btn-sound:hover, .btn-fullscreen:hover {
+      background: rgba(51, 65, 85, 0.8);
+      transform: translateY(-1px);
+    }
+
+    .btn-sound.muted {
+      color: #EF4444;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    /* MAIN STAGE CONTAINER */
+    #stage-container {
+      flex: 1;
+      position: relative;
+      background: #060913 url('/images/virtual-office-empty-backdrop.jpg') no-repeat center center;
+      background-size: contain;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    canvas {
+      display: block;
+      image-rendering: auto;
+    }
+
+    /* LIVE HUD TICKER */
+    .hud-ticker {
+      position: absolute;
+      bottom: 0.85rem;
+      left: 1.25rem;
+      background: rgba(10, 15, 28, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      padding: 0.35rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.72rem;
+      color: #94A3B8;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      z-index: 20;
+      pointer-events: none;
+      max-width: 60%;
+    }
+
+    .hud-ticker .ticker-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #34D399;
+      box-shadow: 0 0 8px #34D399;
+      flex-shrink: 0;
+    }
+
+    /* AGENT HOVER TOOLTIP */
+    #agent-tooltip {
+      position: absolute;
+      display: none;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      border-radius: 10px;
+      padding: 0.55rem 0.85rem;
+      pointer-events: none;
+      transform: translate(-50%, -125%);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7), 0 0 16px rgba(56, 189, 248, 0.25);
+      backdrop-filter: blur(12px);
+      z-index: 50;
+      white-space: nowrap;
+    }
+
+    .tooltip-name {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #F8FAFC;
+    }
+
+    .tooltip-role {
+      font-size: 0.68rem;
+      color: #94A3B8;
+      margin-top: 1px;
+    }
+
+    .tooltip-status {
+      display: inline-block;
+      font-size: 0.62rem;
+      font-weight: 800;
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-working { background: rgba(52, 211, 153, 0.2); color: #34D399; border: 1px solid rgba(52, 211, 153, 0.4); }
+    .status-meeting { background: rgba(99, 102, 241, 0.2); color: #818CF8; border: 1px solid rgba(99, 102, 241, 0.4); }
+    .status-on_break { background: rgba(245, 158, 11, 0.2); color: #FBBF24; border: 1px solid rgba(245, 158, 11, 0.4); }
+
+    /* SPEECH & THOUGHT BUBBLE SYSTEM */
+    #speech-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 35;
+      overflow: hidden;
+    }
+
+    .speech-bubble {
+      position: absolute;
+      background: rgba(15, 23, 42, 0.96);
+      color: #FFFFFF;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      padding: 0.45rem 0.85rem;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 18px rgba(56, 189, 248, 0.25);
+      pointer-events: none;
+      transform: translate(-50%, -100%);
+      animation: pop-in 0.3s cubic-bezier(0.16, 1, 0.3, 1), fade-out 0.4s ease 3.4s forwards;
+      z-index: 36;
+      max-width: 250px;
+      text-align: center;
+      line-height: 1.35;
+      backdrop-filter: blur(10px);
+    }
+
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px 6px 0;
+      border-style: solid;
+      border-color: rgba(15, 23, 42, 0.96) transparent;
+      display: block;
+      width: 0;
+    }
+
+    .thought-bubble {
+      position: absolute;
+      background: rgba(15, 23, 42, 0.96);
+      color: #93C5FD;
+      border: 1px solid rgba(59, 130, 246, 0.45);
+      padding: 0.4rem 0.8rem;
+      border-radius: 12px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 16px rgba(59, 130, 246, 0.25);
+      pointer-events: none;
+      transform: translate(-50%, -100%);
+      animation: pop-in 0.3s cubic-bezier(0.16, 1, 0.3, 1), fade-out 0.4s ease 2.6s forwards;
+      z-index: 36;
+      max-width: 240px;
+      text-align: center;
+      line-height: 1.35;
+      backdrop-filter: blur(8px);
+    }
+
+    .thought-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px 6px 0;
+      border-style: solid;
+      border-color: rgba(59, 130, 246, 0.45) transparent;
+      display: block;
+      width: 0;
+    }
+
+    @keyframes pop-in {
+      from { opacity: 0; transform: translate(-50%, -85%) scale(0.85); }
+      to { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+    }
+
+    @keyframes fade-out {
+      from { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+      to { opacity: 0; transform: translate(-50%, -115%) scale(0.9); }
+    }
+
+    /* AGENT DOSSIER MODAL OVERLAY */
+    #dossier-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(3, 7, 18, 0.85);
+      backdrop-filter: blur(16px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    #dossier-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .dossier-card {
+      background: #0B1120;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      width: 90%;
+      max-width: 580px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9), 0 0 50px rgba(56, 189, 248, 0.15);
+      overflow: hidden;
+      transform: scale(0.92);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #dossier-overlay.active .dossier-card {
+      transform: scale(1);
+    }
+
+    .dossier-header {
+      padding: 1.25rem 1.5rem;
+      background: rgba(15, 23, 42, 0.9);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dossier-agent-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .agent-avatar-frame {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #1E293B, #334155);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .agent-name-role h2 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #F8FAFC;
+    }
+
+    .agent-name-role p {
+      font-size: 0.75rem;
+      color: #94A3B8;
+      margin-top: 2px;
+      font-weight: 600;
+    }
+
+    .dossier-close {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94A3B8;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .dossier-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #FFFFFF;
+      transform: scale(1.05);
+    }
+
+    .dossier-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .dossier-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+    }
+
+    .dossier-tile {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 0.85rem;
+    }
+
+    .dossier-tile .label {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #64748B;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .dossier-tile .value {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #F8FAFC;
+      margin-top: 3px;
+    }
+
+    .code-chip {
+      font-family: 'JetBrains Mono', monospace;
+      color: #38BDF8;
+      font-size: 0.74rem;
+    }
+
+    .log-terminal {
+      background: #070B14;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      line-height: 1.55;
+      max-height: 110px;
+      overflow-y: auto;
+      color: #94A3B8;
+    }
+
+    .log-line { display: flex; gap: 0.5rem; }
+    .log-time { color: #64748B; }
+    .log-msg-success { color: #34D399; }
+    .log-msg-info { color: #38BDF8; }
+
+    .dossier-footer {
+      padding: 1rem 1.5rem;
+      background: rgba(15, 23, 42, 0.7);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dispatch-btn {
+      background: linear-gradient(135deg, #2563EB, #1D4ED8);
+      color: #FFFFFF;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0.5rem 1.15rem;
+      border-radius: 9px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+      transition: all 0.2s ease;
+    }
+
+    .dispatch-btn:hover {
+      background: linear-gradient(135deg, #3B82F6, #2563EB);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.55);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP APP HEADER / STATUS BAR -->
+  <header>
+    <div class="brand-cluster">
+      <div class="brand-logo-badge">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <div class="brand-titles">
+        <h1>OdishaExamPrep <span>Operations Deck</span></h1>
+        <p>REAL-TIME AUTONOMOUS AGENT SIMULATION SUITE</p>
+      </div>
+    </div>
+
+    <div class="telemetry-cluster">
+      <div class="stat-pill">
+        <span class="live-pulse"></span>
+        <span>Active Staff:</span>
+        <strong id="active-staff-count" style="color: #34D399;">7/7 Online</strong>
+      </div>
+
+      <div class="stat-pill">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2.2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+        <span>Tasks Today:</span>
+        <strong id="completed-tasks-count" style="color: #34D399;">14 Completed</strong>
+      </div>
+
+      <div class="stat-pill clock-pill">
+        <span style="color: #94A3B8;">IST:</span>
+        <strong id="live-ist-clock">10:55:04</strong>
+      </div>
+    </div>
+
+    <div class="controls-cluster">
+      <button class="btn btn-bell" id="bell-btn" title="Call All 7 Agents to the Strategy Boardroom">
+        🛎️ All Hands
+      </button>
+
+      <button class="btn btn-coffee" id="coffee-btn" title="Send Staff to Executive Café & Espresso Lounge">
+        ☕ Coffee Break
+      </button>
+
+      <button class="btn btn-work" id="work-btn" title="Return Staff to Workstations">
+        💻 Back to Desks
+      </button>
+
+      <button class="btn btn-sound" id="sound-btn" title="Toggle Sound FX">
+        🔊 Sound On
+      </button>
+
+      <button class="btn btn-fullscreen" id="fullscreen-btn" title="Toggle Fullscreen">
+        ⛶ Fullscreen
+      </button>
+    </div>
+  </header>
+
+  <!-- VIRTUAL OFFICE MAIN STAGE -->
+  <div id="stage-container">
+    <canvas id="office-canvas"></canvas>
+
+    <!-- LIVE HUD TICKER -->
+    <div class="hud-ticker">
+      <div class="ticker-dot"></div>
+      <p id="ticker-text">HQ Operations Nominal. All 7 autonomous engines active across scheduled Green Zones.</p>
+    </div>
+
+    <!-- AGENT HOVER TOOLTIP -->
+    <div id="agent-tooltip">
+      <div class="tooltip-name" id="tip-name">Agent Name</div>
+      <div class="tooltip-role" id="tip-role">Engine Role</div>
+      <div class="tooltip-status" id="tip-status">WORKING</div>
+    </div>
+
+    <!-- SPEECH & THOUGHT BUBBLE CONTAINER -->
+    <div id="speech-container"></div>
+  </div>
+
+  <!-- AGENT DOSSIER OVERLAY -->
+  <div id="dossier-overlay">
+    <div class="dossier-card">
+      <div class="dossier-header">
+        <div class="dossier-agent-info">
+          <div class="agent-avatar-frame" id="dossier-avatar">👨‍💻</div>
+          <div class="agent-name-role">
+            <h2 id="dossier-name">Bikram</h2>
+            <p id="dossier-role">Senior State Exam Radar</p>
+          </div>
+        </div>
+        <button class="dossier-close" id="dossier-close-btn" title="Close Dossier">✕</button>
+      </div>
+
+      <div class="dossier-body">
+        <div class="dossier-grid">
+          <div class="dossier-tile">
+            <div class="label">Script Engine</div>
+            <div class="value code-chip" id="dossier-script">automations/exam_update_engine.py</div>
+          </div>
+          <div class="dossier-tile">
+            <div class="label">Active Schedule</div>
+            <div class="value" id="dossier-schedule">Every 4h (UTC cron)</div>
+          </div>
+          <div class="dossier-tile">
+            <div class="label">AI Model Architecture</div>
+            <div class="value" id="dossier-ai">Gemini 3.5 Flash-Lite</div>
+          </div>
+          <div class="dossier-tile">
+            <div class="label">Engine Health</div>
+            <div class="value" id="dossier-perf" style="color: #34D399;">100% Pass • 0 Errors</div>
+          </div>
+        </div>
+
+        <div class="dossier-tile" style="margin-top: 0.25rem;">
+          <div class="label">Operational Mandate</div>
+          <div class="value" id="dossier-mandate" style="font-weight: 500; font-size: 0.78rem; line-height: 1.45; color: #CBD5E1;">
+            Autonomous execution of state recruitment scraping and verified alerts.
+          </div>
+        </div>
+
+        <div>
+          <div class="label" style="font-size: 0.65rem; font-weight: 800; color: #64748B; text-transform: uppercase; margin-bottom: 0.4rem;">
+            Live Terminal Execution Trace
+          </div>
+          <div class="log-terminal" id="dossier-logs">
+            <div class="log-line"><span class="log-time">[10:48:12]</span><span class="log-msg-info">Cron runner initiated scheduled cycle.</span></div>
+            <div class="log-line"><span class="log-time">[10:48:14]</span><span class="log-msg-info">Querying Supabase state cache... 0 diff.</span></div>
+            <div class="log-line"><span class="log-time">[10:48:17]</span><span class="log-msg-success">Pipeline execution succeeded (Exit Code 0).</span></div>
+            <div class="log-line"><span class="log-time">[10:55:00]</span><span class="log-msg-info">Engine heartbeat OK. Ready for dispatch.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dossier-footer">
+        <span id="dossier-status-text" style="font-size: 0.72rem; color: #34D399; font-weight: 700;">● Active • Standing By</span>
+        <button class="dispatch-btn" id="manual-dispatch-btn">⚡ Force Run Engine Now</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- 1. WEB AUDIO SYNTHESIZER ---
+    class OfficeAudio {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      toggleMute() {
+        this.muted = !this.muted;
+        return this.muted;
+      }
+      playBell() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(440, now + 1.2);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 1.2);
+      }
+      playChime() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(587.33, now);
+        osc.frequency.setValueAtTime(880, now + 0.1);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      }
+      playKeyboard() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(140 + Math.random() * 80, now);
+        gain.gain.setValueAtTime(0.04, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.04);
+      }
+    }
+
+    const audio = new OfficeAudio();
+
+    // --- 2. AGENTS ROSTER WITH CALIBRATED COORDINATES ---
+    // Calibrated exactly to 1024 x 533 Master Architectural Backdrop
+    const AGENTS = [
+      {
+        id: 'bikram',
+        name: 'Bikram',
+        shortRole: 'Web Scraper & Radar',
+        role: 'Senior Exam Radar & Web Scraper',
+        avatar: '👨‍✈️',
+        skinColor: '#F7D0B2',
+        hairColor: '#1E293B',
+        hairStyle: 'short-part',
+        clothesColor: '#1E3A8A',
+        collarColor: '#FFFFFF',
+        pantsColor: '#334155',
+        shoesColor: '#0F172A',
+        accessories: 'glasses',
+        screenType: 'TERMINAL_LOGS',
+        accentColor: '#3B82F6',
+        script: 'automations/exam_update_engine.py',
+        schedule: '3x Daily (04:17, 08:47, 13:47 UTC)',
+        ai: 'Gemini 3.5 Flash-Lite + Heuristic Fallback',
+        mandate: 'Scrapes OPSC, OSSC, OSSSC, Odisha Police, and High Court portals. Normalizes vacancies, dates, and advertisement numbers with zero hallucination.',
+        deskPos: { x: 168, y: 154 },
+        badgePos: { x: 160, y: 110 },
+        breakPos: { x: 740, y: 225 },
+        confPos: { x: 680, y: 418 },
+        state: 'WORKING',
+        tasksCompleted: 4,
+        speechPool: [
+          'Scraping OPSC official notice board...',
+          'No duplicate ads detected! Clean run.',
+          'Standardized recruitment acronyms to 22 chars.',
+          'Checking Orissa High Court typist results...'
+        ]
+      },
+      {
+        id: 'chhabi',
+        name: 'Chhabi',
+        shortRole: 'Visual Card Studio',
+        role: 'Breaking News & Visual Card Dispatcher',
+        avatar: '🎨',
+        skinColor: '#FBCFE8',
+        hairColor: '#78350F',
+        hairStyle: 'auburn-wavy',
+        clothesColor: '#DC2626',
+        collarColor: '#F8FAFC',
+        pantsColor: '#1E293B',
+        shoesColor: '#0F172A',
+        accessories: 'earrings',
+        screenType: 'GRAPHIC_STUDIO',
+        accentColor: '#EF4444',
+        script: 'automations/breaking_engine.py',
+        schedule: 'Real-Time Webhook Listener',
+        ai: 'Gemini 3.8 Flash + Playwright 1080x1080',
+        mandate: 'Generates 1080x1080 breaking alert cards with zero overlapping badges, maps 20 scenario categories, and broadcasts immediate Telegram alerts.',
+        deskPos: { x: 298, y: 154 },
+        badgePos: { x: 296, y: 110 },
+        breakPos: { x: 780, y: 225 },
+        confPos: { x: 730, y: 418 },
+        state: 'WORKING',
+        tasksCompleted: 2,
+        speechPool: [
+          'Rendering 1080x1080 visual card via Playwright...',
+          'Classified as Category 13: Objection Window!',
+          'Zero boilerplate text in bullet cards.',
+          'Broadcasting to @OdishaExamPrepOfficial!'
+        ]
+      },
+      {
+        id: 'dipti',
+        name: 'Dipti',
+        shortRole: 'Chief Quizmaster',
+        role: 'Chief Quizmaster & MCQ Setter',
+        avatar: '👩‍🏫',
+        skinColor: '#FDE68A',
+        hairColor: '#0F172A',
+        hairStyle: 'high-bun',
+        clothesColor: '#059669',
+        collarColor: '#ECFDF5',
+        pantsColor: '#334155',
+        shoesColor: '#0F172A',
+        accessories: 'hairpin',
+        screenType: 'QUESTION_EDITOR',
+        accentColor: '#10B981',
+        script: 'automations/mcq_engine.py',
+        schedule: '3x Daily (9:47 AM, 2:17 PM, 7:17 PM IST)',
+        ai: 'DeepSeek / NIM + Sheet Ingestion',
+        mandate: 'Sets daily syllabus-aligned MCQs, verifies Jaccard anti-leakage score (>0.55), clamps options under 100 characters, and triggers Telegram native polls.',
+        deskPos: { x: 424, y: 154 },
+        badgePos: { x: 425, y: 110 },
+        breakPos: { x: 820, y: 225 },
+        confPos: { x: 780, y: 418 },
+        state: 'WORKING',
+        tasksCompleted: 3,
+        speechPool: [
+          'Checking Jaccard similarity against history...',
+          'Poll options clamped within 100 chars!',
+          'Prepared Evening MCQ Quiz poll.',
+          'Explanation CTA button wired up cleanly.'
+        ]
+      },
+      {
+        id: 'priyanka',
+        name: 'Priyanka',
+        shortRole: 'Current Affairs Lead',
+        role: 'Lead Current Affairs Editor',
+        avatar: '👩‍💼',
+        skinColor: '#F7D0B2',
+        hairColor: '#451A03',
+        hairStyle: 'layered-bob',
+        clothesColor: '#7C3AED',
+        collarColor: '#FAF5FF',
+        pantsColor: '#1E293B',
+        shoesColor: '#0F172A',
+        accessories: 'press-pass',
+        screenType: 'NEWS_FEED',
+        accentColor: '#A855F7',
+        script: 'automations/ca_publisher.py',
+        schedule: 'Daily Evening (7:47 PM IST) • Broadcast 8:00 PM',
+        ai: 'DeepSeek Chat + 7-Day Visual Themes',
+        mandate: 'Synthesizes 5 to 7 high-impact daily current affairs slides across 6 exam pillars, renders 1080x1080 carousels, and publishes to Telegram and YouTube.',
+        deskPos: { x: 530, y: 154 },
+        badgePos: { x: 540, y: 110 },
+        breakPos: { x: 785, y: 295 },
+        confPos: { x: 830, y: 418 },
+        state: 'WORKING',
+        tasksCompleted: 1,
+        speechPool: [
+          'Scraping 6 RSS news feeds for Odisha affairs...',
+          'Decomposing today into 6 visual slides.',
+          'Applying Wednesday Halo Glow theme!',
+          'Publishing 8:00 PM Current Affairs carousel.'
+        ]
+      },
+      {
+        id: 'subham',
+        name: 'Subham',
+        shortRole: 'Head of SEO Articles',
+        role: 'Head of Content & SEO Web Articles',
+        avatar: '👨‍🎓',
+        skinColor: '#FED7AA',
+        hairColor: '#172554',
+        hairStyle: 'classic-crop',
+        clothesColor: '#0891B2',
+        collarColor: '#E0F2FE',
+        pantsColor: '#1E293B',
+        shoesColor: '#0F172A',
+        accessories: 'spectacles',
+        screenType: 'MARKDOWN_DOC',
+        accentColor: '#06B6D4',
+        script: 'automations/ca_website_publisher.py',
+        schedule: 'Daily Scheduled Article Drops',
+        ai: 'Gemini 3.8 Flash (8,192 token output)',
+        mandate: 'Authors 1,500+ word exhaustive preparation masterclasses, embeds ORSP Rules 2017 pay matrix tables, and publishes schema-rich articles to website.',
+        deskPos: { x: 218, y: 280 },
+        badgePos: { x: 218, y: 226 },
+        breakPos: { x: 685, y: 145 },
+        confPos: { x: 680, y: 486 },
+        state: 'WORKING',
+        tasksCompleted: 2,
+        speechPool: [
+          'Drafting 1,800-word OPSC Syllabus Masterclass...',
+          'Validating ORSP 2017 Level-10 pay matrix scale.',
+          'Injecting BlogPosting JSON-LD schema...',
+          'Pushing article cover to Supabase CDN.'
+        ]
+      },
+      {
+        id: 'trupti',
+        name: 'Trupti',
+        shortRole: 'Community Mentor',
+        role: 'Community Mentor & Engagement Lead',
+        avatar: '👩‍💻',
+        skinColor: '#FDE68A',
+        hairColor: '#0F172A',
+        hairStyle: 'ponytail',
+        clothesColor: '#D97706',
+        collarColor: '#FEF3C7',
+        pantsColor: '#334155',
+        shoesColor: '#0F172A',
+        accessories: 'headphones',
+        screenType: 'COMMUNITY_CHAT',
+        accentColor: '#F59E0B',
+        script: 'automations/engagement_engine.py',
+        schedule: 'Daily Continuous Community Traps',
+        ai: 'Llama 3.1 8B Instruct',
+        mandate: 'Creates active recall revision traps across 7 rotating subjects, explains why the trap option is wrong, and keeps student focus sharp.',
+        deskPos: { x: 365, y: 280 },
+        badgePos: { x: 365, y: 226 },
+        breakPos: { x: 730, y: 145 },
+        confPos: { x: 730, y: 486 },
+        state: 'WORKING',
+        tasksCompleted: 1,
+        speechPool: [
+          'Crafting Active Recall trap for Polity Article 243D...',
+          'Explaining the distractor mistake for aspirants.',
+          'Student engagement is up 34% this week!',
+          'Coffee break well earned.'
+        ]
+      },
+      {
+        id: 'manas',
+        name: 'Manas',
+        shortRole: 'Media & YouTube Operator',
+        role: 'YouTube Media & Carousel Operator',
+        avatar: '🎬',
+        skinColor: '#FED7AA',
+        hairColor: '#0F172A',
+        hairStyle: 'cap',
+        clothesColor: '#334155',
+        collarColor: '#E2E8F0',
+        pantsColor: '#0F172A',
+        shoesColor: '#0F172A',
+        accessories: 'boom-mic',
+        screenType: 'MEDIA_TIMELINE',
+        accentColor: '#94A3B8',
+        script: 'automations/post_ca_to_youtube.py',
+        schedule: 'Post-Broadcast Carousel Sync',
+        ai: 'Playwright Headless Session Bridge',
+        mandate: 'Automates multi-image carousel uploads (up to 10 slides) to YouTube Community tab, manages session cookies, and handles safe-zone rendering.',
+        deskPos: { x: 495, y: 280 },
+        badgePos: { x: 495, y: 226 },
+        breakPos: { x: 910, y: 165 },
+        confPos: { x: 780, y: 486 },
+        state: 'WORKING',
+        tasksCompleted: 1,
+        speechPool: [
+          'Attaching 6-slide carousel to YouTube Community...',
+          'Bypassing Polymer shadow DOM click interceptor.',
+          'Verifying desktop session avatar cookies.',
+          'YouTube Community post live and verified!'
+        ]
+      }
+    ];
+
+    // --- 3. CANVAS SETUP & HIGH-DPI SCALING ---
+    const canvas = document.getElementById('office-canvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('stage-container');
+
+    const WORLD_WIDTH = 1024;
+    const WORLD_HEIGHT = 533;
+
+    let scale = 1;
+    let hoveredAgent = null;
+
+    // Master Photorealistic 2.5D Architectural Plate (Empty Offices & Desks)
+    const bgImage = new Image();
+    bgImage.src = '/images/virtual-office-empty-backdrop.jpg';
+    let bgLoaded = false;
+    bgImage.onload = () => {
+      bgLoaded = true;
+      drawOffice();
+    };
+
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = container.getBoundingClientRect();
+
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+
+      canvas.style.width = `${rect.width}px`;
+      canvas.style.height = `${rect.height}px`;
+
+      scale = Math.min(rect.width / WORLD_WIDTH, rect.height / WORLD_HEIGHT);
+      ctx.setTransform(dpr * scale, 0, 0, dpr * scale, (rect.width * dpr - WORLD_WIDTH * scale * dpr) / 2, (rect.height * dpr - WORLD_HEIGHT * scale * dpr) / 2);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+
+    // --- 4. PARTICLES & SIMULATION MANAGEMENT ---
+    const coffeeSteamParticles = [];
+    const waterCoolerBubbles = [];
+    let waterBubbleTimer = 80;
+
+    let activeExecutingAgentId = 'bikram';
+    let activeEngineTimer = 0;
+    const ENGINE_ROTATION_INTERVAL = 2200;
+
+    // Multi-Agent Collaboration Stories
+    const COLLAB_STORIES = [
+      {
+        id: 'radar_card',
+        partnerA: 'bikram',
+        partnerB: 'chhabi',
+        steps: [
+          { type: 'thought', speaker: 'bikram', text: '💭 Playwright webhook caught breaking OPSC Prelims notice...', duration: 140 },
+          { type: 'speech', speaker: 'bikram', lookAt: 'chhabi', text: 'Chhabi, OPSC just dropped an urgent notice! Can you generate the 1080x1080 alert card?', duration: 240 },
+          { type: 'speech', speaker: 'chhabi', lookAt: 'bikram', text: 'On it Bikram! Parsing syllabus bullets—Playwright canvas rendering now.', duration: 220 },
+          { type: 'action', speaker: 'chhabi', posture: 'ACTIVE_RUNNING', duration: 160 },
+          { type: 'speech', speaker: 'chhabi', lookAt: 'bikram', text: 'Card rendered with zero overlap! Broadcasting to Telegram now.', duration: 220 },
+          { type: 'speech', speaker: 'bikram', lookAt: 'chhabi', text: 'Verified on @OdishaExamPrepOfficial! Flawless sync.', duration: 180 }
+        ]
+      },
+      {
+        id: 'quiz_article',
+        partnerA: 'dipti',
+        partnerB: 'subham',
+        steps: [
+          { type: 'thought', speaker: 'dipti', text: '💭 Validating ORSP 2017 Level-10 pay scale distractor...', duration: 140 },
+          { type: 'speech', speaker: 'dipti', lookAt: 'subham', text: 'Subham, I\'m setting the evening Polity quiz. Are ORSP 2017 Level-10 pay matrix rules confirmed in your article?', duration: 250 },
+          { type: 'speech', speaker: 'subham', lookAt: 'dipti', text: 'Yes Dipti! Cross-checked with Finance Department gazette. Scale is ₹56,100–₹1,77,500.', duration: 240 },
+          { type: 'speech', speaker: 'dipti', lookAt: 'subham', text: 'Perfect! Adding explanation CTA so aspirants can read your masterclass.', duration: 210 },
+          { type: 'speech', speaker: 'subham', lookAt: 'dipti', text: 'Published! 1,800-word deep dive is live on the portal.', duration: 180 }
+        ]
+      },
+      {
+        id: 'community_youtube',
+        partnerA: 'trupti',
+        partnerB: 'manas',
+        steps: [
+          { type: 'thought', speaker: 'trupti', text: '💭 Reviewing Telegram doubt comments on Article 243...', duration: 140 },
+          { type: 'speech', speaker: 'trupti', lookAt: 'manas', text: 'Manas, students in the Telegram group found today\'s Panchayati Raj trap tricky. Can we put the solution slide on YouTube?', duration: 240 },
+          { type: 'speech', speaker: 'manas', lookAt: 'trupti', text: 'Already on it! Compiling a 5-slide carousel with the distractor breakdown.', duration: 220 },
+          { type: 'action', speaker: 'manas', posture: 'ACTIVE_RUNNING', duration: 160 },
+          { type: 'speech', speaker: 'manas', lookAt: 'trupti', text: 'Carousel posted to YouTube Community tab! Desktop cookies verified.', duration: 220 },
+          { type: 'speech', speaker: 'trupti', lookAt: 'manas', text: 'You\'re a lifesaver Manas! Engagement is up 34% this week.', duration: 180 }
+        ]
+      },
+      {
+        id: 'news_radar',
+        partnerA: 'priyanka',
+        partnerB: 'bikram',
+        steps: [
+          { type: 'thought', speaker: 'priyanka', text: '💭 Synthesizing today\'s 6 Odisha exam pillars...', duration: 140 },
+          { type: 'speech', speaker: 'priyanka', lookAt: 'bikram', text: 'Bikram, how\'s the Odisha news RSS pipeline looking for the 8:00 PM broadcast?', duration: 230 },
+          { type: 'speech', speaker: 'bikram', lookAt: 'priyanka', text: 'All 6 regional news feeds scraped cleanly. 14 items ingested, zero duplicates.', duration: 230 },
+          { type: 'speech', speaker: 'priyanka', lookAt: 'bikram', text: 'Excellent! Applying the Wednesday Halo theme and publishing the 7-slide carousel.', duration: 200 }
+        ]
+      }
+    ];
+
+    let currentStory = null;
+    let storyStepIndex = 0;
+    let storyStepTimer = 0;
+    let storyCooldownTimer = 400;
+
+    // --- 5. AGENT SPRITE CLASS WITH WAYPOINT NAVIGATION & KINEMATICS ---
+    class AgentSprite {
+      constructor(agent) {
+        this.agent = agent;
+        this.currentX = agent.deskPos.x;
+        this.currentY = agent.deskPos.y;
+        this.targetX = agent.deskPos.x;
+        this.targetY = agent.deskPos.y;
+        this.waypoints = [];
+        this.speed = 2.4;
+        this.walkCycle = 0;
+        this.frame = Math.random() * 500;
+        this.isTyping = true;
+        this.typingTimer = Math.random() * 30;
+
+        // Desynchronized typing speeds & phase offsets
+        const typingSpeeds = [0.20, 0.23, 0.26, 0.28, 0.31, 0.24, 0.27];
+        const agentIndex = AGENTS.findIndex(a => a.id === agent.id);
+        this.typingSpeed = typingSpeeds[agentIndex >= 0 ? agentIndex : 0];
+        this.phaseOffset = (agentIndex * 1.05) % (Math.PI * 2);
+
+        // Dynamic Posture State Machine
+        this.posture = 'READING_MOUSE';
+        this.postureTimer = 100 + Math.random() * 200;
+        this.headAngle = 0;
+        this.targetHeadAngle = 0;
+        this.gazeTimer = 80 + Math.random() * 120;
+        this.thoughtTimer = 400 + Math.random() * 600;
+      }
+
+      setDestination(x, y) {
+        this.waypoints = [];
+        const isFromRow1 = this.currentY < 200;
+        const isTargetBoardroom = x > 600 && y > 350;
+        const isTargetCafe = x > 600 && y < 350;
+        const isTargetDeskRow1 = y < 200;
+
+        if (isTargetBoardroom) {
+          if (isFromRow1) this.waypoints.push({ x: this.currentX, y: 220 });
+          this.waypoints.push({ x: 440, y: 220 });
+          this.waypoints.push({ x: 440, y: 445 });
+          this.waypoints.push({ x: 640, y: 445 });
+          this.waypoints.push({ x, y });
+        } else if (isTargetCafe) {
+          if (isFromRow1) this.waypoints.push({ x: this.currentX, y: 220 });
+          this.waypoints.push({ x: 580, y: 220 });
+          this.waypoints.push({ x, y });
+        } else if (isTargetDeskRow1) {
+          this.waypoints.push({ x: 440, y: 220 });
+          this.waypoints.push({ x, y: 220 });
+          this.waypoints.push({ x, y });
+        } else {
+          this.waypoints.push({ x: 440, y: 310 });
+          this.waypoints.push({ x, y: 310 });
+          this.waypoints.push({ x, y });
+        }
+
+        this.targetX = this.waypoints[0].x;
+        this.targetY = this.waypoints[0].y;
+      }
+
+      update() {
+        this.frame++;
+        this.headAngle += (this.targetHeadAngle - this.headAngle) * 0.12;
+
+        if (this.waypoints.length > 0) {
+          const currentTarget = this.waypoints[0];
+          const dx = currentTarget.x - this.currentX;
+          const dy = currentTarget.y - this.currentY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist > this.speed) {
+            this.currentX += (dx / dist) * this.speed;
+            this.currentY += (dy / dist) * this.speed;
+            this.walkCycle += 0.28;
+            this.isTyping = false;
+          } else {
+            this.currentX = currentTarget.x;
+            this.currentY = currentTarget.y;
+            this.waypoints.shift();
+            if (this.waypoints.length > 0) {
+              this.targetX = this.waypoints[0].x;
+              this.targetY = this.waypoints[0].y;
+            } else {
+              this.walkCycle = 0;
+            }
+          }
+        } else {
+          this.walkCycle = 0;
+          const isAtDesk = Math.abs(this.currentX - this.agent.deskPos.x) < 4 && Math.abs(this.currentY - this.agent.deskPos.y) < 4;
+
+          if (isAtDesk && this.agent.state === 'WORKING') {
+            const isCurrentlyActive = this.agent.id === activeExecutingAgentId;
+
+            if (isCurrentlyActive) {
+              this.posture = 'ACTIVE_RUNNING';
+              this.isTyping = true;
+              this.targetHeadAngle = Math.sin(this.frame * 0.03) * 0.05;
+
+              this.typingTimer--;
+              if (this.typingTimer <= 0) {
+                if (Math.random() < 0.35) audio.playKeyboard();
+                this.typingTimer = 16 + Math.random() * 32;
+              }
+            } else if (this.posture !== 'CONVERSING') {
+              this.postureTimer--;
+              if (this.postureTimer <= 0) {
+                const postures = ['READING_MOUSE', 'READING_MOUSE', 'CHIN_THINKING', 'COFFEE_SIP', 'BURST_TYPING'];
+                this.posture = postures[Math.floor(Math.random() * postures.length)];
+                this.postureTimer = 160 + Math.random() * 320;
+              }
+              this.isTyping = this.posture === 'BURST_TYPING';
+            }
+
+            this.gazeTimer--;
+            if (this.gazeTimer <= 0) {
+              if (this.posture !== 'CONVERSING') {
+                const gazes = [-0.09, 0, 0.09];
+                this.targetHeadAngle = gazes[Math.floor(Math.random() * gazes.length)];
+              }
+              this.gazeTimer = 90 + Math.random() * 160;
+            }
+
+            if (!currentStory) {
+              this.thoughtTimer--;
+              if (this.thoughtTimer <= 0) {
+                this.triggerSoloThought();
+                this.thoughtTimer = 700 + Math.random() * 900;
+              }
+            }
+          } else {
+            this.isTyping = false;
+            this.targetHeadAngle = 0;
+          }
+        }
+      }
+
+      triggerSoloThought() {
+        const thoughts = [
+          '💭 Verifying Playwright selector timing...',
+          '💭 Jaccard anti-leakage verified: 0.72.',
+          '💭 Checking Level-10 pay matrix scale.',
+          '💭 Text contrast ratio verified (>7:1).',
+          '💭 Synthesizing today\'s 6 exam pillars...',
+          '💭 Reviewing Telegram doubt comments...',
+          '💭 Desktop cookies & shadow DOM nominal.'
+        ];
+        const text = thoughts[Math.floor(Math.random() * thoughts.length)];
+        spawnThoughtBubble(this.currentX, this.currentY - 48, text);
+      }
+    }
+
+    const agentSprites = AGENTS.map(a => new AgentSprite(a));
+
+    // Multi-Agent Collaboration Director
+    function updateOfficeCollaboration() {
+      activeEngineTimer++;
+      if (activeEngineTimer >= ENGINE_ROTATION_INTERVAL) {
+        activeEngineTimer = 0;
+        const currentIdx = AGENTS.findIndex(a => a.id === activeExecutingAgentId);
+        const nextAgent = AGENTS[(currentIdx + 1) % AGENTS.length];
+        activeExecutingAgentId = nextAgent.id;
+        document.getElementById('ticker-text').textContent = `⚡ AUTONOMOUS PIPELINE: Active execution spotlight shifted to ${nextAgent.name} (${nextAgent.shortRole}).`;
+      }
+
+      if (!currentStory) {
+        storyCooldownTimer--;
+        if (storyCooldownTimer <= 0) {
+          currentStory = COLLAB_STORIES[Math.floor(Math.random() * COLLAB_STORIES.length)];
+          storyStepIndex = 0;
+          storyStepTimer = 0;
+        }
+      } else {
+        const step = currentStory.steps[storyStepIndex];
+        storyStepTimer++;
+
+        if (storyStepTimer === 1) {
+          const speakerSprite = agentSprites.find(s => s.agent.id === step.speaker);
+
+          if (step.lookAt && speakerSprite) {
+            const listenerSprite = agentSprites.find(s => s.agent.id === step.lookAt);
+            if (listenerSprite) {
+              const dir = listenerSprite.currentX > speakerSprite.currentX ? 0.16 : -0.16;
+              speakerSprite.targetHeadAngle = dir;
+              speakerSprite.posture = 'CONVERSING';
+              listenerSprite.targetHeadAngle = -dir;
+              listenerSprite.posture = 'CONVERSING';
+            }
+          }
+
+          if (step.type === 'thought') {
+            spawnThoughtBubble(speakerSprite.currentX, speakerSprite.currentY - 48, step.text);
+          } else if (step.type === 'speech') {
+            spawnSpeechBubble(speakerSprite.currentX, speakerSprite.currentY - 48, step.text);
+            audio.playChime();
+          } else if (step.type === 'action') {
+            speakerSprite.posture = step.posture;
+          }
+        }
+
+        if (storyStepTimer >= step.duration) {
+          storyStepIndex++;
+          storyStepTimer = 0;
+
+          if (storyStepIndex >= currentStory.steps.length) {
+            const pA = agentSprites.find(s => s.agent.id === currentStory.partnerA);
+            const pB = agentSprites.find(s => s.agent.id === currentStory.partnerB);
+            if (pA) { pA.targetHeadAngle = 0; pA.posture = 'READING_MOUSE'; }
+            if (pB) { pB.targetHeadAngle = 0; pB.posture = 'READING_MOUSE'; }
+
+            currentStory = null;
+            storyCooldownTimer = 650 + Math.random() * 500;
+          }
+        }
+      }
+    }
+
+    // --- 6. RENDERING PIPELINE (100% CLEAN DYNAMIC AGENTS OVER EMPTY BACKDROP) ---
+    function drawOffice() {
+      ctx.clearRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+
+      // 1. Render Photorealistic Master Architectural Plate (Empty Rooms & Empty Desks)
+      if (bgLoaded || bgImage.complete) {
+        ctx.drawImage(bgImage, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+      }
+
+      // 2. Dynamic Server Blade LEDs in Supabase & GitHub Vault
+      drawServerVaultLEDs();
+
+      // 3. Dynamic Telemetry Glow in War Room 85" Screen
+      drawWarRoomDashboardPulse();
+
+      // 4. Dynamic Coffee Steam & Water Bubbles in Café Lounge
+      drawDynamicCafeParticles();
+
+      // 5. Dynamic Seated Agents at Workstations (Rendered ONLY when agent is at desk)
+      drawDynamicWorkstationAgents();
+
+      // 6. Walking / Meeting / Break Sprites (Depth Sorted)
+      const sortedSprites = [...agentSprites].sort((a, b) => a.currentY - b.currentY);
+      sortedSprites.forEach(sprite => {
+        const isAtDesk = sprite.agent.state === 'WORKING' && sprite.walkCycle === 0 &&
+                         Math.abs(sprite.currentX - sprite.agent.deskPos.x) < 5 &&
+                         Math.abs(sprite.currentY - sprite.agent.deskPos.y) < 5;
+        if (!isAtDesk) {
+          drawHumanAgent(sprite);
+        }
+      });
+    }
+
+    // Helper: Rounded Rectangle
+    function roundRect(ctx, x, y, width, height, radius) {
+      if (!radius || radius < 0) radius = 0;
+      radius = Math.min(radius, Math.abs(width) / 2, Math.abs(height) / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    }
+
+    // Dynamic Server Vault LEDs
+    function drawServerVaultLEDs() {
+      for (let y = 385; y <= 425; y += 9) {
+        const blink = Math.sin(Date.now() / 150 + y) > 0.1;
+        ctx.fillStyle = blink ? '#34D399' : '#065F46';
+        ctx.fillRect(115, y, 2.5, 2);
+        ctx.fillRect(122, y, 2.5, 2);
+        ctx.fillRect(150, y, 2.5, 2);
+      }
+
+      for (let y = 385; y <= 425; y += 9) {
+        const blink = Math.cos(Date.now() / 180 + y) > 0.1;
+        ctx.fillStyle = blink ? '#38BDF8' : '#1E40AF';
+        ctx.fillRect(212, y, 2.5, 2);
+        ctx.fillRect(220, y, 2.5, 2);
+        ctx.fillRect(248, y, 2.5, 2);
+      }
+    }
+
+    // Dynamic War Room 85" Telemetry Screen
+    function drawWarRoomDashboardPulse() {
+      const pulse = (Math.sin(Date.now() / 400) + 1) * 0.5;
+      ctx.fillStyle = `rgba(56, 189, 248, ${0.4 + pulse * 0.5})`;
+      ctx.beginPath();
+      ctx.arc(770, 375, 1.8, 0, Math.PI * 2);
+      ctx.arc(805, 378, 1.8, 0, Math.PI * 2);
+      ctx.arc(745, 376, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Dynamic Café Lounge Particles
+    function drawDynamicCafeParticles() {
+      if (Math.random() < 0.25) {
+        coffeeSteamParticles.push({
+          x: 685 + (Math.random() - 0.5) * 8,
+          y: 108,
+          alpha: 0.45,
+          life: 30
+        });
+      }
+
+      for (let i = coffeeSteamParticles.length - 1; i >= 0; i--) {
+        const p = coffeeSteamParticles[i];
+        p.y -= 0.35;
+        p.alpha -= 0.015;
+        p.life--;
+
+        ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, p.alpha)})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (p.life <= 0 || p.alpha <= 0) coffeeSteamParticles.splice(i, 1);
+      }
+
+      waterBubbleTimer--;
+      if (waterBubbleTimer <= 0) {
+        waterCoolerBubbles.push({
+          x: 870 + (Math.random() - 0.5) * 6,
+          y: 135,
+          alpha: 0.6,
+          life: 25
+        });
+        waterBubbleTimer = 70 + Math.random() * 80;
+      }
+
+      for (let i = waterCoolerBubbles.length - 1; i >= 0; i--) {
+        const b = waterCoolerBubbles[i];
+        b.y -= 0.45;
+        b.alpha -= 0.024;
+        b.life--;
+
+        ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, b.alpha)})`;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 1.3, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (b.life <= 0 || b.alpha <= 0) waterCoolerBubbles.splice(i, 1);
+      }
+    }
+
+    // Dynamic Workstation Agents Layer
+    function drawDynamicWorkstationAgents() {
+      AGENTS.forEach(agent => {
+        const sprite = agentSprites.find(s => s.agent.id === agent.id);
+        if (!sprite) return;
+
+        const isAtDesk = agent.state === 'WORKING' && sprite.walkCycle === 0 &&
+                         Math.abs(sprite.currentX - agent.deskPos.x) < 5 &&
+                         Math.abs(sprite.currentY - agent.deskPos.y) < 5;
+
+        // If agent is NOT at desk (walking or in meeting/break):
+        // DO NOT DRAW ANYTHING AT DESK! The backdrop already has the empty chair and desk!
+        if (!isAtDesk) return;
+
+        const isActivelyExecuting = agent.id === activeExecutingAgentId;
+
+        // Draw the living agent seated in the chair at the desk:
+        drawSeatedAgentAtDesk(agent.deskPos.x, agent.deskPos.y, agent, sprite, isActivelyExecuting);
+
+        // Active Engine Status Badge Pulse
+        if (isActivelyExecuting) {
+          drawActiveEngineBadge(agent.badgePos.x, agent.badgePos.y);
+        }
+
+        // Interactive Hover Ring
+        if (hoveredAgent && hoveredAgent.id === agent.id) {
+          ctx.strokeStyle = '#38BDF8';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(agent.deskPos.x, agent.deskPos.y - 12, 34, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      });
+    }
+
+    // Seated Living Agent at Workstation (Torso, Face, Hair, Arms on Desk, Monitors)
+    function drawSeatedAgentAtDesk(dx, dy, agent, sprite, isActivelyExecuting) {
+      const breath = Math.sin(sprite.frame * 0.07) * 0.7;
+
+      // 1. Dual Monitors Screen Graphics
+      drawLiveMonitors(dx, dy - 14, agent, isActivelyExecuting);
+
+      // 2. Seated Torso & Shoulders in Chair
+      ctx.fillStyle = agent.clothesColor;
+      roundRect(ctx, dx - 10, dy - 18 + breath, 20, 14, 4);
+      ctx.fill();
+
+      // Shirt Collar / V-neck
+      ctx.fillStyle = agent.collarColor || '#FFFFFF';
+      ctx.beginPath();
+      ctx.moveTo(dx - 4, dy - 18 + breath);
+      ctx.lineTo(dx, dy - 14 + breath);
+      ctx.lineTo(dx + 4, dy - 18 + breath);
+      ctx.fill();
+
+      // 3. Proportional Head with Smooth Rotation Lerp
+      ctx.save();
+      ctx.translate(dx, dy - 24 + breath);
+      ctx.rotate(sprite.headAngle || 0);
+
+      // Neck
+      ctx.fillStyle = agent.skinColor;
+      ctx.fillRect(-3, 4, 6, 4);
+
+      // Face
+      ctx.beginPath();
+      ctx.arc(0, 0, 7.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Eyes
+      ctx.fillStyle = '#0F172A';
+      ctx.beginPath();
+      ctx.arc(-2.5, -0.5, 1, 0, Math.PI * 2);
+      ctx.arc(2.5, -0.5, 1, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Hair
+      ctx.fillStyle = agent.hairColor;
+      ctx.beginPath();
+      ctx.arc(0, -1.8, 8, Math.PI * 0.85, Math.PI * 2.15);
+      ctx.fill();
+
+      // Accessories
+      if (agent.accessories === 'glasses' || agent.accessories === 'spectacles') {
+        ctx.strokeStyle = '#0F172A';
+        ctx.lineWidth = 1.1;
+        ctx.strokeRect(-6, -2, 4.5, 3.5);
+        ctx.strokeRect(1.5, -2, 4.5, 3.5);
+        ctx.beginPath(); ctx.moveTo(-1.5, 0); ctx.lineTo(1.5, 0); ctx.stroke();
+      } else if (agent.accessories === 'headphones') {
+        ctx.strokeStyle = '#1E293B';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, -2.5, 9, Math.PI * 0.85, Math.PI * 2.15);
+        ctx.stroke();
+        ctx.fillStyle = '#F59E0B';
+        roundRect(ctx, -10, -2, 2.5, 5, 1);
+        ctx.fill();
+        roundRect(ctx, 7.5, -2, 2.5, 5, 1);
+        ctx.fill();
+      } else if (agent.accessories === 'cap') {
+        ctx.fillStyle = '#1E293B';
+        ctx.beginPath();
+        ctx.arc(0, -1.8, 8.5, Math.PI * 0.9, Math.PI * 2.1);
+        ctx.fill();
+        ctx.fillRect(-9, -5, 18, 3.5);
+      }
+
+      ctx.restore();
+
+      // 4. Forearms & Typing Hands (On Desk Surface)
+      drawSeatedAgentHandsOnDesk(dx, dy, agent, sprite, isActivelyExecuting);
+    }
+
+    // Live Monitors Rendering
+    function drawLiveMonitors(dx, dy, agent, isActivelyExecuting) {
+      if (isActivelyExecuting) {
+        const glow = ctx.createRadialGradient(dx, dy, 6, dx, dy, 36);
+        glow.addColorStop(0, 'rgba(56, 189, 248, 0.45)');
+        glow.addColorStop(0.6, 'rgba(52, 211, 153, 0.2)');
+        glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(dx, dy, 36, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.save();
+      ctx.translate(dx - 22, dy);
+      ctx.rotate(0.10);
+      drawScreenUI(agent.screenType, true, isActivelyExecuting);
+      ctx.restore();
+
+      ctx.save();
+      ctx.translate(dx + 22, dy);
+      ctx.rotate(-0.10);
+      drawSecondaryScreenUI(agent, true, isActivelyExecuting);
+      ctx.restore();
+    }
+
+    // Primary Screen UI Graphics
+    function drawScreenUI(type, isWorking, isActivelyExecuting) {
+      const pulse = isActivelyExecuting ? Math.sin(Date.now() / 150) * 0.25 + 0.75 : 0.8;
+
+      if (type === 'TERMINAL_LOGS') {
+        ctx.fillStyle = `rgba(52, 211, 153, ${pulse})`;
+        ctx.fillRect(-11, -5, 14, 1.4);
+        ctx.fillRect(-11, -2, 18, 1.4);
+        ctx.fillRect(-11, 1, 12, 1.4);
+        ctx.fillRect(-11, 4, 16, 1.4);
+      } else if (type === 'GRAPHIC_STUDIO') {
+        ctx.fillStyle = `rgba(239, 68, 68, ${pulse})`;
+        roundRect(ctx, -11, -5, 22, 9, 1.5);
+        ctx.fill();
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(-8, -3, 16, 2);
+      } else if (type === 'QUESTION_EDITOR') {
+        ctx.fillStyle = `rgba(16, 185, 129, ${pulse})`;
+        ctx.fillRect(-11, -5, 18, 2);
+        ctx.fillStyle = '#94A3B8';
+        ctx.fillRect(-11, -1, 6, 1.5);
+        ctx.fillRect(-11, 2, 6, 1.5);
+      } else if (type === 'NEWS_FEED') {
+        ctx.fillStyle = `rgba(168, 85, 247, ${pulse})`;
+        ctx.fillRect(-11, -5, 8, 2);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(-11, -1, 20, 1.5);
+        ctx.fillRect(-11, 2, 16, 1.5);
+      } else if (type === 'MARKDOWN_DOC') {
+        ctx.fillStyle = `rgba(6, 182, 212, ${pulse})`;
+        ctx.fillRect(-11, -5, 16, 2.2);
+        ctx.fillStyle = '#CBD5E1';
+        ctx.fillRect(-11, 0, 20, 1.2);
+      } else if (type === 'COMMUNITY_CHAT') {
+        ctx.fillStyle = `rgba(245, 158, 11, ${pulse})`;
+        roundRect(ctx, -11, -5, 13, 4.5, 1.2);
+        ctx.fill();
+        roundRect(ctx, -5, 1, 14, 4.5, 1.2);
+        ctx.fill();
+      } else {
+        ctx.fillStyle = `rgba(56, 189, 248, ${pulse})`;
+        ctx.fillRect(-11, -5, 22, 5.5);
+        ctx.fillStyle = '#EF4444';
+        ctx.fillRect(-11, 2, 22, 2);
+      }
+    }
+
+    // Role-Specific Secondary Telemetry Displays
+    function drawSecondaryScreenUI(agent, isWorking, isActivelyExecuting) {
+      const pulse = isActivelyExecuting ? Math.sin(Date.now() / 180) * 0.25 + 0.75 : 0.8;
+
+      if (agent.id === 'bikram') {
+        ctx.strokeStyle = `rgba(52, 211, 153, ${pulse * 0.75})`;
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.arc(0, 0, 5, 0, Math.PI * 2);
+        ctx.stroke();
+
+        const sweep = (Date.now() / 500) % (Math.PI * 2);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(sweep) * 5, Math.sin(sweep) * 5);
+        ctx.stroke();
+
+        ctx.fillStyle = '#34D399';
+        ctx.fillRect(-2.5, -2.5, 1.5, 1.5);
+        ctx.fillRect(2, 1.5, 1.5, 1.5);
+      } else if (agent.id === 'chhabi') {
+        ctx.fillStyle = '#38BDF8'; ctx.fillRect(-9, -4.5, 3.5, 3.5);
+        ctx.fillStyle = '#EC4899'; ctx.fillRect(-4, -4.5, 3.5, 3.5);
+        ctx.fillStyle = '#10B981'; ctx.fillRect(1, -4.5, 3.5, 3.5);
+        ctx.fillStyle = '#F59E0B'; ctx.fillRect(6, -4.5, 3.5, 3.5);
+        ctx.strokeStyle = `rgba(244, 63, 94, ${pulse * 0.8})`;
+        ctx.lineWidth = 0.8;
+        ctx.strokeRect(-9, 1, 18, 4);
+      } else if (agent.id === 'dipti') {
+        ctx.fillStyle = '#10B981'; ctx.fillRect(-10, -4.5, 12, 1.8);
+        ctx.fillStyle = '#CBD5E1'; ctx.fillRect(-10, -1, 15, 1.4);
+        ctx.fillStyle = `rgba(16, 185, 129, ${pulse})`;
+        ctx.beginPath();
+        ctx.arc(7, -3.5, 1.5, 0, Math.PI * 2);
+        ctx.arc(7, 0.5, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (agent.id === 'priyanka') {
+        ctx.fillStyle = '#A855F7'; roundRect(ctx, -10, -4.5, 9, 3, 1); ctx.fill();
+        ctx.fillStyle = '#EC4899'; roundRect(ctx, 1, -4.5, 9, 3, 1); ctx.fill();
+        ctx.fillStyle = `rgba(255, 255, 255, ${pulse * 0.9})`; ctx.fillRect(-10, 1, 20, 1.5);
+      } else if (agent.id === 'subham') {
+        ctx.strokeStyle = `rgba(6, 182, 212, ${pulse})`;
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(-10, 3.5); ctx.lineTo(-5, 1.5); ctx.lineTo(0, -0.5); ctx.lineTo(8, -4.5);
+        ctx.stroke();
+        ctx.fillStyle = '#22C55E';
+        ctx.beginPath(); ctx.arc(8, -4.5, 1.6, 0, Math.PI * 2); ctx.fill();
+      } else if (agent.id === 'trupti') {
+        ctx.fillStyle = '#F59E0B'; roundRect(ctx, -10, -4.5, 11, 3, 1); ctx.fill();
+        ctx.fillStyle = '#38BDF8'; roundRect(ctx, -2, 0.5, 11, 3, 1); ctx.fill();
+      } else if (agent.id === 'manas') {
+        const bar1 = Math.min(7, 2.5 + Math.abs(Math.sin(Date.now() / 220)) * 5);
+        const bar2 = Math.min(7, 2 + Math.abs(Math.cos(Date.now() / 190)) * 6);
+        ctx.fillStyle = '#10B981'; ctx.fillRect(-8, 3.5 - bar1, 3, bar1);
+        ctx.fillStyle = '#38BDF8'; ctx.fillRect(-3, 3.5 - bar2, 3, bar2);
+      }
+    }
+
+    // Forearms & Typing Hands (Desynchronized Kinematics)
+    function drawSeatedAgentHandsOnDesk(dx, dy, agent, sprite, isActivelyExecuting) {
+      const breath = Math.sin(sprite.frame * 0.07) * 0.7;
+      const posture = sprite.posture || 'READING_MOUSE';
+
+      if (isActivelyExecuting || posture === 'ACTIVE_RUNNING' || posture === 'BURST_TYPING') {
+        const leftType = Math.sin(sprite.frame * sprite.typingSpeed + sprite.phaseOffset) * 1.6;
+        const rightType = Math.cos(sprite.frame * sprite.typingSpeed + sprite.phaseOffset) * 1.6;
+
+        ctx.fillStyle = agent.clothesColor;
+        ctx.beginPath();
+        ctx.moveTo(dx - 10, dy - 5 + breath);
+        ctx.lineTo(dx - 5, dy + 2);
+        ctx.lineTo(dx - 2, dy + 2);
+        ctx.lineTo(dx - 7, dy - 5 + breath);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(dx + 10, dy - 5 + breath);
+        ctx.lineTo(dx + 5, dy + 2);
+        ctx.lineTo(dx + 2, dy + 2);
+        ctx.lineTo(dx + 7, dy - 5 + breath);
+        ctx.fill();
+
+        ctx.fillStyle = agent.skinColor;
+        ctx.beginPath();
+        ctx.arc(dx - 4, dy + 2 + leftType, 2.6, 0, Math.PI * 2);
+        ctx.arc(dx + 4, dy + 2 + rightType, 2.6, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (posture === 'CHIN_THINKING') {
+        ctx.fillStyle = agent.clothesColor;
+        ctx.fillRect(dx - 9, dy - 4 + breath, 14, 3);
+        ctx.fillStyle = agent.skinColor;
+        ctx.beginPath();
+        ctx.arc(dx + 5, dy - 8 + breath, 2.8, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (posture === 'COFFEE_SIP') {
+        ctx.fillStyle = agent.clothesColor;
+        ctx.fillRect(dx + 4, dy - 6 + breath, 4, 8);
+        ctx.fillStyle = '#F8FAFC';
+        roundRect(ctx, dx + 7, dy - 12 + breath, 5.5, 7, 1.2);
+        ctx.fill();
+      } else {
+        ctx.fillStyle = agent.clothesColor;
+        ctx.fillRect(dx - 9, dy - 4 + breath, 4, 6);
+        ctx.fillRect(dx + 6, dy - 4 + breath, 4, 6);
+        ctx.fillStyle = agent.skinColor;
+        ctx.beginPath();
+        ctx.arc(dx - 7, dy + 2, 2.4, 0, Math.PI * 2);
+        ctx.arc(dx + 8, dy + 2, 2.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Active Engine Status Badge Pulse
+    function drawActiveEngineBadge(bx, by) {
+      const pulse = (Math.sin(Date.now() / 250) + 1) * 0.5;
+      ctx.save();
+      ctx.strokeStyle = `rgba(52, 211, 153, ${0.6 + pulse * 0.4})`;
+      ctx.lineWidth = 1.4;
+      roundRect(ctx, bx - 35, by - 8, 70, 15, 7.5);
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(52, 211, 153, 0.9)';
+      ctx.font = '800 7px JetBrains Mono';
+      ctx.textAlign = 'center';
+      ctx.fillText('⚡ ACTIVE', bx, by + 3);
+      ctx.restore();
+    }
+
+    // Human Agent Rendering (Walking & Meeting / Break Positions)
+    function drawHumanAgent(sprite) {
+      const x = sprite.currentX;
+      const y = sprite.currentY;
+      const agent = sprite.agent;
+      const isWalking = sprite.walkCycle > 0;
+      const breath = Math.sin(sprite.frame * 0.07) * 0.8;
+
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+      ctx.beginPath();
+      ctx.ellipse(x, y + 14, 13, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = agent.pantsColor || '#1E293B';
+      if (isWalking) {
+        const stride = Math.sin(sprite.walkCycle) * 5.5;
+        ctx.fillRect(x - 6, y + 4 - stride, 4.5, 11 + stride);
+        ctx.fillRect(x + 2, y + 4 + stride, 4.5, 11 - stride);
+        ctx.fillStyle = agent.shoesColor || '#0F172A';
+        ctx.fillRect(x - 7, y + 15, 6, 3);
+        ctx.fillRect(x + 1, y + 15, 6, 3);
+      } else {
+        ctx.fillRect(x - 5, y + 6, 4.5, 7);
+        ctx.fillRect(x + 1, y + 6, 4.5, 7);
+        ctx.fillStyle = agent.shoesColor || '#0F172A';
+        ctx.fillRect(x - 6, y + 13, 5.5, 2.8);
+        ctx.fillRect(x + 1, y + 13, 5.5, 2.8);
+      }
+
+      ctx.fillStyle = agent.clothesColor;
+      roundRect(ctx, x - 10, y - 8 + breath, 20, 15, 4);
+      ctx.fill();
+
+      ctx.fillStyle = agent.collarColor || '#FFFFFF';
+      ctx.beginPath();
+      ctx.moveTo(x - 4, y - 8 + breath);
+      ctx.lineTo(x, y - 4 + breath);
+      ctx.lineTo(x + 4, y - 8 + breath);
+      ctx.fill();
+
+      ctx.fillStyle = agent.clothesColor;
+      if (isWalking) {
+        const swing = Math.sin(sprite.walkCycle) * 4.5;
+        ctx.fillRect(x - 12, y - 6 + breath - swing, 4, 10);
+        ctx.fillRect(x + 8, y - 6 + breath + swing, 4, 10);
+        ctx.fillStyle = agent.skinColor;
+        ctx.beginPath();
+        ctx.arc(x - 10, y + 5 - swing, 2.4, 0, Math.PI * 2);
+        ctx.arc(x + 10, y + 5 + swing, 2.4, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.fillRect(x - 12, y - 6 + breath, 4, 10);
+        ctx.fillRect(x + 8, y - 6 + breath, 4, 10);
+        ctx.fillStyle = agent.skinColor;
+        ctx.beginPath();
+        ctx.arc(x - 10, y + 5, 2.4, 0, Math.PI * 2);
+        ctx.arc(x + 10, y + 5, 2.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.save();
+      ctx.translate(x, y - 16 + breath);
+      ctx.rotate(sprite.headAngle || 0);
+
+      ctx.fillStyle = agent.skinColor;
+      ctx.fillRect(-3, 6, 6, 4);
+
+      ctx.beginPath();
+      ctx.arc(0, 0, 8.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#0F172A';
+      ctx.beginPath();
+      ctx.arc(-3, -0.5, 1.1, 0, Math.PI * 2);
+      ctx.arc(3, -0.5, 1.1, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = agent.hairColor;
+      ctx.beginPath();
+      ctx.arc(0, -2, 9, Math.PI * 0.85, Math.PI * 2.15);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // --- 7. ANIMATION TICK LOOP ---
+    function loop() {
+      updateOfficeCollaboration();
+      agentSprites.forEach(s => s.update());
+      drawOffice();
+      requestAnimationFrame(loop);
+    }
+
+    // --- 8. MOUSE INTERACTION & HIT TESTING ---
+    function getCanvasCoordinates(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.clientX - rect.left;
+      const clientY = e.clientY - rect.top;
+
+      const x = (clientX - (rect.width - WORLD_WIDTH * scale) / 2) / scale;
+      const y = (clientY - (rect.height - WORLD_HEIGHT * scale) / 2) / scale;
+      return { x, y };
+    }
+
+    const tooltip = document.getElementById('agent-tooltip');
+    const tipName = document.getElementById('tip-name');
+    const tipRole = document.getElementById('tip-role');
+    const tipStatus = document.getElementById('tip-status');
+
+    canvas.addEventListener('mousemove', (e) => {
+      const pos = getCanvasCoordinates(e);
+      let found = null;
+
+      agentSprites.forEach(s => {
+        const dx = pos.x - s.agent.deskPos.x;
+        const dy = pos.y - (s.agent.deskPos.y - 12);
+        if (Math.sqrt(dx * dx + dy * dy) < 38) {
+          found = s.agent;
+        }
+      });
+
+      hoveredAgent = found;
+
+      if (found) {
+        canvas.style.cursor = 'pointer';
+        tooltip.style.display = 'block';
+        tooltip.style.left = `${e.clientX}px`;
+        tooltip.style.top = `${e.clientY}px`;
+
+        tipName.innerHTML = `${found.avatar} ${found.name}`;
+        tipRole.textContent = found.role;
+        tipStatus.textContent = found.state;
+        tipStatus.className = `tooltip-status status-${found.state.toLowerCase()}`;
+      } else {
+        canvas.style.cursor = 'default';
+        tooltip.style.display = 'none';
+      }
+    });
+
+    canvas.addEventListener('click', (e) => {
+      if (hoveredAgent) {
+        audio.playChime();
+        openDossier(hoveredAgent);
+      }
+    });
+
+    // --- 9. SPEECH & THOUGHT BUBBLE SYSTEM ---
+    const speechContainer = document.getElementById('speech-container');
+
+    function spawnSpeechBubble(worldX, worldY, text) {
+      const bubble = document.createElement('div');
+      bubble.className = 'speech-bubble';
+      bubble.textContent = text;
+
+      const rect = canvas.getBoundingClientRect();
+      const screenX = (worldX * scale) + (rect.width - WORLD_WIDTH * scale) / 2;
+      const screenY = (worldY * scale) + (rect.height - WORLD_HEIGHT * scale) / 2;
+
+      bubble.style.left = `${screenX}px`;
+      bubble.style.top = `${screenY}px`;
+
+      speechContainer.appendChild(bubble);
+
+      setTimeout(() => {
+        bubble.remove();
+      }, 4000);
+    }
+
+    function spawnThoughtBubble(worldX, worldY, text) {
+      const bubble = document.createElement('div');
+      bubble.className = 'thought-bubble';
+      bubble.textContent = text;
+
+      const rect = canvas.getBoundingClientRect();
+      const screenX = (worldX * scale) + (rect.width - WORLD_WIDTH * scale) / 2;
+      const screenY = (worldY * scale) + (rect.height - WORLD_HEIGHT * scale) / 2;
+
+      bubble.style.left = `${screenX}px`;
+      bubble.style.top = `${screenY}px`;
+
+      speechContainer.appendChild(bubble);
+
+      setTimeout(() => {
+        bubble.remove();
+      }, 4200);
+    }
+
+    // --- 10. AGENT DOSSIER MODAL ---
+    const overlay = document.getElementById('dossier-overlay');
+    const closeBtn = document.getElementById('dossier-close-btn');
+    const dossierName = document.getElementById('dossier-name');
+    const dossierRole = document.getElementById('dossier-role');
+    const dossierAvatar = document.getElementById('dossier-avatar');
+    const dossierScript = document.getElementById('dossier-script');
+    const dossierSchedule = document.getElementById('dossier-schedule');
+    const dossierAi = document.getElementById('dossier-ai');
+    const dossierPerf = document.getElementById('dossier-perf');
+    const dossierMandate = document.getElementById('dossier-mandate');
+    const dossierStatusText = document.getElementById('dossier-status-text');
+    const manualDispatchBtn = document.getElementById('manual-dispatch-btn');
+    let currentDossierAgent = null;
+
+    function openDossier(agent) {
+      currentDossierAgent = agent;
+      dossierName.textContent = agent.name;
+      dossierRole.textContent = agent.role;
+      dossierAvatar.textContent = agent.avatar;
+      dossierScript.textContent = agent.script;
+      dossierSchedule.textContent = agent.schedule;
+      dossierAi.textContent = agent.ai;
+      dossierPerf.textContent = `100% Pass • ${agent.tasksCompleted} Tasks Completed Today`;
+      dossierMandate.textContent = agent.mandate;
+      dossierStatusText.textContent = `${agent.state} • Operational`;
+
+      overlay.classList.add('active');
+    }
+
+    function closeDossier() {
+      overlay.classList.remove('active');
+      currentDossierAgent = null;
+    }
+
+    closeBtn.addEventListener('click', closeDossier);
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeDossier();
+    });
+
+    manualDispatchBtn.addEventListener('click', () => {
+      if (!currentDossierAgent) return;
+      audio.playChime();
+      manualDispatchBtn.disabled = true;
+      manualDispatchBtn.textContent = '⏳ Dispatching Task...';
+
+      activeExecutingAgentId = currentDossierAgent.id;
+      activeEngineTimer = 0;
+
+      currentDossierAgent.state = 'WORKING';
+      const sprite = agentSprites.find(s => s.agent.id === currentDossierAgent.id);
+      if (sprite) {
+        sprite.setDestination(currentDossierAgent.deskPos.x, currentDossierAgent.deskPos.y);
+      }
+
+      spawnSpeechBubble(currentDossierAgent.deskPos.x, currentDossierAgent.deskPos.y - 45, `🚀 Manual Task Dispatched for ${currentDossierAgent.name}!`);
+
+      setTimeout(() => {
+        currentDossierAgent.tasksCompleted++;
+        manualDispatchBtn.disabled = false;
+        manualDispatchBtn.textContent = '⚡ Force Run Engine Now';
+        dossierPerf.textContent = `100% Pass • ${currentDossierAgent.tasksCompleted} Tasks Completed Today`;
+        document.getElementById('completed-tasks-count').textContent = `${AGENTS.reduce((acc, a) => acc + a.tasksCompleted, 0)} Completed`;
+      }, 2000);
+    });
+
+    // --- 11. OFFICE COMMAND BUTTONS ---
+    // All Hands (Strategy Boardroom)
+    document.getElementById('bell-btn').addEventListener('click', () => {
+      audio.playBell();
+      agentSprites.forEach(s => {
+        s.agent.state = 'MEETING';
+        s.setDestination(s.agent.confPos.x, s.agent.confPos.y);
+      });
+      document.getElementById('ticker-text').textContent = '🛎️ ALL HANDS CALLED: Entire team gathered in the War Room for fleet strategy briefing.';
+      spawnSpeechBubble(780, 410, '🛎️ All Hands Team Sync in Strategy Boardroom!');
+    });
+
+    // Coffee Break Mode (Café Lounge & Espresso Bar)
+    document.getElementById('coffee-btn').addEventListener('click', () => {
+      audio.playChime();
+      agentSprites.forEach(s => {
+        s.agent.state = 'ON_BREAK';
+        s.setDestination(s.agent.breakPos.x, s.agent.breakPos.y);
+      });
+      document.getElementById('ticker-text').textContent = '☕ COFFEE BREAK: Staff heading to the Café Bar, Leather Sofa & Water Cooler.';
+    });
+
+    // Back to Desks
+    document.getElementById('work-btn').addEventListener('click', () => {
+      audio.playKeyboard();
+      agentSprites.forEach(s => {
+        s.agent.state = 'WORKING';
+        s.setDestination(s.agent.deskPos.x, s.agent.deskPos.y);
+      });
+      document.getElementById('ticker-text').textContent = '💻 WORK RESUMED: Staff returned to workstations to monitor automation pipelines.';
+    });
+
+    // Sound FX Toggle
+    const soundBtn = document.getElementById('sound-btn');
+    soundBtn.addEventListener('click', () => {
+      const isMuted = audio.toggleMute();
+      if (isMuted) {
+        soundBtn.textContent = '🔇 Sound Muted';
+        soundBtn.classList.add('muted');
+      } else {
+        soundBtn.textContent = '🔊 Sound On';
+        soundBtn.classList.remove('muted');
+        audio.playChime();
+      }
+    });
+
+    // Fullscreen Toggle
+    document.getElementById('fullscreen-btn').addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDossier();
+      else if (e.key === 'b' || e.key === 'B') document.getElementById('bell-btn').click();
+      else if (e.key === 'c' || e.key === 'C') document.getElementById('coffee-btn').click();
+      else if (e.key === 'w' || e.key === 'W') document.getElementById('work-btn').click();
+    });
+
+    // --- 12. LIVE CLOCK (INDIAN STANDARD TIME) ---
+    function updateClock() {
+      const now = new Date();
+      const istOptions = {
+        timeZone: 'Asia/Kolkata',
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      };
+      document.getElementById('live-ist-clock').textContent = now.toLocaleTimeString('en-GB', istOptions);
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Start Simulation
+    resizeCanvas();
+    loop();
+  </script>
+</body>
+</html>

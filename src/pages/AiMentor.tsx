@@ -2503,10 +2503,8 @@ EXAM-ORIENTED DIRECTIVES:
         { role: 'user', content: lastUserContent }
       ];
 
-      // Select vision model if an image is attached, else standard Llama model
-      const modelName = hasImageAttachment
-        ? 'meta/llama-3.2-11b-vision-instruct'
-        : (responseMode === 'quick' ? 'meta/llama-3.1-8b-instruct' : 'meta/llama-3.3-70b-instruct');
+      // Select active meta/llama-3.2-11b-vision-instruct model (supports text and vision multimodal)
+      const modelName = 'meta/llama-3.2-11b-vision-instruct';
 
       // Call local proxy endpoint to bypass CORS and protect API key
       const response = await fetch('/api/chat/completions', {
@@ -2953,7 +2951,7 @@ As their expert AI Study Coach, write a personalized, highly encouraging, and br
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'meta/llama-3.1-8b-instruct',
+          model: 'meta/llama-3.2-11b-vision-instruct',
           messages: [
             { role: 'system', content: `You are the expert Website Study Coach. Be direct, coaching-focused, and write under 240 characters. Focus purely on study strategy and do NOT mention the name of any exam under any circumstances.` },
             { role: 'user', content: prompt }
@@ -3018,7 +3016,7 @@ Note: "correctOption" must be an integer index (0 for Option A, 1 for Option B, 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: quizMode === 'quick' ? 'meta/llama-3.1-8b-instruct' : 'meta/llama-3.3-70b-instruct',
+          model: 'meta/llama-3.2-11b-vision-instruct',
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: prompt }
@@ -3313,7 +3311,7 @@ JSON structure:
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'meta/llama-3.1-8b-instruct',
+          model: 'meta/llama-3.2-11b-vision-instruct',
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: prompt }
@@ -3498,7 +3496,7 @@ JSON structure:
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'meta/llama-3.1-8b-instruct',
+          model: 'meta/llama-3.2-11b-vision-instruct',
           messages: [
             { role: 'system', content: `You are an expert tutor for OdishaExamPrep. You extract formulas and shortcuts and output only valid, raw JSON matching the exact requested format.` },
             { role: 'user', content: prompt }

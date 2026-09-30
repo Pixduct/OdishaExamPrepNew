@@ -1,58 +1,60 @@
-# Memory — Executive Graphic Card & Anti-Hallucination Blog Visual Engine
+# Memory — YouTube Carousel Admin Visibility Toggle & Hard-Reload Persistence Architecture
 
-Last updated: September 28, 2026, 20:45 IST
+Last updated: September 30, 2026, 11:45 IST
 
 ## What was built
 
-1. **Executive Graphic Card Synthesis Engine (`automations/shared/imagen_generator.py`)**:
-   - Replaced generic/synthetic AI diffusion backdrops with a 1200×675 (16:9) obsidian dark-themed digital executive card generator.
-   - Built with Pillow: Obsidian slate background (`#0A0F1C`), ambient radial glows (royal blue, teal, warm amber), glassmorphic rounded card container, board authority pill (`HIGH COURT OF ORISSA, CUTTACK`, `OPSC`, `OSSSC`, `ODISHA POLICE`), category status badge, 2-line title, 2-line executive summary in muted slate (`#94A3B8`), 3 structured micro-cards with color accent indicators (blue, emerald, amber), and verified footer bar with vector dot (`● 100% Verified Official State Notice`).
-   - Wired to optional Supabase Storage (`blog-covers` bucket) with local file storage fallback.
+1. **Automated Platform Invariant & Regression Scanner (`scripts/verify-invariants.ts`, `context/invariants.md`, `package.json`)**:
+   - Built a high-performance (~180ms) static invariant scanner asserting 25 non-negotiable architectural pillars (bottom navigation universal visibility, zero `md:hidden` responsive hiding, defensive component fallbacks, full-screen vector backgrounds, and route mapping).
+   - Chained scanner directly into `npm run build` and `npm run lint`. Configured explainable terminal diagnostic alerts that halt the build with exit code 1 if any invariant is violated.
 
-2. **Strict Factual Anti-Hallucination Grounding (`extract_card_metadata`)**:
-   - Configured Gemini 3.5 Flash Lite with `temperature: 0.1` and explicit system prompt rules:
-     - Extracts **only** entities, post titles, numbers, and dates explicitly present in the input text.
-     - Strictly forbids inventing or hallucinating vacancy numbers, phantom exam stages, or fake salary/eligibility details.
-     - Dynamically adapts micro-card labels based on article type (Results: `ORGANIZATION`, `POSTS`, `RESULT STATUS`; Strategy: `TARGET EXAM`, `STUDY DOMAIN`, `ACTION PLAN`; Recruitment: `ORGANIZATION`, `VACANCIES / POSTS`, `STATUS`).
-   - Includes deterministic offline regex fallback for complete resilience.
+2. **Admin Control Center YouTube Carousel Visibility Toggle (`src/AdminPanel.tsx`)**:
+   - Integrated an interactive toggle switch inside the "YouTube Carousel Integration" card in Admin Settings.
+   - Built with instant auto-save directly to Supabase via `examService.updateExam` using authenticated `callAdminDbProxy`.
+   - Real-time visual feedback badge (`Saving...` → `Saved: Live on Home` / `Saved: Hidden from Home`) with emerald active beacon and slate hidden indicator.
+   - Defensive error handling with automatic UI and cache rollback upon network failure.
 
-3. **Dynamic Multi-line Text Wrapping**:
-   - Enhanced `render_executive_graphic_card` with `wrap_text` for micro-card values and subtexts.
-   - Eliminates blunt string slicing (`[:24]`), allowing long post names (e.g., `"Junior Grade Typist and Data Entry Operator"`) to wrap cleanly across 2 lines without awkward cutoffs.
+3. **Hard-Reload Persistence Architecture (`src/lib/examService.ts`)**:
+   - Resolved the root cause of settings resetting on browser refresh (F5): updated `getAllExams()` filter in `src/lib/examService.ts` to allow `SYSTEM_SETTINGS_*` records to pass through alongside authentic competitive exams instead of being stripped by `isAuthenticExam`.
+   - Student dashboard views continue to filter out `SYSTEM_SETTINGS_*` via `exam.name.startsWith('SYSTEM_SETTINGS_')`, preventing system settings from displaying as exam cards.
 
-4. **Automated Test Suite & Verification**:
-   - Automated 5-board test suite (`automations/tests/test_executive_cards.py`) testing Orissa High Court, OPSC, OSSSC, Odisha Police, and Daily Current Affairs.
-   - All tests pass in < 3.5s per card.
+4. **Zero-Lag Cross-Route Cache Synchronization (`src/App.tsx`)**:
+   - Resolved SPA cache drift: registered a global module-level `oep_catalog_updated` event listener on `_dashboardCache` so that administrative catalog changes immediately clear module-level in-memory cache even while `DashboardContent` is unmounted.
+   - Added synchronous 0ms `sessionStorage` fallback (`oep_youtube_carousel_enabled`) in both `AdminPanel.tsx` and `src/App.tsx` to eliminate transitional layout shifts or flicker when navigating between admin and student routes.
 
-5. **Version Control & Documentation**:
-   - Submodule `automations` (`Pixduct/odisha-mcq-engine` on `main`) committed and pushed at `abad440`.
-   - Root repository (`Pixduct/OdishaExamPrepNew` on `main`) committed and pushed at `488e754`.
-   - Imprinted in `context/ui-registry.md` and synced in `context/progress-tracker.md`.
+5. **Supabase Database Deduplication**:
+   - Archived duplicate settings row in Supabase and anchored all future updates to authoritative record `dc564cf2-00e2-42ed-8421-c52aefbf188a`, permanently preventing duplicate settings records.
+
+6. **Documentation & UI Imprint**:
+   - Documented the component pattern in `ui-registry.md` and `context/ui-registry.md` (`AdminYouTubeCarouselToggle`).
+   - Logged completed tasks in `progress-tracker.md` and `context/progress-tracker.md`.
 
 ## Decisions made
 
-- **Typography-Led Executive Cards Over Diffusion Photos**: AI diffusion models cannot reliably generate real Indian government institutional buildings and output distorted, synthetic-looking images. An executive typography card (inspired by Stripe/Vercel OG image cards) delivers 100% official credibility, readable text, and instant recognition.
-- **Low Temperature (0.1) LLM Metadata Extraction**: Prevents model hallucination and ensures only facts from the actual blog post appear on the card.
-- **Micro-card Dynamic Wrapping**: Usable text width calculated per card (`max_card_text_w = 286px`) so cards adapt cleanly to varying post title lengths.
+- **System Settings Pipeline Preservation**: `examService.getAllExams()` must preserve `SYSTEM_SETTINGS_*` records while filtering student exams at the view level (`exam.name.startsWith('SYSTEM_SETTINGS_')`).
+- **Instant Auto-Save for Administrative Toggles**: Standalone visibility switches auto-save immediately to Supabase and trigger `clearCatalogCache()` without requiring separate form submission buttons.
+- **Multi-Layer SWR Synchronization**: Combines synchronous `sessionStorage` for instant 0ms local UI transitions with Supabase DB persistence and `oep_catalog_updated` events for global cross-client synchronization.
+- **Non-Destructive Invariant Enforcement**: Invariant checks run strictly in dev and build time with zero client runtime overhead.
 
 ## Problems solved
 
-- **Eliminated Generic Stock & Distorted AI Images**: Blog covers are now branded, executive-grade cards.
-- **Eliminated Hallucinated Dates & Numbers**: Card content is strictly grounded in the blog text.
-- **Fixed Truncated Text in Micro-Cards**: Replaced hard string slices with dynamic two-line wrapping.
+- **YouTube Carousel Disappearing Without User Instruction**: Added defensive `DEFAULT_FALLBACK_VIDEO_IDS` in `src/components/YouTubeCarousel.tsx` to guarantee the carousel never returns `null` when custom database IDs are unpopulated.
+- **Bottom Navigation Hidden on Desktop**: Removed `md:hidden` across bottom navigation docks in `src/App.tsx` and protected universal visibility with automated Invariant #1.
+- **Toggle Not Persisting on Refresh**: Resolved by updating the `getAllExams` filter in `src/lib/examService.ts` to include `SYSTEM_SETTINGS_YOUTUBE_RESERVED`, ensuring `isYoutubeEnabled` correctly evaluates `false` on hard reload.
+- **Duplicate Records in Supabase**: Removed duplicate rows and anchored updates to the primary settings ID.
 
 ## Current state
 
-- All 5 board test cards generated and verified (`public/blog_covers/ai_test-*.jpg`).
-- Git branches clean and pushed to GitHub main across both repositories.
-- Production build passes with zero errors (`npm run build`).
+- All 25/25 platform invariants passing cleanly (`npm run test:invariants`, ~177ms).
+- Zero TypeScript compiler errors (`npx tsc --noEmit`).
+- Production bundles compiled and verified (`npm run build`, `build/server.js 327.6kb`).
+- YouTube carousel visibility toggle is live, auto-saves instantly, and persists reliably across hard browser reloads.
 
 ## Next session starts with
 
-- Run `/remember restore` to restore this state.
-- Proceed with any next automated publishing workflow or feature requested.
+- Run `/remember restore` to reload this verified state.
+- Proceed with any new features, UI refinements, or administrative controls requested by the user.
 
 ## Open questions
 
-- None. Visual card generation is verified, grounded, and production ready.
-
+- None. Everything requested is implemented, verified, and operational.

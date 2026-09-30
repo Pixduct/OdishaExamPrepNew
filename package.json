@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "node --import tsx --watch --watch-path=server.ts --watch-path=src/lib/routes-config.ts --watch-path=src/lib/serverAiGenerator.ts server.ts",
-    "build": "vite build --outDir=build && esbuild server.ts --bundle --platform=node --format=esm --outfile=build/server.js --packages=external",
+    "test:invariants": "tsx scripts/verify-invariants.ts",
+    "build": "npm run test:invariants && vite build --outDir=build && esbuild server.ts --bundle --platform=node --format=esm --outfile=build/server.js --packages=external",
     "build:frontend": "vite build --outDir=build",
     "build:server": "esbuild server.ts --bundle --platform=node --format=esm --outfile=build/server.js --packages=external",
     "preview": "vite preview",
     "clean": "rm -rf build",
-    "lint": "tsc --noEmit",
+    "lint": "npm run test:invariants && tsc --noEmit",
     "start": "node build/server.js"
   },
   "dependencies": {

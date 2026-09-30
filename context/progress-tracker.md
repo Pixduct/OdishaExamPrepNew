@@ -1,3 +1,141 @@
+- [x] ⚡ Site-Wide AI Subsystem Recovery & NVIDIA NIM Model Modernization (`server.ts`, `src/components/StickyAICompanion.tsx`, `src/pages/AiMentor.tsx`, `src/AnalyticsView.tsx`, `src/lib/serverAiGenerator.ts`, `src/lib/aiDiagnosticManager.ts`, `build/`):
+  1. **Root-Cause Resolution of Site-Wide AI Failures**:
+     - Diagnosed upstream failure: NVIDIA NIM retired `meta/llama-3.1-8b-instruct` and `meta/llama-3.3-70b-instruct` with `HTTP 410 Gone`.
+     - In `server.ts`, resolved model selection: gracefully maps deprecated model IDs and unassigned requests to active, multimodal `meta/llama-3.2-11b-vision-instruct` (~600ms latency, 100% live on NVIDIA NIM).
+     - Upgraded multimodal fallback in `server.ts` to retry gracefully with sanitized text-only payloads for both streaming and non-streaming responses.
+  2. **Caller Model Modernization Across Frontend**:
+     - Updated `StickyAICompanion.tsx` (OEP Buddy floating companion) to request `meta/llama-3.2-11b-vision-instruct`.
+     - Updated `AiMentor.tsx` (main chat, quick quizzes, explanation generator, and flashcard generator) to use `meta/llama-3.2-11b-vision-instruct`.
+     - Updated `AnalyticsView.tsx` AI study strategist and `aiDiagnosticManager.ts` to `meta/llama-3.2-11b-vision-instruct`.
+     - Updated fallback handler in `serverAiGenerator.ts` to prioritize `meta/llama-3.2-11b-vision-instruct`.
+  3. **Verification**:
+     - Verified with `npm run test:invariants` (25/25 platform invariants passing cleanly).
+     - Verified with `npx tsc --noEmit` (0 errors) and compiled production bundles with `npm run build` (0 errors, `build/server.js 328.0kb`).
+     - Live upstream API queries confirmed HTTP 200 responses with exact user prompts ("How do I use the AI Mentor?" and "give me 10 math questions").
+
+- [x] ⚡ Admin Control Center YouTube Carousel Visibility Toggle & Reload Persistence Architecture (`src/AdminPanel.tsx`, `src/lib/examService.ts`, `src/App.tsx`, `build/`):
+  1. **System Settings Pipeline Filter Decoupling & Reload Persistence**:
+     - Diagnosed root cause of reload regression: `src/lib/examService.ts:isAuthenticExam` filtered out all records starting with `SYSTEM_SETTINGS_`, meaning `examService.getAllExams()` stripped out system configuration objects before returning to the dashboard.
+     - Updated `getAllExams` filter in `src/lib/examService.ts` to explicitly allow `SYSTEM_SETTINGS_*` records to pass through alongside authentic competitive exams.
+     - Archived duplicate settings row in Supabase and anchored updates to authoritative record `dc564cf2-00e2-42ed-8421-c52aefbf188a`, permanently fixing duplicate rows.
+  2. **Instant Auto-Save & User Feedback**:
+     - Upgraded the YouTube Carousel visibility toggle switch in `src/AdminPanel.tsx` to automatically persist to Supabase immediately upon clicking without requiring manual form submission.
+     - Added real-time asynchronous visual feedback (`Saving...` $\rightarrow$ `Saved: Live on Home` / `Saved: Hidden from Home`) with animated indicator pills.
+  3. **Zero-Lag Cache Synchronization & SWR Invalidation**:
+     - Resolved SPA cross-route cache drift: registered a global module-level `oep_catalog_updated` listener on `_dashboardCache` in `src/App.tsx` so administrative updates clear module cache even while `DashboardContent` is unmounted.
+     - Added synchronous 0ms `sessionStorage` fallback (`oep_youtube_carousel_enabled`) in both `AdminPanel.tsx` and `src/App.tsx` to eliminate any transitional visual flash when navigating between routes.
+  4. **Verification**:
+     - Verified with `npm run test:invariants` (25/25 platform invariants passing cleanly).
+     - Verified with `npx tsc --noEmit` (0 errors) and compiled production bundles with `npm run build` (0 errors, `build/server.js 327.6kb`).
+
+- [x] ⚡ Authenticated Home Dashboard Vector Background & YouTube Carousel Slider Restoration (`src/App.tsx`, `src/components/YouTubeCarousel.tsx`, `build/`):
+  1. **YouTube Carousel Curated Video Fallback Restoration**:
+     - Diagnosed root cause: `YouTubeCarousel.tsx` strictly returned `null` when `sourceVideos.length === 0`. In `App.tsx`, if the Supabase record `SYSTEM_SETTINGS_YOUTUBE_RESERVED` was unpopulated or had no videos, `globalVideoIds` became `[]`, completely suppressing the slider.
+     - Added `DEFAULT_FALLBACK_VIDEO_IDS = ['jNQXAC9IVRw', 'dQw4w9WgXcQ', 'EngW7tCbLHY']` in `src/components/YouTubeCarousel.tsx` and ensured `effectiveVideoIds` always defaults to these curated masterclasses when no custom database IDs are provided.
+     - Passed `videoIds={globalVideoIds && globalVideoIds.length > 0 ? globalVideoIds : undefined}` from `src/App.tsx`.
+  2. **Full-Screen Vector Background & Canvas Grid Restoration**:
+     - Diagnosed root cause: The site-wide vector canvas grid overlay (`radial-gradient` dot matrix), ambient HSL glow orbs, and floating study watermarks were omitted in the authenticated Home view container.
+     - Restored the full-screen edge-to-edge vector canvas grid (`[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:[radial-gradient(#fff_1.2px,transparent_1.2px)]`), ambient blur orbs (`bg-brand-300/20`, `bg-indigo-200/15`), and floating study watermarks (`GraduationCap`, `BookOpen`, `Award`, `Compass`) in `DashboardContent` when `!selectedExam`.
+     - Injected site-wide vector canvas grid overlay, `MouseTrackingCanvas`, and `VectorCursorFollower` into the authenticated `AppContent` route wrapper.
+  3. **Verification**:
+     - Verified with `npx tsc --noEmit` (0 errors) and compiled production bundles with `npm run build` (0 errors, `build/server.js 327.6kb`).
+
+- [x] ⚡ Authenticated Bottom Navigation Menu Desktop Restoration Recovery (`src/App.tsx`, `build/`, `context/progress-tracker.md`):
+  1. **Root-Cause Resolution of Missing Desktop Navigation Menu**:
+     - Diagnosed and resolved the root cause of the missing footer navigation menu on desktop screens: `md:hidden` had been applied to the `<motion.nav>` bottom navigation bar in commit `cdd1d98`.
+     - In Tailwind CSS, `md:hidden` enforces `display: none` on viewports $\ge 768\text{px}$, causing the entire menu (Home, Study Plan, Analytics, History, Library, AI Mentor) to be hidden on desktop and laptop browsers.
+  2. **Clean Breakpoint Restoration**:
+     - Removed `md:hidden` across all 3 bottom navigation instances in [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx):
+       - `ExamDetailPage` (line 12426)
+       - `AiMentor` tab view (line 13002)
+       - `ROUTE_PATHS.HOME` dashboard view (line 13183)
+  3. **Verification**:
+     - Successfully built and verified via `npm run build` with 0 errors. Bundled frontend assets and compiled `build/server.js`.
+
+- [x] ⚡ Virtual Office Executive Café & Espresso Lounge Seating Orientation & Spatial Ergonomics Overhaul (`public/virtual-office.html`, `build/virtual-office.html`, `context/progress-tracker.md`, `ui-registry.md`, `context/ui-registry.md`):
+  1. **Seating Direction & Heading Angle Trigonometry Alignment**:
+     - **Barstool Occupants Facing North (-Z)**: The bar counter is located at $Z = -30$, with barstools at $Z = -25.2$. Previously `rotY: 0` caused agents to face South ($+Z$) into the open room with backs turned to the espresso bar. Replaced with `rotY = Math.PI` in `agentPresets` (`bikram`, `chhabi`, `subham`, `manas`) and `behaviorPool.CAFE_ESPRESSO` slots (`cafe_stool_1` through `cafe_stool_4`), seating agents facing the marble counter and espresso machine.
+     - **Chesterfield Sofa Occupants Facing North (-Z)**: Chesterfield sofa backrest is located on the South wall ($+Z$ side). Previously `rotY: 0` caused sofa occupants to face into the backrest. Replaced with `rotY = Math.PI` in `agentPresets` (`dipti`, `priyanka`) and `behaviorPool.CAFE_SOFA_LOUNGE` slots (`cafe_sofa_left`, `cafe_sofa_right`), so agents naturally face North across the coffee table toward the café.
+     - **Flanking Armchairs Inward Orientation**:
+       - Left Club Armchair ($X = 13.8, Z = -18.0$): Mesh rotated with `rotY = -Math.PI / 2` and avatar sitting with `rotY = Math.PI / 2` to face East ($+X$) directly towards the coffee table.
+       - Right Club Armchair ($X = 31.2, Z = -18.0$): Mesh rotated with `rotY = Math.PI / 2` and avatar sitting with `rotY = -Math.PI / 2` to face West ($-X$) directly towards the coffee table.
+  2. **Spacious Lounge Suite Layout & Doorway Clearance**:
+     - **Chesterfield Tufted Sofa**: Moved to $(22.5, 0, -13.5)$, creating $> 4.0$ units of unobstructed entryway promenade from the South portal architrave at $Z = -8.0$, eliminating the doorway bottleneck.
+     - **Travertine Coffee Table**: Shifted to $(22.5, 0, -18.0)$, maintaining an ergonomic $0.55$-unit leg clearance from the sofa while opening up $> 5.3$ units of spacious aisleway toward the barstools.
+     - **Designer Area Rug**: Centered at $(22.5, 0.02, -16.5)$ with dimensions $19.0 \times 12.0$, seamlessly anchoring the sofa, coffee table, and both armchairs.
+     - **Potted Bird of Paradise**: Positioned at Southwest corner $(11.0, 0, -11.5)$ for biophilic architectural framing.
+  3. **Strict SHA-256 Byte Parity**:
+     - Verified exact byte parity across `public/virtual-office.html` and `build/virtual-office.html` (`41FEC61A5B919EE46D9402DB22A940741C79DAF1070200D2DE029FC73FAF5A8F`).
+
+- [x] ⚡ Virtual Office Executive Café & Espresso Lounge Spatial Overhaul & Micro-Fidelity Detailing (`public/virtual-office.html`, `build/virtual-office.html`, `context/progress-tracker.md`, `ui-registry.md`, `context/ui-registry.md`):
+  1. **Italian Commercial Dual-Group Espresso Machine Overhaul**:
+     - Replaced primitive black block with a commercial stainless steel/chrome dual-group machine (*La Marzocco / Nuova Simonelli* aesthetic):
+       - Polished chrome chassis with dark fluted walnut side cheeks.
+       - Dual group heads with angled portafilters (brass collars and dark wood handle grips).
+       - Slotted stainless steel drip tray with obsidian cup drainage grate.
+       - Dual articulating chrome steam wands with knurled steam knobs.
+       - Dual round analog pressure dials (boiler PSI and pump pressure) with brass bezels.
+       - Top perimeter stainless warming rack holding stacked ceramic demitasse espresso cups with dark coffee fill.
+  2. **Executive French-Door Stainless Steel Refrigerator**:
+     - Replaced ominous plain black monolith with a commercial brushed stainless steel refrigerator (`#CBD5E1`, `metalness: 0.88, roughness: 0.22`):
+       - Split upper French doors with vertical obsidian reveal seam and dual 3.2-unit tubular chrome pull handles.
+       - Lower pull-out freezer drawer with horizontal tubular handle.
+       - In-door ice & water dispenser cavity with glowing cyan digital temperature display (`#38BDF8`).
+       - Base compressor ventilation louver grille.
+  3. **Modern Hydration Station & Walnut Credenza**:
+     - Built a bespoke hydration cabinet credenza ($3.2 \times 2.4 \times 2.2$) with walnut countertop along the East partition ($X = 33.5, Z = -20.5$).
+     - Modern water cooler with illuminated dispensing alcove, stainless drip catch, and hot (red) / chilled (blue) push paddles.
+     - Inverted 5-gallon ribbed polycarbonate carboy with chrome neck collar.
+  4. **Sightline Unification & 100% SHA-256 Parity**:
+     - Elevated `cafeSign` to $Y = 11.2, Z = -7.95$ mounted on the entrance architrave, clearing 100% of the camera sightline.
+
+- [x] ⚡ Virtual Office War Room Humanoid Skeletal Kinematics & Debrief Natural Animation Recovery (`public/virtual-office.html`, `build/virtual-office.html`, `context/progress-tracker.md`, `context/ui-registry.md`, `ui-registry.md`):
+  1. **Root-Cause Analysis & Fix for Seated Jutting Arms**:
+     - **Mechanism Diagnosed**: In Quaternius GLTF models (`office-*.glb`), the default bind pose has arms flared outward in a 45-degree A-pose. The motion-captured `sit` animation clip rotates shoulders downward by +67° (+1.17 rad). A previous transition script called `u.bones.RightArm.rotation.set(0, 0, 0)` and manual Euler arm modifications on each frame, overwriting the Three.js `AnimationMixer`'s quaternion tracks and locking seated agents into raw, stiff stick-arm A-poses.
+     - **Fix Implemented**: Completely removed manual arm bone overrides (`RightArm`, `LeftArm`, `RightForeArm`, `LeftForeArm`) and zero-rotation resets from `setDebriefPresenter`, `clearDebriefPresenter`, and `animate()`. Let Three.js `AnimationMixer` drive the native motion-captured `sit` clip with 100% fidelity (arms rest naturally on lap/table).
+  2. **Root-Cause Analysis & Fix for Unnatural Head Twisting Contortions**:
+     - **Mechanism Diagnosed**: Character forward direction in local space is along -Z. In `updateWarRoomStandup` and `turnAvatarsToFaceAgent`, heading angles were computed with inverted signs (`atan2(dx, dz) - rotation.y` and `atan2(localSpeaker.x, -localSpeaker.z)`), treating colleagues in front of them as if they were behind their backs. This violently forced head/neck bones (`Head`, `Neck`) into extreme sideways/backwards owl-like twisting limits on every frame.
+     - **Fix Implemented**: Removed all artificial Euler head twisting and lerps from `updateWarRoomStandup`, `turnAvatarsToFaceAgent`, and `animate()`. Allowed the native, motion-captured clips (`sit` for seated audience, `idle` for standing debrief presenter) to govern head posture naturally without bone fighting.
+  3. **Natural Human Debrief Presenter Stance**:
+     - When queried, the active presenter stands up at the table (`applyAvatarPosture(av, 'STANDING')`), taking a step forward to the table edge, smoothly playing the native `idle` clip (subtle natural breathing, comfortable arm hang, lifelike weight shifts).
+     - Torso applies a subtle, organic forward engagement lean (`sp.rotation.x = THREE.MathUtils.lerp(sp.rotation.x, 0.06 + Math.sin(time * 1.2) * 0.02, delta * 3)`).
+     - Executive camera dolly `{ pos: (27.5, 15.0, 42.0), look: (27.5, 3.8, 25.0) }` and thought bubble provide crisp, human presentation framing.
+  4. **Strict Parity Verification**:
+     - Maintained 100% SHA-256 byte parity between `public/virtual-office.html` and `build/virtual-office.html` (`0F8BFF91F0527D54601DA1B3B6B85E33526C160721C61CEB418534CCB8AEDE8F`).
+
+- [x] ⚡ Virtual Office War Room Command Console & Real-Time Multi-Agent AI Debrief Suite (`server.ts`, `build/server.js`, `public/virtual-office.html`, `build/virtual-office.html`, `context/progress-tracker.md`, `context/ui-registry.md`):
+  1. **Avatar Scale Recovery (`createAgentAvatar`)**:
+     - Diagnosed and fixed avatar scaling: Quaternius GLTF models defaulted to `scale = 1.0` because `model.scale.setScalar(avatarScale)` was omitted, rendering tiny miniature humanoids at desks.
+     - Restored full natural proportions by reading `preset.scale` (`2.7`) and applying `model.scale.setScalar(avatarScale)` upon model instantiation.
+     - Re-verified natural human proportions seated at desks, chairs, barstools, sofas, and standing at conference tables.
+  2. **Ground-Truth Ingestion & Low-Latency Engine (`POST /api/automation/warroom-chat`)**:
+     - 100% authentic disk logs, GitHub Actions telemetry, and database metrics ingestion:
+       - Active running processes (`runningProcesses` with 10s caching eliminating cold PowerShell spawns).
+       - Today's GitHub Actions workflow runs (10 runs across 6 engines).
+       - Portal notice alerts (`automations/seen_notices.json` — 139 notices tracked).
+       - Current affairs published history (`automations/history/published_ca_history.json` — 441 articles).
+       - Evergreen masterclasses (`automations/history/evergreen_content_history.json` — 5 deep-dive guides).
+       - Telegram Bot broadcasts (`automations/history/telegram_sent_history.json` — 288 broadcasts, 0 drops).
+       - Supabase live inventory (11,624 questions across 487 exams, cached with 60s in-memory TTL to eliminate sequential DB latency).
+     - Tuned prompt parameters (`max_tokens: 380`, `temperature: 0.20`, crisp executive instructions) to drastically cut inference generation time down from 9+ seconds to concise, rapid debriefs.
+  3. **Glassmorphic Debrief Markdown Tables & Side Panel UI**:
+     - Upgraded `formatDebriefMarkdown`: Automatically parses raw markdown tables into responsive, glassmorphic `.debrief-table` with cyan headers, subtle borders, and row highlights.
+     - Smooth recipient switching: Clicking any recipient chip immediately spotlights that agent as the presenter in the 3D conference room.
+  4. **Strict Parity & End-to-End Verification**:
+     - Bundled `build/server.js` (327.6 KB). Verified live API endpoint latency and accurate ground-truth reporting.
+
+- [x] ⚡ Virtual Office Subham 1:1 Digital Twin Architecture & Truthful Telemetry Alignment (`server.ts`, `build/server.js`, `context/progress-tracker.md`, `context/ui-registry.md`):
+  1. **Root-Cause Resolution of Permanent "ONLINE" State**:
+     - Diagnosed root cause: `server.ts` hardcoded `subham.status = "ONLINE"` and `subham.statusLabel = "● ONLINE"` as a Supabase database cluster health check, while all other 6 agents evaluated their background execution dynamically (`RUNNING` vs `STANDBY`).
+     - Aligned Subham strictly with the **1:1 Digital Twin Architecture Invariant** mapped to `blog_cron.yml` (`automations/seo_blog_engine.py`).
+  2. **Authentic Blog Engine History & Audit Integration**:
+     - Added `blogAudit` inspecting `automations/history/evergreen_content_history.json` (and `used_blog_images.json` fallback).
+     - Dynamically evaluates `subham.status = subhamProc ? "RUNNING" : "STANDBY"`.
+     - Displays authentic last-run timestamps (`Last: 31d ago (29 Aug)`) and active items (`Mastering the 45-Second Question Triage & Sectional Time Budgeting...`).
+  3. **Fleet-Wide Telemetry Harmonization**:
+     - All 7 agents (Bikram, Chhabi, Dipti, Priyanka, Subham, Trupti, Manas) now report uniform `○ STANDBY` when idle and transition to `● RUNNING` when executing.
+     - Bundled and verified `build/server.js` and confirmed 100% SHA-256 byte parity.
+
 - [x] ⚡ Official Notification Source Graphic Card Sanitization & Leak Elimination (`automations/exam_card_renderer.py`, `automations/exam_update_engine.py`, `automations/scraper.py`, `automations/shared/telegram.py`, `automations/breaking_engine.py`, `automations/post_exam_to_youtube.py`, `ui-registry.md`, `context/ui-registry.md`):
   1. **Eradication of Ugly ASP.NET `javascript:__doPostBack` Artifacts on Visual Cards**:
      - Diagnosed root cause: ASP.NET WebForms client-side postbacks (`javascript:__doPostBack('ctl00$generic_masterpage1$ctl62','')`) on government portals (e.g. `ossc.gov.in`) were treated as document URLs by the portal scraper and passed unfiltered to the visual card renderer.

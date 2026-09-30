@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Workstation Fit Test</title>
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/GLTFLoader.js"></script>
+  <script src="vendor/SkeletonUtils.js"></script>
+  <style>
+    body { margin: 0; background: #0b1120; overflow: hidden; }
+    canvas { width: 100vw; height: 100vh; display: block; }
+  </style>
+</head>
+<body>
+<script>
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(-34, 4.2, 10.5);
+  camera.lookAt(-39, 2.7, 13.8);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  document.body.appendChild(renderer.domElement);
+
+  const ambient = new THREE.AmbientLight(0xffffff, 0.9);
+  scene.add(ambient);
+  const dir = new THREE.DirectionalLight(0xffffff, 1.4);
+  dir.position.set(-30, 20, 10);
+  dir.castShadow = true;
+  scene.add(dir);
+
+  // Build 1 actual workstation from virtual-office.html
+  const deskMat = new THREE.MeshStandardMaterial({ color: '#D4A373', roughness: 0.35 });
+  const legMat = new THREE.MeshStandardMaterial({ color: '#1E293B', roughness: 0.5, metalness: 0.8 });
+  const chairMat = new THREE.MeshStandardMaterial({ color: '#0F172A', roughness: 0.6 });
+  const bezelMat = new THREE.MeshStandardMaterial({ color: '#0F172A', roughness: 0.3 });
+
+  const wsGroup = new THREE.Group();
+  wsGroup.position.set(-39, 0, 16);
+
+  const deskTop = new THREE.Mesh(new THREE.BoxGeometry(6.4, 0.25, 3.2), deskMat);
+  deskTop.position.set(0, 2.6, 0);
+  wsGroup.add(deskTop);
+
+  // Monitors
+  const monGroup = new THREE.Group();
+  monGroup.position.set(-1.7, 3.4, 0.5);
+  monGroup.rotation.y = -0.28;
+  const bezel = new THREE.Mesh(new THREE.BoxGeometry(2.7, 1.8, 0.12), bezelMat);
+  monGroup.add(bezel);
+  wsGroup.add(monGroup);
+
+  const rightMonGroup = new THREE.Group();
+  rightMonGroup.position.set(1.7, 3.4, 0.5);
+  rightMonGroup.rotation.y = 0.28;
+  const rightBezel = new THREE.Mesh(new THREE.BoxGeometry(2.7, 1.8, 0.12), bezelMat);
+  rightMonGroup.add(rightBezel);
+  wsGroup.add(rightMonGroup);
+
+  // Keyboard
+  const kbMat = new THREE.MeshStandardMaterial({ color: '#0F172A', roughness: 0.4 });
+  const kb = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.1, 0.9), kbMat);
+  kb.position.set(0, 2.6, -1.0);
+  wsGroup.add(kb);
+
+  // Chair
+  const chairGroup = new THREE.Group();
+  chairGroup.position.set(0, 0, -2.2);
+  chairGroup.rotation.y = Math.PI;
+
+  const chairSeat = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.35, 2.2), chairMat);
+  chairSeat.position.set(0, 1.8, 0);
+  chairGroup.add(chairSeat);
+
+  const chairBack = new THREE.Mesh(new THREE.BoxGeometry(2.0, 2.4, 0.25), chairMat);
+  chairBack.position.set(0, 3.0, 0.95);
+  chairBack.rotation.x = -0.12;
+  chairGroup.add(chairBack);
+
+  const chairPiston = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 1.8, 12), legMat);
+  chairPiston.position.set(0, 0.9, 0);
+  chairGroup.add(chairPiston);
+  wsGroup.add(chairGroup);
+
+  scene.add(wsGroup);
+
+  // Floor
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ color: '#1e293b' }));
+  floor.rotation.x = -Math.PI / 2;
+  scene.add(floor);
+
+  // Load and position agent
+  const loader = new THREE.GLTFLoader();
+  let mixer;
+  loader.load('models/agents/office-ara.glb', gltf => {
+    const model = gltf.scene;
+    // Let's test scale
+    const scale = 2.7;
+    model.scale.setScalar(scale);
+
+    // Place avatar at chair
+    // Chair is at -39, 0, 16 - 2.2 = 13.8.
+    // Facing desk (rotY = Math.PI, looking toward +Z)
+    model.position.set(-39, 0.55, 13.8);
+    model.rotation.y = 0;
+
+    mixer = new THREE.AnimationMixer(model);
+    const clip = THREE.AnimationClip.findByName(gltf.animations, 'sit');
+    if (clip) {
+      const action = mixer.clipAction(clip);
+      action.play();
+    }
+    scene.add(model);
+    window.__TEST_READY__ = true;
+  });
+
+  const clock = new THREE.Clock();
+  function animate() {
+    requestAnimationFrame(animate);
+    const delta = clock.getDelta();
+    if (mixer) mixer.update(delta);
+    renderer.render(scene, camera);
+  }
+  animate();
+</script>
+</body>
+</html>

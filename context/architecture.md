@@ -426,6 +426,19 @@ Repository: `https://github.com/Pixduct/odisha-mcq-engine.git` (`automations/`)
 - **Alert Cards:** Renders 1080x1080 PNG breaking notice graphics (`Real-Time Exam Alerts 🚀`).
 - **Instant Dispatch:** Dispatches immediate alert messages to Telegram Channel and Admin Bot.
 
-### 4. Dynamic Server OpenGraph Serving (`server.ts`)
-- Dynamically serves rotational student promo photos (`student 1.png` - `student 7.png`) for social sharing link previews based on `dayOfWeek`.
+### 5. Virtual Operations Deck (3D Digital Twin Architecture)
+
+The 3D Virtual Operations Deck (`/virtual-office.html`) implements a strict **1:1 Digital Twin Architecture** mapped exclusively to active GitHub Actions workflows in `Pixduct/odisha-mcq-engine`:
+
+- **Fundamental Invariant:** Only automations that run as genuine, active GitHub Actions workflows have dedicated agents. Downstream delivery channels (Telegram bots, WhatsApp broadcast scripts, internal formatters) are pipeline steps within these workflows and do NOT have standalone agents.
+- **Genuine 1:1 Fleet Mapping Matrix:**
+  1. **Bikram Rout** ➔ `notice_scraper.yml` (`Recruitment Portal Notice Scraper`)
+  2. **Chhabi Nayak** ➔ `exam_update_cron.yml` (`Exam Update Engine (Engine 1)`)
+  3. **Dipti Ranjan** ➔ `daily_mcq.yml` (`Daily MCQ Engine`)
+  4. **Priyanka Sethi** ➔ `daily_ca.yml` (`Daily Current Affairs Engine`)
+  5. **Subham Das** ➔ `blog_cron.yml` (`Strategic Evergreen Blog Engine (Engine 2)`)
+  6. **Trupti Jena** ➔ `engagement_engine.yml` (`Strategic Engagement Engine`)
+  7. **Manas Swain** ➔ `daily_ca_website.yml` (`Daily Current Affairs Website Publisher`)
+
+
 

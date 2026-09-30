@@ -1982,6 +1982,10 @@ export const Navbar = ({
         e.preventDefault();
         setIsSearchModalOpen(prev => !prev);
       }
+      if ((e.ctrlKey || e.metaKey) && e.altKey && e.key.toLowerCase() === 'o') {
+        e.preventDefault();
+        window.open('/virtual-office.html', '_blank');
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -5438,6 +5442,18 @@ const _dashboardCache: {
   loadedForUserId: sessionStorage.getItem('oep_cached_loadedForUserId') || null,
   hasFetchedThisSession: false,
 };
+
+// Global catalog cache invalidation listener: When Admin updates catalog or settings,
+// ensure the module-level dashboard cache is immediately cleared even if DashboardContent is unmounted.
+if (typeof window !== 'undefined') {
+  window.addEventListener('oep_catalog_updated', () => {
+    _dashboardCache.exams = [];
+    _dashboardCache.testSeries = [];
+    _dashboardCache.mockTests = [];
+    _dashboardCache.dynamicQuestionBanks = {};
+    _dashboardCache.hasFetchedThisSession = false;
+  });
+}
 
 const SPARKLE_POSITIONS = [
   { left: '12%', top: '25%', x: [-15, 15], y: [-10, 20], duration: 4.5, delay: 0.2 },
@@ -9039,19 +9055,45 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
   if (!selectedExam) {
     let globalVideoIds: string[] | null = exams.length === 0 ? null : [];
+    // Fast synchronous fallback from sessionStorage to avoid any flash during transition
+    const cachedEnabled = typeof window !== 'undefined' ? sessionStorage.getItem('oep_youtube_carousel_enabled') : null;
+    let isYoutubeEnabled = cachedEnabled !== null ? cachedEnabled === 'true' : true;
     
     const sysSettings = exams.find(e => e.name === 'SYSTEM_SETTINGS_YOUTUBE_RESERVED');
     if (sysSettings && sysSettings.description) {
        try {
          const parsed = JSON.parse(sysSettings.description);
          if (parsed.videos && parsed.videos.length > 0) globalVideoIds = parsed.videos;
+         if (typeof parsed.enabled === 'boolean') {
+           isYoutubeEnabled = parsed.enabled;
+           if (typeof window !== 'undefined') {
+             try {
+               sessionStorage.setItem('oep_youtube_carousel_enabled', parsed.enabled ? 'true' : 'false');
+             } catch (e) {}
+           }
+         }
        } catch(e) {}
     }
 
     return (
-      <div className="relative w-full">
+      <div className="relative w-full min-h-screen" style={{ isolation: 'isolate' }}>
+        {/* Full-Screen Edge-to-Edge Academic Vector Canvas Grid & HSL Glows */}
+        <div className="fixed inset-0 bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px] opacity-40 dark:opacity-[0.03] pointer-events-none z-0" />
+        <div className="fixed top-20 left-1/4 w-96 h-96 bg-brand-300/20 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none z-0" />
+        <div className="fixed bottom-20 right-1/4 w-96 h-96 bg-indigo-200/15 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none z-0" />
+
+        {/* Floating Viewport Academic Study Vector Watermarks */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-20">
+          <GraduationCap className="absolute top-24 left-[5%] w-44 h-44 text-slate-800 dark:text-white opacity-[0.08] dark:opacity-[0.04] stroke-[1.2] rotate-12" />
+          <BookOpen className="absolute top-1/3 right-[5%] w-48 h-48 text-brand-600 dark:text-indigo-400 opacity-[0.08] dark:opacity-[0.04] stroke-[1.2] -rotate-6" />
+          <Award className="absolute bottom-1/3 left-[6%] w-44 h-44 text-amber-600 dark:text-amber-400 opacity-[0.08] dark:opacity-[0.04] stroke-[1.2] rotate-45" />
+          <Compass className="absolute bottom-28 right-[6%] w-36 h-36 text-indigo-600 dark:text-blue-400 opacity-[0.08] dark:opacity-[0.04] stroke-[1.2] -rotate-12" />
+        </div>
+
         <div className="w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 space-y-4 sm:space-y-10 pt-2 sm:pt-4 pb-4 sm:pb-8 relative z-10">
-          <YouTubeCarousel videoIds={globalVideoIds} />
+          {isYoutubeEnabled && (
+            <YouTubeCarousel videoIds={globalVideoIds && globalVideoIds.length > 0 ? globalVideoIds : undefined} />
+          )}
         
         {isAdmin && (
           <motion.div
@@ -12414,12 +12456,12 @@ const ExamDetailPage = () => {
         </AnimatePresence>
       </main>
 
-      {/* Mobile Bottom Nav */}
+      {/* Bottom Nav */}
       <motion.nav 
         initial={false}
         animate={{ y: isBottomNavVisible ? 0 : '100%' }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="md:hidden bg-white/92 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/30 dark:border-slate-700/60 sm:glass sm:border-t sm:border-white/25 border-x-transparent border-b-transparent px-2 sm:px-8 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:py-4 flex justify-around items-center fixed bottom-0 left-0 right-0 z-30 rounded-t-[2rem] shadow-[0_-10px_35px_rgba(0,0,0,0.06)] dark:shadow-slate-950/60"
+        className="bg-white/92 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/30 dark:border-slate-700/60 sm:glass sm:border-t sm:border-white/25 border-x-transparent border-b-transparent px-2 sm:px-8 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:py-4 flex justify-around items-center fixed bottom-0 left-0 right-0 z-30 rounded-t-[2rem] shadow-[0_-10px_35px_rgba(0,0,0,0.06)] dark:shadow-slate-950/60"
       >
         <button 
           type="button"
@@ -12990,12 +13032,12 @@ function AppContent() {
             </React.Suspense>
           </main>
 
-          {/* Mobile Bottom Nav */}
+          {/* Bottom Nav */}
           <motion.nav 
             initial={false}
             animate={{ y: isBottomNavVisible ? 0 : '100%' }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="md:hidden bg-white/92 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/30 dark:border-slate-700/60 sm:glass sm:border-t sm:border-white/25 border-x-transparent border-b-transparent px-2 sm:px-8 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:py-4 flex justify-around items-center fixed bottom-0 left-0 right-0 z-30 rounded-t-[2rem] shadow-[0_-10px_35px_rgba(0,0,0,0.06)] dark:shadow-slate-950/60"
+            className="bg-white/92 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/30 dark:border-slate-700/60 sm:glass sm:border-t sm:border-white/25 border-x-transparent border-b-transparent px-2 sm:px-8 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:py-4 flex justify-around items-center fixed bottom-0 left-0 right-0 z-30 rounded-t-[2rem] shadow-[0_-10px_35px_rgba(0,0,0,0.06)] dark:shadow-slate-950/60"
           >
             {/* Hide Navigation Toggle Tab */}
             <button 
@@ -13133,7 +13175,14 @@ function AppContent() {
             !user ? (
               <LandingPage />
             ) : (
-              <div className="flex flex-col min-h-screen min-h-[100dvh]">
+              <div className="flex flex-col min-h-screen min-h-[100dvh] relative overflow-x-clip">
+                {/* Site-Wide Vector Canvas Grid Overlay — Desktop only for peak GPU framerate */}
+                <div className="hidden sm:block fixed inset-0 pointer-events-none z-[0] opacity-40 dark:opacity-[0.05] bg-[radial-gradient(#94a3b8_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:24px_24px]" />
+                
+                {/* Global Mouse Tracking Viewport Spotlight & Vector Cursor Follower */}
+                <MouseTrackingCanvas />
+                <VectorCursorFollower />
+
                 <Navbar user={user} isAdmin={isAdmin} onHomeClick={handleHomeClick} />
 
                 <main className={cn(
@@ -13171,12 +13220,12 @@ function AppContent() {
                   </AnimatePresence>
                 </main>
 
-                {/* Mobile Bottom Nav */}
+                {/* Bottom Nav */}
                 <motion.nav 
                   initial={false}
                   animate={{ y: isBottomNavVisible ? 0 : '100%' }}
                   transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  className="md:hidden bg-white/92 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/30 dark:border-slate-700/60 sm:glass sm:border-t sm:border-white/25 border-x-transparent border-b-transparent px-2 sm:px-8 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:py-4 flex justify-around items-center fixed bottom-0 left-0 right-0 z-30 rounded-t-[2rem] shadow-[0_-10px_35px_rgba(0,0,0,0.06)] dark:shadow-slate-950/60"
+                  className="bg-white/92 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/30 dark:border-slate-700/60 sm:glass sm:border-t sm:border-white/25 border-x-transparent border-b-transparent px-2 sm:px-8 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:py-4 flex justify-around items-center fixed bottom-0 left-0 right-0 z-30 rounded-t-[2rem] shadow-[0_-10px_35px_rgba(0,0,0,0.06)] dark:shadow-slate-950/60"
                 >
                   {/* Hide Navigation Toggle Tab */}
                   <button 

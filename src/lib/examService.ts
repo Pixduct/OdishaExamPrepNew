@@ -937,7 +937,7 @@ export const examService = {
       const rawList = (data || []) as any[];
       const exams = includeAllCategories
         ? rawList.filter(ex => !ex.is_archived)
-        : rawList.filter(isAuthenticExam);
+        : rawList.filter(ex => !ex.is_archived && (isAuthenticExam(ex) || (typeof ex.name === 'string' && ex.name.startsWith('SYSTEM_SETTINGS_'))));
       return exams.map(ex => {
         let metaObj: any = {};
         let cleanDesc = ex.description || '';

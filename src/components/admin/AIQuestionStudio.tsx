@@ -79,7 +79,7 @@ export interface QueueFeedEvent {
   timestamp: string;
   bankId: string;
   bankTitle: string;
-  type: 'queue_init' | 'bank_start' | 'batch_gen' | 'batch_done' | 'publishing' | 'bank_done' | 'advancing' | 'bank_failed' | 'queue_stopped' | 'queue_complete';
+  type: 'queue_init' | 'bank_start' | 'batch_gen' | 'batch_done' | 'publishing' | 'bank_done' | 'advancing' | 'bank_failed' | 'queue_stopped' | 'queue_complete' | 'audit_verified';
   message: string;
   batchNum?: number;
   totalBatches?: number;
@@ -2388,6 +2388,7 @@ export function AIQuestionStudio({
       });
 
       try {
+        const headers = await getAdminAuthHeaders();
         const planRes = await fetch('/api/admin/ai/plan-curriculum', {
           method: 'POST',
           headers,
@@ -2680,6 +2681,7 @@ export function AIQuestionStudio({
 
         if (!isFlashcards && stage2QuestionNaturalDensity && stage2AutoBatch) {
           try {
+            const headers = await getAdminAuthHeaders();
             const bankSubCategory = (currentBank as any).type || (stage2SubCategory !== 'all' ? stage2SubCategory : undefined);
             const planRes = await fetch('/api/admin/ai/plan-curriculum', {
               method: 'POST',

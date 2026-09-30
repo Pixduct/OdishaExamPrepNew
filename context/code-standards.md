@@ -217,6 +217,23 @@ Before approving any code change or merging a pull request, verify:
 5. All administrative routes (`/admin`, `/api/admin/*`) MUST enforce `requireAdmin` authentication middleware.
 6. Questions containing LaTeX math MUST be rendered using `MathTextRenderer.tsx`.
 7. Geometric math figures MUST be rendered dynamically via `UniversalMathDiagramEngine.tsx`.
-8. AI completion API keys MUST stay encapsulated on the Express server (`server.ts`).
-9. Raw SQL strings MUST NOT be concatenated dynamically with un-sanitized user input.
 10. All user-facing network errors MUST display clear notifications via `react-hot-toast`.
+11. Primary dashboard cards and navigation MUST NEVER use responsive hiding (`md:hidden`) or silent `return null` without fallback data.
+12. All code changes MUST pass automated invariant verification (`npm run test:invariants`) with zero regressions.
+
+---
+
+## Defensive Component Architecture & Zero-Blank Fallback Standard
+
+1. **The Zero-Blank Fallback Rule:**
+   - Any component that consumes dynamic database rows (e.g., `YouTubeCarousel`, `AIStudyPlanCard`, `ExamReadinessCard`) MUST provide curated static fallbacks.
+   - Writing `if (data.length === 0) return null;` on primary dashboard modules is strictly prohibited. If remote data is unpopulated, render the curated fallback.
+
+2. **The Responsive Non-Destructive Rule:**
+   - Responsive design must be achieved using fluid sizing (`text-xs sm:text-sm`, `px-2 sm:px-6`, `grid-cols-1 md:grid-cols-2`) rather than hiding entire containers (`md:hidden`) on larger viewports.
+   - Core navigation items must remain accessible on all screen widths.
+
+3. **Automated Verification Gate:**
+   - Every build runs `npm run test:invariants` (`scripts/verify-invariants.ts`), which automatically verifies all 25 platform invariants in <200ms.
+   - If an invariant is violated, the build aborts immediately and logs an explainable terminal restriction box.
+

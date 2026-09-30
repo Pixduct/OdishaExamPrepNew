@@ -131,7 +131,7 @@ Your output must be a JSON object with:
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'meta/llama-3.3-70b-instruct',
+          model: 'meta/llama-3.2-11b-vision-instruct',
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: `Analyze this student data and return JSON:\n${JSON.stringify(stats, null, 2)}` }

@@ -594,6 +594,9 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
 
   const [formData, setFormData] = useState<any>(initialFormData);
   const [youtubeVideosInput, setYoutubeVideosInput] = useState('');
+  const [youtubeEnabled, setYoutubeEnabled] = useState(true);
+  const [isTogglingYoutube, setIsTogglingYoutube] = useState(false);
+  const [youtubeToggleFeedback, setYoutubeToggleFeedback] = useState<string | null>(null);
   const [newsUpdatesInput, setNewsUpdatesInput] = useState('');
   const [diagramText, setDiagramText] = useState('');
   const [showDiagramHelp, setShowDiagramHelp] = useState(false);
@@ -1209,7 +1212,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     // If a specific target tab is requested, perform instant targeted synchronization
     if (target === 'exams') {
       try {
-        const ex = await examService.getAllExams(true);
+        const ex = await examService.getAllExams(true, true);
         if (ex && ex.length > 0) {
           setExams(ex);
           saveAdminCatalogCache({ ex });
@@ -1268,7 +1271,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       const catalogPromise = Promise.all([
         examService.getAllTestSeries(),
         examService.getAllMockTestsLite(),
-        examService.getAllExams(true),
+        examService.getAllExams(true, true),
         examService.getAllQuestionBanks(),
       ]);
 
@@ -1295,6 +1298,11 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         try {
           const parsed = JSON.parse(settingsExam.description);
           if (parsed.videos) setYoutubeVideosInput(parsed.videos.join('\n'));
+          if (typeof parsed.enabled === 'boolean') {
+            setYoutubeEnabled(parsed.enabled);
+          } else {
+            setYoutubeEnabled(true);
+          }
         } catch(e) {}
       }
 
@@ -5376,7 +5384,19 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           </nav>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-xl transition-all border border-slate-200 shadow-sm">
+          <button
+            type="button"
+            onClick={() => window.open('/virtual-office.html', '_blank')}
+            title="Open Virtual Office Agent Simulation (Ctrl+Alt+O)"
+            className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-slate-900 to-indigo-950 hover:from-slate-800 hover:to-indigo-900 text-white rounded-xl text-xs font-black shadow-sm border border-indigo-500/30 transition-all hover:scale-105 active:scale-95 whitespace-nowrap cursor-pointer"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            🏢 Virtual Office
+          </button>
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-xl transition-all border border-slate-200 shadow-sm cursor-pointer">
             <X className="w-5 h-5 text-slate-600" />
           </button>
         </div>
@@ -5681,6 +5701,135 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                   </div>
                 </div>
 
+                {/* On/Off Switch with Instant Auto-Save */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm transition-all">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-3">
+                      <span className="text-base font-extrabold text-slate-800">Display YouTube Carousel</span>
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider transition-colors ${
+                        youtubeEnabled 
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' 
+                          : 'bg-slate-100 text-slate-600 border border-slate-300'
+                      }`}>
+                        <span className={`w-2 h-2 rounded-full ${youtubeEnabled ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
+                        {youtubeEnabled ? 'Live on Dashboard' : 'Hidden from Dashboard'}
+                      </span>
+                      {youtubeToggleFeedback && (
+                        <span className="text-xs font-bold text-brand-600 bg-brand-50 border border-brand-200 px-2.5 py-0.5 rounded-full animate-fade-in">
+                          {youtubeToggleFeedback}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-slate-500 font-medium">
+                      {youtubeEnabled 
+                        ? 'The carousel is visible to students on the home dashboard.' 
+                        : 'The carousel is currently disabled and will not show on the student dashboard.'}
+                      <span className="text-slate-400 ml-1.5 text-xs font-semibold">(Auto-saves immediately upon toggling)</span>
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={isTogglingYoutube}
+                    onClick={async () => {
+                      const nextVal = !youtubeEnabled;
+                      setYoutubeEnabled(nextVal);
+                      setIsTogglingYoutube(true);
+                      setYoutubeToggleFeedback('Saving...');
+                      
+                      // Immediately synchronize sessionStorage cache for 0ms navigation response
+                      if (typeof window !== 'undefined') {
+                        try {
+                          sessionStorage.setItem('oep_youtube_carousel_enabled', nextVal ? 'true' : 'false');
+                        } catch (e) {}
+                      }
+
+                      try {
+                        // Extract current video IDs
+                        let currentVideos: string[] = [];
+                        const parsedFromInput = youtubeVideosInput.split('\n')
+                          .map(s => {
+                            const str = s.trim();
+                            if (!str) return null;
+                            const match = str.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?\n]{11})/);
+                            if (match && match[1]) return match[1];
+                            if (str.length === 11) return str;
+                            return null;
+                          })
+                          .filter(Boolean) as string[];
+
+                        if (parsedFromInput.length > 0) {
+                          currentVideos = parsedFromInput;
+                        } else {
+                          const existingExam = exams.find(e => e.name === 'SYSTEM_SETTINGS_YOUTUBE_RESERVED');
+                          if (existingExam && existingExam.description) {
+                            try {
+                              const p = JSON.parse(existingExam.description);
+                              if (Array.isArray(p.videos)) currentVideos = p.videos;
+                            } catch (e) {}
+                          }
+                        }
+
+                        const updated = {
+                          name: 'SYSTEM_SETTINGS_YOUTUBE_RESERVED',
+                          description: JSON.stringify({ enabled: nextVal, videos: currentVideos }),
+                          icon: '⚙️',
+                          category: 'system' as const
+                        };
+
+                        const exists = exams.find(e => e.name === 'SYSTEM_SETTINGS_YOUTUBE_RESERVED');
+                        const targetId = exists?.id || 'dc564cf2-00e2-42ed-8421-c52aefbf188a';
+                        await examService.updateExam(targetId, updated);
+
+                        // Update local AdminPanel exams state
+                        setExams(prev => {
+                          const idx = prev.findIndex(e => e.name === 'SYSTEM_SETTINGS_YOUTUBE_RESERVED');
+                          if (idx >= 0) {
+                            const copy = [...prev];
+                            copy[idx] = { ...copy[idx], description: updated.description };
+                            return copy;
+                          }
+                          return [...prev, { ...updated, id: targetId }];
+                        });
+
+                        // Clear cache and broadcast catalog update globally
+                        try {
+                          clearCatalogCache();
+                        } catch (e) {}
+
+                        setYoutubeToggleFeedback(nextVal ? 'Saved: Live on Home' : 'Saved: Hidden from Home');
+                        setTimeout(() => setYoutubeToggleFeedback(null), 3000);
+                      } catch (err: any) {
+                        console.error('Failed to toggle YouTube Carousel:', err);
+                        alert(`Failed to save toggle state: ${err.message || 'Unknown error'}`);
+                        setYoutubeEnabled(!nextVal); // Revert
+                        setYoutubeToggleFeedback(null);
+                        if (typeof window !== 'undefined') {
+                          try {
+                            sessionStorage.setItem('oep_youtube_carousel_enabled', !nextVal ? 'true' : 'false');
+                          } catch (e) {}
+                        }
+                      } finally {
+                        setIsTogglingYoutube(false);
+                      }
+                    }}
+                    className={`relative inline-flex h-8 w-16 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 ${
+                      isTogglingYoutube ? 'opacity-60 cursor-wait' : ''
+                    } ${
+                      youtubeEnabled ? 'bg-brand-600' : 'bg-slate-300'
+                    }`}
+                    role="switch"
+                    aria-checked={youtubeEnabled}
+                  >
+                    <span className="sr-only">Toggle YouTube Carousel</span>
+                    <span
+                      className={`pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                        youtubeEnabled ? 'translate-x-8' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+
                 <div className="space-y-3">
                   <label className="text-sm font-extrabold text-slate-700 uppercase tracking-wider">Active Video IDs</label>
                   <textarea 
@@ -5718,16 +5867,31 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
 
                         const updated = {
                            name: 'SYSTEM_SETTINGS_YOUTUBE_RESERVED',
-                           description: JSON.stringify({ videos: parsedIds }),
+                           description: JSON.stringify({ enabled: youtubeEnabled, videos: parsedIds }),
                            icon: '⚙️',
                            category: 'system' as const
                         };
                         const exists = exams.find(e => e.name === 'SYSTEM_SETTINGS_YOUTUBE_RESERVED');
-                        if (exists && exists.id) {
-                           await examService.updateExam(exists.id, updated);
-                        } else {
-                           await examService.addExam(updated);
-                        }
+                        const targetId = exists?.id || 'dc564cf2-00e2-42ed-8421-c52aefbf188a';
+                        await examService.updateExam(targetId, updated);
+
+                        // Update local exams list in AdminPanel
+                        setExams(prev => {
+                           const idx = prev.findIndex(e => e.name === 'SYSTEM_SETTINGS_YOUTUBE_RESERVED');
+                           if (idx >= 0) {
+                              const copy = [...prev];
+                              copy[idx] = { ...copy[idx], description: updated.description };
+                              return copy;
+                           }
+                           return [...prev, { ...updated, id: targetId }];
+                        });
+
+                        // Clear cache and broadcast catalog update globally
+                        try {
+                           clearCatalogCache();
+                           sessionStorage.setItem('oep_youtube_carousel_enabled', youtubeEnabled ? 'true' : 'false');
+                        } catch (e) {}
+
                         alert("Great! Your YouTube configuration was securely saved and published globally.");
                      } catch(err: any) { alert(`Failed to save settings: ${err.message || 'Unknown error'}`); }
                   }} className="px-10 py-3.5 premium-gradient text-white font-extrabold rounded-xl shadow-lg shadow-brand-500/20 hover:premium-glow transition-all active:scale-95 text-lg">Save YouTube Library</button>

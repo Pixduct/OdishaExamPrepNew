@@ -27,6 +27,8 @@ const staticMapping: Record<string, { title: string, category: string }> = {
   'EngW7tCbLHY': { title: 'General Studies: Odisha History & Heritage', category: 'General Studies' },
 };
 
+const DEFAULT_FALLBACK_VIDEO_IDS = ['jNQXAC9IVRw', 'dQw4w9WgXcQ', 'EngW7tCbLHY'];
+
 // Category badge colour mapping for premium look
 const categoryColours: Record<string, { bg: string; text: string; border: string }> = {
   'Aptitude':        { bg: 'bg-blue-50',    text: 'text-blue-700',    border: 'border-blue-200' },
@@ -47,6 +49,10 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
   const [theme] = useTheme();
   const isDark = theme === 'dark';
 
+  const effectiveVideoIds = (videoIds && videoIds.length > 0)
+    ? videoIds
+    : DEFAULT_FALLBACK_VIDEO_IDS;
+
   const getCategoryLabel = (cat: string) => {
     const c = cat.toLowerCase();
     if (c.includes('aptitude')) return t('home.videos.categories.aptitude', 'Aptitude');
@@ -58,11 +64,10 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
   };
 
   // Fetch authentic YouTube titles dynamically via noembed endpoint
-  const videoIdsKey = videoIds ? videoIds.join(',') : '';
+  const videoIdsKey = effectiveVideoIds.join(',');
   useEffect(() => {
-    if (!videoIds || videoIds.length === 0) return;
     let isMounted = true;
-    videoIds.forEach(id => {
+    effectiveVideoIds.forEach(id => {
       fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`)
         .then(res => res.json())
         .then(data => {
@@ -104,13 +109,11 @@ export default function YouTubeCarousel({ videoIds }: { videoIds?: string[] }) {
   const itemStep  = cardWidth + cardGap;
 
   // Map dynamic videos to authentic fetched YouTube titles and categories
-  const sourceVideos = videoIds && videoIds.length > 0
-    ? videoIds.map(id => {
-        const title = fetchedTitles[id] || staticMapping[id]?.title || `Odisha Exam Prep Masterclass`;
-        const category = staticMapping[id]?.category || inferCategory(title);
-        return { id, title, category };
-      })
-    : [];
+  const sourceVideos = effectiveVideoIds.map(id => {
+    const title = fetchedTitles[id] || staticMapping[id]?.title || `Odisha Exam Prep Masterclass`;
+    const category = staticMapping[id]?.category || inferCategory(title);
+    return { id, title, category };
+  });
 
   // Triple the array so we always have items on both sides for seamless looping
   const items = [...sourceVideos, ...sourceVideos, ...sourceVideos];

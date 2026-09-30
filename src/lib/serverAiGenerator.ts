@@ -613,7 +613,7 @@ export async function queryAIModel(
   ]);
 
   if (provider === 'nvidia' && DEAD_MODELS.has(rawModel)) {
-    const fallback = 'openai/gpt-oss-20b';
+    const fallback = 'meta/llama-3.2-11b-vision-instruct';
     console.warn(`[AI] Model "${rawModel}" is deprecated on NIM → falling back to ${fallback}`);
     options = { ...options, model: fallback };
     return queryAIModel(systemPrompt, userPrompt, options);

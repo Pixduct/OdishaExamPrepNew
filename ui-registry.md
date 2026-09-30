@@ -19,6 +19,8 @@ Before creating any new component, developers and AI agents MUST consult this re
 
 | Component Name | Category | File Path | Variants | Used By | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
+| **`AdminYouTubeCarouselToggle`** | Admin / Settings / Controls | [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx) | Interactive dashboard carousel visibility toggle switch with status badge pill (Emerald active beacon / Slate disabled pill) and atomic configuration saving to Supabase | `src/AdminPanel.tsx` (Settings $\rightarrow$ YouTube Carousel Integration), `src/App.tsx` | Active |
+| **`VirtualOfficeCafeLoungeSuite`** | Media / 3D Environment / Lounge | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | Executive Café & Espresso Lounge suite with Italian commercial espresso machine, French-door stainless refrigerator, hydration credenza, barstools facing North counter (`rotY = Math.PI`), Chesterfield sofa at `z = -13.5` facing North (`rotY = Math.PI`), inward-angled club armchairs (`rotY = -Math.PI/2` and `Math.PI/2`), travertine coffee table at `z = -18.0`, and $19 \times 12$ area rug with > 4.0 units entrance promenade | `public/virtual-office.html` (`buildCafeProps`, `agentPresets`, `behaviorPool`), `build/virtual-office.html` | Active |
 | **`VirtualOfficeAgentSimulationSuite`** | Media / Studio / Simulation | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | High-DPI 60fps Three.js WebGL 3D virtual office simulation for 7 autonomous background automation engines (Bikram, Chhabi, Dipti, Priyanka, Subham, Trupti, Manas). Features living 3D humanoids with desynchronized burst-typing, dual-screen gaze shifting, overhead stretches, espresso sipping, live backend automation feed (`/api/automation/live-feed`), War Room All-Hands standup debriefs with conversational head-turning, Café peer banter, and autonomous agency roaming loops | Standalone Tool, `AdminPanel.tsx` header, `App.tsx` global shortcut | Active |
 | **`VirtualOfficeSpeechBubbleSprite`** | Media / 3D UI / Overlay | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | 3D billboarding floating speech bubble CanvasTexture sprite with rounded callout tail, dark obsidian backdrop, emerald speaker badge, and real-time standup debrief text | `public/virtual-office.html` (`createSpeechBubbleSprite`) | Active |
 | **`VirtualOfficeTelemetryBottomTicker`**| HUD / Overlay | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | Viewport-fixed bottom telemetry HUD pill with pulsing emerald status beacon, live Telegram bot logs, Supabase latency, and keyboard/mouse orbit guide | `public/virtual-office.html` (`#ticker-bar`) | Active |
@@ -32,8 +34,127 @@ Before creating any new component, developers and AI agents MUST consult this re
 | **`VirtualOfficeWaypointNavigationAndActivityKinematics`** | Locomotion / Kinematics / Navigation | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | Full office topological waypoint corridor graph (`calculateOfficePath`), calm natural walking speed (`3.5 units/sec`), shortest-arc angular steering, and room-specific activity micro-gestures (coffee sipping, zen deep breathing, console diagnostic typing, presenter 4K camera gestures) | `public/virtual-office.html` (`calculateOfficePath`, `updateActivityMicroBehaviors`, `updateWalkingAgents`) | Active |
 | **`VirtualOfficeTelegramReportsAndCloudDispatcher`** | Telemetry / Operations / Cloud Dispatch | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) & [`server.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/server.ts) | Real GitHub Actions cloud automation dispatcher (`POST /api/automation/dispatch`) wired to "⚡ Force Run Engine Now", 1:1 agent-to-engine alignment across all 7 workflows, and live Telegram Bot live reports & dispatch console (`#telegram-overlay`, `GET /api/automation/today-reports`) displaying authentic execution notifications, exam alerts, and current affairs digests | `public/virtual-office.html` (`#telegram-overlay`, `#manual-dispatch-btn`), `server.ts` | Active |
 | **`VirtualOfficeRiggedHumanoidModelEngine`** | 3D Graphics / Avatar / Rigged GLTF Model | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | Production-grade 3D rigged humanoid agent engine. Replaces uncanny primitive box-and-sphere mannequins with 7 distinct CC0 1.0 Quaternius rigged human models (`office-seok.glb`, `office-jun.glb`, `office-ara.glb`, `office-mira.glb`, `office-chan.glb`, `office-haena.glb`, `office-woojin.glb`). Features continuous organic skin topologies, tailored executive business wear (suits, suspenders, blouses, lab coats, vests), realistic hairstyles, accessories (glasses, headsets, boom mics, backpacks), real skeletal rigs, and Three.js `AnimationMixer` playback for natural seated postures, standing idle, and walking cycles | `public/virtual-office.html` (`preloadAgentModels`, `createAgentAvatar`, `applyAvatarPosture`), `build/virtual-office.html` | Active |
+| **`AuthenticatedBottomNavigationBar`** | Navigation / Shell / Dock | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) | Fixed glassmorphic bottom navigation dock for authenticated views (Home, Study Plan, Analytics, History, Library, AI Mentor). Features spring-animated active tab pill (`activeAppContentBottomTabPill` / `activeExamDetailBottomTabPill`), collapsible toggle chevron, and responsive clearance padding across desktop, tablet, and mobile | `App.tsx` (`ROUTE_PATHS.HOME`, `ROUTE_PATHS.EXAM_DETAIL`, `ai_mentor`) | Active |
+| **`YouTubeCarousel`** | Media / Video Slider / Carousel | [`src/components/YouTubeCarousel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/YouTubeCarousel.tsx) | Curated interactive video masterclass slider with infinite loop auto-scroll, touch/mouse drag physics, dynamic title fetching via noembed, category badge mapping, and zero-blank fallback to curated masterclasses | `src/App.tsx` (Dashboard Home, lines 9058) | Active |
+| **`AuthenticatedHomeVectorBackground`** | Canvas / Visual Effects / Background | [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx) | Full-screen academic vector canvas dot grid (`radial-gradient`), dual HSL ambient glow orbs (`brand-300`/`indigo-200`), 4 floating academic study watermarks (`GraduationCap`, `BookOpen`, `Award`, `Compass`), GPU mouse spotlight, and vector cursor follower | `src/App.tsx` (Home Dashboard, lines 9054, 13153) | Active |
 | **`ExamAlertCardOfficialSourceStrip`** | Media / Graphic Card / Authority Seal | [`automations/exam_card_renderer.py`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/automations/exam_card_renderer.py) | 1080x1080 visual alert card footer strip (`.official-portal-strip`) featuring dark obsidian glassmorphism, verified cyan domain pill (`.portal-link`), and strict domain resolution sanitizer (`resolve_clean_display_domain`) eliminating script postback leaks | `exam_card_renderer.py`, `exam_update_engine.py`, `breaking_engine.py` | Active |
+| **`VirtualOfficeWarRoomCommandConsole`** | Chat / Multi-Agent Debrief / HUD | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) & [`server.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/server.ts) | Real-time multi-agent conversational debrief suite. Slide-out glassmorphic panel (`#warroom-console`) at `right: 16px`, recipient selector pills (`All Hands` + 7 agent leads), quick action prompt chips, markdown message rendering, real-time ground truth ingestion (disk logs, GitHub Actions runs, Supabase counts), NVIDIA NIM model synthesis (`meta/llama-3.2-11b-vision-instruct`), 3D avatar head-turning (`turnAvatarsToFaceAgent`), and speech bubble synchronization | `public/virtual-office.html` (`#warroom-console`, `#warroom-debrief-btn`), `server.ts` (`POST /api/automation/warroom-chat`) | Active |
+| **`VirtualOfficeDebriefPresenterKinematics`** | 3D Kinematics / Rigged Animation / Presentation | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | Procedural oratorical presenter kinematics for War Room debriefs. Targets rigged humanoid skeleton bones (`Head`, `Neck`, `RightArm`, `RightForeArm`, `LeftArm`, `LeftForeArm`, `Spine`, `Spine1`). Transitions speaking agent from seated to standing (`y=0`), steps forward 1.0 unit to conference table edge, executes procedural expressive oratorical arm gesturing, torso pitch sway, and speech bubble projection while non-speaking agents rotate heads to maintain eye contact | `public/virtual-office.html` (`setDebriefPresenter`, `turnAvatarsToFaceAgent`, `animate`), `build/virtual-office.html` | Active |
+| **`VirtualOfficeWarRoomDebriefTable`** | UI / Table / Glassmorphism | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | High-contrast glassmorphic table for tabular debrief analytics (`.debrief-table`). Features obsidian backdrop (`rgba(0, 0, 0, 0.35)`), cyan headers (`#38BDF8`), subtle borders (`rgba(255, 255, 255, 0.1)`), and zebra hover rows | `public/virtual-office.html` (`formatDebriefMarkdown`), `build/virtual-office.html` | Active |
 | **`VirtualOfficeExecutiveCommandHeader`** | HUD / Navigation / Executive Header | [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) | Sleek 48px executive 3-column Grid mission control bar (`display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.75rem;`). Pinned Left Pillar for Brand Identity (`🏢 OdishaExamPrep` + `Operations Deck`), mathematically Centered Pillar for live Fleet Telemetry (`● 7 Standby`, `Tasks: 490`, `IST Clock`), and pinned Right Pillar for Action & Utility controls (`All Hands`, `Coffee`, `Desks`, `Reports`, `🔊` / `🔇`, `⛶`). Zero off-screen overflow, 16px right margin, Service Worker cache bypass | Standalone Tool, `public/virtual-office.html`, `build/virtual-office.html` | Active |
+
+### VirtualOfficeCafeLoungeSuite
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) & [`build/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/build/virtual-office.html)
+Last updated: 2026-09-30
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background / Materials** | Polished Calacatta Gold marble (`#FDFBF7`), beveled Roman travertine (`#E8DEC8`), fluted Italian walnut (`#3E2723`), brushed stainless steel (`#CBD5E1`), polished chrome (`#F1F5F9`), cognac aniline leather (`#9A3412`), and dark mocha tufted leather (`#451A03`) |
+| **Border / Trim** | Architectural satin brass ferrules (`#D97706`), chrome boiler guardrails, obsidian gasket reveals (`#020617`), and fluted ceramic planter rim (`#FDFBF7`) |
+| **Border radius / Geometries** | Beveled box chamfers (`0.35` travertine slab), cylinder turnings (walnut legs), torus footrests (`0.68` radius), and rounded pill cushions |
+| **Lighting / Emissive Accents** | Warm undercounter LED bar (`#FDE68A`, `intensity: 1.8`, `distance: 14`), glowing cyan refrigerator dispenser readout (`#38BDF8`), hot red (`#EF4444`) & cold cyan (`#0284C7`) water taps, and amber portal sign typography (`#F59E0B`) |
+| **Seating Ergonomics & Direction** | Barstools at $Z = -25.2$ facing North (`rotY = Math.PI`), Chesterfield sofa at $Z = -13.5$ facing North (`rotY = Math.PI`), Left armchair at $X = 13.8$ facing East (`rotY = Math.PI / 2`), Right armchair at $X = 31.2$ facing West (`rotY = -Math.PI / 2`) |
+| **Spatial Spacing & Clearances** | $> 4.0$ units unobstructed promenade from South entrance architrave ($Z = -8.0$), $0.55$-unit legroom between sofa and coffee table, $> 5.3$ units open walking aisle to barstools |
+| **Interactive States** | Raycast hover selection, tooltip inspection card, and autonomous agency roaming slots (`CAFE_ESPRESSO` & `CAFE_SOFA_LOUNGE`) |
+| **Floor Anchoring** | High-pile slate wool area rug (`#1E293B`, $19.0 \times 12.0$) centered at $(22.5, 0.02, -16.5)$ anchoring sofa, table, and both armchairs |
+
+**Pattern notes:**
+- **Strict Coordinate & Heading Trigonometry**: In Three.js simulation space, $+Z$ is South ($\text{rotY} = 0$), $-Z$ is North ($\text{rotY} = \pi$), $+X$ is East ($\text{rotY} = \pi/2$), and $-X$ is West ($\text{rotY} = -\pi/2$). Barstools and sofas facing the room or counters must use $\text{rotY} = \pi$ to prevent occupants from facing into backrests or turning away from interactive furniture.
+- **Doorway Promenade Clearance**: Lounge suites placed near entry portals must preserve $\ge 4.0$ units of open walkway between the door threshold and the nearest furniture backrest to prevent spatial bottlenecks.
+- **Symmetrical Conversation Inward Angling**: Flanking club armchairs must be oriented inward facing the central coffee table ($+90^\circ$ and $-90^\circ$ relative to room heading) to create a natural executive conversation circle.
+- **Dual-File Synchronization**: Every update to `public/virtual-office.html` must be accompanied by an identical update to `build/virtual-office.html` verified via SHA-256 byte parity.
+
+### AdminYouTubeCarouselToggle
+
+File: [`src/AdminPanel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/AdminPanel.tsx)
+Last updated: 2026-09-30
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | `bg-white/90` (container), `bg-brand-600` (active track), `bg-slate-300` (inactive track), `bg-white` (knob) |
+| **Border** | `border border-slate-200/80` (container), `border-2 border-transparent` (switch track) |
+| **Border radius** | `rounded-2xl` (container card), `rounded-full` (switch track, knob, status badge pill) |
+| **Text — primary** | `text-base font-extrabold text-slate-800` |
+| **Text — secondary** | `text-sm text-slate-500 font-medium`, `text-slate-400 text-xs font-semibold` |
+| **Spacing** | `p-5 gap-4` (flex container), `space-y-1` (text stack), `gap-3` (header row) |
+| **Hover state** | `focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2` |
+| **Shadow** | `shadow-sm` (card container), `shadow-md` (switch knob) |
+| **Accent usage** | `bg-brand-600` (active switch), `bg-emerald-100 text-emerald-800 border-emerald-300` (active pill), `bg-brand-50 text-brand-600` (toast) |
+
+**Pattern notes:**
+- **Instant Auto-Save Architecture**: Directly writes to Supabase database without requiring manual submission of the broader parent form.
+- **Zero-Lag Cache Synchronization**: Concurrently updates synchronous `sessionStorage` (`oep_youtube_carousel_enabled`) and broadcasts `clearCatalogCache()` / `oep_catalog_updated` to ensure instant updates with 0ms transition flicker.
+- **Hard-Reload Persistence & Authoritative DB Anchoring**: Bypasses catalog authentic-exam stripping in `examService.ts` by preserving `SYSTEM_SETTINGS_*` in `getAllExams`, anchoring updates to authoritative UUIDs to eliminate duplicate rows and guarantee state persistence across hard browser reloads (F5).
+- **Dual Visual State Feedback**: Features real-time state badge (pulse emerald when Live, neutral slate when Hidden) plus asynchronous operation indicators (`Saving...` $\rightarrow$ `Saved: Live on Home`).
+- **Defensive Rollback**: Automatically reverts UI state and cache if network requests fail during toggling.
+
+### AuthenticatedBottomNavigationBar
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
+Last updated: 2026-09-29
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | `bg-white/92 dark:bg-slate-900/95 backdrop-blur-xl sm:glass` |
+| **Border** | `border-t border-slate-200/30 dark:border-slate-700/60 sm:border-t sm:border-white/25 border-x-transparent border-b-transparent` |
+| **Border radius** | `rounded-t-[2rem]` (dock container), `rounded-t-xl` (toggle tab), `rounded-xl` (item pills) |
+| **Text — primary** | `text-brand-650 font-black` (active tab label) |
+| **Text — secondary** | `text-slate-500 font-extrabold hover:text-slate-800 dark:hover:text-slate-200` (inactive tab label) |
+| **Spacing** | `px-2 sm:px-8 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] sm:py-4 flex justify-around items-center` |
+| **Hover state** | `group-hover:scale-115 text-slate-800 transition-all duration-300` |
+| **Shadow** | `shadow-[0_-10px_35px_rgba(0,0,0,0.06)] dark:shadow-slate-950/60` |
+| **Accent usage** | `bg-brand-500/12 border border-brand-500/20 rounded-xl shadow-xs backdrop-blur-xs` (spring animated layout pill) |
+
+**Pattern notes:**
+- **Universal Cross-Platform Visibility**: Rendered uniformly across mobile, tablet, and desktop viewports (`md:hidden` completely removed).
+- **Zero-Occlusion Dynamic Clearance**: Main page container automatically applies dynamic bottom clearance padding (`isBottomNavVisible ? "pb-20 sm:pb-24 lg:pb-28" : "pb-6 sm:pb-12 lg:pb-16"`).
+- **Spring-Animated Active Indicator**: Employs Framer Motion `layoutId="activeAppContentBottomTabPill"` for fluid tab switching.
+- **Collapsible Toggle Tab**: Floating chevron tab allows user to minimize/restore dock with smooth spring translation.
+
+### YouTubeCarousel
+
+File: [`src/components/YouTubeCarousel.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/components/YouTubeCarousel.tsx)
+Last updated: 2026-09-29
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | `bg-[#F2EFE9] dark:bg-slate-900` (outer container), `bg-white dark:bg-slate-900` (video card) |
+| **Border** | `border-2 border-slate-900 dark:border-slate-700` (outer shell & cards) |
+| **Border radius** | `rounded-2xl sm:rounded-[2.5rem]` (container), `rounded-2xl` (cards) |
+| **Text — primary** | `text-slate-900 dark:text-white font-serif font-extrabold text-base leading-snug` |
+| **Text — secondary** | `text-slate-500 dark:text-slate-400 font-medium text-[11px]` |
+| **Spacing** | `py-3.5 sm:py-10 px-0 sm:px-6 lg:px-8` (outer), `gap-3 px-4 pb-1 sm:gap-6 sm:px-10 sm:py-2` (track) |
+| **Hover state** | `md:hover:-translate-x-0.5 md:hover:-translate-y-0.5 md:hover:shadow-[6px_6px_0px_rgba(37,99,235,0.4)]` |
+| **Shadow** | `shadow-xl` (container), `shadow-[4px_4px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_rgba(37,99,235,0.4)]` (cards) |
+| **Accent usage** | `bg-[#2563EB] text-white` (play button), `bg-[#FF0000]` (YouTube subscribe pill) |
+
+**Pattern notes:**
+- **Zero-Blank Fallback Guarantee**: If database records (`SYSTEM_SETTINGS_YOUTUBE_RESERVED`) are empty or unconfigured, automatically falls back to curated masterclass IDs (`DEFAULT_FALLBACK_VIDEO_IDS = ['jNQXAC9IVRw', 'dQw4w9WgXcQ', 'EngW7tCbLHY']`).
+- **Infinite Loop Architecture**: Triples card array (`items = [...sourceVideos, ...sourceVideos, ...sourceVideos]`) with modulo offset wrapping.
+- **Dynamic Title Ingestion**: Automatically resolves authentic YouTube video titles via `noembed.com/embed` endpoint with caching.
+
+### AuthenticatedHomeVectorBackground
+
+File: [`src/App.tsx`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/src/App.tsx)
+Last updated: 2026-09-29
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | `bg-[radial-gradient(#cbd5e1_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:20px_20px]` |
+| **Border** | `none` (ambient canvas overlays) |
+| **Border radius** | `rounded-full` (blur orbs) |
+| **Text — primary** | Inherited from active dashboard cards |
+| **Text — secondary** | `opacity-[0.08] dark:opacity-[0.04]` (watermark icons) |
+| **Spacing** | `fixed inset-0 pointer-events-none z-0` |
+| **Hover state** | Mouse-tracking spotlight via GPU translate3d lerp |
+| **Shadow** | `blur-3xl` (`bg-brand-300/20`, `bg-indigo-200/15`) |
+| **Accent usage** | Ambient HSL glows (`brand-300`, `indigo-200`) and rotating vector study symbols |
+
+**Pattern notes:**
+- **Layer Isolation**: Employs `isolation: isolate` on dashboard root to prevent blending conflicts with fixed overlays.
+- **Academic Iconography**: Features 4 floating vector watermark icons (`GraduationCap`, `BookOpen`, `Award`, `Compass`) with subtle rotations.
+- **Peak GPU Framerate**: Mouse tracking spotlight and cursor followers run via `requestAnimationFrame` lerp with zero React state re-renders during active scrolling.
 
 ### ExamAlertCardOfficialSourceStrip
 
@@ -56,6 +177,29 @@ Last updated: 2026-09-29
 - **Sanitized Authority Domain Contract**: Rendered exclusively via `resolve_clean_display_domain(official_link, org_name, board_short)`. Guarantees clean authoritative domain presentation (e.g., `ossc.gov.in`, `opsc.gov.in`, `orissahighcourt.nic.in`).
 - **Zero Script & Leak Tolerance**: Under zero conditions will raw ASP.NET JavaScript execution triggers (`javascript:__doPostBack(...)`), URI schemes, anchors, or tracking parameters ever leak into visual graphics.
 - **Fallthrough Protection**: Non-standard or broken client-side triggers safely fallback to verified official sovereign/statutory portals registered in `BOARD_OFFICIAL_DOMAINS`.
+
+### VirtualOfficeWarRoomCommandConsole
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) & [`build/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/build/virtual-office.html)
+Last updated: 2026-09-29
+
+| Property | Class / Value |
+| :--- | :--- |
+| **Background** | `rgba(11, 17, 32, 0.95)` with `backdrop-filter: blur(24px)` (`#warroom-console`), `rgba(15, 23, 42, 0.85)` (`.warroom-header`), `rgba(15, 23, 42, 0.6)` (`.warroom-recipients`), `rgba(15, 23, 42, 0.9)` (`.debrief-msg.agent .debrief-bubble`), `linear-gradient(135deg, #1D4ED8, #2563EB)` (`.debrief-msg.user .debrief-bubble`), `rgba(0, 0, 0, 0.35)` (`.warroom-input-box input`) |
+| **Border** | `1px solid rgba(56, 189, 248, 0.35)` (`#warroom-console`), `1px solid rgba(255, 255, 255, 0.08)` (header/input borders), `1px solid rgba(56, 189, 248, 0.22)` (agent bubble), `1px solid rgba(56, 189, 248, 0.25)` (`.quick-chip`), `1px solid rgba(255, 255, 255, 0.08)` (`.recipient-chip`) |
+| **Border radius** | `20px` (`#warroom-console`), `14px` (`.debrief-bubble` with asymmetric `3px` corner anchor for user vs agent), `999px` (`.recipient-chip`, `.warroom-live-pill`), `10px` (`.warroom-brand-icon`, `input`, `.warroom-btn-send`), `6px` (`.quick-chip`, `.warroom-btn-icon`) |
+| **Text — primary** | `#F8FAFC` (title / user message), `#FFFFFF` (active chips / bold highlights), `0.86rem` font weight 800 (header title), `0.74rem` line height 1.55 (bubbles / input) |
+| **Text — secondary** | `#94A3B8` (subtitles, metadata, inactive chips), `0.63rem` font weight 600 (subtitle), `0.62rem` font weight 700 (meta badges) |
+| **Spacing** | `width: 440px; top: 54px; right: 16px; bottom: 52px;` (viewport clearance), `padding: 0.85rem 1.1rem` (header), `padding: 0.9rem; gap: 0.85rem;` (feed), `padding: 0.75rem 0.95rem` (bubbles), `padding: 0.75rem; gap: 0.5rem;` (input bar) |
+| **Hover state** | `.recipient-chip:hover`: `color: #F8FAFC; background: rgba(255, 255, 255, 0.1); border-color: rgba(56, 189, 248, 0.4);`; `.quick-chip:hover`: `background: rgba(56, 189, 248, 0.2); transform: translateY(-1px);`; `.warroom-btn-send:hover`: `transform: translateY(-1px); box-shadow: 0 0 14px rgba(56, 189, 248, 0.4);` |
+| **Shadow** | `0 25px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(56, 189, 248, 0.15)` (console backdrop glow), `0 4px 15px rgba(37, 99, 235, 0.3)` (user bubble), `0 0 10px rgba(56, 189, 248, 0.3)` (active chip) |
+| **Accent usage** | Cyan `#38BDF8` (highlights, active borders, quick chips), Blue `linear-gradient(135deg, #0284C7, #2563EB)` (brand icon, send button, active recipient chip, user bubble), Emerald `#34D399` (`.warroom-live-pill`), Rose `#EF4444` (error bubble border) |
+
+**Pattern notes:**
+- **Zero-Occlusion Slide Dock**: Positioned at `top: 54px; right: 16px; bottom: 52px;` perfectly clearing the 48px top header and 42px bottom ticker HUD with a 6px safety gap on each side.
+- **Conversational Asymmetric Tail Anchor**: Bubbles use a tailored corner radius: user bubbles have `border-bottom-right-radius: 3px` while agent bubbles have `border-bottom-left-radius: 3px` to visually anchor speaker origin.
+- **Ground-Truth Data Integration**: Interacts directly with backend `POST /api/automation/warroom-chat` with real-time log ingestion (no hallucinations).
+- **Synchronized 3D Gaze & Speech**: Active agent responses trigger `spawnSpeechBubble(senderKey, text)` in Three.js and rotate non-speaking avatars' heads toward the speaker via `Office3D.prototype.turnAvatarsToFaceAgent`.
 
 ### VirtualOfficeExecutiveCommandHeader
 
@@ -260,8 +404,8 @@ Last updated: 2026-09-27
 **Pattern notes:**
 ### VirtualOffice3DDeskNameplate
 
-File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html)
-Last updated: 2026-09-28
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html) & [`server.ts`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/server.ts)
+Last updated: 2026-09-29
 
 | Property | Class / Value |
 | :--- | :--- |
@@ -269,14 +413,16 @@ Last updated: 2026-09-28
 | **Border** | `3.5px solid rgba(56, 189, 248, 0.5)` (standby) / `#10B981` (running) |
 | **Border radius** | `24px` rounded rectangular container |
 | **Text — primary** | `#FFFFFF` (`Plus Jakarta Sans`, 900 weight, 38px canvas font) |
-| **Text — secondary**| `#38BDF8` (script tag, 23px font-mono), `#CBD5E1` (status detail, 20px) |
+| **Text — secondary**| `#38BDF8` (clean workflow title, 22px font-bold), `#CBD5E1` (status detail, 19px) |
 | **Spacing** | Canvas internal dimensions `512x160`, left avatar offset `64px`, text left offset `124px` |
 | **Hover state** | Permanent 3D billboard sprite hovering at `y=6.1` above monitors (zero hover required) |
 | **Shadow** | Subtle canvas drop shadow around avatar and name |
 | **Accent usage** | Cyan (`#38BDF8`), Emerald (`#10B981`, `#34D399`), Slate (`#94A3B8`) |
 
 **Pattern notes:**
-Permanent 3D billboarding nameplate sprite mounted at world `y = 6.1` above each bullpen workstation. Rendered with `depthTest: false` and `renderOrder: 850` so that each agent's identity and operational status are permanently visible without hovering.
+- **Permanent 3D Billboard Sprite**: Mounted at world `y = 6.1` above each bullpen workstation. Rendered with `depthTest: false` and `renderOrder: 850` so that each agent's identity and operational status are permanently visible without hovering.
+- **Harmonized 1:1 Lifecycle Across All 7 Agents**: Every agent (including Subham's `Strategic Evergreen Blog Engine (Engine 2)`) dynamically evaluates OS processes to report `○ STANDBY` when idle (with real last-executed audit timestamps e.g. `Last: 31d ago (29 Aug)`) and transitions to `● RUNNING` during active execution. Zero hardcoded permanent "ONLINE" states.
+
 
 ### VirtualOfficeFleetRosterBar
 
@@ -6182,4 +6328,74 @@ Last updated: September 26, 2026
 - **Official ORSP Rules 2017 Grounding**: In `seo_blog_engine.py`, all career profile blogs ground remuneration in official Odisha Revised Scales of Pay (ORSP) Rules, 2017 (Level-9: ₹35,400–₹1,12,400; Level-10: ₹44,900–₹1,42,400; Level-12: ₹56,100–₹1,77,500 Pay Matrices, DA @ 50%+, HRA @ 18%/9%).
 - **8,192 Token Generation Headroom**: Prevents mid-stream truncation on deep-dive current affairs articles and comprehensive 2,000-word career masterclasses.
 - **Strict Template Token Sanitization**: Automatically scrubs corrupt sequences, `[object Object]`, `undefined`, and unrendered placeholders (`[Topic]`, `[District]`, `[Category]`) before rendering or social dispatch.
+
+---
+
+### VirtualOfficeDebriefPresenterKinematics
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html), [`build/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/build/virtual-office.html)
+Last updated: 2026-09-29
+
+| Property | Class / Specification |
+| :--- | :--- |
+| **Animation System** | Native Three.js `AnimationMixer` driving motion-captured clips (`sit` for seated audience, `idle` for standing debrief presenter, `walk` for navigation) |
+| **Speaker Stance** | Standing position (`y = 0`), stepped forward `1.0` unit toward conference table edge (`z += forwardDirection`), natural breathing, weight shifting, and relaxed arms governed by `idle` |
+| **Speaker Torso** | Subtle organic engagement lean (`b.Spine1.rotation.x = THREE.MathUtils.lerp(..., 0.06 + Math.sin(time * 1.2) * 0.02, delta * 3)`) |
+| **Audience Seating** | Pure native `sit` clip execution with zero manual Euler overrides: arms rest naturally on lap/table with zero A-pose jutting; heads and neck maintain anatomical posture without owl-like twists |
+| **Markdown Tables** | `.debrief-table`: obsidian glassmorphism (`rgba(15, 23, 42, 0.75)`), cyan headers (`#38bdf8`), light blue borders (`rgba(56, 189, 248, 0.2)`), hover zebra rows (`rgba(255, 255, 255, 0.04)`) |
+| **Speech Bubble Sync** | Immediate in-flight acknowledgment: *"Consulting live telemetry & disk logs, Boss..."*; auto-transitions to response summary when delivered with 35s active reading timer |
+
+**Pattern notes:**
+- **Zero Bone Overwriting**: Upper arm roots, forearms, and neck bones are 100% driven by Quaternius motion clips. Eliminates stick-arm jutting and unnatural neck contortions permanently.
+- **Executive Framing**: War Room camera preset dollys into an executive presentation framing (`pos: (27.5, 15.0, 42.0), look: (27.5, 3.8, 25.0)`), guaranteeing crisp visual readability from wide views.
+- **Immediate Visual Feedback**: Zero waiting for AI latency—the target agent stands up and acknowledges instantaneously upon query submission.
+- **Deterministic 100% SHA-256 Parity**: Maintained between `public/` and `build/` files (`0F8BFF91F0527D54601DA1B3B6B85E33526C160721C61CEB418534CCB8AEDE8F`).
+
+---
+
+### VirtualOfficeWarRoomDebriefTable
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html), [`build/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/build/virtual-office.html)
+Last updated: 2026-09-29
+
+| Property         | Class / Specification |
+| ---------------- | --------------------- |
+| **Background**   | `.debrief-table`: `rgba(0, 0, 0, 0.35)` |
+| **Border**       | `1px solid rgba(255, 255, 255, 0.1)`, `th` bottom border: `1px solid rgba(255, 255, 255, 0.1)`, cell right border: `1px solid rgba(255, 255, 255, 0.06)`, cell top border: `1px solid rgba(255, 255, 255, 0.05)` |
+| **Border radius**| `6px` (`border-radius: 6px; overflow: hidden;`) |
+| **Text — primary**| Header `th`: `#38BDF8` (`font-weight: 800; font-size: 0.68rem; text-align: left;`), Body `td`: `#F8FAFC` (`font-size: 0.68rem;`) |
+| **Text — secondary**| Muted metrics / secondary stats: `#94A3B8` |
+| **Spacing**      | Table margin: `0.45rem 0; width: 100%; border-collapse: collapse;`, Header padding: `5px 8px`, Cell padding: `4px 8px` |
+| **Hover state**  | `.debrief-table tr:hover`: `background: rgba(255, 255, 255, 0.04);` |
+| **Shadow**       | Obsidian glassmorphism embedded in slide-out panel |
+| **Accent usage** | Cyan `#38BDF8` header highlight with `background: rgba(56, 189, 248, 0.15);` |
+
+**Pattern notes:**
+- **Markdown Auto-Conversion**: Automatically parses markdown tables output by LLMs or deterministic telemetry scripts (`formatDebriefMarkdown(text)`).
+- **Responsive Enclosure**: Fits cleanly inside the 380px `#warroom-console` HUD with zero horizontal overflow or clipping.
+- **Glassmorphic Theme Cohesion**: Matches the obsidian glass aesthetic of `#warroom-console` and `#agent-tooltip`.
+
+---
+
+### VirtualOfficeCafeExecutiveLounge
+
+File: [`public/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/public/virtual-office.html), [`build/virtual-office.html`](file:///c:/Users/Naresh%20Samal/Downloads/OdishaExamPrep%20Website/build/virtual-office.html)
+Last updated: 2026-09-29
+
+| Property | Class / Specification |
+| :--- | :--- |
+| **Architectural Zone** | Executive Café Lounge & Breakroom ($X \in [9.0, 36.0]$, $Z \in [-41.0, -8.0]$) |
+| **Flooring & Rug** | French Walnut herringbone parquet (`TextureGen.createWoodParquet`) with an $18.0 \times 11.5$ slate wool area rug (`#1E293B`) |
+| **Espresso Bar** | Italian Calacatta marble waterfall countertop (`#FDFBF7`) on fluted walnut base with warm LED undercounter wash |
+| **Espresso Machine** | Dual-group commercial espresso machine (*La Marzocco* aesthetic) with chrome boiler, walnut side cheeks, dual group heads & portafilters, articulating steam wands, analog pressure gauges, and stacked demitasse cups |
+| **Refrigeration** | French-door commercial brushed stainless steel refrigerator (`#CBD5E1`) with dual tubular pull handles, pull-out freezer drawer, and ice/water dispenser with glowing cyan LED readout (`#38BDF8`) |
+| **Hydration Credenza**| Walnut & obsidian station with modern beveled water cooler, dual red/blue push paddles, and inverted 5-gallon ribbed polycarbonate carboy |
+| **Lounge Seating** | Chesterfield tufted cognac leather sofa (`#9A3412` / `#7C2D12`) facing North (`rotY = 0`) with turned walnut feet & brass caps; two flanking club armchairs angled at $\pm 45^\circ$ with zero mesh collision ($> 2.5$ units clearance) |
+| **Coffee Table** | Low Italian travertine slab on dual brushed brass pedestal bases with architectural design books, magazine, and espresso tray |
+| **Signage & Sightline**| Header sign mounted high on entrance architrave at $Y = 11.2, Z = -7.95$, clearing 100% of camera sightline |
+
+**Pattern notes:**
+- **Zero Collision Spatial Geometry**: All armchairs, sofas, coffee table, and cabinetry maintain clean $> 2.0$ units clearance with zero interpenetration.
+- **Orientation Harmony**: Avatars and seating face into the room and towards colleagues/bar counter, eliminating backwards seating.
+- **100% Deterministic Parity**: Maintained between `public/` and `build/` files (`4283C8A8E59868F3F285A6CBCE2D9EBA7EFAA63846E8ACE1B037C236395AF12F`).
 

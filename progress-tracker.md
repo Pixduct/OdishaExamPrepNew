@@ -29,6 +29,7 @@
      - *robots.txt BOM Elimination*: Stripped the UTF-8 `EF BB BF` Byte Order Mark from byte 0 of `public/robots.txt` for strict RFC 9309 compliance.
      - *Unified Search Schema & Google Site Verification*: Unified the homepage JSON-LD schema with `WebSite` and `EducationalOrganization` including verified 512x512 logo, and embedded `google-site-verification` meta tags in `index.html`.
      - *Search Engine Ping Utility*: Implemented `/api/seo/ping-sitemap` to programmatically notify search engine sitemap listeners.
+     - *Live Search Verification & SVG Conflict Elimination*: Verified live Google search snippet and title recovery (`OdishaExamPrep - Best Platform for Odisha Exam Preparation` and clean current affairs sitelink; old WooCommerce prices/shop sitelinks eliminated). Confirmed Google Search Console temporary removal of `/shop`. Eliminated `<link rel="icon" type="image/svg+xml" href="/favicon.svg" />` to comply strictly with Google Search Central specifications (Google Search only supports raster PNG/ICO). Added high-priority Express routes in `server.ts` with `Cache-Control: public, max-age=604800, stale-while-revalidate=2592000` for `/favicon.ico` and `/favicon-48x48.png`.
   2. **Automated Verification Across 20/20 Scenarios (100% Green)**:
      - *SEO & Branding Recovery Test Suite (`scratch/test_seo_and_branding_recovery.mjs`)*: **20/20 PASSED (100%)**.
      - *Platform Invariants (`npm run test:invariants`)*: **25/25 PASSED (1363ms)**.

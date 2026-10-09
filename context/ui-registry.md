@@ -7189,3 +7189,50 @@ Last updated: 2026-10-03
 - **Academic & Technical Code Styling**: Supports full code blocks and inline syntax for programming, LaTeX math, and technical queries.
 - **Spatial 3D Synchronization**: Shifts camera focus to the AI Lab during deep investigation before returning to the Founder Suite.
 
+### FlashcardsHubStreamStagePillBar
+
+File: `src/pages/FlashcardsHub.tsx`  
+Last updated: 2026-10-09  
+
+| Property | Class / Implementation |
+| :--- | :--- |
+| **Wrapper Container** | `flex items-center gap-2 flex-wrap` (Ensures zero-overlap wrapping on narrow mobile screens) |
+| **Stream Dock Container** | `flex items-center gap-1.5 p-1 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-850/60 overflow-x-auto no-scrollbar w-fit` |
+| **Stage Dock Container** | `flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 overflow-x-auto no-scrollbar w-fit` |
+| **Label Badge (Stream)** | `text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-300 px-2 flex items-center gap-1 shrink-0` (`🎓 Stream:`) |
+| **Label Badge (Stage)** | `text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-400 px-2 flex items-center gap-1 shrink-0` (`Stage:`) |
+| **Pill Button — Active (Stream)** | `px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer bg-blue-600 text-white shadow-xs` |
+| **Pill Button — Active (Stage)** | `px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer bg-purple-600 text-white shadow-xs` |
+| **Pill Button — Inactive** | `px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200` |
+| **Radius** | `rounded-xl` (Outer dock container), `rounded-lg` (Individual pill buttons) |
+| **Spacing** | `p-1` (dock padding), `px-2.5 py-1` (button padding), `gap-1.5` (pill gap), `gap-2` (dock wrap gap) |
+| **Shadow** | `shadow-xs` on active pill buttons |
+| **Accent Usage** | `blue-600` (Stream primary accent), `purple-600` (Stage primary accent) |
+
+**Pattern notes:**
+- **Opt-in Discipline Filtering**: Renders exclusively when `currentExam?.streams && currentExam.streams.length > 0`, maintaining zero UI clutter for single-discipline exams while seamlessly supporting multi-branch engineering and medical exams.
+- **Bi-Directional Query Sync**: Automatically reads and reflects `?stream=` and `?stage=` URL query parameters upon navigation, enabling bookmarkable filtered deck states.
+- **Natural Deck Filtering**: Automatically includes general decks (`!deck.stream || deck.stream === 'All Streams' || deck.stream === 'Common'`) while filtering branch-specific decks matching the student's chosen discipline.
+
+---
+
+### GoogleCompliantFaviconAndBrandingSuite
+
+File: `index.html`, `server.ts`  
+Last updated: 2026-10-09  
+
+| Property | Class / Implementation |
+| :--- | :--- |
+| **Primary Standard Icon** | `<link rel="icon" type="image/x-icon" href="/favicon.ico" />` (Valid multi-resolution binary ICO with 16x16, 32x32, and 48x48 frames) |
+| **Google Recommended 48px PNG** | `<link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />` (1:1 square raster format strictly compliant with Google Search Central guidelines) |
+| **High-Resolution PNG Hierarchy** | `<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />`, `192x192`, `512x512` |
+| **Apple Touch Icon** | `<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />` |
+| **Prohibited Formats** | Strictly **NO SVG** (`type="image/svg+xml"`) in search crawler favicon `<link>` tags, preventing crawler format rejection |
+| **Server Cache Headers** | `Cache-Control: public, max-age=604800, stale-while-revalidate=2592000` via dedicated high-priority Express routes in `server.ts` |
+| **Structured Data (JSON-LD)** | `EducationalOrganization` with 512x512 PNG logo object (`url`, `width: 512`, `height: 512`) |
+
+**Pattern notes:**
+- **Zero-Ambiguity Search Engine Crawlability**: Aligned 100% with Google Search Central specifications. Eliminates vector SVG confusion for Googlebot and Bingbot while serving high-DPI raster assets.
+- **Dedicated High-Priority Express Routing**: Bypasses any default static middleware caching quirks to guarantee permanent `Cache-Control: public` delivery for search engine bots.
+
+

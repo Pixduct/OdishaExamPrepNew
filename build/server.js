@@ -32,35 +32,28 @@ function normalizeKey(key) {
   return (key || "").toLowerCase().replace(/[\[\]]/g, "").replace(/[\s\-_]/g, "").trim();
 }
 function stripMarkdownWrapper(str) {
-  if (!str)
-    return "";
+  if (!str) return "";
   return str.replace(/^[*_~`#]+\s*/, "").replace(/\s*[*_~`]+$/, "").replace(/\*\*([^*]+)\*\*/g, "$1").replace(/__([^_]+)__/g, "$1").replace(/\*([^*]+)\*/g, "$1").trim();
 }
 function isStructuralMetaText(str) {
-  if (!str)
-    return false;
+  if (!str) return false;
   const l = str.toLowerCase().replace(/[*_#\-:]/g, "").trim();
   return l === "subsubjects" || l === "sub-subjects" || l === "sub subjects" || l === "chapters" || l === "topics" || l === "units" || l === "sections" || l === "modules" || l === "syllabus structure" || l === "examination syllabus structure" || l === "exam syllabus structure" || l === "examination structure" || l === "table of contents" || l === "index" || l === "overview" || l === "course outline" || l.endsWith("syllabus structure") || l.endsWith("examination syllabus") || l.endsWith("examination - syllabus") || l.endsWith("examination \u2014 syllabus");
 }
 function isDocumentTitleOrExamHeader(str, examName = "") {
-  if (!str)
-    return false;
+  if (!str) return false;
   const l = str.toLowerCase().replace(/[*_#\-:]/g, "").trim();
   const examNorm = (examName || "").toLowerCase().replace(/[*_#\-:]/g, "").trim();
-  if (examNorm && (l === examNorm || l.includes(examNorm) || examNorm.includes(l)))
-    return true;
-  if (l.endsWith("syllabus") || l.includes("examination - syllabus") || l.includes("examination \u2014 syllabus"))
-    return true;
+  if (examNorm && (l === examNorm || l.includes(examNorm) || examNorm.includes(l))) return true;
+  if (l.endsWith("syllabus") || l.includes("examination - syllabus") || l.includes("examination \u2014 syllabus")) return true;
   return false;
 }
 function isSubSubjectHeader(trimmed, inSubsubjectsSection = false) {
-  if (!trimmed)
-    return false;
+  if (!trimmed) return false;
   const strippedPrefix = trimmed.replace(/^(?:[\*\-•]|\d+[\.\)])\s+/, "").trim();
   const isBold = (/^[*_]{1,2}[^*_]+[*_]{1,2}$/.test(strippedPrefix) || /^\*\*[^*]+\*\*$/.test(strippedPrefix) || /^\*[^*]+\*\*$/.test(strippedPrefix)) && !strippedPrefix.includes(":");
   const clean = stripMarkdownWrapper(strippedPrefix);
-  if (isStructuralMetaText(clean))
-    return false;
+  if (isStructuralMetaText(clean)) return false;
   if (inSubsubjectsSection && (isBold || trimmed.startsWith("###") || trimmed.startsWith("####") || /^\d+[\.\)]\s+/.test(trimmed) && isBold)) {
     return clean.length > 2 && clean.length < 80;
   }
@@ -70,8 +63,7 @@ function isSubSubjectHeader(trimmed, inSubsubjectsSection = false) {
   return false;
 }
 function cleanTitleText(str, isPaper = false) {
-  if (!str)
-    return "";
+  if (!str) return "";
   let cleaned = str.replace(/^#+\s*/, "").replace(/^[\*\-•]\s*/, "").replace(/^\d+[\.\)\-]\s*/, "").replace(/^[*_~`]+|[*_~`]+$/g, "");
   if (!isPaper) {
     cleaned = cleaned.replace(/^(?:Chapter|Topic|Lesson|Unit|Section|Sectional(?:\s*Test)?|Mock(?:\s*Test)?|Practice(?:\s*Set)?|Module|Part)\s*(?:[\dIVX]+|\s*[-–—]\s*[\dIVX]+)?[:\s\-–—]+/i, "");
@@ -94,8 +86,7 @@ function isLeafTag(normTag) {
   return ["chapter", "topic", "lesson"].includes(normTag);
 }
 function parseSyllabusHierarchy(markdown, examName) {
-  if (!markdown || !markdown.trim())
-    return [];
+  if (!markdown || !markdown.trim()) return [];
   const lines = markdown.split(/\r?\n/);
   const items = [];
   const seenSignatures = /* @__PURE__ */ new Set();
@@ -141,17 +132,14 @@ function parseSyllabusHierarchy(markdown, examName) {
   };
   const processSegment = (seg, rawLine) => {
     const trimmed = seg.trim();
-    if (!trimmed || isNoise(trimmed))
-      return;
+    if (!trimmed || isNoise(trimmed)) return;
     const cleanNorm = stripMarkdownWrapper(trimmed).toLowerCase().replace(/[*_#\-:]/g, "").trim();
     if (cleanNorm === "subsubjects" || cleanNorm === "sub-subjects" || cleanNorm === "sub subjects" || cleanNorm === "units") {
       inSubsubjectsSection = true;
       return;
     }
-    if (isStructuralMetaText(trimmed))
-      return;
-    if (isDocumentTitleOrExamHeader(trimmed, examName) && trimmed.startsWith("#"))
-      return;
+    if (isStructuralMetaText(trimmed)) return;
+    if (isDocumentTitleOrExamHeader(trimmed, examName) && trimmed.startsWith("#")) return;
     const barePaperMatch = stripMarkdownWrapper(trimmed).match(/^Paper(?:\s*-\s*[IVX\d]+|\s+[IVX\d]+)$/i);
     if (barePaperMatch) {
       currentPaper = cleanTitleText(barePaperMatch[0], true);
@@ -292,8 +280,7 @@ function parseSyllabusHierarchy(markdown, examName) {
   };
   for (const line of lines) {
     const trimmed = line.trim();
-    if (!trimmed || isNoise(trimmed))
-      continue;
+    if (!trimmed || isNoise(trimmed)) continue;
     const segments = trimmed.split(/\s*[|;]\s*/);
     if (segments.length > 1) {
       for (const seg of segments) {
@@ -343,8 +330,7 @@ function applyNamingPattern(pattern, item, index, examName, stageName) {
     const rawTag = match[1];
     const fullTag = match[0];
     const normKey = normalizeKey(rawTag);
-    if (normKey.startsWith("#") || /^\d+-\d+$/.test(normKey))
-      continue;
+    if (normKey.startsWith("#") || /^\d+-\d+$/.test(normKey)) continue;
     let val;
     if (item.placeholders && item.placeholders[normKey]) {
       val = item.placeholders[normKey];
@@ -419,18 +405,12 @@ function extractAutonomousSyllabusScope(fullMarkdown, target) {
   const getHeadingLevel = (line) => {
     const trimmed = line.trim();
     const hMatch = trimmed.match(/^(#{1,6})\s+/);
-    if (hMatch)
-      return hMatch[1].length;
-    if (/^(?:#\s*)?\[?paper/i.test(trimmed))
-      return 1;
-    if (/^(?:#\s*)?\[?subject/i.test(trimmed))
-      return 2;
-    if (/^(?:#\s*)?\[?(sub[\s\-_]?subject|unit|section|module)/i.test(trimmed))
-      return 3;
-    if (/^(?:#\s*)?\[?(chapter|topic|lesson)/i.test(trimmed))
-      return 4;
-    if (/^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(trimmed))
-      return 3;
+    if (hMatch) return hMatch[1].length;
+    if (/^(?:#\s*)?\[?paper/i.test(trimmed)) return 1;
+    if (/^(?:#\s*)?\[?subject/i.test(trimmed)) return 2;
+    if (/^(?:#\s*)?\[?(sub[\s\-_]?subject|unit|section|module)/i.test(trimmed)) return 3;
+    if (/^(?:#\s*)?\[?(chapter|topic|lesson)/i.test(trimmed)) return 4;
+    if (/^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(trimmed)) return 3;
     return 99;
   };
   if (rawParts.length > 1) {
@@ -438,12 +418,10 @@ function extractAutonomousSyllabusScope(fullMarkdown, target) {
     const seenNorms = /* @__PURE__ */ new Set();
     for (const part of rawParts) {
       const q = cleanTarget(part);
-      if (q.length < 3)
-        continue;
+      if (q.length < 3) continue;
       for (let i = 0; i < rawLines.length; i++) {
         const line = rawLines[i].trim();
-        if (!line)
-          continue;
+        if (!line) continue;
         const normLine = cleanTarget(line);
         const isHeader = line.startsWith("#") || /^(?:#+\s*)?\[(?:[A-Za-z0-9_\- ]+)\](?:\s*[:\-–—]|$)/i.test(line) || /^(?:#+\s*)?(?:Paper|Subject|Discipline|Sub[\s\-_]?Subject|Unit|Section|Module|Chapter|Topic|Lesson)\s*[:\-–—]/i.test(line) || /^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(line);
         if (isHeader && (normLine === q || normLine.includes(q) || q.includes(normLine))) {
@@ -451,8 +429,7 @@ function extractAutonomousSyllabusScope(fullMarkdown, target) {
           const collected = [rawLines[i]];
           for (let j = i + 1; j < rawLines.length; j++) {
             const nextTrim = rawLines[j].trim();
-            if (nextTrim && getHeadingLevel(nextTrim) <= headingLevel)
-              break;
+            if (nextTrim && getHeadingLevel(nextTrim) <= headingLevel) break;
             collected.push(rawLines[j]);
           }
           const text = collected.join("\n").trim();
@@ -481,8 +458,7 @@ ${s.content}`).join("\n\n");
     let matchedTitle = "";
     for (let i = 0; i < rawLines.length; i++) {
       const line = rawLines[i].trim();
-      if (!line)
-        continue;
+      if (!line) continue;
       const normLine = cleanTarget(line);
       const isHeaderLine = line.startsWith("#") || /^(?:#+\s*)?\[(?:[A-Za-z0-9_\- ]+)\](?:\s*[:\-–—]|$)/i.test(line) || /^(?:#+\s*)?(?:Paper|Subject|Discipline|Sub[\s\-_]?Subject|Unit|Section|Module|Chapter|Topic|Lesson)\s*[:\-–—]/i.test(line) || /^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(line);
       if (isHeaderLine && normLine === query) {
@@ -495,8 +471,7 @@ ${s.content}`).join("\n\n");
     if (matchLineIndex === -1) {
       for (let i = 0; i < rawLines.length; i++) {
         const line = rawLines[i].trim();
-        if (!line)
-          continue;
+        if (!line) continue;
         const normLine = cleanTarget(line);
         const isHeaderLine = line.startsWith("#") || /^(?:#+\s*)?\[(?:[A-Za-z0-9_\- ]+)\](?:\s*[:\-–—]|$)/i.test(line) || /^(?:#+\s*)?(?:Paper|Subject|Discipline|Sub[\s\-_]?Subject|Unit|Section|Module|Chapter|Topic|Lesson)\s*[:\-–—]/i.test(line) || /^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(line);
         const isBulletOrTopicLine = /^(?:[\*\-•]|\d+[\.\)])\s+/.test(line);
@@ -580,8 +555,7 @@ ${scoped}`,
   };
 }
 function extractSyllabusContents(scopedMarkdown) {
-  if (!scopedMarkdown || scopedMarkdown.trim().length < 10)
-    return [];
+  if (!scopedMarkdown || scopedMarkdown.trim().length < 10) return [];
   const lines = scopedMarkdown.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
   const contents = [];
   const seen = /* @__PURE__ */ new Set();
@@ -593,12 +567,9 @@ function extractSyllabusContents(scopedMarkdown) {
     }
   };
   for (const line of lines) {
-    if (/^#{1,6}\s/.test(line))
-      continue;
-    if (/^\[?(Paper|Subject|Discipline|Sub[\s\-_]?Subject|Unit|Section|Module|Chapter|Topic|Lesson)\]?[\s:\-]/i.test(line))
-      continue;
-    if (isStructuralMetaText(line))
-      continue;
+    if (/^#{1,6}\s/.test(line)) continue;
+    if (/^\[?(Paper|Subject|Discipline|Sub[\s\-_]?Subject|Unit|Section|Module|Chapter|Topic|Lesson)\]?[\s:\-]/i.test(line)) continue;
+    if (isStructuralMetaText(line)) continue;
     const isBullet = /^[-*\u2022]\s+/.test(line);
     const isNumbered = /^\d+[\.\)]\s+/.test(line);
     const isBoldLine = /^\*\*[^*:]+\*\*$/.test(line);
@@ -849,8 +820,7 @@ function splitTextByJsonDiagrams(text) {
   return result;
 }
 function extractEmbeddedDiagram(questionText) {
-  if (!questionText)
-    return { cleanedText: "", diagram: null };
+  if (!questionText) return { cleanedText: "", diagram: null };
   let cleanedText = questionText;
   let diagram = null;
   const fencedRegex = /```(?:json)?\s*(\{\s*[\s\S]*?"type"\s*:[\s\S]*?\})\s*```/i;
@@ -910,33 +880,26 @@ function computeChartBounds(clone) {
   let minX = Infinity;
   let maxX = -Infinity;
   const inspectShape = (s) => {
-    if (!s || typeof s !== "object")
-      return;
+    if (!s || typeof s !== "object") return;
     if (Array.isArray(s.points) && s.points.length > 0) {
       s.points.forEach((p) => {
         const py = Number(Array.isArray(p) ? p[1] : p?.y);
         const px = Number(Array.isArray(p) ? p[0] : p?.x);
         if (!isNaN(py)) {
-          if (py < minY)
-            minY = py;
-          if (py > maxY)
-            maxY = py;
+          if (py < minY) minY = py;
+          if (py > maxY) maxY = py;
         }
         if (!isNaN(px)) {
-          if (px < minX)
-            minX = px;
-          if (px > maxX)
-            maxX = px;
+          if (px < minX) minX = px;
+          if (px > maxX) maxX = px;
         }
       });
     }
     if (s.type === "boxPlot") {
       const vals = [s.min, s.q1, s.median, s.q3, s.max].map(Number).filter((v) => !isNaN(v));
       vals.forEach((v) => {
-        if (v < minX)
-          minX = v;
-        if (v > maxX)
-          maxX = v;
+        if (v < minX) minX = v;
+        if (v > maxX) maxX = v;
       });
       minY = Math.min(minY, -3);
       maxY = Math.max(maxY, 3);
@@ -985,14 +948,10 @@ function computeChartBounds(clone) {
         }
         curX += dx;
         curY += dy;
-        if (curX < minX)
-          minX = curX;
-        if (curX > maxX)
-          maxX = curX;
-        if (curY < minY)
-          minY = curY;
-        if (curY > maxY)
-          maxY = curY;
+        if (curX < minX) minX = curX;
+        if (curX > maxX) maxX = curX;
+        if (curY < minY) minY = curY;
+        if (curY > maxY) maxY = curY;
       });
     }
   };
@@ -1016,8 +975,7 @@ function computeChartBounds(clone) {
   return { xRange: finalXRange, yRange: finalYRange };
 }
 function diagramValidator(diagram) {
-  if (!diagram || typeof diagram !== "object")
-    return null;
+  if (!diagram || typeof diagram !== "object") return null;
   const repaired = repairObjectStrings(diagram);
   let clone = { ...repaired };
   if (typeof clone.type !== "string") {
@@ -1060,12 +1018,9 @@ function diagramValidator(diagram) {
       clone.yRange = isCleanVisual ? [-5, 5] : bounds.yRange;
     }
     if (isCleanVisual) {
-      if (clone.grid === void 0)
-        clone.grid = false;
-      if (clone.xAxis === void 0)
-        clone.xAxis = false;
-      if (clone.yAxis === void 0)
-        clone.yAxis = false;
+      if (clone.grid === void 0) clone.grid = false;
+      if (clone.xAxis === void 0) clone.xAxis = false;
+      if (clone.yAxis === void 0) clone.yAxis = false;
     }
   }
   if (!clone.xRange || !Array.isArray(clone.xRange) || clone.xRange.length < 2 || !Number.isFinite(clone.xRange[0]) || !Number.isFinite(clone.xRange[1])) {
@@ -1087,12 +1042,9 @@ function diagramValidator(diagram) {
   return clone;
 }
 function classifyDiagramPedagogicalRole(diagram) {
-  if (!diagram || typeof diagram !== "object")
-    return "neutral";
-  if (diagram.placement === "explanation")
-    return "derivation";
-  if (diagram.placement === "question")
-    return "stimulus";
+  if (!diagram || typeof diagram !== "object") return "neutral";
+  if (diagram.placement === "explanation") return "derivation";
+  if (diagram.placement === "question") return "stimulus";
   const type = diagram.type;
   const shapes = Array.isArray(diagram.shapes) ? diagram.shapes : [];
   const allTypes = /* @__PURE__ */ new Set([type, ...shapes.map((s) => s?.type).filter(Boolean)]);
@@ -1112,26 +1064,19 @@ function classifyDiagramPedagogicalRole(diagram) {
   return "neutral";
 }
 function getDiagramFingerprint(diagram) {
-  if (!diagram || typeof diagram !== "object")
-    return "";
+  if (!diagram || typeof diagram !== "object") return "";
   const parts = [];
   const primaryType = diagram.type || "unknown";
   parts.push(`type:${primaryType}`);
   const inspect = (s) => {
-    if (!s || typeof s !== "object")
-      return;
-    if (s.type)
-      parts.push(`st:${s.type}`);
-    if (Array.isArray(s.items))
-      parts.push(`items:${s.items.join(",")}`);
-    if (Array.isArray(s.values))
-      parts.push(`vals:${s.values.map(Number).join(",")}`);
+    if (!s || typeof s !== "object") return;
+    if (s.type) parts.push(`st:${s.type}`);
+    if (Array.isArray(s.items)) parts.push(`items:${s.items.join(",")}`);
+    if (Array.isArray(s.values)) parts.push(`vals:${s.values.map(Number).join(",")}`);
     if (Array.isArray(s.points)) {
       const pts = s.points.map((p) => {
-        if (Array.isArray(p))
-          return `${p[0]},${p[1]}`;
-        if (p && typeof p === "object")
-          return `${p.x},${p.y}${p.label ? `:${p.label}` : ""}`;
+        if (Array.isArray(p)) return `${p[0]},${p[1]}`;
+        if (p && typeof p === "object") return `${p.x},${p.y}${p.label ? `:${p.label}` : ""}`;
         return String(p);
       });
       parts.push(`pts:${pts.join("|")}`);
@@ -1140,8 +1085,7 @@ function getDiagramFingerprint(diagram) {
       const steps = s.steps.map((st) => `${st.direction || ""}:${st.distance || ""}`);
       parts.push(`steps:${steps.join("|")}`);
     }
-    if (Array.isArray(s.sets))
-      parts.push(`sets:${s.sets.join(",")}`);
+    if (Array.isArray(s.sets)) parts.push(`sets:${s.sets.join(",")}`);
   };
   inspect(diagram);
   if (Array.isArray(diagram.shapes)) {
@@ -1152,15 +1096,13 @@ function getDiagramFingerprint(diagram) {
 function packageDiagramsForStorage(diagram, explanationDiagram) {
   const hasQ = diagram && typeof diagram === "object" && Object.keys(diagram).length > 0;
   const hasE = explanationDiagram && typeof explanationDiagram === "object" && Object.keys(explanationDiagram).length > 0;
-  if (!hasQ && !hasE)
-    return null;
+  if (!hasQ && !hasE) return null;
   if (hasQ && (diagram.type === "composite" || diagram.questionDiagram && diagram.explanationDiagram)) {
     return diagram;
   }
   if (hasQ && !hasE) {
     const qObj = { ...diagram };
-    if (!qObj.placement)
-      qObj.placement = "question";
+    if (!qObj.placement) qObj.placement = "question";
     return qObj;
   }
   if (!hasQ && hasE) {
@@ -1175,8 +1117,7 @@ function packageDiagramsForStorage(diagram, explanationDiagram) {
   };
 }
 function sanitizeDecoupledQuestionText(text) {
-  if (!text)
-    return "";
+  if (!text) return "";
   let cleaned = text;
   cleaned = cleaned.replace(/^Directions(?:\s*\([^\)]+\))?:\s*(?:Refer\s+to|Study|Consider)[^\n]*\n/i, "");
   cleaned = cleaned.replace(/^Directions(?:\s*\([^\)]+\))?:\s*Refer\s+to\s+(?:the\s+)?(?:given\s+)?(?:[a-zA-Z\s]+)?(?:figure|diagram|graph|chart|table|sketch)[,\s]*(?:to\s+answer\s+the\s+question:?|and\s+answer\s+the\s+following:?)?[:\.\s]*/i, "");
@@ -1274,11 +1215,9 @@ function validateAndHealDiagram(diagram, questionText = "") {
     let items = Array.isArray(targetShape.items) ? targetShape.items : Array.isArray(healedClone.items) ? healedClone.items : [];
     let values = Array.isArray(targetShape.values) ? targetShape.values : Array.isArray(healedClone.values) ? healedClone.values : [];
     const cleanValues = values.map((v) => {
-      if (v === null || v === void 0 || typeof v === "boolean")
-        return NaN;
+      if (v === null || v === void 0 || typeof v === "boolean") return NaN;
       const num = Number(v);
-      if (!Number.isFinite(num))
-        return NaN;
+      if (!Number.isFinite(num)) return NaN;
       return primaryType === "pieChart" ? Math.abs(num) : num;
     }).filter((v) => !isNaN(v) && (primaryType === "pieChart" ? v > 0 : true));
     if (cleanValues.length === 0) {
@@ -1347,8 +1286,7 @@ function validateAndHealDiagram(diagram, questionText = "") {
       targetShape.loads = [];
     } else {
       targetShape.loads = targetShape.loads.map((l) => {
-        if (!l || typeof l !== "object")
-          return null;
+        if (!l || typeof l !== "object") return null;
         if (l.type === "udl") {
           const st = Math.max(0, Math.min(span, Number(l.start) || 0));
           const en = Math.max(st, Math.min(span, Number(l.end) || span));
@@ -1409,8 +1347,7 @@ function validateAndHealDiagram(diagram, questionText = "") {
 var PYQ_SECTION_MARKER = "### REFERENCE PYQ BENCHMARK (EXAM DNA)";
 var DIRECTIVES_SECTION_MARKER = "### CUSTOM GENERATION DIRECTIVES";
 function extractPYQAndDirectives(compoundText) {
-  if (!compoundText)
-    return { pyqs: "", directives: "" };
+  if (!compoundText) return { pyqs: "", directives: "" };
   if (compoundText.includes(PYQ_SECTION_MARKER)) {
     const parts = compoundText.split(DIRECTIVES_SECTION_MARKER);
     const pyqPart = parts[0].replace(PYQ_SECTION_MARKER, "").trim();
@@ -1462,13 +1399,11 @@ ${q.fullText}`).join("\n\n");
   };
 }
 function safeEscapeLatex(str) {
-  if (!str)
-    return "";
+  if (!str) return "";
   return str.replace(/\\(?!["\\/bfnrtu])/g, "\\\\");
 }
 function sanitizeLatexJsonTokens(raw) {
-  if (!raw)
-    return "";
+  if (!raw) return "";
   let out = "";
   let inString = false;
   let i = 0;
@@ -1579,10 +1514,8 @@ function extractAndParseJSON(rawText) {
 var keyHealthRegistry = /* @__PURE__ */ new Map();
 var globalGeminiKeyIndex = 0;
 function getKeyPreview(key) {
-  if (!key)
-    return "";
-  if (key.length <= 16)
-    return key;
+  if (!key) return "";
+  if (key.length <= 16) return key;
   return `${key.slice(0, 10)}...${key.slice(-5)}`;
 }
 function calculateNextDailyResetMs() {
@@ -1640,8 +1573,7 @@ function syncAndRecoverKeyPool(keyPool) {
 function resolveGeminiKeyPool(providedKey) {
   const pool = [];
   const addCandidates = (raw) => {
-    if (!raw)
-      return;
+    if (!raw) return;
     const tokens = raw.split(/[\s,;]+/).map((t) => t.replace(/^["'`\s]+|["'`\s]+$/g, "").trim()).filter(Boolean);
     for (const t of tokens) {
       if ((t.startsWith("AQ.") || t.startsWith("AIza") || t.length > 20) && !pool.includes(t)) {
@@ -1680,20 +1612,13 @@ async function queryAIModel(systemPrompt, userPrompt, options) {
   const isOpenAIKey = cleanKey.startsWith("sk-") && !isOpenRouterKey && !isAnthropicKey;
   let provider = "nvidia";
   if (rawBaseUrl) {
-    if (rawBaseUrl.includes("generativelanguage.googleapis.com"))
-      provider = "gemini";
-    else if (rawBaseUrl.includes("groq.com"))
-      provider = "groq";
-    else if (rawBaseUrl.includes("openrouter.ai"))
-      provider = "openrouter";
-    else if (rawBaseUrl.includes("anthropic.com"))
-      provider = "anthropic";
-    else if (rawBaseUrl.includes("integrate.api.nvidia.com"))
-      provider = "nvidia";
-    else if (rawBaseUrl.includes("api.openai.com"))
-      provider = "openai";
-    else
-      provider = "custom";
+    if (rawBaseUrl.includes("generativelanguage.googleapis.com")) provider = "gemini";
+    else if (rawBaseUrl.includes("groq.com")) provider = "groq";
+    else if (rawBaseUrl.includes("openrouter.ai")) provider = "openrouter";
+    else if (rawBaseUrl.includes("anthropic.com")) provider = "anthropic";
+    else if (rawBaseUrl.includes("integrate.api.nvidia.com")) provider = "nvidia";
+    else if (rawBaseUrl.includes("api.openai.com")) provider = "openai";
+    else provider = "custom";
   } else if (isGoogleKey || rawModel.startsWith("gemini") || rawModel.startsWith("google/")) {
     provider = "gemini";
   } else if (isGroqKey || rawModel.startsWith("groq/") || rawModel.includes("llama-3.3-70b-versatile")) {
@@ -1707,12 +1632,9 @@ async function queryAIModel(systemPrompt, userPrompt, options) {
   } else if (isOpenAIKey || rawModel.startsWith("gpt-") || rawModel.startsWith("o1") || rawModel.startsWith("o3")) {
     provider = "openai";
   } else if (isCustom) {
-    if (rawModel.startsWith("gemini"))
-      provider = "gemini";
-    else if (rawModel.includes("/") && !rawModel.startsWith("gpt-"))
-      provider = "nvidia";
-    else
-      provider = "openai";
+    if (rawModel.startsWith("gemini")) provider = "gemini";
+    else if (rawModel.includes("/") && !rawModel.startsWith("gpt-")) provider = "nvidia";
+    else provider = "openai";
   } else {
     const hasGeminiServerKey = Boolean((process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || "").trim());
     if (rawModel.startsWith("gemini") || hasGeminiServerKey && (!rawModel || rawModel === "default" || rawModel === "openai/gpt-oss-20b")) {
@@ -1892,8 +1814,7 @@ async function queryAIModel(systemPrompt, userPrompt, options) {
                         const headerRetry = response2.headers.get("retry-after");
                         if (headerRetry) {
                           const parsedRetry = parseFloat(headerRetry);
-                          if (!isNaN(parsedRetry) && parsedRetry > 0)
-                            cooldownSec = parsedRetry;
+                          if (!isNaN(parsedRetry) && parsedRetry > 0) cooldownSec = parsedRetry;
                         }
                       }
                       activeState.status = "cooldown_rpm";
@@ -2015,16 +1936,14 @@ async function queryAIModel(systemPrompt, userPrompt, options) {
     }
     const data2 = await response2.json();
     const content2 = data2.content?.[0]?.text;
-    if (!content2)
-      throw new Error("Anthropic API returned empty response.");
+    if (!content2) throw new Error("Anthropic API returned empty response.");
     return content2;
   }
   let endpoint = "";
   let effectiveModel = rawModel;
   if (rawBaseUrl) {
     endpoint = `${rawBaseUrl}/chat/completions`;
-    if (!effectiveModel)
-      effectiveModel = "gpt-4o-mini";
+    if (!effectiveModel) effectiveModel = "gpt-4o-mini";
   } else if (provider === "groq") {
     endpoint = "https://api.groq.com/openai/v1/chat/completions";
     if (!effectiveModel || effectiveModel.includes("/") || effectiveModel.startsWith("gemini")) {
@@ -2124,8 +2043,7 @@ function getSyllabusCacheKey(examName, text) {
   return `${normExam}::${len}::${head}::${tail}`;
 }
 async function extractSyllabusHierarchyWithAI(syllabusMarkdown, examName, aiConfig) {
-  if (!syllabusMarkdown || !syllabusMarkdown.trim())
-    return [];
+  if (!syllabusMarkdown || !syllabusMarkdown.trim()) return [];
   const cacheKey = getSyllabusCacheKey(examName, syllabusMarkdown);
   if (syllabusAiCache.has(cacheKey)) {
     return syllabusAiCache.get(cacheKey);
@@ -2177,8 +2095,7 @@ Extract all papers, subjects, sub-subjects, and topics in JSON format now:`;
         const rawTopics = Array.isArray(entry.topics) ? entry.topics : entry.chapter ? [entry.chapter] : [subSubj || subj];
         for (const topic of rawTopics) {
           const cleanTopic = cleanTitleText(String(topic || ""));
-          if (!cleanTopic || isStructuralMetaText(cleanTopic))
-            continue;
+          if (!cleanTopic || isStructuralMetaText(cleanTopic)) continue;
           const sig = `${pap}::${subj}::${subSubj}::${cleanTopic}`.toLowerCase();
           if (!seenSignatures.has(sig)) {
             seenSignatures.add(sig);
@@ -2226,8 +2143,7 @@ async function generateExamStructure(req) {
   const isPractice = mainSection === "practice_test";
   const isBank = mainSection === "question_bank";
   const extractSyllabusHeadings = (markdown) => {
-    if (!markdown)
-      return "";
+    if (!markdown) return "";
     const lines = markdown.split("\n");
     const headings = [];
     for (const line of lines) {
@@ -2246,30 +2162,18 @@ async function generateExamStructure(req) {
     if (mainSection === "flashcards") {
       return req.namingPattern?.trim() || "[Sub-Subject] \xB7 [Chapter]";
     }
-    if (subCat === "sectional")
-      return "[Subject] Sectional Test #[01-05]";
-    if (subCat === "full-length")
-      return "Full Mock Test #[01-10]";
-    if (subCat === "pyq")
-      return "Official PYQ Paper #[01-10]";
-    if (subCat === "daily")
-      return "Weekly Benchmark Test #[01-08]";
-    if (subCat === "topic-wise" && mainSection === "question_bank")
-      return "[Chapter] Question Bank";
-    if (subCat === "topic-wise")
-      return "[Chapter] Drill #[01-05]";
-    if (subCat === "exam-focused" && mainSection === "practice_test")
-      return "High-Yield Practice: [Chapter]";
-    if (subCat === "exam-focused")
-      return "High-Yield: [Chapter]";
-    if (subCat === "revision-sets" && mainSection === "practice_test")
-      return "Speed Quiz: [Chapter]";
-    if (subCat === "revision-sets")
-      return "Formula Booster: [Chapter]";
-    if (subCat === "pyq-collections" && mainSection === "practice_test")
-      return "Solved PYQs: [Chapter]";
-    if (subCat === "pyq-collections")
-      return "PYQ Archive: [Chapter]";
+    if (subCat === "sectional") return "[Subject] Sectional Test #[01-05]";
+    if (subCat === "full-length") return "Full Mock Test #[01-10]";
+    if (subCat === "pyq") return "Official PYQ Paper #[01-10]";
+    if (subCat === "daily") return "Weekly Benchmark Test #[01-08]";
+    if (subCat === "topic-wise" && mainSection === "question_bank") return "[Chapter] Question Bank";
+    if (subCat === "topic-wise") return "[Chapter] Drill #[01-05]";
+    if (subCat === "exam-focused" && mainSection === "practice_test") return "High-Yield Practice: [Chapter]";
+    if (subCat === "exam-focused") return "High-Yield: [Chapter]";
+    if (subCat === "revision-sets" && mainSection === "practice_test") return "Speed Quiz: [Chapter]";
+    if (subCat === "revision-sets") return "Formula Booster: [Chapter]";
+    if (subCat === "pyq-collections" && mainSection === "practice_test") return "Solved PYQs: [Chapter]";
+    if (subCat === "pyq-collections") return "PYQ Archive: [Chapter]";
     return "[Chapter] Set";
   })();
   const subCategoryTitles = {
@@ -2360,8 +2264,7 @@ async function generateExamStructure(req) {
       const matched = parsedHierarchy.filter(
         (it) => it.paper && it.paper.toLowerCase().includes(focusLower) || it.subject.toLowerCase().includes(focusLower) || it.subSubject.toLowerCase().includes(focusLower) || it.chapter.toLowerCase().includes(focusLower)
       );
-      if (matched.length > 0)
-        targetHierarchy = matched;
+      if (matched.length > 0) targetHierarchy = matched;
     }
     const hasSubSubjectsInSyllabus = targetHierarchy.some((it) => it.subSubject && it.subSubject.trim().length > 0);
     const effectiveTier = formulaHasSyllabusPlaceholders ? requestedTier : subCat === "sectional" || mainSection === "flashcards" ? hasSubSubjectsInSyllabus ? "subsubject" : "subject" : "chapter";
@@ -2375,8 +2278,7 @@ async function generateExamStructure(req) {
       const map = /* @__PURE__ */ new Map();
       for (const p of targetHierarchy) {
         const k = p.subSubject && p.subSubject.trim().length > 0 ? `${p.subject || ""}:::${p.subSubject.trim()}` : p.subject || "General Studies";
-        if (!map.has(k))
-          map.set(k, []);
+        if (!map.has(k)) map.set(k, []);
         map.get(k).push(p);
       }
       tierEntries = Array.from(map.entries()).map(([groupKey, chaps]) => ({ groupKey, chaps }));
@@ -2384,8 +2286,7 @@ async function generateExamStructure(req) {
       const map = /* @__PURE__ */ new Map();
       for (const p of targetHierarchy) {
         const k = p.subject?.trim() || "General Studies";
-        if (!map.has(k))
-          map.set(k, []);
+        if (!map.has(k)) map.set(k, []);
         map.get(k).push(p);
       }
       tierEntries = Array.from(map.entries()).map(([groupKey, chaps]) => ({ groupKey, chaps }));
@@ -2393,8 +2294,7 @@ async function generateExamStructure(req) {
       const map = /* @__PURE__ */ new Map();
       for (const p of targetHierarchy) {
         const k = p.paper?.trim() || "Paper 1";
-        if (!map.has(k))
-          map.set(k, []);
+        if (!map.has(k)) map.set(k, []);
         map.get(k).push(p);
       }
       tierEntries = Array.from(map.entries()).map(([groupKey, chaps]) => ({ groupKey, chaps }));
@@ -2643,8 +2543,7 @@ JSON array only. No explanation.`;
   });
 }
 function extractSyllabusSections(markdown) {
-  if (!markdown || !markdown.trim())
-    return [];
+  if (!markdown || !markdown.trim()) return [];
   const lines = markdown.split("\n");
   const sections = [];
   let currentSection = { title: "General Syllabus", content: [] };
@@ -3171,14 +3070,12 @@ Output ONLY the raw JSON array of ${count2} question objects.`;
     const parseAndValidateBatch = (rawJson) => {
       const parsed = extractAndParseJSON(rawJson);
       const items = Array.isArray(parsed) ? parsed : parsed.questions || parsed.items || [];
-      if (!Array.isArray(items))
-        return [];
+      if (!Array.isArray(items)) return [];
       const seenDiagramFingerprints = /* @__PURE__ */ new Set();
       return items.map((q, idx) => {
         let options = Array.isArray(q.options) ? q.options.map(String) : [];
         if (options.length < 4) {
-          while (options.length < 4)
-            options.push(`Option ${options.length + 1}`);
+          while (options.length < 4) options.push(`Option ${options.length + 1}`);
         } else if (options.length > 4) {
           options = options.slice(0, 4);
         }
@@ -3359,8 +3256,7 @@ Output ONLY the raw JSON array of question objects.`;
     accumulatedQuestions = (Array.isArray(batchItems) ? batchItems : []).map((q, idx) => {
       let options = Array.isArray(q.options) ? q.options.map(String) : [];
       if (options.length < 4) {
-        while (options.length < 4)
-          options.push(`Option ${options.length + 1}`);
+        while (options.length < 4) options.push(`Option ${options.length + 1}`);
       } else if (options.length > 4) {
         options = options.slice(0, 4);
       }
@@ -3469,8 +3365,7 @@ Output ONLY the raw JSON array of ${missingCount} question objects.`;
       const topUpItems = Array.isArray(topUpParsed) ? topUpParsed : topUpParsed.questions || topUpParsed.items || [];
       if (Array.isArray(topUpItems)) {
         for (const q of topUpItems) {
-          if (deduplicatedQuestions.length >= targetFloor)
-            break;
+          if (deduplicatedQuestions.length >= targetFloor) break;
           const rawItem = {
             questionText: cleanMathAndProseText(String(q.questionText || q.q || q.question || "Top-Up Question")),
             options: Array.isArray(q.options) && q.options.length >= 4 ? q.options.slice(0, 4).map(cleanOptionText) : ["Option A", "Option B", "Option C", "Option D"],
@@ -3589,12 +3484,10 @@ Output ONLY the raw JSON array of ${missingCount} question objects.`;
   return balancedQuestions;
 }
 function isDuplicateQuestion(candidateText, existingTexts, threshold = 0.65) {
-  if (!candidateText || !existingTexts || existingTexts.length === 0)
-    return false;
+  if (!candidateText || !existingTexts || existingTexts.length === 0) return false;
   const normalize = (t) => t.trim().toLowerCase().replace(/[^\w\s]/g, " ").replace(/\s+/g, " ");
   const cleanCand = normalize(candidateText);
-  if (!cleanCand)
-    return false;
+  if (!cleanCand) return false;
   const tokenize = (text) => {
     return new Set(
       text.toLowerCase().replace(/[^\w\s]/g, " ").split(/\s+/).filter((w) => w.length > 2 && !["the", "and", "for", "with", "which", "what", "following", "statement", "correct", "option", "select", "given", "below", "calculate", "determine", "primary", "type", "types", "regarding", "true", "false", "exam", "paper", "from", "into", "under", "over", "between", "during", "among", "terms", "using", "used", "does", "have", "been", "state", "how", "when", "why"].includes(w))
@@ -3602,28 +3495,22 @@ function isDuplicateQuestion(candidateText, existingTexts, threshold = 0.65) {
   };
   const candTokens = tokenize(candidateText);
   for (const existing of existingTexts) {
-    if (!existing)
-      continue;
+    if (!existing) continue;
     const cleanExist = normalize(existing);
-    if (!cleanExist)
-      continue;
-    if (cleanCand === cleanExist)
-      return true;
+    if (!cleanExist) continue;
+    if (cleanCand === cleanExist) return true;
     if (cleanCand.length > 25 && cleanExist.length > 25) {
-      if (cleanCand.includes(cleanExist) || cleanExist.includes(cleanCand))
-        return true;
+      if (cleanCand.includes(cleanExist) || cleanExist.includes(cleanCand)) return true;
     }
     const existTokens = tokenize(existing);
     if (candTokens.size > 0 && existTokens.size > 0) {
       let intersectionSize = 0;
       for (const w of candTokens) {
-        if (existTokens.has(w))
-          intersectionSize++;
+        if (existTokens.has(w)) intersectionSize++;
       }
       const unionSize = candTokens.size + existTokens.size - intersectionSize;
       const jaccard = unionSize > 0 ? intersectionSize / unionSize : 0;
-      if (jaccard >= threshold)
-        return true;
+      if (jaccard >= threshold) return true;
       const minTokens = Math.min(candTokens.size, existTokens.size);
       if (minTokens >= 4 && intersectionSize / minTokens >= 0.75) {
         return true;
@@ -3633,8 +3520,7 @@ function isDuplicateQuestion(candidateText, existingTexts, threshold = 0.65) {
   return false;
 }
 function balanceAndPermuteAnswerKeys(questions) {
-  if (!questions || questions.length === 0)
-    return [];
+  if (!questions || questions.length === 0) return [];
   const n = questions.length;
   const targetPool = [];
   for (let i = 0; i < n; i++) {
@@ -3685,8 +3571,7 @@ function balanceAndPermuteAnswerKeys(questions) {
   });
 }
 function cleanMathAndProseText(text, isOption = false) {
-  if (!text || typeof text !== "string")
-    return "";
+  if (!text || typeof text !== "string") return "";
   let cleaned = text;
   cleaned = cleaned.replace(/\x0c(rac|orall|rown|lat|otnote)(?![a-zA-Z])/g, "\\f$1").replace(/\x08(eta|ar|ox|ullet|igcap|igcup|igsqcup|iguplus|igodot|mod|owtie)(?![a-zA-Z])/g, "\\b$1").replace(/\x09(au)(?![a-zA-Z])/g, "\\tau").replace(/(^|[^\\])\x09au(?=[_0-9\s{}\\])/g, "$1\\tau").replace(/\x09(heta|imes|riangle|an|tilde|ext|tfrac|tau|o|op|hickspace|iny|today|binom|extbf|extit|exttt|extsf)(?![a-zA-Z])/g, "\\t$1").replace(/\x0d(ight|ho|angle|ightarrow|ightharpoonup|ightharpoondown|brace|floor|ceil)(?![a-zA-Z])/g, "\\r$1").replace(/\x0a(eq|earrow|abla|eg|ode)(?![a-zA-Z])/g, "\\n$1");
   cleaned = cleaned.replace(/(^|[^a-zA-Z\\])au_\{/g, "$1\\tau_{").replace(/\$\s*au([_0-9\s{}\\])/g, "$\\tau$1").replace(/\\tau(?![a-zA-Z])/g, "\\tau").replace(/\\imes(?![a-zA-Z])/g, "\\times").replace(/\\ext(?![a-zA-Z])/g, "\\text").replace(/\\rac(?![a-zA-Z])/g, "\\frac").replace(/\\ight(?![a-zA-Z])/g, "\\right").replace(/\\heta(?![a-zA-Z])/g, "\\theta").replace(/\\riangle(?![a-zA-Z])/g, "\\triangle");
@@ -3705,8 +3590,7 @@ function cleanMathAndProseText(text, isOption = false) {
     return num + " " + unit.replace(/^text/i, "");
   });
   cleaned = cleaned.replace(/\\?text(kg|g|mg|l|ml|ha|cm|m|days|day|hr|s|caco_?3|cp|do|ppm)(\b|\/)/gi, (m, unit, suffix) => {
-    if (unit.toLowerCase().startsWith("caco"))
-      return "CaCO\u2083" + suffix;
+    if (unit.toLowerCase().startsWith("caco")) return "CaCO\u2083" + suffix;
     return unit + suffix;
   });
   cleaned = cleaned.replace(/\\?text\{?CaCO_?3\}?/gi, "CaCO\u2083");
@@ -3762,8 +3646,7 @@ function cleanMathAndProseText(text, isOption = false) {
     /\\?frac\s+(\\\w+\s+[\w_]+|[\w_]+)\s*([\+\-\*\/]|\\times)\s*(\\\w+\s+[\w_]+|[\w_]+)\s+([\w_]+(?:\^\{?[0-9a-zA-Z]+\}?)?)(?:\s*(\\times|\*)\s*(\d+))?/gi,
     (m, numA, op, numB, den, mulOp, factor) => {
       let res = `\\frac{${numA} ${op} ${numB}}{${den}}`;
-      if (factor)
-        res += ` \\times ${factor}`;
+      if (factor) res += ` \\times ${factor}`;
       return res;
     }
   );
@@ -3771,8 +3654,7 @@ function cleanMathAndProseText(text, isOption = false) {
     /\\?frac\s+([A-Za-z0-9_]+)\s+([A-Za-z0-9_]+(?:\^\{?[0-9a-zA-Z]+\}?)?)(?:\s*(\\times|\*)\s*(\d+))?/gi,
     (m, num, den, mulOp, factor) => {
       let res = `\\frac{${num}}{${den}}`;
-      if (factor)
-        res += ` \\times ${factor}`;
+      if (factor) res += ` \\times ${factor}`;
       return res;
     }
   );
@@ -3791,8 +3673,7 @@ function cleanMathAndProseText(text, isOption = false) {
   cleaned = cleaned.replace(
     /(?:^|(?<=[:\n.]))\s*(\\text\{[A-Za-z0-9_\s]+\}\s*=\s*[^$\n]+?)(?=(?:\s*\.|\s*$|\n))/gm,
     (match, equation) => {
-      if (equation.includes("$$") || equation.includes("$"))
-        return match;
+      if (equation.includes("$$") || equation.includes("$")) return match;
       if (equation.includes("\\frac") || equation.includes("\\times") || equation.includes("\\ln") || equation.includes("+") || equation.includes("-")) {
         return `
 
@@ -3807,18 +3688,15 @@ $$${equation.trim()}$$
   return cleaned.trim();
 }
 function cleanOptionText(opt) {
-  if (!opt || typeof opt !== "string")
-    return "";
+  if (!opt || typeof opt !== "string") return "";
   let cleaned = opt.replace(/^[\(\[]?[A-Da-d1-4][\)\]\.\:\-]\s*/, "").replace(/^Option\s+[A-Da-d1-4]\s*[\:\.\-]?\s*/i, "").trim();
   return cleanMathAndProseText(cleaned, true);
 }
 function validateQuestionDomainPurity(q, targetTitle) {
-  if (!q || !q.questionText)
-    return false;
+  if (!q || !q.questionText) return false;
   const titleLower = (targetTitle || "").toLowerCase();
   const isComputerTopic = titleLower.includes("computer") || titleLower.includes("programming") || titleLower.includes("data structure") || titleLower.includes("software") || titleLower.includes("information technology") || titleLower.includes("coding");
-  if (isComputerTopic)
-    return true;
+  if (isComputerTopic) return true;
   const fullText = `${q.questionText} ${(q.options || []).join(" ")} ${q.explanation || ""}`.toLowerCase();
   const forbiddenPatterns = [
     /\b(c programming|c language|ansi c)\b/i,
@@ -4087,11 +3965,9 @@ function calculateQuestionReadinessScore(q, subjectContext) {
   };
 }
 function stripLeakedTailOptions(text, optionsCount = 4) {
-  if (!text || typeof text !== "string")
-    return text;
+  if (!text || typeof text !== "string") return text;
   const leakedMatch = text.match(/(?:[\?:]\s*|\n{2,})\s*(\n\s*(?:\([A-Da-d]\)|[A-Da-d][.)])\s+[\s\S]+)$/);
-  if (!leakedMatch)
-    return text;
+  if (!leakedMatch) return text;
   const tail = leakedMatch[1];
   const hasA = /(?:\(A\)|^A[.)]|\bA\))/im.test(tail);
   const hasB = /(?:\(B\)|^B[.)]|\bB\))/im.test(tail);
@@ -4288,8 +4164,7 @@ function enforceDeterministicGuards(q, targetDifficulty, subjectContext) {
       const extracted = extractEmbeddedDiagram(cleanedQuestionText);
       if (extracted.diagram) {
         if (extracted.diagram.placement === "explanation" || classifyDiagramPedagogicalRole(extracted.diagram) === "derivation") {
-          if (!finalExplanationDiagram)
-            finalExplanationDiagram = extracted.diagram;
+          if (!finalExplanationDiagram) finalExplanationDiagram = extracted.diagram;
         } else {
           finalDiagram = extracted.diagram;
         }
@@ -4336,8 +4211,7 @@ function enforceDeterministicGuards(q, targetDifficulty, subjectContext) {
       const shapes = Array.isArray(finalDiagram.shapes) ? finalDiagram.shapes : [finalDiagram];
       const categories = [];
       shapes.forEach((s) => {
-        if (Array.isArray(s.items))
-          categories.push(...s.items.map(String));
+        if (Array.isArray(s.items)) categories.push(...s.items.map(String));
         if (Array.isArray(s.points)) {
           s.points.forEach((p) => {
             if (p?.label && typeof p.label === "string" && isNaN(Number(p.label)) && p.label.length >= 3) {
@@ -4373,8 +4247,7 @@ function enforceDeterministicGuards(q, targetDifficulty, subjectContext) {
         }
         if (Array.isArray(finalDiagram.shapes)) {
           for (const s of finalDiagram.shapes) {
-            if (s?.type)
-              shapeTypes.push(s.type);
+            if (s?.type) shapeTypes.push(s.type);
           }
         }
         if (shapeTypes.some((t) => ["barGraph", "lineGraph", "pieChart", "histogram", "scatterPlot", "boxPlot"].includes(t))) {
@@ -4422,8 +4295,7 @@ function enforceDeterministicGuards(q, targetDifficulty, subjectContext) {
   };
 }
 async function auditAndVerifyQuestions(questions, context) {
-  if (!questions || questions.length === 0)
-    return [];
+  if (!questions || questions.length === 0) return [];
   const strippedBatch = questions.map((q, idx) => ({
     id: idx,
     questionText: q.questionText,
@@ -4524,10 +4396,8 @@ Return ONLY the raw JSON array of ${strippedBatch.length} audit objects.`;
   }
 }
 async function refineTestTitles(req) {
-  if (!req.titles || req.titles.length === 0)
-    return [];
-  if (!req.instruction || !req.instruction.trim())
-    return req.titles;
+  if (!req.titles || req.titles.length === 0) return [];
+  if (!req.instruction || !req.instruction.trim()) return req.titles;
   const systemPrompt = `You are a professional EdTech Curriculum Editor and Exam Paper Title Architect.
 Your task is to restyle, shorten, or refine an array of examination test titles according to the user's specific instructions.
 
@@ -4691,8 +4561,7 @@ Output ONLY the raw JSON array.`;
   for (const card of items) {
     const frontText = String(card.front_text || card.front || card.question || "").trim();
     const backText = String(card.back_text || card.back || card.answer || "").trim();
-    if (!frontText || !backText)
-      continue;
+    if (!frontText || !backText) continue;
     const isFrontDuplicate = isDuplicateQuestion(frontText, existingFronts, 0.6);
     const isBackDuplicate = backText.length > 4 && isDuplicateQuestion(backText, existingBacks, 0.65);
     if (!isFrontDuplicate && !isBackDuplicate) {
@@ -4731,12 +4600,10 @@ Output strictly a valid JSON array of ${missingCount} flashcard objects matching
       const topUpItems = Array.isArray(topUpParsed) ? topUpParsed : topUpParsed.cards || topUpParsed.flashcards || topUpParsed.items || [];
       if (Array.isArray(topUpItems)) {
         for (const card of topUpItems) {
-          if (deduplicatedCards.length >= targetFloor)
-            break;
+          if (deduplicatedCards.length >= targetFloor) break;
           const frontText = String(card.front_text || card.front || card.question || "").trim();
           const backText = String(card.back_text || card.back || card.answer || "").trim();
-          if (!frontText || !backText)
-            continue;
+          if (!frontText || !backText) continue;
           const isFrontDup = isDuplicateQuestion(frontText, existingFronts, 0.6);
           const isBackDup = backText.length > 4 && isDuplicateQuestion(backText, existingBacks, 0.65);
           if (!isFrontDup && !isBackDup) {
@@ -4776,8 +4643,7 @@ function buildDeterministicCurriculumPlan(syllabusMarkdown, testTitle, ceilingCa
     if (isFullLength && validSections.length >= 2) {
       for (let i = 0; i < batchCount2; i++) {
         const qCount = basePerBatch2 + (remainder2 > 0 ? 1 : 0);
-        if (remainder2 > 0)
-          remainder2--;
+        if (remainder2 > 0) remainder2--;
         const assignedSection = validSections[i % validSections.length];
         const subjectPart = Math.floor(i / validSections.length) + 1;
         batches2.push({
@@ -4807,8 +4673,7 @@ function buildDeterministicCurriculumPlan(syllabusMarkdown, testTitle, ceilingCa
       ];
       for (let i = 0; i < batchCount2; i++) {
         const qCount = basePerBatch2 + (remainder2 > 0 ? 1 : 0);
-        if (remainder2 > 0)
-          remainder2--;
+        if (remainder2 > 0) remainder2--;
         batches2.push({
           batchNumber: i + 1,
           questionCount: qCount,
@@ -4906,8 +4771,7 @@ function buildDeterministicCurriculumPlan(syllabusMarkdown, testTitle, ceilingCa
   const batches = [];
   for (let i = 1; i <= batchCount; i++) {
     const qCount = basePerBatch + (remainder > 0 ? 1 : 0);
-    if (remainder > 0)
-      remainder--;
+    if (remainder > 0) remainder--;
     batches.push({
       batchNumber: i,
       questionCount: qCount,
@@ -5323,8 +5187,7 @@ async function startServer() {
   app.get("/api/admin/users", requireAdmin, async (req, res) => {
     try {
       const { data: { users }, error } = await supabaseAdmin.auth.admin.listUsers();
-      if (error)
-        throw error;
+      if (error) throw error;
       const mapped = users.map((au) => ({
         id: au.id,
         uid: au.id,
@@ -5369,16 +5232,11 @@ async function startServer() {
           for (const prodId of targetActiveProductIds) {
             if (!dbActiveProductIds.has(prodId)) {
               let productType = "unknown";
-              if (prodId === "full_access")
-                productType = "system";
-              else if (prodId.startsWith("exam_bundle_"))
-                productType = "exam_bundle";
-              else if (prodId.startsWith("series_") || prodId.startsWith("test_series_"))
-                productType = "test_series";
-              else if (prodId.startsWith("mock_test_"))
-                productType = "mock_test";
-              else if (prodId.startsWith("question_bank_"))
-                productType = "question_bank";
+              if (prodId === "full_access") productType = "system";
+              else if (prodId.startsWith("exam_bundle_")) productType = "exam_bundle";
+              else if (prodId.startsWith("series_") || prodId.startsWith("test_series_")) productType = "test_series";
+              else if (prodId.startsWith("mock_test_")) productType = "mock_test";
+              else if (prodId.startsWith("question_bank_")) productType = "question_bank";
               const resolvedPrice = prodId === "full_access" ? 999 : 499;
               const { error: upsertErr } = await supabaseAdmin.from("user_purchases").upsert({
                 user_id: userId,
@@ -5410,8 +5268,7 @@ async function startServer() {
         params.password = password;
       }
       const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, params);
-      if (error)
-        throw error;
+      if (error) throw error;
       res.json({ success: true });
     } catch (err) {
       console.error("[Admin User Update Error]", err);
@@ -5438,8 +5295,7 @@ async function startServer() {
       }
       try {
         const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-        if (listError)
-          throw listError;
+        if (listError) throw listError;
         const existingAdmin = users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
         if (!existingAdmin) {
           const { error: createError } = await supabaseAdmin.auth.admin.createUser({
@@ -5448,16 +5304,14 @@ async function startServer() {
             email_confirm: true,
             user_metadata: { role: "admin" }
           });
-          if (createError)
-            throw createError;
+          if (createError) throw createError;
           console.log(`[Admin Login Sync] Created new admin user in Supabase Auth: ${email}`);
         } else {
           const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(existingAdmin.id, {
             password,
             user_metadata: { ...existingAdmin.user_metadata, role: "admin" }
           });
-          if (updateError)
-            throw updateError;
+          if (updateError) throw updateError;
           console.log(`[Admin Login Sync] Synchronized admin password for user: ${email}`);
         }
       } catch (authSyncErr) {
@@ -5597,8 +5451,7 @@ async function startServer() {
         { user_id: userId, endpoint, p256dh, auth, device_info: deviceInfo, is_active: true },
         { onConflict: "user_id,endpoint" }
       );
-      if (error)
-        throw error;
+      if (error) throw error;
       res.json({ success: true });
     } catch (err) {
       console.error("[Push] Subscribe error:", err);
@@ -5612,8 +5465,7 @@ async function startServer() {
         return res.status(400).json({ error: "Missing userId or endpoint" });
       }
       const { error } = await supabaseAdmin.from("push_subscriptions").delete().eq("user_id", userId).eq("endpoint", endpoint);
-      if (error)
-        throw error;
+      if (error) throw error;
       res.json({ success: true });
     } catch (err) {
       console.error("[Push] Unsubscribe error:", err);
@@ -5651,8 +5503,7 @@ async function startServer() {
           scheduled_at: scheduledAt,
           created_by: req.user?.id || null
         }).select().single();
-        if (error)
-          throw error;
+        if (error) throw error;
         return res.json({ success: true, scheduled: true, id: notif2.id });
       }
       const { data: notif, error: notifError } = await supabaseAdmin.from("push_notifications").insert({
@@ -5667,15 +5518,13 @@ async function startServer() {
         status: "sending",
         created_by: req.user?.id || null
       }).select().single();
-      if (notifError)
-        throw notifError;
+      if (notifError) throw notifError;
       let query = supabaseAdmin.from("push_subscriptions").select("*").eq("is_active", true);
       if (targetType === "users" && targetIds.length > 0) {
         query = query.in("user_id", targetIds);
       }
       const { data: subscriptions, error: subError } = await query;
-      if (subError)
-        throw subError;
+      if (subError) throw subError;
       const payload = JSON.stringify({ title, body, icon, image: imageUrl, clickUrl, data });
       let successCount = 0;
       let failCount = 0;
@@ -5721,8 +5570,7 @@ async function startServer() {
       const limit = 20;
       const from = (page - 1) * limit;
       const { data, count, error } = await supabaseAdmin.from("push_notifications").select("*", { count: "exact" }).order("created_at", { ascending: false }).range(from, from + limit - 1);
-      if (error)
-        throw error;
+      if (error) throw error;
       res.json({ notifications: data, total: count, page, limit });
     } catch (err) {
       console.error("[Push] History error:", err);
@@ -6030,11 +5878,9 @@ async function startServer() {
       }
       const idsToRevoke = [productId, ...relatedIds || []];
       const { error: dbError } = await supabaseAdmin.from("user_purchases").update({ status: "inactive" }).in("product_id", idsToRevoke).eq("status", "active");
-      if (dbError)
-        throw dbError;
+      if (dbError) throw dbError;
       const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-      if (listError)
-        throw listError;
+      if (listError) throw listError;
       let successCount = 0;
       for (const u of users) {
         const currentPurchased = u.user_metadata?.purchasedSeries || [];
@@ -6059,8 +5905,7 @@ async function startServer() {
   });
   let schemaHasDiagram = null;
   const checkSchemaHasDiagram = async () => {
-    if (schemaHasDiagram !== null)
-      return schemaHasDiagram;
+    if (schemaHasDiagram !== null) return schemaHasDiagram;
     try {
       const { error } = await supabaseAdmin.from("questions").select("diagram").limit(1);
       schemaHasDiagram = !error;
@@ -6138,8 +5983,7 @@ async function startServer() {
       "c:\\Users\\Naresh Samal\\Downloads\\OdishaExamPrep Website\\automations"
     ];
     for (const dir of candidates) {
-      if (fs.existsSync(dir))
-        return dir;
+      if (fs.existsSync(dir)) return dir;
     }
     return path.resolve(process.cwd(), "automations");
   }
@@ -6216,11 +6060,9 @@ async function startServer() {
       try {
         const pingStart = Date.now();
         const { count: qCount } = await supabaseAdmin.from("questions").select("*", { count: "exact", head: true });
-        if (qCount)
-          totalQuestions = qCount;
+        if (qCount) totalQuestions = qCount;
         const { count: eCount } = await supabaseAdmin.from("exams").select("*", { count: "exact", head: true });
-        if (eCount)
-          totalExams = eCount;
+        if (eCount) totalExams = eCount;
         supabasePingMs = Math.max(8, Date.now() - pingStart);
       } catch (e) {
       }
@@ -6589,8 +6431,7 @@ async function startServer() {
   let lastGhRunsFetch = 0;
   let isRefreshingGh = false;
   function refreshGhRunsBackground() {
-    if (isRefreshingGh)
-      return;
+    if (isRefreshingGh) return;
     isRefreshingGh = true;
     execFile(
       "gh",
@@ -6598,8 +6439,7 @@ async function startServer() {
       { timeout: 35e3 },
       (err, stdout) => {
         isRefreshingGh = false;
-        if (err || !stdout)
-          return;
+        if (err || !stdout) return;
         try {
           const parsed = JSON.parse(stdout);
           if (Array.isArray(parsed) && parsed.length > 0) {
@@ -6782,10 +6622,8 @@ async function startServer() {
             supabaseAdmin.from("questions").select("*", { count: "exact", head: true }),
             supabaseAdmin.from("exams").select("*", { count: "exact", head: true })
           ]);
-          if (qRes && qRes.count)
-            qCountVal = qRes.count;
-          if (eRes && eRes.count)
-            eCountVal = eRes.count;
+          if (qRes && qRes.count) qCountVal = qRes.count;
+          if (eRes && eRes.count) eCountVal = eRes.count;
         } catch (e) {
         }
         cachedWarRoomMetrics = { questions: qCountVal, exams: eCountVal, lastFetched: Date.now() };
@@ -7000,8 +6838,7 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
   let managerVoiceKeyIndex = 0;
   function getNextManagerKey() {
     const keys = resolveGeminiKeyPool();
-    if (keys.length === 0)
-      return "";
+    if (keys.length === 0) return "";
     const key = keys[managerVoiceKeyIndex % keys.length];
     managerVoiceKeyIndex++;
     return key;
@@ -7118,10 +6955,8 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
           supabaseAdmin.from("questions").select("*", { count: "exact", head: true }),
           supabaseAdmin.from("exams").select("*", { count: "exact", head: true })
         ]);
-        if (qRes && qRes.count)
-          qCountVal = qRes.count;
-        if (eRes && eRes.count)
-          eCountVal = eRes.count;
+        if (qRes && qRes.count) qCountVal = qRes.count;
+        if (eRes && eRes.count) eCountVal = eRes.count;
       } catch (e) {
       }
       const nowIST = (/* @__PURE__ */ new Date()).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "full", timeStyle: "medium" });
@@ -7201,14 +7036,11 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
         }
       ].sort((a, b) => b.processedUnits - a.processedUnits).map((item, idx) => ({ ...item, rank: idx + 1 }));
       const validNotices = notices.filter((n) => {
-        if (n.status === "REJECTED_BY_AI")
-          return false;
+        if (n.status === "REJECTED_BY_AI") return false;
         const t = (n.title || "").toLowerCase();
-        if (!t || t.length < 8)
-          return false;
+        if (!t || t.length < 8) return false;
         const generic = ["vision & mission", "duties and functions", "incumbency chart", "annual reports", "why life insurance", "all products"];
-        if (generic.some((g) => t.includes(g)))
-          return false;
+        if (generic.some((g) => t.includes(g))) return false;
         return true;
       });
       const recentNoticesList = validNotices.slice(-6).reverse().map((n) => ({
@@ -7259,8 +7091,7 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
   const saraVoiceAudioCache = /* @__PURE__ */ new Map();
   async function synthesizeManagerVoiceWithRotation(text, lang = "HINDI") {
     const cleanText = text.trim();
-    if (!cleanText)
-      return null;
+    if (!cleanText) return null;
     const cacheKey = `${lang}:${cleanText}`;
     if (saraVoiceAudioCache.has(cacheKey)) {
       return saraVoiceAudioCache.get(cacheKey);
@@ -7278,8 +7109,7 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
         const dataUri = `data:audio/mp3;base64,${buffer.toString("base64")}`;
         if (saraVoiceAudioCache.size > 150) {
           const firstKey = saraVoiceAudioCache.keys().next().value;
-          if (firstKey)
-            saraVoiceAudioCache.delete(firstKey);
+          if (firstKey) saraVoiceAudioCache.delete(firstKey);
         }
         saraVoiceAudioCache.set(cacheKey, dataUri);
         return dataUri;
@@ -7298,8 +7128,7 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
       for (const modelName of TTS_MODELS) {
         for (let attempt = 0; attempt < Math.min(keys.length, 4); attempt++) {
           const apiKey = getNextManagerKey();
-          if (!apiKey)
-            break;
+          if (!apiKey) break;
           try {
             const ttsUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
             const res = await fetch(ttsUrl, {
@@ -7328,8 +7157,7 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
               const dataUri = `data:audio/wav;base64,${wavBuffer.toString("base64")}`;
               if (saraVoiceAudioCache.size > 150) {
                 const firstKey = saraVoiceAudioCache.keys().next().value;
-                if (firstKey)
-                  saraVoiceAudioCache.delete(firstKey);
+                if (firstKey) saraVoiceAudioCache.delete(firstKey);
               }
               saraVoiceAudioCache.set(cacheKey, dataUri);
               return dataUri;
@@ -7343,23 +7171,17 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
   }
   function getDynamicSalutation(hour, lang = "HINDI") {
     if (lang === "ODIA") {
-      if (hour >= 4 && hour < 12)
-        return "\u0B36\u0B41\u0B2D \u0B38\u0B15\u0B3E\u0B33";
-      if (hour >= 12 && hour < 17)
-        return "\u0B36\u0B41\u0B2D \u0B05\u0B2A\u0B30\u0B3E\u0B39\u0B4D\u0B28";
+      if (hour >= 4 && hour < 12) return "\u0B36\u0B41\u0B2D \u0B38\u0B15\u0B3E\u0B33";
+      if (hour >= 12 && hour < 17) return "\u0B36\u0B41\u0B2D \u0B05\u0B2A\u0B30\u0B3E\u0B39\u0B4D\u0B28";
       return "\u0B36\u0B41\u0B2D \u0B38\u0B28\u0B4D\u0B27\u0B4D\u0B5F\u0B3E";
     }
     if (lang === "ENGLISH") {
-      if (hour >= 4 && hour < 12)
-        return "Good morning";
-      if (hour >= 12 && hour < 17)
-        return "Good afternoon";
+      if (hour >= 4 && hour < 12) return "Good morning";
+      if (hour >= 12 && hour < 17) return "Good afternoon";
       return "Good evening";
     }
-    if (hour >= 4 && hour < 12)
-      return "\u0936\u0941\u092D \u092A\u094D\u0930\u092D\u093E\u0924";
-    if (hour >= 12 && hour < 17)
-      return "\u0928\u092E\u0938\u094D\u0924\u0947";
+    if (hour >= 4 && hour < 12) return "\u0936\u0941\u092D \u092A\u094D\u0930\u092D\u093E\u0924";
+    if (hour >= 12 && hour < 17) return "\u0928\u092E\u0938\u094D\u0924\u0947";
     return "\u0936\u0941\u092D \u0938\u0902\u0927\u094D\u092F\u093E";
   }
   async function generateSaraExecutiveBrief(lang = "HINDI") {
@@ -7443,14 +7265,11 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
       }
     }
     const validNotices = notices.filter((n) => {
-      if (n.status === "REJECTED_BY_AI")
-        return false;
+      if (n.status === "REJECTED_BY_AI") return false;
       const t = (n.title || "").toLowerCase();
-      if (!t || t.length < 8)
-        return false;
+      if (!t || t.length < 8) return false;
       const generic = ["vision & mission", "duties and functions", "incumbency chart", "annual reports", "why life insurance", "all products"];
-      if (generic.some((g) => t.includes(g)))
-        return false;
+      if (generic.some((g) => t.includes(g))) return false;
       return true;
     });
     const recent = validNotices.slice(-5).reverse();
@@ -7508,8 +7327,7 @@ ${c.summary || ""}
     }
     if (cleanReply && cleanReply.length > 80 && (q.includes("ise") || q.includes("isko") || q.includes("yeh") || q.includes("details") || q.includes("syllabus") || q.includes("explain") || q.includes("research") || q.includes("report") || q.includes("dossier") || q.includes("bhejo") || q.includes("send"))) {
       let formatted = cleanReply.replace(/###\s*(.*)/g, "<b>$1</b>\n").replace(/##\s*(.*)/g, "<b>$1</b>\n").replace(/\*\*(.*?)\*\*/g, "<b>$1</b>").replace(/\*(.*?)\*/g, "<i>$1</i>");
-      if (formatted.length > 3500)
-        formatted = formatted.slice(0, 3500) + "...";
+      if (formatted.length > 3500) formatted = formatted.slice(0, 3500) + "...";
       const isResearch = cleanReply.includes("Aarya") || cleanReply.includes("\u0906\u0930\u094D\u092F\u093E") || cleanReply.includes("Research") || cleanReply.includes("\u0930\u093F\u0938\u0930\u094D\u091A");
       return {
         title: isResearch ? "Intelligence & Research Dossier for Boss" : "OdishaExamPrep Executive Briefing for Boss",
@@ -7534,12 +7352,9 @@ ${message}
 
 <i>Dispatched by Executive Chief of Staff (Sara)</i>`;
         const targets = [];
-        if ((target === "admin" || target === "both") && localAdmin)
-          targets.push(localAdmin);
-        if ((target === "channel" || target === "both") && localChannel)
-          targets.push(localChannel);
-        if (targets.length === 0 && localAdmin)
-          targets.push(localAdmin);
+        if ((target === "admin" || target === "both") && localAdmin) targets.push(localAdmin);
+        if ((target === "channel" || target === "both") && localChannel) targets.push(localChannel);
+        if (targets.length === 0 && localAdmin) targets.push(localAdmin);
         for (const cid of targets) {
           await fetch(`https://api.telegram.org/bot${localToken}/sendMessage`, {
             method: "POST",
@@ -7697,24 +7512,15 @@ ${message}
   };
   function resolveDelegationTarget(userQuery) {
     const q = (userQuery || "").toLowerCase().trim();
-    if (!q)
-      return FLEET_AGENTS.sara;
-    if (/\b(bikram|vikram)\b/i.test(q))
-      return FLEET_AGENTS.bikram;
-    if (/\b(dipti|deepti)\b/i.test(q))
-      return FLEET_AGENTS.dipti;
-    if (/\b(chhabi|chhavi)\b/i.test(q))
-      return FLEET_AGENTS.chhabi;
-    if (/\b(priyanka)\b/i.test(q))
-      return FLEET_AGENTS.priyanka;
-    if (/\b(subham|shubham)\b/i.test(q))
-      return FLEET_AGENTS.subham;
-    if (/\b(trupti)\b/i.test(q))
-      return FLEET_AGENTS.trupti;
-    if (/\b(manas)\b/i.test(q))
-      return FLEET_AGENTS.manas;
-    if (/\b(aarya|arya)\b/i.test(q))
-      return FLEET_AGENTS.aarya;
+    if (!q) return FLEET_AGENTS.sara;
+    if (/\b(bikram|vikram)\b/i.test(q)) return FLEET_AGENTS.bikram;
+    if (/\b(dipti|deepti)\b/i.test(q)) return FLEET_AGENTS.dipti;
+    if (/\b(chhabi|chhavi)\b/i.test(q)) return FLEET_AGENTS.chhabi;
+    if (/\b(priyanka)\b/i.test(q)) return FLEET_AGENTS.priyanka;
+    if (/\b(subham|shubham)\b/i.test(q)) return FLEET_AGENTS.subham;
+    if (/\b(trupti)\b/i.test(q)) return FLEET_AGENTS.trupti;
+    if (/\b(manas)\b/i.test(q)) return FLEET_AGENTS.manas;
+    if (/\b(aarya|arya)\b/i.test(q)) return FLEET_AGENTS.aarya;
     if (/\b(telegram|tg\b|bhejo telegram|send to telegram|broadcast|notify students|push notification)\b/i.test(q)) {
       return FLEET_AGENTS.trupti;
     }
@@ -7737,8 +7543,7 @@ ${message}
       return FLEET_AGENTS.manas;
     }
     if (/^(hi|hello|namaste|namaskar|hey|sara|boss|kaisa hai|kemiti achhu|good morning|good afternoon|good evening|shubh sandhya|sab kaisa chal raha|fleet status|team status|standup|all hands)\b/i.test(q)) {
-      if (q.split(/\s+/).length <= 4)
-        return FLEET_AGENTS.sara;
+      if (q.split(/\s+/).length <= 4) return FLEET_AGENTS.sara;
     }
     return FLEET_AGENTS.aarya;
   }
@@ -7754,12 +7559,9 @@ ${message}
     let searchSnippets = "";
     let sources = [];
     const needsSearch = (q) => {
-      if (agent.id === "bikram" && /\b(ossc|osssc|opsc|latest|date|notice)\b/i.test(q))
-        return true;
-      if (agent.id === "priyanka")
-        return true;
-      if (agent.id === "aarya" && /\b(latest|current|recent|2024|2025|2026|today|now|news|date|cutoff|who won)\b/i.test(q))
-        return true;
+      if (agent.id === "bikram" && /\b(ossc|osssc|opsc|latest|date|notice)\b/i.test(q)) return true;
+      if (agent.id === "priyanka") return true;
+      if (agent.id === "aarya" && /\b(latest|current|recent|2024|2025|2026|today|now|news|date|cutoff|who won)\b/i.test(q)) return true;
       return false;
     };
     if (needsSearch(userQuery)) {
@@ -7813,8 +7615,7 @@ You MUST respond with all 4 tags below in ${lang}:
     let rawResponse = "";
     for (let attempt = 0; attempt < Math.min(keys.length, 4); attempt++) {
       const apiKey = getNextManagerKey();
-      if (!apiKey)
-        break;
+      if (!apiKey) break;
       try {
         const contents = [];
         if (Array.isArray(history)) {
@@ -7839,8 +7640,7 @@ Boss's Directive: "${userQuery}"` }] });
         if (res.ok) {
           const data = await res.json();
           rawResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-          if (rawResponse)
-            break;
+          if (rawResponse) break;
         }
       } catch (e) {
       }
@@ -7986,8 +7786,7 @@ Boss's Directive: "${userQuery}"` }] });
         return res.status(400).json({ error: "Article ID is required" });
       }
       const { data, error } = await supabaseAdmin.from("exams").update({ is_published: true, status: "published" }).eq("id", id).select().single();
-      if (error)
-        throw error;
+      if (error) throw error;
       res.json({ success: true, message: "Article published live successfully", article: data });
     } catch (err) {
       console.error("[Blog Publish Error]", err);
@@ -8006,8 +7805,7 @@ Boss's Directive: "${userQuery}"` }] });
         return res.status(403).send("<h3>\u{1F512} Invalid Authorization Token</h3>");
       }
       const { data, error } = await supabaseAdmin.from("exams").update({ is_published: true, status: "published" }).eq("id", id).select().single();
-      if (error)
-        throw error;
+      if (error) throw error;
       return res.send(`
         <!DOCTYPE html>
         <html>
@@ -8038,11 +7836,9 @@ Boss's Directive: "${userQuery}"` }] });
   app.post("/api/blog/discard", async (req, res) => {
     try {
       const { id } = req.body;
-      if (!id)
-        return res.status(400).json({ error: "Article ID is required" });
+      if (!id) return res.status(400).json({ error: "Article ID is required" });
       const { error } = await supabaseAdmin.from("exams").update({ is_archived: true, status: "discarded" }).eq("id", id);
-      if (error)
-        throw error;
+      if (error) throw error;
       res.json({ success: true, message: "Draft discarded successfully" });
     } catch (err) {
       console.error("[Blog Discard Error]", err);
@@ -8059,19 +7855,16 @@ Boss's Directive: "${userQuery}"` }] });
       let keepDeleting = true;
       while (keepDeleting) {
         const { data: rows, error: fetchErr } = await supabaseAdmin.from("questions").select("id").eq("topic", topic).limit(500);
-        if (fetchErr)
-          throw fetchErr;
+        if (fetchErr) throw fetchErr;
         if (!rows || rows.length === 0) {
           keepDeleting = false;
           break;
         }
         const ids = rows.map((r) => r.id);
         const { error: delErr } = await supabaseAdmin.from("questions").delete().in("id", ids);
-        if (delErr)
-          throw delErr;
+        if (delErr) throw delErr;
         totalDeleted += ids.length;
-        if (ids.length < 500)
-          keepDeleting = false;
+        if (ids.length < 500) keepDeleting = false;
       }
       if (topic.startsWith("bank__")) {
         const bankId = topic.replace("bank__", "");
@@ -8144,8 +7937,7 @@ Boss's Directive: "${userQuery}"` }] });
         if (Array.isArray(chunkData)) {
           insertedCount += chunkData.length;
           chunkData.forEach((d) => {
-            if (d.id)
-              insertedIds.push(d.id);
+            if (d.id) insertedIds.push(d.id);
           });
         } else {
           insertedCount += chunk.length;
@@ -8214,18 +8006,15 @@ Boss's Directive: "${userQuery}"` }] });
       const pageSize = 1e3;
       while (true) {
         const { data, error } = await supabaseAdmin.from("questions").select("id, topic").eq("examId", examId).range(page * pageSize, (page + 1) * pageSize - 1);
-        if (error || !data || data.length === 0)
-          break;
+        if (error || !data || data.length === 0) break;
         allQuestions = allQuestions.concat(data);
         page++;
-        if (data.length < pageSize)
-          break;
+        if (data.length < pageSize) break;
       }
       const countByBankId = {};
       allQuestions.forEach((q) => {
         const bId = q.topic ? q.topic.replace(/^bank__/, "") : "";
-        if (bId)
-          countByBankId[bId] = (countByBankId[bId] || 0) + 1;
+        if (bId) countByBankId[bId] = (countByBankId[bId] || 0) + 1;
       });
       let updatedCount = 0;
       const updates = [];
@@ -8521,8 +8310,7 @@ Boss's Directive: "${userQuery}"` }] });
       res.flushHeaders();
     }
     const sendEvent = (event, payload) => {
-      if (res.writableEnded || res.destroyed)
-        return;
+      if (res.writableEnded || res.destroyed) return;
       try {
         res.write(`event: ${event}
 data: ${JSON.stringify(payload)}
@@ -8755,8 +8543,7 @@ data: ${JSON.stringify(payload)}
   app.post("/api/admin/questions/sync-counts", requireAdmin, async (req, res) => {
     try {
       const { data: banks, error: bErr } = await supabaseAdmin.from("questionBanks").select("id, title, examId, pdfUrl");
-      if (bErr)
-        throw bErr;
+      if (bErr) throw bErr;
       const { data: topicData, error: rpcErr } = await supabaseAdmin.rpc("get_question_topic_counts");
       const topicCounts = {};
       if (!rpcErr && Array.isArray(topicData)) {
@@ -8772,8 +8559,7 @@ data: ${JSON.stringify(payload)}
         if (b.pdfUrl && typeof b.pdfUrl === "string" && b.pdfUrl.startsWith("{")) {
           try {
             const parsed = JSON.parse(b.pdfUrl);
-            if (parsed && Array.isArray(parsed.questionsData))
-              embeddedCount = parsed.questionsData.length;
+            if (parsed && Array.isArray(parsed.questionsData)) embeddedCount = parsed.questionsData.length;
           } catch (e) {
           }
         }
@@ -8817,15 +8603,13 @@ data: ${JSON.stringify(payload)}
       }
       query = query.order("createdAt", { ascending: false }).range(offset, offset + limit - 1);
       const { data, error, count } = await query;
-      if (error)
-        throw error;
+      if (error) throw error;
       let finalData = data || [];
       let finalCount = count || 0;
       if (finalData.length === 0 && topic !== "all" && !topic.startsWith("mockTest__")) {
         try {
           let bQuery = supabaseAdmin.from("questionBanks").select("id, title, examId, pdfUrl");
-          if (examId !== "all")
-            bQuery = bQuery.eq("examId", examId);
+          if (examId !== "all") bQuery = bQuery.eq("examId", examId);
           bQuery = bQuery.or(`title.eq."${topic}",id.eq."${topic}"`);
           const { data: bData } = await bQuery.limit(1);
           if (bData && bData.length > 0 && bData[0].pdfUrl) {
@@ -8882,8 +8666,7 @@ data: ${JSON.stringify(payload)}
         query = query.ilike("stage", stage);
       }
       const { data, error } = await query;
-      if (error)
-        throw error;
+      if (error) throw error;
       if (stage && (!data || data.length === 0)) {
         const { data: fallbackData } = await supabaseAdmin.from("exam_syllabi").select("*").eq("exam_id", examId).in("stage", ["All Stages", "Single Stage", "General"]);
         return res.json({ success: true, data: fallbackData || [] });
@@ -8937,14 +8720,12 @@ data: ${JSON.stringify(payload)}
             q1Query = q1Query.eq("examId", bank.examId);
           }
           const { data: d1, error: err1 } = await q1Query.select("id");
-          if (err1)
-            throw err1;
+          if (err1) throw err1;
           const c1 = d1?.length ?? 0;
           deletedQuestionCount += c1;
           auditLog.push(`Deleted ${c1} questions matching title/exam for bank "${rawTitle}"`);
           const { data: d2, error: err2 } = await supabaseAdmin.from("questions").delete().in("topic", [entityId, `bank__${entityId}`]).select("id");
-          if (err2)
-            throw err2;
+          if (err2) throw err2;
           const c2 = d2?.length ?? 0;
           deletedQuestionCount += c2;
           auditLog.push(`Deleted ${c2} id-keyed questions for bank ${entityId}`);
@@ -8952,8 +8733,7 @@ data: ${JSON.stringify(payload)}
         }
         if (!clearOnly) {
           const { error: delErr } = await supabaseAdmin.from("questionBanks").delete().eq("id", entityId);
-          if (delErr)
-            throw delErr;
+          if (delErr) throw delErr;
           auditLog.push(`Deleted questionBank row ${entityId}`);
         } else {
           auditLog.push(`Cleared questions for questionBank row ${entityId} (row preserved)`);
@@ -8978,14 +8758,12 @@ data: ${JSON.stringify(payload)}
         if (mt?.seriesId && typeof mt.seriesId === "string" && mt.seriesId.startsWith("{")) {
           try {
             const parsed = JSON.parse(mt.seriesId);
-            if (parsed.examId)
-              examId = parsed.examId;
+            if (parsed.examId) examId = parsed.examId;
           } catch {
           }
         }
         const { data: d1, error: err1 } = await supabaseAdmin.from("questions").delete().in("topic", [`mockTest__${entityId}`, `mocktest__${entityId}`, entityId]).select("id");
-        if (err1)
-          throw err1;
+        if (err1) throw err1;
         const c1 = d1?.length ?? 0;
         deletedQuestionCount += c1;
         auditLog.push(`Deleted ${c1} id-prefixed questions for mockTest ${entityId}`);
@@ -8995,16 +8773,13 @@ data: ${JSON.stringify(payload)}
             mt.title.replace(/(\s*-\s*Practice Session)+$/gi, "").trim()
           ].filter(Boolean);
           let qbCheck = supabaseAdmin.from("questionBanks").select("id").in("title", titleCandidates);
-          if (examId)
-            qbCheck = qbCheck.eq("examId", examId);
+          if (examId) qbCheck = qbCheck.eq("examId", examId);
           const { data: activeBanks } = await qbCheck;
           if (!activeBanks || activeBanks.length === 0) {
             let q2Query = supabaseAdmin.from("questions").delete().in("topic", titleCandidates);
-            if (examId)
-              q2Query = q2Query.eq("examId", examId);
+            if (examId) q2Query = q2Query.eq("examId", examId);
             const { data: d2, error: err2 } = await q2Query.select("id");
-            if (err2)
-              throw err2;
+            if (err2) throw err2;
             const c2 = d2?.length ?? 0;
             deletedQuestionCount += c2;
             auditLog.push(`Deleted ${c2} title-matched questions for mockTest "${mt.title}"`);
@@ -9012,8 +8787,7 @@ data: ${JSON.stringify(payload)}
         }
         if (!clearOnly) {
           const { error: delErr } = await supabaseAdmin.from("mockTests").delete().eq("id", entityId);
-          if (delErr)
-            throw delErr;
+          if (delErr) throw delErr;
           auditLog.push(`Deleted mockTest row ${entityId}`);
         } else {
           auditLog.push(`Cleared questions for mockTest row ${entityId} (row preserved)`);
@@ -9042,28 +8816,24 @@ data: ${JSON.stringify(payload)}
         if (testIds.length > 0) {
           const childTopics = testIds.flatMap((tId) => [`mockTest__${tId}`, `mocktest__${tId}`, tId]);
           const { data: d1, error: err1 } = await supabaseAdmin.from("questions").delete().in("topic", childTopics).select("id");
-          if (err1)
-            throw err1;
+          if (err1) throw err1;
           const c1 = d1?.length ?? 0;
           deletedQuestionCount += c1;
           auditLog.push(`Deleted ${c1} questions across ${testIds.length} child mock tests`);
           if (!clearOnly) {
             const { error: mtDelErr } = await supabaseAdmin.from("mockTests").delete().in("id", testIds);
-            if (mtDelErr)
-              throw mtDelErr;
+            if (mtDelErr) throw mtDelErr;
             auditLog.push(`Deleted ${testIds.length} child mock test rows`);
           }
         }
         if (!clearOnly) {
           const { error: tsDelErr } = await supabaseAdmin.from("testSeries").delete().eq("id", entityId);
-          if (tsDelErr)
-            throw tsDelErr;
+          if (tsDelErr) throw tsDelErr;
           auditLog.push(`Deleted testSeries row ${entityId}`);
         }
       } else if (entityType === "question") {
         const { data: d, error: err } = await supabaseAdmin.from("questions").delete().eq("id", entityId).select("id, topic");
-        if (err)
-          throw err;
+        if (err) throw err;
         deletedQuestionCount = d?.length ?? 1;
         auditLog.push(`Deleted question row ${entityId}`);
         const deletedTopic = d?.[0]?.topic;
@@ -9099,16 +8869,14 @@ data: ${JSON.stringify(payload)}
       let cleanPayload = payload;
       if (table === "mockTests" && payload) {
         const sanitizeMockTestObj = (obj) => {
-          if (!obj || typeof obj !== "object")
-            return obj;
+          if (!obj || typeof obj !== "object") return obj;
           const { examId, questions, questionIds, isPremium, category, _questionCount, subject, chapter, topicsCovered, mainSection, subCategory, subCategoryTitle, targetTable, targetMode, description, questionCountTarget, ...rest } = obj;
           return rest;
         };
         cleanPayload = Array.isArray(payload) ? payload.map(sanitizeMockTestObj) : sanitizeMockTestObj(payload);
       } else if (table === "questionBanks" && payload) {
         const sanitizeQuestionBankObj = (obj) => {
-          if (!obj || typeof obj !== "object")
-            return obj;
+          if (!obj || typeof obj !== "object") return obj;
           const { subject, description, topicsCovered, mainSection, subCategory, subCategoryTitle, targetTable, durationMinutes, totalMarks, negativeMarking, questionCountTarget, ...rest } = obj;
           return rest;
         };
@@ -9117,16 +8885,13 @@ data: ${JSON.stringify(payload)}
       let result;
       if (action === "insert") {
         const { data, error } = await supabaseAdmin.from(table).insert(Array.isArray(cleanPayload) ? cleanPayload : [cleanPayload]).select();
-        if (error)
-          throw error;
+        if (error) throw error;
         result = data;
       } else if (action === "upsert") {
         const options = {};
-        if (onConflict)
-          options.onConflict = onConflict;
+        if (onConflict) options.onConflict = onConflict;
         const { data, error } = await supabaseAdmin.from(table).upsert(cleanPayload, options).select();
-        if (error)
-          throw error;
+        if (error) throw error;
         result = data;
       } else {
         let query;
@@ -9144,20 +8909,16 @@ data: ${JSON.stringify(payload)}
             const filter = filters[col];
             if (filter && typeof filter === "object") {
               const { op, val } = filter;
-              if (op === "eq")
-                query = query.eq(col, val);
-              if (op === "in")
-                query = query.in(col, val);
-              if (op === "like")
-                query = query.like(col, val);
+              if (op === "eq") query = query.eq(col, val);
+              if (op === "in") query = query.in(col, val);
+              if (op === "like") query = query.like(col, val);
             }
           });
         } else {
           return res.status(400).json({ error: "ID or filters is required for update/delete" });
         }
         const { data, error } = await query.select();
-        if (error)
-          throw error;
+        if (error) throw error;
         result = data;
       }
       res.json({ success: true, data: result });
@@ -9323,8 +9084,7 @@ data: ${JSON.stringify(payload)}
         for (let i = 1; i < blocks.length; i++) {
           const block = blocks[i];
           const linkMatch = block.match(/<a[^>]*class="result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]+?)<\/a>/);
-          if (!linkMatch)
-            continue;
+          if (!linkMatch) continue;
           let url = linkMatch[1];
           let title = linkMatch[2].replace(/<[^>]*>/g, "").trim();
           if (url.startsWith("//")) {
@@ -9334,16 +9094,14 @@ data: ${JSON.stringify(payload)}
             try {
               const urlObj = new URL("https://duckduckgo.com" + url);
               const uddg = urlObj.searchParams.get("uddg");
-              if (uddg)
-                url = decodeURIComponent(uddg);
+              if (uddg) url = decodeURIComponent(uddg);
             } catch (e) {
             }
           }
           const snippetMatch = block.match(/<a[^>]*class="result__snippet"[^>]*>([\s\S]+?)<\/a>/) || block.match(/<td[^>]*class="result-snippet"[^>]*>([\s\S]+?)<\/td>/);
           const snippet = snippetMatch ? snippetMatch[1].replace(/<[^>]*>/g, "").trim() : "";
           results.push({ title, url, snippet });
-          if (results.length >= 5)
-            break;
+          if (results.length >= 5) break;
         }
       }
     } catch (e) {
@@ -9358,10 +9116,8 @@ data: ${JSON.stringify(payload)}
         return res.status(400).json({ error: "Messages must be an array" });
       }
       const totalContentLength = messages.reduce((acc, m) => {
-        if (typeof m.content === "string")
-          return acc + m.content.length;
-        if (Array.isArray(m.content))
-          return acc + JSON.stringify(m.content).length;
+        if (typeof m.content === "string") return acc + m.content.length;
+        if (Array.isArray(m.content)) return acc + JSON.stringify(m.content).length;
         return acc;
       }, 0);
       if (totalContentLength > 2e7) {
@@ -9369,10 +9125,8 @@ data: ${JSON.stringify(payload)}
       }
       let apiKey = process.env.VITE_DEEPSEEK_API_KEY || process.env.VITE_DENTA_RESPONSE_AI;
       let baseUrl = process.env.VITE_DEEPSEEK_BASE_URL || "https://integrate.api.nvidia.com/v1";
-      if (apiKey)
-        apiKey = apiKey.replace(/^"|"$/g, "");
-      if (baseUrl)
-        baseUrl = baseUrl.replace(/^"|"$/g, "");
+      if (apiKey) apiKey = apiKey.replace(/^"|"$/g, "");
+      if (baseUrl) baseUrl = baseUrl.replace(/^"|"$/g, "");
       if (!apiKey) {
         console.error("NVIDIA NIM API key is missing in env");
         return res.status(500).json({ error: "NVIDIA NIM API key is not configured on server." });
@@ -9556,8 +9310,7 @@ ${combinedImageContext}`
                   if (reader) {
                     while (true) {
                       const { value, done } = await reader.read();
-                      if (done)
-                        break;
+                      if (done) break;
                       res.write(value);
                     }
                   }
@@ -9584,8 +9337,7 @@ ${combinedImageContext}`
           if (reader) {
             while (true) {
               const { value, done } = await reader.read();
-              if (done)
-                break;
+              if (done) break;
               res.write(value);
             }
           }
@@ -10068,10 +9820,8 @@ Sitemap: ${sitemapUrl}
     const buildPath = path.join(distPath, filename);
     const targetPath = fs.existsSync(buildPath) ? buildPath : fs.existsSync(publicPath) ? publicPath : null;
     if (targetPath) {
-      if (filename.endsWith(".ico"))
-        res.setHeader("Content-Type", "image/x-icon");
-      else if (filename.endsWith(".png"))
-        res.setHeader("Content-Type", "image/png");
+      if (filename.endsWith(".ico")) res.setHeader("Content-Type", "image/x-icon");
+      else if (filename.endsWith(".png")) res.setHeader("Content-Type", "image/png");
       res.setHeader("Cache-Control", "public, max-age=604800, stale-while-revalidate=2592000");
       return res.sendFile(targetPath);
     }
@@ -10079,8 +9829,7 @@ Sitemap: ${sitemapUrl}
   });
   app.get(["/shorts-creator.html", "/shorts-creator", "/memory-shorts-creator.html", "/memory-shorts-creator", "/virtual-office.html", "/virtual-office", "/office"], (req, res) => {
     let clean = req.path.replace(/^\//, "");
-    if (!clean.endsWith(".html"))
-      clean += ".html";
+    if (!clean.endsWith(".html")) clean += ".html";
     const publicPath = path.join(process.cwd(), "public", clean);
     const buildPath = path.join(distPath, clean);
     const targetPath = fs.existsSync(publicPath) ? publicPath : fs.existsSync(buildPath) ? buildPath : null;

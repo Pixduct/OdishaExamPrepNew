@@ -5974,6 +5974,22 @@ Sitemap: ${sitemapUrl}
     });
   });
 
+  // Dedicated handlers for Search Engine Favicons (GoogleFavicon, Bing, Edge)
+  app.get(['/favicon.ico', '/favicon-48x48.png', '/favicon-96x96.png', '/apple-touch-icon.png', '/android-chrome-192x192.png', '/android-chrome-512x512.png'], (req, res) => {
+    const filename = path.basename(req.path);
+    const publicPath = path.join(process.cwd(), 'public', filename);
+    const buildPath = path.join(distPath, filename);
+    const targetPath = fs.existsSync(buildPath) ? buildPath : (fs.existsSync(publicPath) ? publicPath : null);
+
+    if (targetPath) {
+      if (filename.endsWith('.ico')) res.setHeader('Content-Type', 'image/x-icon');
+      else if (filename.endsWith('.png')) res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Cache-Control', 'public, max-age=604800, stale-while-revalidate=2592000');
+      return res.sendFile(targetPath);
+    }
+    res.status(404).end();
+  });
+
   // Dedicated routes for standalone HTML tools (Shorts & Memory Shorts Creators, Virtual Office Simulation)
   app.get(['/shorts-creator.html', '/shorts-creator', '/memory-shorts-creator.html', '/memory-shorts-creator', '/virtual-office.html', '/virtual-office', '/office'], (req, res) => {
     let clean = req.path.replace(/^\//, '');

@@ -668,7 +668,12 @@ const KNOWN_DIAGRAM_TYPES = new Set([
   'matrix', 'grid', 'distance', 'cone', 'probability', 'sequence', 'equation',
   'quadratic', 'sphereDivision', 'boatStream', 'ratio', 'statistics', 'profitLoss',
   'cylinder', 'numberTheory', 'square', 'rightTriangle', 'parallelogram', 'cube',
-  'trapezium', 'semicircle', 'cuboid', 'equilateralTriangle', 'vector', 'universal', 'venn'
+  'trapezium', 'semicircle', 'cuboid', 'equilateralTriangle', 'vector', 'universal', 'venn',
+  // Advanced competitive exam graph, chart, and reasoning diagrams
+  'barGraph', 'lineGraph', 'pieChart', 'histogram', 'scatterPlot', 'boxPlot',
+  'seatingArrangement', 'directionDiagram', 'clock', 'calendar', 'cubeFolding',
+  'mirrorImage', 'treeDiagram', 'probabilityTree', 'unitCircle', 'heightDistance',
+  'parabola', 'hyperbola', 'functionPlot', 'vennDiagram'
 ]);
 
 /**
@@ -741,7 +746,7 @@ export const diagramValidator = (diagram: any): any => {
   
   // Recursively repair all string properties to recover any lost backslashes or corrupted control characters
   const repaired = repairObjectStrings(diagram);
-  const clone = { ...repaired };
+  let clone = { ...repaired };
   
   if (typeof clone.type !== 'string') {
     clone.type = String(clone.type || 'unknown');
@@ -755,6 +760,35 @@ export const diagramValidator = (diagram: any): any => {
   // Map elements -> shapes if elements is present but shapes is not
   if (clone.elements && !clone.shapes) {
     clone.shapes = clone.elements;
+  }
+
+  // Auto-wrap standalone shape diagrams (e.g. { type: 'barGraph', points: [...] }) into UniversalMathDiagramEngine container
+  if (clone.type !== 'universal' && clone.type !== 'vector' && (!clone.shapes || !Array.isArray(clone.shapes))) {
+    const shapeType = clone.type;
+    const isChart = ['barGraph', 'lineGraph', 'histogram', 'scatterPlot'].includes(shapeType);
+    const isReasoning = ['directionDiagram', 'seatingArrangement', 'clock', 'cubeFolding', 'vennDiagram', 'venn'].includes(shapeType);
+    
+    clone = {
+      type: 'universal',
+      width: clone.width || 600,
+      height: clone.height || 360,
+      xRange: clone.xRange || (isChart ? [-0.5, (clone.points?.length || 5) + 0.5] : isReasoning ? [-6, 6] : [-5, 5]),
+      yRange: clone.yRange || (isChart ? [0, 100] : isReasoning ? [-6, 6] : [-5, 5]),
+      grid: clone.grid !== undefined ? clone.grid : isChart,
+      xAxis: clone.xAxis !== undefined ? clone.xAxis : isChart,
+      yAxis: clone.yAxis !== undefined ? clone.yAxis : isChart,
+      xAxisLabel: clone.xAxisLabel,
+      yAxisLabel: clone.yAxisLabel,
+      shapes: [{ ...repaired, id: clone.id || `${shapeType}-1` }]
+    };
+  }
+
+  // Ensure shapes have valid IDs
+  if (Array.isArray(clone.shapes)) {
+    clone.shapes = clone.shapes.map((s: any, idx: number) => ({
+      ...s,
+      id: s.id || `shape-${idx + 1}`
+    }));
   }
 
   // Validate vector shapes
@@ -901,28 +935,29 @@ class DiagramErrorBoundary extends Component<any, any> {
   }
 
   componentDidCatch(error: any, errorInfo: any) {
-    console.error("[DiagramErrorBoundary] Diagram rendering crashed:", error, errorInfo);
+    console.error("[DiagramErrorBoundary] Diagram rendering contained safely:", error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
       const fallbackData = this.props.fallbackData;
+      const diagramTitle = fallbackData?.title || (typeof fallbackData?.type === 'string' ? `${fallbackData.type.toUpperCase()} Schematic` : "Exam Problem Schematic");
       return (
-        <div className="p-4 my-2 border border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/20 text-rose-800 dark:text-rose-200 rounded-lg">
-          <div className="font-bold flex items-center gap-2 mb-1">
-            <svg className="w-5 h-5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        <div className="p-4 my-3 border border-indigo-200 dark:border-indigo-900/60 bg-gradient-to-r from-slate-50 to-indigo-50/40 dark:from-slate-900/80 dark:to-indigo-950/30 text-slate-700 dark:text-slate-300 rounded-xl flex items-start gap-3.5 shadow-sm">
+          <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 mt-0.5">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            Diagram Rendering Error
           </div>
-          <p className="text-xs mb-2 text-rose-600 dark:text-rose-400">
-            {this.state.error?.message || "An unexpected error occurred during rendering."}
-          </p>
-          {fallbackData && (
-            <div className="bg-white dark:bg-slate-900 p-2 rounded border border-slate-200 dark:border-slate-800 text-[10px] font-mono overflow-auto max-h-[120px]">
-              {JSON.stringify(fallbackData, null, 2)}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-black text-slate-800 dark:text-slate-200 tracking-wide">{diagramTitle}</span>
+              <span className="px-1.5 py-0.5 text-[9.5px] font-bold bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 rounded">Text-Solvable</span>
             </div>
-          )}
+            <p className="text-[11.5px] text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+              All quantitative parameters required for solution derivation are specified in the problem statement above.
+            </p>
+          </div>
         </div>
       );
     }

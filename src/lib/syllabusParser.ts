@@ -624,7 +624,11 @@ export function extractAutonomousSyllabusScope(
   // Clean and normalize target queries
   const cleanTarget = (str?: string) =>
     (str || '')
+      .replace(/^#+\s*/, '')
+      .replace(/^\[(?:chapter|paper|subject|sub[\s\-_]?subject|unit|section|module|lesson|topic)\s*:\s*([^\]]+)\]/i, (_m, p) => p)
       .replace(/^\[(?:[A-Za-z0-9_\- ]+)\][:\s]*/i, '')
+      .replace(/^(?:chapter|paper|subject|sub[\s\-_]?subject|unit|section|module|lesson|topic)\s*[-–—]?\s*(?:[ivx\d]+)?\s*[:\-–—]\s*/i, '')
+      .replace(/^(?:\d+[\.\)]\s*|\[\d+\]\s*|#\d+\s*)/, '')
       .replace(/[*_#\-:]/g, ' ')
       .replace(/\s+/g, ' ')
       .trim()
@@ -736,6 +740,7 @@ export function extractAutonomousSyllabusScope(
     let matchHeadingLevel = 99;
     let matchedTitle = '';
 
+    // Two-pass search: Pass 1 looks for an exact heading match (normLine === query); Pass 2 falls back to substring inclusion
     for (let i = 0; i < rawLines.length; i++) {
       const line = rawLines[i].trim();
       if (!line) continue;
@@ -747,14 +752,7 @@ export function extractAutonomousSyllabusScope(
         /^(?:#+\s*)?(?:Paper|Subject|Discipline|Sub[\s\-_]?Subject|Unit|Section|Module|Chapter|Topic|Lesson)\s*[:\-–—]/i.test(line) ||
         /^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(line);
 
-      const isBulletOrTopicLine = /^(?:[\*\-•]|\d+[\.\)])\s+/.test(line);
-
-      if (
-        isHeaderLine &&
-        (normLine === query ||
-          normLine.includes(query) ||
-          query.includes(normLine))
-      ) {
+      if (isHeaderLine && normLine === query) {
         matchLineIndex = i;
         matchHeadingLevel = getHeadingLevel(line);
         matchedTitle = line
@@ -762,40 +760,68 @@ export function extractAutonomousSyllabusScope(
           .replace(/[*_#]+$/g, '')
           .trim();
         break;
-      } else if (
-        isBulletOrTopicLine &&
-        (normLine === query ||
-          normLine.includes(query) ||
-          query.includes(normLine))
-      ) {
-        // Ascend to the nearest enclosing parent heading (Sub-Subject or Subject)
-        let parentIdx = i - 1;
-        while (parentIdx >= 0) {
-          const prev = rawLines[parentIdx].trim();
-          const prevIsHeader =
-            prev.startsWith('#') ||
-            /^(?:#+\s*)?\[(?:[A-Za-z0-9_\- ]+)\](?:\s*[:\-–—]|$)/i.test(prev) ||
-            /^(?:#+\s*)?(?:Paper|Subject|Discipline|Sub[\s\-_]?Subject|Unit|Section|Module|Chapter|Topic|Lesson)\s*[:\-–—]/i.test(prev) ||
-            /^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(prev);
+      }
+    }
 
-          if (prevIsHeader) {
-            break;
-          }
-          parentIdx--;
-        }
-        if (parentIdx >= 0) {
-          matchLineIndex = parentIdx;
-          matchHeadingLevel = getHeadingLevel(rawLines[parentIdx]);
-          matchedTitle = rawLines[parentIdx]
+    // Pass 2: Substring inclusion and bullet ascent if no exact match was found
+    if (matchLineIndex === -1) {
+      for (let i = 0; i < rawLines.length; i++) {
+        const line = rawLines[i].trim();
+        if (!line) continue;
+
+        const normLine = cleanTarget(line);
+        const isHeaderLine =
+          line.startsWith('#') ||
+          /^(?:#+\s*)?\[(?:[A-Za-z0-9_\- ]+)\](?:\s*[:\-–—]|$)/i.test(line) ||
+          /^(?:#+\s*)?(?:Paper|Subject|Discipline|Sub[\s\-_]?Subject|Unit|Section|Module|Chapter|Topic|Lesson)\s*[:\-–—]/i.test(line) ||
+          /^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(line);
+
+        const isBulletOrTopicLine = /^(?:[\*\-•]|\d+[\.\)])\s+/.test(line);
+
+        if (
+          isHeaderLine &&
+          (normLine.includes(query) || (normLine.length > 5 && query.includes(normLine)))
+        ) {
+          matchLineIndex = i;
+          matchHeadingLevel = getHeadingLevel(line);
+          matchedTitle = line
             .replace(/^[#\s*_\-]+/, '')
             .replace(/[*_#]+$/g, '')
             .trim();
-        } else {
-          matchLineIndex = i;
-          matchHeadingLevel = 99;
-          matchedTitle = line;
+          break;
+        } else if (
+          isBulletOrTopicLine &&
+          (normLine === query || normLine.includes(query) || query.includes(normLine))
+        ) {
+          // Ascend to the nearest enclosing parent heading (Sub-Subject or Subject)
+          let parentIdx = i - 1;
+          while (parentIdx >= 0) {
+            const prev = rawLines[parentIdx].trim();
+            const prevIsHeader =
+              prev.startsWith('#') ||
+              /^(?:#+\s*)?\[(?:[A-Za-z0-9_\- ]+)\](?:\s*[:\-–—]|$)/i.test(prev) ||
+              /^(?:#+\s*)?(?:Paper|Subject|Discipline|Sub[\s\-_]?Subject|Unit|Section|Module|Chapter|Topic|Lesson)\s*[:\-–—]/i.test(prev) ||
+              /^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(prev);
+
+            if (prevIsHeader) {
+              break;
+            }
+            parentIdx--;
+          }
+          if (parentIdx >= 0) {
+            matchLineIndex = parentIdx;
+            matchHeadingLevel = getHeadingLevel(rawLines[parentIdx]);
+            matchedTitle = rawLines[parentIdx]
+              .replace(/^[#\s*_\-]+/, '')
+              .replace(/[*_#]+$/g, '')
+              .trim();
+          } else {
+            matchLineIndex = i;
+            matchHeadingLevel = 99;
+            matchedTitle = line;
+          }
+          break;
         }
-        break;
       }
     }
 
@@ -828,12 +854,32 @@ export function extractAutonomousSyllabusScope(
     }
   }
 
-  // Fallback: If no specific section boundary matched, return first 8000 characters
+  // Fallback: If no specific section boundary matched, search for lines mentioning target title tokens
+  const relevantLines: string[] = [];
+  const queryTokens = (target.title || '').toLowerCase().split(/\s+/).filter(t => t.length > 3);
+  for (const line of rawLines) {
+    const lLower = line.toLowerCase();
+    if (queryTokens.some(tok => lLower.includes(tok))) {
+      relevantLines.push(line);
+    }
+  }
+
+  if (relevantLines.length >= 3) {
+    const scoped = relevantLines.join('\n').trim();
+    return {
+      scopedMarkdown: `### [Focused Syllabus Domain: ${target.title || 'Target Subject'}]\n${scoped}`,
+      matchedSectionTitle: target.title || 'Target Subject',
+      hierarchyLevel: 'subject',
+      totalLines: relevantLines.length
+    };
+  }
+
+  // Final fallback: strictly anchor to target title domain (NEVER dump unrelated top-of-syllabus chapters)
   return {
-    scopedMarkdown: fullMarkdown.slice(0, 8000).trim(),
-    matchedSectionTitle: target.title || 'General Syllabus',
-    hierarchyLevel: 'full',
-    totalLines: rawLines.length
+    scopedMarkdown: `### [Target Curriculum Module: ${target.title || 'Target Subject'}]\n- Authentic, advanced examination syllabus core topics for ${target.title || 'this module'}.\n- Core domain mechanisms, formulations, statutory codes, numerical formulas, and technical principles strictly within ${target.title || 'this domain'}.`,
+    matchedSectionTitle: target.title || 'Target Subject',
+    hierarchyLevel: 'subject',
+    totalLines: 3
   };
 }
 
@@ -858,6 +904,18 @@ export function extractSyllabusContents(scopedMarkdown: string): string[] {
 
   const lines = scopedMarkdown.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
   const contents: string[] = [];
+  const seen = new Set<string>();
+
+  const addContent = (text: string) => {
+    const cleaned = text
+      .replace(/^[-*\u2022\d]+[\)\.\s]*/, '')
+      .replace(/\*\*/g, '')
+      .trim();
+    if (cleaned.length > 5 && !seen.has(cleaned.toLowerCase())) {
+      seen.add(cleaned.toLowerCase());
+      contents.push(cleaned.slice(0, 120));
+    }
+  };
 
   for (const line of lines) {
     // Skip heading lines (the chapter/subject title itself)
@@ -875,19 +933,56 @@ export function extractSyllabusContents(scopedMarkdown: string): string[] {
         .replace(/^[-*\u2022\d]+[\)\.\s]*/, '')
         .replace(/\*\*/g, '')
         .trim();
-      if (clean.length > 5) {
-        contents.push(clean.slice(0, 120));
+
+      // Check if this line has a parent category and granular comma-separated sub-topics after a colon
+      const colonIdx = clean.indexOf(':');
+      if (colonIdx > 4 && colonIdx < clean.length - 10) {
+        const parentPrefix = clean.slice(0, colonIdx).trim();
+        const listPart = clean.slice(colonIdx + 1).trim();
+        const subItems = listPart.split(/,\s+/).map(s => s.trim()).filter(s => s.length > 3);
+        if (subItems.length >= 2) {
+          for (const item of subItems) {
+            addContent(`${parentPrefix}: ${item}`);
+          }
+          continue;
+        }
       }
+
+      addContent(clean);
     } else if (line.length > 20) {
       // Non-bulleted prose or colon-delimited topic groups (standard in civil service & engineering syllabi)
       // Split by sentence terminators: '. ' or '; ' or colon-cluster boundaries
       const sentences = line.split(/(?<=[.!?])\s+(?=[A-Z0-9])|;\s+/).map(s => s.trim()).filter(s => s.length > 8);
       if (sentences.length > 1) {
         for (const s of sentences) {
-          contents.push(s.replace(/^[-*\u2022\d]+[\)\.\s]*/, '').slice(0, 120));
+          const colonIdx = s.indexOf(':');
+          if (colonIdx > 4 && colonIdx < s.length - 10) {
+            const parentPrefix = s.slice(0, colonIdx).trim();
+            const listPart = s.slice(colonIdx + 1).trim();
+            const subItems = listPart.split(/,\s+/).map(item => item.trim()).filter(item => item.length > 3);
+            if (subItems.length >= 2) {
+              for (const item of subItems) {
+                addContent(`${parentPrefix}: ${item}`);
+              }
+              continue;
+            }
+          }
+          addContent(s);
         }
       } else {
-        contents.push(line.slice(0, 120));
+        const colonIdx = line.indexOf(':');
+        if (colonIdx > 4 && colonIdx < line.length - 10) {
+          const parentPrefix = line.slice(0, colonIdx).trim();
+          const listPart = line.slice(colonIdx + 1).trim();
+          const subItems = listPart.split(/,\s+/).map(item => item.trim()).filter(item => item.length > 3);
+          if (subItems.length >= 2) {
+            for (const item of subItems) {
+              addContent(`${parentPrefix}: ${item}`);
+            }
+            continue;
+          }
+        }
+        addContent(line);
       }
     }
   }
@@ -938,8 +1033,8 @@ export function computeQuestionNaturalDensity(
     conceptPointCount = Math.min(nonHeadingLines.length, 10);
   }
 
-  // Natural capacity: 2 questions per concept point, bounded 5-50
-  const rawCapacity = Math.max(5, Math.min(conceptPointCount * 2, 50));
+  // Commercial Question Bank capacity: 3 questions per concept point, scalable up to 250 (unless ceiling is provided)
+  const rawCapacity = Math.max(10, Math.min(conceptPointCount * 3, 250));
   const naturalCount = (ceiling && ceiling > 0)
     ? Math.min(rawCapacity, ceiling)
     : rawCapacity;

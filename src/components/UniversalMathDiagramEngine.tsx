@@ -157,14 +157,95 @@ const getCenterY = (s: any): number => {
   return 0;
 };
 
-const mapX = (x: number, xRange: [number, number], width: number): number => {
-  const [minX, maxX] = xRange;
-  return 60 + ((x - minX) / (maxX - minX)) * (width - 120);
+export function formatCompactNumber(val: number, unit: string = ''): string {
+  if (!Number.isFinite(val)) return '0' + unit;
+  if (Math.abs(val) < 0.00001) return '0' + unit;
+  const abs = Math.abs(val);
+  const sign = val < 0 ? '-' : '';
+  const trimmedUnit = unit.trim();
+  const lowerUnit = trimmedUnit.toLowerCase();
+
+  // Determine if unit is an explicit SI engineering/physical unit
+  const isEngineeringUnit = /^(?:pa|mpa|kpa|gpa|n|kn|mn|m|mm|cm|km|j|kj|mj|w|kw|mw|v|kv|a|ma|ka|hz|khz|mhz|ghz|kg|g|mg|s|ms|rad|deg|°)/i.test(lowerUnit);
+
+  // Check if unit already specifies Cr, L, or k to prevent duplicate suffixes (e.g. "2.5Cr Cr")
+  const unitHasCr = lowerUnit === 'cr' || lowerUnit === 'crore' || lowerUnit === 'crores';
+  const unitHasL = lowerUnit === 'l' || lowerUnit === 'lakh' || lowerUnit === 'lakhs';
+  const unitHasK = lowerUnit === 'k';
+
+  // Clean integers under 10,000 stay intact
+  if (abs < 10000 && Number.isInteger(val)) {
+    return `${sign}${abs}${unit}`;
+  }
+  // Decimals under 1
+  if (abs < 1) {
+    return `${sign}${parseFloat(abs.toFixed(3))}${unit}`;
+  }
+
+  // 1. SI Engineering Mode: Standard metric multipliers (k, M, G)
+  if (isEngineeringUnit) {
+    if (abs >= 1000000000) {
+      const g = abs / 1000000000;
+      const formatted = g >= 10 ? Math.round(g) : parseFloat(g.toFixed(1));
+      return `${sign}${formatted}G${unit}`;
+    }
+    if (abs >= 1000000) {
+      const m = abs / 1000000;
+      const formatted = m >= 10 ? Math.round(m) : parseFloat(m.toFixed(1));
+      return `${sign}${formatted}M${unit}`;
+    }
+    if (abs >= 1000) {
+      const k = abs / 1000;
+      const formatted = k >= 100 ? Math.round(k) : parseFloat(k.toFixed(1));
+      return `${sign}${formatted}k${unit}`;
+    }
+    return `${sign}${parseFloat(abs.toFixed(2))}${unit}`;
+  }
+
+  // 2. Demographic / Indian Currency & Statistics Mode: Lakhs & Crores
+  if (abs >= 10000000) {
+    const cr = abs / 10000000;
+    const formatted = cr >= 10 ? Math.round(cr) : parseFloat(cr.toFixed(1));
+    if (unitHasCr) {
+      return `${sign}${formatted}Cr`;
+    }
+    return `${sign}${formatted}Cr${unit}`;
+  }
+  if (abs >= 100000) {
+    const l = abs / 100000;
+    const formatted = l >= 10 ? Math.round(l) : parseFloat(l.toFixed(1));
+    if (unitHasL) {
+      return `${sign}${formatted}L`;
+    }
+    return `${sign}${formatted}L${unit}`;
+  }
+  if (abs >= 10000) {
+    const k = abs / 1000;
+    const formatted = k >= 100 ? Math.round(k) : parseFloat(k.toFixed(1));
+    if (unitHasK) {
+      return `${sign}${formatted}k`;
+    }
+    return `${sign}${formatted}k${unit}`;
+  }
+  return `${sign}${parseFloat(abs.toFixed(2))}${unit}`;
+}
+
+const mapX = (x: number, xRange: [number, number], width: number, leftMargin: number = 60, rightMargin: number = 60): number => {
+  const minX = Number.isFinite(xRange[0]) ? xRange[0] : -5;
+  const rawMaxX = Number.isFinite(xRange[1]) ? xRange[1] : 5;
+  const maxX = rawMaxX <= minX ? minX + 10 : rawMaxX;
+  const safeWidth = Math.max(width, leftMargin + rightMargin + 20);
+  const safeX = Number.isFinite(x) ? x : minX;
+  return leftMargin + ((safeX - minX) / (maxX - minX)) * (safeWidth - (leftMargin + rightMargin));
 };
 
-const mapY = (y: number, yRange: [number, number], height: number): number => {
-  const [minY, maxY] = yRange;
-  return (height - 60) - ((y - minY) / (maxY - minY)) * (height - 120);
+const mapY = (y: number, yRange: [number, number], height: number, topMargin: number = 60, bottomMargin: number = 60): number => {
+  const minY = Number.isFinite(yRange[0]) ? yRange[0] : -5;
+  const rawMaxY = Number.isFinite(yRange[1]) ? yRange[1] : 5;
+  const maxY = rawMaxY <= minY ? minY + 10 : rawMaxY;
+  const safeHeight = Math.max(height, topMargin + bottomMargin + 20);
+  const safeY = Number.isFinite(y) ? y : minY;
+  return (safeHeight - bottomMargin) - ((safeY - minY) / (maxY - minY)) * (safeHeight - (topMargin + bottomMargin));
 };
 
 const diagramKatexCache = new Map<string, string>();
@@ -256,7 +337,12 @@ const RenderLatexLabel: React.FC<{
       y={foY} 
       width={foWidth} 
       height={foHeight} 
-      style={{ overflow: 'visible', pointerEvents: 'none' }}
+      style={{ 
+        overflow: 'visible', 
+        pointerEvents: 'none',
+        transform: 'translate3d(0,0,0)',
+        WebkitTransform: 'translate3d(0,0,0)'
+      }}
     >
       <div 
         className={cn(
@@ -1258,6 +1344,8 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
   const activePointers = useRef<Map<number, any>>(new Map());
   const prevPinchDistance = useRef<number | null>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
+  const [showWheelHint, setShowWheelHint] = useState(false);
+  const wheelHintTimeout = useRef<any>(null);
 
   // Performance-optimized gesture tracking refs to bypass React render cycle
   const currentZoom = useRef(zoom);
@@ -1284,6 +1372,17 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  // Interactive Graph Element Tooltip State
+  const [activeTooltip, setActiveTooltip] = useState<{
+    x: number;
+    y: number;
+    title: string;
+    value: string;
+    subtext?: string;
+    color?: string;
+    targetId?: string;
+  } | null>(null);
+
   // Cursor coordinates
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0, cx: 0, cy: 0, svgX: 0, svgY: 0 });
 
@@ -1306,24 +1405,47 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
     ? (isMobile ? "rgba(99, 102, 241, 0.35)" : "rgba(99, 102, 241, 0.18)") 
     : (isMobile ? "rgba(99, 102, 241, 0.25)" : "rgba(99, 102, 241, 0.12)");
 
+  // Unique Instance Prefix to prevent SVG ID collisions across multiple diagrams on the same page
+  const instancePrefix = useMemo(() => {
+    return (data as any).instanceId || `diag_${Math.random().toString(36).substring(2, 9)}`;
+  }, [(data as any)?.instanceId]);
+
   const arrowDefs = (
     <defs>
+      <marker id={`${instancePrefix}-arrow`} viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+      </marker>
       <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
         <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+      </marker>
+      <marker id={`${instancePrefix}-dot`} viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4">
+        <circle cx="5" cy="5" r="5" fill="currentColor" />
       </marker>
       <marker id="dot" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4">
         <circle cx="5" cy="5" r="5" fill="currentColor" />
       </marker>
       {isDark ? (
-        <radialGradient id="grid-bg-gradient" cx="50%" cy="50%" r="70%">
-          <stop offset="0%" stopColor="#0d1527" />
-          <stop offset="100%" stopColor="#070b12" />
-        </radialGradient>
+        <>
+          <radialGradient id={`${instancePrefix}-grid-bg-gradient`} cx="50%" cy="50%" r="70%">
+            <stop offset="0%" stopColor="#0d1527" />
+            <stop offset="100%" stopColor="#070b12" />
+          </radialGradient>
+          <radialGradient id="grid-bg-gradient" cx="50%" cy="50%" r="70%">
+            <stop offset="0%" stopColor="#0d1527" />
+            <stop offset="100%" stopColor="#070b12" />
+          </radialGradient>
+        </>
       ) : (
-        <radialGradient id="grid-bg-gradient" cx="50%" cy="50%" r="70%">
-          <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="100%" stopColor="#f8fafc" />
-        </radialGradient>
+        <>
+          <radialGradient id={`${instancePrefix}-grid-bg-gradient`} cx="50%" cy="50%" r="70%">
+            <stop offset="0%" stopColor="#ffffff" />
+            <stop offset="100%" stopColor="#f8fafc" />
+          </radialGradient>
+          <radialGradient id="grid-bg-gradient" cx="50%" cy="50%" r="70%">
+            <stop offset="0%" stopColor="#ffffff" />
+            <stop offset="100%" stopColor="#f8fafc" />
+          </radialGradient>
+        </>
       )}
     </defs>
   );
@@ -1411,24 +1533,50 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
     return { xRange: finalXRange, yRange: finalYRange, autoScaled: true };
   }, [shapesData, data.xRange, data.yRange]);
 
-  const mx = useCallback((x: number) => mapX(x, xRange, vWidth), [xRange, vWidth]);
-  const my = useCallback((y: number) => mapY(y, yRange, vHeight), [yRange, vHeight]);
+  // Dynamic canvas left margin based on Y-axis values to prevent number clipping
+  const dynamicLeftMargin = useMemo(() => {
+    if (data.yAxis === false) return 50;
+    const maxYVal = Math.max(Math.abs(yRange[0]), Math.abs(yRange[1]));
+    const formattedStr = formatCompactNumber(maxYVal, data.yAxisUnit || '');
+    const charLen = formattedStr.length;
+    if (charLen <= 3) return 60;
+    return Math.min(95, 60 + (charLen - 3) * 7);
+  }, [data.yAxis, yRange, data.yAxisUnit]);
+
+  // Detect if diagram contains categorical bars or labeled points
+  const hasCategoricalBars = useMemo(() => {
+    return dynamicShapes.some(s => 
+      (s.type === 'barGraph' || s.type === 'histogram') ||
+      (s.type === 'lineGraph' && Array.isArray(s.points) && s.points.some((p: any) => p && typeof p === 'object' && p.label))
+    );
+  }, [dynamicShapes]);
+
+  const mx = useCallback((x: number) => mapX(x, xRange, vWidth, dynamicLeftMargin, 60), [xRange, vWidth, dynamicLeftMargin]);
+  const my = useCallback((y: number) => mapY(y, yRange, vHeight, 60, 60), [yRange, vHeight]);
 
   // Map distances
   const muX = useCallback((dx: number) => {
-    return dx * ((vWidth - 120) / (xRange[1] - xRange[0]));
-  }, [xRange, vWidth]);
+    const span = Math.max(0.001, Math.abs(xRange[1] - xRange[0]));
+    const safeW = Math.max(vWidth, dynamicLeftMargin + 80);
+    return (Number.isFinite(dx) ? dx : 0) * ((safeW - (dynamicLeftMargin + 60)) / span);
+  }, [xRange, vWidth, dynamicLeftMargin]);
 
   const muY = useCallback((dy: number) => {
-    return dy * ((vHeight - 120) / (yRange[1] - yRange[0]));
+    const span = Math.max(0.001, Math.abs(yRange[1] - yRange[0]));
+    const safeH = Math.max(vHeight, 140);
+    return (Number.isFinite(dy) ? dy : 0) * ((safeH - 120) / span);
   }, [yRange, vHeight]);
 
   // Inverse coordinate mapping (SVG -> Cartesian)
   const getCartesian = useCallback((svgX: number, svgY: number) => {
-    const x = ((svgX - 60) / (vWidth - 120)) * (xRange[1] - xRange[0]) + xRange[0];
-    const y = (((vHeight - 60) - svgY) / (vHeight - 120)) * (yRange[1] - yRange[0]) + yRange[0];
+    const spanX = Math.max(0.001, Math.abs(xRange[1] - xRange[0]));
+    const spanY = Math.max(0.001, Math.abs(yRange[1] - yRange[0]));
+    const safeW = Math.max(vWidth, dynamicLeftMargin + 80);
+    const safeH = Math.max(vHeight, 140);
+    const x = ((svgX - dynamicLeftMargin) / (safeW - (dynamicLeftMargin + 60))) * spanX + xRange[0];
+    const y = (((safeH - 60) - svgY) / (safeH - 120)) * spanY + yRange[0];
     return { x, y };
-  }, [xRange, yRange, vWidth, vHeight]);
+  }, [xRange, yRange, vWidth, vHeight, dynamicLeftMargin]);
   // Resolved Labels with Collision Resolution
   const resolvedLabels = useMemo(() => {
     if (!showLabels) return [];
@@ -1629,17 +1777,25 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
     const viewport = viewportRef.current;
     if (!viewport) return;
 
-    // Handle mouse wheel zooming on desktop
+    // Handle mouse wheel zooming on desktop (requiring Ctrl/Cmd, like Figma / Google Maps / Desmos)
     const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      const zoomFactor = 0.08;
-      const direction = e.deltaY < 0 ? 1 : -1;
-      setZoom(prev => Math.min(3.0, Math.max(0.5, prev + direction * zoomFactor)));
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const zoomFactor = 0.08;
+        const direction = e.deltaY < 0 ? 1 : -1;
+        setZoom(prev => Math.min(3.0, Math.max(0.5, prev + direction * zoomFactor)));
+      } else {
+        // Normal scroll is permitted, show hint
+        setShowWheelHint(true);
+        if (wheelHintTimeout.current) clearTimeout(wheelHintTimeout.current);
+        wheelHintTimeout.current = setTimeout(() => setShowWheelHint(false), 1600);
+      }
     };
 
     viewport.addEventListener('wheel', handleWheel, { passive: false });
     return () => {
       viewport.removeEventListener('wheel', handleWheel);
+      if (wheelHintTimeout.current) clearTimeout(wheelHintTimeout.current);
     };
   }, []);
 
@@ -1659,6 +1815,13 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
 
     if (e.button !== 0 || draggedId || activePointers.current.size > 1) return;
     
+    // For single-pointer touch on mobile: if canvas is at default 100% zoom and unpanned,
+    // do NOT hijack the touch! Allow native vertical page scrolling!
+    const isTouch = e.pointerType === 'touch';
+    if (isTouch && currentZoom.current <= 1.05 && currentOffset.current.x === 0 && currentOffset.current.y === 0) {
+      return;
+    }
+
     const target = e.currentTarget;
     try {
       target.setPointerCapture(e.pointerId);
@@ -1671,7 +1834,10 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
       offsetY: currentOffset.current.y,
     };
     setIsPanning(true);
-    e.preventDefault();
+    setActiveTooltip(null);
+    if (!isTouch || currentZoom.current > 1.05) {
+      e.preventDefault();
+    }
   };
 
   const handleCanvasPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -1813,7 +1979,7 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
     const svgDy = (clientDy / rect.height) * vHeight;
     
     // Map delta from pixels to cartesian units
-    const cartesianDx = svgDx * ((xRange[1] - xRange[0]) / (vWidth - 120));
+    const cartesianDx = svgDx * ((xRange[1] - xRange[0]) / (vWidth - (dynamicLeftMargin + 60)));
     const cartesianDy = -svgDy * ((yRange[1] - yRange[0]) / (vHeight - 120)); // Flip Y-axis delta
 
     setDynamicShapes(prev => prev.map(s => {
@@ -2047,90 +2213,92 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
       ref={containerRef}
     >
       {/* 1. Header Toolbar Panel */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-5 py-3 sm:py-3.5 bg-slate-50 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800 select-none backdrop-blur-md z-20 gap-3 rounded-t-2xl sm:rounded-t-[22px]">
-        <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-[#2563EB]" />
-          <span className="text-[10px] font-black font-sans uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-            {data.type?.toUpperCase() || 'MATH'} DIAGRAM ENGINE v2.0
+      <div className="flex flex-row items-center justify-between px-3 sm:px-5 py-2 sm:py-3.5 bg-slate-50 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800 select-none backdrop-blur-md z-20 gap-2 rounded-t-2xl sm:rounded-t-[22px]">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#2563EB]" />
+          <span className="text-[9px] sm:text-[10px] font-black font-sans uppercase tracking-[0.15em] sm:tracking-[0.2em] text-slate-500 dark:text-slate-400">
+            {data.type?.toUpperCase() || 'MATH'} <span className="hidden sm:inline">DIAGRAM ENGINE v2.0</span>
           </span>
         </div>
         
-        {/* Toggle controls */}
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5 w-full sm:w-auto justify-start sm:justify-end">
+        {/* Toggle & Zoom controls */}
+        <div className="flex items-center gap-1 sm:gap-2 justify-end">
           <button
             onClick={() => setShowLabels(!showLabels)}
             className={cn(
-              "p-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer",
+              "p-1 sm:p-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer",
               showLabels 
                 ? "bg-brand-50 border-brand-200 text-[#2563EB]" 
                 : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400"
             )}
             title="Toggle Labels"
           >
-            <Tag className="w-3.5 h-3.5" />
+            <Tag className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
           </button>
           
           <button
             onClick={() => setShowMeasurements(!showMeasurements)}
             className={cn(
-              "p-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer",
+              "p-1 sm:p-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer",
               showMeasurements 
                 ? "bg-brand-50 border-brand-200 text-[#2563EB]" 
                 : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400"
             )}
             title="Toggle Measurements"
           >
-            <Ruler className="w-3.5 h-3.5" />
+            <Ruler className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
           </button>
  
           <button
             onClick={() => setShowCoordinates(!showCoordinates)}
             className={cn(
-              "p-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer",
+              "hidden sm:inline-flex p-1 sm:p-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer",
               showCoordinates 
                 ? "bg-brand-50 border-brand-200 text-[#2563EB]" 
                 : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400"
             )}
             title="Toggle Cursor Coordinates"
           >
-            <MapPin className="w-3.5 h-3.5" />
+            <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
           </button>
  
           <button
             onClick={triggerReplay}
-            className="p-1.5 rounded-lg border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer"
+            className="hidden sm:inline-flex p-1 sm:p-1.5 rounded-lg border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer"
             title="Replay Animation"
           >
-            <Play className="w-3.5 h-3.5" />
+            <Play className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
           </button>
  
-          <div className="hidden sm:block h-4 w-[1px] bg-slate-300 dark:bg-slate-700 mx-1" />
+          <div className="h-3.5 sm:h-4 w-[1px] bg-slate-300 dark:bg-slate-700 mx-0.5 sm:mx-1" />
  
           {/* Zoom controls */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center">
             <button
               onClick={() => setZoom(prev => Math.max(0.5, prev - 0.15))}
-              className="p-1.5 rounded-l-lg border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer"
+              className="p-1 sm:p-1.5 rounded-l-lg border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer"
+              title="Zoom Out"
             >
-              <ZoomOut className="w-3.5 h-3.5" />
+              <ZoomOut className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             </button>
-            <span className="text-[10px] font-bold font-mono text-slate-400 w-11 text-center bg-white dark:bg-slate-800 border-y border-slate-200 dark:border-slate-700 py-1 select-none">
+            <span className="text-[9px] sm:text-[10px] font-bold font-mono text-slate-500 dark:text-slate-400 w-9 sm:w-11 text-center bg-white dark:bg-slate-800 border-y border-slate-200 dark:border-slate-700 py-1 select-none">
               {Math.round(zoom * 100)}%
             </span>
             <button
               onClick={() => setZoom(prev => Math.min(3.0, prev + 0.15))}
-              className="p-1.5 rounded-r-lg border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer"
+              className="p-1 sm:p-1.5 rounded-r-lg border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer"
+              title="Zoom In"
             >
-              <ZoomIn className="w-3.5 h-3.5" />
+              <ZoomIn className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             </button>
           </div>
  
           <button
             onClick={() => { setZoom(1.0); setOffset({ x: 0, y: 0 }); }}
-            className="p-1.5 rounded-lg border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all cursor-pointer"
+            className="p-1 sm:p-1.5 rounded-lg border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all cursor-pointer ml-0.5 sm:ml-1"
             title="Reset Canvas View"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <RotateCcw className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
           </button>
         </div>
       </div>
@@ -2142,12 +2310,12 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
         onPointerMove={handleCanvasPointerMove}
         onPointerUp={handleCanvasPointerUp}
         onPointerCancel={handleCanvasPointerUp}
-        onPointerLeave={(e) => { handleCanvasPointerUp(e); setIsMouseOverCanvas(false); }}
+        onPointerLeave={(e) => { handleCanvasPointerUp(e); setIsMouseOverCanvas(false); setActiveTooltip(null); }}
         onPointerEnter={() => setIsMouseOverCanvas(true)}
-        className="canvas-viewport p-3.5 sm:p-10 flex justify-center items-center bg-slate-50/50 dark:bg-[#070b12] overflow-hidden w-full select-none relative min-h-[260px] sm:min-h-[420px]"
+        className="canvas-viewport p-2 sm:p-8 flex justify-center items-center bg-slate-50/50 dark:bg-[#070b12] overflow-hidden w-full select-none relative min-h-[220px] sm:min-h-[420px]"
         style={{ 
-          cursor: isPanning ? 'grabbing' : (draggedId ? 'grabbing' : 'grab'),
-          touchAction: 'none'
+          cursor: isPanning ? 'grabbing' : (draggedId ? 'grabbing' : (zoom > 1.05 ? 'grab' : 'default')),
+          touchAction: (zoom > 1.05 || isPanning) ? 'none' : 'pan-y'
         }}
       >
         {/* Real-time Cartesian plane coordinate tooltip */}
@@ -2164,6 +2332,15 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
             <span>Y: <b>{cursorPos.y}</b></span>
           </div>
         )}
+
+        {/* Desktop Ctrl+Wheel Zoom Hint Toast */}
+        {showWheelHint && (
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-40 bg-slate-900/90 text-white backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-medium shadow-lg border border-slate-700 pointer-events-none transition-all duration-200 flex items-center gap-1.5">
+            <span>Use</span>
+            <kbd className="px-1.5 py-0.2 bg-slate-800 border border-slate-600 rounded text-[9px] font-mono font-bold">Ctrl</kbd>
+            <span>+ scroll to zoom</span>
+          </div>
+        )}
  
         {/* The Animated/Panned Diagram Wrapper */}
         <div 
@@ -2173,14 +2350,14 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
             transformOrigin: 'center center', 
             transition: isPanning || draggedId ? 'none' : 'transform 0.15s cubic-bezier(0.1, 0.8, 0.25, 1)',
             willChange: isPanning || draggedId ? 'transform' : 'auto',
-            touchAction: 'none'
+            touchAction: (zoom > 1.05 || isPanning) ? 'none' : 'pan-y'
           }}
           className="w-full max-w-[800px] flex justify-center items-center text-slate-800 dark:text-slate-200"
         >
           <svg
             ref={svgRef}
             width="100%"
-            style={{ aspectRatio: `${vWidth}/${vHeight}`, touchAction: 'none' }}
+            style={{ aspectRatio: `${vWidth}/${vHeight}`, touchAction: (zoom > 1.05 || isPanning) ? 'none' : 'pan-y' }}
             viewBox={`0 0 ${vWidth} ${vHeight}`}
             preserveAspectRatio={data.aspectRatio || "xMidYMid meet"}
             className="w-full h-auto pointer-events-auto"
@@ -2192,7 +2369,7 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
             <rect 
               width={vWidth} 
               height={vHeight} 
-              fill="url(#grid-bg-gradient)" 
+              fill={`url(#${instancePrefix}-grid-bg-gradient)`} 
               rx={12} 
             />
 
@@ -2250,7 +2427,7 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
               const showLine = true;
               const showArrow = data.xAxisArrow !== false;
               const showTicks = data.xAxisTicks !== false;
-              const showNumbers = data.xAxisNumbers !== false;
+              const showNumbers = data.xAxisNumbers !== undefined ? data.xAxisNumbers : (!hasCategoricalBars);
               const unit = data.xAxisUnit || '';
 
               const rangeVal = xRange[1] - xRange[0];
@@ -2354,7 +2531,7 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
                             )}
                             textAnchor="middle"
                           >
-                            {x}{unit}
+                            {formatCompactNumber(x, unit)}
                           </text>
                         )}
                       </g>
@@ -2486,7 +2663,8 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
                             )}
                             textAnchor={nearLeft ? 'start' : 'end'}
                           >
-                            {y}{unit}
+                            <title>{y}{unit}</title>
+                            {formatCompactNumber(y, unit)}
                           </text>
                         )}
                       </g>
@@ -3461,8 +3639,11 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
 
                   // 8. Statistics Venn Circle
                   case 'vennDiagram': {
-                    const rVal = muX(shape.r || 2.5);
-                    const count = shape.values?.length || 2;
+                    const rVal = muX(shape.r || 2.4);
+                    const rawValues = Array.isArray(shape.values) ? shape.values : [];
+                    const rawOverlaps = shape.overlaps || {};
+                    const rawSets = shape.sets || shape.items || [];
+                    const count = rawSets.length || (rawValues.length >= 7 ? 3 : 2);
                     const cyVal = my(0);
 
                     if (count === 3) {
@@ -3470,31 +3651,56 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
                       const cx2 = mx(1.0);
                       const cx3 = mx(0);
                       const cy3 = my(-1.2);
+
+                      const set1 = rawSets[0] || 'Set A';
+                      const set2 = rawSets[1] || 'Set B';
+                      const set3 = rawSets[2] || 'Set C';
+
+                      const valA = rawOverlaps.A_only ?? rawValues[0] ?? '';
+                      const valB = rawOverlaps.B_only ?? rawValues[1] ?? '';
+                      const valC = rawOverlaps.C_only ?? rawValues[2] ?? '';
+                      const valCenter = rawOverlaps.all_three ?? rawOverlaps.both ?? rawValues[6] ?? '';
+
                       return (
                         <g key={shapeKey} opacity={opacity}>
-                          <circle cx={cx1} cy={cyVal} r={rVal} fill="rgba(37,99,235,0.05)" stroke="#2563eb" strokeWidth={sWidth} />
-                          <circle cx={cx2} cy={cyVal} r={rVal} fill="rgba(99,102,241,0.05)" stroke="#4f46e5" strokeWidth={sWidth} />
-                          <circle cx={cx3} cy={cy3} r={rVal} fill="rgba(16,185,129,0.05)" stroke="#059669" strokeWidth={sWidth} />
+                          <circle cx={cx1} cy={cyVal} r={rVal} fill="rgba(37,99,235,0.06)" stroke="#2563eb" strokeWidth={sWidth} />
+                          <circle cx={cx2} cy={cyVal} r={rVal} fill="rgba(99,102,241,0.06)" stroke="#4f46e5" strokeWidth={sWidth} />
+                          <circle cx={cx3} cy={cy3} r={rVal} fill="rgba(16,185,129,0.06)" stroke="#059669" strokeWidth={sWidth} />
                           {showLabels && (
                             <>
-                              <text x={cx1 - rVal * 0.4} y={cyVal} className={cn("font-black fill-[#2563eb]", isMobile ? "text-[14px]" : "text-xs")}>Set A</text>
-                              <text x={cx2 + rVal * 0.4} y={cyVal} className={cn("font-black fill-[#4f46e5]", isMobile ? "text-[14px]" : "text-xs")}>Set B</text>
-                              <text x={cx3} y={cy3 - rVal * 0.4} className={cn("font-black fill-[#059669]", isMobile ? "text-[14px]" : "text-xs")} textAnchor="middle">Set C</text>
+                              <text x={cx1 - rVal * 0.4} y={cyVal - rVal * 0.7} className={cn("font-black fill-[#2563eb]", isMobile ? "text-[13px]" : "text-xs")} textAnchor="middle">{set1}</text>
+                              <text x={cx2 + rVal * 0.4} y={cyVal - rVal * 0.7} className={cn("font-black fill-[#4f46e5]", isMobile ? "text-[13px]" : "text-xs")} textAnchor="middle">{set2}</text>
+                              <text x={cx3} y={cy3 + rVal * 0.8} className={cn("font-black fill-[#059669]", isMobile ? "text-[13px]" : "text-xs")} textAnchor="middle">{set3}</text>
+                              
+                              {valA && <text x={cx1 - rVal * 0.45} y={cyVal} className="font-bold fill-slate-700 dark:fill-slate-200 text-[11px]" textAnchor="middle">{valA}</text>}
+                              {valB && <text x={cx2 + rVal * 0.45} y={cyVal} className="font-bold fill-slate-700 dark:fill-slate-200 text-[11px]" textAnchor="middle">{valB}</text>}
+                              {valC && <text x={cx3} y={cy3 - rVal * 0.4} className="font-bold fill-slate-700 dark:fill-slate-200 text-[11px]" textAnchor="middle">{valC}</text>}
+                              {valCenter && <text x={cx3} y={cyVal - 15} className="font-black fill-rose-600 dark:fill-rose-400 text-[11px]" textAnchor="middle">{valCenter}</text>}
                             </>
                           )}
                         </g>
                       );
                     } else {
-                      const cx1 = mx(-1.2);
-                      const cx2 = mx(1.2);
+                      const cx1 = mx(-1.1);
+                      const cx2 = mx(1.1);
+                      const set1 = rawSets[0] || 'Set A';
+                      const set2 = rawSets[1] || 'Set B';
+                      const valA = rawOverlaps.A_only ?? rawValues[0] ?? '';
+                      const valB = rawOverlaps.B_only ?? rawValues[1] ?? '';
+                      const valIntersection = rawOverlaps.both ?? rawOverlaps.intersection ?? rawValues[2] ?? '';
+
                       return (
                         <g key={shapeKey} opacity={opacity}>
                           <circle cx={cx1} cy={cyVal} r={rVal} fill="rgba(37,99,235,0.06)" stroke="#2563eb" strokeWidth={sWidth} />
                           <circle cx={cx2} cy={cyVal} r={rVal} fill="rgba(99,102,241,0.06)" stroke="#4f46e5" strokeWidth={sWidth} />
                           {showLabels && (
                             <>
-                              <text x={cx1 - 30} y={cyVal - rVal - 10} className={cn("font-black fill-[#2563eb]", isMobile ? "text-[14px]" : "text-xs")} textAnchor="middle">Set A</text>
-                              <text x={cx2 + 30} y={cyVal - rVal - 10} className={cn("font-black fill-[#4f46e5]", isMobile ? "text-[14px]" : "text-xs")} textAnchor="middle">Set B</text>
+                              <text x={cx1 - 25} y={cyVal - rVal - 12} className={cn("font-black fill-[#2563eb]", isMobile ? "text-[13px]" : "text-xs")} textAnchor="middle">{set1}</text>
+                              <text x={cx2 + 25} y={cyVal - rVal - 12} className={cn("font-black fill-[#4f46e5]", isMobile ? "text-[13px]" : "text-xs")} textAnchor="middle">{set2}</text>
+                              
+                              {valA && <text x={cx1 - rVal * 0.4} y={cyVal} className="font-bold fill-slate-700 dark:fill-slate-200 text-[11px]" textAnchor="middle">{valA}</text>}
+                              {valB && <text x={cx2 + rVal * 0.4} y={cyVal} className="font-bold fill-slate-700 dark:fill-slate-200 text-[11px]" textAnchor="middle">{valB}</text>}
+                              {valIntersection && <text x={(cx1 + cx2) / 2} y={cyVal} className="font-black fill-rose-600 dark:fill-rose-400 text-[11px]" textAnchor="middle">{valIntersection}</text>}
                             </>
                           )}
                         </g>
@@ -3546,20 +3752,83 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
                   // 10. Graph & Chart shape types
                   case 'lineGraph': {
                     const pts = shape.points || [];
-                    const pointsStr = pts.map((p: any) => `${mx(Array.isArray(p) ? p[0] : p.x)},${my(Array.isArray(p) ? p[1] : p.y)}`).join(' L ');
+                    const pointsStr = pts.map((p: any) => `${mx(Array.isArray(p) ? p[0] : (p.x !== undefined ? p.x : 0))},${my(Array.isArray(p) ? p[1] : (p.y !== undefined ? p.y : 0))}`).join(' L ');
+                    
+                    const catLabels = pts.map((p: any) => Array.isArray(p) ? '' : String(p.label || (p.x > 100 ? p.x : '')));
+                    const maxCatLength = catLabels.reduce((m: number, l: string) => Math.max(m, l.length), 0);
+                    const needsRotation = maxCatLength >= 7 || pts.length >= 5;
+                    const isHighDensity = pts.length >= 8 || maxCatLength > 16;
+                    const rotAngle = isHighDensity ? -48 : (needsRotation ? -35 : 0);
+
                     return (
                       <g key={shapeKey}>
                         <path d={`M ${pointsStr}`} fill="none" stroke={strokeColor} strokeWidth={sWidth} {...dashProps} />
                         {pts.map((p: any, pIdx: number) => {
-                          const px = mx(Array.isArray(p) ? p[0] : p.x);
-                          const py = my(Array.isArray(p) ? p[1] : p.y);
+                          const px = mx(Array.isArray(p) ? p[0] : (p.x !== undefined ? p.x : pIdx + 1));
+                          const py = my(Array.isArray(p) ? p[1] : (p.y !== undefined ? p.y : 0));
+                          const catLabel = Array.isArray(p) ? '' : String(p.label || (p.x > 100 ? p.x : ''));
+                          const rawVal = Array.isArray(p) ? p[1] : (p.y ?? '');
+                          const numVal = Number(rawVal);
+                          const valText = isNaN(numVal) ? String(rawVal) : (Math.abs(numVal) >= 10000 ? formatCompactNumber(numVal) : String(rawVal));
+                          const catY = my(0) + (isMobile ? 18 : 14);
+                          const ptId = `${shapeKey}_pt_${pIdx}`;
+                          const isPtHovered = activeTooltip?.targetId === ptId;
+
                           return (
                             <g key={pIdx}>
-                              <circle cx={px} cy={py} r={isMobile ? 7.5 : 5} fill="#ffffff" stroke={strokeColor} strokeWidth={isMobile ? 3.0 : 2} />
+                              {isPtHovered && (
+                                <circle 
+                                  cx={px} 
+                                  cy={py} 
+                                  r={isMobile ? 12 : 9} 
+                                  fill="none" 
+                                  stroke={isDark ? "#38bdf8" : "#2563eb"} 
+                                  strokeWidth={2} 
+                                  opacity={0.5} 
+                                />
+                              )}
+                              <circle 
+                                cx={px} 
+                                cy={py} 
+                                r={isPtHovered ? (isMobile ? 9 : 7) : (isMobile ? 7.5 : 5)} 
+                                fill={isPtHovered ? (isDark ? "#38bdf8" : "#2563eb") : "#ffffff"} 
+                                stroke={strokeColor} 
+                                strokeWidth={isPtHovered ? 3.5 : (isMobile ? 3.0 : 2)} 
+                                className="cursor-pointer transition-all duration-150"
+                                onPointerEnter={(e) => {
+                                  e.stopPropagation();
+                                  setActiveTooltip({
+                                    x: px,
+                                    y: py,
+                                    title: catLabel || `Point ${pIdx + 1}`,
+                                    value: valText ? `${valText}${data.unit ? ' ' + data.unit : ''}` : String(rawVal),
+                                    subtext: `Index #${pIdx + 1}`,
+                                    color: strokeColor,
+                                    targetId: ptId
+                                  });
+                                }}
+                                onPointerLeave={() => {
+                                  if (activeTooltip?.targetId === ptId) setActiveTooltip(null);
+                                }}
+                              />
                               {showLabels && (
-                                <text x={px} y={py - (isMobile ? 14 : 10)} className={cn("font-bold fill-current", isMobile ? "text-[14px]" : "text-[10px]")} textAnchor="middle">
-                                  {p.label || `${Array.isArray(p) ? p[1] : p.y}`}
-                                </text>
+                                <>
+                                  <text x={px} y={py - (isMobile ? 12 : 8)} className={cn("font-bold fill-current select-none", isHighDensity ? "text-[8.5px]" : (isMobile ? "text-[12px]" : "text-[10px]"))} textAnchor="middle">
+                                    <title>{String(rawVal)}</title>
+                                    {valText}
+                                  </text>
+                                  {catLabel && (
+                                    <text 
+                                      x={px} 
+                                      y={catY} 
+                                      className={cn("font-bold fill-slate-600 dark:fill-slate-300 select-none", isHighDensity ? "text-[8px]" : (isMobile ? "text-[11px]" : "text-[9px]"))} 
+                                      textAnchor={needsRotation ? "end" : "middle"}
+                                      transform={needsRotation ? `rotate(${rotAngle}, ${px}, ${catY})` : undefined}
+                                    >
+                                      {catLabel}
+                                    </text>
+                                  )}
+                                </>
                               )}
                             </g>
                           );
@@ -3570,17 +3839,34 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
 
                   case 'barGraph':
                   case 'histogram': {
-                    const pts = shape.points || [];
-                    const barW = shape.width || 0.4;
+                    const pts = (shape.points && shape.points.length > 0) ? shape.points : [{ x: 1, y: 10, label: 'A' }, { x: 2, y: 20, label: 'B' }, { x: 3, y: 15, label: 'C' }];
+                    const barW = shape.width || 0.45;
                     const zeroY = my(0);
+
+                    const catLabels = pts.map((p: any) => Array.isArray(p) ? '' : String(p.label || p.category || (p.x > 100 ? p.x : '')));
+                    const maxCatLength = catLabels.reduce((m: number, l: string) => Math.max(m, l.length), 0);
+                    const needsRotation = maxCatLength >= 7 || pts.length >= 5;
+                    const isHighDensity = pts.length >= 8 || maxCatLength > 16;
+                    const rotAngle = isHighDensity ? -48 : (needsRotation ? -35 : 0);
+
                     return (
                       <g key={shapeKey}>
                         {pts.map((p: any, pIdx: number) => {
-                          const px = mx(Array.isArray(p) ? p[0] : p.x) - muX(barW) / 2;
-                          const py = my(Array.isArray(p) ? p[1] : p.y);
-                          const bh = Math.abs(zeroY - py);
+                          const rawX = Array.isArray(p) ? p[0] : (p.x !== undefined ? p.x : pIdx + 1);
+                          const rawY = Number(Array.isArray(p) ? p[1] : (p.y !== undefined ? p.y : p.value));
+                          const px = mx(rawX) - muX(barW) / 2;
+                          const py = my(rawY);
+                          const bh = Math.max(2, Math.abs(zeroY - py));
                           const by = Math.min(zeroY, py);
                           const bw = muX(barW);
+                          const catLabel = Array.isArray(p) ? '' : String(p.label || p.category || (p.x > 100 ? p.x : ''));
+                          const valText = isNaN(rawY) ? '' : (Math.abs(rawY) >= 10000 ? formatCompactNumber(rawY) : String(rawY));
+                          const labelX = px + bw / 2;
+                          const catY = zeroY + (isMobile ? 18 : 14);
+
+                          const barId = `${shapeKey}_bar_${pIdx}`;
+                          const isBarHovered = activeTooltip?.targetId === barId;
+
                           return (
                             <g key={pIdx}>
                               <rect
@@ -3589,14 +3875,57 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
                                 width={bw}
                                 height={bh}
                                 fill={fillColor}
-                                fillOpacity={fillOpacity}
-                                stroke={strokeColor}
-                                strokeWidth={sWidth}
+                                fillOpacity={activeTooltip ? (isBarHovered ? 1.0 : 0.45) : fillOpacity}
+                                stroke={isBarHovered ? (isDark ? '#60a5fa' : '#2563eb') : strokeColor}
+                                strokeWidth={isBarHovered ? Math.max(sWidth + 1.5, 2.5) : sWidth}
+                                rx={3}
+                                className="cursor-pointer transition-all duration-150"
+                                style={{
+                                  filter: isBarHovered ? (isDark ? "drop-shadow(0 0 6px rgba(96,165,250,0.65))" : "drop-shadow(0 3px 8px rgba(37,99,235,0.4))") : undefined
+                                }}
+                                onPointerEnter={(e) => {
+                                  e.stopPropagation();
+                                  setActiveTooltip({
+                                    x: labelX,
+                                    y: Math.max(25, by),
+                                    title: catLabel || `Category #${pIdx + 1}`,
+                                    value: valText ? `${valText}${data.unit ? ' ' + data.unit : ''}` : String(rawY),
+                                    subtext: rawY < 0 ? 'Deficit / Negative' : undefined,
+                                    color: fillColor || strokeColor,
+                                    targetId: barId
+                                  });
+                                }}
+                                onPointerLeave={() => {
+                                  if (activeTooltip?.targetId === barId) setActiveTooltip(null);
+                                }}
                               />
                               {showLabels && (
-                                <text x={px + bw / 2} y={by - (isMobile ? 12 : 8)} className={cn("font-bold fill-current", isMobile ? "text-[14px]" : "text-[10px]")} textAnchor="middle">
-                                  {p.label || `${Array.isArray(p) ? p[1] : p.y}`}
-                                </text>
+                                <>
+                                  {/* Numeric value above positive bar or below negative bar */}
+                                  {valText && (
+                                    <text 
+                                      x={labelX} 
+                                      y={rawY < 0 ? (by + bh + (isMobile ? 14 : 10)) : (by - (isMobile ? 10 : 6))} 
+                                      className={cn("font-bold fill-current select-none", isHighDensity ? "text-[8.5px]" : (isMobile ? "text-[12px]" : "text-[10px]"))} 
+                                      textAnchor="middle"
+                                    >
+                                      <title>{String(rawY)}</title>
+                                      {valText}
+                                    </text>
+                                  )}
+                                  {/* Category label below the baseline with auto-rotation when crowded */}
+                                  {catLabel && (
+                                    <text 
+                                      x={labelX} 
+                                      y={catY} 
+                                      className={cn("font-bold fill-slate-600 dark:fill-slate-300 select-none", isHighDensity ? "text-[8px]" : (isMobile ? "text-[11px]" : "text-[9px]"))} 
+                                      textAnchor={needsRotation ? "end" : "middle"}
+                                      transform={needsRotation ? `rotate(${rotAngle}, ${labelX}, ${catY})` : undefined}
+                                    >
+                                      {catLabel}
+                                    </text>
+                                  )}
+                                </>
                               )}
                             </g>
                           );
@@ -3606,54 +3935,161 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
                   }
 
                   case 'pieChart': {
-                    const cxVal = mx(getCenterX(shape));
-                    const cyVal = my(getCenterY(shape));
-                    const rVal = shape.r !== undefined ? muX(shape.r) : 100;
-                    const vals = shape.values || [30, 20, 50];
-                    const total = vals.reduce((a: number, b: number) => a + b, 0);
+                    const vals: number[] = ((shape.values && shape.values.length > 0) ? shape.values : (Array.isArray(shape.points) && shape.points.length > 0 ? shape.points.map((p: any) => p?.y ?? p?.[1] ?? p?.value) : [30, 20, 50])).map(Number);
+                    const items: string[] = shape.items || shape.labels || (Array.isArray(shape.points) ? shape.points.map((p: any) => p?.label || p?.name) : []);
+                    const total = vals.reduce((a: number, b: number) => a + (isNaN(b) ? 0 : b), 0) || 100;
+                    
+                    // Side-by-side layout for complex pie charts (5+ slices or long legend) on wider viewports
+                    const isSideBySide = (vals.length >= 5 || items.some(it => String(it).length > 12)) && vWidth >= 620;
+                    const cxVal = isSideBySide ? vWidth * 0.35 : mx(getCenterX(shape));
+                    const cyVal = isSideBySide ? vHeight * 0.5 : my(getCenterY(shape));
+                    const baseR = shape.r !== undefined ? muX(shape.r) : 95;
+                    const rVal = isSideBySide ? Math.min(baseR, 130) : baseR;
+                    
                     let currentAngle = 0;
+                    const premiumColors = ['#4f46e5', '#f43f5e', '#059669', '#d97706', '#7c3aed', '#ea580c', '#0d9488', '#0284c7'];
                     
-                    const premiumColors = ['#4f46e5', '#f43f5e', '#059669', '#d97706', '#7c3aed', '#ea580c', '#0d9488'];
-                    
+                    const slices: React.ReactNode[] = [];
+                    const legendItems: React.ReactNode[] = [];
+
+                    vals.forEach((v: number, vIdx: number) => {
+                      const val = isNaN(v) ? 0 : v;
+                      const angle = (val / total) * 360;
+                      const startRad = (currentAngle - 90) * Math.PI / 180;
+                      const endRad = (currentAngle + angle - 90) * Math.PI / 180;
+                      
+                      const x1 = cxVal + rVal * Math.cos(startRad);
+                      const y1 = cyVal + rVal * Math.sin(startRad);
+                      const x2 = cxVal + rVal * Math.cos(endRad);
+                      const y2 = cyVal + rVal * Math.sin(endRad);
+                      
+                      const isFullCircle = angle >= 359.9 || vals.length === 1;
+                      const largeArcFlag = angle > 180 ? 1 : 0;
+                      const pathD = `M ${cxVal} ${cyVal} L ${x1} ${y1} A ${rVal} ${rVal} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
+                      const segmentColor = premiumColors[vIdx % premiumColors.length];
+                      
+                      const midRad = (currentAngle + angle / 2 - 90) * Math.PI / 180;
+                      const lx = cxVal + (isFullCircle ? 0 : (rVal * 0.62) * Math.cos(midRad));
+                      const ly = cyVal + (isFullCircle ? 0 : (rVal * 0.62) * Math.sin(midRad));
+                      const pct = Math.round((val / total) * 100);
+                      const itemName = items[vIdx] || `Category ${vIdx + 1}`;
+                      const formattedVal = Math.abs(val) >= 10000 ? formatCompactNumber(val) : String(val);
+
+                      const sliceId = `${shapeKey}_slice_${vIdx}`;
+                      const isSliceHovered = activeTooltip?.targetId === sliceId;
+                      const popDist = isSliceHovered && !isFullCircle ? 7 : 0;
+                      const popX = popDist * Math.cos(midRad);
+                      const popY = popDist * Math.sin(midRad);
+                      const transformPop = isSliceHovered && !isFullCircle ? `translate(${popX}, ${popY})` : undefined;
+
+                      currentAngle += angle;
+
+                      slices.push(
+                        <g 
+                          key={vIdx} 
+                          transform={transformPop}
+                          className="cursor-pointer transition-transform duration-200"
+                          style={{ willChange: 'transform' }}
+                          onPointerEnter={(e) => {
+                            e.stopPropagation();
+                            setActiveTooltip({
+                              x: lx,
+                              y: ly,
+                              title: itemName,
+                              value: `${formattedVal}${data.unit ? ' ' + data.unit : ''} (${pct}%)`,
+                              subtext: `Total: ${total}`,
+                              color: segmentColor,
+                              targetId: sliceId
+                            });
+                          }}
+                          onPointerLeave={() => {
+                            if (activeTooltip?.targetId === sliceId) setActiveTooltip(null);
+                          }}
+                        >
+                          {isFullCircle ? (
+                            <circle
+                              cx={cxVal}
+                              cy={cyVal}
+                              r={rVal}
+                              fill={segmentColor}
+                              fillOpacity={activeTooltip ? (isSliceHovered ? 1.0 : 0.6) : 0.78}
+                              stroke="#ffffff"
+                              strokeWidth={isSliceHovered ? (isMobile ? 3.5 : 2.5) : (isMobile ? 2.5 : 1.5)}
+                              style={{
+                                filter: isSliceHovered ? "drop-shadow(0 0 8px rgba(0,0,0,0.35))" : undefined
+                              }}
+                            />
+                          ) : (
+                            <path
+                              d={pathD}
+                              fill={segmentColor}
+                              fillOpacity={activeTooltip ? (isSliceHovered ? 1.0 : 0.6) : 0.78}
+                              stroke="#ffffff"
+                              strokeWidth={isSliceHovered ? (isMobile ? 3.5 : 2.5) : (isMobile ? 2.5 : 1.5)}
+                              style={{
+                                filter: isSliceHovered ? "drop-shadow(0 0 8px rgba(0,0,0,0.35))" : undefined
+                              }}
+                            />
+                          )}
+                          {showLabels && (isFullCircle || angle >= 16) && pct >= 5 && (
+                            <text x={lx} y={ly} className={cn("font-black fill-white select-none", isMobile ? "text-[13px]" : "text-[10px]")} textAnchor="middle" dominantBaseline="middle">
+                              {pct}%
+                            </text>
+                          )}
+                        </g>
+                      );
+
+                      if (items.length > 0) {
+                        legendItems.push(
+                          <div 
+                            key={vIdx} 
+                            onPointerEnter={() => {
+                              setActiveTooltip({
+                                x: lx,
+                                y: ly,
+                                title: itemName,
+                                value: `${formattedVal}${data.unit ? ' ' + data.unit : ''} (${pct}%)`,
+                                subtext: `Total: ${total}`,
+                                color: segmentColor,
+                                targetId: sliceId
+                              });
+                            }}
+                            onPointerLeave={() => {
+                              if (activeTooltip?.targetId === sliceId) setActiveTooltip(null);
+                            }}
+                            className={cn(
+                              "flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-bold transition-all duration-150 cursor-pointer",
+                              isSliceHovered 
+                                ? "bg-indigo-100 dark:bg-indigo-900/60 ring-2 ring-indigo-500 shadow-sm text-indigo-950 dark:text-white scale-[1.03]" 
+                                : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200/80 dark:hover:bg-slate-700/80"
+                            )}
+                          >
+                            <span className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs" style={{ backgroundColor: segmentColor }} />
+                            <span className="truncate max-w-[120px]">{itemName}:</span>
+                            <span className="text-slate-900 dark:text-white font-extrabold">{formattedVal} ({pct}%)</span>
+                          </div>
+                        );
+                      }
+                    });
+
                     return (
                       <g key={shapeKey}>
-                        {vals.map((v: number, vIdx: number) => {
-                          const angle = (v / total) * 360;
-                          const startRad = (currentAngle - 90) * Math.PI / 180;
-                          const endRad = (currentAngle + angle - 90) * Math.PI / 180;
-                          
-                          const x1 = cxVal + rVal * Math.cos(startRad);
-                          const y1 = cyVal + rVal * Math.sin(startRad);
-                          const x2 = cxVal + rVal * Math.cos(endRad);
-                          const y2 = cyVal + rVal * Math.sin(endRad);
-                          
-                          const largeArcFlag = angle > 180 ? 1 : 0;
-                          const pathD = `M ${cxVal} ${cyVal} L ${x1} ${y1} A ${rVal} ${rVal} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
-                          const segmentColor = premiumColors[vIdx % premiumColors.length];
-                          
-                          const midRad = (currentAngle + angle / 2 - 90) * Math.PI / 180;
-                          const lx = cxVal + (rVal * 0.6) * Math.cos(midRad);
-                          const ly = cyVal + (rVal * 0.6) * Math.sin(midRad);
-                          
-                          currentAngle += angle;
-                          
-                          return (
-                            <g key={vIdx}>
-                              <path
-                                d={pathD}
-                                fill={segmentColor}
-                                fillOpacity={0.7}
-                                stroke="#ffffff"
-                                strokeWidth={isMobile ? 2.5 : 1.5}
-                              />
-                              {showLabels && (
-                                <text x={lx} y={ly} className={cn("font-black fill-white", isMobile ? "text-[14px]" : "text-[10px]")} textAnchor="middle" dominantBaseline="middle">
-                                  {Math.round((v / total) * 100)}%
-                                </text>
-                              )}
-                            </g>
-                          );
-                        })}
+                        {slices}
+                        {legendItems.length > 0 && showLabels && (
+                          isSideBySide ? (
+                            <foreignObject x={vWidth * 0.60} y={30} width={vWidth * 0.38} height={vHeight - 60} style={{ overflow: 'visible' }}>
+                              <div className="flex flex-col justify-center items-start gap-1.5 px-2 max-h-full overflow-y-auto">
+                                {legendItems}
+                              </div>
+                            </foreignObject>
+                          ) : (
+                            <foreignObject x={Math.max(10, cxVal - 260)} y={cyVal + rVal + 18} width={Math.min(vWidth - 20, 520)} height={100} style={{ overflow: 'visible' }}>
+                              <div className="flex flex-wrap justify-center items-center gap-1.5 px-2">
+                                {legendItems}
+                              </div>
+                            </foreignObject>
+                          )
+                        )}
                       </g>
                     );
                   }
@@ -3945,8 +4381,10 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
 
                   case 'seatingArrangement': {
                     const type = shape.seatingType || 'circular';
-                    const names = shape.points || [];
-                    const n = names.length || 6;
+                    const rawNames = (Array.isArray(shape.points) && shape.points.length > 0) ? shape.points : ((Array.isArray(shape.names) && shape.names.length > 0) ? shape.names : (Array.isArray(shape.items) && shape.items.length > 0 ? shape.items : []));
+                    const names = rawNames.length > 0 ? rawNames : ['A', 'B', 'C', 'D', 'E', 'F'];
+                    const n = names.length;
+                    const chairScale = n > 8 ? Math.max(0.72, 8 / n) : 1;
                     const cx = mx(shape.x || 0);
                     const cy = my(shape.y || 0);
                     
@@ -3959,12 +4397,46 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
                             const angle = (idx * 2 * Math.PI) / n;
                             const cxChair = cx + tableR * Math.cos(angle);
                             const cyChair = cy + tableR * Math.sin(angle);
-                            const label = typeof chair === 'string' ? chair : (chair.label || chair.text || String.fromCharCode(65 + idx));
+                            const rawLabel = typeof chair === 'string' ? chair : (chair.label || chair.text || String.fromCharCode(65 + idx));
+                            const labelStr = String(rawLabel);
+                            const chairW = Math.max(26, (labelStr.length * 7.2 + 12) * chairScale);
+                            const chairH = Math.round(26 * chairScale);
+                            const chairId = `${shapeKey}_chair_${idx}`;
+                            const isChairHovered = activeTooltip?.targetId === chairId;
+
                             return (
                               <g key={idx}>
-                                <circle cx={cxChair} cy={cyChair} r={16} fill="#ffffff" stroke={strokeColor} strokeWidth={2} />
-                                <text x={cxChair} y={cyChair} className="text-[10px] font-black fill-current" textAnchor="middle" dominantBaseline="middle">
-                                  {label}
+                                <rect 
+                                  x={cxChair - chairW / 2} 
+                                  y={cyChair - chairH / 2} 
+                                  width={chairW} 
+                                  height={chairH} 
+                                  rx={chairH / 2} 
+                                  fill={isChairHovered ? (isDark ? "#312e81" : "#e0e7ff") : "#ffffff"} 
+                                  stroke={isChairHovered ? (isDark ? "#818cf8" : "#4f46e5") : strokeColor} 
+                                  strokeWidth={isChairHovered ? 2.5 : 2} 
+                                  className="cursor-pointer transition-all duration-150"
+                                  style={{
+                                    filter: isChairHovered ? "drop-shadow(0 0 6px rgba(99,102,241,0.5))" : undefined
+                                  }}
+                                  onPointerEnter={(e) => {
+                                    e.stopPropagation();
+                                    setActiveTooltip({
+                                      x: cxChair,
+                                      y: cyChair,
+                                      title: `Seat #${idx + 1}`,
+                                      value: labelStr,
+                                      subtext: 'Circular Arrangement',
+                                      color: strokeColor,
+                                      targetId: chairId
+                                    });
+                                  }}
+                                  onPointerLeave={() => {
+                                    if (activeTooltip?.targetId === chairId) setActiveTooltip(null);
+                                  }}
+                                />
+                                <text x={cxChair} y={cyChair} className={cn("font-black select-none pointer-events-none", isChairHovered ? "fill-indigo-600 dark:fill-indigo-300" : "fill-slate-800 dark:fill-slate-100", n > 8 ? "text-[8px]" : "text-[10px]")} textAnchor="middle" dominantBaseline="middle">
+                                  {labelStr}
                                 </text>
                               </g>
                             );
@@ -3979,12 +4451,46 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
                           {names.map((seat: any, idx: number) => {
                             const offset = names.length > 1 ? (idx / (names.length - 1) - 0.5) * (widthVal - 40) : 0;
                             const sx = cx + offset;
-                            const label = typeof seat === 'string' ? seat : (seat.label || seat.text || String.fromCharCode(65 + idx));
+                            const rawLabel = typeof seat === 'string' ? seat : (seat.label || seat.text || String.fromCharCode(65 + idx));
+                            const labelStr = String(rawLabel);
+                            const chairW = Math.max(28, labelStr.length * 7.2 + 12);
+                            const chairH = 24;
+                            const chairId = `${shapeKey}_linchair_${idx}`;
+                            const isChairHovered = activeTooltip?.targetId === chairId;
+
                             return (
                               <g key={idx}>
-                                <circle cx={sx} cy={cy} r={14} fill="#ffffff" stroke={strokeColor} strokeWidth={1.5} />
-                                <text x={sx} y={cy} className="text-[10px] font-black fill-current" textAnchor="middle" dominantBaseline="middle">
-                                  {label}
+                                <rect 
+                                  x={sx - chairW / 2} 
+                                  y={cy - chairH / 2} 
+                                  width={chairW} 
+                                  height={chairH} 
+                                  rx={chairH / 2} 
+                                  fill={isChairHovered ? (isDark ? "#312e81" : "#e0e7ff") : "#ffffff"} 
+                                  stroke={isChairHovered ? (isDark ? "#818cf8" : "#4f46e5") : strokeColor} 
+                                  strokeWidth={isChairHovered ? 2.5 : 1.5} 
+                                  className="cursor-pointer transition-all duration-150"
+                                  style={{
+                                    filter: isChairHovered ? "drop-shadow(0 0 6px rgba(99,102,241,0.5))" : undefined
+                                  }}
+                                  onPointerEnter={(e) => {
+                                    e.stopPropagation();
+                                    setActiveTooltip({
+                                      x: sx,
+                                      y: cy,
+                                      title: `Seat #${idx + 1}`,
+                                      value: labelStr,
+                                      subtext: 'Linear Row Seat',
+                                      color: strokeColor,
+                                      targetId: chairId
+                                    });
+                                  }}
+                                  onPointerLeave={() => {
+                                    if (activeTooltip?.targetId === chairId) setActiveTooltip(null);
+                                  }}
+                                />
+                                <text x={sx} y={cy} className={cn("text-[10px] font-black select-none pointer-events-none", isChairHovered ? "fill-indigo-600 dark:fill-indigo-300" : "fill-slate-800 dark:fill-slate-100")} textAnchor="middle" dominantBaseline="middle">
+                                  {labelStr}
                                 </text>
                               </g>
                             );
@@ -3995,7 +4501,7 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
                   }
 
                   case 'directionDiagram': {
-                    const steps = shape.steps || [];
+                    const steps = (Array.isArray(shape.steps) && shape.steps.length > 0) ? shape.steps : [{ direction: 'N', distance: 10, label: '10m' }, { direction: 'E', distance: 15, label: '15m' }];
                     const cx = mx(shape.x || 0);
                     const cy = my(shape.y || 0);
                     
@@ -4027,12 +4533,59 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
                       paths.push(
                         <line key={`line-${sIdx}`} x1={curX} y1={curY} x2={nextX} y2={nextY} stroke={strokeColor} strokeWidth={3} markerEnd="url(#arrow)" />
                       );
+                      
+                      const stepText = step.label || (step.distance ? `${step.distance}${data.unit || 'm'}` : `${d}m`);
+                      const pillWidth = Math.max(38, stepText.length * 7.5 + 16);
+                      const pillHeight = 18;
+                      const midX = (curX + nextX) / 2;
+                      const midY = (curY + nextY) / 2;
+                      const clampedMidY = Math.max(16, Math.min(vHeight - 16, midY));
+
+                      const stepId = `${shapeKey}_step_${sIdx}`;
+                      const isStepHovered = activeTooltip?.targetId === stepId;
+
                       paths.push(
-                        <rect key={`lbl-bg-${sIdx}`} x={(curX + nextX)/2 - 20} y={(curY + nextY)/2 - 8} width={40} height={16} rx={4} fill="#ffffff" stroke="rgba(148, 163, 184, 0.1)" strokeWidth={1} />
+                        <rect 
+                          key={`lbl-bg-${sIdx}`} 
+                          x={midX - pillWidth / 2} 
+                          y={clampedMidY - pillHeight / 2} 
+                          width={pillWidth} 
+                          height={pillHeight} 
+                          rx={5} 
+                          fill={isStepHovered ? (isDark ? "#312e81" : "#e0e7ff") : (isDark ? "#1e293b" : "#ffffff")} 
+                          stroke={isStepHovered ? (isDark ? "#818cf8" : "#4f46e5") : (isDark ? "rgba(148, 163, 184, 0.3)" : "rgba(148, 163, 184, 0.25)")} 
+                          strokeWidth={isStepHovered ? 2 : 1} 
+                          className="cursor-pointer transition-all duration-150"
+                          style={{
+                            filter: isStepHovered ? "drop-shadow(0 0 6px rgba(99,102,241,0.5))" : undefined
+                          }}
+                          onPointerEnter={(e) => {
+                            e.stopPropagation();
+                            setActiveTooltip({
+                              x: midX,
+                              y: clampedMidY,
+                              title: `Step #${sIdx + 1} (${dir})`,
+                              value: stepText,
+                              subtext: `Bearing: ${dir} • Vector Path`,
+                              color: "#4f46e5",
+                              targetId: stepId
+                            });
+                          }}
+                          onPointerLeave={() => {
+                            if (activeTooltip?.targetId === stepId) setActiveTooltip(null);
+                          }}
+                        />
                       );
                       paths.push(
-                        <text key={`lbl-${sIdx}`} x={(curX + nextX)/2} y={(curY + nextY)/2} className="text-[9px] font-black fill-[#4f46e5]" textAnchor="middle" dominantBaseline="middle">
-                          {step.label || `${d}m`}
+                        <text 
+                          key={`lbl-${sIdx}`} 
+                          x={midX} 
+                          y={clampedMidY} 
+                          className="text-[9px] font-black fill-indigo-600 dark:fill-indigo-400 select-none" 
+                          textAnchor="middle" 
+                          dominantBaseline="middle"
+                        >
+                          {stepText}
                         </text>
                       );
                       
@@ -4044,16 +4597,23 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
                     return (
                       <g key={shapeKey}>
                         {paths}
-                        {pointsList.map((pt, idx) => (
-                          <g key={idx}>
-                            <circle cx={pt.x} cy={pt.y} r={idx === 0 ? 5 : 4} fill={idx === 0 ? '#10b981' : (idx === pointsList.length - 1 ? '#ef4444' : '#475569')} />
-                            {pt.label && (
-                              <text x={pt.x} y={pt.y - 10} className="text-[10px] font-black fill-current" textAnchor="middle">
-                                {pt.label}
-                              </text>
-                            )}
-                          </g>
-                        ))}
+                        {pointsList.map((pt, idx) => {
+                          const isEnd = idx === pointsList.length - 1;
+                          const startPt = pointsList[0];
+                          const isCoincidentWithStart = isEnd && idx > 0 && Math.hypot(pt.x - startPt.x, pt.y - startPt.y) < 15;
+                          const defaultY = isCoincidentWithStart ? pt.y + 16 : pt.y - 10;
+                          const clampedPtLabelY = Math.max(14, Math.min(vHeight - 10, defaultY));
+                          return (
+                            <g key={idx}>
+                              <circle cx={pt.x} cy={pt.y} r={idx === 0 ? 5 : 4} fill={idx === 0 ? '#10b981' : (idx === pointsList.length - 1 ? '#ef4444' : '#475569')} />
+                              {pt.label && (
+                                <text x={pt.x} y={clampedPtLabelY} className="text-[10px] font-black fill-current select-none" textAnchor="middle">
+                                  {pt.label}
+                                </text>
+                              )}
+                            </g>
+                          );
+                        })}
                         <g transform={`translate(${vWidth - 60}, 60)`}>
                           <circle cx={0} cy={0} r={20} fill="none" stroke="currentColor" strokeWidth={1} opacity={0.3} />
                           <line x1={0} y1={-25} x2={0} y2={25} stroke="currentColor" strokeWidth={1} />
@@ -4181,6 +4741,674 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
                     );
                   }
 
+                  case 'punnettSquare': {
+                    const gametes1: string[] = Array.isArray(shape.gametes1) ? shape.gametes1 : (shape.parent1 ? String(shape.parent1).split('') : ['T', 't']);
+                    const gametes2: string[] = Array.isArray(shape.gametes2) ? shape.gametes2 : (shape.parent2 ? String(shape.parent2).split('') : ['T', 't']);
+                    const cols = gametes1.length || 2;
+                    const rows = gametes2.length || 2;
+                    
+                    const rawGrid = shape.grid || shape.matrix;
+                    const gridCells: string[][] = [];
+                    for (let r = 0; r < rows; r++) {
+                      const rowArr: string[] = [];
+                      for (let c = 0; c < cols; c++) {
+                        if (Array.isArray(rawGrid) && rawGrid[r] && rawGrid[r][c]) {
+                          rowArr.push(String(rawGrid[r][c]));
+                        } else {
+                          const a1 = gametes1[c] || '';
+                          const a2 = gametes2[r] || '';
+                          rowArr.push(a1.toUpperCase() === a1 ? `${a1}${a2}` : `${a2}${a1}`);
+                        }
+                      }
+                      gridCells.push(rowArr);
+                    }
+
+                    const cx = vWidth / 2;
+                    const cy = vHeight / 2 - 10;
+                    const cellSize = cols > 2 ? 46 : 58;
+                    const startX = cx - (cols * cellSize) / 2 + cellSize / 2;
+                    const startY = cy - (rows * cellSize) / 2 + cellSize / 2;
+                    const title = shape.title || `Punnett Square (${shape.crossType || 'Genetic Cross'})`;
+                    const ratioText = shape.ratio || shape.phenotypeRatio || shape.genotypeRatio || '';
+
+                    return (
+                      <g key={shapeKey}>
+                        <text x={cx} y={startY - cellSize - 16} className="text-[12px] font-black fill-slate-800 dark:fill-slate-100 select-none" textAnchor="middle">
+                          {title}
+                        </text>
+
+                        <text x={startX - cellSize * 0.7} y={startY - cellSize / 2 - 6} className="text-[9px] font-bold fill-indigo-500 select-none" textAnchor="middle">
+                          ♀ / ♂
+                        </text>
+                        {gametes1.map((gVal, cIdx) => (
+                          <g key={`g1-${cIdx}`}>
+                            <rect 
+                              x={startX + cIdx * cellSize - cellSize / 2 + 3} 
+                              y={startY - cellSize + 6} 
+                              width={cellSize - 6} 
+                              height={26} 
+                              rx={6} 
+                              fill={isDark ? "rgba(99, 102, 241, 0.25)" : "rgba(224, 231, 255, 0.9)"} 
+                              stroke={isDark ? "#818cf8" : "#6366f1"} 
+                              strokeWidth={1.5} 
+                            />
+                            <text x={startX + cIdx * cellSize} y={startY - cellSize / 2 - 2} className="text-[12px] font-mono font-black fill-indigo-700 dark:fill-indigo-300 select-none" textAnchor="middle" dominantBaseline="middle">
+                              {gVal}
+                            </text>
+                          </g>
+                        ))}
+
+                        {gametes2.map((gVal, rIdx) => (
+                          <g key={`g2-${rIdx}`}>
+                            <rect 
+                              x={startX - cellSize + 6} 
+                              y={startY + rIdx * cellSize - cellSize / 2 + 3} 
+                              width={26} 
+                              height={cellSize - 6} 
+                              rx={6} 
+                              fill={isDark ? "rgba(99, 102, 241, 0.25)" : "rgba(224, 231, 255, 0.9)"} 
+                              stroke={isDark ? "#818cf8" : "#6366f1"} 
+                              strokeWidth={1.5} 
+                            />
+                            <text x={startX - cellSize / 2 + 5} y={startY + rIdx * cellSize} className="text-[12px] font-mono font-black fill-indigo-700 dark:fill-indigo-300 select-none" textAnchor="middle" dominantBaseline="middle">
+                              {gVal}
+                            </text>
+                          </g>
+                        ))}
+
+                        {gridCells.map((row, rIdx) => 
+                          row.map((cellVal, cIdx) => {
+                            const cellX = startX + cIdx * cellSize;
+                            const cellY = startY + rIdx * cellSize;
+                            const cellId = `${shapeKey}_cell_${rIdx}_${cIdx}`;
+                            const isCellHovered = activeTooltip?.targetId === cellId;
+                            const isHomo = cellVal.length === 2 && cellVal[0] === cellVal[1];
+
+                            return (
+                              <g key={`c-${rIdx}-${cIdx}`}>
+                                <rect
+                                  x={cellX - cellSize / 2 + 2}
+                                  y={cellY - cellSize / 2 + 2}
+                                  width={cellSize - 4}
+                                  height={cellSize - 4}
+                                  rx={8}
+                                  fill={isCellHovered 
+                                    ? (isDark ? "rgba(79, 70, 229, 0.45)" : "rgba(199, 210, 254, 0.8)")
+                                    : ((rIdx + cIdx) % 2 === 0 
+                                      ? (isDark ? "rgba(30, 41, 59, 0.85)" : "rgba(248, 250, 252, 0.95)")
+                                      : (isDark ? "rgba(15, 23, 42, 0.85)" : "rgba(241, 245, 249, 0.95)"))}
+                                  stroke={isCellHovered ? (isDark ? "#a5b4fc" : "#4338ca") : (isDark ? "rgba(148, 163, 184, 0.25)" : "rgba(203, 213, 225, 0.8)")}
+                                  strokeWidth={isCellHovered ? 2.5 : 1.5}
+                                  className="cursor-pointer transition-all duration-150"
+                                  style={{
+                                    filter: isCellHovered ? "drop-shadow(0 0 8px rgba(99,102,241,0.5))" : undefined
+                                  }}
+                                  onPointerEnter={(e) => {
+                                    e.stopPropagation();
+                                    setActiveTooltip({
+                                      x: cellX,
+                                      y: cellY,
+                                      title: `Gametes: ${gametes1[cIdx]} × ${gametes2[rIdx]}`,
+                                      value: `Genotype: ${cellVal}`,
+                                      subtext: isHomo ? 'Homozygous' : 'Heterozygous',
+                                      color: '#6366f1',
+                                      targetId: cellId
+                                    });
+                                  }}
+                                  onPointerLeave={() => {
+                                    if (activeTooltip?.targetId === cellId) setActiveTooltip(null);
+                                  }}
+                                />
+                                <text 
+                                  x={cellX} 
+                                  y={cellY} 
+                                  className={cn("text-[13px] font-mono font-black select-none pointer-events-none", isCellHovered ? "fill-indigo-600 dark:fill-indigo-300" : "fill-slate-900 dark:fill-white")} 
+                                  textAnchor="middle" 
+                                  dominantBaseline="middle"
+                                >
+                                  {cellVal}
+                                </text>
+                              </g>
+                            );
+                          })
+                        )}
+
+                        {ratioText && (
+                          <g transform={`translate(${cx}, ${startY + rows * cellSize + 14})`}>
+                            <rect x={-Math.max(100, ratioText.length * 4.2 + 20)} y={-12} width={Math.max(200, ratioText.length * 8.4 + 40)} height={24} rx={12} fill={isDark ? "rgba(30, 41, 59, 0.9)" : "rgba(241, 245, 249, 0.95)"} stroke="rgba(99, 102, 241, 0.3)" strokeWidth={1} />
+                            <text x={0} y={1} className="text-[10px] font-bold fill-indigo-600 dark:fill-indigo-400 select-none" textAnchor="middle" dominantBaseline="middle">
+                              Ratio: {ratioText}
+                            </text>
+                          </g>
+                        )}
+                      </g>
+                    );
+                  }
+
+                  case 'trophicPyramid': {
+                    const tiers: any[] = (Array.isArray(shape.tiers) && shape.tiers.length > 0) 
+                      ? shape.tiers 
+                      : (Array.isArray(shape.levels) && shape.levels.length > 0)
+                      ? shape.levels
+                      : [
+                          { label: 'Tertiary Consumers (Apex)', value: '10 kcal', color: '#ef4444' },
+                          { label: 'Secondary Consumers (Carnivores)', value: '100 kcal', color: '#f59e0b' },
+                          { label: 'Primary Consumers (Herbivores)', value: '1,000 kcal', color: '#3b82f6' },
+                          { label: 'Primary Producers (Plants)', value: '10,000 kcal', color: '#10b981' }
+                        ];
+
+                    const totalTiers = tiers.length;
+                    const pyramidW = Math.min(vWidth * 0.65, 420);
+                    const pyramidH = Math.min(vHeight * 0.68, 230);
+                    const cx = vWidth / 2;
+                    const baseY = vHeight / 2 + pyramidH / 2 - 8;
+                    const tierH = pyramidH / totalTiers;
+                    const title = shape.title || `Ecological Pyramid of ${shape.pyramidType || 'Energy'}`;
+                    const defaultColors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
+
+                    return (
+                      <g key={shapeKey}>
+                        <text x={cx} y={baseY - pyramidH - 18} className="text-[12px] font-black fill-slate-800 dark:fill-slate-100 select-none" textAnchor="middle">
+                          {title}
+                        </text>
+
+                        {tiers.map((tier, idx) => {
+                          const isFromTop = shape.reversed !== true;
+                          const tierIdxFromBottom = isFromTop ? (totalTiers - 1 - idx) : idx;
+                          const tierY = baseY - (tierIdxFromBottom + 1) * tierH;
+
+                          const topRatio = (tierIdxFromBottom + 1) / totalTiers;
+                          const botRatio = tierIdxFromBottom / totalTiers;
+                          
+                          const bW = pyramidW * (1 - botRatio * 0.78);
+                          const tW = pyramidW * (1 - topRatio * 0.78);
+
+                          const x1 = cx - bW / 2;
+                          const y1 = tierY + tierH;
+                          const x2 = cx + bW / 2;
+                          const y2 = tierY + tierH;
+                          const x3 = cx + tW / 2;
+                          const y3 = tierY;
+                          const x4 = cx - tW / 2;
+                          const y4 = tierY;
+
+                          const pathD = `M ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3} L ${x4} ${y4} Z`;
+                          const tierColor = tier.color || defaultColors[tierIdxFromBottom % defaultColors.length];
+                          const tierId = `${shapeKey}_tier_${idx}`;
+                          const isTierHovered = activeTooltip?.targetId === tierId;
+
+                          const labelText = String(tier.label || tier.name || `Trophic Level ${tierIdxFromBottom + 1}`);
+                          const valText = tier.value !== undefined ? String(tier.value) : '';
+
+                          return (
+                            <g key={tierId}>
+                              <path
+                                d={pathD}
+                                fill={tierColor}
+                                fillOpacity={activeTooltip ? (isTierHovered ? 0.95 : 0.5) : 0.82}
+                                stroke={isTierHovered ? "#ffffff" : (isDark ? "rgba(15, 23, 42, 0.7)" : "#ffffff")}
+                                strokeWidth={isTierHovered ? 2.5 : 1.5}
+                                className="cursor-pointer transition-all duration-150"
+                                style={{
+                                  filter: isTierHovered ? "drop-shadow(0 0 10px rgba(0,0,0,0.4))" : undefined
+                                }}
+                                onPointerEnter={(e) => {
+                                  e.stopPropagation();
+                                  setActiveTooltip({
+                                    x: cx,
+                                    y: tierY + tierH / 2,
+                                    title: labelText,
+                                    value: valText ? `${valText}${tier.unit ? ' ' + tier.unit : ''}` : `Level ${tierIdxFromBottom + 1}`,
+                                    subtext: `10% Energy Transfer Law`,
+                                    color: tierColor,
+                                    targetId: tierId
+                                  });
+                                }}
+                                onPointerLeave={() => {
+                                  if (activeTooltip?.targetId === tierId) setActiveTooltip(null);
+                                }}
+                              />
+                              <text
+                                x={cx}
+                                y={tierY + tierH / 2}
+                                className="text-[10px] font-black fill-white select-none pointer-events-none drop-shadow-xs"
+                                textAnchor="middle"
+                                dominantBaseline="middle"
+                              >
+                                {labelText} {valText ? `(${valText})` : ''}
+                              </text>
+                            </g>
+                          );
+                        })}
+
+                        <g transform={`translate(${cx + pyramidW / 2 + 22}, ${baseY - pyramidH / 2})`}>
+                          <line x1={0} y1={pyramidH / 2 - 12} x2={0} y2={-pyramidH / 2 + 12} stroke="#10b981" strokeWidth={2} strokeDasharray="4 3" />
+                          <polygon points="0,-pyramidH/2+4 -4,-pyramidH/2+14 4,-pyramidH/2+14" fill="#10b981" />
+                          <text x={12} y={0} className="text-[9px] font-black fill-emerald-600 dark:fill-emerald-400 select-none" transform="rotate(90, 12, 0)" textAnchor="middle">
+                            ~10% Transfer
+                          </text>
+                        </g>
+                      </g>
+                    );
+                  }
+
+                  case 'beam':
+                  case 'sfdBmd': {
+                    const beamLength = Number(shape.length || shape.span || 10);
+                    const cx = vWidth / 2;
+                    const startBeamX = Math.max(60, vWidth * 0.15);
+                    const endBeamX = Math.min(vWidth - 60, vWidth * 0.85);
+                    const beamPixelW = endBeamX - startBeamX;
+                    const scaleX = (xPos: number) => startBeamX + (Math.max(0, Math.min(beamLength, xPos)) / beamLength) * beamPixelW;
+
+                    const beamY = vHeight * 0.32;
+                    const supports: any[] = Array.isArray(shape.supports) ? shape.supports : [
+                      { type: 'pin', x: 0, label: 'A' },
+                      { type: 'roller', x: beamLength, label: 'B' }
+                    ];
+                    const loads: any[] = Array.isArray(shape.loads) ? shape.loads : [
+                      { type: 'point', x: beamLength / 2, magnitude: 20, unit: 'kN', label: 'P = 20 kN' }
+                    ];
+
+                    const title = shape.title || `Structural Beam Analysis (${shape.beamType || 'Simply Supported'})`;
+
+                    return (
+                      <g key={shapeKey}>
+                        <text x={cx} y={beamY - 55} className="text-[12px] font-black fill-slate-800 dark:fill-slate-100 select-none" textAnchor="middle">
+                          {title}
+                        </text>
+
+                        <rect 
+                          x={startBeamX} 
+                          y={beamY - 4} 
+                          width={beamPixelW} 
+                          height={8} 
+                          rx={2} 
+                          fill={isDark ? "#475569" : "#64748b"} 
+                          stroke={isDark ? "#94a3b8" : "#334155"} 
+                          strokeWidth={2} 
+                        />
+
+                        <g transform={`translate(0, ${beamY + 36})`}>
+                          <line x1={startBeamX} y1={0} x2={endBeamX} y2={0} stroke="rgba(148,163,184,0.6)" strokeWidth={1} />
+                          <line x1={startBeamX} y1={-4} x2={startBeamX} y2={4} stroke="rgba(148,163,184,0.6)" strokeWidth={1} />
+                          <line x1={endBeamX} y1={-4} x2={endBeamX} y2={4} stroke="rgba(148,163,184,0.6)" strokeWidth={1} />
+                          <text x={cx} y={-5} className="text-[9.5px] font-bold fill-slate-500 dark:fill-slate-400 select-none" textAnchor="middle">
+                            L = {beamLength}m
+                          </text>
+                        </g>
+
+                        {supports.map((sup, sIdx) => {
+                          const sx = scaleX(Number(sup.x || 0));
+                          const supId = `${shapeKey}_sup_${sIdx}`;
+
+                          if (sup.type === 'roller') {
+                            return (
+                              <g key={supId} className="cursor-pointer"
+                                onPointerEnter={(e) => {
+                                  e.stopPropagation();
+                                  setActiveTooltip({
+                                    x: sx,
+                                    y: beamY + 18,
+                                    title: `Support ${sup.label || String.fromCharCode(65 + sIdx)} (Roller)`,
+                                    value: sup.reaction ? `Reaction: ${sup.reaction}` : 'Vertical Restraint (Ry)',
+                                    subtext: 'Free Horizontal Expansion',
+                                    color: '#3b82f6',
+                                    targetId: supId
+                                  });
+                                }}
+                                onPointerLeave={() => { if (activeTooltip?.targetId === supId) setActiveTooltip(null); }}
+                              >
+                                <circle cx={sx} cy={beamY + 10} r={5} fill={isDark ? "#1e293b" : "#ffffff"} stroke="#3b82f6" strokeWidth={2} />
+                                <line x1={sx - 10} y1={beamY + 16} x2={sx + 10} y2={beamY + 16} stroke="#3b82f6" strokeWidth={2} />
+                                <text x={sx} y={beamY + 28} className="text-[10px] font-bold fill-blue-600 dark:fill-blue-400 select-none" textAnchor="middle">
+                                  {sup.label || ''}
+                                </text>
+                              </g>
+                            );
+                          } else if (sup.type === 'fixed') {
+                            return (
+                              <g key={supId}>
+                                <line x1={sx} y1={beamY - 20} x2={sx} y2={beamY + 20} stroke="#ef4444" strokeWidth={4} />
+                                {[-16, -8, 0, 8, 16].map((hy, hIdx) => (
+                                  <line key={hIdx} x1={sx} y1={beamY + hy} x2={sx - 8} y2={beamY + hy + 6} stroke="#ef4444" strokeWidth={1.5} />
+                                ))}
+                              </g>
+                            );
+                          } else {
+                            return (
+                              <g key={supId} className="cursor-pointer"
+                                onPointerEnter={(e) => {
+                                  e.stopPropagation();
+                                  setActiveTooltip({
+                                    x: sx,
+                                    y: beamY + 18,
+                                    title: `Support ${sup.label || String.fromCharCode(65 + sIdx)} (Pin)`,
+                                    value: sup.reaction ? `Reaction: ${sup.reaction}` : 'Pinned Joint (Rx, Ry)',
+                                    subtext: 'Zero Moment Hinge',
+                                    color: '#10b981',
+                                    targetId: supId
+                                  });
+                                }}
+                                onPointerLeave={() => { if (activeTooltip?.targetId === supId) setActiveTooltip(null); }}
+                              >
+                                <polygon points={`${sx},${beamY + 4} ${sx - 8},${beamY + 18} ${sx + 8},${beamY + 18}`} fill={isDark ? "#1e293b" : "#ffffff"} stroke="#10b981" strokeWidth={2} />
+                                <line x1={sx - 12} y1={beamY + 18} x2={sx + 12} y2={beamY + 18} stroke="#10b981" strokeWidth={2} />
+                                <text x={sx} y={beamY + 28} className="text-[10px] font-bold fill-emerald-600 dark:fill-emerald-400 select-none" textAnchor="middle">
+                                  {sup.label || ''}
+                                </text>
+                              </g>
+                            );
+                          }
+                        })}
+
+                        {loads.map((load, lIdx) => {
+                          const loadId = `${shapeKey}_load_${lIdx}`;
+
+                          if (load.type === 'udl') {
+                            const uStart = scaleX(Number(load.startX !== undefined ? load.startX : 0));
+                            const uEnd = scaleX(Number(load.endX !== undefined ? load.endX : beamLength));
+                            const uW = uEnd - uStart;
+                            const uVal = load.magnitude !== undefined ? `${load.magnitude} ${load.unit || 'kN/m'}` : (load.label || 'w');
+
+                            return (
+                              <g key={loadId} className="cursor-pointer"
+                                onPointerEnter={(e) => {
+                                  e.stopPropagation();
+                                  setActiveTooltip({
+                                    x: (uStart + uEnd) / 2,
+                                    y: beamY - 24,
+                                    title: 'Uniformly Distributed Load (UDL)',
+                                    value: uVal,
+                                    subtext: `Span: ${load.startX || 0}m to ${load.endX || beamLength}m`,
+                                    color: '#f59e0b',
+                                    targetId: loadId
+                                  });
+                                }}
+                                onPointerLeave={() => { if (activeTooltip?.targetId === loadId) setActiveTooltip(null); }}
+                              >
+                                <rect x={uStart} y={beamY - 22} width={uW} height={18} fill="rgba(245, 158, 11, 0.15)" stroke="#f59e0b" strokeWidth={1.5} strokeDasharray="3 2" />
+                                {Array.from({ length: Math.max(3, Math.floor(uW / 24)) }).map((_, aIdx, arr) => {
+                                  const ax = uStart + ((aIdx + 0.5) / arr.length) * uW;
+                                  return (
+                                    <path key={aIdx} d={`M ${ax} ${beamY - 20} L ${ax} ${beamY - 6} M ${ax - 3} ${beamY - 9} L ${ax} ${beamY - 6} L ${ax + 3} ${beamY - 9}`} stroke="#f59e0b" strokeWidth={1.5} fill="none" />
+                                  );
+                                })}
+                                <text x={(uStart + uEnd) / 2} y={beamY - 26} className="text-[10px] font-black fill-amber-600 dark:fill-amber-400 select-none" textAnchor="middle">
+                                  w = {uVal}
+                                </text>
+                              </g>
+                            );
+                          } else {
+                            const lx = scaleX(Number(load.x !== undefined ? load.x : beamLength / 2));
+                            const lVal = load.magnitude !== undefined ? `${load.magnitude} ${load.unit || 'kN'}` : (load.label || 'P');
+
+                            return (
+                              <g key={loadId} className="cursor-pointer"
+                                onPointerEnter={(e) => {
+                                  e.stopPropagation();
+                                  setActiveTooltip({
+                                    x: lx,
+                                    y: beamY - 30,
+                                    title: 'Point Load',
+                                    value: lVal,
+                                    subtext: `Applied at x = ${load.x || beamLength / 2}m`,
+                                    color: '#ef4444',
+                                    targetId: loadId
+                                  });
+                                }}
+                                onPointerLeave={() => { if (activeTooltip?.targetId === loadId) setActiveTooltip(null); }}
+                              >
+                                <line x1={lx} y1={beamY - 36} x2={lx} y2={beamY - 6} stroke="#ef4444" strokeWidth={2.5} />
+                                <polygon points={`${lx},${beamY - 4} ${lx - 4},${beamY - 12} ${lx + 4},${beamY - 12}`} fill="#ef4444" />
+                                <text x={lx} y={beamY - 40} className="text-[10px] font-black fill-rose-600 dark:fill-rose-400 select-none" textAnchor="middle">
+                                  {lVal}
+                                </text>
+                              </g>
+                            );
+                          }
+                        })}
+
+                        {(shape.showSFD || shape.type === 'sfdBmd') && (
+                          <g transform={`translate(0, ${beamY + 68})`}>
+                            <text x={startBeamX - 15} y={0} className="text-[9px] font-black fill-blue-600 dark:fill-blue-400 select-none" textAnchor="end">
+                              SFD
+                            </text>
+                            <line x1={startBeamX} y1={0} x2={endBeamX} y2={0} stroke="rgba(148,163,184,0.5)" strokeWidth={1} />
+                            <polygon 
+                              points={`${startBeamX},0 ${startBeamX},-18 ${scaleX(beamLength / 2)},-18 ${scaleX(beamLength / 2)},18 ${endBeamX},18 ${endBeamX},0`} 
+                              fill="rgba(59, 130, 246, 0.15)" 
+                              stroke="#3b82f6" 
+                              strokeWidth={1.5} 
+                            />
+                            <text x={startBeamX + 15} y={-22} className="text-[8.5px] font-bold fill-blue-600 select-none">+V</text>
+                            <text x={endBeamX - 15} y={26} className="text-[8.5px] font-bold fill-blue-600 select-none">-V</text>
+                          </g>
+                        )}
+
+                        {(shape.showBMD || shape.type === 'sfdBmd') && (
+                          <g transform={`translate(0, ${beamY + 128})`}>
+                            <text x={startBeamX - 15} y={0} className="text-[9px] font-black fill-emerald-600 dark:fill-emerald-400 select-none" textAnchor="end">
+                              BMD
+                            </text>
+                            <line x1={startBeamX} y1={0} x2={endBeamX} y2={0} stroke="rgba(148,163,184,0.5)" strokeWidth={1} />
+                            <polygon 
+                              points={`${startBeamX},0 ${scaleX(beamLength / 2)},-24 ${endBeamX},0`} 
+                              fill="rgba(16, 185, 129, 0.15)" 
+                              stroke="#10b981" 
+                              strokeWidth={1.5} 
+                            />
+                            <text x={scaleX(beamLength / 2)} y={-28} className="text-[8.5px] font-bold fill-emerald-600 select-none" textAnchor="middle">
+                              M_max = {shape.maxMoment || 'PL/4'}
+                            </text>
+                          </g>
+                        )}
+                      </g>
+                    );
+                  }
+
+                  case 'mohrCircle': {
+                    const sigmaX = Number(shape.sigmaX !== undefined ? shape.sigmaX : 80);
+                    const sigmaY = Number(shape.sigmaY !== undefined ? shape.sigmaY : 20);
+                    const tauXY = Number(shape.tauXY !== undefined ? shape.tauXY : 40);
+
+                    const sigmaAvg = (sigmaX + sigmaY) / 2;
+                    const radius = Math.sqrt(Math.pow((sigmaX - sigmaY) / 2, 2) + Math.pow(tauXY, 2));
+                    const sigma1 = Math.round(sigmaAvg + radius);
+                    const sigma2 = Math.round(sigmaAvg - radius);
+                    const tauMax = Math.round(radius);
+
+                    const cx = vWidth / 2;
+                    const cy = vHeight / 2;
+                    const scale = Math.min((vWidth * 0.35) / Math.max(1, radius * 1.5), 1.6);
+
+                    const circleCX = cx + (sigmaAvg - 50) * scale * 0.4;
+                    const circleR = Math.max(25, radius * scale * 0.8);
+                    const title = shape.title || "Mohr's Circle of Stress";
+
+                    return (
+                      <g key={shapeKey}>
+                        <text x={cx} y={cy - circleR - 35} className="text-[12px] font-black fill-slate-800 dark:fill-slate-100 select-none" textAnchor="middle">
+                          {title}
+                        </text>
+
+                        <line x1={cx - circleR - 40} y1={cy} x2={cx + circleR + 60} y2={cy} stroke={isDark ? "#94a3b8" : "#475569"} strokeWidth={1.5} />
+                        <text x={cx + circleR + 55} y={cy - 8} className="text-[10px] font-black fill-slate-700 dark:fill-slate-300 select-none">
+                          σ (Normal)
+                        </text>
+
+                        <line x1={circleCX - circleR * 0.7} y1={cy + circleR + 35} x2={circleCX - circleR * 0.7} y2={cy - circleR - 35} stroke={isDark ? "#94a3b8" : "#475569"} strokeWidth={1.5} />
+                        <text x={circleCX - circleR * 0.7 + 8} y={cy - circleR - 25} className="text-[10px] font-black fill-slate-700 dark:fill-slate-300 select-none">
+                          τ (Shear)
+                        </text>
+
+                        <circle 
+                          cx={circleCX} 
+                          cy={cy} 
+                          r={circleR} 
+                          fill="rgba(99, 102, 241, 0.08)" 
+                          stroke="#6366f1" 
+                          strokeWidth={2} 
+                          style={{ filter: "drop-shadow(0 2px 8px rgba(99,102,241,0.25))" }}
+                        />
+
+                        <circle cx={circleCX} cy={cy} r={3.5} fill="#6366f1" />
+                        <text x={circleCX} y={cy + 14} className="text-[9px] font-bold fill-indigo-600 dark:fill-indigo-400 select-none" textAnchor="middle">
+                          C ({Math.round(sigmaAvg)})
+                        </text>
+
+                        <circle 
+                          cx={circleCX + circleR} 
+                          cy={cy} 
+                          r={4.5} 
+                          fill="#10b981" 
+                          className="cursor-pointer"
+                          onPointerEnter={(e) => {
+                            e.stopPropagation();
+                            setActiveTooltip({
+                              x: circleCX + circleR,
+                              y: cy,
+                              title: 'Major Principal Stress (σ₁)',
+                              value: `${sigma1} MPa`,
+                              subtext: 'Zero Shear Stress Plane',
+                              color: '#10b981',
+                              targetId: `${shapeKey}_sigma1`
+                            });
+                          }}
+                          onPointerLeave={() => setActiveTooltip(null)}
+                        />
+                        <text x={circleCX + circleR} y={cy - 10} className="text-[9.5px] font-black fill-emerald-600 dark:fill-emerald-400 select-none" textAnchor="middle">
+                          σ₁ = {sigma1}
+                        </text>
+
+                        <circle 
+                          cx={circleCX - circleR} 
+                          cy={cy} 
+                          r={4.5} 
+                          fill="#3b82f6" 
+                          className="cursor-pointer"
+                          onPointerEnter={(e) => {
+                            e.stopPropagation();
+                            setActiveTooltip({
+                              x: circleCX - circleR,
+                              y: cy,
+                              title: 'Minor Principal Stress (σ₂)',
+                              value: `${sigma2} MPa`,
+                              subtext: 'Zero Shear Stress Plane',
+                              color: '#3b82f6',
+                              targetId: `${shapeKey}_sigma2`
+                            });
+                          }}
+                          onPointerLeave={() => setActiveTooltip(null)}
+                        />
+                        <text x={circleCX - circleR} y={cy - 10} className="text-[9.5px] font-black fill-blue-600 dark:fill-blue-400 select-none" textAnchor="middle">
+                          σ₂ = {sigma2}
+                        </text>
+
+                        <circle 
+                          cx={circleCX} 
+                          cy={cy - circleR} 
+                          r={4.5} 
+                          fill="#ef4444" 
+                          className="cursor-pointer"
+                          onPointerEnter={(e) => {
+                            e.stopPropagation();
+                            setActiveTooltip({
+                              x: circleCX,
+                              y: cy - circleR,
+                              title: 'Maximum Shear Stress (τ_max)',
+                              value: `${tauMax} MPa`,
+                              subtext: `Radius R = ${tauMax}`,
+                              color: '#ef4444',
+                              targetId: `${shapeKey}_taumax`
+                            });
+                          }}
+                          onPointerLeave={() => setActiveTooltip(null)}
+                        />
+                        <text x={circleCX} y={cy - circleR - 10} className="text-[9.5px] font-black fill-rose-600 dark:fill-rose-400 select-none" textAnchor="middle">
+                          τ_max = {tauMax}
+                        </text>
+
+                        <line 
+                          x1={circleCX - circleR * 0.7} 
+                          y1={cy + circleR * 0.7} 
+                          x2={circleCX + circleR * 0.7} 
+                          y2={cy - circleR * 0.7} 
+                          stroke="#8b5cf6" 
+                          strokeWidth={1.5} 
+                          strokeDasharray="4 3" 
+                        />
+                      </g>
+                    );
+                  }
+
+                  case 'soilPhase': {
+                    const cx = vWidth / 2;
+                    const cy = vHeight / 2;
+                    const boxW = Math.min(vWidth * 0.38, 200);
+                    const totalH = Math.min(vHeight * 0.65, 200);
+                    const airH = totalH * 0.22;
+                    const waterH = totalH * 0.33;
+                    const solidH = totalH * 0.45;
+
+                    const title = shape.title || "Three-Phase Soil System";
+
+                    return (
+                      <g key={shapeKey}>
+                        <text x={cx} y={cy - totalH / 2 - 18} className="text-[12px] font-black fill-slate-800 dark:fill-slate-100 select-none" textAnchor="middle">
+                          {title}
+                        </text>
+
+                        <rect 
+                          x={cx - boxW / 2} 
+                          y={cy - totalH / 2} 
+                          width={boxW} 
+                          height={airH} 
+                          fill={isDark ? "rgba(148, 163, 184, 0.2)" : "rgba(241, 245, 249, 0.9)"} 
+                          stroke={isDark ? "#94a3b8" : "#64748b"} 
+                          strokeWidth={1.5} 
+                        />
+                        <text x={cx} y={cy - totalH / 2 + airH / 2} className="text-[11px] font-black fill-slate-700 dark:fill-slate-300 select-none" textAnchor="middle" dominantBaseline="middle">
+                          AIR (V_a)
+                        </text>
+
+                        <rect 
+                          x={cx - boxW / 2} 
+                          y={cy - totalH / 2 + airH} 
+                          width={boxW} 
+                          height={waterH} 
+                          fill={isDark ? "rgba(59, 130, 246, 0.3)" : "rgba(191, 219, 254, 0.85)"} 
+                          stroke={isDark ? "#60a5fa" : "#3b82f6"} 
+                          strokeWidth={1.5} 
+                        />
+                        <text x={cx} y={cy - totalH / 2 + airH + waterH / 2} className="text-[11px] font-black fill-blue-700 dark:fill-blue-300 select-none" textAnchor="middle" dominantBaseline="middle">
+                          WATER (V_w)
+                        </text>
+
+                        <rect 
+                          x={cx - boxW / 2} 
+                          y={cy - totalH / 2 + airH + waterH} 
+                          width={boxW} 
+                          height={solidH} 
+                          fill={isDark ? "rgba(180, 83, 9, 0.3)" : "rgba(254, 215, 170, 0.85)"} 
+                          stroke={isDark ? "#d97706" : "#b45309"} 
+                          strokeWidth={1.5} 
+                        />
+                        <text x={cx} y={cy - totalH / 2 + airH + waterH + solidH / 2} className="text-[11px] font-black fill-amber-800 dark:fill-amber-300 select-none" textAnchor="middle" dominantBaseline="middle">
+                          SOLIDS (V_s)
+                        </text>
+
+                        <text x={cx - boxW / 2 - 14} y={cy} className="text-[10px] font-black fill-slate-600 dark:fill-slate-400 select-none" textAnchor="end">
+                          Volume (V)
+                        </text>
+
+                        <text x={cx + boxW / 2 + 14} y={cy} className="text-[10px] font-black fill-slate-600 dark:fill-slate-400 select-none" textAnchor="start">
+                          Weight (W)
+                        </text>
+                      </g>
+                    );
+                  }
+
                   default:
                     return null;
                 }
@@ -4272,6 +5500,74 @@ export default function UniversalMathDiagramEngine({ data: rawData }: UniversalM
                   fill="currentColor" 
                 />
               </g>
+            )}
+
+            {/* Floating Interactive Tooltip Card Overlay */}
+            {activeTooltip && (
+              (() => {
+                const titleStr = activeTooltip.title;
+                const valStr = activeTooltip.value;
+                const subStr = activeTooltip.subtext || '';
+                const maxLen = Math.max(titleStr.length, valStr.length, subStr.length);
+                const tooltipW = Math.max(125, Math.min(260, maxLen * 7.5 + 32));
+                const tooltipH = subStr ? 46 : 36;
+                const clampedX = Math.max(tooltipW / 2 + 10, Math.min(vWidth - tooltipW / 2 - 10, activeTooltip.x));
+                const placeBelow = activeTooltip.y < 55;
+                const clampedY = placeBelow ? activeTooltip.y + 24 : activeTooltip.y - 12;
+
+                return (
+                  <g 
+                    transform={`translate(${clampedX}, ${clampedY})`} 
+                    className="pointer-events-none select-none transition-all duration-150"
+                    style={{ filter: isDark ? 'drop-shadow(0 6px 16px rgba(0,0,0,0.7))' : 'drop-shadow(0 4px 12px rgba(15,23,42,0.18))' }}
+                  >
+                    {/* Glassmorphic Backdrop */}
+                    <rect
+                      x={-tooltipW / 2}
+                      y={-tooltipH}
+                      width={tooltipW}
+                      height={tooltipH}
+                      rx={7}
+                      fill={isDark ? "rgba(15, 23, 42, 0.95)" : "rgba(255, 255, 255, 0.97)"}
+                      stroke={activeTooltip.color || (isDark ? "rgba(99, 102, 241, 0.45)" : "rgba(99, 102, 241, 0.35)")}
+                      strokeWidth={1.5}
+                    />
+                    {/* Accent Beacon Dot */}
+                    <circle
+                      cx={-tooltipW / 2 + 12}
+                      cy={-tooltipH + 13}
+                      r={3.5}
+                      fill={activeTooltip.color || "#4f46e5"}
+                    />
+                    {/* Title / Category */}
+                    <text
+                      x={-tooltipW / 2 + 22}
+                      y={-tooltipH + 16}
+                      className="text-[9.5px] font-bold fill-slate-500 dark:fill-slate-400 select-none"
+                    >
+                      {titleStr.length > 25 ? titleStr.slice(0, 24) + '…' : titleStr}
+                    </text>
+                    {/* Value */}
+                    <text
+                      x={-tooltipW / 2 + 12}
+                      y={-tooltipH + (subStr ? 30 : 27)}
+                      className="text-[11px] font-black fill-slate-900 dark:fill-white select-none"
+                    >
+                      {valStr}
+                    </text>
+                    {/* Optional Subtext */}
+                    {subStr && (
+                      <text
+                        x={-tooltipW / 2 + 12}
+                        y={-tooltipH + 41}
+                        className="text-[8px] font-semibold fill-slate-500 dark:fill-slate-400 select-none"
+                      >
+                        {subStr.length > 30 ? subStr.slice(0, 29) + '…' : subStr}
+                      </text>
+                    )}
+                  </g>
+                );
+              })()
             )}
           </svg>
         </div>

@@ -25,7 +25,8 @@ import {
   ChevronRight,
   ArrowRight
 } from 'lucide-react';
-import { MathTextRenderer } from './MathTextRenderer';
+import { MathTextRenderer, DiagramRenderer } from './MathTextRenderer';
+import { resolveDiagramPlacements } from '../lib/diagramValidator';
 import UniversalMathDiagramEngine from './UniversalMathDiagramEngine';
 import { exportQuestionBankToPdf } from '../lib/pdfExportEngine';
 import { PdfExportGuideModal } from './PdfExportGuideModal';
@@ -85,6 +86,7 @@ const QuestionCardItem = React.memo<QuestionCardItemProps>(({
   onToggleBookmark,
 }) => {
   const rawText = q.questionText || q.question || '';
+  const { questionDiagram, explanationDiagram } = resolveDiagramPlacements({ ...q, id: q.id || `qb_q_${idx}` });
   const ansIdx = q.correctAnswerIndex !== undefined 
     ? q.correctAnswerIndex 
     : (typeof q.answer === 'number' ? q.answer : (typeof q.answer === 'string' && ['A','B','C','D'].indexOf(q.answer.toUpperCase()) !== -1 ? ['A','B','C','D'].indexOf(q.answer.toUpperCase()) : undefined));
@@ -144,12 +146,12 @@ const QuestionCardItem = React.memo<QuestionCardItemProps>(({
         <MathTextRenderer text={rawText} />
       </div>
 
-      {q.diagram && (
+      {questionDiagram && (
         <div className={cn(
           "my-3 sm:my-4 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-[#060B16] border border-slate-200/60 dark:border-slate-800 flex justify-center overflow-x-auto",
           isFullscreen ? "p-6 md:p-8" : "p-3 sm:p-4"
         )}>
-          <UniversalMathDiagramEngine data={q.diagram} />
+          <DiagramRenderer diagram={questionDiagram} data={questionDiagram} />
         </div>
       )}
 
@@ -275,8 +277,17 @@ const QuestionCardItem = React.memo<QuestionCardItemProps>(({
           )}>
             <Sparkles className={cn(isFullscreen ? "w-4 h-4 md:w-5 md:h-5" : "w-3.5 h-3.5 md:w-4 md:h-4")} /> Detailed Explanation:
           </div>
-          <div className="leading-relaxed overflow-x-auto">
+          <div className="leading-relaxed overflow-x-auto space-y-3">
             <MathTextRenderer text={q.explanation} />
+            {explanationDiagram && (
+              <div className="mt-3.5 pt-3 border-t border-emerald-200/60 dark:border-emerald-800/60 overflow-x-auto">
+                <span className="text-[10.5px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-400 block mb-1.5 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                  Solution Derivation Visual:
+                </span>
+                <DiagramRenderer diagram={explanationDiagram} data={explanationDiagram} />
+              </div>
+            )}
           </div>
         </motion.div>
       )}

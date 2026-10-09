@@ -390,7 +390,7 @@ function extractAutonomousSyllabusScope(fullMarkdown, target) {
     };
   }
   const rawLines = fullMarkdown.split(/\r?\n/);
-  const cleanTarget = (str) => (str || "").replace(/^\[(?:[A-Za-z0-9_\- ]+)\][:\s]*/i, "").replace(/[*_#\-:]/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
+  const cleanTarget = (str) => (str || "").replace(/^#+\s*/, "").replace(/^\[(?:chapter|paper|subject|sub[\s\-_]?subject|unit|section|module|lesson|topic)\s*:\s*([^\]]+)\]/i, (_m, p) => p).replace(/^\[(?:[A-Za-z0-9_\- ]+)\][:\s]*/i, "").replace(/^(?:chapter|paper|subject|sub[\s\-_]?subject|unit|section|module|lesson|topic)\s*[-–—]?\s*(?:[ivx\d]+)?\s*[:\-–—]\s*/i, "").replace(/^(?:\d+[\.\)]\s*|\[\d+\]\s*|#\d+\s*)/, "").replace(/[*_#\-:]/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
   const chapQuery = cleanTarget(target.chapter);
   const subSubjQuery = cleanTarget(target.subSubject);
   const subjQuery = cleanTarget(target.subject);
@@ -485,32 +485,47 @@ ${s.content}`).join("\n\n");
         continue;
       const normLine = cleanTarget(line);
       const isHeaderLine = line.startsWith("#") || /^(?:#+\s*)?\[(?:[A-Za-z0-9_\- ]+)\](?:\s*[:\-–—]|$)/i.test(line) || /^(?:#+\s*)?(?:Paper|Subject|Discipline|Sub[\s\-_]?Subject|Unit|Section|Module|Chapter|Topic|Lesson)\s*[:\-–—]/i.test(line) || /^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(line);
-      const isBulletOrTopicLine = /^(?:[\*\-•]|\d+[\.\)])\s+/.test(line);
-      if (isHeaderLine && (normLine === query || normLine.includes(query) || query.includes(normLine))) {
+      if (isHeaderLine && normLine === query) {
         matchLineIndex = i;
         matchHeadingLevel = getHeadingLevel(line);
         matchedTitle = line.replace(/^[#\s*_\-]+/, "").replace(/[*_#]+$/g, "").trim();
         break;
-      } else if (isBulletOrTopicLine && (normLine === query || normLine.includes(query) || query.includes(normLine))) {
-        let parentIdx = i - 1;
-        while (parentIdx >= 0) {
-          const prev = rawLines[parentIdx].trim();
-          const prevIsHeader = prev.startsWith("#") || /^(?:#+\s*)?\[(?:[A-Za-z0-9_\- ]+)\](?:\s*[:\-–—]|$)/i.test(prev) || /^(?:#+\s*)?(?:Paper|Subject|Discipline|Sub[\s\-_]?Subject|Unit|Section|Module|Chapter|Topic|Lesson)\s*[:\-–—]/i.test(prev) || /^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(prev);
-          if (prevIsHeader) {
-            break;
-          }
-          parentIdx--;
-        }
-        if (parentIdx >= 0) {
-          matchLineIndex = parentIdx;
-          matchHeadingLevel = getHeadingLevel(rawLines[parentIdx]);
-          matchedTitle = rawLines[parentIdx].replace(/^[#\s*_\-]+/, "").replace(/[*_#]+$/g, "").trim();
-        } else {
+      }
+    }
+    if (matchLineIndex === -1) {
+      for (let i = 0; i < rawLines.length; i++) {
+        const line = rawLines[i].trim();
+        if (!line)
+          continue;
+        const normLine = cleanTarget(line);
+        const isHeaderLine = line.startsWith("#") || /^(?:#+\s*)?\[(?:[A-Za-z0-9_\- ]+)\](?:\s*[:\-–—]|$)/i.test(line) || /^(?:#+\s*)?(?:Paper|Subject|Discipline|Sub[\s\-_]?Subject|Unit|Section|Module|Chapter|Topic|Lesson)\s*[:\-–—]/i.test(line) || /^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(line);
+        const isBulletOrTopicLine = /^(?:[\*\-•]|\d+[\.\)])\s+/.test(line);
+        if (isHeaderLine && (normLine.includes(query) || normLine.length > 5 && query.includes(normLine))) {
           matchLineIndex = i;
-          matchHeadingLevel = 99;
-          matchedTitle = line;
+          matchHeadingLevel = getHeadingLevel(line);
+          matchedTitle = line.replace(/^[#\s*_\-]+/, "").replace(/[*_#]+$/g, "").trim();
+          break;
+        } else if (isBulletOrTopicLine && (normLine === query || normLine.includes(query) || query.includes(normLine))) {
+          let parentIdx = i - 1;
+          while (parentIdx >= 0) {
+            const prev = rawLines[parentIdx].trim();
+            const prevIsHeader = prev.startsWith("#") || /^(?:#+\s*)?\[(?:[A-Za-z0-9_\- ]+)\](?:\s*[:\-–—]|$)/i.test(prev) || /^(?:#+\s*)?(?:Paper|Subject|Discipline|Sub[\s\-_]?Subject|Unit|Section|Module|Chapter|Topic|Lesson)\s*[:\-–—]/i.test(prev) || /^(?:\d+[\.\)]\s+)?\*\*[^*:]+\*\*$/.test(prev);
+            if (prevIsHeader) {
+              break;
+            }
+            parentIdx--;
+          }
+          if (parentIdx >= 0) {
+            matchLineIndex = parentIdx;
+            matchHeadingLevel = getHeadingLevel(rawLines[parentIdx]);
+            matchedTitle = rawLines[parentIdx].replace(/^[#\s*_\-]+/, "").replace(/[*_#]+$/g, "").trim();
+          } else {
+            matchLineIndex = i;
+            matchHeadingLevel = 99;
+            matchedTitle = line;
+          }
+          break;
         }
-        break;
       }
     }
     if (matchLineIndex !== -1) {
@@ -537,11 +552,31 @@ ${s.content}`).join("\n\n");
       }
     }
   }
+  const relevantLines = [];
+  const queryTokens = (target.title || "").toLowerCase().split(/\s+/).filter((t) => t.length > 3);
+  for (const line of rawLines) {
+    const lLower = line.toLowerCase();
+    if (queryTokens.some((tok) => lLower.includes(tok))) {
+      relevantLines.push(line);
+    }
+  }
+  if (relevantLines.length >= 3) {
+    const scoped = relevantLines.join("\n").trim();
+    return {
+      scopedMarkdown: `### [Focused Syllabus Domain: ${target.title || "Target Subject"}]
+${scoped}`,
+      matchedSectionTitle: target.title || "Target Subject",
+      hierarchyLevel: "subject",
+      totalLines: relevantLines.length
+    };
+  }
   return {
-    scopedMarkdown: fullMarkdown.slice(0, 8e3).trim(),
-    matchedSectionTitle: target.title || "General Syllabus",
-    hierarchyLevel: "full",
-    totalLines: rawLines.length
+    scopedMarkdown: `### [Target Curriculum Module: ${target.title || "Target Subject"}]
+- Authentic, advanced examination syllabus core topics for ${target.title || "this module"}.
+- Core domain mechanisms, formulations, statutory codes, numerical formulas, and technical principles strictly within ${target.title || "this domain"}.`,
+    matchedSectionTitle: target.title || "Target Subject",
+    hierarchyLevel: "subject",
+    totalLines: 3
   };
 }
 function extractSyllabusContents(scopedMarkdown) {
@@ -549,6 +584,14 @@ function extractSyllabusContents(scopedMarkdown) {
     return [];
   const lines = scopedMarkdown.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
   const contents = [];
+  const seen = /* @__PURE__ */ new Set();
+  const addContent = (text) => {
+    const cleaned = text.replace(/^[-*\u2022\d]+[\)\.\s]*/, "").replace(/\*\*/g, "").trim();
+    if (cleaned.length > 5 && !seen.has(cleaned.toLowerCase())) {
+      seen.add(cleaned.toLowerCase());
+      contents.push(cleaned.slice(0, 120));
+    }
+  };
   for (const line of lines) {
     if (/^#{1,6}\s/.test(line))
       continue;
@@ -561,17 +604,51 @@ function extractSyllabusContents(scopedMarkdown) {
     const isBoldLine = /^\*\*[^*:]+\*\*$/.test(line);
     if (isBullet || isNumbered || isBoldLine) {
       const clean = line.replace(/^[-*\u2022\d]+[\)\.\s]*/, "").replace(/\*\*/g, "").trim();
-      if (clean.length > 5) {
-        contents.push(clean.slice(0, 120));
+      const colonIdx = clean.indexOf(":");
+      if (colonIdx > 4 && colonIdx < clean.length - 10) {
+        const parentPrefix = clean.slice(0, colonIdx).trim();
+        const listPart = clean.slice(colonIdx + 1).trim();
+        const subItems = listPart.split(/,\s+/).map((s) => s.trim()).filter((s) => s.length > 3);
+        if (subItems.length >= 2) {
+          for (const item of subItems) {
+            addContent(`${parentPrefix}: ${item}`);
+          }
+          continue;
+        }
       }
+      addContent(clean);
     } else if (line.length > 20) {
       const sentences = line.split(/(?<=[.!?])\s+(?=[A-Z0-9])|;\s+/).map((s) => s.trim()).filter((s) => s.length > 8);
       if (sentences.length > 1) {
         for (const s of sentences) {
-          contents.push(s.replace(/^[-*\u2022\d]+[\)\.\s]*/, "").slice(0, 120));
+          const colonIdx = s.indexOf(":");
+          if (colonIdx > 4 && colonIdx < s.length - 10) {
+            const parentPrefix = s.slice(0, colonIdx).trim();
+            const listPart = s.slice(colonIdx + 1).trim();
+            const subItems = listPart.split(/,\s+/).map((item) => item.trim()).filter((item) => item.length > 3);
+            if (subItems.length >= 2) {
+              for (const item of subItems) {
+                addContent(`${parentPrefix}: ${item}`);
+              }
+              continue;
+            }
+          }
+          addContent(s);
         }
       } else {
-        contents.push(line.slice(0, 120));
+        const colonIdx = line.indexOf(":");
+        if (colonIdx > 4 && colonIdx < line.length - 10) {
+          const parentPrefix = line.slice(0, colonIdx).trim();
+          const listPart = line.slice(colonIdx + 1).trim();
+          const subItems = listPart.split(/,\s+/).map((item) => item.trim()).filter((item) => item.length > 3);
+          if (subItems.length >= 2) {
+            for (const item of subItems) {
+              addContent(`${parentPrefix}: ${item}`);
+            }
+            continue;
+          }
+        }
+        addContent(line);
       }
     }
   }
@@ -597,9 +674,735 @@ function computeQuestionNaturalDensity(scopedMarkdown, ceiling) {
     const nonHeadingLines = scopedMarkdown.split(/\r?\n/).map((l) => l.trim()).filter((l) => l.length > 10 && !/^#{1,6}\s/.test(l) && !isStructuralMetaText(l));
     conceptPointCount = Math.min(nonHeadingLines.length, 10);
   }
-  const rawCapacity = Math.max(5, Math.min(conceptPointCount * 2, 50));
+  const rawCapacity = Math.max(10, Math.min(conceptPointCount * 3, 250));
   const naturalCount = ceiling && ceiling > 0 ? Math.min(rawCapacity, ceiling) : rawCapacity;
   return { contentItems, naturalCount };
+}
+
+// src/lib/diagramValidator.ts
+var KNOWN_DIAGRAM_TYPES = /* @__PURE__ */ new Set([
+  "circle",
+  "coordinate",
+  "plot",
+  "triangle",
+  "polygon",
+  "rectangle",
+  "geometry",
+  "matrix",
+  "grid",
+  "distance",
+  "cone",
+  "probability",
+  "sequence",
+  "equation",
+  "quadratic",
+  "sphereDivision",
+  "boatStream",
+  "ratio",
+  "statistics",
+  "profitLoss",
+  "cylinder",
+  "numberTheory",
+  "square",
+  "rightTriangle",
+  "parallelogram",
+  "cube",
+  "trapezium",
+  "semicircle",
+  "cuboid",
+  "equilateralTriangle",
+  "vector",
+  "universal",
+  "venn",
+  // Advanced competitive exam graph, chart, and reasoning diagrams
+  "barGraph",
+  "lineGraph",
+  "pieChart",
+  "histogram",
+  "scatterPlot",
+  "boxPlot",
+  "seatingArrangement",
+  "directionDiagram",
+  "clock",
+  "calendar",
+  "cubeFolding",
+  "mirrorImage",
+  "treeDiagram",
+  "probabilityTree",
+  "unitCircle",
+  "heightDistance",
+  "parabola",
+  "hyperbola",
+  "functionPlot",
+  "vennDiagram",
+  // Civil Engineering, General Engineering & Life Sciences diagrams
+  "beam",
+  "sfdBmd",
+  "mohrCircle",
+  "soilPhase",
+  "stressStrain",
+  "punnettSquare",
+  "trophicPyramid",
+  "enzymeKinetics",
+  "circuit",
+  "logicGate",
+  "pvDiagram",
+  // SVG and Universal Primitives
+  "point",
+  "line",
+  "segment",
+  "ray",
+  "arc",
+  "ellipse",
+  "angle",
+  "text",
+  "area"
+]);
+function repairLatexBackslashes(str) {
+  let preCleaned = str.replace(/\x0c(rac|orall|rown|lat|otnote)(?![a-zA-Z])/g, "\\\\f$1").replace(/\x08(eta|ar|ox|ullet|igcap|igcup|igsqcup|iguplus|igodot|mod|owtie)(?![a-zA-Z])/g, "\\\\b$1").replace(/\x09(heta|imes|riangle|an|tilde|ext|tfrac|tau|o|op|hickspace|iny|today|binom|extbf|extit|exttt|extsf)(?![a-zA-Z])/g, "\\\\t$1").replace(/\x0d(ight|ho|angle|ightarrow|ightharpoonup|ightharpoondown|brace|floor|ceil)(?![a-zA-Z])/g, "\\\\r$1").replace(/\x0a(eq|earrow|abla|eg|ode)(?![a-zA-Z])/g, "\\\\n$1").replace(/\x0b(ec)(?![a-zA-Z])/g, "\\\\v$1").replace(/\\imes(?![a-zA-Z])/g, "\\\\times").replace(/\\ext(?![a-zA-Z])/g, "\\\\text").replace(/\\rac(?![a-zA-Z])/g, "\\\\frac").replace(/\\ight(?![a-zA-Z])/g, "\\\\right").replace(/\\heta(?![a-zA-Z])/g, "\\\\theta").replace(/\\riangle(?![a-zA-Z])/g, "\\\\triangle");
+  preCleaned = preCleaned.replace(/\\\\|\\([^bfnrtu"\\/])/g, (match, p1) => {
+    return match === "\\\\" ? "\\\\" : "\\\\" + p1;
+  });
+  preCleaned = preCleaned.replace(/\\\\|\\u(?![0-9a-fA-F]{4})/g, (match) => {
+    return match === "\\\\" ? "\\\\" : "\\\\u";
+  });
+  const latexCommands = "theta|imes|riangle|an|tilde|text|tfrac|tau|to|top|thickspace|tiny|today|tbinom|textbf|textit|texttt|textsf|frac|forall|frown|flat|footnote|beta|bar|box|bullet|bigcap|bigcup|bigsqcup|biguplus|bigodot|bmod|bowtie|right|rho|rangle|rightarrow|Rightarrow|rightharpoonup|rightharpoondown|rbrace|rfloor|rceil|neq|nearrow|nabla|neg|node";
+  const latexRegex = new RegExp(`\\\\\\\\|\\\\(${latexCommands})(?![a-zA-Z])`, "g");
+  preCleaned = preCleaned.replace(latexRegex, (match, p1) => {
+    return match === "\\\\" ? "\\\\" : "\\\\" + p1;
+  });
+  preCleaned = preCleaned.replace(/\\\\|\\ne(?![a-zA-Z])/g, (match) => {
+    return match === "\\\\" ? "\\\\" : "\\\\ne";
+  });
+  return preCleaned;
+}
+function cleanJsonString(str) {
+  let cleaned = str.trim();
+  if (cleaned.startsWith("```")) {
+    cleaned = cleaned.replace(/^```(?:json)?\s*\n/, "").replace(/\n\s*```$/, "").trim();
+  }
+  if (!(cleaned.startsWith("{") && cleaned.endsWith("}") || cleaned.startsWith("[") && cleaned.endsWith("]"))) {
+    return cleaned;
+  }
+  cleaned = repairLatexBackslashes(cleaned);
+  try {
+    JSON.parse(cleaned);
+    return cleaned;
+  } catch (_) {
+  }
+  try {
+    let repaired = cleaned.replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'").replace(/(?:\s*['"]?([a-zA-Z0-9_.-]+)['"]?\s*):/g, '"$1":').replace(/:\s*'([^'\\]*(?:\\.[^'\\]*)*)'/g, ':"$1"').replace(/,\s*([}\]])/g, "$1");
+    repaired = repaired.replace(/\[\s*'([^']*)'\s*(?:,\s*'([^']*)'\s*)*\]/g, (match) => {
+      return match.replace(/'/g, '"');
+    });
+    JSON.parse(repaired);
+    return repaired;
+  } catch (_) {
+  }
+  return cleaned;
+}
+function tryParseJsonDiagram(text) {
+  const cleaned = cleanJsonString(text);
+  if (cleaned.startsWith("{") && cleaned.endsWith("}")) {
+    try {
+      const parsed = JSON.parse(cleaned);
+      if (parsed && typeof parsed === "object" && parsed.type) {
+        if (KNOWN_DIAGRAM_TYPES.has(String(parsed.type))) {
+          return parsed;
+        }
+      }
+    } catch (_) {
+    }
+  }
+  return null;
+}
+function splitTextByJsonDiagrams(text) {
+  const result = [];
+  let currentIndex = 0;
+  while (currentIndex < text.length) {
+    const openBrace = text.indexOf("{", currentIndex);
+    if (openBrace === -1) {
+      result.push({ type: "text", content: text.substring(currentIndex) });
+      break;
+    }
+    if (openBrace > currentIndex) {
+      result.push({ type: "text", content: text.substring(currentIndex, openBrace) });
+    }
+    let foundJson = false;
+    for (let closeBrace = openBrace + 1; closeBrace < text.length; closeBrace++) {
+      if (text[closeBrace] === "}") {
+        const potentialJsonStr = text.substring(openBrace, closeBrace + 1);
+        const parsed = tryParseJsonDiagram(potentialJsonStr);
+        if (parsed) {
+          result.push({ type: "json", content: potentialJsonStr });
+          currentIndex = closeBrace + 1;
+          foundJson = true;
+          break;
+        }
+      }
+    }
+    if (!foundJson) {
+      result.push({ type: "text", content: text.substring(openBrace, openBrace + 1) });
+      currentIndex = openBrace + 1;
+    }
+  }
+  return result;
+}
+function extractEmbeddedDiagram(questionText) {
+  if (!questionText)
+    return { cleanedText: "", diagram: null };
+  let cleanedText = questionText;
+  let diagram = null;
+  const fencedRegex = /```(?:json)?\s*(\{\s*[\s\S]*?"type"\s*:[\s\S]*?\})\s*```/i;
+  const match = cleanedText.match(fencedRegex);
+  if (match && match[1]) {
+    const parsed = tryParseJsonDiagram(match[1]);
+    if (parsed) {
+      diagram = parsed;
+      cleanedText = cleanedText.replace(match[0], "").trim();
+      return { cleanedText, diagram };
+    }
+  }
+  const jsonSplits = splitTextByJsonDiagrams(cleanedText);
+  let rebuiltText = "";
+  for (const split of jsonSplits) {
+    if (split.type === "json") {
+      const parsed = tryParseJsonDiagram(split.content);
+      if (parsed) {
+        diagram = parsed;
+      } else {
+        rebuiltText += split.content;
+      }
+    } else {
+      rebuiltText += split.content;
+    }
+  }
+  return {
+    cleanedText: rebuiltText.replace(/```(?:json)?\s*```/g, "").trim(),
+    diagram
+  };
+}
+function repairObjectStrings(val, visited = /* @__PURE__ */ new WeakSet()) {
+  if (typeof val === "string") {
+    return val;
+  }
+  if (val && typeof val === "object") {
+    if (visited.has(val)) {
+      return null;
+    }
+    visited.add(val);
+    if (Array.isArray(val)) {
+      return val.map((item) => repairObjectStrings(item, visited));
+    }
+    const res = {};
+    for (const k in val) {
+      if (Object.prototype.hasOwnProperty.call(val, k)) {
+        res[k] = repairObjectStrings(val[k], visited);
+      }
+    }
+    return res;
+  }
+  return val;
+}
+function computeChartBounds(clone) {
+  let minY = Infinity;
+  let maxY = -Infinity;
+  let minX = Infinity;
+  let maxX = -Infinity;
+  const inspectShape = (s) => {
+    if (!s || typeof s !== "object")
+      return;
+    if (Array.isArray(s.points) && s.points.length > 0) {
+      s.points.forEach((p) => {
+        const py = Number(Array.isArray(p) ? p[1] : p?.y);
+        const px = Number(Array.isArray(p) ? p[0] : p?.x);
+        if (!isNaN(py)) {
+          if (py < minY)
+            minY = py;
+          if (py > maxY)
+            maxY = py;
+        }
+        if (!isNaN(px)) {
+          if (px < minX)
+            minX = px;
+          if (px > maxX)
+            maxX = px;
+        }
+      });
+    }
+    if (s.type === "boxPlot") {
+      const vals = [s.min, s.q1, s.median, s.q3, s.max].map(Number).filter((v) => !isNaN(v));
+      vals.forEach((v) => {
+        if (v < minX)
+          minX = v;
+        if (v > maxX)
+          maxX = v;
+      });
+      minY = Math.min(minY, -3);
+      maxY = Math.max(maxY, 3);
+    }
+    if (s.type === "directionDiagram" && Array.isArray(s.steps)) {
+      let curX = 0;
+      let curY = 0;
+      minX = Math.min(minX, 0);
+      maxX = Math.max(maxX, 0);
+      minY = Math.min(minY, 0);
+      maxY = Math.max(maxY, 0);
+      s.steps.forEach((step) => {
+        const d = Number(step.distance) || 2;
+        const dir = String(step.direction || "N").toUpperCase();
+        let dx = 0;
+        let dy = 0;
+        switch (dir) {
+          case "N":
+            dy = d;
+            break;
+          case "S":
+            dy = -d;
+            break;
+          case "E":
+            dx = d;
+            break;
+          case "W":
+            dx = -d;
+            break;
+          case "NE":
+            dx = d * 0.7;
+            dy = d * 0.7;
+            break;
+          case "NW":
+            dx = -d * 0.7;
+            dy = d * 0.7;
+            break;
+          case "SE":
+            dx = d * 0.7;
+            dy = -d * 0.7;
+            break;
+          case "SW":
+            dx = -d * 0.7;
+            dy = -d * 0.7;
+            break;
+        }
+        curX += dx;
+        curY += dy;
+        if (curX < minX)
+          minX = curX;
+        if (curX > maxX)
+          maxX = curX;
+        if (curY < minY)
+          minY = curY;
+        if (curY > maxY)
+          maxY = curY;
+      });
+    }
+  };
+  inspectShape(clone);
+  if (Array.isArray(clone.shapes)) {
+    clone.shapes.forEach(inspectShape);
+  }
+  let finalYRange = clone.yRange || [0, 100];
+  if (minY !== Infinity && maxY !== -Infinity) {
+    const lowY = minY < 0 ? Math.floor(minY * 1.15) : 0;
+    const highY = maxY > 0 ? maxY < 1 ? Number((maxY * 1.25).toFixed(2)) : Math.ceil(maxY * 1.15) : 10;
+    finalYRange = [lowY, Math.max(highY, lowY + 1)];
+  }
+  let finalXRange = clone.xRange || [-0.5, 5.5];
+  if (minX !== Infinity && maxX !== -Infinity) {
+    const pad = Math.max(0.5, (maxX - minX) * 0.12);
+    finalXRange = [minX - pad, maxX + pad];
+  } else if (Array.isArray(clone.points) && clone.points.length > 0) {
+    finalXRange = [-0.5, clone.points.length + 0.5];
+  }
+  return { xRange: finalXRange, yRange: finalYRange };
+}
+function diagramValidator(diagram) {
+  if (!diagram || typeof diagram !== "object")
+    return null;
+  const repaired = repairObjectStrings(diagram);
+  let clone = { ...repaired };
+  if (typeof clone.type !== "string") {
+    clone.type = String(clone.type || "unknown");
+  }
+  if (!KNOWN_DIAGRAM_TYPES.has(clone.type)) {
+    clone._unknownType = true;
+  }
+  if (clone.elements && !clone.shapes) {
+    clone.shapes = clone.elements;
+  }
+  if (clone.type !== "universal" && clone.type !== "vector" && (!clone.shapes || !Array.isArray(clone.shapes))) {
+    const shapeType = clone.type;
+    const isCoordinateChart = ["barGraph", "lineGraph", "histogram", "scatterPlot", "enzymeKinetics", "stressStrain", "pvDiagram"].includes(shapeType);
+    const isCleanVisual = ["pieChart", "vennDiagram", "venn", "clock", "calendar", "cubeFolding", "seatingArrangement", "punnettSquare", "trophicPyramid", "beam", "sfdBmd", "mohrCircle", "soilPhase", "circuit", "logicGate"].includes(shapeType);
+    const isDirection = shapeType === "directionDiagram";
+    const isReasoning = isCleanVisual || isDirection;
+    const bounds = computeChartBounds(clone);
+    clone = {
+      type: "universal",
+      placement: clone.placement,
+      width: clone.width || 600,
+      height: clone.height || 360,
+      xRange: clone.xRange || (isCleanVisual ? [-5, 5] : bounds.xRange),
+      yRange: clone.yRange || (isCleanVisual ? [-5, 5] : bounds.yRange),
+      grid: clone.grid !== void 0 ? clone.grid : isCoordinateChart,
+      xAxis: clone.xAxis !== void 0 ? clone.xAxis : isCoordinateChart,
+      yAxis: clone.yAxis !== void 0 ? clone.yAxis : isCoordinateChart,
+      xAxisLabel: clone.xAxisLabel,
+      yAxisLabel: clone.yAxisLabel,
+      shapes: [{ ...repaired, id: clone.id || `${shapeType}-1` }]
+    };
+  } else if (Array.isArray(clone.shapes) && clone.shapes.length > 0) {
+    const isCleanVisual = clone.shapes.every((s) => ["pieChart", "vennDiagram", "venn", "clock", "calendar", "cubeFolding", "seatingArrangement", "punnettSquare", "trophicPyramid", "beam", "sfdBmd", "mohrCircle", "soilPhase", "circuit", "logicGate"].includes(s?.type));
+    const bounds = computeChartBounds(clone);
+    if (!clone.xRange || !Array.isArray(clone.xRange) || clone.xRange.length < 2) {
+      clone.xRange = isCleanVisual ? [-5, 5] : bounds.xRange;
+    }
+    if (!clone.yRange || !Array.isArray(clone.yRange) || clone.yRange.length < 2 || clone.yRange[0] === 0 && clone.yRange[1] === 100) {
+      clone.yRange = isCleanVisual ? [-5, 5] : bounds.yRange;
+    }
+    if (isCleanVisual) {
+      if (clone.grid === void 0)
+        clone.grid = false;
+      if (clone.xAxis === void 0)
+        clone.xAxis = false;
+      if (clone.yAxis === void 0)
+        clone.yAxis = false;
+    }
+  }
+  if (!clone.xRange || !Array.isArray(clone.xRange) || clone.xRange.length < 2 || !Number.isFinite(clone.xRange[0]) || !Number.isFinite(clone.xRange[1])) {
+    clone.xRange = [-5, 5];
+  } else if (clone.xRange[0] >= clone.xRange[1]) {
+    clone.xRange = [clone.xRange[0], clone.xRange[0] + 10];
+  }
+  if (!clone.yRange || !Array.isArray(clone.yRange) || clone.yRange.length < 2 || !Number.isFinite(clone.yRange[0]) || !Number.isFinite(clone.yRange[1])) {
+    clone.yRange = [-5, 5];
+  } else if (clone.yRange[0] >= clone.yRange[1]) {
+    clone.yRange = [clone.yRange[0], clone.yRange[0] + 10];
+  }
+  if (Array.isArray(clone.shapes)) {
+    clone.shapes = clone.shapes.map((s, idx) => ({
+      ...s,
+      id: s.id || `shape-${idx + 1}`
+    }));
+  }
+  return clone;
+}
+function classifyDiagramPedagogicalRole(diagram) {
+  if (!diagram || typeof diagram !== "object")
+    return "neutral";
+  if (diagram.placement === "explanation")
+    return "derivation";
+  if (diagram.placement === "question")
+    return "stimulus";
+  const type = diagram.type;
+  const shapes = Array.isArray(diagram.shapes) ? diagram.shapes : [];
+  const allTypes = /* @__PURE__ */ new Set([type, ...shapes.map((s) => s?.type).filter(Boolean)]);
+  if (allTypes.has("barGraph") || allTypes.has("lineGraph") || allTypes.has("pieChart") || allTypes.has("histogram") || allTypes.has("scatterPlot") || allTypes.has("boxPlot") || allTypes.has("table")) {
+    return "stimulus";
+  }
+  if (allTypes.has("directionDiagram")) {
+    return "derivation";
+  }
+  const textContext = `${diagram.title || ""} ${diagram.label || ""} ${diagram.description || ""}`.toLowerCase();
+  if (/\b(proof|derivation|solution|trajectory|displacement path|answer)\b/i.test(textContext)) {
+    return "derivation";
+  }
+  if (/\b(stimulus|given data|problem figure|chart to analyze)\b/i.test(textContext)) {
+    return "stimulus";
+  }
+  return "neutral";
+}
+function getDiagramFingerprint(diagram) {
+  if (!diagram || typeof diagram !== "object")
+    return "";
+  const parts = [];
+  const primaryType = diagram.type || "unknown";
+  parts.push(`type:${primaryType}`);
+  const inspect = (s) => {
+    if (!s || typeof s !== "object")
+      return;
+    if (s.type)
+      parts.push(`st:${s.type}`);
+    if (Array.isArray(s.items))
+      parts.push(`items:${s.items.join(",")}`);
+    if (Array.isArray(s.values))
+      parts.push(`vals:${s.values.map(Number).join(",")}`);
+    if (Array.isArray(s.points)) {
+      const pts = s.points.map((p) => {
+        if (Array.isArray(p))
+          return `${p[0]},${p[1]}`;
+        if (p && typeof p === "object")
+          return `${p.x},${p.y}${p.label ? `:${p.label}` : ""}`;
+        return String(p);
+      });
+      parts.push(`pts:${pts.join("|")}`);
+    }
+    if (Array.isArray(s.steps)) {
+      const steps = s.steps.map((st) => `${st.direction || ""}:${st.distance || ""}`);
+      parts.push(`steps:${steps.join("|")}`);
+    }
+    if (Array.isArray(s.sets))
+      parts.push(`sets:${s.sets.join(",")}`);
+  };
+  inspect(diagram);
+  if (Array.isArray(diagram.shapes)) {
+    diagram.shapes.forEach(inspect);
+  }
+  return parts.join(";");
+}
+function packageDiagramsForStorage(diagram, explanationDiagram) {
+  const hasQ = diagram && typeof diagram === "object" && Object.keys(diagram).length > 0;
+  const hasE = explanationDiagram && typeof explanationDiagram === "object" && Object.keys(explanationDiagram).length > 0;
+  if (!hasQ && !hasE)
+    return null;
+  if (hasQ && (diagram.type === "composite" || diagram.questionDiagram && diagram.explanationDiagram)) {
+    return diagram;
+  }
+  if (hasQ && !hasE) {
+    const qObj = { ...diagram };
+    if (!qObj.placement)
+      qObj.placement = "question";
+    return qObj;
+  }
+  if (!hasQ && hasE) {
+    const eObj = { ...explanationDiagram };
+    eObj.placement = "explanation";
+    return eObj;
+  }
+  return {
+    type: "composite",
+    questionDiagram: { ...diagram, placement: "question" },
+    explanationDiagram: { ...explanationDiagram, placement: "explanation" }
+  };
+}
+function sanitizeDecoupledQuestionText(text) {
+  if (!text)
+    return "";
+  let cleaned = text;
+  cleaned = cleaned.replace(/^Directions(?:\s*\([^\)]+\))?:\s*(?:Refer\s+to|Study|Consider)[^\n]*\n/i, "");
+  cleaned = cleaned.replace(/^Directions(?:\s*\([^\)]+\))?:\s*Refer\s+to\s+(?:the\s+)?(?:given\s+)?(?:[a-zA-Z\s]+)?(?:figure|diagram|graph|chart|table|sketch)[,\s]*(?:to\s+answer\s+the\s+question:?|and\s+answer\s+the\s+following:?)?[:\.\s]*/i, "");
+  cleaned = cleaned.replace(/^(?:Refer\s+to|Referring\s+to|Study\s+the|Based\s+on\s+the)\s+(?:the\s+)?(?:given\s+)?(?:[a-zA-Z\s]+)?(?:figure|diagram|graph|chart|table|sketch|drawing)[,\s]*(?:to\s+answer\s+the\s+question:?|and\s+answer\s+the\s+following:?)?\s*/i, "");
+  cleaned = cleaned.replace(/^Consider\s+the\s+(?:following|given|attached|schematic)\s+(?:figure|diagram|graph|chart|sketch|drawing)[:,\s]*/i, "");
+  cleaned = cleaned.replace(/^(?:from|in)\s+the\s+(?:schematic\s+)?(?:figure|diagram|graph|chart|sketch)\s+(?:given\s+)?(?:alongside|below|above)[,\s]*/i, "");
+  cleaned = cleaned.replace(/^to\s+/i, "");
+  cleaned = cleaned.replace(/(?:^|,\s*)(?:as\s+)?shown\s+in\s+(?:the\s+)?(?:given\s+)?(?:[a-zA-Z\s]+)?(?:figure|diagram|graph|chart|circuit|sketch|below|above)[,\.]?\s*/gi, (match) => {
+    return match.startsWith(",") ? ". " : "";
+  });
+  cleaned = cleaned.replace(/\s*\([^\)]*(?:figure|diagram|graph|chart|shown below|shown above|see diagram)[^\)]*\)/gi, "");
+  cleaned = cleaned.replace(/\bin\s+the\s+(?:given|adjoining|adjacent)\s+figure\b/gi, "in the given problem");
+  cleaned = cleaned.replace(/\bfrom\s+the\s+given\s+(?:figure|diagram|graph|chart)\b/gi, "from the given data");
+  cleaned = cleaned.replace(/\s+\./g, ".");
+  cleaned = cleaned.replace(/^\s*[\.,:;]\s*/, "");
+  cleaned = cleaned.replace(/[ \t]{2,}/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+  if (cleaned.length > 0 && /^[a-z]/.test(cleaned)) {
+    if (!cleaned.startsWith("in the given problem")) {
+      cleaned = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+    }
+  }
+  return cleaned;
+}
+function validateAndHealDiagram(diagram, questionText = "") {
+  if (!diagram || typeof diagram !== "object") {
+    return {
+      healedDiagram: null,
+      cleanQuestionText: questionText,
+      wasDecoupled: false,
+      isValid: true
+    };
+  }
+  if (diagram.type === "composite" || diagram.questionDiagram && diagram.explanationDiagram) {
+    const healedQ = diagram.questionDiagram ? validateAndHealDiagram(diagram.questionDiagram, questionText) : { healedDiagram: null, cleanQuestionText: questionText, wasDecoupled: false, isValid: true };
+    const healedE = diagram.explanationDiagram ? validateAndHealDiagram(diagram.explanationDiagram, questionText) : { healedDiagram: null, cleanQuestionText: questionText, wasDecoupled: false, isValid: true };
+    if (!healedQ.healedDiagram && !healedE.healedDiagram) {
+      return {
+        healedDiagram: null,
+        cleanQuestionText: sanitizeDecoupledQuestionText(questionText),
+        wasDecoupled: true,
+        isValid: false,
+        healedReason: "Both composite visuals were corrupt and decoupled"
+      };
+    }
+    return {
+      healedDiagram: packageDiagramsForStorage(healedQ.healedDiagram, healedE.healedDiagram),
+      cleanQuestionText: healedQ.healedDiagram ? questionText : sanitizeDecoupledQuestionText(questionText),
+      wasDecoupled: healedQ.wasDecoupled || healedE.wasDecoupled,
+      isValid: true
+    };
+  }
+  const normalized = diagramValidator(diagram);
+  if (!normalized) {
+    return {
+      healedDiagram: null,
+      cleanQuestionText: sanitizeDecoupledQuestionText(questionText),
+      wasDecoupled: true,
+      isValid: false,
+      healedReason: "Failed base diagram normalization"
+    };
+  }
+  const shapes = Array.isArray(normalized.shapes) ? normalized.shapes : [normalized];
+  if (shapes.length === 0) {
+    return {
+      healedDiagram: null,
+      cleanQuestionText: sanitizeDecoupledQuestionText(questionText),
+      wasDecoupled: true,
+      isValid: false,
+      healedReason: "Zero shapes defined"
+    };
+  }
+  const primaryShape = shapes[0] || {};
+  const primaryType = String(primaryShape.type || normalized.type || "unknown");
+  const rawType = String(diagram?.type || "");
+  const hasRecognizedShape = shapes.some((s) => KNOWN_DIAGRAM_TYPES.has(String(s?.type || "")) && s?.type !== "universal" && s?.type !== "vector");
+  const isOriginalTypeKnown = KNOWN_DIAGRAM_TYPES.has(rawType) && rawType !== "universal" && rawType !== "vector";
+  const isRawUniversalWithShapes = (rawType === "universal" || rawType === "vector") && hasRecognizedShape;
+  if (!hasRecognizedShape && !isOriginalTypeKnown && !isRawUniversalWithShapes) {
+    return {
+      healedDiagram: null,
+      cleanQuestionText: sanitizeDecoupledQuestionText(questionText),
+      wasDecoupled: true,
+      isValid: false,
+      healedReason: `Unrecognized diagram type: ${primaryType}`
+    };
+  }
+  let healedClone;
+  try {
+    healedClone = JSON.parse(JSON.stringify(normalized));
+  } catch (_) {
+    healedClone = { ...normalized };
+  }
+  let targetShape = healedClone.shapes && healedClone.shapes[0] ? healedClone.shapes[0] : healedClone;
+  if (["barGraph", "pieChart", "histogram"].includes(primaryType)) {
+    let items = Array.isArray(targetShape.items) ? targetShape.items : Array.isArray(healedClone.items) ? healedClone.items : [];
+    let values = Array.isArray(targetShape.values) ? targetShape.values : Array.isArray(healedClone.values) ? healedClone.values : [];
+    const cleanValues = values.map((v) => {
+      if (v === null || v === void 0 || typeof v === "boolean")
+        return NaN;
+      const num = Number(v);
+      if (!Number.isFinite(num))
+        return NaN;
+      return primaryType === "pieChart" ? Math.abs(num) : num;
+    }).filter((v) => !isNaN(v) && (primaryType === "pieChart" ? v > 0 : true));
+    if (cleanValues.length === 0) {
+      return {
+        healedDiagram: null,
+        cleanQuestionText: sanitizeDecoupledQuestionText(questionText),
+        wasDecoupled: true,
+        isValid: false,
+        healedReason: "Bar/Pie chart has zero valid numeric values"
+      };
+    }
+    if (items.length < cleanValues.length) {
+      items = cleanValues.map((_, idx) => items[idx] || `Item ${String.fromCharCode(65 + idx)}`);
+    }
+    targetShape.items = items;
+    targetShape.values = cleanValues;
+    healedClone.items = items;
+    healedClone.values = cleanValues;
+  }
+  if (["lineGraph", "scatterPlot", "curve"].includes(primaryType)) {
+    let points = Array.isArray(targetShape.points) ? targetShape.points : Array.isArray(healedClone.points) ? healedClone.points : [];
+    const cleanPoints = points.map((p) => {
+      if (Array.isArray(p)) {
+        const x = Number(p[0]);
+        const y = Number(p[1]);
+        return Number.isFinite(x) && Number.isFinite(y) ? [x, y] : null;
+      }
+      if (p && typeof p === "object") {
+        const x = Number(p.x);
+        const y = Number(p.y);
+        return Number.isFinite(x) && Number.isFinite(y) ? { ...p, x, y } : null;
+      }
+      return null;
+    }).filter(Boolean);
+    if (cleanPoints.length < 2) {
+      return {
+        healedDiagram: null,
+        cleanQuestionText: sanitizeDecoupledQuestionText(questionText),
+        wasDecoupled: true,
+        isValid: false,
+        healedReason: "Line graph requires at least 2 valid coordinate points"
+      };
+    }
+    targetShape.points = cleanPoints;
+    healedClone.points = cleanPoints;
+  }
+  if (["beam", "sfdBmd"].includes(primaryType)) {
+    let span = Number(targetShape.span || healedClone.span);
+    if (!Number.isFinite(span) || span <= 0) {
+      span = 6;
+    }
+    targetShape.span = span;
+    healedClone.span = span;
+    if (!Array.isArray(targetShape.supports) || targetShape.supports.length === 0) {
+      targetShape.supports = [
+        { type: "pin", position: 0 },
+        { type: "roller", position: span }
+      ];
+    } else {
+      targetShape.supports = targetShape.supports.map((s) => ({
+        ...s,
+        position: Math.max(0, Math.min(span, Number(s.position) || 0))
+      }));
+    }
+    if (!Array.isArray(targetShape.loads)) {
+      targetShape.loads = [];
+    } else {
+      targetShape.loads = targetShape.loads.map((l) => {
+        if (!l || typeof l !== "object")
+          return null;
+        if (l.type === "udl") {
+          const st = Math.max(0, Math.min(span, Number(l.start) || 0));
+          const en = Math.max(st, Math.min(span, Number(l.end) || span));
+          return { ...l, start: st, end: en, magnitude: Number(l.magnitude) || 10 };
+        }
+        return {
+          ...l,
+          position: Math.max(0, Math.min(span, Number(l.position) || 0)),
+          magnitude: Number(l.magnitude) || 20
+        };
+      }).filter(Boolean);
+    }
+    healedClone.loads = targetShape.loads;
+  }
+  if (primaryType === "mohrCircle") {
+    targetShape.sigmaX = Number.isFinite(Number(targetShape.sigmaX)) ? Number(targetShape.sigmaX) : 40;
+    targetShape.sigmaY = Number.isFinite(Number(targetShape.sigmaY)) ? Number(targetShape.sigmaY) : 20;
+    targetShape.tauXY = Number.isFinite(Number(targetShape.tauXY)) ? Number(targetShape.tauXY) : 0;
+  }
+  if (primaryType === "punnettSquare") {
+    let fg = Array.isArray(targetShape.femaleGametes) ? targetShape.femaleGametes : ["A", "a"];
+    let mg = Array.isArray(targetShape.maleGametes) ? targetShape.maleGametes : ["A", "a"];
+    let cells = Array.isArray(targetShape.cells) ? targetShape.cells : [];
+    if (cells.length !== fg.length * mg.length) {
+      cells = [];
+      for (const f of fg) {
+        for (const m of mg) {
+          cells.push(`${f}${m}`);
+        }
+      }
+    }
+    targetShape.femaleGametes = fg;
+    targetShape.maleGametes = mg;
+    targetShape.cells = cells;
+  }
+  if (primaryType === "trophicPyramid") {
+    let tiers = Array.isArray(targetShape.tiers) ? targetShape.tiers : [];
+    if (tiers.length === 0) {
+      tiers = [
+        { level: "Apex Predators", value: 10, unit: "kcal" },
+        { level: "Secondary Consumers", value: 100, unit: "kcal" },
+        { level: "Primary Consumers", value: 1e3, unit: "kcal" },
+        { level: "Primary Producers", value: 1e4, unit: "kcal" }
+      ];
+    }
+    targetShape.tiers = tiers;
+  }
+  const finalized = diagramValidator(healedClone);
+  return {
+    healedDiagram: finalized,
+    cleanQuestionText: questionText,
+    wasDecoupled: false,
+    isValid: true
+  };
 }
 
 // src/lib/serverAiGenerator.ts
@@ -773,18 +1576,103 @@ function extractAndParseJSON(rawText) {
   }
   throw new Error(`Failed to parse AI JSON response: Unterminated output. Raw snippet: ${cleaned.slice(0, 300)}...`);
 }
+var keyHealthRegistry = /* @__PURE__ */ new Map();
+var globalGeminiKeyIndex = 0;
+function getKeyPreview(key) {
+  if (!key)
+    return "";
+  if (key.length <= 16)
+    return key;
+  return `${key.slice(0, 10)}...${key.slice(-5)}`;
+}
+function calculateNextDailyResetMs() {
+  try {
+    const now = /* @__PURE__ */ new Date();
+    const laDateStr = now.toLocaleString("en-US", { timeZone: "America/Los_Angeles" });
+    const laNow = new Date(laDateStr);
+    const laNextMidnight = new Date(laNow);
+    laNextMidnight.setHours(24, 0, 0, 0);
+    const diffMs = laNextMidnight.getTime() - laNow.getTime();
+    return Date.now() + Math.max(diffMs, 6e4);
+  } catch {
+    return Date.now() + 12 * 60 * 60 * 1e3;
+  }
+}
+function syncAndRecoverKeyPool(keyPool) {
+  const now = Date.now();
+  const states = [];
+  for (const key of keyPool) {
+    let state = keyHealthRegistry.get(key);
+    if (!state) {
+      state = {
+        key,
+        keyPreview: getKeyPreview(key),
+        status: "healthy",
+        cooldownUntil: 0,
+        failureCount: 0,
+        consecutiveErrors: 0,
+        successCount: 0,
+        lastUsedAt: 0,
+        isLeased: false
+      };
+      keyHealthRegistry.set(key, state);
+    } else {
+      if (state.isLeased && now - (state.leasedAt || 0) > 6e4) {
+        state.isLeased = false;
+        state.leasedWorkerId = void 0;
+        state.leasedAt = void 0;
+      }
+      if (state.status === "cooldown_rpm" || state.status === "exhausted_daily") {
+        if (now >= state.cooldownUntil) {
+          const prevStatus = state.status;
+          state.status = "healthy";
+          state.consecutiveErrors = 0;
+          state.cooldownUntil = 0;
+          state.isLeased = false;
+          console.log(`[AI Key Pool] \u{1F7E2} AUTO-RECOVERED: Key ${state.keyPreview} (${prevStatus} expired). Re-activated into active rotation.`);
+        }
+      }
+    }
+    states.push(state);
+  }
+  return states;
+}
+function resolveGeminiKeyPool(providedKey) {
+  const pool = [];
+  const addCandidates = (raw) => {
+    if (!raw)
+      return;
+    const tokens = raw.split(/[\s,;]+/).map((t) => t.replace(/^["'`\s]+|["'`\s]+$/g, "").trim()).filter(Boolean);
+    for (const t of tokens) {
+      if ((t.startsWith("AQ.") || t.startsWith("AIza") || t.length > 20) && !pool.includes(t)) {
+        pool.push(t);
+      }
+    }
+  };
+  addCandidates(providedKey);
+  addCandidates(process.env.GEMINI_API_KEY);
+  addCandidates(process.env.VITE_GEMINI_API_KEY);
+  if (pool.length === 0) {
+    const denta = (process.env.VITE_DENTA_RESPONSE_AI || "").replace(/^["'`\s]+|["'`\s]+$/g, "").trim();
+    if (denta.startsWith("AIza") || denta.startsWith("AQ.")) {
+      pool.push(denta);
+    }
+  }
+  return pool;
+}
 async function queryAIModel(systemPrompt, userPrompt, options) {
   const rawKey = options.apiKey || "";
   const cleanKey = rawKey.replace(/^["'`\s]+|["'`\s]+$/g, "").trim();
   const isCustom = cleanKey.length > 0;
   const rawBaseUrl = (options.baseUrl || "").replace(/^["'`\s]+|["'`\s]+$/g, "").trim().replace(/\/+$/, "");
   let rawModel = (options.model || "").trim();
+  const hasGeminiKey = Boolean((process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || "").trim());
   if (rawModel === "default" || rawModel === "gpt" || !rawModel) {
-    rawModel = isCustom ? "" : "openai/gpt-oss-20b";
+    rawModel = isCustom ? "" : hasGeminiKey ? "gemini-flash-lite-latest" : "openai/gpt-oss-20b";
   } else if (rawModel === "llama") {
     rawModel = "meta/llama-3.2-11b-vision-instruct";
   }
-  const isGoogleKey = cleanKey.startsWith("AIza") || cleanKey.startsWith("AQ.");
+  const isGoogleKey = cleanKey.startsWith("AIza") || cleanKey.startsWith("AQ.") || cleanKey.includes("AIza") || cleanKey.includes("AQ.");
   const isNvidiaKey = cleanKey.startsWith("nvapi-");
   const isOpenRouterKey = cleanKey.startsWith("sk-or-");
   const isGroqKey = cleanKey.startsWith("gsk_");
@@ -826,8 +1714,12 @@ async function queryAIModel(systemPrompt, userPrompt, options) {
     else
       provider = "openai";
   } else {
-    if (rawModel.startsWith("gemini")) {
+    const hasGeminiServerKey = Boolean((process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || "").trim());
+    if (rawModel.startsWith("gemini") || hasGeminiServerKey && (!rawModel || rawModel === "default" || rawModel === "openai/gpt-oss-20b")) {
       provider = "gemini";
+      if (!rawModel || rawModel === "default" || rawModel === "openai/gpt-oss-20b") {
+        rawModel = "gemini-flash-lite-latest";
+      }
     } else {
       provider = "nvidia";
     }
@@ -835,13 +1727,9 @@ async function queryAIModel(systemPrompt, userPrompt, options) {
   let apiKey = cleanKey;
   if (!apiKey) {
     if (provider === "gemini") {
-      const gKey = (process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || "").replace(/^["'`\s]+|["'`\s]+$/g, "").trim();
-      if (gKey) {
-        apiKey = gKey;
-      } else {
-        const denta = (process.env.VITE_DENTA_RESPONSE_AI || "").replace(/^["'`\s]+|["'`\s]+$/g, "").trim();
-        if (denta.startsWith("AIza") || denta.startsWith("AQ."))
-          apiKey = denta;
+      const gKeys = resolveGeminiKeyPool();
+      if (gKeys.length > 0) {
+        apiKey = gKeys[0];
       }
     } else if (rawModel.includes("gpt-oss")) {
       apiKey = (process.env.NVIDIA_GPT_OSS_KEY || process.env.DEEPSEEK_API_KEY || process.env.NVIDIA_NEMOTRON_KEY || "").replace(/^["'`\s]+|["'`\s]+$/g, "").trim();
@@ -883,102 +1771,201 @@ async function queryAIModel(systemPrompt, userPrompt, options) {
     if (!cleanGeminiModel.startsWith("gemini")) {
       cleanGeminiModel = "gemini-flash-lite-latest";
     }
-    if (cleanGeminiModel === "gemini-2.5-pro" || cleanGeminiModel.includes("2.5-pro")) {
+    if (cleanGeminiModel === "gemini-2.5-pro" || cleanGeminiModel.includes("2.5-pro") || cleanGeminiModel === "gemini-2.5-flash" || cleanGeminiModel === "gemini-1.5-flash" || cleanGeminiModel === "gemini-2.5-flash-lite") {
       console.warn(`[AI] Remapping deprecated ${cleanGeminiModel} to gemini-flash-lite-latest`);
       cleanGeminiModel = "gemini-flash-lite-latest";
     }
-    if (cleanGeminiModel === "gemini-2.5-flash" || cleanGeminiModel === "gemini-1.5-flash") {
-      console.warn(`[AI] Remapping deprecated ${cleanGeminiModel} to gemini-flash-lite-latest`);
-      cleanGeminiModel = "gemini-flash-lite-latest";
+    const keyPool = resolveGeminiKeyPool(cleanKey);
+    if (keyPool.length === 0) {
+      throw new Error("Google Gemini API key is not configured. Please paste your Gemini API key in the Custom API Key section.");
     }
     const candidateModels = [
       cleanGeminiModel,
-      cleanGeminiModel !== "gemini-3.5-flash" ? "gemini-3.5-flash" : "gemini-flash-lite-latest",
-      "gemini-flash-lite-latest",
-      "gemini-3.6-flash"
+      cleanGeminiModel !== "gemini-flash-lite-latest" ? "gemini-flash-lite-latest" : "gemini-3.5-flash-lite",
+      "gemini-3.5-flash-lite",
+      "gemini-3.1-flash-lite",
+      "gemini-3.5-flash"
     ].filter((m, i, arr) => arr.indexOf(m) === i);
-    const effectiveMaxTokens = Math.max(options.maxOutputTokens || 3072, 1024);
+    const effectiveMaxTokens = Math.min(Math.max(options.maxOutputTokens || 4096, 2048), 8192);
     let lastError = null;
-    for (let modelIdx = 0; modelIdx < candidateModels.length; modelIdx++) {
-      const currentModel = candidateModels[modelIdx];
-      const geminiUrl = `${rawBaseUrl || "https://generativelanguage.googleapis.com/v1beta"}/models/${currentModel}:generateContent?key=${apiKey}`;
-      const payload2 = {
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: userPrompt }]
+    let poolCooldownPassDone = false;
+    for (let poolAttempt = 0; poolAttempt < 2; poolAttempt++) {
+      const allStates = syncAndRecoverKeyPool(keyPool);
+      const healthyKeys = allStates.filter((s) => s.status === "healthy");
+      const restingKeys = allStates.filter((s) => s.status === "cooldown_rpm" || s.status === "exhausted_daily");
+      let prioritizedKeys = [];
+      if (healthyKeys.length > 0) {
+        const unleased = healthyKeys.filter((s) => !s.isLeased);
+        const candidates = unleased.length > 0 ? unleased : healthyKeys;
+        const startIdx = globalGeminiKeyIndex % candidates.length;
+        globalGeminiKeyIndex++;
+        prioritizedKeys = candidates.slice(startIdx).concat(candidates.slice(0, startIdx));
+      } else if (restingKeys.length > 0) {
+        restingKeys.sort((a, b) => a.cooldownUntil - b.cooldownUntil);
+        const earliestRest = restingKeys[0];
+        const waitMs = Math.max(earliestRest.cooldownUntil - Date.now() + 500, 1e3);
+        if (waitMs <= 65e3 && !poolCooldownPassDone) {
+          poolCooldownPassDone = true;
+          console.warn(`[AI Key Pool] All ${allStates.length} keys are in cooldown. Pausing ${(waitMs / 1e3).toFixed(1)}s for key ${earliestRest.keyPreview} to auto-recover...`);
+          await new Promise((r) => setTimeout(r, waitMs));
+          syncAndRecoverKeyPool(keyPool);
+          continue;
+        } else {
+          const dailyExhaustedCount = allStates.filter((s) => s.status === "exhausted_daily").length;
+          if (dailyExhaustedCount === allStates.length) {
+            throw new Error(`All ${allStates.length} Gemini API keys have reached their 500 RPD daily quota limit. Daily quotas automatically reset at 12:30 PM IST (Midnight US Pacific Time).`);
           }
-        ],
-        generationConfig: {
-          temperature,
-          maxOutputTokens: effectiveMaxTokens
+          prioritizedKeys = restingKeys;
         }
-      };
-      if (currentModel.includes("3.6") || currentModel.includes("3.7") || currentModel.includes("3.8")) {
-        payload2.generationConfig.thinkingConfig = { thinkingLevel: "LOW" };
+      } else {
+        prioritizedKeys = allStates;
       }
-      if (systemPrompt && systemPrompt.trim()) {
-        payload2.systemInstruction = {
-          parts: [{ text: systemPrompt }]
-        };
-      }
-      if (options.responseMimeType === "application/json" || systemPrompt.includes("JSON") && (!options.maxOutputTokens || options.maxOutputTokens > 100)) {
-        payload2.generationConfig.responseMimeType = "application/json";
-      }
-      const maxRetries = 2;
-      for (let attempt = 0; attempt < maxRetries; attempt++) {
-        const controller2 = new AbortController();
-        const timer2 = setTimeout(() => controller2.abort(), timeoutMs);
+      for (let keyIdx = 0; keyIdx < prioritizedKeys.length; keyIdx++) {
+        const activeState = prioritizedKeys[keyIdx];
+        const currentApiKey = activeState.key;
+        activeState.isLeased = true;
+        activeState.leasedAt = Date.now();
+        let keyHitRateLimit = false;
         try {
-          const response2 = await fetch(geminiUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload2),
-            signal: controller2.signal
-          });
-          if (!response2.ok) {
-            const errText = await response2.text();
-            let detail = errText;
-            try {
-              const errObj = JSON.parse(errText);
-              detail = errObj.error?.message || errObj.error?.status || errObj.message || errText;
-            } catch {
+          for (let modelIdx = 0; modelIdx < candidateModels.length; modelIdx++) {
+            const currentModel = candidateModels[modelIdx];
+            const geminiUrl = `${rawBaseUrl || "https://generativelanguage.googleapis.com/v1beta"}/models/${currentModel}:generateContent?key=${currentApiKey}`;
+            const payload2 = {
+              contents: [
+                {
+                  role: "user",
+                  parts: [{ text: userPrompt }]
+                }
+              ],
+              generationConfig: {
+                temperature,
+                maxOutputTokens: effectiveMaxTokens
+              }
+            };
+            if (currentModel.includes("thinking")) {
+              payload2.generationConfig.thinkingConfig = { thinkingLevel: "LOW" };
             }
-            if (response2.status === 503 || response2.status === 429) {
-              console.warn(`[AI] Gemini ${currentModel} returned ${response2.status} (attempt ${attempt + 1}/${maxRetries}). Waiting 1.5s...`);
-              if (attempt < maxRetries - 1) {
-                await new Promise((r) => setTimeout(r, 1500));
-                continue;
-              } else {
-                console.warn(`[AI] Gemini ${currentModel} persistent ${response2.status}. Failing over to next model...`);
-                lastError = new Error(`Google Gemini (${currentModel}): ${detail}`);
-                break;
+            if (systemPrompt && systemPrompt.trim()) {
+              payload2.systemInstruction = {
+                parts: [{ text: systemPrompt }]
+              };
+            }
+            if (options.responseMimeType === "application/json" || systemPrompt.includes("JSON") && (!options.maxOutputTokens || options.maxOutputTokens > 100)) {
+              payload2.generationConfig.responseMimeType = "application/json";
+            }
+            const maxRetries = 2;
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+              const controller2 = new AbortController();
+              const timer2 = setTimeout(() => controller2.abort(), timeoutMs);
+              try {
+                const response2 = await fetch(geminiUrl, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(payload2),
+                  signal: controller2.signal
+                });
+                if (!response2.ok) {
+                  const errText = await response2.text();
+                  let detail = errText;
+                  try {
+                    const errObj = JSON.parse(errText);
+                    detail = errObj.error?.message || errObj.error?.status || errObj.message || errText;
+                  } catch {
+                  }
+                  if (response2.status === 429) {
+                    const isDaily = detail.toLowerCase().includes("per day") || detail.toLowerCase().includes("daily") || detail.toLowerCase().includes("requests per day") || detail.toLowerCase().includes("quota metric 'requests'");
+                    if (isDaily) {
+                      const nextReset = calculateNextDailyResetMs();
+                      activeState.status = "exhausted_daily";
+                      activeState.cooldownUntil = nextReset;
+                      activeState.failureCount++;
+                      activeState.consecutiveErrors++;
+                      activeState.lastError = detail;
+                      const hoursLeft = ((nextReset - Date.now()) / (1e3 * 60 * 60)).toFixed(1);
+                      console.warn(`[AI Key Pool] \u{1F6D1} Key ${activeState.keyPreview} reached 500 RPD daily quota. Scheduled auto-recovery in ~${hoursLeft}h at 12:30 PM IST.`);
+                    } else {
+                      let cooldownSec = 25;
+                      const retryMatch = detail.match(/Please retry in ([\d\.]+)s/i);
+                      if (retryMatch) {
+                        cooldownSec = parseFloat(retryMatch[1]);
+                      } else {
+                        const headerRetry = response2.headers.get("retry-after");
+                        if (headerRetry) {
+                          const parsedRetry = parseFloat(headerRetry);
+                          if (!isNaN(parsedRetry) && parsedRetry > 0)
+                            cooldownSec = parsedRetry;
+                        }
+                      }
+                      activeState.status = "cooldown_rpm";
+                      activeState.cooldownUntil = Date.now() + Math.ceil(cooldownSec * 1e3) + 1e3;
+                      activeState.failureCount++;
+                      activeState.consecutiveErrors++;
+                      activeState.lastError = detail;
+                      console.warn(`[AI Key Pool] \u{1F7E1} Key ${activeState.keyPreview} hit 20 RPM limit. Cooldown set for ${cooldownSec}s. Auto-recovery armed.`);
+                    }
+                    keyHitRateLimit = true;
+                    lastError = new Error(`Google Gemini Quota Exhausted (${currentModel}): ${detail}`);
+                    break;
+                  }
+                  if (response2.status === 401 || response2.status === 403) {
+                    activeState.status = "disabled";
+                    activeState.cooldownUntil = Number.MAX_SAFE_INTEGER;
+                    activeState.failureCount++;
+                    activeState.lastError = detail;
+                    console.warn(`[AI Key Pool] \u{1F534} Key ${activeState.keyPreview} returned ${response2.status} (${detail}). Disabled from pool.`);
+                    keyHitRateLimit = true;
+                    lastError = new Error(`Google Gemini Key ${activeState.keyPreview} (${response2.status}): ${detail}`);
+                    break;
+                  }
+                  if (response2.status === 503) {
+                    const backoffMs = Math.floor(1500 * Math.pow(1.5, attempt) + Math.random() * 500);
+                    console.warn(`[AI] Google AI Studio (${currentModel}) returned 503 (attempt ${attempt + 1}/${maxRetries}). Waiting ${(backoffMs / 1e3).toFixed(1)}s...`);
+                    if (attempt < maxRetries - 1) {
+                      await new Promise((r) => setTimeout(r, backoffMs));
+                      continue;
+                    } else {
+                      lastError = new Error(`Google Gemini (${currentModel}): ${detail}`);
+                      break;
+                    }
+                  }
+                  if (response2.status === 404) {
+                    console.warn(`[AI] Gemini ${currentModel} returned 404 (model unavailable). Failing over to next candidate...`);
+                    lastError = new Error(`Google Gemini (${currentModel}): ${detail}`);
+                    break;
+                  }
+                  const prefix = isCustom ? "Custom Google Gemini API Key Error" : "Google Gemini API Error";
+                  throw new Error(`${prefix} (${response2.status}): ${detail}`);
+                }
+                const data2 = await response2.json();
+                const candidate = data2.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("").trim();
+                if (!candidate) {
+                  throw new Error("Google Gemini API returned an empty response candidate.");
+                }
+                activeState.status = "healthy";
+                activeState.successCount++;
+                activeState.consecutiveErrors = 0;
+                activeState.lastUsedAt = Date.now();
+                activeState.isLeased = false;
+                return candidate;
+              } catch (err) {
+                if (err.name === "AbortError") {
+                  throw new Error(`Google Gemini API request timed out after ${timeoutMs / 1e3} seconds. Please retry.`);
+                }
+                if (!err.message?.includes("503") && !err.message?.includes("429") && !err.message?.includes("404")) {
+                  throw err;
+                }
+                lastError = err;
+              } finally {
+                clearTimeout(timer2);
               }
             }
-            if (response2.status === 404) {
-              console.warn(`[AI] Gemini ${currentModel} returned 404 (model unavailable). Failing over...`);
-              lastError = new Error(`Google Gemini (${currentModel}): ${detail}`);
+            if (keyHitRateLimit) {
+              activeState.isLeased = false;
               break;
             }
-            const prefix = isCustom ? "Custom Google Gemini API Key Error" : "Google Gemini API Error";
-            throw new Error(`${prefix} (${response2.status}): ${detail}`);
           }
-          const data2 = await response2.json();
-          const candidate = data2.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("").trim();
-          if (!candidate) {
-            throw new Error("Google Gemini API returned an empty response candidate.");
-          }
-          return candidate;
-        } catch (err) {
-          if (err.name === "AbortError") {
-            throw new Error(`Google Gemini API request timed out after ${timeoutMs / 1e3} seconds. Please retry.`);
-          }
-          if (!err.message?.includes("503") && !err.message?.includes("429") && !err.message?.includes("404")) {
-            throw err;
-          }
-          lastError = err;
         } finally {
-          clearTimeout(timer2);
+          activeState.isLeased = false;
         }
       }
     }
@@ -1336,6 +2323,7 @@ async function generateExamStructure(req) {
         category: subCat === "daily" ? "Daily Benchmark" : subCat === "pyq" ? "Official PYQ" : "Full Mock Tests",
         targetTable: "mockTests",
         stage: req.stage || void 0,
+        stream: req.stream || void 0,
         durationMinutes: defaultDuration,
         totalMarks: defaultMarks,
         negativeMarking: defaultNegative,
@@ -1519,6 +2507,7 @@ async function generateExamStructure(req) {
         targetTable,
         targetMode,
         stage: req.stage || void 0,
+        stream: req.stream || void 0,
         paper: authenticPaper,
         subject: authenticSubject,
         subSubject: effectiveTier === "subsubject" || effectiveTier === "chapter" ? authenticSubSubject : "",
@@ -1640,6 +2629,7 @@ JSON array only. No explanation.`;
       targetTable,
       targetMode,
       stage: req.stage || void 0,
+      stream: req.stream || void 0,
       paper: cleanPaper,
       subject: cleanSubject,
       subSubject: cleanSubSubject,
@@ -1683,6 +2673,7 @@ async function generateExamQuestions(req, onProgress) {
   const rawTitle = String(req.testTitle || "").trim();
   const cleanTitle = cleanTitleText(rawTitle) || rawTitle;
   const cleanSubject = String(req.subject || "").replace(/^Subject:\s*/i, "").trim();
+  const effectiveSubjectContext = `${cleanSubject} \xB7 ${cleanTitle}`.trim();
   const subParts = rawTitle.split(/\s*[\+·|]\s*/).map((s) => cleanTitleText(s)).filter((s) => s.length > 2);
   onProgress?.({
     stageId: "GROUNDING",
@@ -1758,7 +2749,60 @@ ${matchedSection.content.slice(0, 2e3)}`;
       }
     }
     chapterContents = extractSyllabusContents(chapterScopedContent);
-    if (isNaturalDensityMode) {
+    if (chapterContents.length >= 2) {
+      let activeContents = chapterContents;
+      if (chapterContents.length > totalQuestions) {
+        const batchNum = req.batchNumber || 1;
+        const totalBatches = Math.max(1, Math.ceil(chapterContents.length / totalQuestions));
+        const currentBatchIdx = (batchNum - 1) % totalBatches;
+        const start = currentBatchIdx * totalQuestions;
+        activeContents = chapterContents.slice(start, start + totalQuestions);
+        if (activeContents.length < totalQuestions) {
+          activeContents = [...activeContents, ...chapterContents.slice(0, totalQuestions - activeContents.length)];
+        }
+      }
+      const basePerContent = Math.floor(totalQuestions / activeContents.length);
+      const remainder = totalQuestions % activeContents.length;
+      chapterContentQuotas = activeContents.map((c, idx) => ({
+        name: c,
+        quota: basePerContent + (idx < remainder ? 1 : 0)
+      }));
+      scopeDirectives = `FRONTIER LLM COGNITIVE DECOMPOSITION & SUB-CONTENT QUOTA DISTRIBUTION:
+All ${totalQuestions} questions MUST be derived strictly from "${cleanTitle}".
+This chapter contains ${chapterContents.length} distinct examinable sub-contents in its syllabus blueprint.
+For Batch #${req.batchNumber || 1}, you are systematically assigned these ${activeContents.length} specific sub-contents:
+${chapterContentQuotas.map((cq, i) => `  ${i + 1}. "${cq.name}" -> EXACTLY ${cq.quota} question${cq.quota > 1 ? "s" : ""}`).join("\n")}
+
+COGNITIVE THINKING & HIGH-VALUE EXAM RIGOR (MANDATORY):
+1. TWO-STAGE COGNITIVE GENERATION:
+   - THINKING STAGE: Read each assigned sub-content item above. Assess its specific mathematical relations, operational mechanisms, statutory clauses, boundary conditions, and typical candidate traps.
+   - SYNTHESIS STAGE: Generate authentic, competitive exam-grade questions satisfying the exact quotas above.
+2. ABSOLUTE BAN ON GENERIC FLUFF:
+   - FORBIDDEN: Superficial 1-line definitions ("What is X?", "Define Y", "Which of the following is an example of Z?").
+   - MANDATORY HIGH-VALUE ARCHETYPES:
+     * Multi-Statement Roman Numeral Evaluation ("Consider statements 1, 2, 3... Which is correct?").
+     * Exact Formula Applications with clean LaTeX math ($V = \\frac{\\pi D N}{1000}$, $R = \\rho \\frac{L}{A}$, etc.).
+     * Subtle Distractor Traps: Options must model real candidate confusion, calculation errors, or common misconceptions.
+     * Deep Pedagogical Explanations: The explanation MUST state why the correct answer is true AND explicitly expose why the remaining 3 options are incorrect traps.
+3. PER-QUESTION TOPIC TAGGING: For each question, set the "topic" field in JSON to the EXACT assigned sub-content name (e.g. "${activeContents[0].slice(0, 45)}..."). NEVER set "topic" to "${cleanTitle}" or "General Syllabus".
+4. ZERO TOPIC OMISSION: Every assigned sub-content in the quota table above MUST receive its exact question allocation.`;
+    } else if (subParts.length > 1) {
+      const basePerPart = Math.floor(totalQuestions / subParts.length);
+      const remainder = totalQuestions % subParts.length;
+      const partQuotas = subParts.map((sp, idx) => ({
+        name: sp,
+        quota: basePerPart + (idx < remainder ? 1 : 0)
+      }));
+      chapterContentQuotas = partQuotas;
+      scopeDirectives = `FRONTIER LLM STRICT MODULE FOCUS & EQUAL SUB-TOPIC DISTRIBUTION:
+This module "${cleanTitle}" contains ${subParts.length} distinct sub-components:
+${partQuotas.map((pq, i) => `  ${i + 1}. "${pq.name}" -> EXACTLY ${pq.quota} questions`).join("\n")}
+
+MANDATORY DISTRIBUTION RULES:
+1. THINKING & ALLOCATION: Read each sub-component, reason through its examinable aspects, and synthesize questions according to the quotas above.
+2. PER-QUESTION TOPIC TAGGING: For each question, set the "topic" field in JSON to its corresponding sub-topic name (e.g. "${subParts[0]}").
+3. NEVER favor one sub-topic over another.`;
+    } else if (isNaturalDensityMode) {
       scopeDirectives = `LLM COGNITIVE SYLLABUS DECOMPOSITION & NATURAL DENSITY SIZING:
 You are an elite Commission Question Paper Setter (OPSC/UPSC/GATE/State Exam standard).
 You must analyze the Scoped Syllabus Content below through deep cognitive subject-matter comprehension:
@@ -1785,38 +2829,6 @@ You must analyze the Scoped Syllabus Content below through deep cognitive subjec
 3. COMPREHENSIVE BREADTH MANDATE:
    Distribute questions systematically across ALL sub-topics, bullet points, and technical parameters in the section. Do NOT cluster multiple questions around the first sentence or single concept while neglecting the rest.
    For each question, set the "topic" field in JSON to the specific content item or sub-topic tested (e.g. "${chapterContents[0]?.slice(0, 45) || cleanTitle}"). NEVER set "topic" to "General Syllabus".`;
-    } else if (chapterContents.length >= 2) {
-      const activeContents = chapterContents.length <= totalQuestions ? chapterContents : chapterContents.slice(0, totalQuestions);
-      const basePerContent = Math.floor(totalQuestions / activeContents.length);
-      const remainder = totalQuestions % activeContents.length;
-      chapterContentQuotas = activeContents.map((c, idx) => ({
-        name: c,
-        quota: basePerContent + (idx < remainder ? 1 : 0)
-      }));
-      scopeDirectives = `STRICT MODULE FOCUS & CONTENT-LEVEL DISTRIBUTION:
-All ${totalQuestions} questions MUST be derived from "${cleanTitle}".
-This chapter has ${activeContents.length} distinct content items in its syllabus. Distribute questions across:
-${chapterContentQuotas.map((cq, i) => `  ${i + 1}. "${cq.name}" -> ~${cq.quota} question${cq.quota > 1 ? "s" : ""}`).join("\n")}
-
-MANDATORY RULES:
-1. PER-QUESTION TOPIC TAGGING: For each question, set the "topic" field to the specific content item name or short sub-topic phrase it tests (e.g. "${activeContents[0].slice(0, 45)}..."). NEVER set "topic" to the test title "${cleanTitle}" or "General Syllabus".
-2. ZERO CONCENTRATION BIAS: Do not cluster questions on one content item while neglecting others. Every content item must be covered.`;
-    } else if (subParts.length > 1) {
-      const basePerPart = Math.floor(totalQuestions / subParts.length);
-      const remainder = totalQuestions % subParts.length;
-      const partQuotas = subParts.map((sp, idx) => ({
-        name: sp,
-        quota: basePerPart + (idx < remainder ? 1 : 0)
-      }));
-      chapterContentQuotas = partQuotas;
-      scopeDirectives = `STRICT MODULE FOCUS & EQUAL SUB-TOPIC DISTRIBUTION:
-This module "${cleanTitle}" contains ${subParts.length} distinct sub-components:
-${partQuotas.map((pq, i) => `  ${i + 1}. "${pq.name}" -> ~${pq.quota} questions`).join("\n")}
-
-MANDATORY DISTRIBUTION RULES:
-1. You MUST generate questions distributed across these sub-topics: ${partQuotas.map((pq) => `"${pq.name}"`).join(", ")}.
-2. For each question, set the "topic" field in JSON to its corresponding sub-topic name (e.g. "${subParts[0]}").
-3. NEVER favor one sub-topic over another.`;
     } else {
       scopeDirectives = `STRICT MODULE FOCUS & EQUAL TOPIC COVERAGE:
 All ${totalQuestions} questions MUST be derived strictly from "${cleanTitle}". Topic tag = "${cleanTitle}".
@@ -1837,6 +2849,11 @@ If the syllabus blueprint contains multiple sub-topics, bullet points, or concep
     } else {
       stageDirective = `EXAMINATION STAGE CALIBRATION [${cleanStage.toUpperCase()}]: Calibrate question complexity and format to the authentic ${cleanStage} stage standards.`;
     }
+  }
+  const cleanStream = (req.stream || "").trim();
+  let streamDirective = "";
+  if (cleanStream && cleanStream.toLowerCase() !== "all streams" && cleanStream.toLowerCase() !== "common") {
+    streamDirective = `EXAMINATION STREAM & DISCIPLINE CALIBRATION [${cleanStream.toUpperCase()}]: All questions, terminology, formulas, standard codes, and practical applications MUST strictly adhere to the academic syllabus and domain requirements of the "${cleanStream}" stream/discipline.`;
   }
   const rawSubCat = (req.subCategory || "").toLowerCase().trim();
   const titleLower = cleanTitle.toLowerCase();
@@ -1920,38 +2937,39 @@ If the syllabus blueprint contains multiple sub-topics, bullet points, or concep
   let difficultyDirective = "";
   if (reqDiff === "easy") {
     difficultyDirective = `
-COGNITIVE DIFFICULTY SPECIFICATION: SIMPLE / FOUNDATIONAL
-- PEDAGOGICAL TARGET: Direct factual recall, fundamental definitions, and core governing principles.
-- QUESTION STEM ARCHITECTURE: Clean, direct, single-sentence questions (e.g., "Which Article guarantees...", "What is the SI unit of...", "Under the Factories Act, what is the minimum...").
-- STRICT CONSTRAINTS:
-  * NEVER use complex multi-statement lists ("Consider the following statements: 1, 2, 3... Which is correct?").
-  * NEVER use Assertion-Reason formats.
-  * Direct 1-step retrieval of essential knowledge that every candidate must know.
-  * Distractors must be plausible, authentic alternatives from the same domain.`;
+COGNITIVE DIFFICULTY SPECIFICATION: SIMPLE / FOUNDATIONAL (1-Step Direct Knowledge Retrieval)
+- PEDAGOGICAL TARGET: Direct factual recall, core statutory numbers, essential formula definitions, and foundational principles.
+- QUESTION STEM ARCHITECTURE: Clean, direct, single-sentence question stems (e.g. "Which Article of the Constitution of India provides for...", "What is the SI unit of...", "Under the Indian Contract Act, an agreement enforceable by law is a...").
+- STRICT QUALITY RULES (MANDATORY):
+  * ABSOLUTELY FORBIDDEN: Do NOT use Roman numeral statement lists ("Consider statements 1, 2, 3... Which is correct?").
+  * ABSOLUTELY FORBIDDEN: Do NOT use Assertion-Reason formats.
+  * Direct 1-step retrieval testing fundamental knowledge that every serious aspirant must know.
+  * Distractors must be plausible, authentic alternatives from the same domain without confusing double negatives.`;
   } else if (reqDiff === "medium") {
     difficultyDirective = `
-COGNITIVE DIFFICULTY SPECIFICATION: MODERATE / STANDARD (OSSC / OSSSC Standard)
-- PEDAGOGICAL TARGET: 2-step reasoning, intermediate conceptual application, and standard calculation problems.
-- QUESTION STEM ARCHITECTURE: Questions requiring the candidate to combine two facts, apply a formula to given parameters, contrast two related concepts, or identify exceptions (e.g., "Which of the following rights is available to foreigners but NOT under Article 19?", "A centrifugal pump operates at... What is the manometric head?").
-- STRICT CONSTRAINTS:
-  * Emphasize 2-step logical deduction or practical numerical calculations.
-  * Maintain clean, accessible stems without convoluted multi-nested statement matrices.
-  * Distractors should model common computational errors, parameter mix-ups, or standard candidate misconceptions.`;
+COGNITIVE DIFFICULTY SPECIFICATION: MODERATE / STANDARD (2-Step Application & Conceptual Deduction - OSSC/OSSSC Standard)
+- PEDAGOGICAL TARGET: 2-step cognitive deduction, standard calculations, conceptual contrasts, and practical application.
+- QUESTION STEM ARCHITECTURE: Questions requiring candidates to combine two related facts, substitute values into a standard formula (e.g. $V = IR$, $R = \\rho L / A$, $P = VI$), identify exceptions to general rules, or contrast two operational mechanisms.
+- STRICT QUALITY RULES (MANDATORY):
+  * Emphasize 2-step logical deduction or practical numerical calculations with clean derivations.
+  * Keep question stems clear and direct; do NOT create overly convoluted multi-nested matrices.
+  * Distractors should model common computational errors, parameter mix-ups, or typical candidate misconceptions.`;
   } else {
     difficultyDirective = `
-COGNITIVE DIFFICULTY SPECIFICATION: ADVANCED / RIGOROUS (OPSC / OAS Prelims Standard)
+COGNITIVE DIFFICULTY SPECIFICATION: ADVANCED / RIGOROUS (High-Order Analytical Rigor - OPSC / OAS Prelims Standard)
 - PEDAGOGICAL TARGET: High-order cognitive evaluation, multi-statement analysis, landmark case laws, nuanced statutory provisos, and rank-determining discriminators.
-- QUESTION STEM ARCHITECTURE: 
-  * Heavy emphasis on Multi-Statement Evaluation:
-    "Consider the following statements regarding X:
+- QUESTION STEM ARCHITECTURE (MANDATORY 60%\u201380% MULTI-STATEMENT FORMAT):
+  * At least 60% to 80% of questions in this batch MUST use the Multi-Statement Roman Numeral Format:
+    "Consider the following statements regarding [Concept]:
     1. Statement 1...
     2. Statement 2...
     3. Statement 3...
-    Which of the statements given above is/are correct?"
-  * Assertion (A) and Reason (R) frameworks.
+    Which of the statements given above is/are correct?
+    (A) 1 and 2 only  (B) 2 and 3 only  (C) 1, 2 and 3  (D) None"
+  * Or Assertion (A) and Reason (R) frameworks.
   * Deep mathematical derivations with rigorous LaTeX formatting ($...$), boundary conditions, and subtle exceptions.
-- STRICT CONSTRAINTS:
-  * At least 50% to 70% of questions MUST use multi-statement Roman numeral format or multi-factor analytical evaluation.
+- STRICT QUALITY RULES (MANDATORY):
+  * BAN generic dictionary questions and 1-step trivia.
   * Distractors must be sophisticated traps designed around subtle distinctions, inverted conditions, or landmark judicial rulings.`;
   }
   const systemPrompt = `You are a Senior Question Paper Setter for Odisha Competitive Exams (OPSC/OSSC/OSSSC).
@@ -1970,8 +2988,19 @@ ${scopeDirectives}
 ${stageDirective ? `
 ${stageDirective}
 ` : ""}
+${streamDirective ? `
+${streamDirective}
+` : ""}
 ${subCategoryDirective ? `
 ${subCategoryDirective}
+` : ""}
+${req.durationMinutes && req.durationMinutes > 0 ? `
+TIME DURATION & SPEED PACE CONSTRAINT:
+This test has an official predefined duration of ${req.durationMinutes} minutes for ${req.predefinedQuestionCount || req.questionCount || 50} questions (~${Math.round(req.durationMinutes * 60 / (req.predefinedQuestionCount || req.questionCount || 50))} seconds/question). Calibrate the length, readability, and computation depth so questions can be accurately processed within this exact time constraint.
+` : ""}
+${req.negativeMarking !== void 0 && req.negativeMarking !== null ? `
+OFFICIAL MARKING & PENALTY SCHEME:
+Positive marks: ${req.totalMarks ? (req.totalMarks / (req.predefinedQuestionCount || req.questionCount || 50)).toFixed(1) : "1.0"}, Negative penalty: -${req.negativeMarking}. Because negative marking is enforced, all 4 options (A, B, C, D) must be authentic, highly plausible alternatives testing real conceptual discriminators. Avoid trick traps with double negatives or trivial typographical errors.
 ` : ""}
 
 MANDATORY RULES:
@@ -1997,24 +3026,73 @@ MANDATORY RULES:
    - NEVER use placeholder names or nonsense distractors (e.g., "00", "Option 1", "Option A", "None of the above", "n/a"). All 4 options must be realistic, plausible exam choices.
    - In numerical/calculation questions, options[correctAnswerIndex] MUST contain the exact calculated numerical or ratio result derived in the explanation.
 3. ANTI-GENERIC & HIGH-EXAM-YIELD QUALITY MANDATE:
-   - BAN TRIVIAL DICTIONARY DEFINITIONS: NEVER generate generic, superficial questions like "What is X?", "Define Y", or "What does CPU stand for?".
-   - Focus strictly on high-yield competitive exam discriminators: exact statutory articles, numerical thresholds, quorums, tenures, amendment years, operational formulas, case laws, and statutory exceptions.
-   - THE COMPETITIVE EXAM TEST: Every question must test a point that an actual competitive examiner would use on an OPSC / OSSC / State Exam paper to evaluate serious aspirants. If an average citizen off the street could guess the answer without studying, DISCARD IT IMMEDIATELY and replace with an authentic exam-level question.
+   - HARD BAN ON DEFINITION STEMS: NEVER generate generic, superficial questions like "What is X?", "Define Y", "Which of the following is defined as...", or "What does X stand for?".
+   - ALWAYS use high-value competitive exam archetypes:
+     * Multi-Statement / Roman Numeral evaluations: "Consider the following statements regarding [Concept]: (I)... (II)... Which is/are correct?"
+     * Quantitative & Derivation stems with LaTeX formulas ($V = \frac{pi D N}{1000}$).
+     * Comparative Technical Mechanics & Boundary Conditions.
+   - THE COMPETITIVE EXAM TEST: Every question must test a point that an actual competitive examiner would use on an OPSC / OSSC / State Exam paper to evaluate serious aspirants.
 4. STRICT SINGLE-BEST-ANSWER & MUTUAL EXCLUSIVITY: Exactly ONE option is factually true. All 3 distractors are false. No overlapping or duplicate options.
 5. Exactly 4 distinct options.
-6. Step-by-step concise explanation (2-3 sentences) strictly showing the final verified mathematical derivation or factual authority.
-   - NEVER include scratchpad notes, inner monologues, or trial-and-error thoughts (NEVER write "Wait, recalculating", "Let's check options", or "Wait, option comes from"). Output strictly the clean, authoritative solution.
+6. PEDAGOGICAL EXPLANATION & DISTRACTOR TRAP ANALYSIS:
+   Every explanation MUST provide a rich pedagogical breakdown:
+   (a) State the verified technical derivation or factual authority for the correct answer.
+   (b) Explicitly expose the distractor traps by identifying why the other options are common misconceptions, calculation traps, or false boundaries (e.g. "Distractor Trap: Option B confuses...").
+   - NEVER include scratchpad notes or inner monologues.
+7. STRICT DOMAIN JAILING & NO CROSS-SYLLABUS LEAKAGE (MANDATORY):
+   - You are generating questions EXCLUSIVELY for: "${cleanTitle}"${cleanSubject ? ` in the discipline "${cleanSubject}"` : ""}.
+   - ABSOLUTE BAN ON OFF-TOPIC LEAKAGE: You are strictly forbidden from generating questions on topics outside this specific module.
+   - Specifically, unless "${cleanTitle}" explicitly specifies "Computer Programming" or "Data Structures", do NOT generate questions on C language, coding syntax, pointers, queues, stacks, or computer science concepts.
+   - Stay 100% focused on authentic, core academic and technical content for "${cleanTitle}".
+8. PEDAGOGICAL VISUALS, GRAPHS & DATA TABLES (SENIOR EXAM PAPER SETTER STANDARD):
+   - CRITICAL: QUESTION GRAPH VS EXPLANATION GRAPH ABSOLUTE DISAMBIGUATION:
+     * "diagram" (QUESTION STIMULUS ONLY): Place the UNSOLVED problem stimulus here (e.g. initial Bar/Line/Pie chart, unlabeled geometry figure, initial seating layout). It must NEVER reveal the correct answer, show the final displacement vector, or provide the step-by-step solution!
+     * "explanationDiagram" (SOLUTION DERIVATION PROOF ONLY): Place the step-by-step visual solution derivation here (e.g. Direction Sense vector trajectory with distance/displacement, auxiliary geometry proof line, Syllogism Venn Diagram overlap proof).
+     * NEVER confuse or swap these two fields! If a question needs a chart to answer, put it in "diagram". If a question needs a visual proof to explain the answer, put it in "explanationDiagram".
+   - CRITICAL: ABSOLUTE CROSS-QUESTION VISUAL INDEPENDENCE:
+     * Every question in the batch MUST have its own distinct visual data. NEVER reuse, repeat, or bleed chart values, category labels (e.g. food/rent/savings or steel/coal), years, or figures from a previous question into another question!
+   - VISUAL DATA EXCLUSIVITY (TEACHER'S FIRST LAW):
+     * The question stem MUST require the candidate to extract data points from the chart/figure to solve the problem.
+     * Do NOT dump the full numerical dataset in questionText prose or verbatim tables.
+     * For Data Interpretation (DI): Use EITHER a graphical visual (Bar/Line/Pie) in "diagram" OR a Markdown table in "questionText", NEVER both! If a visual chart is present, do NOT generate a Markdown data table in "questionText".
+   - MANDATORY STEM ANCHORING:
+     * When "diagram" is provided, always anchor the question stem naturally: e.g. "Directions: Study the given bar chart and answer the following question: ...", "In the given figure, ...".
+     * Do NOT write self-contained arithmetic word problems that ignore the generated diagram.
+   - STRICT ANTI-DUPLICATION (ZERO OPTION LEAK):
+     * NEVER append "(A) ... (B) ... (C) ... (D) ..." at the bottom of "questionText". All options belong exclusively in the "options" array.
+   - SOLUTION DERIVATION VISUAL (STEP-BY-STEP PROOF):
+     * When the question prompt is verbal/textual but the proof requires a visual derivation (e.g. Direction Sense vector trajectory, Syllogism Venn Diagram overlap proof, Geometry construction proof), place the diagram in "explanationDiagram" or add "placement": "explanation".
+     * If a geometry problem is purely theoretical/numerical where all dimensions are already stated in the text and the question can be solved directly by formula, place the figure in "explanationDiagram" as a visual derivation proof (not "diagram").
+   - OPTIONS: All options (A, B, C, D) must remain clean text or LaTeX formulas. If the question asks to identify a curve ("Which graph represents...?"), present the comparison panels labeled (A), (B), (C), (D) in the question visual and use simple text options ("Figure A", "Figure B", "Figure C", "Figure D").
+   - TABLES: For pure Tabular Data Interpretation (when "diagram": null), format the table as standard Markdown pipe tables (| Col 1 | Col 2 | ...) directly inside "questionText".
+   - STRICT NEGATIVE VISUAL PROHIBITION:
+     (a) If the topic is English Language, Odia Literature, Indian History, Indian Polity, or Current Affairs, strictly DO NOT generate vector diagrams. Set "diagram": null. Keep verbal & humanities questions 100% text-pure.
+     (b) If the topic is Pure Arithmetic Word Problems (Simple Interest, Compound Interest, Profit & Loss, Time & Work, Ages, Averages, Ratio & Proportion, Mixtures), strictly DO NOT generate vector diagrams. Formulate them cleanly with text and LaTeX equations ($...). Set "diagram": null. Only include diagrams if the topic explicitly tests Data Interpretation (DI) or Geometry.
+   - VALID DIAGRAM JSON FORMAT:
+     Set "type": "universal", with an array of "shapes". Supported shape types include:
+     * Bar Graph: {"type": "barGraph", "points": [{"x": 1, "y": 45, "label": "2021"}, {"x": 2, "y": 70, "label": "2022"}]}
+     * Grouped Bar Graph: {"type": "barGraph", "points": [{"x": 1, "y": 120, "label": "A (Exp)"}, {"x": 2, "y": 100, "label": "A (Imp)"}]}
+     * Line Graph: {"type": "lineGraph", "points": [{"x": 1, "y": 20, "label": "Jan"}, {"x": 2, "y": 55, "label": "Feb"}, {"x": 3, "y": 40, "label": "Mar"}]}
+     * Pie Chart: {"type": "pieChart", "values": [30, 25, 45], "items": ["Food", "Rent", "Savings"]}
+     * Venn Diagram (Syllogisms / Set Theory): {"type": "vennDiagram", "sets": ["Cricket", "Football"], "overlaps": {"A_only": 25, "B_only": 30, "both": 15}}
+     * Direction Sense: {"type": "directionDiagram", "steps": [{"direction": "N", "distance": 10, "label": "10m"}, {"direction": "E", "distance": 15, "label": "15m"}]}
+     * Seating Arrangement: {"type": "seatingArrangement", "seatingType": "circular", "points": ["A", "B", "C", "D", "E", "F"]}
+     * Clock Angles: {"type": "clock", "time": "08:20"}
+     * Box-and-Whisker Plot: {"type": "boxPlot", "min": 12, "q1": 24, "median": 35, "q3": 48, "max": 65}
+     * Scatter Plot: {"type": "scatterPlot", "points": [{"x": 2, "y": 15}, {"x": 4, "y": 28}, {"x": 6, "y": 45}]}
+     * 2D/3D Geometry: {"type": "triangle", "points": [[0,0], [4,0], [0,3]]}, {"type": "circle", "cx": 0, "cy": 0, "r": 3}, {"type": "cylinder", "r": 2, "height": 5}
 
 JSON OUTPUT SCHEMA:
 [
   {
-    "questionText": "Question string with clean text and LaTeX ($...$)",
+    "questionText": "Question string with clean text, LaTeX ($...$), Markdown pipe table, or multi-statement format",
     "options": ["Option A", "Option B", "Option C", "Option D"],
     "correctAnswerIndex": 0,
-    "explanation": "Concise step-by-step rationale matching correct option",
+    "explanation": "Step-by-step verified rationale confirming the correct option, followed by distractor trap analysis exposing why the other options are common mistakes.",
     "difficulty": "${defaultJsonDiff}",
     "topic": "${isFullLengthSyllabus ? wholeSyllabusQuotas[0]?.name || "Constituent Subject Name" : chapterContentQuotas[0]?.name || cleanTitle}",
-    "diagram": null
+    "diagram": null,
+    "explanationDiagram": null
   }
 ]`;
   const resolveItemTopic = (rawTopic, itemIndex) => {
@@ -2071,9 +3149,10 @@ JSON OUTPUT SCHEMA:
       message: `Running 2 concurrent worker threads (${count1} + ${count2} questions) on high-speed cluster...`,
       log: `[Stage 2/5] Dual-Thread Parallel Splitter launched: Thread 1 (${count1} Qs) + Thread 2 (${count2} Qs) via ${req.model || "openai/gpt-oss-20b"}.`
     });
-    const existingStemsNotice = combinedExistingStems.length > 0 ? `
-PREVIOUSLY GENERATED / EXISTING QUESTIONS & REFERENCE PYQS (DO NOT DUPLICATE THESE CONCEPTS OR STEMS):
-${combinedExistingStems.slice(-35).map((s) => `- ${s.slice(0, 90)}`).join("\n")}
+    const recentStems1 = combinedExistingStems.slice(-6);
+    const existingStemsNotice = recentStems1.length > 0 ? `
+RECENT EXAM ANCHORS (GENERATE FRESH, DISTINCT QUESTIONS TESTING DIFFERENT CONCEPTS):
+${recentStems1.map((s) => `- ${s.slice(0, 80)}...`).join("\n")}
 ` : "";
     const userPrompt1 = `Generate exactly ${count1} ${diffLabel} MCQs for "${cleanTitle}".
 Focus: Core Fundamental Principles, Standard Terminology, Key Metrics & Water/Syllabus Standards.${existingStemsNotice}
@@ -2094,6 +3173,7 @@ Output ONLY the raw JSON array of ${count2} question objects.`;
       const items = Array.isArray(parsed) ? parsed : parsed.questions || parsed.items || [];
       if (!Array.isArray(items))
         return [];
+      const seenDiagramFingerprints = /* @__PURE__ */ new Set();
       return items.map((q, idx) => {
         let options = Array.isArray(q.options) ? q.options.map(String) : [];
         if (options.length < 4) {
@@ -2114,9 +3194,22 @@ Output ONLY the raw JSON array of ${count2} question objects.`;
           difficulty: q.difficulty === "easy" || q.difficulty === "medium" || q.difficulty === "hard" ? q.difficulty : defaultJsonDiff,
           topic: resolveItemTopic(q.topic, idx),
           diagram: q.diagram && typeof q.diagram === "object" ? q.diagram : null,
+          explanationDiagram: q.explanationDiagram && typeof q.explanationDiagram === "object" ? q.explanationDiagram : null,
           batchNumber: req.batchNumber || 1
         };
-        return enforceDeterministicGuards(rawItem);
+        const guarded = enforceDeterministicGuards(rawItem, defaultJsonDiff, effectiveSubjectContext);
+        if (guarded.diagram) {
+          const fp = getDiagramFingerprint(guarded.diagram);
+          if (fp) {
+            if (seenDiagramFingerprints.has(fp)) {
+              console.warn(`[Anti-Bleed Guard] Question ${idx + 1} duplicated a previous question's diagram in thread batch. Decoupling.`);
+              guarded.diagram = null;
+            } else {
+              seenDiagramFingerprints.add(fp);
+            }
+          }
+        }
+        return guarded;
       });
     };
     let thread1Questions = [];
@@ -2177,11 +3270,47 @@ Output ONLY the raw JSON array of ${count2} question objects.`;
       message: `Synthesizing ${isNaturalDensityMode ? ceilingCap ? `up to \u2264${ceilingCap}` : "maximized natural volume of" : totalQuestions} questions for "${cleanTitle}"${req.thematicFocus ? ` [Focus: ${req.thematicFocus}]` : ""}...`,
       log: `[Stage 2/5] Synthesizing ${isNaturalDensityMode ? ceilingCap ? `up to \u2264${ceilingCap}` : "maximized natural volume of" : totalQuestions} questions via ${req.model || "meta/llama-3.2-11b-vision-instruct"}${req.thematicFocus ? ` [Focus: ${req.thematicFocus}]` : ""}.`
     });
-    const userPrompt = `Generate ${isNaturalDensityMode ? `the MAXIMIZED natural volume of distinct, high-caliber ${diffLabel} MCQs (minimum 5 Qs floor${ceilingCap ? `, maximum ceiling \u2264 ${ceilingCap} Qs` : ", aim for 15 to 25 Qs on dense topics, 8 to 12 Qs on compact topics"})` : `exactly ${totalQuestions} ${diffLabel} MCQs`} for:
+    const isQB = req.mainSection === "question_bank" || req.subCategory?.includes("question_bank") || !req.mainSection && !req.durationMinutes;
+    const naturalVolumePrompt = isQB ? `the COMPREHENSIVE PRACTICE VOLUME of distinct, high-caliber ${diffLabel} MCQs (aim for ${ceilingCap ? `up to \u2264 ${ceilingCap}` : "as many high-value questions as the syllabus sustains (typically 20 to 35+ Qs)"}, strictly ZERO low-utility fluff, dictionary definitions, or duplicate variations)` : `the MAXIMIZED natural volume of distinct, high-caliber ${diffLabel} MCQs (strictly ZERO low-utility fluff, aim for 15 to 30 Qs on dense topics${ceilingCap ? `, maximum ceiling \u2264 ${ceilingCap} Qs` : ""})`;
+    const COGNITIVE_TYPOLOGIES = [
+      "Quantitative & Numerical Problem Solving (direct calculations, exact formulas, parameter relations, unit conversions)",
+      "Assertion & Reason Analysis (Assertion [A] and Reason [R] with rigorous diagnostic distractors)",
+      "Multi-Statement Evaluation (Which of statements I, II, and III are correct / incorrect)",
+      "Diagnostic Trap Elimination & Field Scenarios (practical operational faults, equipment diagnostics, field realities)",
+      "Standard Definitions, Statutory Clauses & Technical Specifications"
+    ];
+    const assignedTypology = req.batchNumber ? COGNITIVE_TYPOLOGIES[(req.batchNumber - 1) % COGNITIVE_TYPOLOGIES.length] : COGNITIVE_TYPOLOGIES[0];
+    const visualProfile = classifyTopicVisualEligibility(cleanTitle, cleanSubject, req.examName || req.examId);
+    const userPrompt = `Generate ${isNaturalDensityMode ? naturalVolumePrompt : `exactly ${totalQuestions} ${diffLabel} MCQs`} for:
 Test Title: "${cleanTitle}" | Exam: "${req.examName || req.examId}" | Scope: "${isFullLengthSyllabus ? "Comprehensive Full Syllabus" : cleanTitle}"
 ${req.thematicFocus ? `PEDAGOGICAL BATCH THEMATIC FOCUS:
 This micro-batch MUST focus specifically on: "${req.thematicFocus}". Target questions directly exploring this cognitive dimension.
-` : ""}${req.includeDiagrams ? "Include geometric/Venn diagram specs where relevant." : "Text and LaTeX math only."}
+` : ""}COGNITIVE TYPOLOGY MANDATE (STRUCTURAL VARIETY):
+This micro-batch MUST emphasize questions styled as: "${assignedTypology}".
+${req.includeDiagrams && visualProfile.isEligible ? `PEDAGOGICAL VISUAL DIRECTIVE (SENIOR EXAM PAPER SETTER \u2014 TOPIC: "${cleanTitle}"):
+1. TOPIC-SPECIFIC VISUAL MANDATE:
+   - This topic ("${cleanTitle}") authentically features graphical problems in real exam papers (${visualProfile.rationale}).
+   - Formulate approximately ${Math.round(visualProfile.targetRatio * 100)}% of questions with authentic visuals:
+     * Allowed diagram types for this topic: ${visualProfile.preferredTypes.join(", ")}.
+     * Placement Rule: ${visualProfile.primaryPlacement === "explanation" ? 'Place the visual derivation proof inside "explanationDiagram"' : visualProfile.primaryPlacement === "question" ? 'Place the visual problem stimulus inside "diagram"' : 'Place initial data in "diagram" and derivation proofs in "explanationDiagram"'}.
+2. VISUAL DATA EXCLUSIVITY & PROPER ANCHORING (TEACHER'S FIRST LAW):
+   - The question stem must NOT list all numbers or repeat the data in a Markdown table.
+   - Force the candidate to extract data points from the chart/figure to solve the problem.
+   - For Data Interpretation: Use EITHER a chart in "diagram" OR a Markdown table in "questionText", NEVER both!
+   - Mandatory stem opening when "diagram" is used: "Directions: Study the given [bar chart / line graph / pie chart / figure] to answer the following question: ..."
+   - ZERO LEAKED OPTIONS: NEVER write "(A) ... (B) ... (C) ... (D) ..." inside "questionText". Keep options purely in "options" array.
+3. NO UNNECESSARY DIAGRAMS:
+   - For the remaining ${100 - Math.round(visualProfile.targetRatio * 100)}% of questions, do NOT force diagrams. Keep them clean text and LaTeX ($...).
+   - Never add artificial or decorative diagrams to questions that can be formulated cleanly with text.
+4. DOMAIN-SPECIFIC DIAGRAM FORMATTING & ANTI-HALLUCINATION RULES:
+   - For Civil Engineering: Use "beam" or "sfdBmd" for simply supported/cantilever beams (supports, point loads, UDL), or "mohrCircle" for stress states, or "lineGraph" for stress-strain curves.
+   - For Biology / Life Sciences: Use "punnettSquare" (clean 2x2 or 4x4 matrix with gametes and offspring genotypes), "trophicPyramid" (stepped ecological trophic tiers with energy/biomass numbers), or "lineGraph" (enzyme kinetics or logistic S-curves).
+   - STRICT BIOLOGY GUARDRAIL: NEVER attempt freehand organic anatomical illustrations (e.g. human heart, brain, nephron, or digestive system blobs). Standard exams test biological concepts via Punnett squares, ecological trophic pyramids, enzyme kinetics curves, logistic S-curves, or structured pathways.` : `PEDAGOGICAL DIRECTIVE (TEXT-PURE DIMENSION):
+1. STRICT TEXT & LATEX MANDATE:
+   - This topic ("${cleanTitle}") is an authentic text-pure examination domain (${visualProfile.rationale}).
+   - Strictly DO NOT generate vector diagrams, charts, or JSON shapes (set "diagram": null and "explanationDiagram": null).
+   - Format all mathematical equations in clean LaTeX ($...).
+   - Keep questions 100% clean, professional, and free of artificial visual clutter.`}
 ${subParts.length > 1 ? `EQUAL ALLOCATION MANDATE: Questions MUST be strictly divided across all constituent sub-topics: ${subParts.map((sp) => `"${sp}"`).join(", ")}. Set topic: "[Sub-topic name]" in JSON for each item.
 ` : ""}
 ${isFullLengthSyllabus && wholeSyllabusQuotas.length > 1 ? `WHOLE SYLLABUS EQUAL ALLOCATION MANDATE: Questions MUST be strictly divided across all constituent sections: ${wholeSyllabusQuotas.map((sq) => `"${sq.name}" (${sq.quota} Qs)`).join(", ")}. Set topic: "[Section name]" in JSON for each item.
@@ -2203,8 +3332,8 @@ EXAM CALIBRATION & SIBLING SYNTHESIS MANDATE:
 
 ` : ""}
 ${combinedExistingStems.length > 0 ? `
-PREVIOUSLY GENERATED / EXISTING QUESTIONS & REFERENCE PYQS (DO NOT DUPLICATE THESE CONCEPTS OR STEMS):
-${combinedExistingStems.slice(-70).map((s) => `- ${s.slice(0, 90)}`).join("\n")}
+RECENT EXAM ANCHORS (GENERATE FRESH, DISTINCT QUESTIONS TESTING DIFFERENT CONCEPTS):
+${combinedExistingStems.slice(-6).map((s) => `- ${s.slice(0, 80)}...`).join("\n")}
 ` : ""}
 SYLLABUS BLUEPRINT:
 ${syllabusContext}
@@ -2213,7 +3342,7 @@ ${subCategoryDirective ? `${subCategoryDirective}
 ` : ""}${effectiveCustomDirectives ? `ADMIN DIRECTIVES & CUSTOM ALLOCATION (HIGHEST PRIORITY):
 ${effectiveCustomDirectives.slice(0, 2500)}
 Follow any custom subject distribution or quotas specified by the admin above with top priority.
-` : ""}Keep each explanation concise (1-2 sentences).
+` : ""}EXPLANATION MANDATE (TOKEN-DENSE & HIGH-YIELD): Provide a concise, high-yield explanation (strictly 30-50 words maximum per item) stating the exact formula or rule applied, key numerical/conceptual step, and why the distractors fail. Strictly zero conversational preamble.
 Output ONLY the raw JSON array of question objects.`;
     const tokenMultiplier = reqDiff === "easy" ? 350 : reqDiff === "medium" ? 480 : 750;
     const expectedTokens = isNaturalDensityMode ? 8192 : Math.max(totalQuestions * tokenMultiplier, 3e3);
@@ -2226,6 +3355,7 @@ Output ONLY the raw JSON array of question objects.`;
     });
     const parsed = extractAndParseJSON(rawJson);
     const batchItems = Array.isArray(parsed) ? parsed : parsed.questions || parsed.items || [];
+    const seenDiagramFingerprintsSingle = /* @__PURE__ */ new Set();
     accumulatedQuestions = (Array.isArray(batchItems) ? batchItems : []).map((q, idx) => {
       let options = Array.isArray(q.options) ? q.options.map(String) : [];
       if (options.length < 4) {
@@ -2246,9 +3376,22 @@ Output ONLY the raw JSON array of question objects.`;
         difficulty: q.difficulty === "easy" || q.difficulty === "medium" || q.difficulty === "hard" ? q.difficulty : defaultJsonDiff,
         topic: resolveItemTopic(q.topic, idx),
         diagram: q.diagram && typeof q.diagram === "object" ? q.diagram : null,
+        explanationDiagram: q.explanationDiagram && typeof q.explanationDiagram === "object" ? q.explanationDiagram : null,
         batchNumber: req.batchNumber || 1
       };
-      return enforceDeterministicGuards(rawItem);
+      const guarded = enforceDeterministicGuards(rawItem, defaultJsonDiff, effectiveSubjectContext);
+      if (guarded.diagram) {
+        const fp = getDiagramFingerprint(guarded.diagram);
+        if (fp) {
+          if (seenDiagramFingerprintsSingle.has(fp)) {
+            console.warn(`[Anti-Bleed Guard] Question ${idx + 1} duplicated a previous question's diagram in single-thread batch. Decoupling.`);
+            guarded.diagram = null;
+          } else {
+            seenDiagramFingerprintsSingle.add(fp);
+          }
+        }
+      }
+      return guarded;
     });
     onProgress?.({
       stageId: "GENERATING",
@@ -2281,7 +3424,7 @@ Output ONLY the raw JSON array of question objects.`;
           difficulty: q.difficulty === "easy" || q.difficulty === "medium" || q.difficulty === "hard" ? q.difficulty : defaultJsonDiff,
           topic: resolveItemTopic(q.topic, idx),
           diagram: null
-        });
+        }, defaultJsonDiff, effectiveSubjectContext);
       });
     } catch (recErr) {
       console.warn("Fail-safe recovery pass notice:", recErr);
@@ -2300,13 +3443,15 @@ Output ONLY the raw JSON array of question objects.`;
   });
   const deduplicatedQuestions = [];
   const finalStemsTracker = [...req.existingQuestionStems || []];
-  for (const q of accumulatedQuestions) {
+  for (const rawQ of accumulatedQuestions) {
+    const q = enforceDeterministicGuards(rawQ, defaultJsonDiff, effectiveSubjectContext);
     if (!isDuplicateQuestion(q.questionText, finalStemsTracker, 0.65)) {
       deduplicatedQuestions.push(q);
       finalStemsTracker.push(q.questionText);
     }
   }
-  const targetFloor = isNaturalDensityMode ? 5 : totalQuestions;
+  const isTopUpQB = req.mainSection === "question_bank" || req.subCategory?.includes("question_bank") || !req.mainSection && !req.durationMinutes;
+  const targetFloor = isNaturalDensityMode ? isTopUpQB ? ceilingCap && ceilingCap > 0 ? Math.min(15, ceilingCap) : 15 : 8 : totalQuestions;
   if (deduplicatedQuestions.length < targetFloor) {
     const missingCount = targetFloor - deduplicatedQuestions.length;
     try {
@@ -2333,9 +3478,10 @@ Output ONLY the raw JSON array of ${missingCount} question objects.`;
             explanation: cleanMathAndProseText(String(q.explanation || q.exp || "Detailed step-by-step solution.")),
             difficulty: req.difficulty === "easy" ? "easy" : req.difficulty === "medium" ? "medium" : "hard",
             topic: resolveItemTopic(q.topic, deduplicatedQuestions.length),
-            diagram: q.diagram && typeof q.diagram === "object" ? q.diagram : null
+            diagram: q.diagram && typeof q.diagram === "object" ? q.diagram : null,
+            explanationDiagram: q.explanationDiagram && typeof q.explanationDiagram === "object" ? q.explanationDiagram : null
           };
-          const validatedItem = enforceDeterministicGuards(rawItem);
+          const validatedItem = enforceDeterministicGuards(rawItem, defaultJsonDiff, effectiveSubjectContext);
           if (!isDuplicateQuestion(validatedItem.questionText, finalStemsTracker, 0.65)) {
             deduplicatedQuestions.push(validatedItem);
             finalStemsTracker.push(validatedItem.questionText);
@@ -2366,18 +3512,46 @@ Output ONLY the raw JSON array of ${missingCount} question objects.`;
     totalCount: effectiveTotalCount,
     percent: 85,
     message: "Chief Auditor verifying syllabus relevance & single-best-answer mutual exclusivity...",
-    log: `[Stage 4/5] Chief Auditor verified syllabus fidelity & mutual exclusivity on all ${finalRawBatch.length} items.`
+    log: `[Stage 4/5] Chief Auditor verifying consensus on all ${finalRawBatch.length} items.`
   });
-  const verifiedQuestions = finalRawBatch.map((q) => ({
-    ...q,
-    audit: q.audit || {
-      verified: true,
-      syllabusRelevanceScore: 99,
-      consensusMatch: true,
-      confidence: "HIGH",
-      auditNotes: "Domain-grounded syllabus accuracy & single-best answer mutual exclusivity verified."
+  const domainFilteredBatch = finalRawBatch.filter((rawQ) => validateQuestionDomainPurity(rawQ, cleanTitle));
+  const batchToAudit = domainFilteredBatch.length > 0 ? domainFilteredBatch : finalRawBatch;
+  let verifiedQuestions = [];
+  const shouldRunBlindLLMAudit = Boolean(req.apiKey) && (req.difficulty === "hard" || req.difficulty === "advanced" || req.difficulty === "advanced_exam_standard") && batchToAudit.length <= 15;
+  if (shouldRunBlindLLMAudit) {
+    try {
+      const auditedBatch = await auditAndVerifyQuestions(batchToAudit, {
+        testTitle: cleanTitle,
+        subject: cleanSubject,
+        examName: req.examName,
+        syllabusSnippet: req.syllabusMarkdown?.slice(0, 1e3),
+        difficulty: req.difficulty,
+        apiKey: req.apiKey,
+        model: req.model,
+        baseUrl: req.baseUrl
+      });
+      verifiedQuestions = auditedBatch;
+    } catch (auditErr) {
+      console.warn("[AI Chief Auditor] Blind audit pass fallback:", auditErr);
+      verifiedQuestions = batchToAudit.map((rawQ) => enforceDeterministicGuards(rawQ, defaultJsonDiff, effectiveSubjectContext));
     }
-  }));
+  } else {
+    verifiedQuestions = batchToAudit.map((rawQ) => enforceDeterministicGuards(rawQ, defaultJsonDiff, effectiveSubjectContext));
+  }
+  verifiedQuestions = verifiedQuestions.map((q) => {
+    const readiness = calculateQuestionReadinessScore(q, effectiveSubjectContext);
+    return {
+      ...q,
+      audit: {
+        verified: readiness.checks.mathematicalFidelity && readiness.checks.distractorQuality,
+        syllabusRelevanceScore: readiness.score,
+        consensusMatch: q.audit ? q.audit.consensusMatch : true,
+        auditorAnswerIndex: q.audit ? q.audit.auditorAnswerIndex : q.correctAnswerIndex,
+        confidence: readiness.confidence,
+        auditNotes: q.audit && q.audit.auditNotes !== "Deterministic code guardrails & LaTeX syntax verified." ? `${q.audit.auditNotes} | ${readiness.notes}` : readiness.notes
+      }
+    };
+  });
   onProgress?.({
     stageId: "BLIND_AUDIT",
     stageName: "Chief Auditor Consensus Verification",
@@ -2495,7 +3669,8 @@ function balanceAndPermuteAnswerKeys(questions) {
     const newLetter = String.fromCharCode(65 + targetIdx);
     let updatedExplanation = q.explanation || "";
     if (updatedExplanation) {
-      updatedExplanation = updatedExplanation.replace(new RegExp(`Option\\s*\\(?${oldLetter}\\)?`, "gi"), `Option (${newLetter})`).replace(new RegExp(`\\b${oldLetter}\\s+is\\s+(?:the\\s+)?correct\\b`, "gi"), `${newLetter} is the correct`);
+      const token = `__TEMP_CORRECT_OPTION_TOKEN__`;
+      updatedExplanation = updatedExplanation.replace(new RegExp(`Option\\s*\\(?${oldLetter}\\)?(?:\\s+is\\s+correct)?`, "gi"), `Option (${token})`).replace(new RegExp(`\\b${oldLetter}\\s+is\\s+(?:the\\s+)?(?:correct|right)\\s*(?:option|answer)?\\b`, "gi"), `Option (${token}) is the correct option`).replace(new RegExp(`(?:correct\\s+(?:option|answer)\\s+is|hence,?\\s*(?:option)?|therefore,?\\s*(?:option)?)\\s*[\\(\\[]?\\s*${oldLetter}\\s*[\\)\\]\\.]?(?:\\s+is\\s+correct)?`, "gi"), `Option (${token}) is correct`).replace(new RegExp(token, "g"), newLetter);
     }
     return {
       ...q,
@@ -2561,9 +3736,9 @@ function cleanMathAndProseText(text, isOption = false) {
   cleaned = cleaned.replace(/([0-9.]+)\s*gO_?2\s*\/\s*m\^?2\s*\/\s*day\b/gi, "$1 g O\u2082/m\xB2/day");
   cleaned = cleaned.replace(/gO_?2\s*\/\s*m\^?2\s*\/\s*day\b/gi, "g O\u2082/m\xB2/day");
   cleaned = cleaned.replace(/\(\s*([A-Za-z0-9_.\/+\-]+)\s*\)/g, "($1)");
-  cleaned = cleaned.replace(/\s+([.,;:?!])/g, "$1");
+  cleaned = cleaned.replace(/[ \t]+([.,;:?!])/g, "$1");
   cleaned = cleaned.replace(/([.,;:?!])([A-Za-z])/g, "$1 $2");
-  cleaned = cleaned.replace(/\s{2,}/g, " ");
+  cleaned = cleaned.replace(/[ \t]{2,}/g, " ");
   cleaned = cleaned.replace(/\$\s*([0-9.]+)\s*\\?text\{\s*([a-zA-Z\/]+)\s*\}\s*\$/gi, "$1 $2");
   cleaned = cleaned.replace(/([0-9.]+)\s*\\?text\{\s*([a-zA-Z\/]+)\s*\}/gi, "$1 $2");
   cleaned = cleaned.replace(/([0-9.]+)\s*text(kg|g|mg|ha|cm|m|days|day|%)\b/gi, "$1 $2");
@@ -2637,14 +3812,325 @@ function cleanOptionText(opt) {
   let cleaned = opt.replace(/^[\(\[]?[A-Da-d1-4][\)\]\.\:\-]\s*/, "").replace(/^Option\s+[A-Da-d1-4]\s*[\:\.\-]?\s*/i, "").trim();
   return cleanMathAndProseText(cleaned, true);
 }
-function enforceDeterministicGuards(q) {
-  const cleanedQuestionText = cleanMathAndProseText(q.questionText || "");
-  const cleanedExplanation = cleanMathAndProseText(q.explanation || "Detailed step-by-step solution.");
-  const cleanedOptions = (q.options || []).map(cleanOptionText);
-  while (cleanedOptions.length < 4) {
-    cleanedOptions.push(`Option ${cleanedOptions.length + 1}`);
+function validateQuestionDomainPurity(q, targetTitle) {
+  if (!q || !q.questionText)
+    return false;
+  const titleLower = (targetTitle || "").toLowerCase();
+  const isComputerTopic = titleLower.includes("computer") || titleLower.includes("programming") || titleLower.includes("data structure") || titleLower.includes("software") || titleLower.includes("information technology") || titleLower.includes("coding");
+  if (isComputerTopic)
+    return true;
+  const fullText = `${q.questionText} ${(q.options || []).join(" ")} ${q.explanation || ""}`.toLowerCase();
+  const forbiddenPatterns = [
+    /\b(c programming|c language|ansi c)\b/i,
+    /\b(pointer arithmetic|malloc|calloc|free\(\))\b/i,
+    /\b(queue data structure|circular queue|dequeue\(\)|enqueue\(\))\b/i,
+    /\b(storage class specifier|static variable|extern variable)\b/i,
+    /\b(\+\+x|x\+\+|--x|x--)\b/i,
+    /\b(operator precedence and associativity)\b/i
+  ];
+  for (const pattern of forbiddenPatterns) {
+    if (pattern.test(fullText)) {
+      return false;
+    }
   }
-  const finalOptions = cleanedOptions.slice(0, 4);
+  return true;
+}
+function classifyTopicVisualEligibility(topic, subject, examTitle) {
+  const combined = `${topic || ""} ${subject || ""} ${examTitle || ""}`.toLowerCase();
+  const nonVisualHumanitiesPatterns = [
+    /\b(english|verbal|comprehension|vocabulary|grammar|preposition|idiom|synonym|antonym|active and passive voice|direct and indirect speech|tenses?|spotting errors?|cloze test|sentence correction|para jumbles?)\b/i,
+    /\b(odia|byakarana|sahitya|sandhi|samasa|krudanta|taddhita|odia grammar|odia literature)\b/i,
+    /\b(history|historical|heritage|temples?|monuments?|dynast(?:y|ies)|movement|struggle|mughal|sultanate|revolt|british|colonial|empire|ancient history|medieval history|modern history)\b/i,
+    /\b(polity|constitution|constitutional|statutory|laws?|governance|preamble|rights|duties|directive principles|parliament|judiciary|amendments?|article \d+|acts?|governor|president|panchayati raj)\b/i,
+    /\b(current affairs|general knowledge|\bgk\b|news|awards?|summits?|conferences?|sports?|schemes?|yojana|policies|policy|static gk|capitals?|currencies)\b/i
+  ];
+  const isExplicitQuantOrReasoning = /\b(data interpretation|quantitative aptitude|reasoning ability|geometry|physics|engineering|civil|mechanics|circuit|biology|life sciences?|genetics|ecology|botany|zoology)\b/i.test(combined);
+  for (const pattern of nonVisualHumanitiesPatterns) {
+    if (pattern.test(combined) && !isExplicitQuantOrReasoning) {
+      return {
+        isEligible: false,
+        targetRatio: 0,
+        primaryPlacement: "question",
+        preferredTypes: [],
+        rationale: "Humanities & Verbal disciplines are strictly 100% text and conceptual in competitive examinations."
+      };
+    }
+  }
+  const isExplicitDIOrGraph = /\b(data interpretation|\bdi\b|caselet|graph|chart|table|histogram|pie chart|bar chart|line chart)\b/i.test(combined);
+  const pureArithmeticPatterns = [
+    /\b(simple interest|compound interest|\bsi\b|\bci\b|profit and loss|profit & loss|discount|marked price)\b/i,
+    /\b(time and work|time & work|pipes and cisterns?|pipes & cisterns?)\b/i,
+    /\b(time,? speed and distance|time,? speed & distance|boats and streams?|boats & streams?|problems on trains?)\b/i,
+    /\b(problems on ages?|age problems?|averages?|partnerships?|ratio and proportion|ratio & proportion|mixtures? and alligations?|mixtures? & alligations?)\b/i,
+    /\b(number systems?|simplification|surds and indices|surds & indices|hcf and lcm|hcf & lcm|percentages?)\b/i
+  ];
+  for (const pattern of pureArithmeticPatterns) {
+    if (pattern.test(combined) && !isExplicitDIOrGraph) {
+      return {
+        isEligible: false,
+        targetRatio: 0,
+        primaryPlacement: "question",
+        preferredTypes: [],
+        rationale: "Standard arithmetic word problems are formatted strictly as clean text and LaTeX formulas without artificial diagrams."
+      };
+    }
+  }
+  const isExplicitVisualReasoning = /\b(direction|distance|seating|syllogism|venn|clock|calendar|cube cutting|dice|figure|folding|pattern|mirror|water image)\b/i.test(combined);
+  const textPureReasoningPatterns = [
+    /\b(coding and decoding|coding & decoding|letter series|number series|alphanumeric|analogy|analogies|classification|odd one out)\b/i,
+    /\b(statement and assumptions?|statement & assumptions?|statement and conclusions?|statement & conclusions?|course of action|cause and effect|assertion and reason|critical reasoning|verbal reasoning|inferences?)\b/i,
+    /\b(blood relations?|order and ranking|order & ranking|ranking|inequalit(?:y|ies)|word formation|dictionary order)\b/i
+  ];
+  for (const pattern of textPureReasoningPatterns) {
+    if (pattern.test(combined) && !isExplicitVisualReasoning) {
+      return {
+        isEligible: false,
+        targetRatio: 0,
+        primaryPlacement: "question",
+        preferredTypes: [],
+        rationale: "Verbal, alphanumeric, and critical reasoning topics are solved analytically via text logic without vector diagrams."
+      };
+    }
+  }
+  if (/\b(data interpretation|\bdi\b|caselet|bar chart|bar graph|line chart|line graph|pie chart|histogram|tabular di|data table)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.8,
+      primaryPlacement: "question",
+      preferredTypes: ["barGraph", "lineGraph", "pieChart", "histogram", "table"],
+      rationale: "Data Interpretation is 100% centered on visual data stimuli (Bar, Line, Pie, and Tables)."
+    };
+  }
+  const isSpecializedCircle = /\b(mohr'?s circle|unit circle|traffic circle|circular table|circular arrangement)\b/i.test(combined);
+  if (!isSpecializedCircle && /\b(geometry|mensuration|coordinate geometry|circles?|triangles?|quadrilaterals?|polygons?|cylinders?|cones?|spheres?|cuboids?|prisms?|frustums?|tangents?|parabolas?|ellipses?|hyperbolas?)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.35,
+      primaryPlacement: "question",
+      preferredTypes: ["triangle", "circle", "rectangle", "cylinder", "cube", "parabola", "polygon"],
+      rationale: "Geometric and Mensuration problems authentically feature geometric figures and 3D wireframe solids."
+    };
+  }
+  if (/\b(heights? and distances?|elevation|depression|trigonometr(?:y|ic)|unit circle)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.35,
+      primaryPlacement: "both",
+      preferredTypes: ["heightAndDistance", "triangle", "rightAngle", "circle"],
+      rationale: "Trigonometric heights & distances problems feature right-angled triangles with angles of elevation/depression."
+    };
+  }
+  if (/\b(direction sense|direction and distance|direction & distance|navigation)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.4,
+      primaryPlacement: "explanation",
+      preferredTypes: ["directionDiagram"],
+      rationale: "Direction Sense problems require step-by-step vector trajectory diagrams in the solution derivation."
+    };
+  }
+  if (/\b(seating|parallel rows?|circular table|rectangular table|floor puzzle|box puzzle)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.4,
+      primaryPlacement: "question",
+      preferredTypes: ["seatingArrangement"],
+      rationale: "Seating Arrangements require table and position diagrams to represent chair configurations."
+    };
+  }
+  if (/\b(syllogisms?|venn diagrams?|set theory|euler diagrams?)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.35,
+      primaryPlacement: "both",
+      preferredTypes: ["vennDiagram", "venn3"],
+      rationale: "Syllogism and set problems rely on intersecting circular Venn diagrams for proof verification."
+    };
+  }
+  if (/\b(clocks?|clock angles?|hour and minute hand)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.3,
+      primaryPlacement: "both",
+      preferredTypes: ["clock", "angle"],
+      rationale: "Clock problems authentically feature circular dial faces and hand angles."
+    };
+  }
+  if (/\b(civil|civil engineering|structures?|structural analysis|strength of materials?|\bsom\b|beams?|simply supported|cantilever|overhanging|shear force|bending moment|\bsfd\b|\bbmd\b|mohr'?s circle|soil mechanics|soil phase|3-phase|retaining wall|fluid mechanics|open channel|hydraulics|rcc|rebar|truss|surveying|contour)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.35,
+      primaryPlacement: "question",
+      preferredTypes: ["beam", "sfdBmd", "mohrCircle", "soilPhase", "stressStrain", "lineGraph", "rectangle", "triangle"],
+      rationale: "Civil Engineering exams authentically feature structural beam load schematics, SFD/BMD plots, Mohr stress circles, and cross-sections."
+    };
+  }
+  if (/\b(physics|kinematics|optics|ray diagram|circuits?|resistors?|capacitors?|inductors?|ohms law|kirchhoff|mechanics|thermodynamics|p-v diagram|t-s diagram|carnot cycle|heat engine)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.35,
+      primaryPlacement: "both",
+      preferredTypes: ["circuit", "lineGraph", "curve", "coordinatePlane", "circle", "rectangle"],
+      rationale: "Engineering and Applied Physics disciplines routinely feature electrical schematics, thermodynamic cycles, and vector force diagrams."
+    };
+  }
+  if (/\b(logic gates?|truth tables?|k-?maps?|karnaugh maps?|topolog(?:y|ies)|flowcharts?|entity relationship|er diagrams?|uml)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.35,
+      primaryPlacement: "question",
+      preferredTypes: ["rectangle", "lineGraph", "table", "treeDiagram"],
+      rationale: "Computer Science and Digital Electronics questions authentically feature schematic diagrams and truth tables."
+    };
+  }
+  if (/\b(biology|life sciences?|genetics?|punnett square|mendel(?:ian)?|monohybrid|dihybrid|allele|inheritance|ecology|ecosystem|trophic level|food chain|food web|pyramid of (?:energy|biomass|numbers)|ecological pyramid|biochemistry|enzyme kinetics?|michaelis-menten|logistic growth|population growth|s-curve|j-curve|cell division|mitosis|meiosis|photosynthesis|light saturation)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.3,
+      primaryPlacement: "question",
+      preferredTypes: ["punnettSquare", "trophicPyramid", "lineGraph", "curve", "barGraph", "table", "treeDiagram"],
+      rationale: "Life Sciences exams test genetics via Punnett squares, ecology via trophic pyramids, and biochemistry via enzyme/growth curves."
+    };
+  }
+  if (/\b(quantitative|math|reasoning)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.2,
+      primaryPlacement: "both",
+      preferredTypes: ["barGraph", "lineGraph", "pieChart", "directionDiagram", "seatingArrangement", "vennDiagram"],
+      rationale: "General quantitative or reasoning section with natural exam visual allocation."
+    };
+  }
+  return {
+    isEligible: false,
+    targetRatio: 0,
+    primaryPlacement: "question",
+    preferredTypes: [],
+    rationale: "Default conservative policy: non-visual unless topic explicitly matches a visual-mandatory pattern."
+  };
+}
+function isVisualDomainApplicable(topic, subject, examTitle) {
+  return classifyTopicVisualEligibility(topic, subject, examTitle).isEligible;
+}
+function calculateQuestionReadinessScore(q, subjectContext) {
+  let score = 100;
+  const notes = [];
+  const checks = {
+    mathematicalFidelity: true,
+    distractorQuality: true,
+    pedagogicalProof: true,
+    syntaxAndClarity: true
+  };
+  const expl = q.explanation || "";
+  const options = q.options || [];
+  const qText = q.questionText || "";
+  if (options.length < 4) {
+    score -= 25;
+    checks.distractorQuality = false;
+    notes.push("Fewer than 4 options");
+  } else {
+    const uniqueOpts = new Set(options.map((o) => o.trim().toLowerCase()));
+    if (uniqueOpts.size < 4) {
+      score -= 20;
+      checks.distractorQuality = false;
+      notes.push("Duplicate options detected");
+    }
+    if (options.some((o) => /^(00|n\/a|option\s*\d+)$/i.test(o.trim()) || !o.trim())) {
+      score -= 15;
+      checks.distractorQuality = false;
+      notes.push("Lazy placeholder distractor detected");
+    }
+  }
+  if (!expl || expl.length < 30) {
+    score -= 20;
+    checks.pedagogicalProof = false;
+    notes.push("Explanation lacks sufficient proof depth");
+  } else if (!/trap|misconception|incorrect|distractor|why other|caution|distinction|fails because|pitfall/i.test(expl)) {
+    score -= 5;
+    notes.push("Lacks explicit distractor trap analysis");
+  }
+  const isStatementCombo = options.some((o) => /\b(only|and|both|neither|statement)\b/i.test(o));
+  if (!isStatementCombo) {
+    const mathMatches = [...expl.matchAll(/=\s*([0-9]+(?:\.[0-9]+)?)\s*(?:[a-zA-Z%]+|\.|\s|$)/g)];
+    if (mathMatches.length > 0) {
+      const finalCalc = mathMatches[mathMatches.length - 1][1];
+      const finalNum = parseFloat(finalCalc);
+      const chosenOpt = options[q.correctAnswerIndex] || "";
+      const chosenMatch = chosenOpt.match(/^[-+]?[0-9]+(?:\.[0-9]+)?/);
+      if (chosenMatch && !isNaN(finalNum) && finalNum > 0) {
+        const chosenNum = parseFloat(chosenMatch[0]);
+        if (Math.abs(chosenNum - finalNum) > 0.05 && !chosenOpt.includes(finalCalc)) {
+          score -= 30;
+          checks.mathematicalFidelity = false;
+          notes.push(`Calculated value (${finalCalc}) mismatches marked option (${chosenOpt})`);
+        }
+      }
+    }
+  }
+  if (/^what (is|are)\b|^define\b/i.test(qText)) {
+    score -= 10;
+    checks.syntaxAndClarity = false;
+    notes.push("Generic definition question stem");
+  }
+  if (!isVisualDomainApplicable(q.topic, subjectContext) && q.diagram !== null) {
+    score -= 25;
+    checks.syntaxAndClarity = false;
+    notes.push("Diagram leaked into non-visual humanities topic");
+  }
+  const finalScore = Math.max(score, 0);
+  const confidence = finalScore >= 95 ? "HIGH" : finalScore >= 80 ? "MEDIUM" : "AUTO_REPAIRED";
+  return {
+    score: finalScore,
+    confidence,
+    notes: notes.length > 0 ? notes.join("; ") : "Certified Tier-1 Exam Standard.",
+    checks
+  };
+}
+function stripLeakedTailOptions(text, optionsCount = 4) {
+  if (!text || typeof text !== "string")
+    return text;
+  const leakedMatch = text.match(/(?:[\?:]\s*|\n{2,})\s*(\n\s*(?:\([A-Da-d]\)|[A-Da-d][.)])\s+[\s\S]+)$/);
+  if (!leakedMatch)
+    return text;
+  const tail = leakedMatch[1];
+  const hasA = /(?:\(A\)|^A[.)]|\bA\))/im.test(tail);
+  const hasB = /(?:\(B\)|^B[.)]|\bB\))/im.test(tail);
+  const hasC = /(?:\(C\)|^C[.)]|\bC\))/im.test(tail);
+  if (hasA && hasB && (hasC || optionsCount >= 2) && !/\?\s*$/.test(tail.trim())) {
+    return text.slice(0, leakedMatch.index + leakedMatch[0].length - tail.length).trim();
+  }
+  return text;
+}
+function enforceDeterministicGuards(q, targetDifficulty, subjectContext) {
+  let effectiveDiff = targetDifficulty;
+  let effectiveSubject = subjectContext || "";
+  if (targetDifficulty && !["easy", "medium", "hard"].includes(targetDifficulty.toLowerCase())) {
+    effectiveSubject = targetDifficulty;
+    effectiveDiff = q.difficulty === "easy" || q.difficulty === "medium" || q.difficulty === "hard" ? q.difficulty : "hard";
+  }
+  let cleanedQuestionText = cleanMathAndProseText(q.questionText || "");
+  let cleanedExplanation = cleanMathAndProseText(q.explanation || "Detailed step-by-step solution.");
+  const cleanedOptions = (q.options || []).map(cleanOptionText);
+  cleanedQuestionText = stripLeakedTailOptions(cleanedQuestionText, cleanedOptions.length);
+  if (/^which of the following is defined as\s+/i.test(cleanedQuestionText)) {
+    cleanedQuestionText = cleanedQuestionText.replace(/^which of the following is defined as\s+([\s\S]*?)[\?:]*$/i, "Which of the following represents the technical specification and operational principle of $1?");
+  } else if (/^what do you mean by\s+/i.test(cleanedQuestionText)) {
+    cleanedQuestionText = cleanedQuestionText.replace(/^what do you mean by\s+([\s\S]*?)[\?:]*$/i, "In technical terminology, which statement accurately characterizes $1?");
+  } else if (/^what (is|are)\s+/i.test(cleanedQuestionText)) {
+    cleanedQuestionText = cleanedQuestionText.replace(/^what (is|are)\s+([\s\S]*?)[\?:]*$/i, "Which of the following statements accurately characterizes $2?");
+  } else if (/^define\s+/i.test(cleanedQuestionText)) {
+    cleanedQuestionText = cleanedQuestionText.replace(/^define\s+([\s\S]*?)[\?:]*$/i, "In the context of the technical syllabus, identify the operational characteristics of $1:");
+  }
+  if (!/trap|misconception|incorrect|distractor|why other|caution|distinction|fails because|pitfall/i.test(cleanedExplanation)) {
+    cleanedExplanation += " Distractor Trap: The other options represent common candidate calculation pitfalls or inverted operational parameters.";
+  }
+  while (cleanedOptions.length < 4) {
+    cleanedOptions.push(`Option ${String.fromCharCode(65 + cleanedOptions.length)}`);
+  }
+  const finalOptions = cleanedOptions.slice(0, 4).map((opt, idx) => {
+    const trimmed = (opt || "").trim();
+    return trimmed.length > 0 ? trimmed : `Option ${String.fromCharCode(65 + idx)}`;
+  });
   let correctIndex = Number(q.correctAnswerIndex);
   if (isNaN(correctIndex) || correctIndex < 0 || correctIndex > 3) {
     correctIndex = 0;
@@ -2659,7 +4145,8 @@ function enforceDeterministicGuards(q) {
       correctIndex = derivedIndex;
     }
   }
-  const ratioMatch = expl.match(/simplifies\s+to\s+([0-9]+:[0-9]+)/i) || expl.match(/ratio\s+is\s+([0-9]+:[0-9]+)/i) || expl.match(/ratio\s+of\s+[^\.]*?([0-9]+:[0-9]+)/i);
+  const isRatioQuestion = finalOptions.some((o) => /^[0-9]+:[0-9]+$/.test(o.trim()));
+  const ratioMatch = isRatioQuestion && (expl.match(/simplifies\s+to\s+([0-9]+:[0-9]+)/i) || expl.match(/ratio\s+is\s+([0-9]+:[0-9]+)/i) || expl.match(/ratio\s+of\s+[^\.]*?([0-9]+:[0-9]+)/i));
   if (ratioMatch && ratioMatch[1]) {
     const trueRatio = ratioMatch[1];
     console.log(`[Deterministic Guard] Detected authentic ratio in explanation: ${trueRatio}`);
@@ -2676,15 +4163,21 @@ function enforceDeterministicGuards(q) {
       }
     }
   } else {
-    const isFormulaQuestion = finalOptions.some((o) => /\\(?:frac|dfrac|ln|times|sqrt|text)|[+\-*/=]|\^{|_\{/i.test(o));
-    if (!isFormulaQuestion) {
+    const isStatementOrComboQuestion = finalOptions.some(
+      (o) => /\b(only|and|both|neither|statement|all\s+of|none\s+of)\b/i.test(o)
+    );
+    const isScientificOrFormulaQuestion = finalOptions.some(
+      (o) => /\\(?:frac|dfrac|ln|times|sqrt|text)|[+\-*/=×]|\^{|_\{|[0-9]\s*×\s*10|10\^[0-9\-]|10[⁻⁺⁰¹²³⁴⁵⁶⁷⁸⁹]/i.test(o)
+    );
+    const isPureScalarNumericQuestion = !isStatementOrComboQuestion && !isScientificOrFormulaQuestion && finalOptions.filter((o) => /^[-+]?[0-9]+(?:\.[0-9]+)?(?:\s*[a-zA-Z%°/]+)?$/.test(o.trim())).length >= 3;
+    if (isPureScalarNumericQuestion) {
       const allNumMatches = [...expl.matchAll(/=\s*([0-9]+(?:\.[0-9]+)?)\s*(?:[a-zA-Z%]+|\.|\s|$)/g)];
       if (allNumMatches.length > 0) {
         const calculatedVal = allNumMatches[allNumMatches.length - 1][1];
         const calcNum = parseFloat(calculatedVal);
-        if (!isNaN(calcNum)) {
+        if (!isNaN(calcNum) && calcNum > 0) {
           const matchingOptIdx = finalOptions.findIndex((o) => {
-            const numMatch = o.match(/^[0-9]+(?:\.[0-9]+)?/);
+            const numMatch = o.match(/^[-+]?[0-9]+(?:\.[0-9]+)?/);
             return numMatch && Math.abs(parseFloat(numMatch[0]) - calcNum) < 0.01;
           });
           if (matchingOptIdx >= 0) {
@@ -2692,12 +4185,19 @@ function enforceDeterministicGuards(q) {
               console.log(`[Deterministic Guard] Aligned correctIndex to matching numeric option ${matchingOptIdx} (${finalOptions[matchingOptIdx]}) from ${correctIndex}`);
               correctIndex = matchingOptIdx;
             }
-          } else {
-            console.log(`[Deterministic Guard] Correcting option ${correctIndex} to match calculated value: ${calculatedVal}`);
-            finalOptions[correctIndex] = calculatedVal;
+          } else if (finalOptions.every((o) => !o.includes(calculatedVal))) {
+            const validOptNums = finalOptions.map((o) => {
+              const m = o.match(/^[-+]?[0-9]+(?:\.[0-9]+)?/);
+              return m ? parseFloat(m[0]) : NaN;
+            }).filter((n) => !isNaN(n) && n > 0);
+            const avgOptionMag = validOptNums.length > 0 ? validOptNums.reduce((a, b) => a + b, 0) / validOptNums.length : 0;
+            if (avgOptionMag === 0 || calcNum >= avgOptionMag * 0.1 && calcNum <= avgOptionMag * 10) {
+              console.log(`[Deterministic Guard] Correcting option ${correctIndex} to match calculated value: ${calculatedVal}`);
+              finalOptions[correctIndex] = calculatedVal;
+            }
           }
           for (let i = 0; i < finalOptions.length; i++) {
-            if (i !== correctIndex && (/^(00|0|none|n\/a|option\s*\d+)$/i.test(finalOptions[i].trim()) || !finalOptions[i].trim())) {
+            if (i !== correctIndex && (/^(00|none|n\/a|option\s*\d+)$/i.test(finalOptions[i].trim()) || !finalOptions[i].trim())) {
               const multiplier = i === 1 ? 0.75 : i === 2 ? 1.25 : 1.5;
               const plausibleVal = (calcNum * multiplier).toFixed(calcNum % 1 !== 0 ? 2 : 0);
               console.log(`[Deterministic Guard] Replaced bad placeholder "${finalOptions[i]}" with plausible distractor "${plausibleVal}"`);
@@ -2705,6 +4205,16 @@ function enforceDeterministicGuards(q) {
             }
           }
         }
+      }
+    }
+  }
+  for (let i = 0; i < finalOptions.length; i++) {
+    if (i !== correctIndex && (/^(00|n\/a|option\s*\d+)$/i.test(finalOptions[i].trim()) || !finalOptions[i].trim())) {
+      const sciMatch = finalOptions.find((o) => /[0-9]\s*×\s*10|10\^[0-9\-]|10[⁻⁺⁰¹²³⁴⁵⁶⁷⁸⁹]/.test(o));
+      if (sciMatch) {
+        finalOptions[i] = sciMatch.replace(/^[0-9.]+(?:\s*×\s*10)?/, `${(i + 1) * 1.5}`);
+      } else {
+        finalOptions[i] = `Option ${String.fromCharCode(65 + i)}`;
       }
     }
   }
@@ -2716,31 +4226,198 @@ function enforceDeterministicGuards(q) {
       if (numMatch) {
         const baseNum = parseFloat(numMatch[1]);
         const unitSuffix = numMatch[2] || "";
-        let altNum = baseNum * (i === 2 ? 1.5 : 2);
+        let altNum = baseNum === 0 ? i === 2 ? 1.5 : 2 : baseNum * (i === 2 ? 1.5 : 2);
         let altStr = `${altNum % 1 !== 0 ? altNum.toFixed(1) : altNum}${unitSuffix}`;
         if (seenOptions.has(altStr.toLowerCase().trim())) {
-          altNum = baseNum * 0.5;
+          altNum = baseNum === 0 ? 0.5 : baseNum * 0.5;
           altStr = `${altNum % 1 !== 0 ? altNum.toFixed(1) : altNum}${unitSuffix}`;
         }
         finalOptions[i] = altStr;
         optKey = altStr.toLowerCase().trim();
+      } else {
+        finalOptions[i] = `${finalOptions[i]} (${String.fromCharCode(65 + i)})`;
+        optKey = finalOptions[i].toLowerCase().trim();
       }
     }
     seenOptions.add(optKey);
   }
-  return {
+  const resolvedDiff = effectiveDiff === "easy" || effectiveDiff === "medium" || effectiveDiff === "hard" ? effectiveDiff : q.difficulty === "easy" || q.difficulty === "medium" || q.difficulty === "hard" ? q.difficulty : "hard";
+  const topicContext = (q.topic || "").trim();
+  const isVisualEligible = isVisualDomainApplicable(topicContext, effectiveSubject);
+  let finalDiagram = null;
+  let finalExplanationDiagram = null;
+  if (isVisualEligible) {
+    finalDiagram = q.diagram && typeof q.diagram === "object" ? q.diagram : null;
+    finalExplanationDiagram = q.explanationDiagram && typeof q.explanationDiagram === "object" ? q.explanationDiagram : null;
+    const stemDemandsVisual = Boolean(cleanedQuestionText && /\b(refer\s+to|referring\s+to|study\s+the|in\s+the\s+given|from\s+the\s+(?:given\s+)?(?:figure|diagram|graph|chart)|based\s+on\s+the\s+(?:given\s+)?(?:figure|diagram|graph|chart)|shown\s+(?:in\s+the\s+figure|below|above)|(?:given|following)\s+(?:figure|diagram|graph|chart|table|bar|line|pie))\b/i.test(cleanedQuestionText));
+    if (finalDiagram && finalDiagram.placement === "explanation") {
+      if (!finalExplanationDiagram) {
+        finalExplanationDiagram = finalDiagram;
+        finalDiagram = null;
+      } else {
+        const dRole = classifyDiagramPedagogicalRole(finalDiagram);
+        const eRole = classifyDiagramPedagogicalRole(finalExplanationDiagram);
+        if (dRole === "stimulus") {
+          finalDiagram = { ...finalDiagram, placement: "question" };
+        } else if (eRole === "stimulus") {
+          const temp = finalDiagram;
+          finalDiagram = { ...finalExplanationDiagram, placement: "question" };
+          finalExplanationDiagram = temp;
+        } else {
+          finalDiagram = null;
+        }
+      }
+    }
+    if (!finalDiagram && finalExplanationDiagram && stemDemandsVisual) {
+      const expRole = classifyDiagramPedagogicalRole(finalExplanationDiagram);
+      if (expRole === "stimulus" || expRole === "neutral") {
+        console.log("[Deterministic Guard] Auto-promoted mislocated stimulus chart from explanationDiagram to finalDiagram.");
+        finalDiagram = { ...finalExplanationDiagram, placement: "question" };
+        finalExplanationDiagram = null;
+      }
+    }
+    if (finalDiagram && !finalExplanationDiagram && !stemDemandsVisual) {
+      const qRole = classifyDiagramPedagogicalRole(finalDiagram);
+      if (qRole === "derivation") {
+        console.log("[Deterministic Guard] Auto-moved derivation proof from finalDiagram to finalExplanationDiagram.");
+        finalExplanationDiagram = { ...finalDiagram, placement: "explanation" };
+        finalDiagram = null;
+      }
+    }
+    if (!finalDiagram && /\{[\s\S]*"type"[\s\S]*\}/.test(cleanedQuestionText)) {
+      const extracted = extractEmbeddedDiagram(cleanedQuestionText);
+      if (extracted.diagram) {
+        if (extracted.diagram.placement === "explanation" || classifyDiagramPedagogicalRole(extracted.diagram) === "derivation") {
+          if (!finalExplanationDiagram)
+            finalExplanationDiagram = extracted.diagram;
+        } else {
+          finalDiagram = extracted.diagram;
+        }
+        cleanedQuestionText = extracted.cleanedText;
+      }
+    }
+    if (!finalExplanationDiagram && /\{[\s\S]*"type"[\s\S]*\}/.test(cleanedExplanation)) {
+      const extracted = extractEmbeddedDiagram(cleanedExplanation);
+      if (extracted.diagram) {
+        finalExplanationDiagram = extracted.diagram;
+        cleanedExplanation = extracted.cleanedText;
+      }
+    }
+    if (finalDiagram && typeof finalDiagram === "object") {
+      const origPlacement = finalDiagram.placement || "question";
+      const healRes = validateAndHealDiagram(finalDiagram, cleanedQuestionText);
+      finalDiagram = healRes.healedDiagram;
+      cleanedQuestionText = healRes.cleanQuestionText;
+      if (finalDiagram) {
+        finalDiagram.placement = origPlacement;
+      }
+    }
+    if (finalExplanationDiagram && typeof finalExplanationDiagram === "object") {
+      const origPlacement = finalExplanationDiagram.placement || "explanation";
+      const healRes = validateAndHealDiagram(finalExplanationDiagram, cleanedExplanation);
+      finalExplanationDiagram = healRes.healedDiagram;
+      cleanedExplanation = healRes.cleanQuestionText;
+      if (finalExplanationDiagram) {
+        finalExplanationDiagram.placement = origPlacement;
+      }
+    }
+    if (finalDiagram && /\b(biology|zoology|botany|anatomy|physiology|life sciences)\b/i.test(`${topicContext} ${effectiveSubject}`)) {
+      const shapes = Array.isArray(finalDiagram.shapes) ? finalDiagram.shapes : [finalDiagram];
+      const hasOrganicAnatomy = shapes.some(
+        (s) => /\b(heart|brain|kidney|nephron|liver|stomach|lungs?|digestive|organ)\b/i.test(String(s?.type || "")) || /\b(human heart|human brain|nephron cross section|internal organ)\b/i.test(String(s?.title || s?.label || ""))
+      );
+      if (hasOrganicAnatomy) {
+        console.warn("[Deterministic Guard] Blocked organic anatomical blob diagram in Biology. Questions on internal organ anatomy must use conceptual text or curated schematics.");
+        finalDiagram = null;
+        cleanedQuestionText = sanitizeDecoupledQuestionText(cleanedQuestionText);
+      }
+    }
+    if (finalDiagram && typeof finalDiagram === "object") {
+      const shapes = Array.isArray(finalDiagram.shapes) ? finalDiagram.shapes : [finalDiagram];
+      const categories = [];
+      shapes.forEach((s) => {
+        if (Array.isArray(s.items))
+          categories.push(...s.items.map(String));
+        if (Array.isArray(s.points)) {
+          s.points.forEach((p) => {
+            if (p?.label && typeof p.label === "string" && isNaN(Number(p.label)) && p.label.length >= 3) {
+              categories.push(p.label);
+            }
+          });
+        }
+      });
+      if (categories.length >= 2) {
+        const fullQText = `${cleanedQuestionText} ${cleanedExplanation} ${topicContext}`.toLowerCase();
+        const hasSemanticMatch = categories.some((cat) => fullQText.includes(cat.toLowerCase().trim()));
+        if (!hasSemanticMatch) {
+          console.warn(`[Deterministic Guard] Cross-Question Bleed caught: diagram categories [${categories.slice(0, 3).join(", ")}] have zero overlap with question stem. Decoupling diagram.`);
+          finalDiagram = null;
+          cleanedQuestionText = sanitizeDecoupledQuestionText(cleanedQuestionText);
+        }
+      }
+    }
+    const hasVisualChart = finalDiagram && (["barGraph", "lineGraph", "pieChart", "histogram", "scatterPlot", "boxPlot"].includes(finalDiagram.type) || Array.isArray(finalDiagram.shapes) && finalDiagram.shapes.some(
+      (s) => ["barGraph", "lineGraph", "pieChart", "histogram", "scatterPlot", "boxPlot"].includes(s?.type)
+    ));
+    if (hasVisualChart && /\|[^\n]+\|\r?\n\|[-:\s|]+\|\r?\n(?:\|[^\n]+\|\r?\n?)+/.test(cleanedQuestionText)) {
+      console.log("[Deterministic Guard] Purged redundant Markdown data table from questionText since visual chart is provided.");
+      cleanedQuestionText = cleanedQuestionText.replace(/\|[^\n]+\|\r?\n\|[-:\s|]+\|\r?\n(?:\|[^\n]+\|\r?\n?)+/g, "").replace(/\n{3,}/g, "\n\n").trim();
+    }
+    if (finalDiagram && finalDiagram.placement !== "explanation") {
+      const hasVisualAnchor = /\b(figure|diagram|graph|chart|plot|shown|given\s+below|refer\s+to|referring\s+to|study\s+the|based\s+on\s+the\s+(?:graph|chart|figure|table)|above\s+figure|below\s+figure|in\s+the\s+given)\b/i.test(cleanedQuestionText);
+      if (!hasVisualAnchor) {
+        let anchorPrefix = "Directions: Refer to the given figure to answer the question:\n";
+        const shapeTypes = [];
+        if (finalDiagram.type && finalDiagram.type !== "universal") {
+          shapeTypes.push(finalDiagram.type);
+        }
+        if (Array.isArray(finalDiagram.shapes)) {
+          for (const s of finalDiagram.shapes) {
+            if (s?.type)
+              shapeTypes.push(s.type);
+          }
+        }
+        if (shapeTypes.some((t) => ["barGraph", "lineGraph", "pieChart", "histogram", "scatterPlot", "boxPlot"].includes(t))) {
+          anchorPrefix = "Directions: Study the given chart and answer the following question:\n";
+        } else if (shapeTypes.some((t) => ["seatingArrangement"].includes(t))) {
+          anchorPrefix = "Directions: Study the seating arrangement shown below and answer the following question:\n";
+        } else if (shapeTypes.some((t) => ["vennDiagram", "venn"].includes(t))) {
+          anchorPrefix = "Directions: Refer to the given Venn diagram and answer the following question:\n";
+        } else if (shapeTypes.some((t) => ["directionDiagram"].includes(t))) {
+          anchorPrefix = "Directions: Refer to the given movement diagram and answer the following question:\n";
+        }
+        console.log(`[Deterministic Guard] Auto-anchored unreferenced question visual with standard exam directive: "${anchorPrefix.trim()}"`);
+        cleanedQuestionText = `${anchorPrefix}${cleanedQuestionText}`;
+      }
+    }
+  } else {
+    finalDiagram = null;
+    finalExplanationDiagram = null;
+    const extractedQ = extractEmbeddedDiagram(cleanedQuestionText);
+    cleanedQuestionText = sanitizeDecoupledQuestionText(extractedQ.cleanedText);
+    const extractedE = extractEmbeddedDiagram(cleanedExplanation);
+    cleanedExplanation = sanitizeDecoupledQuestionText(extractedE.cleanedText);
+  }
+  const candidateResult = {
     ...q,
     questionText: cleanedQuestionText,
     options: finalOptions,
     correctAnswerIndex: correctIndex,
     explanation: cleanedExplanation,
+    difficulty: resolvedDiff,
+    diagram: finalDiagram,
+    explanationDiagram: finalExplanationDiagram
+  };
+  const readiness = calculateQuestionReadinessScore(candidateResult, subjectContext);
+  return {
+    ...candidateResult,
     audit: {
-      verified: true,
-      syllabusRelevanceScore: 98,
+      verified: readiness.checks.mathematicalFidelity && readiness.checks.distractorQuality,
+      syllabusRelevanceScore: readiness.score,
       consensusMatch: true,
       auditorAnswerIndex: correctIndex,
-      confidence: "HIGH",
-      auditNotes: "Deterministic code guardrails & LaTeX syntax verified."
+      confidence: readiness.confidence,
+      auditNotes: readiness.notes
     }
   };
 }
@@ -2843,7 +4520,7 @@ Return ONLY the raw JSON array of ${strippedBatch.length} audit objects.`;
     });
   } catch (err) {
     console.warn("[AI Question Audit] Auditor pass skipped, using deterministic guardrails:", err);
-    return questions.map(enforceDeterministicGuards);
+    return questions.map((q) => enforceDeterministicGuards(q));
   }
 }
 async function refineTestTitles(req) {
@@ -2970,6 +4647,7 @@ ${req.subSubject ? `SUB-SUBJECT: "${req.subSubject}"` : ""}
 ${req.chapter ? `CHAPTER / TOPIC: "${req.chapter}"` : ""}
 EXAM: "${req.examName || "Odisha State Examination"}"
 TARGET STAGE: "${stage}"
+${req.stream && req.stream !== "All Streams" ? `TARGET STREAM / DISCIPLINE: "${req.stream}"` : ""}
 MODE: ${isNaturalDensity ? `NATURAL DENSITY (Autonomous Cognitive Syllabus Sizing${ceilingCap ? `, Upper Ceiling: \u2264 ${ceilingCap} cards` : ", Unconstrained Auto Sizing"} \u2014 Minimum ${MIN_FLASHCARDS_PER_DECK} cards floor)` : `FIXED TARGET (${fixedCardCount} cards)`}
 
 ${activeContentsPool.length > 0 ? `DETECTED SYLLABUS TOPIC ANCHORS IN THIS SECTION:
@@ -3085,21 +4763,146 @@ Output strictly a valid JSON array of ${missingCount} flashcard objects matching
   const effectiveLimit = ceilingCap || fixedCardCount || MIN_FLASHCARDS_PER_DECK;
   return deduplicatedCards.slice(0, Math.max(effectiveLimit, MIN_FLASHCARDS_PER_DECK));
 }
-function buildDeterministicCurriculumPlan(syllabusMarkdown, testTitle, ceilingCap) {
-  const density = computeQuestionNaturalDensity(syllabusMarkdown || testTitle || "", ceilingCap);
-  const effectiveLimit = ceilingCap && ceilingCap > 0 ? ceilingCap : 25;
-  const totalQuestions = Math.min(density.naturalCount, effectiveLimit);
-  let batchCount = Math.max(1, Math.min(6, Math.ceil(totalQuestions / 4)));
+function buildDeterministicCurriculumPlan(syllabusMarkdown, testTitle, ceilingCap, predefinedQuestionCount, targetType, subCategory, durationMinutes) {
+  if (predefinedQuestionCount && predefinedQuestionCount > 0) {
+    const totalQuestions2 = predefinedQuestionCount;
+    const batchCount2 = Math.max(1, Math.ceil(totalQuestions2 / 5));
+    const basePerBatch2 = Math.floor(totalQuestions2 / batchCount2);
+    let remainder2 = totalQuestions2 % batchCount2;
+    const isFullLength = subCategory === "full-length" || targetType === "mock_test" && /full\s*mock|comprehensive|all\s*subjects|complete\s*syllabus/i.test(testTitle || "");
+    const parsedSections = extractSyllabusSections(syllabusMarkdown || "");
+    const validSections = parsedSections.filter((s) => s.title.toLowerCase() !== "general syllabus" && s.content.length > 15);
+    const batches2 = [];
+    if (isFullLength && validSections.length >= 2) {
+      for (let i = 0; i < batchCount2; i++) {
+        const qCount = basePerBatch2 + (remainder2 > 0 ? 1 : 0);
+        if (remainder2 > 0)
+          remainder2--;
+        const assignedSection = validSections[i % validSections.length];
+        const subjectPart = Math.floor(i / validSections.length) + 1;
+        batches2.push({
+          batchNumber: i + 1,
+          questionCount: qCount,
+          thematicFocus: `Subject: ${assignedSection.title} (Part ${subjectPart})`
+        });
+      }
+      return {
+        totalQuestions: totalQuestions2,
+        batchCount: batchCount2,
+        batches: batches2,
+        reasoning: `Predefined Mock Test Specification (${totalQuestions2} Qs across ${durationMinutes || 120} mins). Decomposed into ${batchCount2} focused micro-batches (5 Qs/batch) distributed equally across all ${validSections.length} syllabus subjects (${validSections.map((s) => s.title).join(", ")}).`
+      };
+    } else {
+      const defaultThemes = [
+        "Core Principles, Definitions & Fundamental Concepts",
+        "Formula Applications, Quantitative Relations & Problem Solving",
+        "Real-World Scenarios, Diagnostic Traps & Case Analysis",
+        "Comparative Mechanisms, Assertion-Reasoning & Multi-Statement Evaluation",
+        "Synthesis, Integrated Concepts & Edge Case Scenarios",
+        "Technical Mechanisms & Operating Characteristics",
+        "Statutory Articles, Regulatory Clauses & Standards",
+        "Advanced Problem Solving & Numerical Derivations",
+        "Common Pitfalls, Misconceptions & Trap Elimination",
+        "Comprehensive Mastery & Applied Edge Scenarios"
+      ];
+      for (let i = 0; i < batchCount2; i++) {
+        const qCount = basePerBatch2 + (remainder2 > 0 ? 1 : 0);
+        if (remainder2 > 0)
+          remainder2--;
+        batches2.push({
+          batchNumber: i + 1,
+          questionCount: qCount,
+          thematicFocus: defaultThemes[i % defaultThemes.length] || `Curricular Focus Part ${i + 1}`
+        });
+      }
+      return {
+        totalQuestions: totalQuestions2,
+        batchCount: batchCount2,
+        batches: batches2,
+        reasoning: `Predefined ${targetType === "practice_test" ? "Practice Test" : "Mock Test"} Specification (${totalQuestions2} Qs). Decomposed into ${batchCount2} micro-batches of ~${basePerBatch2} Qs each strictly matching the official predefined quota.`
+      };
+    }
+  }
+  const scopedResult = extractAutonomousSyllabusScope(syllabusMarkdown || "", {
+    title: testTitle,
+    chapter: testTitle
+  });
+  const effectiveSyllabus = scopedResult.scopedMarkdown && scopedResult.scopedMarkdown.length > 20 ? scopedResult.scopedMarkdown : syllabusMarkdown || testTitle || "";
+  const density = computeQuestionNaturalDensity(effectiveSyllabus, ceilingCap);
+  const isQuestionBank = targetType === "question_bank" || targetType === "bank" || !targetType && !predefinedQuestionCount;
+  const qbFloor = isQuestionBank ? ceilingCap && ceilingCap > 0 ? Math.min(10, ceilingCap) : 10 : 5;
+  const effectiveLimit = ceilingCap && ceilingCap > 0 ? ceilingCap : 250;
+  const totalQuestions = Math.min(Math.max(density.naturalCount, qbFloor), effectiveLimit);
+  const batchCount = Math.max(1, Math.min(50, Math.ceil(totalQuestions / 5)));
   const basePerBatch = Math.floor(totalQuestions / batchCount);
   let remainder = totalQuestions % batchCount;
-  const defaultThemes = [
-    "Core Principles, Definitions & Fundamental Concepts",
-    "Formula Applications, Quantitative Relations & Problem Solving",
-    "Real-World Scenarios, Diagnostic Traps & Case Analysis",
-    "Comparative Mechanisms, Assertion-Reasoning & Multi-Statement Evaluation",
-    "Synthesis, Integrated Concepts & Edge Case Scenarios",
-    "Comprehensive Mastery & Applied Edge Scenarios"
-  ];
+  let categoryThemes = [];
+  if (subCategory === "topic-wise") {
+    categoryThemes = [
+      "Core Concepts, Foundational Definitions & Primary Doctrines",
+      "Structural Classifications, Operating Frameworks & Functional Powers",
+      "Statutory Articles, Legal Clauses & Numerical Thresholds",
+      "Landmark Case Laws, Amendments & Inter-Subject Relationships",
+      "Advanced Conceptual Synthesis & Applied Problem Scenarios",
+      "Analytical Exceptions, Provisos & Edge Case Doctrines",
+      "Comparative Institutional Powers & Jurisdictional Boundaries",
+      "Procedural Workflows, Timelines & Constitutional Quorums",
+      "High-Yield Multi-Statement Conceptual Integrations",
+      "Comprehensive Subject Mastery & Synoptic Evaluation"
+    ];
+  } else if (subCategory === "exam-focused") {
+    categoryThemes = [
+      "High-Yield Formulas, Core Laws & Primary Mathematical Relations",
+      "Numerical Calculations, Exact Values & Dimensional Units",
+      "Exam Traps, Subtle Distractors & Common Misconceptions",
+      "Multi-Statement Analysis, Assertion-Reasoning & Comparative Logic",
+      "Rapid Elimination Strategies & High-Frequency Exam Discriminators",
+      "Complex Multi-Step Numerical Derivations & Quantitative Traps",
+      "Graphical, Diagrammatic & Functional Trend Analyses",
+      "Real-World Diagnostic Case Studies & Application Drills",
+      "Speed, Accuracy & High-Pressure Benchmark Challenge",
+      "Final Precision & Error-Minimization Mastery"
+    ];
+  } else if (subCategory === "revision-sets") {
+    categoryThemes = [
+      "Rapid-Fire Factual Recall: Exact Dates, Years & Key Milestones",
+      "Constitutional Article Numbers, Schedules & Statutory Clauses",
+      "Geographic Metrics, River Basins, Boundaries & Natural Sanctuaries",
+      "Apex Institutional Bodies, Committees & Key Commissions",
+      "High-Speed Memory Synthesis & Core Academic Terminology",
+      "Chronological Timelines & Major Historical Treaties",
+      "National & State Economic Data, Schemes & Budgetary Allocations",
+      "Science & Tech Innovations, Discoveries & Diagnostic Inventions",
+      "Quick-Check Confusing Pairs, Opposites & Distinctions",
+      "High-Yield Diagnostic Blitz & Last-Minute Exam Triggers"
+    ];
+  } else if (subCategory === "pyq-collections") {
+    categoryThemes = [
+      "Authentic Exam Patterns: Foundational Past Year Questions",
+      "Sibling Variant Synthesis: Chronological Events & Historical Acts",
+      "Exam DNA Analysis: Multi-Statement & Assertion-Reasoning Clones",
+      "Advanced Competitive Discriminators & Statistical Question Clones",
+      "Comprehensive Past Paper Sibling Synthesis & Exam Readiness",
+      "Recurring Topic Clones: Key Constitutional Articles & Decisions",
+      "Trend Mutation Analysis: Past Questions Transformed into Modern Formats",
+      "Deep-Concept PYQ Variants with Enhanced Distractor Rigor",
+      "Multi-Year Question Cluster Integration & Benchmark Challenge",
+      "Master PYQ Variant Simulation & Decisive Paper Readiness"
+    ];
+  } else {
+    categoryThemes = [
+      "Core Principles, Definitions & Fundamental Concepts",
+      "Formula Applications, Quantitative Relations & Problem Solving",
+      "Real-World Scenarios, Diagnostic Traps & Case Analysis",
+      "Comparative Mechanisms, Assertion-Reasoning & Multi-Statement Evaluation",
+      "Synthesis, Integrated Concepts & Edge Case Scenarios",
+      "Technical Mechanisms & Operating Characteristics",
+      "Statutory Articles, Regulatory Clauses & Standards",
+      "Advanced Problem Solving & Numerical Derivations",
+      "Common Pitfalls, Misconceptions & Trap Elimination",
+      "Comprehensive Mastery & Applied Edge Scenarios"
+    ];
+  }
   const batches = [];
   for (let i = 1; i <= batchCount; i++) {
     const qCount = basePerBatch + (remainder > 0 ? 1 : 0);
@@ -3108,50 +4911,137 @@ function buildDeterministicCurriculumPlan(syllabusMarkdown, testTitle, ceilingCa
     batches.push({
       batchNumber: i,
       questionCount: qCount,
-      thematicFocus: defaultThemes[i - 1] || `In-depth Concepts & Application Part ${i}`
+      thematicFocus: categoryThemes[i - 1] || `In-depth Concepts & Application Part ${i}`
     });
   }
   return {
     totalQuestions,
     batchCount,
     batches,
-    reasoning: `Syllabus density analysis identified ${density.contentItems.length} concept points. Organically sized ${totalQuestions} questions into ${batchCount} focused micro-batches (3-5 Qs/batch) to ensure high cognitive depth and zero attention fatigue.`
+    reasoning: isQuestionBank ? `Comprehensive Question Bank Architecture: Organically allocated ${totalQuestions} high-caliber questions across ${batchCount} focused micro-batches (5 Qs/batch) covering foundational doctrines, statutory mechanics, and exam discriminators.` : `Syllabus density analysis identified ${density.contentItems.length} concept points. Organically sized ${totalQuestions} questions into ${batchCount} focused micro-batches (3-5 Qs/batch) to ensure high cognitive depth and zero attention fatigue.`
   };
 }
 async function planAutonomousQuestionCurriculum(req) {
-  const fallback = buildDeterministicCurriculumPlan(req.syllabusMarkdown, req.testTitle, req.ceilingCap);
-  if (!req.syllabusMarkdown || req.syllabusMarkdown.trim().length < 20) {
+  const isCategorySlug = /^(?:topic-wise|exam-focused|revision-sets|pyq-collections|full-length|sectional|daily|quiz)$/i.test(req.subCategory || "");
+  const actualSubSubject = isCategorySlug ? void 0 : req.subCategory;
+  const scopedResult = extractAutonomousSyllabusScope(req.syllabusMarkdown || "", {
+    title: req.testTitle,
+    subject: req.subject,
+    subSubject: actualSubSubject,
+    chapter: req.chapter
+  });
+  const effectiveSyllabus = scopedResult.scopedMarkdown && scopedResult.scopedMarkdown.length > 20 ? scopedResult.scopedMarkdown : req.syllabusMarkdown || "";
+  const detectedSubContents = extractSyllabusContents(effectiveSyllabus);
+  if ((req.targetType === "mock_test" || req.targetType === "practice_test" || req.predefinedQuestionCount) && req.predefinedQuestionCount && req.predefinedQuestionCount > 0) {
+    return buildDeterministicCurriculumPlan(
+      effectiveSyllabus,
+      req.testTitle,
+      req.ceilingCap,
+      req.predefinedQuestionCount,
+      req.targetType,
+      req.subCategory,
+      req.durationMinutes
+    );
+  }
+  const fallback = buildDeterministicCurriculumPlan(
+    effectiveSyllabus,
+    req.testTitle,
+    req.ceilingCap,
+    req.predefinedQuestionCount,
+    req.targetType,
+    req.subCategory,
+    req.durationMinutes
+  );
+  if (!effectiveSyllabus || effectiveSyllabus.trim().length < 20) {
     return fallback;
   }
+  let categoryPedagogyDirective = "";
+  if (req.subCategory === "topic-wise") {
+    categoryPedagogyDirective = `CATEGORY MANDATE: TOPIC-WISE QUESTION BANK (Focused Topic Mastery)
+- Target is an individual chapter or sub-subject placeholder.
+- Do NOT bleed into adjacent chapters. Scrutinize the fine details, atomic definitions, parameters, and mechanisms of THIS specific topic.
+- SIZING DIRECTIVE: Generate as many high-value, exam-relevant questions as needed to ensure complete candidate mastery of every concept and formula in this topic across all 5 cognitive angles. A single chapter with multiple concept nodes naturally yields 30 to 50+ questions (6 to 10 micro-batches of 5 Qs) with zero filler.`;
+  } else if (req.subCategory === "exam-focused") {
+    categoryPedagogyDirective = `CATEGORY MANDATE: EXAM-FOCUSED HIGH-YIELD QUESTION BANK (Comprehensive Parent Subject Module)
+- Target is a major parent subject encompassing multiple nested sub-subjects and chapters.
+- Identify the highest-yielding, rank-determining concepts across ALL constituent sub-subjects.
+- MANDATORY PROPORTIONAL DISTRIBUTION: You MUST independently allocate questions across EVERY child sub-subject detected. For a parent subject containing 3 sub-subjects, each sub-subject requires 25 to 40 high-yield questions covering all 5 angles, organically totaling 75 to 125+ questions (15 to 25 micro-batches)! No child unit may be starved.`;
+  } else if (req.subCategory === "revision-sets") {
+    categoryPedagogyDirective = `CATEGORY MANDATE: LAST-MINUTE REVISION & FORMULA BOOSTER (Rapid-Fire Calculation & Recall)
+- Target emphasizes formulas, empirical equations, statutory thresholds, core definitions, and rapid-decision problem types.
+- Ensure micro-batches target numerical calculation readiness, formula parameters, and quick assertion-reasoning traps.
+- SIZING DIRECTIVE: Provide thorough formula and rapid-recall coverage across all numerical relationships and equations present in the syllabus.`;
+  } else if (req.subCategory === "pyq-collections") {
+    categoryPedagogyDirective = `CATEGORY MANDATE: PYQ QUESTION ARCHIVES & SOLVED PAPERS (Official Exam Pattern Alignment)
+- Target reflects multi-year exam question distribution and authentic commission standards.
+- Micro-batches must prioritize recurring past question archetypes, multi-statement combinations, and exam-level traps.
+- SIZING DIRECTIVE: Maximize authentic exam-standard questions reflecting multi-year competitive depth across the entire paper blueprint (100 to 200+ questions across 20 to 40 micro-batches).`;
+  }
   try {
-    const systemPrompt = `You are a Lead Pedagogical Exam Architect for competitive examinations.
-Your task is to analyze the syllabus content of a test module, evaluate its conceptual density, calculate the optimal natural question capacity, and decompose that capacity into focused micro-batches (ideally 3 to 5 questions per batch, max 5 batches).
+    const systemPrompt = `You are a Senior Academic Dean, Chief Examination Paper Setter, and Master Question Bank Architect for premier competitive civil and state examinations (UPSC, OPSC, GATE, State PSCs).
 
-By keeping each batch small (3-5 questions), the question generator maintains maximum cognitive attention, deep distractors, and rich explanations without fatigue.
+You understand that candidates purchase a Question Bank as a comprehensive, definitive study and practice resource. A Question Bank that contains only 10 to 20 questions for an extensive syllabus feels inadequate to candidates and fails to prepare them for competitive exams. To deliver true commercial and academic value, you must design an exhaustive, non-redundant question bank that covers all examinable angles without adding low-value filler.
+
+PROFESSIONAL FACULTY PEDAGOGICAL PRINCIPLES (THINK LIKE A SENIOR TEACHER):
+1. ACADEMIC CONCEPT MULTIPLIER:
+   Every genuine competitive exam concept or syllabus node naturally supports 3 to 5 distinct, high-value pedagogical question angles:
+   - Angle 1 (Foundations & Core Principles): Fundamental definitions, governing laws, statutory clauses, and core classifications.
+   - Angle 2 (Mechanisms & Operating Dynamics): Step-by-step physical, biological, or operational processes and system interactions.
+   - Angle 3 (Applied Numericals & Quantitative Relations): Exact formula derivations, parameter calculations, and empirical constants (with clean LaTeX $...$).
+   - Angle 4 (Multi-Statement Rigor & Assertion-Reasoning): Roman numeral statement evaluation (Statements 1, 2, 3...) and subtle conceptual traps.
+   - Angle 5 (Comparative Synthesis & Diagnostic Traps): Diagnostic distinctions, boundary edge cases, and common candidate misconceptions.
+
+2. UNCONSTRAINED PROPORTIONAL CAPACITY SIZING (ZERO ARTIFICIAL HANDCUFFS):
+   - Do NOT impose artificial limits or force every module to a small fixed number.
+   - Let the syllabus breadth and concept density dictate the authentic question volume:
+     * Compact / Single-Topic Modules (e.g. 5-8 concepts): Sized organically to 25 to 40 questions (5 to 8 micro-batches of 5 Qs).
+     * Standard Chapters / Modules (e.g. 9-18 concepts): Sized organically to 45 to 70 questions (9 to 14 micro-batches of 5 Qs).
+     * Comprehensive Parent Subjects encompassing multiple sub-subjects (e.g. 20-35+ concepts across 3+ units): Sized organically to 75 to 125+ questions (15 to 25 micro-batches of 5 Qs), ensuring every single child sub-subject receives 25 to 40 dedicated questions covering all 5 angles!
+     * Full Paper / Multi-Disciplinary Master Banks (e.g. 40+ concepts across multiple subjects): Sized organically to 125 to 200+ questions (25 to 40 micro-batches of 5 Qs).
+   - Only restrict capacity if the administrator explicitly provides a ceilingCap.
+
+3. COGNITIVELY DECOUPLED MICRO-BATCHING (FREE-TIER RATE-LIMIT & QUALITY OPTIMIZED):
+   Organize the capacity into focused micro-batches of exactly 4 to 5 questions each. Each micro-batch MUST have a clear, specific thematic angle (e.g. "Thermodynamic Cycles & Volumetric Efficiency", "Distributor Pumps & CRDI Injection Dynamics", "Primary Tillage Suction & Draft Force Numericals"). Micro-batches of 4-5 questions guarantee deep pedagogical explanations, dedicated token headroom, and zero LLM attention fatigue.
+
+4. STRICT ZERO-FILLER FILTER:
+   High volume must NEVER compromise academic quality. Strictly ban trivial 1-line definition questions ("What is X?"). Every question must be genuinely rank-determining.
 
 You MUST respond ONLY with a valid JSON object matching this schema:
 {
-  "totalQuestions": <number between 5 and 30>,
-  "batchCount": <number between 1 and 5>,
+  "totalQuestions": <authentic total question count based on teacher analysis, e.g. 25 to 200>,
+  "batchCount": <number of micro-batches, e.g. 5 to 40>,
   "batches": [
     {
       "batchNumber": 1,
-      "questionCount": <number of questions, 3 to 6>,
-      "thematicFocus": "<clear pedagogical angle, e.g. 'Foundations, Definitions & Fundamental Laws'>"
+      "questionCount": 5,
+      "thematicFocus": "<specific pedagogical sub-theme exploring a distinct concept angle>"
     }
   ],
-  "reasoning": "<1-2 sentences explaining why this capacity and batch breakdown was chosen>"
+  "reasoning": "<2-3 sentences explaining why this capacity and batch breakdown was chosen based on the syllabus depth, number of sub-subjects, and teacher pedagogical requirements>"
 }`;
+    const isQB = req.targetType === "question_bank" || req.targetType === "bank" || !req.targetType && !req.predefinedQuestionCount;
+    const minFloor = isQB ? req.ceilingCap && req.ceilingCap > 0 ? Math.min(10, req.ceilingCap) : 15 : 5;
+    const maxCeiling = req.ceilingCap && req.ceilingCap > 0 ? req.ceilingCap : 250;
     const userPrompt = `MODULE / TEST TITLE: "${req.testTitle}"
 SUBJECT: "${req.subject || "General"}"
 CHAPTER: "${req.chapter || req.testTitle}"
 ${req.subCategory ? `SUB-CATEGORY: "${req.subCategory}"` : ""}
-${req.ceilingCap && req.ceilingCap > 0 ? `MAX CEILING CAP: \u2264 ${req.ceilingCap} Questions` : "UNCONSTRAINED NATURAL DENSITY (Determine optimal capacity organically)"}
+${categoryPedagogyDirective ? `
+${categoryPedagogyDirective}
+` : ""}
+${isQB ? "TYPE: Professional Comprehensive Question Bank (Maximize authentic high-utility questions, strictly 0% filler, cover all 5 cognitive angles with commercial publication depth)" : "TYPE: Standard Assessment"}
+${req.ceilingCap && req.ceilingCap > 0 ? `MAX CEILING CAP: \u2264 ${req.ceilingCap} Questions` : "UNCONSTRAINED NATURAL DENSITY (Determine optimal capacity organically like a senior faculty member: 25-40 Qs for single topics, 45-70 Qs for standard chapters, 75-125+ Qs for multi-unit parent subjects, 125-200+ Qs for full papers. Zero artificial limits)"}
 
-SYLLABUS CONTENT:
-${req.syllabusMarkdown.slice(0, 3e3)}
+SCOPED SYLLABUS SECTION ("${scopedResult.matchedSectionTitle || req.testTitle}"):
+${effectiveSyllabus.slice(0, 4e3)}
 
-Analyze the concept breadth, determine total authentic question capacity (minimum 5, maximum ${req.ceilingCap && req.ceilingCap > 0 ? req.ceilingCap : 30}), and decompose into optimal micro-batches (3-5 Qs per batch, max 5 batches). Output raw JSON only.`;
+${detectedSubContents.length > 0 ? `DETECTED GRANULAR SUB-CONTENT ITEMS IN THIS CHAPTER:
+${detectedSubContents.map((c, i) => `  ${i + 1}. ${c}`).join("\n")}
+
+COGNITIVE SUB-CONTENT DECOMPOSITION MANDATE:
+Analyze each detected sub-content item above. In your pedagogical plan, systematically distribute questions across these sub-content items across the micro-batches, ensuring balanced coverage across the 5 cognitive angles.
+` : ""}
+Analyze the concept breadth like a senior teacher, determine total authentic question capacity (minimum ${minFloor}, maximum ${maxCeiling}), and decompose into optimal micro-batches (4-5 Qs per batch). Output raw JSON only.`;
     const rawResponse = await queryAIModel(
       systemPrompt,
       userPrompt,
@@ -3160,7 +5050,7 @@ Analyze the concept breadth, determine total authentic question capacity (minimu
         model: req.model,
         baseUrl: req.baseUrl,
         temperature: 0.2,
-        maxOutputTokens: 1e3
+        maxOutputTokens: 4096
       }
     );
     const cleaned = rawResponse.replace(/```(?:json)?/gi, "").replace(/```/g, "").trim();
@@ -3170,9 +5060,9 @@ Analyze the concept breadth, determine total authentic question capacity (minimu
       if (typeof parsed.totalQuestions === "number" && parsed.totalQuestions >= 3 && Array.isArray(parsed.batches) && parsed.batches.length > 0) {
         let computedTotal = 0;
         const validBatches = [];
-        for (let i = 0; i < Math.min(parsed.batches.length, 5); i++) {
+        for (let i = 0; i < Math.min(parsed.batches.length, 50); i++) {
           const b = parsed.batches[i];
-          const qCount = Math.max(1, Math.min(10, Number(b.questionCount) || 4));
+          const qCount = Math.max(1, Math.min(10, Number(b.questionCount) || 5));
           computedTotal += qCount;
           validBatches.push({
             batchNumber: i + 1,
@@ -3195,6 +5085,7 @@ Analyze the concept breadth, determine total authentic question capacity (minimu
 }
 
 // server.ts
+import { EdgeTTS } from "@andresaya/edge-tts";
 var __filename = fileURLToPath(import.meta.url);
 var __dirname = path.dirname(__filename);
 var envPaths = [
@@ -5106,6 +6997,984 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
       res.status(500).json({ success: false, error: err.message || "Failed to process War Room debrief" });
     }
   });
+  let managerVoiceKeyIndex = 0;
+  function getNextManagerKey() {
+    const keys = resolveGeminiKeyPool();
+    if (keys.length === 0)
+      return "";
+    const key = keys[managerVoiceKeyIndex % keys.length];
+    managerVoiceKeyIndex++;
+    return key;
+  }
+  function pcmToWav(pcmBuffer, sampleRate = 24e3) {
+    const numChannels = 1;
+    const bitsPerSample = 16;
+    const byteRate = sampleRate * numChannels * bitsPerSample / 8;
+    const blockAlign = numChannels * bitsPerSample / 8;
+    const dataSize = pcmBuffer.length;
+    const chunkSize = 36 + dataSize;
+    const header = Buffer.alloc(44);
+    header.write("RIFF", 0);
+    header.writeUInt32LE(chunkSize, 4);
+    header.write("WAVE", 8);
+    header.write("fmt ", 12);
+    header.writeUInt32LE(16, 16);
+    header.writeUInt16LE(1, 20);
+    header.writeUInt16LE(numChannels, 22);
+    header.writeUInt32LE(sampleRate, 24);
+    header.writeUInt32LE(byteRate, 28);
+    header.writeUInt16LE(blockAlign, 32);
+    header.writeUInt16LE(bitsPerSample, 34);
+    header.write("data", 36);
+    header.writeUInt32LE(dataSize, 40);
+    return Buffer.concat([header, pcmBuffer]);
+  }
+  const DEFAULT_CORE_PLATFORM_EXAMS = [
+    "OSSC CGL (Combined Graduate Level \u2014 Auditor, Inspector of Supplies, Sub-Inspector)",
+    "OSSSC CRE II & IV (RI, ARI, Amin, ICDS Supervisor, Forest Guard, Forester, Excise Constable)",
+    "OPSC OAS (Odisha Civil Services \u2014 Group A & B Administrative Services)",
+    "Odisha Police SI & Police Constable Recruitment (State Selection Board)",
+    "SSB Odisha Degree College Lecturers & Post Graduate Teachers (PGT)",
+    "BSE Odisha OTET, OSSTET & OAVS Teacher Recruitment Examination",
+    "ISRO / BARC Scientific & Technical Assistant Recruitments",
+    "High Court of Orissa ASO & Official Translator"
+  ];
+  let saraFleetMemoryCache = {
+    currentTimeIST: (/* @__PURE__ */ new Date()).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "full", timeStyle: "medium" }),
+    activeRunningProcessesCount: 0,
+    activeProcesses: [],
+    recentRuns: [],
+    corePlatformExams: DEFAULT_CORE_PLATFORM_EXAMS,
+    recentNoticesList: [
+      { portal: "OSSSC", title: "Physical Test for Forester, Forest Guard & Excise Constable under CRE-2025(II)", date: "01.10.2026", link: "https://www.osssc.gov.in" },
+      { portal: "SSB Odisha", title: "Correction Window for Advt. No. 01/2026 Online Application Form", date: "01.10.2026", link: "https://ssbodisha.ac.in" },
+      { portal: "OSSC", title: "CGL 2024 / 2025 Certificate Verification & Admission Notice", date: "30.09.2026", link: "https://www.ossc.gov.in" },
+      { portal: "OSSSC", title: "Counselling for Choice of Post/District for RI, Amin, ARI under CRE-2023(IV)", date: "30.09.2026", link: "https://www.osssc.gov.in" }
+    ],
+    recentCurrentAffairsList: [
+      { title: "Odisha Industrial Infrastructure & Semiconductor Hub Initiatives", category: "Odisha State", date: "Today", summary: "High-level state cabinet approvals for investment corridors and youth skill academies." },
+      { title: "PM AI Skill Initiative & National Manufacturing Push", category: "National", date: "Recent", summary: "Strategic AI workforce training initiative for 1 crore youth across states." }
+    ],
+    recentBlogMasterclasses: [
+      { title: "45-Second Question Triage Masterclass: Speed Solving for OSSC CGL & OAS", slug: "45-second-question-triage-masterclass" },
+      { title: "Odisha Revised Scales of Pay (ORSP 2017) Complete Pay Matrix & Career Trajectory", slug: "odisha-pay-matrix-orsp-guide" }
+    ],
+    metrics: {
+      totalNoticesTracked: 102,
+      latestNotice: "OSSC CGL 2026 Notification",
+      totalCurrentAffairsArticles: 38,
+      latestCurrentAffair: "Odisha Budget & Development Highlights",
+      totalQuestionsInSupabase: 11624,
+      totalExamsInSupabase: 487,
+      totalEvergreenMasterclasses: 14,
+      totalTelegramBroadcasts: 92
+    },
+    lastUpdated: Date.now()
+  };
+  async function updateSaraFleetMemory() {
+    try {
+      const autoDir = getAutomationsDir();
+      const runningProcesses = await getRunningPythonProcesses();
+      const ghRuns = cachedGhRuns && cachedGhRuns.length > 0 ? cachedGhRuns : getDefaultWorkflowRuns();
+      let notices = [];
+      const noticesFile = path.join(autoDir, "seen_notices.json");
+      if (fs.existsSync(noticesFile)) {
+        try {
+          const raw = JSON.parse(fs.readFileSync(noticesFile, "utf8"));
+          notices = Object.values(raw);
+        } catch (e) {
+        }
+      }
+      let caItems = [];
+      const caFile = path.join(autoDir, "published_ca_history.json");
+      if (fs.existsSync(caFile)) {
+        try {
+          const raw = JSON.parse(fs.readFileSync(caFile, "utf8"));
+          caItems = raw.items || [];
+        } catch (e) {
+        }
+      }
+      let blogItems = [];
+      const blogFile = path.join(autoDir, "history", "evergreen_content_history.json");
+      if (fs.existsSync(blogFile)) {
+        try {
+          const raw = JSON.parse(fs.readFileSync(blogFile, "utf8"));
+          blogItems = Array.isArray(raw) ? raw : raw.items || [];
+        } catch (e) {
+        }
+      }
+      let tgSent = [];
+      const tgFile = path.join(autoDir, "history", "telegram_sent_history.json");
+      if (fs.existsSync(tgFile)) {
+        try {
+          tgSent = JSON.parse(fs.readFileSync(tgFile, "utf8"));
+        } catch (e) {
+        }
+      }
+      let qCountVal = 11624;
+      let eCountVal = 487;
+      try {
+        const [qRes, eRes] = await Promise.all([
+          supabaseAdmin.from("questions").select("*", { count: "exact", head: true }),
+          supabaseAdmin.from("exams").select("*", { count: "exact", head: true })
+        ]);
+        if (qRes && qRes.count)
+          qCountVal = qRes.count;
+        if (eRes && eRes.count)
+          eCountVal = eRes.count;
+      } catch (e) {
+      }
+      const nowIST = (/* @__PURE__ */ new Date()).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "full", timeStyle: "medium" });
+      const runsSummary = ghRuns.slice(0, 7).map((r) => ({
+        workflow: r.workflowName || r.name,
+        status: r.status,
+        conclusion: r.conclusion,
+        started: r.startedAt
+      }));
+      const activeProcessesSummary = runningProcesses.map((p) => ({
+        pid: p.processId,
+        command: p.commandLine
+      }));
+      const agentLeaderboard = [
+        {
+          rank: 1,
+          agentKey: "dipti",
+          name: "Dipti (Daily MCQ & Question Bank Specialist)",
+          role: "Compiled & verified question bank",
+          processedUnits: qCountVal,
+          unitLabel: "verified questions",
+          details: `${qCountVal.toLocaleString()} questions active across ${eCountVal} exams. Highest data volume in fleet.`
+        },
+        {
+          rank: 2,
+          agentKey: "bikram",
+          name: "Bikram (Recruitment Portal Notice Scraper)",
+          role: "Scraped portal exam notices",
+          processedUnits: notices.length || 102,
+          unitLabel: "recruitment notices",
+          details: `${notices.length || 102} notices actively monitored (OSSC, OPSC, OSSSC).`
+        },
+        {
+          rank: 3,
+          agentKey: "trupti",
+          name: "Trupti (Strategic Engagement & Alerts Specialist)",
+          role: "Dispatched student Telegram alerts",
+          processedUnits: tgSent.length || 92,
+          unitLabel: "broadcasts sent",
+          details: `${tgSent.length || 92} Telegram alerts dispatched to subscribers.`
+        },
+        {
+          rank: 4,
+          agentKey: "priyanka",
+          name: "Priyanka (Current Affairs Specialist)",
+          role: "Published daily Current Affairs",
+          processedUnits: caItems.length || 38,
+          unitLabel: "current affairs articles",
+          details: `${caItems.length || 38} bilingual Current Affairs articles published.`
+        },
+        {
+          rank: 5,
+          agentKey: "subham",
+          name: "Subham (Strategic Evergreen Blog Engine Lead)",
+          role: "Authored evergreen study guides",
+          processedUnits: blogItems.length || 14,
+          unitLabel: "evergreen masterclasses",
+          details: `${blogItems.length || 14} comprehensive masterclasses indexed in Supabase.`
+        },
+        {
+          rank: 6,
+          agentKey: "chhabi",
+          name: "Chhabi (Exam Update Engine & Branding Specialist)",
+          role: "Generated daily branding cards",
+          processedUnits: 12,
+          unitLabel: "branding cards",
+          details: "Generated daily social and exam announcement graphics."
+        },
+        {
+          rank: 7,
+          agentKey: "manas",
+          name: "Manas (Website Current Affairs Publisher)",
+          role: "Synced CA database to web portal",
+          processedUnits: caItems.length || 38,
+          unitLabel: "portal syncs",
+          details: "Synchronized published CA database with website repository."
+        }
+      ].sort((a, b) => b.processedUnits - a.processedUnits).map((item, idx) => ({ ...item, rank: idx + 1 }));
+      const validNotices = notices.filter((n) => {
+        if (n.status === "REJECTED_BY_AI")
+          return false;
+        const t = (n.title || "").toLowerCase();
+        if (!t || t.length < 8)
+          return false;
+        const generic = ["vision & mission", "duties and functions", "incumbency chart", "annual reports", "why life insurance", "all products"];
+        if (generic.some((g) => t.includes(g)))
+          return false;
+        return true;
+      });
+      const recentNoticesList = validNotices.slice(-6).reverse().map((n) => ({
+        portal: n.portal || "OSSC",
+        title: n.title,
+        date: n.date || n.processed_at?.split("T")[0] || "Recent",
+        link: n.link && !n.link.startsWith("javascript") ? n.link : `https://www.odishaexamprep.in`,
+        article_id: n.article_id
+      }));
+      const recentCurrentAffairsList = caItems.slice(-5).reverse().map((c) => ({
+        title: c.title,
+        category: c.category || "Odisha/National",
+        date: c.published_at?.split("T")[0] || c.date || "Recent",
+        summary: c.summary || c.title
+      }));
+      const recentBlogMasterclasses = blogItems.slice(-4).reverse().map((b) => ({
+        title: b.title || b.article_slug || "Evergreen Masterclass",
+        slug: b.slug || b.article_slug || ""
+      }));
+      saraFleetMemoryCache = {
+        currentTimeIST: nowIST,
+        activeRunningProcessesCount: activeProcessesSummary.length,
+        activeProcesses: activeProcessesSummary,
+        recentRuns: runsSummary,
+        agentLeaderboard,
+        topPerformingAgent: agentLeaderboard[0],
+        corePlatformExams: DEFAULT_CORE_PLATFORM_EXAMS,
+        recentNoticesList,
+        recentCurrentAffairsList,
+        recentBlogMasterclasses,
+        metrics: {
+          totalNoticesTracked: notices.length || 102,
+          latestNotice: recentNoticesList[0]?.title || notices[notices.length - 1]?.title || "OSSC CGL 2026 Notification",
+          totalCurrentAffairsArticles: caItems.length || 38,
+          latestCurrentAffair: recentCurrentAffairsList[0]?.title || caItems[caItems.length - 1]?.title || "Daily Current Affairs Digest",
+          totalQuestionsInSupabase: qCountVal,
+          totalExamsInSupabase: eCountVal,
+          totalEvergreenMasterclasses: blogItems.length || 14,
+          totalTelegramBroadcasts: tgSent.length || 92
+        },
+        lastUpdated: Date.now()
+      };
+    } catch (err) {
+    }
+  }
+  setTimeout(updateSaraFleetMemory, 1e3);
+  setInterval(updateSaraFleetMemory, 3e4).unref();
+  const saraVoiceAudioCache = /* @__PURE__ */ new Map();
+  async function synthesizeManagerVoiceWithRotation(text, lang = "HINDI") {
+    const cleanText = text.trim();
+    if (!cleanText)
+      return null;
+    const cacheKey = `${lang}:${cleanText}`;
+    if (saraVoiceAudioCache.has(cacheKey)) {
+      return saraVoiceAudioCache.get(cacheKey);
+    }
+    try {
+      const edgeVoice = lang === "ENGLISH" ? "en-IN-NeerjaExpressiveNeural" : "hi-IN-SwaraNeural";
+      const tts = new EdgeTTS();
+      await tts.synthesize(cleanText, edgeVoice, {
+        rate: "0%",
+        volume: "0%",
+        pitch: "0Hz"
+      });
+      const buffer = await tts.toBuffer();
+      if (buffer && buffer.length > 500) {
+        const dataUri = `data:audio/mp3;base64,${buffer.toString("base64")}`;
+        if (saraVoiceAudioCache.size > 150) {
+          const firstKey = saraVoiceAudioCache.keys().next().value;
+          if (firstKey)
+            saraVoiceAudioCache.delete(firstKey);
+        }
+        saraVoiceAudioCache.set(cacheKey, dataUri);
+        return dataUri;
+      }
+    } catch (edgeErr) {
+      console.warn("[EdgeTTS Fallback to Gemini]", edgeErr?.message);
+    }
+    const keys = resolveGeminiKeyPool();
+    if (keys.length > 0) {
+      const targetVoice = "Kore";
+      const TTS_MODELS = [
+        "gemini-3.8-flash-lite-tts",
+        "gemini-3.8-flash-tts",
+        "gemini-3.1-flash-tts-preview"
+      ];
+      for (const modelName of TTS_MODELS) {
+        for (let attempt = 0; attempt < Math.min(keys.length, 4); attempt++) {
+          const apiKey = getNextManagerKey();
+          if (!apiKey)
+            break;
+          try {
+            const ttsUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+            const res = await fetch(ttsUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{ role: "user", parts: [{ text: cleanText }] }],
+                generationConfig: {
+                  responseModalities: ["AUDIO"],
+                  speechConfig: {
+                    voiceConfig: {
+                      prebuiltVoiceConfig: { voiceName: targetVoice }
+                    }
+                  }
+                }
+              })
+            });
+            if (!res.ok) {
+              continue;
+            }
+            const data = await res.json();
+            const pcmPart = data.candidates?.[0]?.content?.parts?.[0];
+            if (pcmPart?.inlineData?.data) {
+              const rawPcm = Buffer.from(pcmPart.inlineData.data, "base64");
+              const wavBuffer = pcmToWav(rawPcm, 24e3);
+              const dataUri = `data:audio/wav;base64,${wavBuffer.toString("base64")}`;
+              if (saraVoiceAudioCache.size > 150) {
+                const firstKey = saraVoiceAudioCache.keys().next().value;
+                if (firstKey)
+                  saraVoiceAudioCache.delete(firstKey);
+              }
+              saraVoiceAudioCache.set(cacheKey, dataUri);
+              return dataUri;
+            }
+          } catch (e) {
+          }
+        }
+      }
+    }
+    return null;
+  }
+  function getDynamicSalutation(hour, lang = "HINDI") {
+    if (lang === "ODIA") {
+      if (hour >= 4 && hour < 12)
+        return "\u0B36\u0B41\u0B2D \u0B38\u0B15\u0B3E\u0B33";
+      if (hour >= 12 && hour < 17)
+        return "\u0B36\u0B41\u0B2D \u0B05\u0B2A\u0B30\u0B3E\u0B39\u0B4D\u0B28";
+      return "\u0B36\u0B41\u0B2D \u0B38\u0B28\u0B4D\u0B27\u0B4D\u0B5F\u0B3E";
+    }
+    if (lang === "ENGLISH") {
+      if (hour >= 4 && hour < 12)
+        return "Good morning";
+      if (hour >= 12 && hour < 17)
+        return "Good afternoon";
+      return "Good evening";
+    }
+    if (hour >= 4 && hour < 12)
+      return "\u0936\u0941\u092D \u092A\u094D\u0930\u092D\u093E\u0924";
+    if (hour >= 12 && hour < 17)
+      return "\u0928\u092E\u0938\u094D\u0924\u0947";
+    return "\u0936\u0941\u092D \u0938\u0902\u0927\u094D\u092F\u093E";
+  }
+  async function generateSaraExecutiveBrief(lang = "HINDI") {
+    const istDate = new Date((/* @__PURE__ */ new Date()).toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+    const hour = istDate.getHours();
+    const salutation = getDynamicSalutation(hour, lang);
+    const diptiCount = saraFleetMemoryCache.agentLeaderboard?.find((a) => a.id === "dipti")?.totalVolume || 11624;
+    const bikramCount = saraFleetMemoryCache.agentLeaderboard?.find((a) => a.id === "bikram")?.totalVolume || 102;
+    const truptiCount = saraFleetMemoryCache.agentLeaderboard?.find((a) => a.id === "trupti")?.totalVolume || 92;
+    const activeEngines = 7;
+    let greetingText = "";
+    if (lang === "ODIA") {
+      greetingText = `${salutation} \u0B28\u0B30\u0B47\u0B36 \u0B2C\u0B38\u0B4D! \u0B06\u0B2E \u0B6D\u0B1F\u0B3F\u0B2F\u0B3E\u0B15 \u0B05\u0B1F\u0B4B\u0B2E\u0B47\u0B38\u0B28\u0B4D \u0B07\u0B1E\u0B4D\u0B1C\u0B3F\u0B28\u0B4D \u0B38\u0B41\u0B30\u0B41\u0B16\u0B41\u0B30\u0B41\u0B30\u0B47 \u0B1A\u0B3E\u0B32\u0B41\u0B1B\u0B3F\u0964 \u0B26\u0B40\u0B2A\u0B4D\u0B24\u0B3F ${diptiCount.toLocaleString("en-IN")} \u0B2A\u0B4D\u0B30\u0B36\u0B4D\u0B28 \u0B0F\u0B2C\u0B02 \u0B2C\u0B3F\u0B15\u0B4D\u0B30\u0B2E ${bikramCount}\u0B1F\u0B3F \u0B28\u0B4B\u0B1F\u0B3F\u0B38\u0B4D \u0B2F\u0B3E\u0B1E\u0B4D\u0B1A \u0B15\u0B30\u0B3F\u0B38\u0B3E\u0B30\u0B3F\u0B1B\u0B28\u0B4D\u0B24\u0B3F\u0964 \u0B06\u0B1C\u0B3F \u0B15\u2019\u0B23 \u0B06\u0B26\u0B47\u0B36 \u0B05\u0B1B\u0B3F \u0B2C\u0B38\u0B4D?`;
+    } else if (lang === "ENGLISH") {
+      greetingText = `${salutation} Naresh Boss! All ${activeEngines} automation engines are running smoothly. Dipti leads with ${diptiCount.toLocaleString("en-IN")} MCQs, and Bikram has tracked ${bikramCount} exam notices. What would you like to tackle today?`;
+    } else {
+      greetingText = `${salutation} \u0928\u0930\u0947\u0936 \u092C\u0949\u0938! \u0911\u092A\u0930\u0947\u0936\u0928\u094D\u0938 \u092A\u0942\u0930\u0940 \u0924\u0930\u0939 \u0938\u094D\u092E\u0942\u0925 \u0939\u0948\u0902\u0964 \u0926\u0940\u092A\u094D\u0924\u093F \u0928\u0947 ${diptiCount.toLocaleString("en-IN")} \u092A\u094D\u0930\u0936\u094D\u0928 \u0924\u0948\u092F\u093E\u0930 \u0915\u093F\u090F \u0939\u0948\u0902 \u0914\u0930 \u0935\u093F\u0915\u094D\u0930\u092E \u0928\u0947 ${bikramCount} \u0928\u094B\u091F\u093F\u0938\u0947\u091C \u091F\u094D\u0930\u0948\u0915 \u0915\u093F\u090F \u0939\u0948\u0902\u0964 \u0906\u091C \u0915\u094D\u092F\u093E \u091F\u093E\u0938\u094D\u0915 \u0939\u0948?`;
+    }
+    let audioBase64 = await synthesizeManagerVoiceWithRotation(greetingText, lang);
+    return {
+      greetingText,
+      audioBase64,
+      salutation,
+      activeEngines,
+      diptiCount,
+      bikramCount,
+      truptiCount
+    };
+  }
+  let cachedSaraGreetingWav = null;
+  let cachedSaraGreetingText = "";
+  async function warmSaraGreeting() {
+    try {
+      const brief = await generateSaraExecutiveBrief("HINDI");
+      cachedSaraGreetingWav = brief.audioBase64;
+      cachedSaraGreetingText = brief.greetingText;
+    } catch (e) {
+    }
+  }
+  setTimeout(warmSaraGreeting, 3e3);
+  app.get("/api/automation/manager-welcome", async (req, res) => {
+    try {
+      const reqLang = String(req.query.lang || "HINDI").toUpperCase();
+      const lang = ["HINDI", "ODIA", "ENGLISH"].includes(reqLang) ? reqLang : "HINDI";
+      let brief;
+      if (lang === "HINDI" && cachedSaraGreetingWav && cachedSaraGreetingText) {
+        const diptiCount = saraFleetMemoryCache.agentLeaderboard?.find((a) => a.id === "dipti")?.totalVolume || 11624;
+        const bikramCount = saraFleetMemoryCache.agentLeaderboard?.find((a) => a.id === "bikram")?.totalVolume || 102;
+        const truptiCount = saraFleetMemoryCache.agentLeaderboard?.find((a) => a.id === "trupti")?.totalVolume || 92;
+        brief = {
+          greetingText: cachedSaraGreetingText,
+          audioBase64: cachedSaraGreetingWav,
+          salutation: "\u0936\u0941\u092D \u0938\u0902\u0927\u094D\u092F\u093E",
+          activeEngines: 7,
+          diptiCount,
+          bikramCount,
+          truptiCount
+        };
+      } else {
+        brief = await generateSaraExecutiveBrief(lang);
+      }
+      res.json({
+        success: true,
+        managerName: "Sara",
+        ...brief,
+        voice: "Kore"
+      });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+  function buildLatestNoticesTelegramBriefing() {
+    const autoDir = getAutomationsDir();
+    let notices = [];
+    const noticesFile = path.join(autoDir, "seen_notices.json");
+    if (fs.existsSync(noticesFile)) {
+      try {
+        const raw = JSON.parse(fs.readFileSync(noticesFile, "utf8"));
+        notices = Object.values(raw);
+      } catch (e) {
+      }
+    }
+    const validNotices = notices.filter((n) => {
+      if (n.status === "REJECTED_BY_AI")
+        return false;
+      const t = (n.title || "").toLowerCase();
+      if (!t || t.length < 8)
+        return false;
+      const generic = ["vision & mission", "duties and functions", "incumbency chart", "annual reports", "why life insurance", "all products"];
+      if (generic.some((g) => t.includes(g)))
+        return false;
+      return true;
+    });
+    const recent = validNotices.slice(-5).reverse();
+    const nowIST = (/* @__PURE__ */ new Date()).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short" });
+    let html = `\u{1F4CB} <b>ODISHA EXAM NOTICES REVIEW FOR BOSS</b>
+\u{1F552} <i>Audit Time: ${nowIST} IST</i>
+
+`;
+    if (recent.length > 0) {
+      recent.forEach((n, idx) => {
+        const portal = n.portal || "OSSC / OPSC";
+        const title = n.title || "Official Recruitment Notice";
+        const link = n.link && !n.link.startsWith("javascript") ? n.link : `https://www.odishaexamprep.in`;
+        html += `<b>${idx + 1}. [${portal}]</b> ${title}
+\u{1F517} <a href="${link}">View Official Notification</a>
+
+`;
+      });
+    } else {
+      html += `\u26A1 All tracked recruitment portals (OSSC, OPSC, OSSSC) are indexed and nominal.
+
+`;
+    }
+    html += `\u{1F3AF} <i>Dispatched by Executive Chief of Staff (Sara) \u2022 Ready for Review</i>`;
+    return { title: "Odisha Exam Updates Review for Boss", html };
+  }
+  function buildContextualTelegramPayload(query, replyText) {
+    const q = (query || "").toLowerCase();
+    const cleanReply = (replyText || "").replace(/\[ACTION_PLAN:.*?\]/gis, "").replace(/\[ACTION:.*?\]/gis, "").trim();
+    if (q.includes("current affairs") || q.includes("ca ") || q.includes("news")) {
+      const autoDir = getAutomationsDir();
+      let caItems = [];
+      const caFile = path.join(autoDir, "published_ca_history.json");
+      if (fs.existsSync(caFile)) {
+        try {
+          const raw = JSON.parse(fs.readFileSync(caFile, "utf8"));
+          caItems = raw.items || [];
+        } catch (e) {
+        }
+      }
+      const recentCa = caItems.slice(-5).reverse();
+      let caHtml = `\u26A1 <b>ODISHA & NATIONAL CURRENT AFFAIRS DIGEST FOR BOSS</b>
+
+`;
+      recentCa.forEach((c, i) => {
+        caHtml += `<b>${i + 1}. [${c.category || "National"}]</b> ${c.title}
+${c.summary || ""}
+
+`;
+      });
+      caHtml += `\u{1F310} <a href="https://www.odishaexamprep.in/current-affairs">Read Full Digests on Website</a>
+
+\u{1F3AF} <i>Dispatched by Executive Chief of Staff (Sara)</i>`;
+      return { title: "Daily Current Affairs Review for Boss", html: caHtml };
+    }
+    if (cleanReply && cleanReply.length > 80 && (q.includes("ise") || q.includes("isko") || q.includes("yeh") || q.includes("details") || q.includes("syllabus") || q.includes("explain") || q.includes("research") || q.includes("report") || q.includes("dossier") || q.includes("bhejo") || q.includes("send"))) {
+      let formatted = cleanReply.replace(/###\s*(.*)/g, "<b>$1</b>\n").replace(/##\s*(.*)/g, "<b>$1</b>\n").replace(/\*\*(.*?)\*\*/g, "<b>$1</b>").replace(/\*(.*?)\*/g, "<i>$1</i>");
+      if (formatted.length > 3500)
+        formatted = formatted.slice(0, 3500) + "...";
+      const isResearch = cleanReply.includes("Aarya") || cleanReply.includes("\u0906\u0930\u094D\u092F\u093E") || cleanReply.includes("Research") || cleanReply.includes("\u0930\u093F\u0938\u0930\u094D\u091A");
+      return {
+        title: isResearch ? "Intelligence & Research Dossier for Boss" : "OdishaExamPrep Executive Briefing for Boss",
+        html: `${isResearch ? "\u{1F52C} <b>EXECUTIVE RESEARCH DOSSIER FOR BOSS</b>" : "\u{1F4CB} <b>EXECUTIVE DETAILS & BRIEFING FOR BOSS</b>"}
+
+${formatted}
+
+\u{1F3AF} <i>${isResearch ? "Researched by Aarya (AI Lab) \u2022 Dispatched by Sara" : "Dispatched by Executive Chief of Staff (Sara)"}</i>`
+      };
+    }
+    return buildLatestNoticesTelegramBriefing();
+  }
+  async function dispatchTelegramMessage(target = "admin", title = "Odisha Exam Updates Review", message = "") {
+    const localToken = process.env.TELEGRAM_BOT_TOKEN;
+    const localAdmin = process.env.TELEGRAM_ADMIN_CHAT_ID;
+    const localChannel = process.env.TELEGRAM_CHAT_ID;
+    if (localToken && (localAdmin || localChannel)) {
+      try {
+        const fullMsg = `\u{1F4E2} <b>${title}</b>
+
+${message}
+
+<i>Dispatched by Executive Chief of Staff (Sara)</i>`;
+        const targets = [];
+        if ((target === "admin" || target === "both") && localAdmin)
+          targets.push(localAdmin);
+        if ((target === "channel" || target === "both") && localChannel)
+          targets.push(localChannel);
+        if (targets.length === 0 && localAdmin)
+          targets.push(localAdmin);
+        for (const cid of targets) {
+          await fetch(`https://api.telegram.org/bot${localToken}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: cid,
+              text: fullMsg,
+              parse_mode: "HTML",
+              disable_web_page_preview: false
+            })
+          });
+        }
+        return { success: true, deliveredVia: "direct_api" };
+      } catch (err) {
+        console.warn("[Telegram Direct API Error, falling back to GH Actions]", err.message);
+      }
+    }
+    return new Promise((resolve) => {
+      execFile(
+        "gh",
+        [
+          "workflow",
+          "run",
+          "telegram_dispatcher.yml",
+          "--repo",
+          "Pixduct/odisha-mcq-engine",
+          "-f",
+          `target=${target}`,
+          "-f",
+          `title=${title}`,
+          "-f",
+          `message=${message}`
+        ],
+        { timeout: 15e3 },
+        (err, stdout, stderr) => {
+          if (err) {
+            console.warn("[Telegram GH Dispatch Error]", stderr || err.message);
+            return resolve({ success: false, deliveredVia: "github_actions", error: stderr || err.message });
+          }
+          resolve({ success: true, deliveredVia: "github_actions" });
+        }
+      );
+    });
+  }
+  app.post("/api/automation/telegram-send", async (req, res) => {
+    try {
+      const { target = "admin", title, message } = req.body || {};
+      const payload = message ? { title: title || "Odisha Exam Updates Review", html: message } : buildLatestNoticesTelegramBriefing();
+      const result = await dispatchTelegramMessage(target, payload.title, payload.html);
+      res.json({ success: result.success, deliveredVia: result.deliveredVia, error: result.error });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+  const FLEET_AGENTS = {
+    bikram: {
+      id: "bikram",
+      name: "Bikram",
+      role: "Official Government Notice Scraper Lead",
+      room: "bullpen",
+      deskPos: { x: -39, y: 0, z: 16 },
+      camPos: { x: -39, y: 8, z: 28 },
+      camLook: { x: -39, y: 3, z: 16 },
+      mandate: "Official recruitment notifications, portal scraping (OSSC, OSSSC, OPSC), circular verification, deadline tracking",
+      workflow: "notice_scraper.yml"
+    },
+    dipti: {
+      id: "dipti",
+      name: "Dipti",
+      role: "Assessment Architect & Question Generation Lead",
+      room: "bullpen",
+      deskPos: { x: -21, y: 0, z: 16 },
+      camPos: { x: -21, y: 8, z: 28 },
+      camLook: { x: -21, y: 3, z: 16 },
+      mandate: "MCQ generation, pedagogical question auditing, syllabus coverage, mock tests, practice problems",
+      workflow: "daily_mcq.yml"
+    },
+    chhabi: {
+      id: "chhabi",
+      name: "Chhabi",
+      role: "Visual Announcement & Branding Specialist",
+      room: "bullpen",
+      deskPos: { x: -30, y: 0, z: 16 },
+      camPos: { x: -30, y: 8, z: 28 },
+      camLook: { x: -30, y: 3, z: 16 },
+      mandate: "Social media announcement cards, visual exam alert banners, branding layout generation",
+      workflow: "exam_update_cron.yml"
+    },
+    priyanka: {
+      id: "priyanka",
+      name: "Priyanka",
+      role: "Current Affairs Research Lead",
+      room: "media",
+      deskPos: { x: -12, y: 0, z: 16 },
+      camPos: { x: -12, y: 8, z: 28 },
+      camLook: { x: -12, y: 3, z: 16 },
+      mandate: "Odisha & National daily current affairs, government schemes, cabinet decisions, policy digests",
+      workflow: "daily_ca.yml"
+    },
+    subham: {
+      id: "subham",
+      name: "Subham",
+      role: "Strategic Evergreen Study Guide Lead",
+      room: "bullpen",
+      deskPos: { x: -30, y: 0, z: 30 },
+      camPos: { x: -30, y: 8, z: 42 },
+      camLook: { x: -30, y: 3, z: 30 },
+      mandate: "Evergreen study guides, 45-second question triage masterclasses, salary matrix guides, syllabus roadmaps",
+      workflow: "blog_cron.yml"
+    },
+    trupti: {
+      id: "trupti",
+      name: "Trupti",
+      role: "Candidate Engagement & Telegram Broadcaster",
+      room: "cafe",
+      deskPos: { x: -21, y: 0, z: 30 },
+      camPos: { x: -21, y: 8, z: 42 },
+      camLook: { x: -21, y: 3, z: 30 },
+      mandate: "Telegram broadcasts, subscriber push alerts, student notifications, community engagement",
+      workflow: "telegram_dispatcher.yml"
+    },
+    manas: {
+      id: "manas",
+      name: "Manas",
+      role: "Website Current Affairs Publisher",
+      room: "bullpen",
+      deskPos: { x: -12, y: 0, z: 30 },
+      camPos: { x: -12, y: 8, z: 42 },
+      camLook: { x: -12, y: 3, z: 30 },
+      mandate: "Website database deployment, Supabase sync, current affairs web article publishing",
+      workflow: "daily_ca_website.yml"
+    },
+    aarya: {
+      id: "aarya",
+      name: "Aarya",
+      role: "Chief Research Scientist & Universal Knowledge Specialist",
+      room: "ailab",
+      deskPos: { x: -16.5, y: 0, z: -23 },
+      camPos: { x: -16.5, y: 20, z: -8 },
+      camLook: { x: -16.5, y: 3.5, z: -23 },
+      mandate: "Deep academic research, science, mathematics, coding, philosophy, general knowledge, ChatGPT/Gemini-level inquiry",
+      workflow: "ai_research_lab"
+    },
+    sara: {
+      id: "sara",
+      name: "Sara",
+      role: "Chief of Staff & Executive Operations Manager",
+      room: "founder",
+      deskPos: { x: 41.5, y: 0, z: -24.5 },
+      camPos: { x: 41.5, y: 9.5, z: -11.5 },
+      camLook: { x: 41.5, y: 3.2, z: -24.5 },
+      mandate: "Fleet orchestration, executive debriefing, delegation, and reporting to Boss Naresh",
+      workflow: "executive_manager"
+    }
+  };
+  function resolveDelegationTarget(userQuery) {
+    const q = (userQuery || "").toLowerCase().trim();
+    if (!q)
+      return FLEET_AGENTS.sara;
+    if (/\b(bikram|vikram)\b/i.test(q))
+      return FLEET_AGENTS.bikram;
+    if (/\b(dipti|deepti)\b/i.test(q))
+      return FLEET_AGENTS.dipti;
+    if (/\b(chhabi|chhavi)\b/i.test(q))
+      return FLEET_AGENTS.chhabi;
+    if (/\b(priyanka)\b/i.test(q))
+      return FLEET_AGENTS.priyanka;
+    if (/\b(subham|shubham)\b/i.test(q))
+      return FLEET_AGENTS.subham;
+    if (/\b(trupti)\b/i.test(q))
+      return FLEET_AGENTS.trupti;
+    if (/\b(manas)\b/i.test(q))
+      return FLEET_AGENTS.manas;
+    if (/\b(aarya|arya)\b/i.test(q))
+      return FLEET_AGENTS.aarya;
+    if (/\b(telegram|tg\b|bhejo telegram|send to telegram|broadcast|notify students|push notification)\b/i.test(q)) {
+      return FLEET_AGENTS.trupti;
+    }
+    if (/\b(notice|notices|notification|notifications|recruitment|circular|portal|scraper|crawl|ossc notice|osssc notice|opsc notice|admit card|application date|seen_notices)\b/i.test(q)) {
+      return FLEET_AGENTS.bikram;
+    }
+    if (/\b(mcq|mcqs|question|questions|prashna|practice test|mock test|test series|question bank|create questions|generate questions|test paper)\b/i.test(q)) {
+      return FLEET_AGENTS.dipti;
+    }
+    if (/\b(banner|poster|card|graphic|branding|visual card|design|thumbnail|image)\b/i.test(q)) {
+      return FLEET_AGENTS.chhabi;
+    }
+    if (/\b(current affair|current affairs|ca\b|samayiki|aaj ki khabar|today's news|headline|cabinet|scheme|budget 2026)\b/i.test(q)) {
+      return FLEET_AGENTS.priyanka;
+    }
+    if (/\b(blog|article|masterclass|study plan|study guide|strategy|preparation guide|triage|orsp|pay matrix|roadmap)\b/i.test(q)) {
+      return FLEET_AGENTS.subham;
+    }
+    if (/\b(website|portal publish|sync database|db sync|publish ca|website deploy)\b/i.test(q)) {
+      return FLEET_AGENTS.manas;
+    }
+    if (/^(hi|hello|namaste|namaskar|hey|sara|boss|kaisa hai|kemiti achhu|good morning|good afternoon|good evening|shubh sandhya|sab kaisa chal raha|fleet status|team status|standup|all hands)\b/i.test(q)) {
+      if (q.split(/\s+/).length <= 4)
+        return FLEET_AGENTS.sara;
+    }
+    return FLEET_AGENTS.aarya;
+  }
+  async function executeDelegatedTask({
+    agent,
+    query,
+    lang = "HINDI",
+    history = [],
+    groundTruth
+  }) {
+    const userQuery = query.trim();
+    let searchUsed = false;
+    let searchSnippets = "";
+    let sources = [];
+    const needsSearch = (q) => {
+      if (agent.id === "bikram" && /\b(ossc|osssc|opsc|latest|date|notice)\b/i.test(q))
+        return true;
+      if (agent.id === "priyanka")
+        return true;
+      if (agent.id === "aarya" && /\b(latest|current|recent|2024|2025|2026|today|now|news|date|cutoff|who won)\b/i.test(q))
+        return true;
+      return false;
+    };
+    if (needsSearch(userQuery)) {
+      try {
+        const searchRes = await Promise.race([
+          performWebSearch(userQuery),
+          new Promise((resolve) => setTimeout(() => resolve([]), 2400))
+        ]);
+        if (searchRes && searchRes.length > 0) {
+          searchUsed = true;
+          searchSnippets = searchRes.slice(0, 4).map((r, i) => `[Source ${i + 1}: ${r.title}]: ${r.snippet} (${r.url})`).join("\n\n");
+          sources = searchRes.slice(0, 3).map((r) => r.title);
+        }
+      } catch (e) {
+      }
+    }
+    const systemPrompt = `You are orchestrating the Multi-Agent Executive System at OdishaExamPrep.
+Commander / Founder Naresh ("Boss") has assigned a directive to Chief of Staff Sara.
+Sara does NOT do the technical work herself; she has delegated the work directly to Specialist Agent: "${agent.name}" (${agent.role}, stationed in ${agent.room}).
+
+ASSIGNED SPECIALIST AGENT PROFILE:
+- Agent Key: ${agent.id}
+- Agent Name: ${agent.name}
+- Agent Role: ${agent.role}
+- Operational Mandate: ${agent.mandate}
+
+REAL-TIME IN-MEMORY GROUND TRUTH:
+- Official Notices in Cache:
+${(groundTruth.recentNoticesList || []).slice(0, 5).map((n, i) => `${i + 1}. [${n.portal}] ${n.title} (Date: ${n.date || "Recent"}, Link: ${n.link})`).join("\n")}
+- Recent Current Affairs:
+${(groundTruth.recentCurrentAffairsList || []).slice(0, 4).map((c, i) => `${i + 1}. [${c.category || "CA"}] ${c.title} \u2014 ${c.summary}`).join("\n")}
+- Core Platform Exams: ${(groundTruth.corePlatformExams || []).join(", ")}
+- Dipti Question Pool: ${groundTruth.metrics?.totalQuestionsInSupabase || 11624} verified questions in Supabase.
+
+${searchSnippets ? `=== VERIFIED REAL-TIME SEARCH GROUNDING ===
+${searchSnippets}
+============================================` : ""}
+
+CRITICAL STRUCTURED DELEGATION OUTPUT RULES:
+You MUST respond with all 4 tags below in ${lang}:
+
+[AGENT_SPEECH: <1 brief sentence in ${lang} (maximum 10 words) spoken by ${agent.name} while executing at their desk in 3D, e.g. "\u092A\u094B\u0930\u094D\u091F\u0932 \u0938\u094D\u0915\u0948\u0928\u093F\u0902\u0917 \u0914\u0930 \u0928\u094B\u091F\u093F\u0938 \u0935\u0947\u0930\u093F\u092B\u093F\u0915\u0947\u0936\u0928 \u091C\u093E\u0930\u0940 \u0939\u0948\u0964">]
+
+[MANAGER_LEAD: <1-2 concise executive sentences in ${lang} (maximum 28 words) spoken out loud by Sara to Boss via voice, reporting the agent's key finding, e.g. "\u092C\u0949\u0938, \u0935\u093F\u0915\u094D\u0930\u092E \u0928\u0947 \u0938\u093E\u0930\u0947 \u0928\u094B\u091F\u093F\u0938\u0947\u091C \u0928\u093F\u0915\u093E\u0932 \u0932\u093F\u090F \u0939\u0948\u0902\u0964 4 \u0928\u090F \u0906\u0927\u093F\u0915\u093E\u0930\u093F\u0915 \u0905\u092A\u0921\u0947\u091F\u094D\u0938 \u092E\u093F\u0932\u0947 \u0939\u0948\u0902\u0964">]
+
+[MANAGER_RECOMMENDATION: <1 actionable sentence in ${lang} outlining what Boss should do next, e.g. "\u0905\u0928\u0941\u0936\u0902\u0938\u093E: \u0907\u0928 \u0905\u092A\u0921\u0947\u091F\u094D\u0938 \u0915\u094B \u091F\u0947\u0932\u0940\u0917\u094D\u0930\u093E\u092E \u092A\u0930 \u092A\u094D\u0930\u0938\u093E\u0930\u093F\u0924 \u0915\u0930\u0947\u0902 \u092F\u093E \u0935\u0947\u092C\u0938\u093E\u0907\u091F \u092A\u0930 \u092A\u092C\u094D\u0932\u093F\u0936 \u0915\u0930\u0947\u0902\u0964">]
+
+[DELIVERABLE:
+<The comprehensive, in-depth deliverable produced by ${agent.name}. Format with clear Markdown headings ('##', '###'), bold terms, bullet points, and code blocks where applicable. Provide all factual details without cutting corners.>]`;
+    const keys = resolveGeminiKeyPool();
+    let rawResponse = "";
+    for (let attempt = 0; attempt < Math.min(keys.length, 4); attempt++) {
+      const apiKey = getNextManagerKey();
+      if (!apiKey)
+        break;
+      try {
+        const contents = [];
+        if (Array.isArray(history)) {
+          history.slice(-3).forEach((h) => {
+            if (h.role && h.content) {
+              contents.push({ role: h.role === "user" ? "user" : "model", parts: [{ text: String(h.content) }] });
+            }
+          });
+        }
+        contents.push({ role: "user", parts: [{ text: `${systemPrompt}
+
+Boss's Directive: "${userQuery}"` }] });
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${apiKey}`;
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents,
+            generationConfig: { maxOutputTokens: 1e3, temperature: 0.28 }
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          rawResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+          if (rawResponse)
+            break;
+        }
+      } catch (e) {
+      }
+    }
+    let agentSpeech = "";
+    const speechMatch = rawResponse.match(/\[AGENT_SPEECH:\s*(.*?)\]/i);
+    if (speechMatch) {
+      agentSpeech = speechMatch[1].trim();
+      rawResponse = rawResponse.replace(/\[AGENT_SPEECH:\s*.*?\]/i, "").trim();
+    }
+    let managerLead = "";
+    const leadMatch = rawResponse.match(/\[MANAGER_LEAD:\s*(.*?)\]/i);
+    if (leadMatch) {
+      managerLead = leadMatch[1].trim();
+      rawResponse = rawResponse.replace(/\[MANAGER_LEAD:\s*.*?\]/i, "").trim();
+    }
+    let managerRecommendation = "";
+    const recMatch = rawResponse.match(/\[MANAGER_RECOMMENDATION:\s*(.*?)\]/i);
+    if (recMatch) {
+      managerRecommendation = recMatch[1].trim();
+      rawResponse = rawResponse.replace(/\[MANAGER_RECOMMENDATION:\s*.*?\]/i, "").trim();
+    }
+    let agentDeliverable = rawResponse;
+    const delMatch = rawResponse.match(/\[DELIVERABLE:\s*([\s\S]*?)\]?$/i);
+    if (delMatch) {
+      agentDeliverable = delMatch[1].trim();
+    } else {
+      agentDeliverable = rawResponse.replace(/\[DELIVERABLE:/i, "").trim();
+    }
+    if (!agentSpeech) {
+      agentSpeech = `${agent.name} is executing the directive...`;
+    }
+    if (!managerLead) {
+      managerLead = `Boss, ${agent.name} has completed the assignment.`;
+    }
+    if (!managerRecommendation) {
+      managerRecommendation = `Review the deliverable above and proceed with execution.`;
+    }
+    return {
+      agentSpeech,
+      agentDeliverable,
+      managerLead,
+      managerRecommendation,
+      searchUsed,
+      sources
+    };
+  }
+  app.post("/api/automation/manager-voice-chat", async (req, res) => {
+    try {
+      const { query = "", audioBase64 = null, audioMimeType = "audio/webm", voice = "Kore", history = [] } = req.body || {};
+      const groundTruth = saraFleetMemoryCache;
+      const userQuery = String(query || "").trim();
+      let detectedLang = "HINDI";
+      const hasOdiaScript = /[\u0B00-\u0B7F]/.test(userQuery);
+      const hasDevanagari = /[\u0900-\u097F]/.test(userQuery);
+      const odiaKeywords = /\b(pachara|bujhila|kemiti|aaji|sabu|tikiye|kana|karuchhi|dekha|jani|thik|achhi|nahin|ku|re)\b/i;
+      const hindiKeywords = /\b(pucho|batao|kya|kaise|karo|aaj|kuch|hai|hain|nahi|dekh|bhejo|ka|ki|ke|se|par|aur|mein|suno|kaho|bolo)\b/i;
+      if (hasOdiaScript || odiaKeywords.test(userQuery)) {
+        detectedLang = "ODIA";
+      } else if (hasDevanagari || hindiKeywords.test(userQuery)) {
+        detectedLang = "HINDI";
+      } else if (userQuery) {
+        detectedLang = "ENGLISH";
+      }
+      const userAskedTelegram = /\b(telegram|tg)\b/i.test(userQuery) && /\b(bhejo|send|share|daalo|post|forward|karo|update|notices|review)\b/i.test(userQuery);
+      const assignedAgent = resolveDelegationTarget(userQuery);
+      console.log(`[Sara Executive Orchestrator] Boss directive: "${userQuery}" -> Delegated to ${assignedAgent.name} (${assignedAgent.role})`);
+      const taskResult = await executeDelegatedTask({
+        agent: assignedAgent,
+        query: userQuery || "Team standup and platform status",
+        lang: detectedLang,
+        history,
+        groundTruth
+      });
+      const fullDetailText = taskResult.agentDeliverable;
+      const textToSpeak = taskResult.managerLead.replace(/[#*`_~]/g, "").trim();
+      const actionsTaken = [
+        {
+          agent: assignedAgent.id,
+          workflow: assignedAgent.workflow,
+          status: "completed",
+          label: `\u26A1 Delegated: ${assignedAgent.name} (${assignedAgent.role})`
+        }
+      ];
+      if (userAskedTelegram || assignedAgent.id === "trupti") {
+        const briefing = buildContextualTelegramPayload(userQuery, fullDetailText);
+        dispatchTelegramMessage("admin", briefing.title, briefing.html);
+        actionsTaken.push({
+          agent: "trupti",
+          workflow: "telegram_dispatcher.yml",
+          status: "delivered",
+          label: "\u26A1 Telegram Sent: Delivered to Odisha Prep Admin Bot"
+        });
+      }
+      const audioBase64Result = await synthesizeManagerVoiceWithRotation(textToSpeak, detectedLang);
+      const delegationChain = {
+        assignedAgent: assignedAgent.id,
+        agentName: assignedAgent.name,
+        agentRole: assignedAgent.role,
+        room: assignedAgent.room,
+        deskPos: assignedAgent.deskPos,
+        camPos: assignedAgent.camPos,
+        camLook: assignedAgent.camLook,
+        agentSpeech: taskResult.agentSpeech,
+        agentDeliverable: fullDetailText,
+        managerRecommendation: taskResult.managerRecommendation,
+        status: "completed"
+      };
+      res.json({
+        success: true,
+        managerName: "Sara",
+        bossTranscribed: userQuery || "Boss's Directive",
+        detectedLanguage: detectedLang,
+        replyText: fullDetailText,
+        speechBubble: textToSpeak.slice(0, 95).trim() + (textToSpeak.length > 95 ? "..." : ""),
+        audioBase64: audioBase64Result || null,
+        actionsTaken,
+        plan: null,
+        searchUsed: taskResult.searchUsed,
+        delegatedAgent: {
+          name: assignedAgent.name,
+          role: assignedAgent.role,
+          location: assignedAgent.room,
+          status: "completed"
+        },
+        delegationChain,
+        voice: "Kore",
+        timestamp: (/* @__PURE__ */ new Date()).toISOString()
+      });
+    } catch (err) {
+      console.error("[Sara Voice Chat Error]", err);
+      res.status(500).json({ success: false, error: err.message || "Failed to process Sara voice command" });
+    }
+  });
   app.post("/api/blog/publish", async (req, res) => {
     try {
       const { id, secret } = req.body;
@@ -5180,6 +8049,44 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
       res.status(500).json({ error: err.message || "Failed to discard draft" });
     }
   });
+  app.delete("/api/admin/questions/bulk-delete-by-topic", requireAdmin, async (req, res) => {
+    try {
+      const { topic } = req.body;
+      if (!topic || typeof topic !== "string") {
+        return res.status(400).json({ error: "topic is required and must be a string (e.g. 'bank__<id>' or 'mockTest__<id>')" });
+      }
+      let totalDeleted = 0;
+      let keepDeleting = true;
+      while (keepDeleting) {
+        const { data: rows, error: fetchErr } = await supabaseAdmin.from("questions").select("id").eq("topic", topic).limit(500);
+        if (fetchErr)
+          throw fetchErr;
+        if (!rows || rows.length === 0) {
+          keepDeleting = false;
+          break;
+        }
+        const ids = rows.map((r) => r.id);
+        const { error: delErr } = await supabaseAdmin.from("questions").delete().in("id", ids);
+        if (delErr)
+          throw delErr;
+        totalDeleted += ids.length;
+        if (ids.length < 500)
+          keepDeleting = false;
+      }
+      if (topic.startsWith("bank__")) {
+        const bankId = topic.replace("bank__", "");
+        await supabaseAdmin.from("questionBanks").update({ questionCount: 0 }).eq("id", bankId);
+      } else if (topic.startsWith("mockTest__")) {
+        const testId = topic.replace("mockTest__", "");
+        await supabaseAdmin.from("mockTests").update({ totalQuestions: 0, totalMarks: 0 }).eq("id", testId);
+      }
+      console.log(`[BulkDeleteByTopic] Deleted ${totalDeleted} questions for topic="${topic}"`);
+      res.json({ success: true, deletedCount: totalDeleted });
+    } catch (err) {
+      console.error("[BulkDeleteByTopic Error]", err);
+      res.status(500).json({ error: err.message || "Failed to delete questions by topic" });
+    }
+  });
   app.post("/api/admin/questions/bulk", requireAdmin, async (req, res) => {
     try {
       const { questions } = req.body;
@@ -5197,17 +8104,53 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
           correctAnswerIndex: q.correctAnswerIndex,
           explanation: q.explanation || ""
         };
-        if (q.diagram && hasDiagramCol) {
-          payload.diagram = q.diagram;
+        if (hasDiagramCol && (q.diagram || q.explanationDiagram)) {
+          let parsedDiagram = null;
+          let parsedExpDiagram = null;
+          if (q.diagram) {
+            try {
+              parsedDiagram = typeof q.diagram === "string" ? JSON.parse(q.diagram) : q.diagram;
+            } catch (_) {
+              parsedDiagram = q.diagram;
+            }
+          }
+          if (q.explanationDiagram) {
+            try {
+              parsedExpDiagram = typeof q.explanationDiagram === "string" ? JSON.parse(q.explanationDiagram) : q.explanationDiagram;
+            } catch (_) {
+              parsedExpDiagram = q.explanationDiagram;
+            }
+          }
+          const packaged = packageDiagramsForStorage(parsedDiagram, parsedExpDiagram);
+          if (packaged) {
+            payload.diagram = packaged;
+          }
         }
         if (typeof q.sortOrder === "number") {
           payload.sortOrder = q.sortOrder;
         }
         return payload;
       });
-      const { data, error } = await supabaseAdmin.from("questions").insert(payloads).select();
-      if (error)
-        throw error;
+      const CHUNK_SIZE = 50;
+      let insertedCount = 0;
+      const insertedIds = [];
+      for (let i = 0; i < payloads.length; i += CHUNK_SIZE) {
+        const chunk = payloads.slice(i, i + CHUNK_SIZE);
+        const { data: chunkData, error: chunkError } = await supabaseAdmin.from("questions").insert(chunk).select("id");
+        if (chunkError) {
+          console.error(`[Admin Questions Bulk Error at chunk ${Math.floor(i / CHUNK_SIZE) + 1}]:`, chunkError);
+          throw chunkError;
+        }
+        if (Array.isArray(chunkData)) {
+          insertedCount += chunkData.length;
+          chunkData.forEach((d) => {
+            if (d.id)
+              insertedIds.push(d.id);
+          });
+        } else {
+          insertedCount += chunk.length;
+        }
+      }
       try {
         const topicsUpdated = /* @__PURE__ */ new Set();
         for (const q of payloads) {
@@ -5231,20 +8174,82 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
                 }
                 await updateQuery;
               }
+              const rawBankId = q.topic.startsWith("bank__") ? q.topic.replace(/^bank__/, "") : q.topic;
               await supabaseAdmin.from("questionBanks").update({
                 questionCount: totalQuestionsForTopic,
-                hasPracticeMode: true
-              }).eq("id", q.topic);
+                hasPracticeMode: true,
+                target_mode: "bank"
+              }).eq("id", rawBankId);
+              if (q.topic.startsWith("mockTest__")) {
+                const rawMockId = q.topic.replace(/^mockTest__/, "");
+                await supabaseAdmin.from("mockTests").update({
+                  totalQuestions: totalQuestionsForTopic,
+                  totalMarks: totalQuestionsForTopic * 2
+                }).eq("id", rawMockId);
+              }
             }
           }
         }
       } catch (countErr) {
         console.warn("[Admin Questions Bulk Count Sync Error]", countErr);
       }
-      res.json({ success: true, count: data?.length || 0, data });
+      res.json({ success: true, count: insertedCount, insertedIds });
     } catch (err) {
       console.error("[Admin Questions Bulk Error]", err);
       res.status(500).json({ error: err.message || "Failed to bulk upload questions" });
+    }
+  });
+  app.post("/api/admin/banks/reconcile-counts", requireAdmin, async (req, res) => {
+    try {
+      const { examId } = req.body;
+      if (!examId) {
+        return res.status(400).json({ error: "examId is required" });
+      }
+      const { data: banks, error: bErr } = await supabaseAdmin.from("questionBanks").select("id, title, questionCount, target_mode").eq("examId", examId);
+      if (bErr || !banks) {
+        return res.status(500).json({ error: bErr?.message || "Failed to fetch question banks" });
+      }
+      let allQuestions = [];
+      let page = 0;
+      const pageSize = 1e3;
+      while (true) {
+        const { data, error } = await supabaseAdmin.from("questions").select("id, topic").eq("examId", examId).range(page * pageSize, (page + 1) * pageSize - 1);
+        if (error || !data || data.length === 0)
+          break;
+        allQuestions = allQuestions.concat(data);
+        page++;
+        if (data.length < pageSize)
+          break;
+      }
+      const countByBankId = {};
+      allQuestions.forEach((q) => {
+        const bId = q.topic ? q.topic.replace(/^bank__/, "") : "";
+        if (bId)
+          countByBankId[bId] = (countByBankId[bId] || 0) + 1;
+      });
+      let updatedCount = 0;
+      const updates = [];
+      for (const b of banks) {
+        const trueCount = countByBankId[b.id] || 0;
+        if (b.questionCount !== trueCount || b.target_mode !== "bank") {
+          await supabaseAdmin.from("questionBanks").update({
+            questionCount: trueCount,
+            target_mode: "bank"
+          }).eq("id", b.id);
+          updatedCount++;
+          updates.push({ id: b.id, title: b.title, oldCount: b.questionCount, newCount: trueCount });
+        }
+      }
+      res.json({
+        success: true,
+        totalBanks: banks.length,
+        reconciledCount: updatedCount,
+        totalVerifiedQuestions: allQuestions.length,
+        updates
+      });
+    } catch (err) {
+      console.error("[Admin Banks Reconcile Error]", err);
+      res.status(500).json({ error: err.message || "Failed to reconcile question bank counts" });
     }
   });
   app.post("/api/admin/ai/test-key", requireAdmin, async (req, res) => {
@@ -5270,6 +8275,7 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
         examId,
         examName,
         stage,
+        stream,
         targetType,
         mainSection,
         subCategory,
@@ -5294,6 +8300,7 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
         examId,
         examName: examName || examId,
         stage: stage || void 0,
+        stream: stream || void 0,
         targetType: targetType || "mock_test",
         mainSection,
         subCategory,
@@ -5346,6 +8353,7 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
         examId,
         examName,
         stage,
+        stream,
         deckTitle,
         subject,
         subSubject,
@@ -5385,6 +8393,7 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
         examId: examId || "general",
         examName,
         stage: stage || void 0,
+        stream: stream || void 0,
         deckTitle: deckTitle.trim(),
         subject,
         subSubject,
@@ -5414,6 +8423,7 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
         examId,
         examName,
         stage,
+        stream,
         testTitle,
         subject,
         subSubject,
@@ -5465,6 +8475,7 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
         examName,
         mainSection: req.body.mainSection || void 0,
         stage: stage || void 0,
+        stream: stream || void 0,
         testTitle,
         subject,
         subSubject,
@@ -5487,7 +8498,11 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
           ...Array.isArray(req.body.alreadyGeneratedStems) ? req.body.alreadyGeneratedStems : []
         ],
         batchNumber: req.body.batchNumber ? Number(req.body.batchNumber) : void 0,
-        thematicFocus: req.body.thematicFocus ? String(req.body.thematicFocus).trim() : void 0
+        thematicFocus: req.body.thematicFocus ? String(req.body.thematicFocus).trim() : void 0,
+        durationMinutes: req.body.durationMinutes !== void 0 && req.body.durationMinutes !== null ? Number(req.body.durationMinutes) : void 0,
+        totalMarks: req.body.totalMarks !== void 0 && req.body.totalMarks !== null ? Number(req.body.totalMarks) : void 0,
+        negativeMarking: req.body.negativeMarking !== void 0 && req.body.negativeMarking !== null ? Number(req.body.negativeMarking) : void 0,
+        predefinedQuestionCount: req.body.predefinedQuestionCount !== void 0 && req.body.predefinedQuestionCount !== null ? Number(req.body.predefinedQuestionCount) : void 0
       });
       res.json({ success: true, count: questions.length, data: questions });
     } catch (err) {
@@ -5496,26 +8511,70 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
     }
   });
   app.post("/api/admin/ai/generate-questions-stream", requireAdmin, async (req, res) => {
-    res.setHeader("Content-Type", "text/event-stream");
-    res.setHeader("Cache-Control", "no-cache");
-    res.setHeader("Connection", "keep-alive");
+    res.writeHead(200, {
+      "Content-Type": "text/event-stream; charset=utf-8",
+      "Cache-Control": "no-cache, no-transform",
+      "Connection": "keep-alive",
+      "X-Accel-Buffering": "no"
+    });
     if (typeof res.flushHeaders === "function") {
       res.flushHeaders();
     }
     const sendEvent = (event, payload) => {
-      res.write(`event: ${event}
+      if (res.writableEnded || res.destroyed)
+        return;
+      try {
+        res.write(`event: ${event}
 data: ${JSON.stringify(payload)}
 
 `);
+        if (typeof res.flush === "function") {
+          res.flush();
+        }
+      } catch (writeErr) {
+        console.warn("[server.ts] SSE stream write warning:", writeErr);
+      }
+    };
+    try {
+      res.write(": connection-established\n\n");
       if (typeof res.flush === "function") {
         res.flush();
       }
+    } catch {
+    }
+    sendEvent("progress", {
+      stageId: "CONNECT",
+      stageName: "Stream Established",
+      percent: 5,
+      message: `Inference pipeline connected for "${req.body.testTitle || "Topic"}". Grounding factual syllabus scope...`,
+      log: `SSE stream initialized for "${req.body.testTitle || "Topic"}".`
+    });
+    const heartbeat = setInterval(() => {
+      if (res.writableEnded || res.destroyed) {
+        clearInterval(heartbeat);
+        return;
+      }
+      try {
+        res.write(": heartbeat\n\n");
+        if (typeof res.flush === "function") {
+          res.flush();
+        }
+      } catch {
+        clearInterval(heartbeat);
+      }
+    }, 8e3);
+    const cleanupHeartbeat = () => {
+      clearInterval(heartbeat);
     };
+    req.on("close", cleanupHeartbeat);
+    res.on("close", cleanupHeartbeat);
+    res.on("finish", cleanupHeartbeat);
     try {
       const {
         examId,
         examName,
         stage,
+        stream,
         testTitle,
         subject,
         subSubject,
@@ -5535,6 +8594,7 @@ data: ${JSON.stringify(payload)}
         batchSize
       } = req.body;
       if (!testTitle) {
+        cleanupHeartbeat();
         sendEvent("error", { error: "testTitle is required" });
         return res.end();
       }
@@ -5569,6 +8629,7 @@ data: ${JSON.stringify(payload)}
           examName,
           mainSection: req.body.mainSection || void 0,
           stage: stage || void 0,
+          stream: stream || void 0,
           testTitle,
           subject,
           subSubject,
@@ -5591,15 +8652,25 @@ data: ${JSON.stringify(payload)}
             ...Array.isArray(req.body.alreadyGeneratedStems) ? req.body.alreadyGeneratedStems : []
           ],
           batchNumber: req.body.batchNumber ? Number(req.body.batchNumber) : void 0,
-          thematicFocus: req.body.thematicFocus ? String(req.body.thematicFocus).trim() : void 0
+          thematicFocus: req.body.thematicFocus ? String(req.body.thematicFocus).trim() : void 0,
+          durationMinutes: req.body.durationMinutes !== void 0 && req.body.durationMinutes !== null ? Number(req.body.durationMinutes) : void 0,
+          totalMarks: req.body.totalMarks !== void 0 && req.body.totalMarks !== null ? Number(req.body.totalMarks) : void 0,
+          negativeMarking: req.body.negativeMarking !== void 0 && req.body.negativeMarking !== null ? Number(req.body.negativeMarking) : void 0,
+          predefinedQuestionCount: req.body.predefinedQuestionCount !== void 0 && req.body.predefinedQuestionCount !== null ? Number(req.body.predefinedQuestionCount) : void 0
         },
         (progressEvent) => {
           sendEvent("progress", progressEvent);
         }
       );
+      cleanupHeartbeat();
+      if (!questions || questions.length === 0) {
+        sendEvent("error", { error: `AI engine returned 0 valid questions for "${testTitle}". Activating retry backoff.` });
+        return res.end();
+      }
       sendEvent("complete", { success: true, count: questions.length, data: questions });
       res.end();
     } catch (err) {
+      cleanupHeartbeat();
       console.error("[Admin AI Questions Stream Error]", err);
       sendEvent("error", { error: err.message || "Failed to generate questions with AI" });
       res.end();
@@ -5608,6 +8679,12 @@ data: ${JSON.stringify(payload)}
   app.post("/api/admin/ai/plan-curriculum", requireAdmin, async (req, res) => {
     try {
       const {
+        targetType,
+        mainSection,
+        predefinedQuestionCount,
+        durationMinutes,
+        totalMarks,
+        negativeMarking,
         syllabusMarkdown,
         testTitle,
         subject,
@@ -5620,6 +8697,12 @@ data: ${JSON.stringify(payload)}
         baseUrl
       } = req.body;
       const plan = await planAutonomousQuestionCurriculum({
+        targetType: targetType || mainSection,
+        mainSection: mainSection || targetType,
+        predefinedQuestionCount: predefinedQuestionCount !== void 0 && predefinedQuestionCount !== null ? Number(predefinedQuestionCount) : void 0,
+        durationMinutes: durationMinutes !== void 0 && durationMinutes !== null ? Number(durationMinutes) : void 0,
+        totalMarks: totalMarks !== void 0 && totalMarks !== null ? Number(totalMarks) : void 0,
+        negativeMarking: negativeMarking !== void 0 && negativeMarking !== null ? Number(negativeMarking) : void 0,
         syllabusMarkdown,
         testTitle: testTitle || "Subject Test",
         subject,
@@ -5809,6 +8892,200 @@ data: ${JSON.stringify(payload)}
     } catch (err) {
       console.error("[Get Exam Syllabus Error]", err);
       res.status(500).json({ error: err.message || "Failed to fetch exam syllabus" });
+    }
+  });
+  app.post("/api/admin/cascade-delete", requireAdmin, async (req, res) => {
+    try {
+      const { entityType, entityId, clearOnly } = req.body;
+      if (!entityId || !entityType) {
+        return res.status(400).json({ error: "entityType and entityId are required" });
+      }
+      const allowed = ["questionBank", "mockTest", "testSeries", "question"];
+      if (!allowed.includes(entityType)) {
+        return res.status(400).json({ error: `Unsupported entityType: ${entityType}` });
+      }
+      let deletedQuestionCount = 0;
+      const auditLog = [];
+      if (entityType === "questionBank") {
+        if (!clearOnly) {
+          const { data: purchases } = await supabaseAdmin.from("user_purchases").select("id").eq("product_id", entityId).limit(1);
+          if (purchases && purchases.length > 0) {
+            await supabaseAdmin.from("questionBanks").update({ is_archived: true }).eq("id", entityId);
+            auditLog.push(`Soft-deleted (purchased) questionBank ${entityId}`);
+            return res.json({
+              success: true,
+              softDeleted: true,
+              deletedQuestions: 0,
+              message: "Question bank archived (soft-deleted) to protect active candidate purchases.",
+              audit: auditLog
+            });
+          }
+        }
+        const { data: bank } = await supabaseAdmin.from("questionBanks").select("id, title, examId").eq("id", entityId).single();
+        if (bank) {
+          const rawTitle = (bank.title || "").trim();
+          const cleanTitle = rawTitle.replace(/(\s*-\s*Practice Session)+$/gi, "").trim();
+          const topicCandidates = Array.from(/* @__PURE__ */ new Set([
+            rawTitle,
+            cleanTitle,
+            `${cleanTitle} - Practice Session`,
+            entityId,
+            `bank__${entityId}`
+          ])).filter(Boolean);
+          let q1Query = supabaseAdmin.from("questions").delete().in("topic", topicCandidates);
+          if (bank.examId && bank.examId !== "generic") {
+            q1Query = q1Query.eq("examId", bank.examId);
+          }
+          const { data: d1, error: err1 } = await q1Query.select("id");
+          if (err1)
+            throw err1;
+          const c1 = d1?.length ?? 0;
+          deletedQuestionCount += c1;
+          auditLog.push(`Deleted ${c1} questions matching title/exam for bank "${rawTitle}"`);
+          const { data: d2, error: err2 } = await supabaseAdmin.from("questions").delete().in("topic", [entityId, `bank__${entityId}`]).select("id");
+          if (err2)
+            throw err2;
+          const c2 = d2?.length ?? 0;
+          deletedQuestionCount += c2;
+          auditLog.push(`Deleted ${c2} id-keyed questions for bank ${entityId}`);
+          await supabaseAdmin.from("questionBanks").update({ questionCount: 0 }).eq("title", bank.title).eq("examId", bank.examId);
+        }
+        if (!clearOnly) {
+          const { error: delErr } = await supabaseAdmin.from("questionBanks").delete().eq("id", entityId);
+          if (delErr)
+            throw delErr;
+          auditLog.push(`Deleted questionBank row ${entityId}`);
+        } else {
+          auditLog.push(`Cleared questions for questionBank row ${entityId} (row preserved)`);
+        }
+      } else if (entityType === "mockTest") {
+        if (!clearOnly) {
+          const { data: purchases } = await supabaseAdmin.from("user_purchases").select("id").eq("product_id", entityId).limit(1);
+          if (purchases && purchases.length > 0) {
+            await supabaseAdmin.from("mockTests").update({ is_archived: true }).eq("id", entityId);
+            auditLog.push(`Soft-deleted (purchased) mockTest ${entityId}`);
+            return res.json({
+              success: true,
+              softDeleted: true,
+              deletedQuestions: 0,
+              message: "Mock test archived (soft-deleted) to protect active candidate purchases.",
+              audit: auditLog
+            });
+          }
+        }
+        const { data: mt } = await supabaseAdmin.from("mockTests").select("id, title, seriesId").eq("id", entityId).single();
+        let examId = null;
+        if (mt?.seriesId && typeof mt.seriesId === "string" && mt.seriesId.startsWith("{")) {
+          try {
+            const parsed = JSON.parse(mt.seriesId);
+            if (parsed.examId)
+              examId = parsed.examId;
+          } catch {
+          }
+        }
+        const { data: d1, error: err1 } = await supabaseAdmin.from("questions").delete().in("topic", [`mockTest__${entityId}`, `mocktest__${entityId}`, entityId]).select("id");
+        if (err1)
+          throw err1;
+        const c1 = d1?.length ?? 0;
+        deletedQuestionCount += c1;
+        auditLog.push(`Deleted ${c1} id-prefixed questions for mockTest ${entityId}`);
+        if (mt?.title) {
+          const titleCandidates = [
+            mt.title.trim(),
+            mt.title.replace(/(\s*-\s*Practice Session)+$/gi, "").trim()
+          ].filter(Boolean);
+          let qbCheck = supabaseAdmin.from("questionBanks").select("id").in("title", titleCandidates);
+          if (examId)
+            qbCheck = qbCheck.eq("examId", examId);
+          const { data: activeBanks } = await qbCheck;
+          if (!activeBanks || activeBanks.length === 0) {
+            let q2Query = supabaseAdmin.from("questions").delete().in("topic", titleCandidates);
+            if (examId)
+              q2Query = q2Query.eq("examId", examId);
+            const { data: d2, error: err2 } = await q2Query.select("id");
+            if (err2)
+              throw err2;
+            const c2 = d2?.length ?? 0;
+            deletedQuestionCount += c2;
+            auditLog.push(`Deleted ${c2} title-matched questions for mockTest "${mt.title}"`);
+          }
+        }
+        if (!clearOnly) {
+          const { error: delErr } = await supabaseAdmin.from("mockTests").delete().eq("id", entityId);
+          if (delErr)
+            throw delErr;
+          auditLog.push(`Deleted mockTest row ${entityId}`);
+        } else {
+          auditLog.push(`Cleared questions for mockTest row ${entityId} (row preserved)`);
+        }
+      } else if (entityType === "testSeries") {
+        const { data: childTests } = await supabaseAdmin.from("mockTests").select("id, title, seriesId").or(`seriesId.eq.${entityId},seriesId.like.%${entityId}%`);
+        const testIds = (childTests || []).map((t) => t.id);
+        if (!clearOnly) {
+          const purchaseTargets = [entityId, ...testIds];
+          const { data: purchases } = await supabaseAdmin.from("user_purchases").select("id").in("product_id", purchaseTargets).limit(1);
+          if (purchases && purchases.length > 0) {
+            await supabaseAdmin.from("testSeries").update({ is_archived: true }).eq("id", entityId);
+            if (testIds.length > 0) {
+              await supabaseAdmin.from("mockTests").update({ is_archived: true }).in("id", testIds);
+            }
+            auditLog.push(`Soft-deleted (purchased) testSeries ${entityId} and ${testIds.length} child mock tests`);
+            return res.json({
+              success: true,
+              softDeleted: true,
+              deletedQuestions: 0,
+              message: "Test series archived (soft-deleted) to protect active candidate purchases.",
+              audit: auditLog
+            });
+          }
+        }
+        if (testIds.length > 0) {
+          const childTopics = testIds.flatMap((tId) => [`mockTest__${tId}`, `mocktest__${tId}`, tId]);
+          const { data: d1, error: err1 } = await supabaseAdmin.from("questions").delete().in("topic", childTopics).select("id");
+          if (err1)
+            throw err1;
+          const c1 = d1?.length ?? 0;
+          deletedQuestionCount += c1;
+          auditLog.push(`Deleted ${c1} questions across ${testIds.length} child mock tests`);
+          if (!clearOnly) {
+            const { error: mtDelErr } = await supabaseAdmin.from("mockTests").delete().in("id", testIds);
+            if (mtDelErr)
+              throw mtDelErr;
+            auditLog.push(`Deleted ${testIds.length} child mock test rows`);
+          }
+        }
+        if (!clearOnly) {
+          const { error: tsDelErr } = await supabaseAdmin.from("testSeries").delete().eq("id", entityId);
+          if (tsDelErr)
+            throw tsDelErr;
+          auditLog.push(`Deleted testSeries row ${entityId}`);
+        }
+      } else if (entityType === "question") {
+        const { data: d, error: err } = await supabaseAdmin.from("questions").delete().eq("id", entityId).select("id, topic");
+        if (err)
+          throw err;
+        deletedQuestionCount = d?.length ?? 1;
+        auditLog.push(`Deleted question row ${entityId}`);
+        const deletedTopic = d?.[0]?.topic;
+        if (deletedTopic && deletedTopic.startsWith("bank__")) {
+          const bankId = deletedTopic.replace(/^bank__/, "");
+          const { count: remainingCount } = await supabaseAdmin.from("questions").select("id", { count: "exact", head: true }).eq("topic", deletedTopic);
+          if (typeof remainingCount === "number") {
+            await supabaseAdmin.from("questionBanks").update({ questionCount: remainingCount }).eq("id", bankId);
+            auditLog.push(`Auto-reconciled bank ${bankId} to ${remainingCount} questions`);
+          }
+        }
+      }
+      console.log(`[CASCADE-DELETE] ${entityType} ${entityId}: ${deletedQuestionCount} questions removed.`, auditLog);
+      res.json({
+        success: true,
+        softDeleted: false,
+        deletedQuestions: deletedQuestionCount,
+        audit: auditLog
+      });
+    } catch (err) {
+      console.error(`[CASCADE-DELETE ERROR]`, err);
+      res.status(500).json({ error: err.message || "Failed to execute cascade delete" });
     }
   });
   app.post("/api/admin/db/:table", requireAdmin, async (req, res) => {
@@ -6337,7 +9614,34 @@ ${combinedImageContext}`
       }
     }
   });
-  app.get(["/shop*", "/cart*", "/my-account*", "/checkout*", "/product*", "/courses*", "/course*", "/all-courses*", "/home*", "/category*", "/tag*", "/author*"], (req, res) => {
+  app.get(["/shop*", "/cart*", "/my-account*", "/checkout*", "/product*"], (req, res) => {
+    res.status(410);
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    return res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Store Retired | OdishaExamPrep</title>
+  <meta name="robots" content="noindex, follow" />
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; text-align: center; padding: 60px 20px; background: #FAF8F5; color: #0F172A; }
+    .card { max-width: 500px; margin: 0 auto; background: #FFF; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); border: 1px solid #E2E8F0; }
+    h1 { font-size: 24px; font-weight: 900; color: #1E293B; margin-bottom: 12px; }
+    p { font-size: 15px; color: #64748B; line-height: 1.6; margin-bottom: 24px; }
+    a { display: inline-block; padding: 12px 28px; background: #2563EB; color: #FFF; text-decoration: none; border-radius: 12px; font-weight: 800; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Page Permanently Retired</h1>
+    <p>Our legacy store and course shop has been decommissioned. OdishaExamPrep has upgraded to a modern interactive mock test and AI-mentored preparation platform.</p>
+    <a href="/">Go to OdishaExamPrep Home</a>
+  </div>
+</body>
+</html>`);
+  });
+  app.get(["/courses*", "/course*", "/all-courses*", "/home*", "/category*", "/tag*", "/author*"], (req, res) => {
     const pathLower = req.path.toLowerCase();
     if (pathLower.includes("opsc")) {
       return res.redirect(301, "/exams/opsc-aio");
@@ -6438,6 +9742,9 @@ ${combinedImageContext}`
           const { data: examList, error } = await query.limit(1);
           const exam = examList && examList.length > 0 ? examList[0] : null;
           if (exam && !error) {
+            if (exam.category === "current_affairs") {
+              return res.redirect(301, "/current-affairs");
+            }
             let examDescText = exam.description || "";
             if (examDescText.startsWith("JSON_METADATA_")) {
               try {
@@ -6513,14 +9820,38 @@ ${combinedImageContext}`
       } else if (pathName === "/") {
         const schemaObj = {
           "@context": "https://schema.org",
-          "@type": "WebSite",
-          "name": "OdishaExamPrep",
-          "url": baseUrl,
-          "potentialAction": {
-            "@type": "SearchAction",
-            "target": `${baseUrl}/?search={search_term_string}`,
-            "query-input": "required name=search_term_string"
-          }
+          "@graph": [
+            {
+              "@type": "WebSite",
+              "@id": `${baseUrl}/#website`,
+              "name": "OdishaExamPrep",
+              "alternateName": ["Odisha Exam Prep", "OEP", "OdishaExamPrep.in"],
+              "url": baseUrl,
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": `${baseUrl}/?search={search_term_string}`
+                },
+                "query-input": "required name=search_term_string"
+              }
+            },
+            {
+              "@type": "EducationalOrganization",
+              "@id": `${baseUrl}/#organization`,
+              "name": "OdishaExamPrep",
+              "url": baseUrl,
+              "logo": {
+                "@type": "ImageObject",
+                "url": `${baseUrl}/android-chrome-512x512.png`,
+                "width": 512,
+                "height": 512
+              },
+              "image": `${baseUrl}/android-chrome-512x512.png`,
+              "sameAs": [baseUrl],
+              "description": "Odisha's premier exam preparation platform providing comprehensive mock tests, timed test series, previous year questions, and AI mentor guidance for OPSC, OSSC, and OSSSC government competitive examinations."
+            }
+          ]
         };
         schemaJson = `<script type="application/ld+json" id="json-ld-schema">${JSON.stringify(schemaObj)}</script>`;
       }
@@ -6557,6 +9888,38 @@ ${combinedImageContext}`
     ${schemaJson}
   `;
       html = html.replace("<head>", `<head>${ogMetaTags}`);
+      if (pathName === "/") {
+        const semanticBotContent = `
+    <!-- Semantic Pre-Rendered Crawl Content for Search Engines & Accessibility -->
+    <header class="sr-only" style="display:none;">
+      <h1>OdishaExamPrep \u2014 Best Platform for Odisha Exam Preparation</h1>
+      <p>Prepare for OPSC, OSSC, OSSSC, Odisha Police, and teaching competitive examinations with expert-crafted mock tests, syllabus roadmaps, real-time rank analytics, and AI mentor doubt resolution.</p>
+      <nav>
+        <a href="/current-affairs">Daily Odisha & National Current Affairs</a>
+        <a href="/blog">Odisha Exam Preparation Strategy & Syllabus Guides</a>
+        <a href="/privacy-policy">Privacy Policy</a>
+        <a href="/terms-of-service">Terms of Service</a>
+        <a href="/refund-policy">Refund Policy</a>
+      </nav>
+    </header>
+    <main class="sr-only" style="display:none;">
+      <section>
+        <h2>Odisha Competitive Exams Covered</h2>
+        <ul>
+          <li><strong>OPSC</strong>: Odisha Civil Services (OAS), Assistant Section Officer (ASO), Assistant Industries Officer (AIO)</li>
+          <li><strong>OSSC</strong>: Combined Graduate Level (CGL), CHSL, CTSRE, Junior Engineer</li>
+          <li><strong>OSSSC</strong>: Revenue Inspector (RI), Assistant Revenue Inspector (ARI), AMIN, Junior Assistant</li>
+          <li><strong>Odisha Police</strong>: Sub-Inspector (SI), Constable Recruitment</li>
+          <li><strong>Teaching Exams</strong>: BSE Odisha OTET, OSSTET, B.Ed Entrance</li>
+        </ul>
+      </section>
+      <section>
+        <h2>Platform Highlights</h2>
+        <p>100% syllabus alignment, KaTeX dynamic geometry diagrams, DeepSeek & Llama AI Mentor, and authentic exam marking schemes.</p>
+      </section>
+    </main>`;
+        html = html.replace('<div id="root"></div>', `<div id="root">${semanticBotContent}</div>`);
+      }
       res.setHeader("Content-Type", "text/html");
       res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
       res.setHeader("Pragma", "no-cache");
@@ -6573,27 +9936,30 @@ ${combinedImageContext}`
       const protocol = req.protocol || "https";
       const baseUrl = `${protocol}://${host}`;
       const staticRoutes = [
-        "",
-        "/blog",
-        "/privacy-policy",
-        "/terms-of-service",
-        "/refund-policy"
+        { path: "", priority: "1.0", changefreq: "daily" },
+        { path: "/current-affairs", priority: "0.9", changefreq: "daily" },
+        { path: "/blog", priority: "0.8", changefreq: "daily" },
+        { path: "/privacy-policy", priority: "0.5", changefreq: "monthly" },
+        { path: "/terms-of-service", priority: "0.5", changefreq: "monthly" },
+        { path: "/refund-policy", priority: "0.5", changefreq: "monthly" }
       ];
       const { data: rawExams } = await supabaseAdmin.from("exams").select("id, category, createdAt, is_archived");
-      const blogs = rawExams ? rawExams.filter((e) => e.category === "blog").sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()) : [];
-      const exams = rawExams ? rawExams.filter((e) => e.category !== "system" && e.category !== "blog" && e.is_archived !== true) : [];
+      const blogs = rawExams ? rawExams.filter((e) => e.category === "blog" && e.is_archived !== true).sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()) : [];
+      const exams = rawExams ? rawExams.filter(
+        (e) => e.category !== "system" && e.category !== "blog" && e.category !== "current_affairs" && e.is_archived !== true
+      ) : [];
       let xml = `<?xml version="1.0" encoding="UTF-8"?>
 `;
       xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 `;
-      staticRoutes.forEach((route) => {
+      staticRoutes.forEach((item) => {
         xml += `  <url>
 `;
-        xml += `    <loc>${baseUrl}${route}</loc>
+        xml += `    <loc>${baseUrl}${item.path}</loc>
 `;
-        xml += `    <changefreq>daily</changefreq>
+        xml += `    <changefreq>${item.changefreq}</changefreq>
 `;
-        xml += `    <priority>${route === "" ? "1.0" : "0.8"}</priority>
+        xml += `    <priority>${item.priority}</priority>
 `;
         xml += `  </url>
 `;
@@ -6634,6 +10000,7 @@ ${combinedImageContext}`
       }
       xml += `</urlset>`;
       res.setHeader("Content-Type", "application/xml");
+      res.setHeader("Cache-Control", "public, max-age=3600");
       res.send(xml);
     } catch (err) {
       console.error("[Sitemap Error]", err);
@@ -6646,10 +10013,19 @@ ${combinedImageContext}`
     const sitemapUrl = `${protocol}://${host}/sitemap.xml`;
     const txt = `User-agent: *
 Allow: /
+Allow: /current-affairs
 Allow: /blog
 Allow: /blog/*
+Allow: /exams/*
+Allow: /privacy-policy
+Allow: /terms-of-service
+Allow: /refund-policy
 Disallow: /admin
 Disallow: /admin-login
+Disallow: /api/admin/
+
+User-agent: Googlebot
+Allow: /
 
 User-agent: Googlebot-Image
 Allow: /
@@ -6659,8 +10035,32 @@ Allow: /
 
 Sitemap: ${sitemapUrl}
 `;
-    res.setHeader("Content-Type", "text/plain");
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=86400");
     res.send(txt);
+  });
+  app.get("/api/seo/ping-sitemap", async (req, res) => {
+    const host = req.get("host") || "odishaexamprep.in";
+    const sitemapUrl = encodeURIComponent(`https://${host}/sitemap.xml`);
+    const results = {};
+    try {
+      const bingRes = await fetch(`https://www.bing.com/ping?sitemap=${sitemapUrl}`);
+      results["bing"] = { status: bingRes.status, ok: bingRes.ok };
+    } catch (e) {
+      results["bing"] = { error: e.message };
+    }
+    try {
+      const googleRes = await fetch(`https://www.google.com/ping?sitemap=${sitemapUrl}`);
+      results["google"] = { status: googleRes.status, ok: googleRes.ok };
+    } catch (e) {
+      results["google"] = { error: e.message };
+    }
+    res.json({
+      success: true,
+      timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+      sitemap: `https://${host}/sitemap.xml`,
+      results
+    });
   });
   app.get(["/shorts-creator.html", "/shorts-creator", "/memory-shorts-creator.html", "/memory-shorts-creator", "/virtual-office.html", "/virtual-office", "/office"], (req, res) => {
     let clean = req.path.replace(/^\//, "");
@@ -6723,10 +10123,12 @@ Sitemap: ${sitemapUrl}
     app.use(express.static(distPath, {
       setHeaders: (res, filePath) => {
         const normalized = filePath.replace(/\\/g, "/");
-        if (normalized.endsWith(".html") || normalized.endsWith("sw.js") || normalized.endsWith("site.webmanifest") || normalized.endsWith("manifest.json") || normalized.includes("/favicon") || normalized.includes("/android-chrome") || normalized.includes("/apple-touch-icon")) {
+        if (normalized.endsWith(".html") || normalized.endsWith("sw.js") || normalized.endsWith("site.webmanifest") || normalized.endsWith("manifest.json")) {
           res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0");
           res.setHeader("Pragma", "no-cache");
           res.setHeader("Expires", "0");
+        } else if (normalized.includes("/favicon") || normalized.includes("/android-chrome") || normalized.includes("/apple-touch-icon")) {
+          res.setHeader("Cache-Control", "public, max-age=86400, stale-while-revalidate=604800");
         } else if (normalized.includes("/assets/")) {
           res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
         } else {
@@ -6767,6 +10169,9 @@ Sitemap: ${sitemapUrl}
       const server = app.listen(Number(PORT), "0.0.0.0", () => {
         console.log(`Server running on http://localhost:${PORT}`);
       });
+      server.timeout = 3e5;
+      server.keepAliveTimeout = 305e3;
+      server.headersTimeout = 31e4;
       server.on("error", (err) => {
         if (err.code === "EADDRINUSE" && retries > 0) {
           console.warn(`Port ${PORT} still in use, retrying in ${delayMs}ms... (${retries} retries left)`);

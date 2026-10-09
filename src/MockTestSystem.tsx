@@ -27,6 +27,7 @@ import { Button } from './components/Button';
 import { useAuth } from './lib/AuthContext';
 import { useLanguage } from './lib/LanguageContext';
 import { MathTextRenderer, DiagramRenderer } from './components/MathTextRenderer';
+import { resolveDiagramPlacements } from './lib/diagramValidator';
 import { fadeSlideUp, modalContent } from './lib/animations';
 import { recordQuestionSolved, completeDailyGoalDirectly } from './lib/streakManager';
 import { destroyLenis, initLenis } from './lib/lenisScroll';
@@ -131,6 +132,7 @@ interface Question {
   correctAnswerIndex: number;
   explanation: string;
   diagram?: any;
+  explanationDiagram?: any;
 }
 
 interface MockTestProps {
@@ -1255,7 +1257,8 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                - Math-heavy questions: stacked full-width (question top, options below)
           */}
           {(() => {
-            const mathHeavy = isMathHeavyQuestion(currentQuestion.questionText) || !!currentQuestion.diagram;
+            const { questionDiagram, explanationDiagram } = resolveDiagramPlacements(currentQuestion);
+            const mathHeavy = isMathHeavyQuestion(currentQuestion.questionText) || !!questionDiagram;
             const mathBlockCount = countMathBlocks(currentQuestion.questionText);
             const useCompactBlocks = mathBlockCount >= 2;
             const paragraphs = (currentQuestion.questionText || '').split('\n\n').filter(Boolean);
@@ -1331,11 +1334,11 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                               />
                             </p>
                           ))}
-                          {currentQuestion.diagram ? (
+                          {questionDiagram ? (
                             <div className="mt-4 sm:mt-5 w-full block">
                               <DiagramRenderer
-                                diagram={currentQuestion.diagram}
-                                data={currentQuestion.diagram}
+                                diagram={questionDiagram}
+                                data={questionDiagram}
                               />
                             </div>
                           ) : null}
@@ -1422,9 +1425,18 @@ const MockTestSystem = ({ test, mode = 'mock', initialState, onComplete, onExit 
                                 <span className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase tracking-wider mt-1 block">Solution Breakdown</span>
                               </div>
                             </div>
-                            <p className="text-slate-700 dark:text-slate-200 text-sm sm:text-base leading-relaxed font-serif font-medium border-l-4 border-[#2563EB] dark:border-blue-500 pl-4 py-1">
+                            <div className="text-slate-700 dark:text-slate-200 text-sm sm:text-base leading-relaxed font-serif font-medium border-l-4 border-[#2563EB] dark:border-blue-500 pl-4 py-1 space-y-3">
                               <MathTextRenderer text={currentQuestion.explanation} />
-                            </p>
+                              {explanationDiagram && (
+                                <div className="mt-3.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1.5 flex items-center gap-1.5">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                                    Solution Derivation Visual:
+                                  </span>
+                                  <DiagramRenderer diagram={explanationDiagram} data={explanationDiagram} />
+                                </div>
+                              )}
+                            </div>
                           </motion.div>
                         )}
                       </div>

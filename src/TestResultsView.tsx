@@ -5,6 +5,7 @@ import { cn } from './lib/utils';
 import { Button } from './components/Button';
 import { fadeSlideUpSm } from './lib/animations';
 import { MathTextRenderer, DiagramRenderer } from './components/MathTextRenderer';
+import { resolveDiagramPlacements } from './lib/diagramValidator';
 import { DynamicVectorCard } from './components/DynamicVectorCard';
 
 import { evaluatePersonalBestImprovements, PersonalBestImprovement } from './lib/personalBestManager';
@@ -222,10 +223,11 @@ export default function TestResultsView({ results, onClose }: { results: any, on
 
   // Detect if current question text overflows its container
   React.useEffect(() => {
-    setQuestionExpanded(!!currentQ?.diagram);
+    const { questionDiagram } = resolveDiagramPlacements(currentQ);
+    setQuestionExpanded(!!questionDiagram);
     const el = questionTextRef.current;
     if (el) {
-      setQuestionOverflows(currentQ?.diagram ? false : el.scrollHeight > 280);
+      setQuestionOverflows(questionDiagram ? false : el.scrollHeight > 280);
     }
   }, [currentIdx, currentQ]);
 
@@ -268,6 +270,10 @@ export default function TestResultsView({ results, onClose }: { results: any, on
     return `${Math.floor(secs/60)}m ${Math.floor(secs%60)}s`;
   };
 
+  const { questionDiagram, explanationDiagram } = React.useMemo(() => {
+    return resolveDiagramPlacements(currentQ);
+  }, [currentQ]);
+
   const questionTextContent = React.useMemo(() => (
     <div
       ref={questionTextRef}
@@ -278,13 +284,13 @@ export default function TestResultsView({ results, onClose }: { results: any, on
           <MathTextRenderer text={para} />
         </p>
       ))}
-      {currentQ?.diagram ? (
+      {questionDiagram ? (
         <div className="mt-5 sm:mt-6 w-full block">
-          <DiagramRenderer diagram={currentQ.diagram} data={currentQ.diagram} />
+          <DiagramRenderer diagram={questionDiagram} data={questionDiagram} />
         </div>
       ) : null}
     </div>
-  ), [currentQ]);
+  ), [currentQ, questionDiagram]);
 
   const cardContent = React.useMemo(() => (
     <>
@@ -397,9 +403,18 @@ export default function TestResultsView({ results, onClose }: { results: any, on
              <div className="bg-white dark:bg-[#0B1528] p-1 sm:p-2 rounded-md sm:rounded-xl shadow-sm shrink-0 border border-transparent dark:border-slate-800"><AlertCircle className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-brand-600 dark:text-blue-400"/></div> 
              Explanation
            </h4>
-           <p className="text-brand-800 dark:text-slate-200 font-medium leading-relaxed text-sm sm:text-base lg:text-[15px]">
+           <div className="text-brand-800 dark:text-slate-200 font-medium leading-relaxed text-sm sm:text-base lg:text-[15px] space-y-3">
              <MathTextRenderer text={currentQ.explanation} />
-           </p>
+             {explanationDiagram && (
+               <div className="mt-3.5 pt-3 border-t border-brand-200/60 dark:border-slate-800 overflow-x-auto">
+                 <span className="text-[10px] font-bold uppercase tracking-wider text-brand-700 dark:text-blue-400 block mb-1.5 flex items-center gap-1.5">
+                   <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                   Solution Derivation Visual:
+                 </span>
+                 <DiagramRenderer diagram={explanationDiagram} data={explanationDiagram} />
+               </div>
+             )}
+           </div>
          </div>
       )}
       

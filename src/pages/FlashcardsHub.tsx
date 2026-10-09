@@ -32,10 +32,11 @@ export const FlashcardsHub: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // URL Context: selected exam & active subject & stage
+  // URL Context: selected exam & active subject, stage & stream
   const queryExam = searchParams.get('exam');
   const querySubject = searchParams.get('subject');
   const queryStage = searchParams.get('stage');
+  const queryStream = searchParams.get('stream');
 
   const [selectedExamId, setSelectedExamId] = useState<string>(() => {
     if (queryExam && queryExam !== 'all') return queryExam;
@@ -47,6 +48,7 @@ export const FlashcardsHub: React.FC = () => {
   });
   const [activeSubject, setActiveSubject] = useState<string | null>(querySubject || null);
   const [selectedStage, setSelectedStage] = useState<string>(queryStage || 'all');
+  const [selectedStream, setSelectedStream] = useState<string>(queryStream || 'all');
 
   // Active study session modal
   const [activeDeck, setActiveDeck] = useState<FlashcardDeck | null>(null);
@@ -69,6 +71,10 @@ export const FlashcardsHub: React.FC = () => {
   useEffect(() => {
     setSelectedStage(queryStage || 'all');
   }, [queryStage]);
+
+  useEffect(() => {
+    setSelectedStream(queryStream || 'all');
+  }, [queryStream]);
 
   // Load all exams, flashcard decks, and user progress
   useEffect(() => {
@@ -131,6 +137,7 @@ export const FlashcardsHub: React.FC = () => {
     setSelectedExamId(examId);
     setActiveSubject(null);
     setSelectedStage('all');
+    setSelectedStream('all');
     const params = new URLSearchParams(searchParams);
     if (examId === 'all') {
       params.delete('exam');
@@ -139,6 +146,7 @@ export const FlashcardsHub: React.FC = () => {
     }
     params.delete('subject');
     params.delete('stage');
+    params.delete('stream');
     setSearchParams(params);
   };
 
@@ -151,6 +159,20 @@ export const FlashcardsHub: React.FC = () => {
       params.delete('stage');
     } else {
       params.set('stage', stage);
+    }
+    params.delete('subject');
+    setSearchParams(params);
+  };
+
+  // Handle stream change
+  const handleSelectStream = (stream: string) => {
+    setSelectedStream(stream);
+    setActiveSubject(null);
+    const params = new URLSearchParams(searchParams);
+    if (stream === 'all') {
+      params.delete('stream');
+    } else {
+      params.set('stream', stream);
     }
     params.delete('subject');
     setSearchParams(params);
@@ -206,6 +228,9 @@ export const FlashcardsHub: React.FC = () => {
     }
     if (selectedStage !== 'all') {
       list = list.filter(d => !d.stage || d.stage === 'All Stages' || d.stage.toLowerCase() === selectedStage.toLowerCase());
+    }
+    if (selectedStream !== 'all') {
+      list = list.filter(d => !d.stream || d.stream === 'All Streams' || d.stream.toLowerCase() === 'common' || d.stream.toLowerCase() === selectedStream.toLowerCase());
     }
     return list;
   }, [decks, selectedExamId, currentExam, selectedStage]);
@@ -373,39 +398,75 @@ export const FlashcardsHub: React.FC = () => {
             </span>
           </Link>
 
-          {/* Stage Switcher (Only displayed if the active exam has multiple stages) */}
-          {currentExam?.stages && currentExam.stages.length > 1 && !currentExam.stages.includes('Single Stage') && (
-            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 overflow-x-auto no-scrollbar w-fit">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-400 px-2 flex items-center gap-1 shrink-0">
-                <Filter className="w-3 h-3 text-purple-600 dark:text-purple-400" /> Stage:
-              </span>
-              <button
-                type="button"
-                onClick={() => handleSelectStage('all')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-                  selectedStage === 'all'
-                    ? 'bg-purple-600 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                }`}
-              >
-                All Stages
-              </button>
-              {currentExam.stages.map((st) => (
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Stage Switcher (Only displayed if the active exam has multiple stages) */}
+            {currentExam?.stages && currentExam.stages.length > 1 && !currentExam.stages.includes('Single Stage') && (
+              <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 overflow-x-auto no-scrollbar w-fit">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-400 px-2 flex items-center gap-1 shrink-0">
+                  <Filter className="w-3 h-3 text-purple-600 dark:text-purple-400" /> Stage:
+                </span>
                 <button
-                  key={st}
                   type="button"
-                  onClick={() => handleSelectStage(st)}
+                  onClick={() => handleSelectStage('all')}
                   className={`px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-                    selectedStage.toLowerCase() === st.toLowerCase()
+                    selectedStage === 'all'
                       ? 'bg-purple-600 text-white shadow-xs'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
-                  {st}
+                  All Stages
                 </button>
-              ))}
-            </div>
-          )}
+                {currentExam.stages.map((st) => (
+                  <button
+                    key={st}
+                    type="button"
+                    onClick={() => handleSelectStage(st)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                      selectedStage.toLowerCase() === st.toLowerCase()
+                        ? 'bg-purple-600 text-white shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    {st}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Stream Switcher (Only displayed if the active exam has streams configured) */}
+            {currentExam?.streams && currentExam.streams.length > 0 && (
+              <div className="flex items-center gap-1.5 p-1 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-850/60 overflow-x-auto no-scrollbar w-fit">
+                <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-300 px-2 flex items-center gap-1 shrink-0">
+                  🎓 Stream:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleSelectStream('all')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                    selectedStream === 'all'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  }`}
+                >
+                  All Streams
+                </button>
+                {currentExam.streams.map((str) => (
+                  <button
+                    key={str}
+                    type="button"
+                    onClick={() => handleSelectStream(str)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                      selectedStream.toLowerCase() === str.toLowerCase()
+                        ? 'bg-blue-600 text-white shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    🎓 {str}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* ==================== 2. HERO / SMART SRS BANNER ==================== */}

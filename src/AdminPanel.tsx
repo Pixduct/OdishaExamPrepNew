@@ -45,7 +45,7 @@ import {
   FolderSync
 } from 'lucide-react';
 import { Reorder } from 'framer-motion';
-import { examService, clearCatalogCache, Question, TestSeries, MockTest, Exam, EXAM_STAGES } from './lib/examService';
+import { examService, clearCatalogCache, Question, TestSeries, MockTest, Exam, EXAM_STAGES, EXAM_STREAM_PRESETS } from './lib/examService';
 import { destroyLenis, initLenis } from './lib/lenisScroll';
 import { DEFAULT_ACHIEVERS_JOURNAL, AchieverStory } from './lib/defaultAchievers';
 import { cn, getDirectImageUrl } from './lib/utils';
@@ -533,6 +533,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     examDate: '',
     stages: [] as string[],
     stage: '',
+    streams: [] as string[],
+    stream: '',
     
     // Generic
     title: '',
@@ -615,6 +617,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
   const [bulkJsonInput, setBulkJsonInput] = useState('');
   const [bulkGlobalExamId, setBulkGlobalExamId] = useState('');
   const [bulkGlobalStage, setBulkGlobalStage] = useState('');
+  const [bulkGlobalStream, setBulkGlobalStream] = useState('');
+  const [customStreamInput, setCustomStreamInput] = useState('');
   const [bulkGlobalCategory, setBulkGlobalCategory] = useState('topic-wise');
   const [bulkGlobalTagline, setBulkGlobalTagline] = useState('');
   const [bulkGlobalTargetMode, setBulkGlobalTargetMode] = useState<'bank' | 'practice' | 'both'>('practice');
@@ -1519,7 +1523,11 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         filtered = filtered.filter(q => !(q.topic || '').startsWith('mockTest__'));
         if (selectedTargetIdForQuestions) {
           const targetLower = selectedTargetIdForQuestions.trim().toLowerCase();
-          filtered = filtered.filter(q => q.topic === selectedTargetIdForQuestions || (q.topic && q.topic.trim().toLowerCase() === targetLower));
+          filtered = filtered.filter(q => 
+            q.topic === selectedTargetIdForQuestions || 
+            q.topic === `bank__${selectedTargetIdForQuestions}` || 
+            (q.topic && q.topic.trim().toLowerCase() === targetLower)
+          );
           if (filtered.length === 0) {
             const matchingBank = banks.find(b => 
               (b.examId === selectedExamIdForQuestions || !b.examId) && 
@@ -1569,6 +1577,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
             const testId = q.topic.split('__')[1];
             const mt = mockTests.find(m => m.id === testId);
             if (mt && mt.title.toLowerCase().includes(lowerQ)) mockTitleMatch = true;
+          } else if ((q.topic || '').startsWith('bank__')) {
+            const bId = q.topic.split('__')[1];
+            const bk = banks.find(b => b.id === bId);
+            if (bk && bk.title.toLowerCase().includes(lowerQ)) mockTitleMatch = true;
           }
           return textMatch || topicMatch || examNameMatch || mockTitleMatch;
         });
@@ -1952,12 +1964,17 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     }
 
     try {
-      if (activeTab === 'questions') await examService.deleteQuestion(id);
-      else if (activeTab === 'series') await examService.deleteTestSeries(id);
-      else if (activeTab === 'tests') await examService.deleteMockTest(id);
-      else if (activeTab === 'exams' || activeTab === 'blogs') await examService.deleteExam(id);
+      let res: any;
+      if (activeTab === 'questions') res = await examService.deleteQuestion(id);
+      else if (activeTab === 'series') res = await examService.deleteTestSeries(id);
+      else if (activeTab === 'tests') res = await examService.deleteMockTest(id);
+      else if (activeTab === 'exams' || activeTab === 'blogs') res = await examService.deleteExam(id);
       else if (activeTab === 'banks' || activeTab === 'practice') {
-        await examService.deleteQuestionBank(id);
+        res = await examService.deleteQuestionBank(id);
+      }
+      
+      if (res?.softDeleted) {
+        alert('ℹ️ Item was archived instead of permanently deleted to protect active candidate purchases.');
       }
       
       // Fetch data in the background to ensure consistency, without blocking the UI
@@ -1979,14 +1996,16 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
 
     try {
       setLoading(true);
+      let res: any;
       if (activeTab === 'tests') {
-        await examService.clearQuestionsForMockTest(item.id);
+        res = await examService.clearQuestionsForMockTest(item.id);
         setMockTests(prev => prev.map(t => t.id === item.id ? { ...t, _questionCount: 0 } : t));
       } else {
-        await examService.clearQuestionsForBank(item.id);
+        res = await examService.clearQuestionsForBank(item.id);
         setBanks(prev => prev.map(b => (b.id === item.id || b.title === item.title) ? { ...b, questionCount: 0, practiceQuestionCount: 0 } : b));
       }
-      alert(`✅ Successfully cleared questions for "${item.title}". Count reset to 0.`);
+      const removedDetail = res?.deletedQuestions !== undefined ? ` (${res.deletedQuestions} questions permanently removed from database)` : '';
+      alert(`✅ Successfully cleared questions for "${item.title}". Count reset to 0.${removedDetail}`);
       await fetchData();
     } catch (err: any) {
       console.error("Clear questions error:", err);
@@ -2020,6 +2039,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         examId: item.examId || '',
         mockSubject: parsedTagline.subject || (item as any).subject || '',
         stage: parsedTagline.stage || item.stage || '',
+        stream: parsedTagline.stream || (item as any).stream || '',
         type: item.type || 'topic-wise',
         target_mode: (item.target_mode || 'both') as 'bank' | 'practice' | 'both',
         title: item.title || '',
@@ -2120,6 +2140,18 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         resolvedStages = [...item.stages];
       }
 
+      // Resolve streams robustly
+      let resolvedStreams: string[] = [];
+      if (Array.isArray(item.streams) && item.streams.length > 0) {
+        resolvedStreams = [...item.streams];
+      } else if (Array.isArray(parsedExamMeta.streams) && parsedExamMeta.streams.length > 0) {
+        resolvedStreams = [...parsedExamMeta.streams];
+      } else if (parsedExamMeta.stream && typeof parsedExamMeta.stream === 'string') {
+        resolvedStreams = [parsedExamMeta.stream];
+      } else if (Array.isArray(item.streams)) {
+        resolvedStreams = [...item.streams];
+      }
+
       newData = {
         ...newData,
         name: item.name || '',
@@ -2146,7 +2178,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         examDateStatus: parsedExamMeta.examDateStatus || (parsedExamMeta.examDate || item.examDate ? 'published' : 'tba'),
         formFillupStatus: parsedExamMeta.formFillupStatus || 'tba',
         formFillupEndDate: parsedExamMeta.formFillupEndDate || '',
-        stages: resolvedStages
+        stages: resolvedStages,
+        streams: resolvedStreams
       };
     } else if (activeTab === 'blogs') {
       newData = {
@@ -2216,6 +2249,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         mockCategory: parsedMockConfig.category || 'full-length',
         mockSubject: parsedMockConfig.subject || '',
         stage: parsedMockConfig.stage || item.stage || '',
+        stream: parsedMockConfig.stream || item.stream || '',
         isPremium: parsedMockConfig.isPremium || false,
         price: parsedMockConfig.price || 499,
         originalPrice: parsedMockConfig.originalPrice || ((parsedMockConfig.price || 499) * 2),
@@ -2306,6 +2340,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
       const itemScheduledAt = computeScheduleForItem(item, i);
 
       const itemStage = item.stage || bulkGlobalStage || undefined;
+      const itemStream = item.stream || bulkGlobalStream || undefined;
 
       try {
         if (activeTab === 'banks' || activeTab === 'practice') {
@@ -2314,9 +2349,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
             price: itemPrice,
             originalPrice: itemOrigPrice,
             subject: item.subject || '',
-            stage: itemStage
+            stage: itemStage,
+            stream: itemStream
           };
-          const hasTaglineMeta = itemIsPremium || item.subject || itemTagline || item.price !== undefined || itemStage;
+          const hasTaglineMeta = itemIsPremium || item.subject || itemTagline || item.price !== undefined || itemStage || itemStream;
           const payload = {
             examId: bulkGlobalExamId,
             type: bulkGlobalCategory,
@@ -2339,6 +2375,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
             subject: bulkGlobalCategory === 'sectional' ? (item.subject || '') : null,
             tagline: itemTagline || undefined,
             stage: itemStage,
+            stream: itemStream,
             isPremium: itemIsPremium,
             price: itemPrice,
             originalPrice: itemOrigPrice,
@@ -2441,6 +2478,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
            examId: formData.examId,
            category: formData.mockCategory,
            stage: formData.stage || null,
+           stream: formData.stream || null,
            subject: formData.mockCategory === 'sectional' ? formData.mockSubject : null,
            isPremium: formData.isPremium,
            price: Number(formData.price) || 499,
@@ -2504,6 +2542,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           formFillupStatus: formData.formFillupStatus || 'tba',
           formFillupEndDate: formData.formFillupEndDate || '',
           stages: Array.isArray(formData.stages) ? formData.stages : [],
+          streams: Array.isArray(formData.streams) ? formData.streams : [],
           isPremium: isExamPremium,
           starterPrice: Number(formData.starterPrice) || 29,
           starterOriginalPrice: Number(formData.starterOriginalPrice) || 99,
@@ -2530,9 +2569,10 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
         };
         if (!validateChangeBeforePublish('exam', payload, !!editingId)) return;
         const updatedStages = Array.isArray(formData.stages) ? [...formData.stages] : [];
+        const updatedStreams = Array.isArray(formData.streams) ? [...formData.streams] : [];
         if (editingId) {
           await examService.updateExam(editingId, payload);
-          // Optimistic update: synchronously set clean description, rawDescription, stages, and pricingConfig
+          // Optimistic update: synchronously set clean description, rawDescription, stages, streams, and pricingConfig
           setExams(prev => {
             const next = prev.map(e => e.id === editingId ? {
               ...e,
@@ -2541,6 +2581,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
               description: formData.description || '',
               rawDescription: rawDescriptionString,
               stages: updatedStages,
+              streams: updatedStreams,
               pricingConfig: metaObj
             } : e);
             saveAdminCatalogCache({ ex: next });
@@ -2555,6 +2596,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
               description: formData.description || '',
               rawDescription: rawDescriptionString,
               stages: updatedStages,
+              streams: updatedStreams,
               pricingConfig: metaObj
             };
             setExams(prev => {
@@ -2585,7 +2627,8 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           price: Number(formData.price) || 499,
           originalPrice: Number(formData.originalPrice) || ((Number(formData.price) || 499) * 2),
           subject: formData.mockSubject || '',
-          stage: formData.stage || ''
+          stage: formData.stage || '',
+          stream: formData.stream || ''
         };
 
         const assignedTargetMode = formData.target_mode || (activeTab === 'practice' ? 'practice' : 'bank');
@@ -2599,7 +2642,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
           title: formData.title,
           sortOrder: targetOrder,
           questionCount: finalQuestionCount,
-          tagline: (formData.isPremium || formData.mockSubject || formData.tagline || formData.stage) ? JSON.stringify(metaTaglineObj) : '',
+          tagline: (formData.isPremium || formData.mockSubject || formData.tagline || formData.stage || formData.stream) ? JSON.stringify(metaTaglineObj) : '',
           image: formData.image,
           isPremium: formData.isPremium,
           pdfUrl: finalPdfPayload,
@@ -2822,21 +2865,30 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
     if (selectedItemIds.size === 0) return;
     const total = selectedItemIds.size;
     const itemLabel = activeTab === 'tests' ? 'mock tests' : activeTab === 'practice' ? 'practice sets' : 'question banks';
-    if (!confirm(`⚠️ Are you sure you want to permanently delete all ${total} selected ${itemLabel}? This action cannot be undone.`)) return;
+    if (!confirm(`⚠️ Are you sure you want to permanently delete all ${total} selected ${itemLabel} and all their attached questions? This action cannot be undone.`)) return;
 
     setLoading(true);
     try {
-      const deletePromises = Array.from(selectedItemIds).map((id: string) => {
-        if (activeTab === 'tests') return examService.deleteMockTest(id);
-        if (activeTab === 'banks' || activeTab === 'practice') return examService.deleteQuestionBank(id);
-        return Promise.resolve();
+      let totalDeletedQuestions = 0;
+      const deletePromises = Array.from(selectedItemIds).map(async (id: string) => {
+        if (activeTab === 'tests') {
+          const res = await examService.deleteMockTest(id);
+          return res?.deletedQuestions || 0;
+        }
+        if (activeTab === 'banks' || activeTab === 'practice') {
+          const res = await examService.deleteQuestionBank(id);
+          return res?.deletedQuestions || 0;
+        }
+        return 0;
       });
-      await Promise.all(deletePromises);
+      const results = await Promise.all(deletePromises);
+      totalDeletedQuestions = results.reduce((acc, c) => acc + c, 0);
 
       setSelectedItemIds(new Set());
       try { clearCatalogCache(); } catch(e) {}
       await fetchData();
-      alert(`🗑️ Successfully deleted ${total} ${itemLabel}.`);
+      const qText = totalDeletedQuestions > 0 ? ` and permanently removed ${totalDeletedQuestions} attached questions.` : '.';
+      alert(`🗑️ Successfully deleted ${total} ${itemLabel}${qText}`);
     } catch (err: any) {
       console.error('Bulk delete failed:', err);
       alert('Error deleting items: ' + (err.message || err));
@@ -3560,6 +3612,127 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                 })}
               </div>
             </div>
+            
+            {/* Academic Streams & Disciplines (Optional - e.g. Civil, Mechanical, Electrical, Nursing) */}
+            <div className="md:col-span-2 p-5 bg-gradient-to-br from-cyan-50/70 via-slate-50/50 to-blue-50/60 dark:from-slate-850 dark:via-slate-800 dark:to-cyan-950/20 rounded-2xl border border-cyan-200/70 dark:border-slate-750 space-y-4 mt-4 shadow-xs">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-cyan-600 text-white flex items-center justify-center font-black text-xs shadow-sm">
+                    🎓
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Academic Streams & Disciplines</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Configure branch/subject specializations (e.g. Civil, Mechanical, Electrical, Nursing, Physics). Leave empty for general exams.</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
+                    {(formData.streams || []).length === 0
+                      ? '🌐 General Exam (No Streams)'
+                      : `🎓 ${(formData.streams || []).length} Streams Configured`}
+                  </span>
+                  {(formData.streams || []).length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, streams: [] })}
+                      className="text-[11px] font-bold text-rose-500 hover:text-rose-600 px-2 py-1 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all cursor-pointer"
+                    >
+                      Clear All
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Active Configured Streams */}
+              {(formData.streams || []).length > 0 && (
+                <div className="flex flex-wrap gap-2 p-3 bg-white/80 dark:bg-slate-900/80 rounded-xl border border-cyan-200/50 dark:border-slate-700">
+                  {(formData.streams || []).map((streamName: string) => (
+                    <span 
+                      key={streamName}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-cyan-50 dark:bg-cyan-950/60 text-cyan-800 dark:text-cyan-200 border border-cyan-200 dark:border-cyan-800 text-xs font-bold"
+                    >
+                      <span>{streamName}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = (formData.streams || []).filter((s: string) => s !== streamName);
+                          setFormData({ ...formData, streams: updated });
+                        }}
+                        className="hover:text-rose-600 cursor-pointer p-0.5 rounded-full hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Quick Add Presets */}
+              <div className="space-y-1.5 pt-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Quick-Add Popular Presets:</span>
+                <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto pr-1">
+                  {EXAM_STREAM_PRESETS.map((preset: string) => {
+                    const isAdded = (formData.streams || []).includes(preset);
+                    return (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => {
+                          const current = formData.streams || [];
+                          const updated = isAdded 
+                            ? current.filter((s: string) => s !== preset)
+                            : [...current, preset];
+                          setFormData({ ...formData, streams: updated });
+                        }}
+                        className={cn(
+                          "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border flex items-center gap-1 cursor-pointer select-none",
+                          isAdded
+                            ? "bg-cyan-600 text-white border-cyan-700 shadow-xs"
+                            : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-cyan-400 hover:text-cyan-700"
+                        )}
+                      >
+                        <span>{isAdded ? '✓' : '+'}</span>
+                        <span>{preset}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Custom Stream Input */}
+              <div className="flex gap-2 pt-1">
+                <input
+                  type="text"
+                  placeholder="Or enter custom stream (e.g. Mining Engineering, Geology)..."
+                  value={customStreamInput}
+                  onChange={e => setCustomStreamInput(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      const val = customStreamInput.trim();
+                      if (val && !(formData.streams || []).includes(val)) {
+                        setFormData({ ...formData, streams: [...(formData.streams || []), val] });
+                        setCustomStreamInput('');
+                      }
+                    }
+                  }}
+                  className="flex-1 px-3.5 py-2 rounded-xl text-xs font-medium border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const val = customStreamInput.trim();
+                    if (val && !(formData.streams || []).includes(val)) {
+                      setFormData({ ...formData, streams: [...(formData.streams || []), val] });
+                      setCustomStreamInput('');
+                    }
+                  }}
+                  className="px-4 py-2 rounded-xl text-xs font-black bg-cyan-600 hover:bg-cyan-700 text-white shadow-xs transition-colors cursor-pointer"
+                >
+                  + Add Stream
+                </button>
+              </div>
+            </div>
             </div>
             
             <div className="md:col-span-2 p-6 bg-gradient-to-br from-brand-50/60 via-slate-50/60 to-indigo-50/60 dark:from-slate-800/80 dark:via-slate-800/40 dark:to-indigo-950/30 rounded-3xl border border-brand-200/60 dark:border-slate-700 space-y-5 mt-6 shadow-sm">
@@ -3805,6 +3978,36 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                         <option value="">-- All Stages / General (Shown across all stages) --</option>
                         {stages.map(st => (
                           <option key={st} value={st}>{st}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Target Stream / Academic Discipline (if exam has streams configured) */}
+              {(() => {
+                const targetExam = actualExams.find(ex => ex.id === formData.examId);
+                const streams = (targetExam?.streams && targetExam.streams.length > 0)
+                  ? targetExam.streams
+                  : [];
+                if (streams.length === 0) return null;
+                return (
+                  <div className="space-y-2 col-span-1 md:col-span-2 bg-cyan-50/80 dark:bg-cyan-950/30 p-3.5 rounded-2xl border border-cyan-200/80 dark:border-cyan-800/60">
+                    <label className={cn(labelClass, "text-cyan-900 dark:text-cyan-200 flex items-center gap-1.5")}>
+                      <span>🎓 Target Academic Stream / Discipline</span>
+                      <span className="text-[10px] text-cyan-600 dark:text-cyan-400 font-normal lowercase">(optional)</span>
+                    </label>
+                    <div className={selectWrapperClass}>
+                      <select 
+                        value={formData.stream || ''} 
+                        onChange={e => setFormData({ ...formData, stream: e.target.value })} 
+                        className={selectClass}
+                      >
+                        <option value="">-- All Streams / Common (Shown across all branches) --</option>
+                        {streams.map(str => (
+                          <option key={str} value={str}>🎓 {str}</option>
                         ))}
                       </select>
                       <ChevronDown className="w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -4075,6 +4278,36 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                         <option value="">-- All Stages / General (Shown across all stages) --</option>
                         {stages.map(st => (
                           <option key={st} value={st}>{st}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Target Stream / Academic Discipline (if exam has streams configured) */}
+              {(() => {
+                const targetExam = actualExams.find(ex => ex.id === formData.examId);
+                const streams = (targetExam?.streams && targetExam.streams.length > 0)
+                  ? targetExam.streams
+                  : [];
+                if (streams.length === 0) return null;
+                return (
+                  <div className="space-y-2 col-span-1 md:col-span-2 bg-cyan-50/80 dark:bg-cyan-950/30 p-3.5 rounded-2xl border border-cyan-200/80 dark:border-cyan-800/60">
+                    <label className={cn(labelClass, "text-cyan-900 dark:text-cyan-200 flex items-center gap-1.5")}>
+                      <span>🎓 Target Academic Stream / Discipline</span>
+                      <span className="text-[10px] text-cyan-600 dark:text-cyan-400 font-normal lowercase">(optional)</span>
+                    </label>
+                    <div className={selectWrapperClass}>
+                      <select 
+                        value={formData.stream || ''} 
+                        onChange={e => setFormData({ ...formData, stream: e.target.value })} 
+                        className={selectClass}
+                      >
+                        <option value="">-- All Streams / Common (Shown across all branches) --</option>
+                        {streams.map(str => (
+                          <option key={str} value={str}>🎓 {str}</option>
                         ))}
                       </select>
                       <ChevronDown className="w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -8001,7 +8234,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                         key={bank.id}
                                         whileHover={{ y: -4, scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
-                                        onClick={() => setSelectedTargetIdForQuestions(bank.title)}
+                                        onClick={() => setSelectedTargetIdForQuestions(bank.id)}
                                         className="bg-white rounded-[2rem] border border-slate-200/60 p-6 flex flex-col justify-between hover:border-brand-500/50 hover:shadow-xl hover:shadow-brand-500/5 transition-all duration-300 cursor-pointer premium-shadow group relative overflow-hidden"
                                       >
                                         <div className="absolute inset-0 bg-gradient-to-br from-brand-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -9148,6 +9381,11 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                                              📍 {item.stage}
                                            </span>
                                          )}
+                                         {item.stream && item.stream !== 'All Streams' && (
+                                           <span className="shrink-0 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">
+                                             🎓 {item.stream}
+                                           </span>
+                                         )}
                                        </div>
                                        <div className="text-xs text-slate-400 font-bold mt-1 uppercase tracking-wider">
                                           {(() => {
@@ -9709,6 +9947,7 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                       onChange={e => {
                         setBulkGlobalExamId(e.target.value);
                         setBulkGlobalStage('');
+                        setBulkGlobalStream('');
                       }}
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-brand-400 focus:outline-none font-bold text-sm bg-white"
                     >
@@ -9743,6 +9982,35 @@ const AdminPanel = ({ onClose, onLogout }: { onClose: () => void, onLogout?: () 
                         </select>
                         <p className="text-[10px] text-purple-700 font-semibold">
                           Items with individual <code className="bg-white/80 px-1 rounded font-mono">"stage"</code> in their JSON will override this batch stage.
+                        </p>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Target Academic Stream / Discipline (Only shown if selected exam has streams configured) */}
+                  {(() => {
+                    const selectedEx = exams.find((ex: any) => ex.id === bulkGlobalExamId);
+                    if (!selectedEx || !selectedEx.streams || selectedEx.streams.length === 0) {
+                      return null;
+                    }
+                    return (
+                      <div className="space-y-1.5 p-3 rounded-xl bg-blue-50/60 border border-blue-100 animate-in fade-in duration-150">
+                        <label className="text-xs font-black text-blue-900 uppercase tracking-wider flex items-center gap-1.5">
+                          <span>🎓 Target Academic Stream</span>
+                          <span className="text-[10px] text-blue-600 font-normal lowercase">(optional / batch-wide)</span>
+                        </label>
+                        <select
+                          value={bulkGlobalStream}
+                          onChange={e => setBulkGlobalStream(e.target.value)}
+                          className="w-full px-4 py-2 rounded-xl border border-blue-200 focus:border-blue-400 focus:outline-none font-bold text-sm bg-white text-blue-950"
+                        >
+                          <option value="">-- All Streams / Common Paper --</option>
+                          {selectedEx.streams.map((st: string) => (
+                            <option key={st} value={st}>🎓 {st}</option>
+                          ))}
+                        </select>
+                        <p className="text-[10px] text-blue-700 font-semibold">
+                          Items with individual <code className="bg-white/80 px-1 rounded font-mono">"stream"</code> in their JSON will override this batch stream.
                         </p>
                       </div>
                     );

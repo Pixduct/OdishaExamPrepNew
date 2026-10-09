@@ -95,6 +95,29 @@ async function callAdminDbProxy(table: string, action: 'insert' | 'update' | 'de
   return data.data;
 }
 
+async function callCascadeDelete(entityType: 'questionBank' | 'mockTest' | 'testSeries' | 'question', entityId: string, clearOnly = false) {
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+  if (!token) {
+    throw new Error("Admin authorization token is missing. Please log in again.");
+  }
+
+  const res = await fetch(`/api/admin/cascade-delete`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ entityType, entityId, clearOnly })
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || `Cascade delete failed for ${entityType}`);
+  }
+  return data;
+}
+
 // --- Topic Count Helper ---
 async function fetchTopicCounts(topics: string[]): Promise<Record<string, number>> {
   const validTopics = (topics || []).filter(Boolean);
@@ -176,6 +199,7 @@ export interface Question {
   correctAnswerIndex: number;
   explanation: string;
   diagram?: any;
+  explanationDiagram?: any;
   sortOrder?: number;
   createdAt?: string;
 }
@@ -210,6 +234,43 @@ export const EXAM_STAGES = [
 
 export type ExamStage = typeof EXAM_STAGES[number];
 
+export const EXAM_STREAM_PRESETS = [
+  // Engineering & Technical
+  'Civil Engineering',
+  'Mechanical Engineering',
+  'Electrical Engineering',
+  'Computer Science & IT',
+  'Electronics & Telecommunication',
+  'Chemical Engineering',
+  'Automobile Engineering',
+  'Mining Engineering',
+  // Medical & Paramedical
+  'Nursing / GNM',
+  'Pharmacy',
+  'Medical Laboratory Technology (MLT)',
+  'Radiography',
+  // Agriculture & Allied
+  'Agriculture',
+  'Horticulture',
+  'Fisheries Science',
+  'Forestry',
+  'Veterinary & Animal Husbandry',
+  // Academic & Lecturer Disciplines
+  'Physics',
+  'Chemistry',
+  'Mathematics',
+  'Botany',
+  'Zoology',
+  'History',
+  'Political Science',
+  'Odia Literature',
+  'English Literature',
+  'Commerce & Management',
+  'Economics'
+] as const;
+
+export type ExamStreamPreset = typeof EXAM_STREAM_PRESETS[number];
+
 export interface ExamPricingConfig {
   starterTestCount?: number;
   starterSectionalCount?: number;
@@ -239,6 +300,7 @@ export interface MockTest {
   mockCategory?: string;
   mockSubject?: string;
   stage?: string;
+  stream?: string;
   _questionCount?: number;
   questionCount?: number;
 }
@@ -262,16 +324,47 @@ export interface Exam {
   originalPrice?: number;
   pricingConfig?: ExamPricingConfig;
   stages?: string[];
+  streams?: string[];
 }
 
 export interface ExamSyllabus {
   id?: string;
   exam_id: string;
   stage: string;
+  stream?: string;
   syllabus_markdown: string;
   directives_markdown?: string;
   created_at?: string;
   updated_at?: string;
+}
+
+/**
+ * Universal Dual-Axis Visibility Predicate (Stage x Stream)
+ * Evaluates whether a mock test, question bank, or deck should be displayed
+ * given the user's active stage and active stream selections.
+ */
+export function isContentVisibleForStageAndStream(
+  item: { stage?: string; stream?: string },
+  activeStage?: string,
+  activeStream?: string
+): boolean {
+  // 1. Stage Scoping
+  if (activeStage && activeStage !== 'All Stages' && item.stage && item.stage !== 'All Stages') {
+    if (item.stage.toLowerCase() !== activeStage.toLowerCase()) {
+      return false;
+    }
+  }
+
+  // 2. Stream Scoping
+  if (activeStream && activeStream !== 'All Streams' && activeStream.toLowerCase() !== 'common') {
+    if (item.stream && item.stream !== 'All Streams' && item.stream.toLowerCase() !== 'common') {
+      if (item.stream.toLowerCase() !== activeStream.toLowerCase()) {
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 /**
@@ -315,6 +408,7 @@ export interface QuestionBank {
   is_archived?: boolean;
   scheduled_at?: string | null;
   stage?: string;
+  stream?: string;
 }
 
 /**
@@ -537,10 +631,11 @@ export const examService = {
     cacheService.clear('topic_counts');
     cacheService.clear('all_question_banks');
     cacheService.clear('all_mock_tests_lite');
-    await callAdminDbProxy('questions', 'delete', undefined, id);
+    const result = await callCascadeDelete('question', id);
     cacheService.clear('topic_counts');
     cacheService.clear('all_question_banks');
     cacheService.clear('all_mock_tests_lite');
+    return result;
   },
 
   async updateQuestion(id: string, updates: Partial<Question>) {
@@ -592,57 +687,12 @@ export const examService = {
   async deleteTestSeries(id: string) {
     cacheService.clear('all_test_series');
     cacheService.clear('all_mock_tests_lite');
-    // Check if purchased
-    const { data: purchaseCount } = await supabase
-      .from('user_purchases')
-      .select('id')
-      .eq('product_id', id);
-
-    // Also check if any mock tests inside this series are purchased
-    const { data: allTests } = await supabase
-      .from('mockTests')
-      .select('id, seriesId');
-    
-    const testIds = (allTests || [])
-      .filter((t: any) => {
-        if (t.seriesId === id) return true;
-        if (typeof t.seriesId === 'string' && t.seriesId.includes(id)) return true;
-        return false;
-      })
-      .map((t: any) => t.id);
-
-    let hasPurchasedChildren = false;
-    if (testIds.length > 0) {
-      const { data: childPurchases } = await supabase
-        .from('user_purchases')
-        .select('id')
-        .in('product_id', testIds);
-      if (childPurchases && childPurchases.length > 0) {
-        hasPurchasedChildren = true;
-      }
-    }
-
-    const isPurchased = (purchaseCount && purchaseCount.length > 0) || hasPurchasedChildren;
-
-    if (isPurchased) {
-      // Soft delete: set is_archived = true on the testSeries, and on its mockTests
-      console.log(`Test series ${id} or its mock tests have active user purchases. Archiving to protect access.`);
-      await callAdminDbProxy('testSeries', 'update', { is_archived: true }, id);
-
-      if (testIds.length > 0) {
-        await callAdminDbProxy('mockTests', 'update', { is_archived: true }, undefined, { id: { op: 'in', val: testIds } });
-      }
-    } else {
-      // Hard delete: delete associated mock tests and questions, then the series
-      if (testIds.length > 0) {
-        const topicIds = testIds.map(tId => `mockTest__${tId}`);
-        await callAdminDbProxy('questions', 'delete', undefined, undefined, { topic: { op: 'in', val: topicIds } });
-        await callAdminDbProxy('mockTests', 'delete', undefined, undefined, { id: { op: 'in', val: testIds } });
-      }
-      await callAdminDbProxy('testSeries', 'delete', undefined, id);
-    }
+    cacheService.clear('topic_counts');
+    const result = await callCascadeDelete('testSeries', id);
     cacheService.clear('all_test_series');
     cacheService.clear('all_mock_tests_lite');
+    cacheService.clear('topic_counts');
+    return result;
   },
 
   async updateTestSeries(id: string, updates: Partial<TestSeries>) {
@@ -725,6 +775,7 @@ export const examService = {
         try { seriesData = JSON.parse(seriesData); } catch(e) {}
       }
       const stage = (t as any).stage || (seriesData && typeof seriesData === 'object' ? seriesData.stage : null) || null;
+      const stream = (t as any).stream || (seriesData && typeof seriesData === 'object' ? seriesData.stream : null) || null;
       const examId = (t as any).examId || (seriesData && typeof seriesData === 'object' ? seriesData.examId : null) || null;
       const category = (t as any).category || (seriesData && typeof seriesData === 'object' ? seriesData.category : null) || null;
 
@@ -733,6 +784,7 @@ export const examService = {
         examId,
         category,
         stage: stage || undefined,
+        stream: stream || undefined,
         questions: qList,
         _questionCount: cnt,
         questionCount: cnt,
@@ -771,6 +823,7 @@ export const examService = {
         let isPremium = t.isPremium ?? false;
         let category: string | null = t.category || null;
         let stage: string | null = t.stage || null;
+        let stream: string | null = t.stream || null;
 
         let seriesData = t.seriesId;
         if (typeof seriesData === 'string' && seriesData.startsWith('{')) {
@@ -782,6 +835,7 @@ export const examService = {
           isPremium = seriesData.isPremium ?? isPremium;
           category  = category  || seriesData.category  || null;
           stage     = stage     || seriesData.stage     || null;
+          stream    = stream    || seriesData.stream    || null;
         }
 
         const _questionCount = countMap[`mockTest__${t.id}`] || 0;
@@ -792,6 +846,7 @@ export const examService = {
           isPremium,
           category,
           stage: stage || undefined,
+          stream: stream || undefined,
           _questionCount,
           questionCount: _questionCount,
           actualQuestionCount: _questionCount,
@@ -809,27 +864,12 @@ export const examService = {
     cacheService.clear('topic_counts');
     try { sessionStorage.removeItem('oep_admin_catalog_cache_v2'); } catch(e) {}
 
-    // Check if mock test is purchased
-    const { data: purchaseCount } = await supabase
-      .from('user_purchases')
-      .select('id')
-      .eq('product_id', id);
+    const result = await callCascadeDelete('mockTest', id);
 
-    if (purchaseCount && purchaseCount.length > 0) {
-      // Soft delete to protect student purchase history
-      console.log(`Mock test ${id} has active user purchases. Archiving to protect access.`);
-      await callAdminDbProxy('mockTests', 'update', { is_archived: true }, id);
-    } else {
-      // Hard delete: delete associated questions first across all topic key variations
-      const candidateTopics = [`mockTest__${id}`, id, `mocktest__${id}`];
-      await callAdminDbProxy('questions', 'delete', undefined, undefined, { 
-        topic: { op: 'in', val: candidateTopics } 
-      });
-      await callAdminDbProxy('mockTests', 'delete', undefined, id);
-    }
     cacheService.clear('all_mock_tests_lite');
     cacheService.clear('topic_counts');
     try { sessionStorage.removeItem('oep_admin_catalog_cache_v2'); } catch(e) {}
+    return result;
   },
 
   async clearQuestionsForMockTest(id: string) {
@@ -837,14 +877,12 @@ export const examService = {
     cacheService.clear('topic_counts');
     try { sessionStorage.removeItem('oep_admin_catalog_cache_v2'); } catch(e) {}
 
-    const candidateTopics = [`mockTest__${id}`, id, `mocktest__${id}`];
-    await callAdminDbProxy('questions', 'delete', undefined, undefined, { 
-      topic: { op: 'in', val: candidateTopics } 
-    });
+    const result = await callCascadeDelete('mockTest', id, true);
 
     cacheService.clear('all_mock_tests_lite');
     cacheService.clear('topic_counts');
     try { sessionStorage.removeItem('oep_admin_catalog_cache_v2'); } catch(e) {}
+    return result;
   },
 
   async updateMockTest(id: string, updates: Partial<MockTest>) {
@@ -860,15 +898,24 @@ export const examService = {
   async getQuestionsForMockTest(mockTestId: string) {
     if (!mockTestId) return [];
     try {
-      const { data, error } = await supabase
-        .from('questions')
-        .select('id, examId, topic, difficulty, questionText, options, correctAnswerIndex, explanation, diagram, sortOrder')
-        .eq('topic', `mockTest__${mockTestId}`)
-        .order('sortOrder', { ascending: true })
-        .limit(200);
+      let allQuestions: Question[] = [];
+      let page = 0;
+      const pageSize = 1000;
+      while (true) {
+        const { data, error } = await supabase
+          .from('questions')
+          .select('id, examId, topic, difficulty, questionText, options, correctAnswerIndex, explanation, diagram, sortOrder')
+          .eq('topic', `mockTest__${mockTestId}`)
+          .order('sortOrder', { ascending: true, nullsFirst: false })
+          .range(page * pageSize, (page + 1) * pageSize - 1);
 
-      if (error) throw error;
-      return (data || []) as Question[];
+        if (error) throw error;
+        if (!data || data.length === 0) break;
+        allQuestions = allQuestions.concat(data as Question[]);
+        if (data.length < pageSize) break;
+        page++;
+      }
+      return allQuestions;
     } catch (e) {
       console.error(`Error fetching questions for mock test ${mockTestId}:`, e);
       return [];
@@ -950,11 +997,15 @@ export const examService = {
         const stages = Array.isArray(metaObj.stages)
           ? metaObj.stages
           : (metaObj.stage ? [metaObj.stage] : []);
+        const streams = Array.isArray(metaObj.streams)
+          ? metaObj.streams
+          : (metaObj.stream ? [metaObj.stream] : []);
         return {
           ...ex,
           description: cleanDesc,
           rawDescription: ex.description,
           stages,
+          streams,
           isPremium: metaObj.isPremium ?? (Number(metaObj.price || ex.price) > 0),
           price: Number(metaObj.price || ex.price || 99),
           originalPrice: Number(metaObj.originalPrice || ex.originalPrice || 299),
@@ -1246,7 +1297,18 @@ export const examService = {
             const nkRaw = normKey(rawTitle);
             const nkClean = normKey(cleanTitle);
 
-            let resolvedCount = topicCounts[b.id] || topicCounts[rawTitle] || topicCounts[rawTitle.trim()] || topicCounts[rawTitle.trim().toLowerCase()] || topicCounts[cleanTitle] || topicCounts[nkRaw] || topicCounts[nkClean] || 0;
+            // 1. High-priority exact match by unique bank ID namespace
+            let resolvedCount = topicCounts[`bank__${b.id}`] || topicCounts[b.id] || 0;
+
+            // 2. Fallback to title ONLY if no ID-bound count exists and title is not ambiguous across multiple banks in this exam
+            if (resolvedCount === 0 && rawTitle) {
+              const banksWithSameTitle = banks.filter(
+                other => other.examId === b.examId && (other.title || '').trim().toLowerCase() === rawTitle.trim().toLowerCase()
+              );
+              if (banksWithSameTitle.length <= 1) {
+                resolvedCount = topicCounts[rawTitle] || topicCounts[rawTitle.trim()] || topicCounts[rawTitle.trim().toLowerCase()] || topicCounts[cleanTitle] || topicCounts[nkRaw] || topicCounts[nkClean] || 0;
+              }
+            }
 
             // Fallback: embedded questionsData in pdfUrl column
             if (resolvedCount === 0 && b.pdfUrl && typeof b.pdfUrl === 'string' && b.pdfUrl.startsWith('{')) {
@@ -1260,24 +1322,30 @@ export const examService = {
               } catch (_e) {}
             }
 
-            // Fallback: use database stored questionCount (now synced to actual question counts)
+            // Fallback: use database stored questionCount if verified
             if (resolvedCount === 0 && typeof b.questionCount === 'number' && b.questionCount > 0) {
-              resolvedCount = b.questionCount;
+              const banksWithSameTitle = banks.filter(
+                other => other.examId === b.examId && (other.title || '').trim().toLowerCase() === rawTitle.trim().toLowerCase()
+              );
+              if (banksWithSameTitle.length <= 1) {
+                resolvedCount = b.questionCount;
+              }
             }
 
             b.practiceQuestionCount = resolvedCount;
-            if (resolvedCount > 0) {
-              b.questionCount = resolvedCount;
-            }
+            b.questionCount = resolvedCount;
 
             let stage: string | null = (b as any).stage || null;
-            if (!stage && b.tagline && typeof b.tagline === 'string' && b.tagline.trim().startsWith('{')) {
+            let stream: string | null = (b as any).stream || null;
+            if (b.tagline && typeof b.tagline === 'string' && b.tagline.trim().startsWith('{')) {
               try {
                 const parsed = JSON.parse(b.tagline);
-                if (parsed && parsed.stage) stage = parsed.stage;
+                if (!stage && parsed && parsed.stage) stage = parsed.stage;
+                if (!stream && parsed && parsed.stream) stream = parsed.stream;
               } catch (_e) {}
             }
             b.stage = stage || undefined;
+            b.stream = stream || undefined;
           });
         } catch (err) {
           console.error('Failed to fetch actual question counts for question banks:', err);
@@ -1292,68 +1360,12 @@ export const examService = {
     cacheService.clear('topic_counts');
     try { sessionStorage.removeItem('oep_admin_catalog_cache_v2'); } catch(e) {}
 
-    // Check if question bank is purchased
-    const { data: purchaseCount } = await supabase
-      .from('user_purchases')
-      .select('id')
-      .eq('product_id', id);
+    const result = await callCascadeDelete('questionBank', id);
 
-    if (purchaseCount && purchaseCount.length > 0) {
-      // Soft delete
-      console.log(`Question bank ${id} has active user purchases. Archiving to protect access.`);
-      await callAdminDbProxy('questionBanks', 'update', { is_archived: true }, id);
-    } else {
-      try {
-        // Fetch bank to get its title and examId
-        const { data: bank } = await supabase
-          .from('questionBanks')
-          .select('title, examId, target_mode')
-          .eq('id', id)
-          .single();
-
-        if (bank && bank.title) {
-          const rawTitle = bank.title;
-          const cleanTitle = rawTitle.replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
-          const candidateTopics = Array.from(new Set([
-            rawTitle,
-            rawTitle.trim(),
-            cleanTitle,
-            `${cleanTitle} - Practice Session`,
-            id,
-            `bank__${id}`
-          ])).filter(Boolean);
-
-          // Unconditionally delete questions associated with this bank/topic for this exam
-          await callAdminDbProxy('questions', 'delete', undefined, undefined, {
-            topic: { op: 'in', val: candidateTopics },
-            examId: { op: 'eq', val: bank.examId }
-          });
-          await callAdminDbProxy('questions', 'delete', undefined, undefined, {
-            topic: { op: 'in', val: [id, `bank__${id}`] }
-          });
-
-          // If any sibling banks exist (e.g. practice mode counterpart or duplicates), reset their questionCount to 0
-          const { data: siblingBanks } = await supabase
-            .from('questionBanks')
-            .select('id')
-            .eq('title', bank.title)
-            .eq('examId', bank.examId)
-            .neq('id', id);
-
-          if (siblingBanks && siblingBanks.length > 0) {
-            for (const sib of siblingBanks) {
-              await callAdminDbProxy('questionBanks', 'update', { questionCount: 0 }, sib.id);
-            }
-          }
-        }
-      } catch (err) {
-        console.error("Failed to safely cascade delete questions for bank:", err);
-      }
-      await callAdminDbProxy('questionBanks', 'delete', undefined, id);
-    }
     cacheService.clear('all_question_banks');
     cacheService.clear('topic_counts');
     try { sessionStorage.removeItem('oep_admin_catalog_cache_v2'); } catch(e) {}
+    return result;
   },
 
   async clearQuestionsForBank(id: string) {
@@ -1361,57 +1373,12 @@ export const examService = {
     cacheService.clear('topic_counts');
     try { sessionStorage.removeItem('oep_admin_catalog_cache_v2'); } catch(e) {}
 
-    try {
-      const { data: bank } = await supabase
-        .from('questionBanks')
-        .select('title, examId')
-        .eq('id', id)
-        .single();
-
-      if (bank && bank.title) {
-        const rawTitle = bank.title;
-        const cleanTitle = rawTitle.replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
-        const candidateTopics = Array.from(new Set([
-          rawTitle,
-          rawTitle.trim(),
-          cleanTitle,
-          `${cleanTitle} - Practice Session`,
-          id,
-          `bank__${id}`
-        ])).filter(Boolean);
-
-        // Delete all questions belonging to this topic/bank
-        await callAdminDbProxy('questions', 'delete', undefined, undefined, {
-          topic: { op: 'in', val: candidateTopics },
-          examId: { op: 'eq', val: bank.examId }
-        });
-        await callAdminDbProxy('questions', 'delete', undefined, undefined, {
-          topic: { op: 'in', val: [id, `bank__${id}`] }
-        });
-
-        // Reset question count on this bank and any siblings sharing the title
-        const { data: matchingBanks } = await supabase
-          .from('questionBanks')
-          .select('id')
-          .eq('title', bank.title)
-          .eq('examId', bank.examId);
-
-        if (matchingBanks && matchingBanks.length > 0) {
-          for (const mb of matchingBanks) {
-            await callAdminDbProxy('questionBanks', 'update', { questionCount: 0 }, mb.id);
-          }
-        } else {
-          await callAdminDbProxy('questionBanks', 'update', { questionCount: 0 }, id);
-        }
-      }
-    } catch (err) {
-      console.error("Failed to clear questions for bank:", err);
-      throw err;
-    }
+    const result = await callCascadeDelete('questionBank', id, true);
 
     cacheService.clear('all_question_banks');
     cacheService.clear('topic_counts');
     try { sessionStorage.removeItem('oep_admin_catalog_cache_v2'); } catch(e) {}
+    return result;
   },
 
   async updateQuestionBank(id: string, updates: Partial<QuestionBank>) {
@@ -1444,47 +1411,56 @@ export const examService = {
 
   async getQuestionsForQuestionBank(bankId: string, bankTitle?: string, examId?: string): Promise<Question[]> {
     try {
-      // 1. Collect all potential topic candidates
-      const topicCandidates = new Set<string>();
+      // 1. High-priority exact match by unique bank ID namespace (with infinite auto-pagination)
       if (bankId) {
-        topicCandidates.add(bankId);
-      }
-      if (bankTitle) {
-        topicCandidates.add(bankTitle);
-        topicCandidates.add(bankTitle.trim());
-        const stripped = bankTitle.replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
-        topicCandidates.add(stripped);
-        topicCandidates.add(`${stripped} - Practice Session`);
-      }
+        const idCandidates = [`bank__${bankId}`, bankId];
+        let allIdQuestions: Question[] = [];
+        let page = 0;
+        const pageSize = 1000;
 
-      const candidateList = Array.from(topicCandidates).filter(Boolean);
-
-      // 1a. Try matching with candidate list and examId if provided
-      if (candidateList.length > 0) {
-        let query = supabase
-          .from('questions')
-          .select('id, examId, topic, difficulty, questionText, options, correctAnswerIndex, explanation, diagram, sortOrder')
-          .in('topic', candidateList);
-
-        if (examId) {
-          query = query.eq('examId', examId);
-        }
-
-        const { data, error } = await query.order('sortOrder', { ascending: true, nullsFirst: false });
-        if (!error && data && data.length > 0) {
-          return data;
-        }
-
-        // 1b. If examId filter yielded nothing, retry without examId (in case questions were saved with different or omitted examId)
-        if (examId) {
-          const { data: noExamData, error: noExamErr } = await supabase
+        while (true) {
+          let idQuery = supabase
             .from('questions')
             .select('id, examId, topic, difficulty, questionText, options, correctAnswerIndex, explanation, diagram, sortOrder')
-            .in('topic', candidateList)
+            .in('topic', idCandidates)
+            .range(page * pageSize, (page + 1) * pageSize - 1)
             .order('sortOrder', { ascending: true, nullsFirst: false });
 
-          if (!noExamErr && noExamData && noExamData.length > 0) {
-            return noExamData;
+          if (examId) {
+            idQuery = idQuery.eq('examId', examId);
+          }
+
+          const { data: pageData, error: idErr } = await idQuery;
+          if (idErr || !pageData || pageData.length === 0) break;
+          allIdQuestions = allIdQuestions.concat(pageData);
+          page++;
+          if (pageData.length < pageSize) break;
+        }
+
+        if (allIdQuestions.length > 0) {
+          return allIdQuestions;
+        }
+
+        // Retry without examId filter in case examId was saved differently (with pagination)
+        if (examId) {
+          let allRetryQuestions: Question[] = [];
+          let retryPage = 0;
+          while (true) {
+            const { data: noExamIdData, error: noExamIdErr } = await supabase
+              .from('questions')
+              .select('id, examId, topic, difficulty, questionText, options, correctAnswerIndex, explanation, diagram, sortOrder')
+              .in('topic', idCandidates)
+              .range(retryPage * pageSize, (retryPage + 1) * pageSize - 1)
+              .order('sortOrder', { ascending: true, nullsFirst: false });
+
+            if (noExamIdErr || !noExamIdData || noExamIdData.length === 0) break;
+            allRetryQuestions = allRetryQuestions.concat(noExamIdData);
+            retryPage++;
+            if (noExamIdData.length < pageSize) break;
+          }
+
+          if (allRetryQuestions.length > 0) {
+            return allRetryQuestions;
           }
         }
       }
@@ -1515,21 +1491,41 @@ export const examService = {
         }
       }
 
-      // 3. Fallback: ilike match on topic if title is sufficiently descriptive
+      // 3. Fallback for legacy plain-title topics:
+      // Verify that this title is NOT shared across multiple banks in the same exam
       if (bankTitle) {
-        const clean = bankTitle.replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
-        if (clean.length > 3) {
-          let ilikeQuery = supabase
-            .from('questions')
-            .select('id, examId, topic, difficulty, questionText, options, correctAnswerIndex, explanation, diagram, sortOrder')
-            .ilike('topic', `%${clean}%`);
-          if (examId) {
-            ilikeQuery = ilikeQuery.eq('examId', examId);
+        if (examId) {
+          const { data: siblingBanks } = await supabase
+            .from('questionBanks')
+            .select('id')
+            .eq('examId', examId)
+            .eq('title', bankTitle);
+          if (siblingBanks && siblingBanks.length > 1) {
+            // Sibling banks share this title; do NOT bleed questions across categories!
+            return [];
           }
-          const { data: ilikeData, error: ilikeErr } = await ilikeQuery.order('sortOrder', { ascending: true, nullsFirst: false }).limit(200);
-          if (!ilikeErr && ilikeData && ilikeData.length > 0) {
-            return ilikeData;
-          }
+        }
+
+        const topicCandidates = new Set<string>();
+        topicCandidates.add(bankTitle);
+        topicCandidates.add(bankTitle.trim());
+        const stripped = bankTitle.replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
+        topicCandidates.add(stripped);
+        topicCandidates.add(`${stripped} - Practice Session`);
+
+        const candidateList = Array.from(topicCandidates).filter(Boolean);
+        let titleQuery = supabase
+          .from('questions')
+          .select('id, examId, topic, difficulty, questionText, options, correctAnswerIndex, explanation, diagram, sortOrder')
+          .in('topic', candidateList);
+
+        if (examId) {
+          titleQuery = titleQuery.eq('examId', examId);
+        }
+
+        const { data: titleData, error: titleErr } = await titleQuery.order('sortOrder', { ascending: true, nullsFirst: false });
+        if (!titleErr && titleData && titleData.length > 0) {
+          return titleData;
         }
       }
 
@@ -1782,11 +1778,12 @@ export const examService = {
     return data?.[0] || data;
   },
 
-  // --- Exam Syllabi (Stage-Segregated) ---
-  async getExamSyllabus(examId: string, stage?: string): Promise<ExamSyllabus | null> {
+  // --- Exam Syllabi (Stage & Stream Segregated) ---
+  async getExamSyllabus(examId: string, stage?: string, stream?: string): Promise<ExamSyllabus | null> {
     if (!examId) return null;
     const cleanStage = (stage || '').trim();
-    const cacheKey = `syllabus_${examId}_${cleanStage || 'all'}`;
+    const cleanStream = (stream || '').trim();
+    const cacheKey = `syllabus_${examId}_${cleanStage || 'all'}_${cleanStream || 'all'}`;
 
     return fetchWithInFlightDeduplication(cacheKey, async () => {
       let query = supabase
@@ -1798,9 +1795,13 @@ export const examService = {
         query = query.ilike('stage', cleanStage);
       }
 
+      if (cleanStream && cleanStream.toLowerCase() !== 'all streams') {
+        query = query.ilike('stream', cleanStream);
+      }
+
       const { data, error } = await query;
       if (error) {
-        console.warn(`[getExamSyllabus] Error for ${examId} ${cleanStage}:`, error.message);
+        console.warn(`[getExamSyllabus] Error for ${examId} ${cleanStage} ${cleanStream}:`, error.message);
         return null;
       }
 
@@ -1808,7 +1809,20 @@ export const examService = {
         return data[0] as ExamSyllabus;
       }
 
-      // Fallback: If specific stage requested was not found, check for 'All Stages', 'Single Stage', or 'General'
+      // Fallback 1: If specific stream requested was not found for this stage, check for 'All Streams', 'General', or 'Common'
+      if (cleanStream && cleanStream.toLowerCase() !== 'all streams') {
+        const { data: streamFallback } = await supabase
+          .from('exam_syllabi')
+          .select('*')
+          .eq('exam_id', examId)
+          .ilike('stage', cleanStage || '%')
+          .in('stream', ['All Streams', 'General', 'Common']);
+        if (streamFallback && streamFallback.length > 0) {
+          return streamFallback[0] as ExamSyllabus;
+        }
+      }
+
+      // Fallback 2: If specific stage requested was not found, check for 'All Stages', 'Single Stage', or 'General'
       if (cleanStage) {
         const { data: fallback } = await supabase
           .from('exam_syllabi')
@@ -1832,7 +1846,8 @@ export const examService = {
         .from('exam_syllabi')
         .select('*')
         .eq('exam_id', examId)
-        .order('stage', { ascending: true });
+        .order('stage', { ascending: true })
+        .order('stream', { ascending: true });
       if (error) {
         console.warn(`[getAllExamSyllabi] Error for ${examId}:`, error.message);
         return [];
@@ -1841,23 +1856,35 @@ export const examService = {
     });
   },
 
-  async saveExamSyllabus(examId: string, stage: string, syllabusMarkdown: string, directivesMarkdown?: string): Promise<ExamSyllabus> {
+  async saveExamSyllabus(
+    examId: string, 
+    stage: string, 
+    syllabusMarkdown: string, 
+    directivesMarkdown?: string,
+    stream?: string
+  ): Promise<ExamSyllabus> {
     const cleanStage = (stage || 'All Stages').trim();
+    const cleanStream = (stream || 'All Streams').trim();
     const payload = {
       exam_id: examId,
       stage: cleanStage,
+      stream: cleanStream,
       syllabus_markdown: syllabusMarkdown || '',
       directives_markdown: directivesMarkdown || '',
       updated_at: new Date().toISOString()
     };
 
-    const result = await callAdminDbProxy('exam_syllabi', 'upsert', payload, undefined, undefined, 'exam_id,stage');
+    const result = await callAdminDbProxy('exam_syllabi', 'upsert', payload, undefined, undefined, 'exam_id,stage,stream');
 
+    cacheService.clear(`syllabus_${examId}_${cleanStage}_${cleanStream}`);
+    cacheService.clear(`syllabus_${examId}_${cleanStage}_all`);
+    cacheService.clear(`syllabus_${examId}_all_all`);
     cacheService.clear(`syllabus_${examId}_${cleanStage}`);
     cacheService.clear(`syllabus_${examId}_all`);
     cacheService.clear(`all_syllabi_${examId}`);
     try {
       if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem(`oep_cache_syllabus_${examId}_${cleanStage}_${cleanStream}`);
         sessionStorage.removeItem(`oep_cache_syllabus_${examId}_${cleanStage}`);
         sessionStorage.removeItem(`oep_cache_syllabus_${examId}_all`);
       }
@@ -1866,14 +1893,41 @@ export const examService = {
     return (Array.isArray(result) ? result[0] : result) as ExamSyllabus;
   },
 
-  async deleteExamSyllabus(examId: string, stage: string): Promise<boolean> {
+  async deleteExamSyllabus(examId: string, stage: string, stream?: string): Promise<boolean> {
     const cleanStage = (stage || '').trim();
-    await callAdminDbProxy('exam_syllabi', 'delete', undefined, undefined, {
+    const cleanStream = (stream || '').trim();
+    const matchObj: Record<string, { op: string; val: any }> = {
       exam_id: { op: 'eq', val: examId },
       stage: { op: 'eq', val: cleanStage }
-    });
+    };
+    if (cleanStream) {
+      matchObj.stream = { op: 'eq', val: cleanStream };
+    }
+    await callAdminDbProxy('exam_syllabi', 'delete', undefined, undefined, matchObj);
+    cacheService.clear(`syllabus_${examId}_${cleanStage}_${cleanStream}`);
     cacheService.clear(`syllabus_${examId}_${cleanStage}`);
     cacheService.clear(`all_syllabi_${examId}`);
     return true;
+  },
+
+  async reconcileBankCounts(examId: string): Promise<any> {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    const res = await fetch('/api/admin/banks/reconcile-counts', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ examId })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to reconcile bank counts');
+    }
+    return res.json();
   }
 };

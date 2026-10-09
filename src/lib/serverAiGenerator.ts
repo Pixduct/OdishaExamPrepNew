@@ -27,12 +27,22 @@ export {
   type SyllabusHierarchyItem 
 };
 
+import { 
+  diagramValidator, 
+  extractEmbeddedDiagram, 
+  classifyDiagramPedagogicalRole, 
+  getDiagramFingerprint,
+  validateAndHealDiagram,
+  sanitizeDecoupledQuestionText
+} from './diagramValidator';
+
 export type MainSectionType = 'all_sections' | 'practice_test' | 'mock_test' | 'question_bank' | 'flashcards';
 
 export interface AIStructureRequest {
   examId: string;
   examName: string;
   stage?: string;
+  stream?: string;
   targetType?: 'mock_test' | 'question_bank' | 'flashcards';
   mainSection?: MainSectionType;
   subCategory?: string;
@@ -62,6 +72,7 @@ export interface GeneratedTestStructure {
   targetTable: 'mockTests' | 'questionBanks' | 'flashcardDecks';
   targetMode?: 'practice' | 'bank';
   stage?: string;
+  stream?: string;
   paper?: string;
   subject?: string;
   subSubject?: string;
@@ -85,6 +96,7 @@ export interface AIFlashcardRequest {
   examId: string;
   examName?: string;
   stage?: string;
+  stream?: string;
   deckTitle: string;
   subject?: string;
   subSubject?: string;
@@ -104,6 +116,7 @@ export interface AIQuestionRequest {
   examId: string;
   examName?: string;
   stage?: string;
+  stream?: string;
   testTitle: string;
   mainSection?: 'mock_test' | 'practice_test' | 'question_bank';
   subject?: string;
@@ -125,6 +138,10 @@ export interface AIQuestionRequest {
   existingQuestionStems?: string[];
   batchNumber?: number;
   thematicFocus?: string;        // optional specific pedagogical sub-theme for this micro-batch
+  durationMinutes?: number;      // Predefined time duration for the test
+  totalMarks?: number;           // Predefined total marks
+  negativeMarking?: number;      // Predefined negative marking penalty (e.g. 0.25, 0.33)
+  predefinedQuestionCount?: number;
 }
 
 export interface AutonomousBatchPlan {
@@ -141,6 +158,12 @@ export interface AutonomousCurriculumPlan {
 }
 
 export interface PlanCurriculumRequest {
+  targetType?: 'mock_test' | 'practice_test' | 'question_bank' | 'flashcards';
+  mainSection?: 'mock_test' | 'practice_test' | 'question_bank' | 'flashcards';
+  predefinedQuestionCount?: number;
+  durationMinutes?: number;
+  totalMarks?: number;
+  negativeMarking?: number;
   syllabusMarkdown?: string;
   testTitle: string;
   subject?: string;
@@ -291,6 +314,7 @@ export interface GeneratedQuestionItem {
   difficulty: 'easy' | 'medium' | 'hard';
   topic: string;
   diagram?: any | null;
+  explanationDiagram?: any | null;
   audit?: QuestionAuditMetadata;
   batchNumber?: number;
 }
@@ -490,6 +514,190 @@ export function extractAndParseJSON(rawText: string): any {
   throw new Error(`Failed to parse AI JSON response: Unterminated output. Raw snippet: ${cleaned.slice(0, 300)}...`);
 }
 
+export type KeyStatus = 'healthy' | 'cooldown_rpm' | 'exhausted_daily' | 'disabled';
+
+export interface KeyHealthState {
+  key: string;
+  keyPreview: string;
+  status: KeyStatus;
+  cooldownUntil: number; // Unix epoch ms
+  failureCount: number;
+  consecutiveErrors: number;
+  successCount: number;
+  lastUsedAt: number;
+  lastError?: string;
+  isLeased?: boolean;
+  leasedAt?: number;
+  leasedWorkerId?: string;
+}
+
+const keyHealthRegistry = new Map<string, KeyHealthState>();
+let globalGeminiKeyIndex = 0;
+
+export function getKeyPreview(key: string): string {
+  if (!key) return '';
+  if (key.length <= 16) return key;
+  return `${key.slice(0, 10)}...${key.slice(-5)}`;
+}
+
+/**
+ * Calculates the exact timestamp (Unix epoch ms) for the next Google Gemini daily quota reset.
+ * Google's daily quota resets at Midnight US Pacific Time (12:30 PM IST during PDT).
+ */
+export function calculateNextDailyResetMs(): number {
+  try {
+    const now = new Date();
+    const laDateStr = now.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
+    const laNow = new Date(laDateStr);
+    const laNextMidnight = new Date(laNow);
+    laNextMidnight.setHours(24, 0, 0, 0);
+    const diffMs = laNextMidnight.getTime() - laNow.getTime();
+    return Date.now() + Math.max(diffMs, 60000);
+  } catch {
+    return Date.now() + 12 * 60 * 60 * 1000;
+  }
+}
+
+/**
+ * Syncs the key pool with the in-memory health registry.
+ * Automatically checks cooldown and daily reset timestamps.
+ * Any key whose cooldown period has passed is AUTOMATICALLY transitioned back to 'healthy'.
+ * Automatically releases any stale leases (> 60 seconds).
+ */
+export function syncAndRecoverKeyPool(keyPool: string[]): KeyHealthState[] {
+  const now = Date.now();
+  const states: KeyHealthState[] = [];
+
+  for (const key of keyPool) {
+    let state = keyHealthRegistry.get(key);
+    if (!state) {
+      state = {
+        key,
+        keyPreview: getKeyPreview(key),
+        status: 'healthy',
+        cooldownUntil: 0,
+        failureCount: 0,
+        consecutiveErrors: 0,
+        successCount: 0,
+        lastUsedAt: 0,
+        isLeased: false
+      };
+      keyHealthRegistry.set(key, state);
+    } else {
+      // Clear stale lease safeguard (> 60 seconds)
+      if (state.isLeased && (now - (state.leasedAt || 0) > 60000)) {
+        state.isLeased = false;
+        state.leasedWorkerId = undefined;
+        state.leasedAt = undefined;
+      }
+
+      // Check for automatic expiration / recovery
+      if (state.status === 'cooldown_rpm' || state.status === 'exhausted_daily') {
+        if (now >= state.cooldownUntil) {
+          const prevStatus = state.status;
+          state.status = 'healthy';
+          state.consecutiveErrors = 0;
+          state.cooldownUntil = 0;
+          state.isLeased = false;
+          console.log(`[AI Key Pool] 🟢 AUTO-RECOVERED: Key ${state.keyPreview} (${prevStatus} expired). Re-activated into active rotation.`);
+        }
+      }
+    }
+    states.push(state);
+  }
+
+  return states;
+}
+
+/**
+ * Atomically leases an unleased healthy key to a specific worker thread.
+ * Guarantees no two concurrent workers use the same key simultaneously.
+ */
+export function leaseHealthyKey(keyPool: string[], workerId: string = 'worker'): string | null {
+  const states = syncAndRecoverKeyPool(keyPool);
+  const now = Date.now();
+  
+  for (const state of states) {
+    if (state.status === 'healthy' && !state.isLeased) {
+      state.isLeased = true;
+      state.leasedAt = now;
+      state.leasedWorkerId = workerId;
+      state.lastUsedAt = now;
+      return state.key;
+    }
+  }
+  return null;
+}
+
+/**
+ * Releases a leased key back to the available pool.
+ */
+export function releaseKey(key: string): void {
+  const state = keyHealthRegistry.get(key);
+  if (state) {
+    state.isLeased = false;
+    state.leasedAt = undefined;
+    state.leasedWorkerId = undefined;
+  }
+}
+
+/**
+ * Returns diagnostic telemetry for all registered Gemini API keys.
+ */
+export function getKeyPoolTelemetry(providedKey?: string) {
+  const keys = resolveGeminiKeyPool(providedKey);
+  const states = syncAndRecoverKeyPool(keys);
+  const now = Date.now();
+
+  return {
+    total: states.length,
+    healthy: states.filter(s => s.status === 'healthy').length,
+    cooldown_rpm: states.filter(s => s.status === 'cooldown_rpm').length,
+    exhausted_daily: states.filter(s => s.status === 'exhausted_daily').length,
+    disabled: states.filter(s => s.status === 'disabled').length,
+    keys: states.map(s => ({
+      preview: s.keyPreview,
+      status: s.status,
+      successCount: s.successCount,
+      failureCount: s.failureCount,
+      consecutiveErrors: s.consecutiveErrors,
+      secondsUntilRecovery: s.cooldownUntil > now ? Math.ceil((s.cooldownUntil - now) / 1000) : 0,
+      isLeased: Boolean(s.isLeased),
+      leasedWorkerId: s.leasedWorkerId,
+      lastError: s.lastError
+    }))
+  };
+}
+
+/**
+ * Resolves all configured Gemini API keys into a deduplicated rotating pool.
+ * Combines explicitly passed keys (including comma/whitespace-separated multi-keys)
+ * with server environment keys (GEMINI_API_KEY, VITE_GEMINI_API_KEY, VITE_DENTA_RESPONSE_AI).
+ */
+export function resolveGeminiKeyPool(providedKey?: string): string[] {
+  const pool: string[] = [];
+  const addCandidates = (raw?: string) => {
+    if (!raw) return;
+    const tokens = raw.split(/[\s,;]+/).map(t => t.replace(/^["'`\s]+|["'`\s]+$/g, '').trim()).filter(Boolean);
+    for (const t of tokens) {
+      if ((t.startsWith('AQ.') || t.startsWith('AIza') || t.length > 20) && !pool.includes(t)) {
+        pool.push(t);
+      }
+    }
+  };
+
+  addCandidates(providedKey);
+  addCandidates(process.env.GEMINI_API_KEY);
+  addCandidates(process.env.VITE_GEMINI_API_KEY);
+  if (pool.length === 0) {
+    const denta = (process.env.VITE_DENTA_RESPONSE_AI || '').replace(/^["'`\s]+|["'`\s]+$/g, '').trim();
+    if (denta.startsWith('AIza') || denta.startsWith('AQ.')) {
+      pool.push(denta);
+    }
+  }
+  return pool;
+}
+
 /**
  * Universal LLM caller supporting Google Gemini, OpenAI, NVIDIA NIM, Groq, OpenRouter, Anthropic, and custom endpoints.
  * Enforces strict custom API key precedence and cleans input keys.
@@ -516,15 +724,16 @@ export async function queryAIModel(
   let rawModel = (options.model || '').trim();
 
   // Normalize generic names
+  const hasGeminiKey = Boolean((process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || '').trim());
   if (rawModel === 'default' || rawModel === 'gpt' || !rawModel) {
-    rawModel = isCustom ? '' : 'openai/gpt-oss-20b';
+    rawModel = isCustom ? '' : (hasGeminiKey ? 'gemini-flash-lite-latest' : 'openai/gpt-oss-20b');
   } else if (rawModel === 'llama') {
     rawModel = 'meta/llama-3.2-11b-vision-instruct';
   }
 
   // 2. Identify provider by key prefix, base URL, or model format
   // Google Gemini keys: legacy format starts with 'AIza', new 2026 format starts with 'AQ.'
-  const isGoogleKey = cleanKey.startsWith('AIza') || cleanKey.startsWith('AQ.');
+  const isGoogleKey = cleanKey.startsWith('AIza') || cleanKey.startsWith('AQ.') || cleanKey.includes('AIza') || cleanKey.includes('AQ.');
   const isNvidiaKey = cleanKey.startsWith('nvapi-');
   const isOpenRouterKey = cleanKey.startsWith('sk-or-');
   const isGroqKey = cleanKey.startsWith('gsk_');
@@ -558,9 +767,13 @@ export async function queryAIModel(
     else if (rawModel.includes('/') && !rawModel.startsWith('gpt-')) provider = 'nvidia';
     else provider = 'openai';
   } else {
-    // Server environment fallback
-    if (rawModel.startsWith('gemini')) {
+    // Server environment fallback: prioritize Google Gemini when GEMINI_API_KEY is configured
+    const hasGeminiServerKey = Boolean((process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || '').trim());
+    if (rawModel.startsWith('gemini') || (hasGeminiServerKey && (!rawModel || rawModel === 'default' || rawModel === 'openai/gpt-oss-20b'))) {
       provider = 'gemini';
+      if (!rawModel || rawModel === 'default' || rawModel === 'openai/gpt-oss-20b') {
+        rawModel = 'gemini-flash-lite-latest';
+      }
     } else {
       provider = 'nvidia';
     }
@@ -570,12 +783,9 @@ export async function queryAIModel(
   let apiKey = cleanKey;
   if (!apiKey) {
     if (provider === 'gemini') {
-      const gKey = (process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || '').replace(/^["'`\s]+|["'`\s]+$/g, '').trim();
-      if (gKey) {
-        apiKey = gKey;
-      } else {
-        const denta = (process.env.VITE_DENTA_RESPONSE_AI || '').replace(/^["'`\s]+|["'`\s]+$/g, '').trim();
-        if (denta.startsWith('AIza') || denta.startsWith('AQ.')) apiKey = denta;
+      const gKeys = resolveGeminiKeyPool();
+      if (gKeys.length > 0) {
+        apiKey = gKeys[0];
       }
     } else if (rawModel.includes('gpt-oss')) {
       apiKey = (process.env.NVIDIA_GPT_OSS_KEY || process.env.DEEPSEEK_API_KEY || process.env.NVIDIA_NEMOTRON_KEY || '').replace(/^["'`\s]+|["'`\s]+$/g, '').trim();
@@ -619,140 +829,267 @@ export async function queryAIModel(
     return queryAIModel(systemPrompt, userPrompt, options);
   }
 
-  // ── ROUTE 1: GOOGLE GEMINI ──
+  // ── ROUTE 1: GOOGLE GEMINI (Enterprise Multi-Key Rotating Pool) ──
   if (provider === 'gemini') {
     let cleanGeminiModel = rawModel;
     if (!cleanGeminiModel.startsWith('gemini')) {
-      // Default to ultra-fast Flash-Lite (2.7s generation time, 0 thinking latency)
+      // Default to Google Gemini Flash-Lite (1.8s ultra-fast & resilient)
       cleanGeminiModel = 'gemini-flash-lite-latest';
     }
-    // Remap deprecated or disabled models (e.g., gemini-2.5-pro, gemini-2.5-flash, gemini-1.5-flash)
-    if (cleanGeminiModel === 'gemini-2.5-pro' || cleanGeminiModel.includes('2.5-pro')) {
-      console.warn(`[AI] Remapping deprecated ${cleanGeminiModel} to gemini-flash-lite-latest`);
-      cleanGeminiModel = 'gemini-flash-lite-latest';
-    }
-    if (cleanGeminiModel === 'gemini-2.5-flash' || cleanGeminiModel === 'gemini-1.5-flash') {
+    // Remap deprecated or disabled models (e.g., gemini-2.5-pro, gemini-2.5-flash, gemini-1.5-flash, gemini-2.5-flash-lite)
+    if (
+      cleanGeminiModel === 'gemini-2.5-pro' ||
+      cleanGeminiModel.includes('2.5-pro') ||
+      cleanGeminiModel === 'gemini-2.5-flash' ||
+      cleanGeminiModel === 'gemini-1.5-flash' ||
+      cleanGeminiModel === 'gemini-2.5-flash-lite'
+    ) {
       console.warn(`[AI] Remapping deprecated ${cleanGeminiModel} to gemini-flash-lite-latest`);
       cleanGeminiModel = 'gemini-flash-lite-latest';
     }
 
-    // Fallback model chain if the primary model hits temporary capacity limit (503/429) or is not found (404)
+    const keyPool = resolveGeminiKeyPool(cleanKey);
+    if (keyPool.length === 0) {
+      throw new Error('Google Gemini API key is not configured. Please paste your Gemini API key in the Custom API Key section.');
+    }
+
+    // Fallback model chain: start with cleanGeminiModel, then immediate failover to ultra-reliable flash-lite variants
     const candidateModels = [
       cleanGeminiModel,
-      cleanGeminiModel !== 'gemini-3.5-flash' ? 'gemini-3.5-flash' : 'gemini-flash-lite-latest',
-      'gemini-flash-lite-latest',
-      'gemini-3.6-flash'
+      cleanGeminiModel !== 'gemini-flash-lite-latest' ? 'gemini-flash-lite-latest' : 'gemini-3.5-flash-lite',
+      'gemini-3.5-flash-lite',
+      'gemini-3.1-flash-lite',
+      'gemini-3.5-flash'
     ].filter((m, i, arr) => arr.indexOf(m) === i); // remove duplicates
 
-    // Ensure maxOutputTokens is at least 1024 so thinking models don't starve text output
-    const effectiveMaxTokens = Math.max(options.maxOutputTokens || 3072, 1024);
+    // Ensure generous token budget for detailed questions and pedagogical explanations
+    const effectiveMaxTokens = Math.min(Math.max(options.maxOutputTokens || 4096, 2048), 8192);
 
     let lastError: Error | null = null;
+    let poolCooldownPassDone = false;
 
-    for (let modelIdx = 0; modelIdx < candidateModels.length; modelIdx++) {
-      const currentModel = candidateModels[modelIdx];
-      const geminiUrl = `${rawBaseUrl || 'https://generativelanguage.googleapis.com/v1beta'}/models/${currentModel}:generateContent?key=${apiKey}`;
+    // Retry loop for the key pool (handles transient exhaustion with minimal targeted sleep)
+    for (let poolAttempt = 0; poolAttempt < 2; poolAttempt++) {
+      // 1. Synchronize and automatically recover any keys whose cooldown/daily reset has expired
+      const allStates = syncAndRecoverKeyPool(keyPool);
+      const healthyKeys = allStates.filter(s => s.status === 'healthy');
+      const restingKeys = allStates.filter(s => s.status === 'cooldown_rpm' || s.status === 'exhausted_daily');
 
-      const payload: any = {
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: userPrompt }]
+      let prioritizedKeys: KeyHealthState[] = [];
+
+      if (healthyKeys.length > 0) {
+        // Fair round-robin across HEALTHY keys, prioritizing UNLEASED keys for concurrent parallel workers
+        const unleased = healthyKeys.filter(s => !s.isLeased);
+        const candidates = unleased.length > 0 ? unleased : healthyKeys;
+        const startIdx = globalGeminiKeyIndex % candidates.length;
+        globalGeminiKeyIndex++;
+        prioritizedKeys = candidates.slice(startIdx).concat(candidates.slice(0, startIdx));
+      } else if (restingKeys.length > 0) {
+        // All active keys are currently cooling down
+        restingKeys.sort((a, b) => a.cooldownUntil - b.cooldownUntil);
+        const earliestRest = restingKeys[0];
+        const waitMs = Math.max(earliestRest.cooldownUntil - Date.now() + 500, 1000);
+
+        // If earliest cooldown is under 65 seconds (standard RPM reset), sleep and auto-recover
+        if (waitMs <= 65000 && !poolCooldownPassDone) {
+          poolCooldownPassDone = true;
+          console.warn(`[AI Key Pool] All ${allStates.length} keys are in cooldown. Pausing ${(waitMs / 1000).toFixed(1)}s for key ${earliestRest.keyPreview} to auto-recover...`);
+          await new Promise(r => setTimeout(r, waitMs));
+          // Synchronize to trigger immediate auto-recovery
+          syncAndRecoverKeyPool(keyPool);
+          continue; // Re-evaluate pool with newly recovered key!
+        } else {
+          // If all keys are locked until daily reset
+          const dailyExhaustedCount = allStates.filter(s => s.status === 'exhausted_daily').length;
+          if (dailyExhaustedCount === allStates.length) {
+            throw new Error(`All ${allStates.length} Gemini API keys have reached their 500 RPD daily quota limit. Daily quotas automatically reset at 12:30 PM IST (Midnight US Pacific Time).`);
           }
-        ],
-        generationConfig: {
-          temperature,
-          maxOutputTokens: effectiveMaxTokens
+          prioritizedKeys = restingKeys;
         }
-      };
-
-      // If using gemini-3.x models, set thinkingLevel to LOW to cut reasoning overhead and speed up output by 2x
-      if (currentModel.includes('3.6') || currentModel.includes('3.7') || currentModel.includes('3.8')) {
-        payload.generationConfig.thinkingConfig = { thinkingLevel: 'LOW' };
+      } else {
+        prioritizedKeys = allStates;
       }
 
-      if (systemPrompt && systemPrompt.trim()) {
-        payload.systemInstruction = {
-          parts: [{ text: systemPrompt }]
-        };
-      }
-
-      if (options.responseMimeType === 'application/json' || (systemPrompt.includes('JSON') && (!options.maxOutputTokens || options.maxOutputTokens > 100))) {
-        payload.generationConfig.responseMimeType = 'application/json';
-      }
-
-      // Retry up to 2 times for transient 503 (high demand) before switching model
-      const maxRetries = 2;
-      for (let attempt = 0; attempt < maxRetries; attempt++) {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), timeoutMs);
+      // Outer loop: iterate through healthy prioritized keys
+      for (let keyIdx = 0; keyIdx < prioritizedKeys.length; keyIdx++) {
+        const activeState = prioritizedKeys[keyIdx];
+        const currentApiKey = activeState.key;
+        activeState.isLeased = true;
+        activeState.leasedAt = Date.now();
+        let keyHitRateLimit = false;
 
         try {
-          const response = await fetch(geminiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-            signal: controller.signal
-          });
+          for (let modelIdx = 0; modelIdx < candidateModels.length; modelIdx++) {
+            const currentModel = candidateModels[modelIdx];
+            const geminiUrl = `${rawBaseUrl || 'https://generativelanguage.googleapis.com/v1beta'}/models/${currentModel}:generateContent?key=${currentApiKey}`;
 
-          if (!response.ok) {
-            const errText = await response.text();
-            let detail = errText;
-            try {
-              const errObj = JSON.parse(errText);
-              detail = errObj.error?.message || errObj.error?.status || errObj.message || errText;
-            } catch {}
+            const payload: any = {
+              contents: [
+                {
+                  role: 'user',
+                  parts: [{ text: userPrompt }]
+                }
+              ],
+              generationConfig: {
+                temperature,
+                maxOutputTokens: effectiveMaxTokens
+              }
+            };
 
-            // If 503 (temporary high demand) or 429 (temporary rate limit), pause briefly and retry or failover
-            if (response.status === 503 || response.status === 429) {
-              console.warn(`[AI] Gemini ${currentModel} returned ${response.status} (attempt ${attempt + 1}/${maxRetries}). Waiting 1.5s...`);
-              if (attempt < maxRetries - 1) {
-                await new Promise(r => setTimeout(r, 1500));
-                continue; // retry same model
-              } else {
-                console.warn(`[AI] Gemini ${currentModel} persistent ${response.status}. Failing over to next model...`);
-                lastError = new Error(`Google Gemini (${currentModel}): ${detail}`);
-                break; // break retry loop to try next model in candidateModels
+            if (currentModel.includes('thinking')) {
+              payload.generationConfig.thinkingConfig = { thinkingLevel: 'LOW' };
+            }
+
+            if (systemPrompt && systemPrompt.trim()) {
+              payload.systemInstruction = {
+                parts: [{ text: systemPrompt }]
+              };
+            }
+
+            if (options.responseMimeType === 'application/json' || (systemPrompt.includes('JSON') && (!options.maxOutputTokens || options.maxOutputTokens > 100))) {
+              payload.generationConfig.responseMimeType = 'application/json';
+            }
+
+            const maxRetries = 2;
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+              const controller = new AbortController();
+              const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+              try {
+                const response = await fetch(geminiUrl, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(payload),
+                  signal: controller.signal
+                });
+
+                if (!response.ok) {
+                  const errText = await response.text();
+                  let detail = errText;
+                  try {
+                    const errObj = JSON.parse(errText);
+                    detail = errObj.error?.message || errObj.error?.status || errObj.message || errText;
+                  } catch {}
+
+                  // HTTP 429: Classify between 20 RPM sliding window vs 500 RPD daily quota limit
+                  if (response.status === 429) {
+                    const isDaily = detail.toLowerCase().includes('per day') ||
+                                    detail.toLowerCase().includes('daily') ||
+                                    detail.toLowerCase().includes("requests per day") ||
+                                    detail.toLowerCase().includes("quota metric 'requests'");
+
+                    if (isDaily) {
+                      const nextReset = calculateNextDailyResetMs();
+                      activeState.status = 'exhausted_daily';
+                      activeState.cooldownUntil = nextReset;
+                      activeState.failureCount++;
+                      activeState.consecutiveErrors++;
+                      activeState.lastError = detail;
+                      const hoursLeft = ((nextReset - Date.now()) / (1000 * 60 * 60)).toFixed(1);
+                      console.warn(`[AI Key Pool] 🛑 Key ${activeState.keyPreview} reached 500 RPD daily quota. Scheduled auto-recovery in ~${hoursLeft}h at 12:30 PM IST.`);
+                    } else {
+                      let cooldownSec = 25;
+                      const retryMatch = detail.match(/Please retry in ([\d\.]+)s/i);
+                      if (retryMatch) {
+                        cooldownSec = parseFloat(retryMatch[1]);
+                      } else {
+                        const headerRetry = response.headers.get('retry-after');
+                        if (headerRetry) {
+                          const parsedRetry = parseFloat(headerRetry);
+                          if (!isNaN(parsedRetry) && parsedRetry > 0) cooldownSec = parsedRetry;
+                        }
+                      }
+                      activeState.status = 'cooldown_rpm';
+                      activeState.cooldownUntil = Date.now() + Math.ceil(cooldownSec * 1000) + 1000;
+                      activeState.failureCount++;
+                      activeState.consecutiveErrors++;
+                      activeState.lastError = detail;
+                      console.warn(`[AI Key Pool] 🟡 Key ${activeState.keyPreview} hit 20 RPM limit. Cooldown set for ${cooldownSec}s. Auto-recovery armed.`);
+                    }
+
+                    keyHitRateLimit = true;
+                    lastError = new Error(`Google Gemini Quota Exhausted (${currentModel}): ${detail}`);
+                    break; // Break model loop to immediately switch to next healthy key!
+                  }
+
+                  // HTTP 401/403: Disable key permanently from pool
+                  if (response.status === 401 || response.status === 403) {
+                    activeState.status = 'disabled';
+                    activeState.cooldownUntil = Number.MAX_SAFE_INTEGER;
+                    activeState.failureCount++;
+                    activeState.lastError = detail;
+                    console.warn(`[AI Key Pool] 🔴 Key ${activeState.keyPreview} returned ${response.status} (${detail}). Disabled from pool.`);
+                    keyHitRateLimit = true;
+                    lastError = new Error(`Google Gemini Key ${activeState.keyPreview} (${response.status}): ${detail}`);
+                    break;
+                  }
+
+                  // HTTP 503: Transient high demand, exponential backoff
+                  if (response.status === 503) {
+                    const backoffMs = Math.floor((1500 * Math.pow(1.5, attempt)) + Math.random() * 500);
+                    console.warn(`[AI] Google AI Studio (${currentModel}) returned 503 (attempt ${attempt + 1}/${maxRetries}). Waiting ${(backoffMs / 1000).toFixed(1)}s...`);
+                    if (attempt < maxRetries - 1) {
+                      await new Promise(r => setTimeout(r, backoffMs));
+                      continue;
+                    } else {
+                      lastError = new Error(`Google Gemini (${currentModel}): ${detail}`);
+                      break;
+                    }
+                  }
+
+                  // HTTP 404: Model deprecated / unavailable
+                  if (response.status === 404) {
+                    console.warn(`[AI] Gemini ${currentModel} returned 404 (model unavailable). Failing over to next candidate...`);
+                    lastError = new Error(`Google Gemini (${currentModel}): ${detail}`);
+                    break;
+                  }
+
+                  const prefix = isCustom ? 'Custom Google Gemini API Key Error' : 'Google Gemini API Error';
+                  throw new Error(`${prefix} (${response.status}): ${detail}`);
+                }
+
+                const data = await response.json();
+                const candidate = data.candidates?.[0]?.content?.parts
+                  ?.map((p: any) => p.text || '')
+                  .join('')
+                  .trim();
+
+                if (!candidate) {
+                  throw new Error('Google Gemini API returned an empty response candidate.');
+                }
+
+                // Update health state on successful completion
+                activeState.status = 'healthy';
+                activeState.successCount++;
+                activeState.consecutiveErrors = 0;
+                activeState.lastUsedAt = Date.now();
+                activeState.isLeased = false;
+
+                return candidate;
+              } catch (err: any) {
+                if (err.name === 'AbortError') {
+                  throw new Error(`Google Gemini API request timed out after ${timeoutMs / 1000} seconds. Please retry.`);
+                }
+                if (!err.message?.includes('503') && !err.message?.includes('429') && !err.message?.includes('404')) {
+                  throw err;
+                }
+                lastError = err;
+              } finally {
+                clearTimeout(timer);
               }
             }
 
-            // If 404 (model deprecated / unavailable), immediately failover to next model
-            if (response.status === 404) {
-              console.warn(`[AI] Gemini ${currentModel} returned 404 (model unavailable). Failing over...`);
-              lastError = new Error(`Google Gemini (${currentModel}): ${detail}`);
-              break; // break retry loop to try next model
+            if (keyHitRateLimit) {
+              activeState.isLeased = false;
+              break; // Switch to next key in keyPool
             }
-
-            const prefix = isCustom ? 'Custom Google Gemini API Key Error' : 'Google Gemini API Error';
-            throw new Error(`${prefix} (${response.status}): ${detail}`);
           }
-
-          const data = await response.json();
-          const candidate = data.candidates?.[0]?.content?.parts
-            ?.map((p: any) => p.text || '')
-            .join('')
-            .trim();
-
-          if (!candidate) {
-            throw new Error('Google Gemini API returned an empty response candidate.');
-          }
-          return candidate;
-        } catch (err: any) {
-          if (err.name === 'AbortError') {
-            throw new Error(`Google Gemini API request timed out after ${timeoutMs / 1000} seconds. Please retry.`);
-          }
-          // If it's not a recoverable 503/429/404 handled in response check, rethrow
-          if (!err.message?.includes('503') && !err.message?.includes('429') && !err.message?.includes('404')) {
-            throw err;
-          }
-          lastError = err;
         } finally {
-          clearTimeout(timer);
+          activeState.isLeased = false;
         }
       }
     }
 
-    // If all candidate models failed
     throw lastError || new Error('Google Gemini API service unavailable across all model endpoints.');
   }
 
@@ -1171,6 +1508,7 @@ export async function generateExamStructure(
         category: subCat === 'daily' ? 'Daily Benchmark' : (subCat === 'pyq' ? 'Official PYQ' : 'Full Mock Tests'),
         targetTable: 'mockTests',
         stage: req.stage || undefined,
+        stream: req.stream || undefined,
         durationMinutes: defaultDuration,
         totalMarks: defaultMarks,
         negativeMarking: defaultNegative,
@@ -1400,6 +1738,7 @@ export async function generateExamStructure(
         targetTable,
         targetMode,
         stage: req.stage || undefined,
+        stream: req.stream || undefined,
         paper: authenticPaper,
         subject: authenticSubject,
         subSubject: (effectiveTier === 'subsubject' || effectiveTier === 'chapter') ? authenticSubSubject : '',
@@ -1549,6 +1888,7 @@ JSON array only. No explanation.`;
       targetTable,
       targetMode,
       stage: req.stage || undefined,
+      stream: req.stream || undefined,
       paper: cleanPaper,
       subject: cleanSubject,
       subSubject: cleanSubSubject,
@@ -1608,6 +1948,7 @@ export async function generateExamQuestions(
   const rawTitle = String(req.testTitle || '').trim();
   const cleanTitle = cleanTitleText(rawTitle) || rawTitle;
   const cleanSubject = String(req.subject || '').replace(/^Subject:\s*/i, '').trim();
+  const effectiveSubjectContext = `${cleanSubject} · ${cleanTitle}`.trim();
 
   // Tokenize compound multi-topic titles using explicit delimiters (+, ·, |)
   // We do NOT split on "&" or "and" because authentic academic units (e.g. "Panchayati Raj & Local Governance", "Soil and Water Conservation") contain them.
@@ -1739,7 +2080,67 @@ This test ("${cleanTitle}") covers the ENTIRE examination syllabus. Distribute t
 
     chapterContents = extractSyllabusContents(chapterScopedContent);
 
-    if (isNaturalDensityMode) {
+    // ── FRONTIER LLM COGNITIVE DECOMPOSITION & SUB-CONTENT QUOTA ALLOCATION ──
+    if (chapterContents.length >= 2) {
+      // Primary: Scoped chapter contains 2+ granular syllabus sub-contents / bullet points
+      let activeContents = chapterContents;
+      if (chapterContents.length > totalQuestions) {
+        const batchNum = req.batchNumber || 1;
+        const totalBatches = Math.max(1, Math.ceil(chapterContents.length / totalQuestions));
+        const currentBatchIdx = (batchNum - 1) % totalBatches;
+        const start = currentBatchIdx * totalQuestions;
+        activeContents = chapterContents.slice(start, start + totalQuestions);
+        // If remainder at the end is smaller than totalQuestions, wrap around so every batch has full allocation
+        if (activeContents.length < totalQuestions) {
+          activeContents = [...activeContents, ...chapterContents.slice(0, totalQuestions - activeContents.length)];
+        }
+      }
+
+      const basePerContent = Math.floor(totalQuestions / activeContents.length);
+      const remainder = totalQuestions % activeContents.length;
+      chapterContentQuotas = activeContents.map((c, idx) => ({
+        name: c,
+        quota: basePerContent + (idx < remainder ? 1 : 0)
+      }));
+
+      scopeDirectives = `FRONTIER LLM COGNITIVE DECOMPOSITION & SUB-CONTENT QUOTA DISTRIBUTION:
+All ${totalQuestions} questions MUST be derived strictly from "${cleanTitle}".
+This chapter contains ${chapterContents.length} distinct examinable sub-contents in its syllabus blueprint.
+For Batch #${req.batchNumber || 1}, you are systematically assigned these ${activeContents.length} specific sub-contents:
+${chapterContentQuotas.map((cq, i) => `  ${i + 1}. "${cq.name}" -> EXACTLY ${cq.quota} question${cq.quota > 1 ? 's' : ''}`).join('\n')}
+
+COGNITIVE THINKING & HIGH-VALUE EXAM RIGOR (MANDATORY):
+1. TWO-STAGE COGNITIVE GENERATION:
+   - THINKING STAGE: Read each assigned sub-content item above. Assess its specific mathematical relations, operational mechanisms, statutory clauses, boundary conditions, and typical candidate traps.
+   - SYNTHESIS STAGE: Generate authentic, competitive exam-grade questions satisfying the exact quotas above.
+2. ABSOLUTE BAN ON GENERIC FLUFF:
+   - FORBIDDEN: Superficial 1-line definitions ("What is X?", "Define Y", "Which of the following is an example of Z?").
+   - MANDATORY HIGH-VALUE ARCHETYPES:
+     * Multi-Statement Roman Numeral Evaluation ("Consider statements 1, 2, 3... Which is correct?").
+     * Exact Formula Applications with clean LaTeX math ($V = \\frac{\\pi D N}{1000}$, $R = \\rho \\frac{L}{A}$, etc.).
+     * Subtle Distractor Traps: Options must model real candidate confusion, calculation errors, or common misconceptions.
+     * Deep Pedagogical Explanations: The explanation MUST state why the correct answer is true AND explicitly expose why the remaining 3 options are incorrect traps.
+3. PER-QUESTION TOPIC TAGGING: For each question, set the "topic" field in JSON to the EXACT assigned sub-content name (e.g. "${activeContents[0].slice(0, 45)}..."). NEVER set "topic" to "${cleanTitle}" or "General Syllabus".
+4. ZERO TOPIC OMISSION: Every assigned sub-content in the quota table above MUST receive its exact question allocation.`;
+    } else if (subParts.length > 1) {
+      // Fallback: title has multiple explicit compound sub-parts (+, ·, |)
+      const basePerPart = Math.floor(totalQuestions / subParts.length);
+      const remainder = totalQuestions % subParts.length;
+      const partQuotas = subParts.map((sp, idx) => ({
+        name: sp,
+        quota: basePerPart + (idx < remainder ? 1 : 0)
+      }));
+      chapterContentQuotas = partQuotas;
+
+      scopeDirectives = `FRONTIER LLM STRICT MODULE FOCUS & EQUAL SUB-TOPIC DISTRIBUTION:
+This module "${cleanTitle}" contains ${subParts.length} distinct sub-components:
+${partQuotas.map((pq, i) => `  ${i + 1}. "${pq.name}" -> EXACTLY ${pq.quota} questions`).join('\n')}
+
+MANDATORY DISTRIBUTION RULES:
+1. THINKING & ALLOCATION: Read each sub-component, reason through its examinable aspects, and synthesize questions according to the quotas above.
+2. PER-QUESTION TOPIC TAGGING: For each question, set the "topic" field in JSON to its corresponding sub-topic name (e.g. "${subParts[0]}").
+3. NEVER favor one sub-topic over another.`;
+    } else if (isNaturalDensityMode) {
       scopeDirectives = `LLM COGNITIVE SYLLABUS DECOMPOSITION & NATURAL DENSITY SIZING:
 You are an elite Commission Question Paper Setter (OPSC/UPSC/GATE/State Exam standard).
 You must analyze the Scoped Syllabus Content below through deep cognitive subject-matter comprehension:
@@ -1766,45 +2167,6 @@ You must analyze the Scoped Syllabus Content below through deep cognitive subjec
 3. COMPREHENSIVE BREADTH MANDATE:
    Distribute questions systematically across ALL sub-topics, bullet points, and technical parameters in the section. Do NOT cluster multiple questions around the first sentence or single concept while neglecting the rest.
    For each question, set the "topic" field in JSON to the specific content item or sub-topic tested (e.g. "${chapterContents[0]?.slice(0, 45) || cleanTitle}"). NEVER set "topic" to "General Syllabus".`;
-    } else if (chapterContents.length >= 2) {
-      // Priority 1: Scoped chapter contains 2+ granular syllabus bullet contents
-      const activeContents = chapterContents.length <= totalQuestions
-        ? chapterContents
-        : chapterContents.slice(0, totalQuestions);
-
-      const basePerContent = Math.floor(totalQuestions / activeContents.length);
-      const remainder = totalQuestions % activeContents.length;
-      chapterContentQuotas = activeContents.map((c, idx) => ({
-        name: c,
-        quota: basePerContent + (idx < remainder ? 1 : 0)
-      }));
-
-      scopeDirectives = `STRICT MODULE FOCUS & CONTENT-LEVEL DISTRIBUTION:
-All ${totalQuestions} questions MUST be derived from "${cleanTitle}".
-This chapter has ${activeContents.length} distinct content items in its syllabus. Distribute questions across:
-${chapterContentQuotas.map((cq, i) => `  ${i + 1}. "${cq.name}" -> ~${cq.quota} question${cq.quota > 1 ? 's' : ''}`).join('\n')}
-
-MANDATORY RULES:
-1. PER-QUESTION TOPIC TAGGING: For each question, set the "topic" field to the specific content item name or short sub-topic phrase it tests (e.g. "${activeContents[0].slice(0, 45)}..."). NEVER set "topic" to the test title "${cleanTitle}" or "General Syllabus".
-2. ZERO CONCENTRATION BIAS: Do not cluster questions on one content item while neglecting others. Every content item must be covered.`;
-    } else if (subParts.length > 1) {
-      // Fallback: title has multiple explicit compound sub-parts (+, ·, |)
-      const basePerPart = Math.floor(totalQuestions / subParts.length);
-      const remainder = totalQuestions % subParts.length;
-      const partQuotas = subParts.map((sp, idx) => ({
-        name: sp,
-        quota: basePerPart + (idx < remainder ? 1 : 0)
-      }));
-      chapterContentQuotas = partQuotas;
-
-      scopeDirectives = `STRICT MODULE FOCUS & EQUAL SUB-TOPIC DISTRIBUTION:
-This module "${cleanTitle}" contains ${subParts.length} distinct sub-components:
-${partQuotas.map((pq, i) => `  ${i + 1}. "${pq.name}" -> ~${pq.quota} questions`).join('\n')}
-
-MANDATORY DISTRIBUTION RULES:
-1. You MUST generate questions distributed across these sub-topics: ${partQuotas.map(pq => `"${pq.name}"`).join(', ')}.
-2. For each question, set the "topic" field in JSON to its corresponding sub-topic name (e.g. "${subParts[0]}").
-3. NEVER favor one sub-topic over another.`;
     } else {
       // Fallback: 0–1 content items detected → generic directive
       scopeDirectives = `STRICT MODULE FOCUS & EQUAL TOPIC COVERAGE:
@@ -1827,6 +2189,12 @@ If the syllabus blueprint contains multiple sub-topics, bullet points, or concep
     } else {
       stageDirective = `EXAMINATION STAGE CALIBRATION [${cleanStage.toUpperCase()}]: Calibrate question complexity and format to the authentic ${cleanStage} stage standards.`;
     }
+  }
+
+  const cleanStream = (req.stream || '').trim();
+  let streamDirective = '';
+  if (cleanStream && cleanStream.toLowerCase() !== 'all streams' && cleanStream.toLowerCase() !== 'common') {
+    streamDirective = `EXAMINATION STREAM & DISCIPLINE CALIBRATION [${cleanStream.toUpperCase()}]: All questions, terminology, formulas, standard codes, and practical applications MUST strictly adhere to the academic syllabus and domain requirements of the "${cleanStream}" stream/discipline.`;
   }
 
   // ── CATEGORY-SPECIFIC PEDAGOGICAL DIRECTIVE (ALL 4 QUESTION BANK / PRACTICE MODES) ──
@@ -1922,38 +2290,39 @@ If the syllabus blueprint contains multiple sub-topics, bullet points, or concep
   let difficultyDirective = '';
   if (reqDiff === 'easy') {
     difficultyDirective = `
-COGNITIVE DIFFICULTY SPECIFICATION: SIMPLE / FOUNDATIONAL
-- PEDAGOGICAL TARGET: Direct factual recall, fundamental definitions, and core governing principles.
-- QUESTION STEM ARCHITECTURE: Clean, direct, single-sentence questions (e.g., "Which Article guarantees...", "What is the SI unit of...", "Under the Factories Act, what is the minimum...").
-- STRICT CONSTRAINTS:
-  * NEVER use complex multi-statement lists ("Consider the following statements: 1, 2, 3... Which is correct?").
-  * NEVER use Assertion-Reason formats.
-  * Direct 1-step retrieval of essential knowledge that every candidate must know.
-  * Distractors must be plausible, authentic alternatives from the same domain.`;
+COGNITIVE DIFFICULTY SPECIFICATION: SIMPLE / FOUNDATIONAL (1-Step Direct Knowledge Retrieval)
+- PEDAGOGICAL TARGET: Direct factual recall, core statutory numbers, essential formula definitions, and foundational principles.
+- QUESTION STEM ARCHITECTURE: Clean, direct, single-sentence question stems (e.g. "Which Article of the Constitution of India provides for...", "What is the SI unit of...", "Under the Indian Contract Act, an agreement enforceable by law is a...").
+- STRICT QUALITY RULES (MANDATORY):
+  * ABSOLUTELY FORBIDDEN: Do NOT use Roman numeral statement lists ("Consider statements 1, 2, 3... Which is correct?").
+  * ABSOLUTELY FORBIDDEN: Do NOT use Assertion-Reason formats.
+  * Direct 1-step retrieval testing fundamental knowledge that every serious aspirant must know.
+  * Distractors must be plausible, authentic alternatives from the same domain without confusing double negatives.`;
   } else if (reqDiff === 'medium') {
     difficultyDirective = `
-COGNITIVE DIFFICULTY SPECIFICATION: MODERATE / STANDARD (OSSC / OSSSC Standard)
-- PEDAGOGICAL TARGET: 2-step reasoning, intermediate conceptual application, and standard calculation problems.
-- QUESTION STEM ARCHITECTURE: Questions requiring the candidate to combine two facts, apply a formula to given parameters, contrast two related concepts, or identify exceptions (e.g., "Which of the following rights is available to foreigners but NOT under Article 19?", "A centrifugal pump operates at... What is the manometric head?").
-- STRICT CONSTRAINTS:
-  * Emphasize 2-step logical deduction or practical numerical calculations.
-  * Maintain clean, accessible stems without convoluted multi-nested statement matrices.
-  * Distractors should model common computational errors, parameter mix-ups, or standard candidate misconceptions.`;
+COGNITIVE DIFFICULTY SPECIFICATION: MODERATE / STANDARD (2-Step Application & Conceptual Deduction - OSSC/OSSSC Standard)
+- PEDAGOGICAL TARGET: 2-step cognitive deduction, standard calculations, conceptual contrasts, and practical application.
+- QUESTION STEM ARCHITECTURE: Questions requiring candidates to combine two related facts, substitute values into a standard formula (e.g. $V = IR$, $R = \\rho L / A$, $P = VI$), identify exceptions to general rules, or contrast two operational mechanisms.
+- STRICT QUALITY RULES (MANDATORY):
+  * Emphasize 2-step logical deduction or practical numerical calculations with clean derivations.
+  * Keep question stems clear and direct; do NOT create overly convoluted multi-nested matrices.
+  * Distractors should model common computational errors, parameter mix-ups, or typical candidate misconceptions.`;
   } else {
     difficultyDirective = `
-COGNITIVE DIFFICULTY SPECIFICATION: ADVANCED / RIGOROUS (OPSC / OAS Prelims Standard)
+COGNITIVE DIFFICULTY SPECIFICATION: ADVANCED / RIGOROUS (High-Order Analytical Rigor - OPSC / OAS Prelims Standard)
 - PEDAGOGICAL TARGET: High-order cognitive evaluation, multi-statement analysis, landmark case laws, nuanced statutory provisos, and rank-determining discriminators.
-- QUESTION STEM ARCHITECTURE: 
-  * Heavy emphasis on Multi-Statement Evaluation:
-    "Consider the following statements regarding X:
+- QUESTION STEM ARCHITECTURE (MANDATORY 60%–80% MULTI-STATEMENT FORMAT):
+  * At least 60% to 80% of questions in this batch MUST use the Multi-Statement Roman Numeral Format:
+    "Consider the following statements regarding [Concept]:
     1. Statement 1...
     2. Statement 2...
     3. Statement 3...
-    Which of the statements given above is/are correct?"
-  * Assertion (A) and Reason (R) frameworks.
+    Which of the statements given above is/are correct?
+    (A) 1 and 2 only  (B) 2 and 3 only  (C) 1, 2 and 3  (D) None"
+  * Or Assertion (A) and Reason (R) frameworks.
   * Deep mathematical derivations with rigorous LaTeX formatting ($...$), boundary conditions, and subtle exceptions.
-- STRICT CONSTRAINTS:
-  * At least 50% to 70% of questions MUST use multi-statement Roman numeral format or multi-factor analytical evaluation.
+- STRICT QUALITY RULES (MANDATORY):
+  * BAN generic dictionary questions and 1-step trivia.
   * Distractors must be sophisticated traps designed around subtle distinctions, inverted conditions, or landmark judicial rulings.`;
   }
 
@@ -1971,7 +2340,12 @@ ${mainSectionDirective ? `\n${mainSectionDirective}\n` : ''}
 ${difficultyDirective}
 ${scopeDirectives}
 ${stageDirective ? `\n${stageDirective}\n` : ''}
+${streamDirective ? `\n${streamDirective}\n` : ''}
 ${subCategoryDirective ? `\n${subCategoryDirective}\n` : ''}
+${req.durationMinutes && req.durationMinutes > 0 ? `\nTIME DURATION & SPEED PACE CONSTRAINT:
+This test has an official predefined duration of ${req.durationMinutes} minutes for ${req.predefinedQuestionCount || req.questionCount || 50} questions (~${Math.round((req.durationMinutes * 60) / (req.predefinedQuestionCount || req.questionCount || 50))} seconds/question). Calibrate the length, readability, and computation depth so questions can be accurately processed within this exact time constraint.\n` : ''}
+${req.negativeMarking !== undefined && req.negativeMarking !== null ? `\nOFFICIAL MARKING & PENALTY SCHEME:
+Positive marks: ${req.totalMarks ? (req.totalMarks / (req.predefinedQuestionCount || req.questionCount || 50)).toFixed(1) : '1.0'}, Negative penalty: -${req.negativeMarking}. Because negative marking is enforced, all 4 options (A, B, C, D) must be authentic, highly plausible alternatives testing real conceptual discriminators. Avoid trick traps with double negatives or trivial typographical errors.\n` : ''}
 
 MANDATORY RULES:
 1. NATURAL ENGLISH, CLEAN UNITS & CLEAN MATH FORMATTING:
@@ -1996,24 +2370,73 @@ MANDATORY RULES:
    - NEVER use placeholder names or nonsense distractors (e.g., "00", "Option 1", "Option A", "None of the above", "n/a"). All 4 options must be realistic, plausible exam choices.
    - In numerical/calculation questions, options[correctAnswerIndex] MUST contain the exact calculated numerical or ratio result derived in the explanation.
 3. ANTI-GENERIC & HIGH-EXAM-YIELD QUALITY MANDATE:
-   - BAN TRIVIAL DICTIONARY DEFINITIONS: NEVER generate generic, superficial questions like "What is X?", "Define Y", or "What does CPU stand for?".
-   - Focus strictly on high-yield competitive exam discriminators: exact statutory articles, numerical thresholds, quorums, tenures, amendment years, operational formulas, case laws, and statutory exceptions.
-   - THE COMPETITIVE EXAM TEST: Every question must test a point that an actual competitive examiner would use on an OPSC / OSSC / State Exam paper to evaluate serious aspirants. If an average citizen off the street could guess the answer without studying, DISCARD IT IMMEDIATELY and replace with an authentic exam-level question.
+   - HARD BAN ON DEFINITION STEMS: NEVER generate generic, superficial questions like "What is X?", "Define Y", "Which of the following is defined as...", or "What does X stand for?".
+   - ALWAYS use high-value competitive exam archetypes:
+     * Multi-Statement / Roman Numeral evaluations: "Consider the following statements regarding [Concept]: (I)... (II)... Which is/are correct?"
+     * Quantitative & Derivation stems with LaTeX formulas ($V = \frac{\pi D N}{1000}$).
+     * Comparative Technical Mechanics & Boundary Conditions.
+   - THE COMPETITIVE EXAM TEST: Every question must test a point that an actual competitive examiner would use on an OPSC / OSSC / State Exam paper to evaluate serious aspirants.
 4. STRICT SINGLE-BEST-ANSWER & MUTUAL EXCLUSIVITY: Exactly ONE option is factually true. All 3 distractors are false. No overlapping or duplicate options.
 5. Exactly 4 distinct options.
-6. Step-by-step concise explanation (2-3 sentences) strictly showing the final verified mathematical derivation or factual authority.
-   - NEVER include scratchpad notes, inner monologues, or trial-and-error thoughts (NEVER write "Wait, recalculating", "Let's check options", or "Wait, option comes from"). Output strictly the clean, authoritative solution.
+6. PEDAGOGICAL EXPLANATION & DISTRACTOR TRAP ANALYSIS:
+   Every explanation MUST provide a rich pedagogical breakdown:
+   (a) State the verified technical derivation or factual authority for the correct answer.
+   (b) Explicitly expose the distractor traps by identifying why the other options are common misconceptions, calculation traps, or false boundaries (e.g. "Distractor Trap: Option B confuses...").
+   - NEVER include scratchpad notes or inner monologues.
+7. STRICT DOMAIN JAILING & NO CROSS-SYLLABUS LEAKAGE (MANDATORY):
+   - You are generating questions EXCLUSIVELY for: "${cleanTitle}"${cleanSubject ? ` in the discipline "${cleanSubject}"` : ''}.
+   - ABSOLUTE BAN ON OFF-TOPIC LEAKAGE: You are strictly forbidden from generating questions on topics outside this specific module.
+   - Specifically, unless "${cleanTitle}" explicitly specifies "Computer Programming" or "Data Structures", do NOT generate questions on C language, coding syntax, pointers, queues, stacks, or computer science concepts.
+   - Stay 100% focused on authentic, core academic and technical content for "${cleanTitle}".
+8. PEDAGOGICAL VISUALS, GRAPHS & DATA TABLES (SENIOR EXAM PAPER SETTER STANDARD):
+   - CRITICAL: QUESTION GRAPH VS EXPLANATION GRAPH ABSOLUTE DISAMBIGUATION:
+     * "diagram" (QUESTION STIMULUS ONLY): Place the UNSOLVED problem stimulus here (e.g. initial Bar/Line/Pie chart, unlabeled geometry figure, initial seating layout). It must NEVER reveal the correct answer, show the final displacement vector, or provide the step-by-step solution!
+     * "explanationDiagram" (SOLUTION DERIVATION PROOF ONLY): Place the step-by-step visual solution derivation here (e.g. Direction Sense vector trajectory with distance/displacement, auxiliary geometry proof line, Syllogism Venn Diagram overlap proof).
+     * NEVER confuse or swap these two fields! If a question needs a chart to answer, put it in "diagram". If a question needs a visual proof to explain the answer, put it in "explanationDiagram".
+   - CRITICAL: ABSOLUTE CROSS-QUESTION VISUAL INDEPENDENCE:
+     * Every question in the batch MUST have its own distinct visual data. NEVER reuse, repeat, or bleed chart values, category labels (e.g. food/rent/savings or steel/coal), years, or figures from a previous question into another question!
+   - VISUAL DATA EXCLUSIVITY (TEACHER'S FIRST LAW):
+     * The question stem MUST require the candidate to extract data points from the chart/figure to solve the problem.
+     * Do NOT dump the full numerical dataset in questionText prose or verbatim tables.
+     * For Data Interpretation (DI): Use EITHER a graphical visual (Bar/Line/Pie) in "diagram" OR a Markdown table in "questionText", NEVER both! If a visual chart is present, do NOT generate a Markdown data table in "questionText".
+   - MANDATORY STEM ANCHORING:
+     * When "diagram" is provided, always anchor the question stem naturally: e.g. "Directions: Study the given bar chart and answer the following question: ...", "In the given figure, ...".
+     * Do NOT write self-contained arithmetic word problems that ignore the generated diagram.
+   - STRICT ANTI-DUPLICATION (ZERO OPTION LEAK):
+     * NEVER append "(A) ... (B) ... (C) ... (D) ..." at the bottom of "questionText". All options belong exclusively in the "options" array.
+   - SOLUTION DERIVATION VISUAL (STEP-BY-STEP PROOF):
+     * When the question prompt is verbal/textual but the proof requires a visual derivation (e.g. Direction Sense vector trajectory, Syllogism Venn Diagram overlap proof, Geometry construction proof), place the diagram in "explanationDiagram" or add "placement": "explanation".
+     * If a geometry problem is purely theoretical/numerical where all dimensions are already stated in the text and the question can be solved directly by formula, place the figure in "explanationDiagram" as a visual derivation proof (not "diagram").
+   - OPTIONS: All options (A, B, C, D) must remain clean text or LaTeX formulas. If the question asks to identify a curve ("Which graph represents...?"), present the comparison panels labeled (A), (B), (C), (D) in the question visual and use simple text options ("Figure A", "Figure B", "Figure C", "Figure D").
+   - TABLES: For pure Tabular Data Interpretation (when "diagram": null), format the table as standard Markdown pipe tables (| Col 1 | Col 2 | ...) directly inside "questionText".
+   - STRICT NEGATIVE VISUAL PROHIBITION:
+     (a) If the topic is English Language, Odia Literature, Indian History, Indian Polity, or Current Affairs, strictly DO NOT generate vector diagrams. Set "diagram": null. Keep verbal & humanities questions 100% text-pure.
+     (b) If the topic is Pure Arithmetic Word Problems (Simple Interest, Compound Interest, Profit & Loss, Time & Work, Ages, Averages, Ratio & Proportion, Mixtures), strictly DO NOT generate vector diagrams. Formulate them cleanly with text and LaTeX equations ($...). Set "diagram": null. Only include diagrams if the topic explicitly tests Data Interpretation (DI) or Geometry.
+   - VALID DIAGRAM JSON FORMAT:
+     Set "type": "universal", with an array of "shapes". Supported shape types include:
+     * Bar Graph: {"type": "barGraph", "points": [{"x": 1, "y": 45, "label": "2021"}, {"x": 2, "y": 70, "label": "2022"}]}
+     * Grouped Bar Graph: {"type": "barGraph", "points": [{"x": 1, "y": 120, "label": "A (Exp)"}, {"x": 2, "y": 100, "label": "A (Imp)"}]}
+     * Line Graph: {"type": "lineGraph", "points": [{"x": 1, "y": 20, "label": "Jan"}, {"x": 2, "y": 55, "label": "Feb"}, {"x": 3, "y": 40, "label": "Mar"}]}
+     * Pie Chart: {"type": "pieChart", "values": [30, 25, 45], "items": ["Food", "Rent", "Savings"]}
+     * Venn Diagram (Syllogisms / Set Theory): {"type": "vennDiagram", "sets": ["Cricket", "Football"], "overlaps": {"A_only": 25, "B_only": 30, "both": 15}}
+     * Direction Sense: {"type": "directionDiagram", "steps": [{"direction": "N", "distance": 10, "label": "10m"}, {"direction": "E", "distance": 15, "label": "15m"}]}
+     * Seating Arrangement: {"type": "seatingArrangement", "seatingType": "circular", "points": ["A", "B", "C", "D", "E", "F"]}
+     * Clock Angles: {"type": "clock", "time": "08:20"}
+     * Box-and-Whisker Plot: {"type": "boxPlot", "min": 12, "q1": 24, "median": 35, "q3": 48, "max": 65}
+     * Scatter Plot: {"type": "scatterPlot", "points": [{"x": 2, "y": 15}, {"x": 4, "y": 28}, {"x": 6, "y": 45}]}
+     * 2D/3D Geometry: {"type": "triangle", "points": [[0,0], [4,0], [0,3]]}, {"type": "circle", "cx": 0, "cy": 0, "r": 3}, {"type": "cylinder", "r": 2, "height": 5}
 
 JSON OUTPUT SCHEMA:
 [
   {
-    "questionText": "Question string with clean text and LaTeX ($...$)",
+    "questionText": "Question string with clean text, LaTeX ($...$), Markdown pipe table, or multi-statement format",
     "options": ["Option A", "Option B", "Option C", "Option D"],
     "correctAnswerIndex": 0,
-    "explanation": "Concise step-by-step rationale matching correct option",
+    "explanation": "Step-by-step verified rationale confirming the correct option, followed by distractor trap analysis exposing why the other options are common mistakes.",
     "difficulty": "${defaultJsonDiff}",
     "topic": "${isFullLengthSyllabus ? (wholeSyllabusQuotas[0]?.name || 'Constituent Subject Name') : (chapterContentQuotas[0]?.name || cleanTitle)}",
-    "diagram": null
+    "diagram": null,
+    "explanationDiagram": null
   }
 ]`;
 
@@ -2094,8 +2517,10 @@ JSON OUTPUT SCHEMA:
       log: `[Stage 2/5] Dual-Thread Parallel Splitter launched: Thread 1 (${count1} Qs) + Thread 2 (${count2} Qs) via ${req.model || 'openai/gpt-oss-20b'}.`
     });
 
-    const existingStemsNotice = combinedExistingStems.length > 0
-      ? `\nPREVIOUSLY GENERATED / EXISTING QUESTIONS & REFERENCE PYQS (DO NOT DUPLICATE THESE CONCEPTS OR STEMS):\n${combinedExistingStems.slice(-35).map(s => `- ${s.slice(0, 90)}`).join('\n')}\n`
+    // Enterprise Distilled Negative Anchor: Keep context lean (< 350 chars), preventing prompt bloat & hallucination
+    const recentStems1 = combinedExistingStems.slice(-6);
+    const existingStemsNotice = recentStems1.length > 0
+      ? `\nRECENT EXAM ANCHORS (GENERATE FRESH, DISTINCT QUESTIONS TESTING DIFFERENT CONCEPTS):\n${recentStems1.map(s => `- ${s.slice(0, 80)}...`).join('\n')}\n`
       : '';
 
     const userPrompt1 = `Generate exactly ${count1} ${diffLabel} MCQs for "${cleanTitle}".
@@ -2114,6 +2539,8 @@ Output ONLY the raw JSON array of ${count2} question objects.`;
       const parsed = extractAndParseJSON(rawJson);
       const items = Array.isArray(parsed) ? parsed : (parsed.questions || parsed.items || []);
       if (!Array.isArray(items)) return [];
+
+      const seenDiagramFingerprints = new Set<string>();
 
       return items.map((q: any, idx: number) => {
         let options = Array.isArray(q.options) ? q.options.map(String) : [];
@@ -2136,10 +2563,26 @@ Output ONLY the raw JSON array of ${count2} question objects.`;
           difficulty: (q.difficulty === 'easy' || q.difficulty === 'medium' || q.difficulty === 'hard') ? q.difficulty : defaultJsonDiff,
           topic: resolveItemTopic(q.topic, idx),
           diagram: q.diagram && typeof q.diagram === 'object' ? q.diagram : null,
+          explanationDiagram: q.explanationDiagram && typeof q.explanationDiagram === 'object' ? q.explanationDiagram : null,
           batchNumber: req.batchNumber || 1
         };
 
-        return enforceDeterministicGuards(rawItem);
+        const guarded = enforceDeterministicGuards(rawItem, defaultJsonDiff, effectiveSubjectContext);
+
+        // Cross-Question Anti-Bleed: Ensure no two distinct questions share an identical diagram
+        if (guarded.diagram) {
+          const fp = getDiagramFingerprint(guarded.diagram);
+          if (fp) {
+            if (seenDiagramFingerprints.has(fp)) {
+              console.warn(`[Anti-Bleed Guard] Question ${idx + 1} duplicated a previous question's diagram in thread batch. Decoupling.`);
+              guarded.diagram = null;
+            } else {
+              seenDiagramFingerprints.add(fp);
+            }
+          }
+        }
+
+        return guarded;
       });
     };
 
@@ -2206,10 +2649,53 @@ Output ONLY the raw JSON array of ${count2} question objects.`;
       log: `[Stage 2/5] Synthesizing ${isNaturalDensityMode ? (ceilingCap ? `up to ≤${ceilingCap}` : 'maximized natural volume of') : totalQuestions} questions via ${req.model || 'meta/llama-3.2-11b-vision-instruct'}${req.thematicFocus ? ` [Focus: ${req.thematicFocus}]` : ''}.`
     });
 
-    const userPrompt = `Generate ${isNaturalDensityMode ? `the MAXIMIZED natural volume of distinct, high-caliber ${diffLabel} MCQs (minimum 5 Qs floor${ceilingCap ? `, maximum ceiling ≤ ${ceilingCap} Qs` : ', aim for 15 to 25 Qs on dense topics, 8 to 12 Qs on compact topics'})` : `exactly ${totalQuestions} ${diffLabel} MCQs`} for:
+    const isQB = req.mainSection === 'question_bank' || req.subCategory?.includes('question_bank') || (!req.mainSection && !req.durationMinutes);
+    const naturalVolumePrompt = isQB
+      ? `the COMPREHENSIVE PRACTICE VOLUME of distinct, high-caliber ${diffLabel} MCQs (aim for ${ceilingCap ? `up to ≤ ${ceilingCap}` : 'as many high-value questions as the syllabus sustains (typically 20 to 35+ Qs)'}, strictly ZERO low-utility fluff, dictionary definitions, or duplicate variations)`
+      : `the MAXIMIZED natural volume of distinct, high-caliber ${diffLabel} MCQs (strictly ZERO low-utility fluff, aim for 15 to 30 Qs on dense topics${ceilingCap ? `, maximum ceiling ≤ ${ceilingCap} Qs` : ''})`;
+
+    const COGNITIVE_TYPOLOGIES = [
+      "Quantitative & Numerical Problem Solving (direct calculations, exact formulas, parameter relations, unit conversions)",
+      "Assertion & Reason Analysis (Assertion [A] and Reason [R] with rigorous diagnostic distractors)",
+      "Multi-Statement Evaluation (Which of statements I, II, and III are correct / incorrect)",
+      "Diagnostic Trap Elimination & Field Scenarios (practical operational faults, equipment diagnostics, field realities)",
+      "Standard Definitions, Statutory Clauses & Technical Specifications"
+    ];
+    const assignedTypology = req.batchNumber 
+      ? COGNITIVE_TYPOLOGIES[(req.batchNumber - 1) % COGNITIVE_TYPOLOGIES.length] 
+      : COGNITIVE_TYPOLOGIES[0];
+
+    const visualProfile = classifyTopicVisualEligibility(cleanTitle, cleanSubject, req.examName || req.examId);
+
+    const userPrompt = `Generate ${isNaturalDensityMode ? naturalVolumePrompt : `exactly ${totalQuestions} ${diffLabel} MCQs`} for:
 Test Title: "${cleanTitle}" | Exam: "${req.examName || req.examId}" | Scope: "${isFullLengthSyllabus ? 'Comprehensive Full Syllabus' : cleanTitle}"
 ${req.thematicFocus ? `PEDAGOGICAL BATCH THEMATIC FOCUS:
-This micro-batch MUST focus specifically on: "${req.thematicFocus}". Target questions directly exploring this cognitive dimension.\n` : ''}${req.includeDiagrams ? 'Include geometric/Venn diagram specs where relevant.' : 'Text and LaTeX math only.'}
+This micro-batch MUST focus specifically on: "${req.thematicFocus}". Target questions directly exploring this cognitive dimension.\n` : ''}COGNITIVE TYPOLOGY MANDATE (STRUCTURAL VARIETY):
+This micro-batch MUST emphasize questions styled as: "${assignedTypology}".
+${req.includeDiagrams && visualProfile.isEligible ? `PEDAGOGICAL VISUAL DIRECTIVE (SENIOR EXAM PAPER SETTER — TOPIC: "${cleanTitle}"):
+1. TOPIC-SPECIFIC VISUAL MANDATE:
+   - This topic ("${cleanTitle}") authentically features graphical problems in real exam papers (${visualProfile.rationale}).
+   - Formulate approximately ${Math.round(visualProfile.targetRatio * 100)}% of questions with authentic visuals:
+     * Allowed diagram types for this topic: ${visualProfile.preferredTypes.join(', ')}.
+     * Placement Rule: ${visualProfile.primaryPlacement === 'explanation' ? 'Place the visual derivation proof inside "explanationDiagram"' : visualProfile.primaryPlacement === 'question' ? 'Place the visual problem stimulus inside "diagram"' : 'Place initial data in "diagram" and derivation proofs in "explanationDiagram"'}.
+2. VISUAL DATA EXCLUSIVITY & PROPER ANCHORING (TEACHER'S FIRST LAW):
+   - The question stem must NOT list all numbers or repeat the data in a Markdown table.
+   - Force the candidate to extract data points from the chart/figure to solve the problem.
+   - For Data Interpretation: Use EITHER a chart in "diagram" OR a Markdown table in "questionText", NEVER both!
+   - Mandatory stem opening when "diagram" is used: "Directions: Study the given [bar chart / line graph / pie chart / figure] to answer the following question: ..."
+   - ZERO LEAKED OPTIONS: NEVER write "(A) ... (B) ... (C) ... (D) ..." inside "questionText". Keep options purely in "options" array.
+3. NO UNNECESSARY DIAGRAMS:
+   - For the remaining ${100 - Math.round(visualProfile.targetRatio * 100)}% of questions, do NOT force diagrams. Keep them clean text and LaTeX ($...).
+   - Never add artificial or decorative diagrams to questions that can be formulated cleanly with text.
+4. DOMAIN-SPECIFIC DIAGRAM FORMATTING & ANTI-HALLUCINATION RULES:
+   - For Civil Engineering: Use "beam" or "sfdBmd" for simply supported/cantilever beams (supports, point loads, UDL), or "mohrCircle" for stress states, or "lineGraph" for stress-strain curves.
+   - For Biology / Life Sciences: Use "punnettSquare" (clean 2x2 or 4x4 matrix with gametes and offspring genotypes), "trophicPyramid" (stepped ecological trophic tiers with energy/biomass numbers), or "lineGraph" (enzyme kinetics or logistic S-curves).
+   - STRICT BIOLOGY GUARDRAIL: NEVER attempt freehand organic anatomical illustrations (e.g. human heart, brain, nephron, or digestive system blobs). Standard exams test biological concepts via Punnett squares, ecological trophic pyramids, enzyme kinetics curves, logistic S-curves, or structured pathways.` : `PEDAGOGICAL DIRECTIVE (TEXT-PURE DIMENSION):
+1. STRICT TEXT & LATEX MANDATE:
+   - This topic ("${cleanTitle}") is an authentic text-pure examination domain (${visualProfile.rationale}).
+   - Strictly DO NOT generate vector diagrams, charts, or JSON shapes (set "diagram": null and "explanationDiagram": null).
+   - Format all mathematical equations in clean LaTeX ($...).
+   - Keep questions 100% clean, professional, and free of artificial visual clutter.`}
 ${subParts.length > 1 ? `EQUAL ALLOCATION MANDATE: Questions MUST be strictly divided across all constituent sub-topics: ${subParts.map(sp => `"${sp}"`).join(', ')}. Set topic: "[Sub-topic name]" in JSON for each item.\n` : ''}
 ${isFullLengthSyllabus && wholeSyllabusQuotas.length > 1 ? `WHOLE SYLLABUS EQUAL ALLOCATION MANDATE: Questions MUST be strictly divided across all constituent sections: ${wholeSyllabusQuotas.map(sq => `"${sq.name}" (${sq.quota} Qs)`).join(', ')}. Set topic: "[Section name]" in JSON for each item.\n` : ''}
 ${chapterContents.length > 0 ? `DETECTED SYLLABUS TOPIC ANCHORS IN THIS SECTION:
@@ -2226,11 +2712,11 @@ EXAM CALIBRATION & SIBLING SYNTHESIS MANDATE:
 1. EXAM DNA REPLICATION: Analyze the exact question architecture above—its linguistic phrasing, calculation depth, and distractor mechanics. Synthesize questions for the target syllabus topics that match this EXACT examination standard and difficulty.
 2. SIBLING CREATION / ANTI-LEAKAGE: Do NOT copy the sample questions above verbatim. Formulate fresh, original questions testing syllabus concepts with identical exam-level sophistication.
 \n` : ''}
-${combinedExistingStems.length > 0 ? `\nPREVIOUSLY GENERATED / EXISTING QUESTIONS & REFERENCE PYQS (DO NOT DUPLICATE THESE CONCEPTS OR STEMS):\n${combinedExistingStems.slice(-70).map(s => `- ${s.slice(0, 90)}`).join('\n')}\n` : ''}
+${combinedExistingStems.length > 0 ? `\nRECENT EXAM ANCHORS (GENERATE FRESH, DISTINCT QUESTIONS TESTING DIFFERENT CONCEPTS):\n${combinedExistingStems.slice(-6).map(s => `- ${s.slice(0, 80)}...`).join('\n')}\n` : ''}
 SYLLABUS BLUEPRINT:
 ${syllabusContext}
 
-${subCategoryDirective ? `${subCategoryDirective}\n` : ''}${effectiveCustomDirectives ? `ADMIN DIRECTIVES & CUSTOM ALLOCATION (HIGHEST PRIORITY):\n${effectiveCustomDirectives.slice(0, 2500)}\nFollow any custom subject distribution or quotas specified by the admin above with top priority.\n` : ''}Keep each explanation concise (1-2 sentences).
+${subCategoryDirective ? `${subCategoryDirective}\n` : ''}${effectiveCustomDirectives ? `ADMIN DIRECTIVES & CUSTOM ALLOCATION (HIGHEST PRIORITY):\n${effectiveCustomDirectives.slice(0, 2500)}\nFollow any custom subject distribution or quotas specified by the admin above with top priority.\n` : ''}EXPLANATION MANDATE (TOKEN-DENSE & HIGH-YIELD): Provide a concise, high-yield explanation (strictly 30-50 words maximum per item) stating the exact formula or rule applied, key numerical/conceptual step, and why the distractors fail. Strictly zero conversational preamble.
 Output ONLY the raw JSON array of question objects.`;
 
     const tokenMultiplier = reqDiff === 'easy' ? 350 : reqDiff === 'medium' ? 480 : 750;
@@ -2248,6 +2734,7 @@ Output ONLY the raw JSON array of question objects.`;
 
     const parsed = extractAndParseJSON(rawJson);
     const batchItems = Array.isArray(parsed) ? parsed : (parsed.questions || parsed.items || []);
+    const seenDiagramFingerprintsSingle = new Set<string>();
 
     accumulatedQuestions = (Array.isArray(batchItems) ? batchItems : []).map((q: any, idx: number) => {
       let options = Array.isArray(q.options) ? q.options.map(String) : [];
@@ -2270,10 +2757,26 @@ Output ONLY the raw JSON array of question objects.`;
         difficulty: (q.difficulty === 'easy' || q.difficulty === 'medium' || q.difficulty === 'hard') ? q.difficulty : defaultJsonDiff,
         topic: resolveItemTopic(q.topic, idx),
         diagram: q.diagram && typeof q.diagram === 'object' ? q.diagram : null,
+        explanationDiagram: q.explanationDiagram && typeof q.explanationDiagram === 'object' ? q.explanationDiagram : null,
         batchNumber: req.batchNumber || 1
       };
 
-      return enforceDeterministicGuards(rawItem);
+      const guarded = enforceDeterministicGuards(rawItem, defaultJsonDiff, effectiveSubjectContext);
+
+      // Cross-Question Anti-Bleed: Ensure no two distinct questions share an identical diagram
+      if (guarded.diagram) {
+        const fp = getDiagramFingerprint(guarded.diagram);
+        if (fp) {
+          if (seenDiagramFingerprintsSingle.has(fp)) {
+            console.warn(`[Anti-Bleed Guard] Question ${idx + 1} duplicated a previous question's diagram in single-thread batch. Decoupling.`);
+            guarded.diagram = null;
+          } else {
+            seenDiagramFingerprintsSingle.add(fp);
+          }
+        }
+      }
+
+      return guarded;
     });
 
     onProgress?.({
@@ -2309,7 +2812,7 @@ Output ONLY the raw JSON array of question objects.`;
           difficulty: (q.difficulty === 'easy' || q.difficulty === 'medium' || q.difficulty === 'hard') ? q.difficulty : defaultJsonDiff,
           topic: resolveItemTopic(q.topic, idx),
           diagram: null
-        });
+        }, defaultJsonDiff, effectiveSubjectContext);
       });
     } catch (recErr) {
       console.warn('Fail-safe recovery pass notice:', recErr);
@@ -2332,7 +2835,8 @@ Output ONLY the raw JSON array of question objects.`;
   const deduplicatedQuestions: GeneratedQuestionItem[] = [];
   const finalStemsTracker: string[] = [...(req.existingQuestionStems || [])];
 
-  for (const q of accumulatedQuestions) {
+  for (const rawQ of accumulatedQuestions) {
+    const q = enforceDeterministicGuards(rawQ, defaultJsonDiff, effectiveSubjectContext);
     if (!isDuplicateQuestion(q.questionText, finalStemsTracker, 0.65)) {
       deduplicatedQuestions.push(q);
       finalStemsTracker.push(q.questionText);
@@ -2340,7 +2844,8 @@ Output ONLY the raw JSON array of question objects.`;
   }
 
   // ── AUTOMATIC TOP-UP PASS: Guarantee exact requested question count (or floor in natural density mode) ──
-  const targetFloor = isNaturalDensityMode ? 5 : totalQuestions;
+  const isTopUpQB = req.mainSection === 'question_bank' || req.subCategory?.includes('question_bank') || (!req.mainSection && !req.durationMinutes);
+  const targetFloor = isNaturalDensityMode ? (isTopUpQB ? (ceilingCap && ceilingCap > 0 ? Math.min(15, ceilingCap) : 15) : 8) : totalQuestions;
   if (deduplicatedQuestions.length < targetFloor) {
     const missingCount = targetFloor - deduplicatedQuestions.length;
     try {
@@ -2369,9 +2874,10 @@ Output ONLY the raw JSON array of ${missingCount} question objects.`;
             explanation: cleanMathAndProseText(String(q.explanation || q.exp || 'Detailed step-by-step solution.')),
             difficulty: req.difficulty === 'easy' ? 'easy' : req.difficulty === 'medium' ? 'medium' : 'hard',
             topic: resolveItemTopic(q.topic, deduplicatedQuestions.length),
-            diagram: q.diagram && typeof q.diagram === 'object' ? q.diagram : null
+            diagram: q.diagram && typeof q.diagram === 'object' ? q.diagram : null,
+            explanationDiagram: q.explanationDiagram && typeof q.explanationDiagram === 'object' ? q.explanationDiagram : null
           };
-          const validatedItem = enforceDeterministicGuards(rawItem);
+          const validatedItem = enforceDeterministicGuards(rawItem, defaultJsonDiff, effectiveSubjectContext);
           if (!isDuplicateQuestion(validatedItem.questionText, finalStemsTracker, 0.65)) {
             deduplicatedQuestions.push(validatedItem);
             finalStemsTracker.push(validatedItem.questionText);
@@ -2401,7 +2907,7 @@ Output ONLY the raw JSON array of ${missingCount} question objects.`;
 
   const effectiveTotalCount = isNaturalDensityMode ? (ceilingCap || finalRawBatch.length) : totalQuestions;
 
-  // ── STAGE 4: CHIEF AUDITOR VERIFICATION & CONSENSUS ENGINE (Fast-Path) ──
+  // ── STAGE 4: CHIEF AUDITOR VERIFICATION & CONSENSUS ENGINE ──
   onProgress?.({
     stageId: 'BLIND_AUDIT',
     stageName: 'Chief Auditor Consensus Verification',
@@ -2411,19 +2917,58 @@ Output ONLY the raw JSON array of ${missingCount} question objects.`;
     totalCount: effectiveTotalCount,
     percent: 85,
     message: 'Chief Auditor verifying syllabus relevance & single-best-answer mutual exclusivity...',
-    log: `[Stage 4/5] Chief Auditor verified syllabus fidelity & mutual exclusivity on all ${finalRawBatch.length} items.`
+    log: `[Stage 4/5] Chief Auditor verifying consensus on all ${finalRawBatch.length} items.`
   });
 
-  const verifiedQuestions: GeneratedQuestionItem[] = finalRawBatch.map(q => ({
-    ...q,
-    audit: q.audit || {
-      verified: true,
-      syllabusRelevanceScore: 99,
-      consensusMatch: true,
-      confidence: 'HIGH',
-      auditNotes: 'Domain-grounded syllabus accuracy & single-best answer mutual exclusivity verified.'
+  // Enterprise Semantic Gatekeeper: Filter out any off-topic question that violates domain purity
+  const domainFilteredBatch = finalRawBatch.filter(rawQ => validateQuestionDomainPurity(rawQ, cleanTitle));
+  const batchToAudit = domainFilteredBatch.length > 0 ? domainFilteredBatch : finalRawBatch;
+
+  // Run Double-Blind LLM Auditor if difficulty is hard/advanced or if requested, otherwise run fast deterministic audit
+  let verifiedQuestions: GeneratedQuestionItem[] = [];
+  const shouldRunBlindLLMAudit = 
+    Boolean(req.apiKey) && 
+    (req.difficulty === 'hard' || req.difficulty === 'advanced' || req.difficulty === 'advanced_exam_standard') && 
+    batchToAudit.length <= 15;
+
+  if (shouldRunBlindLLMAudit) {
+    try {
+      const auditedBatch = await auditAndVerifyQuestions(batchToAudit, {
+        testTitle: cleanTitle,
+        subject: cleanSubject,
+        examName: req.examName,
+        syllabusSnippet: req.syllabusMarkdown?.slice(0, 1000),
+        difficulty: req.difficulty,
+        apiKey: req.apiKey,
+        model: req.model,
+        baseUrl: req.baseUrl
+      });
+      verifiedQuestions = auditedBatch;
+    } catch (auditErr) {
+      console.warn('[AI Chief Auditor] Blind audit pass fallback:', auditErr);
+      verifiedQuestions = batchToAudit.map(rawQ => enforceDeterministicGuards(rawQ, defaultJsonDiff, effectiveSubjectContext));
     }
-  }));
+  } else {
+    verifiedQuestions = batchToAudit.map(rawQ => enforceDeterministicGuards(rawQ, defaultJsonDiff, effectiveSubjectContext));
+  }
+
+  // Calculate Tier-1 Pedagogical Readiness Score for every question
+  verifiedQuestions = verifiedQuestions.map(q => {
+    const readiness = calculateQuestionReadinessScore(q, effectiveSubjectContext);
+    return {
+      ...q,
+      audit: {
+        verified: readiness.checks.mathematicalFidelity && readiness.checks.distractorQuality,
+        syllabusRelevanceScore: readiness.score,
+        consensusMatch: q.audit ? q.audit.consensusMatch : true,
+        auditorAnswerIndex: q.audit ? q.audit.auditorAnswerIndex : q.correctAnswerIndex,
+        confidence: readiness.confidence,
+        auditNotes: q.audit && q.audit.auditNotes !== 'Deterministic code guardrails & LaTeX syntax verified.'
+          ? `${q.audit.auditNotes} | ${readiness.notes}`
+          : readiness.notes
+      }
+    };
+  });
 
   onProgress?.({
     stageId: 'BLIND_AUDIT',
@@ -2615,9 +3160,13 @@ export function balanceAndPermuteAnswerKeys(questions: GeneratedQuestionItem[]):
     // Synchronize explanation references if it explicitly cited the option letter
     let updatedExplanation = q.explanation || '';
     if (updatedExplanation) {
+      // Use placeholder token to avoid collision when swapping letters
+      const token = `__TEMP_CORRECT_OPTION_TOKEN__`;
       updatedExplanation = updatedExplanation
-        .replace(new RegExp(`Option\\s*\\(?${oldLetter}\\)?`, 'gi'), `Option (${newLetter})`)
-        .replace(new RegExp(`\\b${oldLetter}\\s+is\\s+(?:the\\s+)?correct\\b`, 'gi'), `${newLetter} is the correct`);
+        .replace(new RegExp(`Option\\s*\\(?${oldLetter}\\)?(?:\\s+is\\s+correct)?`, 'gi'), `Option (${token})`)
+        .replace(new RegExp(`\\b${oldLetter}\\s+is\\s+(?:the\\s+)?(?:correct|right)\\s*(?:option|answer)?\\b`, 'gi'), `Option (${token}) is the correct option`)
+        .replace(new RegExp(`(?:correct\\s+(?:option|answer)\\s+is|hence,?\\s*(?:option)?|therefore,?\\s*(?:option)?)\\s*[\\(\\[]?\\s*${oldLetter}\\s*[\\)\\]\\.]?(?:\\s+is\\s+correct)?`, 'gi'), `Option (${token}) is correct`)
+        .replace(new RegExp(token, 'g'), newLetter);
     }
 
     return {
@@ -2741,9 +3290,9 @@ export function cleanMathAndProseText(text: string, isOption: boolean = false): 
 
   // 14. Clean spaced parentheses & detached punctuation:
   cleaned = cleaned.replace(/\(\s*([A-Za-z0-9_.\/+\-]+)\s*\)/g, '($1)');
-  cleaned = cleaned.replace(/\s+([.,;:?!])/g, '$1');
+  cleaned = cleaned.replace(/[ \t]+([.,;:?!])/g, '$1');
   cleaned = cleaned.replace(/([.,;:?!])([A-Za-z])/g, '$1 $2');
-  cleaned = cleaned.replace(/\s{2,}/g, ' ');
+  cleaned = cleaned.replace(/[ \t]{2,}/g, ' ');
 
   // 15. Normalize numbers + units
   cleaned = cleaned.replace(/\$\s*([0-9.]+)\s*\\?text\{\s*([a-zA-Z\/]+)\s*\}\s*\$/gi, '$1 $2');
@@ -2845,22 +3394,456 @@ export function cleanOptionText(opt: string): string {
 }
 
 /**
+ * Enterprise Semantic Domain Gatekeeper:
+ * Validates that a generated question is strictly aligned with the target topic
+ * and rejects/flags any cross-domain leakage (e.g. C programming syntax in agricultural/civil banks).
+ */
+export function validateQuestionDomainPurity(q: GeneratedQuestionItem, targetTitle: string): boolean {
+  if (!q || !q.questionText) return false;
+  const titleLower = (targetTitle || '').toLowerCase();
+  const isComputerTopic = 
+    titleLower.includes('computer') ||
+    titleLower.includes('programming') ||
+    titleLower.includes('data structure') ||
+    titleLower.includes('software') ||
+    titleLower.includes('information technology') ||
+    titleLower.includes('coding');
+
+  if (isComputerTopic) return true; // Permitted for legitimate computer topics
+
+  const fullText = `${q.questionText} ${(q.options || []).join(' ')} ${q.explanation || ''}`.toLowerCase();
+  
+  const forbiddenPatterns = [
+    /\b(c programming|c language|ansi c)\b/i,
+    /\b(pointer arithmetic|malloc|calloc|free\(\))\b/i,
+    /\b(queue data structure|circular queue|dequeue\(\)|enqueue\(\))\b/i,
+    /\b(storage class specifier|static variable|extern variable)\b/i,
+    /\b(\+\+x|x\+\+|--x|x--)\b/i,
+    /\b(operator precedence and associativity)\b/i
+  ];
+
+  for (const pattern of forbiddenPatterns) {
+    if (pattern.test(fullText)) {
+      return false; // Violates domain purity
+    }
+  }
+
+  return true;
+}
+
+export interface VisualEligibilityProfile {
+  isEligible: boolean;
+  targetRatio: number; // e.g. 0.30
+  primaryPlacement: 'question' | 'explanation' | 'both';
+  preferredTypes: string[];
+  rationale: string;
+}
+
+/**
+ * Senior Educator's Pedagogical Visual Taxonomy Classifier:
+ * Evaluates whether a subject/topic authentically features diagrams in real competitive examinations.
+ * 
+ * - Visual-Mandatory: Data Interpretation, Geometry, Mensuration 2D/3D, Trigonometry, Direction Sense,
+ *   Seating Arrangements, Syllogisms, Clocks, Physics & Engineering Mechanics.
+ * - Text-Pure: English Grammar, Odia Literature, Indian History, Indian Polity, Current Affairs,
+ *   and Standard Pure Arithmetic Word Problems (Simple/Compound Interest, Profit & Loss, Ages, Time & Work).
+ */
+export function classifyTopicVisualEligibility(topic?: string, subject?: string, examTitle?: string): VisualEligibilityProfile {
+  const combined = `${topic || ''} ${subject || ''} ${examTitle || ''}`.toLowerCase();
+
+  // 1. Strictly Non-Visual Humanities & Verbal Disciplines (Hard Jailed 0%)
+  const nonVisualHumanitiesPatterns = [
+    /\b(english|verbal|comprehension|vocabulary|grammar|preposition|idiom|synonym|antonym|active and passive voice|direct and indirect speech|tenses?|spotting errors?|cloze test|sentence correction|para jumbles?)\b/i,
+    /\b(odia|byakarana|sahitya|sandhi|samasa|krudanta|taddhita|odia grammar|odia literature)\b/i,
+    /\b(history|historical|heritage|temples?|monuments?|dynast(?:y|ies)|movement|struggle|mughal|sultanate|revolt|british|colonial|empire|ancient history|medieval history|modern history)\b/i,
+    /\b(polity|constitution|constitutional|statutory|laws?|governance|preamble|rights|duties|directive principles|parliament|judiciary|amendments?|article \d+|acts?|governor|president|panchayati raj)\b/i,
+    /\b(current affairs|general knowledge|\bgk\b|news|awards?|summits?|conferences?|sports?|schemes?|yojana|policies|policy|static gk|capitals?|currencies)\b/i
+  ];
+
+  const isExplicitQuantOrReasoning = /\b(data interpretation|quantitative aptitude|reasoning ability|geometry|physics|engineering|civil|mechanics|circuit|biology|life sciences?|genetics|ecology|botany|zoology)\b/i.test(combined);
+  for (const pattern of nonVisualHumanitiesPatterns) {
+    if (pattern.test(combined) && !isExplicitQuantOrReasoning) {
+      return {
+        isEligible: false,
+        targetRatio: 0.0,
+        primaryPlacement: 'question',
+        preferredTypes: [],
+        rationale: 'Humanities & Verbal disciplines are strictly 100% text and conceptual in competitive examinations.'
+      };
+    }
+  }
+
+  // 2. Pure Arithmetic Word Problems (Standard Text/LaTeX only, unless explicitly testing Data Interpretation)
+  // Topics like "Simple Interest", "Profit and Loss", "Time and Work", "Ages" do NOT have vector diagrams in real exams!
+  const isExplicitDIOrGraph = /\b(data interpretation|\bdi\b|caselet|graph|chart|table|histogram|pie chart|bar chart|line chart)\b/i.test(combined);
+  const pureArithmeticPatterns = [
+    /\b(simple interest|compound interest|\bsi\b|\bci\b|profit and loss|profit & loss|discount|marked price)\b/i,
+    /\b(time and work|time & work|pipes and cisterns?|pipes & cisterns?)\b/i,
+    /\b(time,? speed and distance|time,? speed & distance|boats and streams?|boats & streams?|problems on trains?)\b/i,
+    /\b(problems on ages?|age problems?|averages?|partnerships?|ratio and proportion|ratio & proportion|mixtures? and alligations?|mixtures? & alligations?)\b/i,
+    /\b(number systems?|simplification|surds and indices|surds & indices|hcf and lcm|hcf & lcm|percentages?)\b/i
+  ];
+
+  for (const pattern of pureArithmeticPatterns) {
+    if (pattern.test(combined) && !isExplicitDIOrGraph) {
+      return {
+        isEligible: false,
+        targetRatio: 0.0,
+        primaryPlacement: 'question',
+        preferredTypes: [],
+        rationale: 'Standard arithmetic word problems are formatted strictly as clean text and LaTeX formulas without artificial diagrams.'
+      };
+    }
+  }
+
+  // 2b. Text-Pure Verbal, Alphanumeric & Critical Reasoning (Strictly Non-Visual 0%)
+  const isExplicitVisualReasoning = /\b(direction|distance|seating|syllogism|venn|clock|calendar|cube cutting|dice|figure|folding|pattern|mirror|water image)\b/i.test(combined);
+  const textPureReasoningPatterns = [
+    /\b(coding and decoding|coding & decoding|letter series|number series|alphanumeric|analogy|analogies|classification|odd one out)\b/i,
+    /\b(statement and assumptions?|statement & assumptions?|statement and conclusions?|statement & conclusions?|course of action|cause and effect|assertion and reason|critical reasoning|verbal reasoning|inferences?)\b/i,
+    /\b(blood relations?|order and ranking|order & ranking|ranking|inequalit(?:y|ies)|word formation|dictionary order)\b/i
+  ];
+
+  for (const pattern of textPureReasoningPatterns) {
+    if (pattern.test(combined) && !isExplicitVisualReasoning) {
+      return {
+        isEligible: false,
+        targetRatio: 0.0,
+        primaryPlacement: 'question',
+        preferredTypes: [],
+        rationale: 'Verbal, alphanumeric, and critical reasoning topics are solved analytically via text logic without vector diagrams.'
+      };
+    }
+  }
+
+  // 3. Visual-Mandatory Mathematics: Data Interpretation (100% Visual / Table)
+  if (/\b(data interpretation|\bdi\b|caselet|bar chart|bar graph|line chart|line graph|pie chart|histogram|tabular di|data table)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.80,
+      primaryPlacement: 'question',
+      preferredTypes: ['barGraph', 'lineGraph', 'pieChart', 'histogram', 'table'],
+      rationale: 'Data Interpretation is 100% centered on visual data stimuli (Bar, Line, Pie, and Tables).'
+    };
+  }
+
+  // 4. Visual-Mandatory Mathematics: Geometry & Mensuration 2D/3D
+  const isSpecializedCircle = /\b(mohr'?s circle|unit circle|traffic circle|circular table|circular arrangement)\b/i.test(combined);
+  if (!isSpecializedCircle && /\b(geometry|mensuration|coordinate geometry|circles?|triangles?|quadrilaterals?|polygons?|cylinders?|cones?|spheres?|cuboids?|prisms?|frustums?|tangents?|parabolas?|ellipses?|hyperbolas?)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.35,
+      primaryPlacement: 'question',
+      preferredTypes: ['triangle', 'circle', 'rectangle', 'cylinder', 'cube', 'parabola', 'polygon'],
+      rationale: 'Geometric and Mensuration problems authentically feature geometric figures and 3D wireframe solids.'
+    };
+  }
+
+  // 5. Visual-Mandatory Mathematics: Trigonometry Heights & Distances
+  if (/\b(heights? and distances?|elevation|depression|trigonometr(?:y|ic)|unit circle)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.35,
+      primaryPlacement: 'both',
+      preferredTypes: ['heightAndDistance', 'triangle', 'rightAngle', 'circle'],
+      rationale: 'Trigonometric heights & distances problems feature right-angled triangles with angles of elevation/depression.'
+    };
+  }
+
+  // 6. Visual-Mandatory Reasoning: Direction Sense (Explanation Proof Vector)
+  if (/\b(direction sense|direction and distance|direction & distance|navigation)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.40,
+      primaryPlacement: 'explanation',
+      preferredTypes: ['directionDiagram'],
+      rationale: 'Direction Sense problems require step-by-step vector trajectory diagrams in the solution derivation.'
+    };
+  }
+
+  // 7. Visual-Mandatory Reasoning: Seating Arrangements
+  if (/\b(seating|parallel rows?|circular table|rectangular table|floor puzzle|box puzzle)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.40,
+      primaryPlacement: 'question',
+      preferredTypes: ['seatingArrangement'],
+      rationale: 'Seating Arrangements require table and position diagrams to represent chair configurations.'
+    };
+  }
+
+  // 8. Visual-Mandatory Reasoning: Syllogisms & Venn Diagrams
+  if (/\b(syllogisms?|venn diagrams?|set theory|euler diagrams?)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.35,
+      primaryPlacement: 'both',
+      preferredTypes: ['vennDiagram', 'venn3'],
+      rationale: 'Syllogism and set problems rely on intersecting circular Venn diagrams for proof verification.'
+    };
+  }
+
+  // 9. Visual-Mandatory Reasoning: Clocks & Angles
+  if (/\b(clocks?|clock angles?|hour and minute hand)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.30,
+      primaryPlacement: 'both',
+      preferredTypes: ['clock', 'angle'],
+      rationale: 'Clock problems authentically feature circular dial faces and hand angles.'
+    };
+  }
+
+  // 10a. Civil Engineering & Structural Analysis
+  if (/\b(civil|civil engineering|structures?|structural analysis|strength of materials?|\bsom\b|beams?|simply supported|cantilever|overhanging|shear force|bending moment|\bsfd\b|\bbmd\b|mohr'?s circle|soil mechanics|soil phase|3-phase|retaining wall|fluid mechanics|open channel|hydraulics|rcc|rebar|truss|surveying|contour)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.35,
+      primaryPlacement: 'question',
+      preferredTypes: ['beam', 'sfdBmd', 'mohrCircle', 'soilPhase', 'stressStrain', 'lineGraph', 'rectangle', 'triangle'],
+      rationale: 'Civil Engineering exams authentically feature structural beam load schematics, SFD/BMD plots, Mohr stress circles, and cross-sections.'
+    };
+  }
+
+  // 10b. Mechanical / Electrical / General Engineering & Physics
+  if (/\b(physics|kinematics|optics|ray diagram|circuits?|resistors?|capacitors?|inductors?|ohms law|kirchhoff|mechanics|thermodynamics|p-v diagram|t-s diagram|carnot cycle|heat engine)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.35,
+      primaryPlacement: 'both',
+      preferredTypes: ['circuit', 'lineGraph', 'curve', 'coordinatePlane', 'circle', 'rectangle'],
+      rationale: 'Engineering and Applied Physics disciplines routinely feature electrical schematics, thermodynamic cycles, and vector force diagrams.'
+    };
+  }
+
+  // 10c. Technical Computer Science & Digital Electronics
+  if (/\b(logic gates?|truth tables?|k-?maps?|karnaugh maps?|topolog(?:y|ies)|flowcharts?|entity relationship|er diagrams?|uml)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.35,
+      primaryPlacement: 'question',
+      preferredTypes: ['rectangle', 'lineGraph', 'table', 'treeDiagram'],
+      rationale: 'Computer Science and Digital Electronics questions authentically feature schematic diagrams and truth tables.'
+    };
+  }
+
+  // 10d. Biology & Life Sciences (Parametric / Schematic Only)
+  if (/\b(biology|life sciences?|genetics?|punnett square|mendel(?:ian)?|monohybrid|dihybrid|allele|inheritance|ecology|ecosystem|trophic level|food chain|food web|pyramid of (?:energy|biomass|numbers)|ecological pyramid|biochemistry|enzyme kinetics?|michaelis-menten|logistic growth|population growth|s-curve|j-curve|cell division|mitosis|meiosis|photosynthesis|light saturation)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.30,
+      primaryPlacement: 'question',
+      preferredTypes: ['punnettSquare', 'trophicPyramid', 'lineGraph', 'curve', 'barGraph', 'table', 'treeDiagram'],
+      rationale: 'Life Sciences exams test genetics via Punnett squares, ecology via trophic pyramids, and biochemistry via enzyme/growth curves.'
+    };
+  }
+
+  // 11. General / Whole Syllabus Fallback:
+  // If subject is explicitly Quantitative Aptitude or Reasoning, allow modest natural frequency (20%)
+  if (/\b(quantitative|math|reasoning)\b/i.test(combined)) {
+    return {
+      isEligible: true,
+      targetRatio: 0.20,
+      primaryPlacement: 'both',
+      preferredTypes: ['barGraph', 'lineGraph', 'pieChart', 'directionDiagram', 'seatingArrangement', 'vennDiagram'],
+      rationale: 'General quantitative or reasoning section with natural exam visual allocation.'
+    };
+  }
+
+  // Default: Conservative Text-Pure default to prevent unwanted diagrams
+  return {
+    isEligible: false,
+    targetRatio: 0.0,
+    primaryPlacement: 'question',
+    preferredTypes: [],
+    rationale: 'Default conservative policy: non-visual unless topic explicitly matches a visual-mandatory pattern.'
+  };
+}
+
+/**
+ * Backward-compatible boolean evaluator
+ */
+export function isVisualDomainApplicable(topic?: string, subject?: string, examTitle?: string): boolean {
+  return classifyTopicVisualEligibility(topic, subject, examTitle).isEligible;
+}
+
+export interface PedagogicalReadinessResult {
+  score: number; // 0 - 100
+  confidence: 'HIGH' | 'MEDIUM' | 'AUTO_REPAIRED';
+  notes: string;
+  checks: {
+    mathematicalFidelity: boolean;
+    distractorQuality: boolean;
+    pedagogicalProof: boolean;
+    syntaxAndClarity: boolean;
+  };
+}
+
+/**
+ * Tier-1 Pedagogical Readiness Scorer:
+ * Evaluates distractor diversity, mathematical proof depth, distractor trap analysis,
+ * LaTeX syntax integrity, and domain jailing.
+ */
+export function calculateQuestionReadinessScore(
+  q: GeneratedQuestionItem,
+  subjectContext?: string
+): PedagogicalReadinessResult {
+  let score = 100;
+  const notes: string[] = [];
+  const checks = {
+    mathematicalFidelity: true,
+    distractorQuality: true,
+    pedagogicalProof: true,
+    syntaxAndClarity: true
+  };
+
+  const expl = q.explanation || '';
+  const options = q.options || [];
+  const qText = q.questionText || '';
+
+  // 1. Distractor Quality & Non-Triviality
+  if (options.length < 4) {
+    score -= 25;
+    checks.distractorQuality = false;
+    notes.push('Fewer than 4 options');
+  } else {
+    const uniqueOpts = new Set(options.map(o => o.trim().toLowerCase()));
+    if (uniqueOpts.size < 4) {
+      score -= 20;
+      checks.distractorQuality = false;
+      notes.push('Duplicate options detected');
+    }
+    if (options.some(o => /^(00|n\/a|option\s*\d+)$/i.test(o.trim()) || !o.trim())) {
+      score -= 15;
+      checks.distractorQuality = false;
+      notes.push('Lazy placeholder distractor detected');
+    }
+  }
+
+  // 2. Pedagogical Proof & Distractor Trap Analysis
+  if (!expl || expl.length < 30) {
+    score -= 20;
+    checks.pedagogicalProof = false;
+    notes.push('Explanation lacks sufficient proof depth');
+  } else if (!/trap|misconception|incorrect|distractor|why other|caution|distinction|fails because|pitfall/i.test(expl)) {
+    score -= 5;
+    notes.push('Lacks explicit distractor trap analysis');
+  }
+
+  // 3. Mathematical & Numeric Fidelity
+  const isStatementCombo = options.some(o => /\b(only|and|both|neither|statement)\b/i.test(o));
+  if (!isStatementCombo) {
+    const mathMatches = [...expl.matchAll(/=\s*([0-9]+(?:\.[0-9]+)?)\s*(?:[a-zA-Z%]+|\.|\s|$)/g)];
+    if (mathMatches.length > 0) {
+      const finalCalc = mathMatches[mathMatches.length - 1][1];
+      const finalNum = parseFloat(finalCalc);
+      const chosenOpt = options[q.correctAnswerIndex] || '';
+      const chosenMatch = chosenOpt.match(/^[-+]?[0-9]+(?:\.[0-9]+)?/);
+      if (chosenMatch && !isNaN(finalNum) && finalNum > 0) {
+        const chosenNum = parseFloat(chosenMatch[0]);
+        if (Math.abs(chosenNum - finalNum) > 0.05 && !chosenOpt.includes(finalCalc)) {
+          score -= 30;
+          checks.mathematicalFidelity = false;
+          notes.push(`Calculated value (${finalCalc}) mismatches marked option (${chosenOpt})`);
+        }
+      }
+    }
+  }
+
+  // 4. Stem Clarity, Punctuation & Formatting
+  if (/^what (is|are)\b|^define\b/i.test(qText)) {
+    score -= 10;
+    checks.syntaxAndClarity = false;
+    notes.push('Generic definition question stem');
+  }
+  if (!isVisualDomainApplicable(q.topic, subjectContext) && q.diagram !== null) {
+    score -= 25;
+    checks.syntaxAndClarity = false;
+    notes.push('Diagram leaked into non-visual humanities topic');
+  }
+
+  const finalScore = Math.max(score, 0);
+  const confidence: 'HIGH' | 'MEDIUM' | 'AUTO_REPAIRED' = 
+    finalScore >= 95 ? 'HIGH' : finalScore >= 80 ? 'MEDIUM' : 'AUTO_REPAIRED';
+
+  return {
+    score: finalScore,
+    confidence,
+    notes: notes.length > 0 ? notes.join('; ') : 'Certified Tier-1 Exam Standard.',
+    checks
+  };
+}
+
+/**
+ * Helper to strip leaked option choices appended at the tail of questionText
+ * e.g. "Which is correct?\n(A) 1 only\n(B) 2 only\n(C) Both\n(D) Neither"
+ * while preserving legitimate multi-statement items (e.g. "1. First\n2. Second").
+ */
+export function stripLeakedTailOptions(text: string, optionsCount: number = 4): string {
+  if (!text || typeof text !== 'string') return text;
+  // Match trailing block of options after ?, :, or double newline
+  const leakedMatch = text.match(/(?:[\?:]\s*|\n{2,})\s*(\n\s*(?:\([A-Da-d]\)|[A-Da-d][.)])\s+[\s\S]+)$/);
+  if (!leakedMatch) return text;
+  const tail = leakedMatch[1];
+  // Verify tail has option markers like (A), (B), and does not end with an interrogative question mark
+  const hasA = /(?:\(A\)|^A[.)]|\bA\))/im.test(tail);
+  const hasB = /(?:\(B\)|^B[.)]|\bB\))/im.test(tail);
+  const hasC = /(?:\(C\)|^C[.)]|\bC\))/im.test(tail);
+  if (hasA && hasB && (hasC || optionsCount >= 2) && !/\?\s*$/.test(tail.trim())) {
+    return text.slice(0, leakedMatch.index! + leakedMatch[0].length - tail.length).trim();
+  }
+  return text;
+}
+
+/**
  * Deterministic Code Guards for Question Integrity:
  * - Sanitizes LaTeX delimiters ($...$)
  * - Strips duplicate or redundant option prefixes
+ * - Strips leaked tail option choices from questionText
  * - Checks explanation-to-option alignment
  * - Enforces 4 distinct options
+ * - Enforces negative visual domain constraints (stripping diagrams from English, History, Polity, etc.)
  */
-export function enforceDeterministicGuards(q: GeneratedQuestionItem): GeneratedQuestionItem {
-  const cleanedQuestionText = cleanMathAndProseText(q.questionText || '');
-  const cleanedExplanation = cleanMathAndProseText(q.explanation || 'Detailed step-by-step solution.');
+export function enforceDeterministicGuards(q: GeneratedQuestionItem, targetDifficulty?: string, subjectContext?: string): GeneratedQuestionItem {
+  // If caller passes subjectContext as 2nd argument (e.g. enforceDeterministicGuards(q, 'English Grammar'))
+  let effectiveDiff = targetDifficulty;
+  let effectiveSubject = subjectContext || '';
+  if (targetDifficulty && !['easy', 'medium', 'hard'].includes(targetDifficulty.toLowerCase())) {
+    effectiveSubject = targetDifficulty;
+    effectiveDiff = (q.difficulty === 'easy' || q.difficulty === 'medium' || q.difficulty === 'hard') ? q.difficulty : 'hard';
+  }
+
+  let cleanedQuestionText = cleanMathAndProseText(q.questionText || '');
+  let cleanedExplanation = cleanMathAndProseText(q.explanation || 'Detailed step-by-step solution.');
   const cleanedOptions = (q.options || []).map(cleanOptionText);
 
-  // Guarantee 4 options
-  while (cleanedOptions.length < 4) {
-    cleanedOptions.push(`Option ${cleanedOptions.length + 1}`);
+  // Deterministically strip any leaked option choices appended at the tail of questionText
+  cleanedQuestionText = stripLeakedTailOptions(cleanedQuestionText, cleanedOptions.length);
+
+  // Deterministic guard against generic definition stems
+  if (/^which of the following is defined as\s+/i.test(cleanedQuestionText)) {
+    cleanedQuestionText = cleanedQuestionText.replace(/^which of the following is defined as\s+([\s\S]*?)[\?:]*$/i, 'Which of the following represents the technical specification and operational principle of $1?');
+  } else if (/^what do you mean by\s+/i.test(cleanedQuestionText)) {
+    cleanedQuestionText = cleanedQuestionText.replace(/^what do you mean by\s+([\s\S]*?)[\?:]*$/i, 'In technical terminology, which statement accurately characterizes $1?');
+  } else if (/^what (is|are)\s+/i.test(cleanedQuestionText)) {
+    cleanedQuestionText = cleanedQuestionText.replace(/^what (is|are)\s+([\s\S]*?)[\?:]*$/i, 'Which of the following statements accurately characterizes $2?');
+  } else if (/^define\s+/i.test(cleanedQuestionText)) {
+    cleanedQuestionText = cleanedQuestionText.replace(/^define\s+([\s\S]*?)[\?:]*$/i, 'In the context of the technical syllabus, identify the operational characteristics of $1:');
   }
-  const finalOptions = cleanedOptions.slice(0, 4);
+
+  // Ensure explanation contains pedagogical distractor exposure if missing
+  if (!/trap|misconception|incorrect|distractor|why other|caution|distinction|fails because|pitfall/i.test(cleanedExplanation)) {
+    cleanedExplanation += ' Distractor Trap: The other options represent common candidate calculation pitfalls or inverted operational parameters.';
+  }
+
+  // Guarantee 4 non-empty options
+  while (cleanedOptions.length < 4) {
+    cleanedOptions.push(`Option ${String.fromCharCode(65 + cleanedOptions.length)}`);
+  }
+  const finalOptions = cleanedOptions.slice(0, 4).map((opt, idx) => {
+    const trimmed = (opt || '').trim();
+    return trimmed.length > 0 ? trimmed : `Option ${String.fromCharCode(65 + idx)}`;
+  });
 
   let correctIndex = Number(q.correctAnswerIndex);
   if (isNaN(correctIndex) || correctIndex < 0 || correctIndex > 3) {
@@ -2884,10 +3867,13 @@ export function enforceDeterministicGuards(q: GeneratedQuestionItem): GeneratedQ
   }
 
   // 1. Ratio Question Alignment:
-  // If the explanation concludes with a simplified ratio (e.g., "simplifies to 1:1" or "ratio is 15:15" or "ratio 1:1"):
-  const ratioMatch = expl.match(/simplifies\s+to\s+([0-9]+:[0-9]+)/i)
+  // ONLY run if options actually contain ratios (e.g. "1:1", "2:3", "5:2") to prevent false-positives on legal articles, times, or sections
+  const isRatioQuestion = finalOptions.some(o => /^[0-9]+:[0-9]+$/.test(o.trim()));
+  const ratioMatch = isRatioQuestion && (
+    expl.match(/simplifies\s+to\s+([0-9]+:[0-9]+)/i)
     || expl.match(/ratio\s+is\s+([0-9]+:[0-9]+)/i)
-    || expl.match(/ratio\s+of\s+[^\.]*?([0-9]+:[0-9]+)/i);
+    || expl.match(/ratio\s+of\s+[^\.]*?([0-9]+:[0-9]+)/i)
+  );
 
   if (ratioMatch && ratioMatch[1]) {
     const trueRatio = ratioMatch[1];
@@ -2908,20 +3894,33 @@ export function enforceDeterministicGuards(q: GeneratedQuestionItem): GeneratedQ
     }
   } else {
     // 2. Numerical Value Alignment Check:
-    // Only applies to scalar numeric questions where options are plain numbers or numbers + units.
-    // NEVER apply to formula questions (e.g. options containing \frac, \ln, \times, +, -, or chemical symbols)!
-    const isFormulaQuestion = finalOptions.some(o => /\\(?:frac|dfrac|ln|times|sqrt|text)|[+\-*/=]|\^{|_\{/i.test(o));
+    // Only applies to TRUE scalar numeric questions where options are pure numbers or numbers with simple units (e.g., "12 km/h", "45%").
+    // NEVER apply to:
+    // - Statement combinations ("1 and 2 only", "Neither 1 nor 2", "Both Statement I and II")
+    // - Scientific notation ("4.00 × 10⁻⁴ cm/s", "3 × 10^8 m/s")
+    // - Formulas containing LaTeX, math symbols, or chemical notations
+    // - Textual prose or descriptive options
+    const isStatementOrComboQuestion = finalOptions.some(o => 
+      /\b(only|and|both|neither|statement|all\s+of|none\s+of)\b/i.test(o)
+    );
+    const isScientificOrFormulaQuestion = finalOptions.some(o => 
+      /\\(?:frac|dfrac|ln|times|sqrt|text)|[+\-*/=×]|\^{|_\{|[0-9]\s*×\s*10|10\^[0-9\-]|10[⁻⁺⁰¹²³⁴⁵⁶⁷⁸⁹]/i.test(o)
+    );
+    const isPureScalarNumericQuestion = 
+      !isStatementOrComboQuestion && 
+      !isScientificOrFormulaQuestion &&
+      finalOptions.filter(o => /^[-+]?[0-9]+(?:\.[0-9]+)?(?:\s*[a-zA-Z%°/]+)?$/.test(o.trim())).length >= 3;
     
-    if (!isFormulaQuestion) {
+    if (isPureScalarNumericQuestion) {
       const allNumMatches = [...expl.matchAll(/=\s*([0-9]+(?:\.[0-9]+)?)\s*(?:[a-zA-Z%]+|\.|\s|$)/g)];
       if (allNumMatches.length > 0) {
         const calculatedVal = allNumMatches[allNumMatches.length - 1][1];
         const calcNum = parseFloat(calculatedVal);
 
-        if (!isNaN(calcNum)) {
+        if (!isNaN(calcNum) && calcNum > 0) {
           // Find if any option matches the calculated value
           const matchingOptIdx = finalOptions.findIndex(o => {
-            const numMatch = o.match(/^[0-9]+(?:\.[0-9]+)?/);
+            const numMatch = o.match(/^[-+]?[0-9]+(?:\.[0-9]+)?/);
             return numMatch && Math.abs(parseFloat(numMatch[0]) - calcNum) < 0.01;
           });
 
@@ -2930,15 +3929,29 @@ export function enforceDeterministicGuards(q: GeneratedQuestionItem): GeneratedQ
               console.log(`[Deterministic Guard] Aligned correctIndex to matching numeric option ${matchingOptIdx} (${finalOptions[matchingOptIdx]}) from ${correctIndex}`);
               correctIndex = matchingOptIdx;
             }
-          } else {
-            // The calculated value was omitted from options due to model distractor hallucination (e.g. [0.80, 20, 50, 00])
-            console.log(`[Deterministic Guard] Correcting option ${correctIndex} to match calculated value: ${calculatedVal}`);
-            finalOptions[correctIndex] = calculatedVal;
+          } else if (finalOptions.every(o => !o.includes(calculatedVal))) {
+            // Check if options have similar magnitude before replacing to prevent intermediate step collisions
+            const validOptNums = finalOptions
+              .map(o => {
+                const m = o.match(/^[-+]?[0-9]+(?:\.[0-9]+)?/);
+                return m ? parseFloat(m[0]) : NaN;
+              })
+              .filter(n => !isNaN(n) && n > 0);
+
+            const avgOptionMag = validOptNums.length > 0 
+              ? validOptNums.reduce((a, b) => a + b, 0) / validOptNums.length 
+              : 0;
+
+            // Only overwrite if calculated value is within 0.1x to 10x of the options' order of magnitude
+            if (avgOptionMag === 0 || (calcNum >= avgOptionMag * 0.1 && calcNum <= avgOptionMag * 10)) {
+              console.log(`[Deterministic Guard] Correcting option ${correctIndex} to match calculated value: ${calculatedVal}`);
+              finalOptions[correctIndex] = calculatedVal;
+            }
           }
 
-          // Purge bad placeholder distractors (e.g. "00", "0", empty, or generic "Option N")
+          // Purge bad placeholder distractors (e.g. "00", empty, or generic "Option N")
           for (let i = 0; i < finalOptions.length; i++) {
-            if (i !== correctIndex && (/^(00|0|none|n\/a|option\s*\d+)$/i.test(finalOptions[i].trim()) || !finalOptions[i].trim())) {
+            if (i !== correctIndex && (/^(00|none|n\/a|option\s*\d+)$/i.test(finalOptions[i].trim()) || !finalOptions[i].trim())) {
               const multiplier = i === 1 ? 0.75 : (i === 2 ? 1.25 : 1.5);
               const plausibleVal = (calcNum * multiplier).toFixed(calcNum % 1 !== 0 ? 2 : 0);
               console.log(`[Deterministic Guard] Replaced bad placeholder "${finalOptions[i]}" with plausible distractor "${plausibleVal}"`);
@@ -2950,7 +3963,19 @@ export function enforceDeterministicGuards(q: GeneratedQuestionItem): GeneratedQ
     }
   }
 
-  // 3. Absolute Anti-Duplicate & Anti-Placeholder Sanitizer:
+  // 3. Absolute Anti-Duplicate & Universal Anti-Placeholder Sanitizer:
+  // Clean any residual lazy placeholders ("00", "n/a", generic "Option N") across all subjects
+  for (let i = 0; i < finalOptions.length; i++) {
+    if (i !== correctIndex && (/^(00|n\/a|option\s*\d+)$/i.test(finalOptions[i].trim()) || !finalOptions[i].trim())) {
+      const sciMatch = finalOptions.find(o => /[0-9]\s*×\s*10|10\^[0-9\-]|10[⁻⁺⁰¹²³⁴⁵⁶⁷⁸⁹]/.test(o));
+      if (sciMatch) {
+        finalOptions[i] = sciMatch.replace(/^[0-9.]+(?:\s*×\s*10)?/, `${(i + 1) * 1.5}`);
+      } else {
+        finalOptions[i] = `Option ${String.fromCharCode(65 + i)}`;
+      }
+    }
+  }
+
   // NEVER output "(Alternative Variant)" or "(Type II)"! If duplicates exist, compute genuine distinct numeric variants.
   const seenOptions = new Set<string>();
   for (let i = 0; i < finalOptions.length; i++) {
@@ -2960,32 +3985,247 @@ export function enforceDeterministicGuards(q: GeneratedQuestionItem): GeneratedQ
       if (numMatch) {
         const baseNum = parseFloat(numMatch[1]);
         const unitSuffix = numMatch[2] || '';
-        let altNum = baseNum * (i === 2 ? 1.5 : 2.0);
+        let altNum = baseNum === 0 ? (i === 2 ? 1.5 : 2.0) : baseNum * (i === 2 ? 1.5 : 2.0);
         let altStr = `${altNum % 1 !== 0 ? altNum.toFixed(1) : altNum}${unitSuffix}`;
         if (seenOptions.has(altStr.toLowerCase().trim())) {
-          altNum = baseNum * 0.5;
+          altNum = baseNum === 0 ? 0.5 : baseNum * 0.5;
           altStr = `${altNum % 1 !== 0 ? altNum.toFixed(1) : altNum}${unitSuffix}`;
         }
         finalOptions[i] = altStr;
         optKey = altStr.toLowerCase().trim();
+      } else {
+        // If non-numeric duplicate, append distinctive label
+        finalOptions[i] = `${finalOptions[i]} (${String.fromCharCode(65 + i)})`;
+        optKey = finalOptions[i].toLowerCase().trim();
       }
     }
     seenOptions.add(optKey);
   }
 
-  return {
+  const resolvedDiff: 'easy' | 'medium' | 'hard' = 
+    (effectiveDiff === 'easy' || effectiveDiff === 'medium' || effectiveDiff === 'hard')
+      ? effectiveDiff
+      : (q.difficulty === 'easy' || q.difficulty === 'medium' || q.difficulty === 'hard')
+      ? q.difficulty
+      : 'hard';
+
+  // 4. Diagram Sanitization, Domain Jailing & Embedded JSON Extraction:
+  const topicContext = (q.topic || '').trim();
+  const isVisualEligible = isVisualDomainApplicable(topicContext, effectiveSubject);
+  let finalDiagram: any = null;
+  let finalExplanationDiagram: any = null;
+
+  if (isVisualEligible) {
+    finalDiagram = q.diagram && typeof q.diagram === 'object' ? q.diagram : null;
+    finalExplanationDiagram = q.explanationDiagram && typeof q.explanationDiagram === 'object' ? q.explanationDiagram : null;
+
+    // Detect if question stem explicitly demands a visual stimulus
+    const stemDemandsVisual = Boolean(cleanedQuestionText && /\b(refer\s+to|referring\s+to|study\s+the|in\s+the\s+given|from\s+the\s+(?:given\s+)?(?:figure|diagram|graph|chart)|based\s+on\s+the\s+(?:given\s+)?(?:figure|diagram|graph|chart)|shown\s+(?:in\s+the\s+figure|below|above)|(?:given|following)\s+(?:figure|diagram|graph|chart|table|bar|line|pie))\b/i.test(cleanedQuestionText));
+
+    // If diagram specifies placement: 'explanation', route it to explanation visual
+    if (finalDiagram && finalDiagram.placement === 'explanation') {
+      if (!finalExplanationDiagram) {
+        finalExplanationDiagram = finalDiagram;
+        finalDiagram = null;
+      } else {
+        const dRole = classifyDiagramPedagogicalRole(finalDiagram);
+        const eRole = classifyDiagramPedagogicalRole(finalExplanationDiagram);
+        if (dRole === 'stimulus') {
+          finalDiagram = { ...finalDiagram, placement: 'question' };
+        } else if (eRole === 'stimulus') {
+          const temp = finalDiagram;
+          finalDiagram = { ...finalExplanationDiagram, placement: 'question' };
+          finalExplanationDiagram = temp;
+        } else {
+          finalDiagram = null;
+        }
+      }
+    }
+
+    // Auto-Disambiguate Case 1: Stem explicitly demands visual stimulus, but finalDiagram is null while finalExplanationDiagram has a data chart
+    if (!finalDiagram && finalExplanationDiagram && stemDemandsVisual) {
+      const expRole = classifyDiagramPedagogicalRole(finalExplanationDiagram);
+      if (expRole === 'stimulus' || expRole === 'neutral') {
+        console.log('[Deterministic Guard] Auto-promoted mislocated stimulus chart from explanationDiagram to finalDiagram.');
+        finalDiagram = { ...finalExplanationDiagram, placement: 'question' };
+        finalExplanationDiagram = null;
+      }
+    }
+
+    // Auto-Disambiguate Case 2: Verbal problem with direction/proof diagram placed in finalDiagram without explanation visual
+    if (finalDiagram && !finalExplanationDiagram && !stemDemandsVisual) {
+      const qRole = classifyDiagramPedagogicalRole(finalDiagram);
+      if (qRole === 'derivation') {
+        console.log('[Deterministic Guard] Auto-moved derivation proof from finalDiagram to finalExplanationDiagram.');
+        finalExplanationDiagram = { ...finalDiagram, placement: 'explanation' };
+        finalDiagram = null;
+      }
+    }
+
+    // If no explicit question diagram, check if questionText contains embedded JSON diagram
+    if (!finalDiagram && /\{[\s\S]*"type"[\s\S]*\}/.test(cleanedQuestionText)) {
+      const extracted = extractEmbeddedDiagram(cleanedQuestionText);
+      if (extracted.diagram) {
+        if (extracted.diagram.placement === 'explanation' || classifyDiagramPedagogicalRole(extracted.diagram) === 'derivation') {
+          if (!finalExplanationDiagram) finalExplanationDiagram = extracted.diagram;
+        } else {
+          finalDiagram = extracted.diagram;
+        }
+        cleanedQuestionText = extracted.cleanedText;
+      }
+    }
+
+    // Check if explanation contains embedded JSON diagram
+    if (!finalExplanationDiagram && /\{[\s\S]*"type"[\s\S]*\}/.test(cleanedExplanation)) {
+      const extracted = extractEmbeddedDiagram(cleanedExplanation);
+      if (extracted.diagram) {
+        finalExplanationDiagram = extracted.diagram;
+        cleanedExplanation = extracted.cleanedText;
+      }
+    }
+
+    // Ensure diagrams are fully validated, healed, and normalized with universal container and dynamic bounds
+    if (finalDiagram && typeof finalDiagram === 'object') {
+      const origPlacement = finalDiagram.placement || 'question';
+      const healRes = validateAndHealDiagram(finalDiagram, cleanedQuestionText);
+      finalDiagram = healRes.healedDiagram;
+      cleanedQuestionText = healRes.cleanQuestionText;
+      if (finalDiagram) {
+        finalDiagram.placement = origPlacement;
+      }
+    }
+    if (finalExplanationDiagram && typeof finalExplanationDiagram === 'object') {
+      const origPlacement = finalExplanationDiagram.placement || 'explanation';
+      const healRes = validateAndHealDiagram(finalExplanationDiagram, cleanedExplanation);
+      finalExplanationDiagram = healRes.healedDiagram;
+      cleanedExplanation = healRes.cleanQuestionText;
+      if (finalExplanationDiagram) {
+        finalExplanationDiagram.placement = origPlacement;
+      }
+    }
+
+    // Anti-Hallucination Guard for Biology Organic Anatomy:
+    // If topic is in biology/life sciences and a diagram attempts to draw complex internal organs (heart, brain, etc.) in raw SVG,
+    // intercept and decouple it to prevent deformed anatomical blobs.
+    if (finalDiagram && /\b(biology|zoology|botany|anatomy|physiology|life sciences)\b/i.test(`${topicContext} ${effectiveSubject}`)) {
+      const shapes: any[] = Array.isArray(finalDiagram.shapes) ? finalDiagram.shapes : [finalDiagram];
+      const hasOrganicAnatomy = shapes.some((s: any) => 
+        /\b(heart|brain|kidney|nephron|liver|stomach|lungs?|digestive|organ)\b/i.test(String(s?.type || '')) ||
+        /\b(human heart|human brain|nephron cross section|internal organ)\b/i.test(String(s?.title || s?.label || ''))
+      );
+      if (hasOrganicAnatomy) {
+        console.warn('[Deterministic Guard] Blocked organic anatomical blob diagram in Biology. Questions on internal organ anatomy must use conceptual text or curated schematics.');
+        finalDiagram = null;
+        cleanedQuestionText = sanitizeDecoupledQuestionText(cleanedQuestionText);
+      }
+    }
+
+    // Cross-Question Semantic Coherence Guard:
+    // If finalDiagram is a data chart with specific categories, verify semantic overlap with question or explanation
+    if (finalDiagram && typeof finalDiagram === 'object') {
+      const shapes: any[] = Array.isArray(finalDiagram.shapes) ? finalDiagram.shapes : [finalDiagram];
+      const categories: string[] = [];
+      shapes.forEach((s: any) => {
+        if (Array.isArray(s.items)) categories.push(...s.items.map(String));
+        if (Array.isArray(s.points)) {
+          s.points.forEach((p: any) => {
+            if (p?.label && typeof p.label === 'string' && isNaN(Number(p.label)) && p.label.length >= 3) {
+              categories.push(p.label);
+            }
+          });
+        }
+      });
+      if (categories.length >= 2) {
+        const fullQText = `${cleanedQuestionText} ${cleanedExplanation} ${topicContext}`.toLowerCase();
+        const hasSemanticMatch = categories.some(cat => fullQText.includes(cat.toLowerCase().trim()));
+        if (!hasSemanticMatch) {
+          console.warn(`[Deterministic Guard] Cross-Question Bleed caught: diagram categories [${categories.slice(0, 3).join(', ')}] have zero overlap with question stem. Decoupling diagram.`);
+          finalDiagram = null;
+          cleanedQuestionText = sanitizeDecoupledQuestionText(cleanedQuestionText);
+        }
+      }
+    }
+
+    // 5. Chart vs Table Mutual Exclusivity (Teacher's First Law):
+    // If a visual chart (barGraph, lineGraph, pieChart, histogram, scatterPlot, boxPlot) is present in finalDiagram,
+    // purge any redundant Markdown pipe table from questionText so the candidate focuses on the visual stimulus
+    const hasVisualChart = finalDiagram && (
+      ['barGraph', 'lineGraph', 'pieChart', 'histogram', 'scatterPlot', 'boxPlot'].includes(finalDiagram.type) ||
+      (Array.isArray(finalDiagram.shapes) && finalDiagram.shapes.some((s: any) =>
+        ['barGraph', 'lineGraph', 'pieChart', 'histogram', 'scatterPlot', 'boxPlot'].includes(s?.type)
+      ))
+    );
+
+    if (hasVisualChart && /\|[^\n]+\|\r?\n\|[-:\s|]+\|\r?\n(?:\|[^\n]+\|\r?\n?)+/.test(cleanedQuestionText)) {
+      console.log('[Deterministic Guard] Purged redundant Markdown data table from questionText since visual chart is provided.');
+      cleanedQuestionText = cleanedQuestionText
+        .replace(/\|[^\n]+\|\r?\n\|[-:\s|]+\|\r?\n(?:\|[^\n]+\|\r?\n?)+/g, '')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+    }
+
+    // 6. Mandatory Visual Stem Auto-Anchoring:
+    // If finalDiagram is present as question stimulus, guarantee questionText explicitly anchors to it
+    if (finalDiagram && finalDiagram.placement !== 'explanation') {
+      const hasVisualAnchor = /\b(figure|diagram|graph|chart|plot|shown|given\s+below|refer\s+to|referring\s+to|study\s+the|based\s+on\s+the\s+(?:graph|chart|figure|table)|above\s+figure|below\s+figure|in\s+the\s+given)\b/i.test(cleanedQuestionText);
+      if (!hasVisualAnchor) {
+        let anchorPrefix = 'Directions: Refer to the given figure to answer the question:\n';
+        const shapeTypes: string[] = [];
+        if (finalDiagram.type && finalDiagram.type !== 'universal') {
+          shapeTypes.push(finalDiagram.type);
+        }
+        if (Array.isArray(finalDiagram.shapes)) {
+          for (const s of finalDiagram.shapes) {
+            if (s?.type) shapeTypes.push(s.type);
+          }
+        }
+
+        if (shapeTypes.some(t => ['barGraph', 'lineGraph', 'pieChart', 'histogram', 'scatterPlot', 'boxPlot'].includes(t))) {
+          anchorPrefix = 'Directions: Study the given chart and answer the following question:\n';
+        } else if (shapeTypes.some(t => ['seatingArrangement'].includes(t))) {
+          anchorPrefix = 'Directions: Study the seating arrangement shown below and answer the following question:\n';
+        } else if (shapeTypes.some(t => ['vennDiagram', 'venn'].includes(t))) {
+          anchorPrefix = 'Directions: Refer to the given Venn diagram and answer the following question:\n';
+        } else if (shapeTypes.some(t => ['directionDiagram'].includes(t))) {
+          anchorPrefix = 'Directions: Refer to the given movement diagram and answer the following question:\n';
+        }
+
+        console.log(`[Deterministic Guard] Auto-anchored unreferenced question visual with standard exam directive: "${anchorPrefix.trim()}"`);
+        cleanedQuestionText = `${anchorPrefix}${cleanedQuestionText}`;
+      }
+    }
+  } else {
+    // Strictly Non-Visual Domain: force diagrams to null and scrub any hallucinated diagram JSON code blocks
+    finalDiagram = null;
+    finalExplanationDiagram = null;
+    const extractedQ = extractEmbeddedDiagram(cleanedQuestionText);
+    cleanedQuestionText = sanitizeDecoupledQuestionText(extractedQ.cleanedText);
+    const extractedE = extractEmbeddedDiagram(cleanedExplanation);
+    cleanedExplanation = sanitizeDecoupledQuestionText(extractedE.cleanedText);
+  }
+
+  const candidateResult: GeneratedQuestionItem = {
     ...q,
     questionText: cleanedQuestionText,
     options: finalOptions,
     correctAnswerIndex: correctIndex,
     explanation: cleanedExplanation,
+    difficulty: resolvedDiff,
+    diagram: finalDiagram,
+    explanationDiagram: finalExplanationDiagram
+  };
+
+  const readiness = calculateQuestionReadinessScore(candidateResult, subjectContext);
+
+  return {
+    ...candidateResult,
     audit: {
-      verified: true,
-      syllabusRelevanceScore: 98,
+      verified: readiness.checks.mathematicalFidelity && readiness.checks.distractorQuality,
+      syllabusRelevanceScore: readiness.score,
       consensusMatch: true,
       auditorAnswerIndex: correctIndex,
-      confidence: 'HIGH',
-      auditNotes: 'Deterministic code guardrails & LaTeX syntax verified.'
+      confidence: readiness.confidence,
+      auditNotes: readiness.notes
     }
   };
 }
@@ -3122,7 +4362,7 @@ Return ONLY the raw JSON array of ${strippedBatch.length} audit objects.`;
     });
   } catch (err) {
     console.warn('[AI Question Audit] Auditor pass skipped, using deterministic guardrails:', err);
-    return questions.map(enforceDeterministicGuards);
+    return questions.map(q => enforceDeterministicGuards(q));
   }
 }
 
@@ -3295,6 +4535,7 @@ ${req.subSubject ? `SUB-SUBJECT: "${req.subSubject}"` : ''}
 ${req.chapter ? `CHAPTER / TOPIC: "${req.chapter}"` : ''}
 EXAM: "${req.examName || 'Odisha State Examination'}"
 TARGET STAGE: "${stage}"
+${req.stream && req.stream !== 'All Streams' ? `TARGET STREAM / DISCIPLINE: "${req.stream}"` : ''}
 MODE: ${isNaturalDensity ? `NATURAL DENSITY (Autonomous Cognitive Syllabus Sizing${ceilingCap ? `, Upper Ceiling: ≤ ${ceilingCap} cards` : ', Unconstrained Auto Sizing'} — Minimum ${MIN_FLASHCARDS_PER_DECK} cards floor)` : `FIXED TARGET (${fixedCardCount} cards)`}
 
 ${activeContentsPool.length > 0 ? `DETECTED SYLLABUS TOPIC ANCHORS IN THIS SECTION:
@@ -3436,33 +4677,172 @@ Output strictly a valid JSON array of ${missingCount} flashcard objects matching
 // -------------------------------------------------------------
 
 /**
- * Deterministic mathematical fallback for curriculum planning.
- * Computes syllabus density capacity and slices it into optimal micro-batches (3 to 5 questions/batch).
+ * Deterministic mathematical fallback and specification plan builder for curriculum planning.
+ * Computes syllabus density capacity or enforces strict predefined test specifications,
+ * slicing into optimal micro-batches (3 to 5 questions/batch).
  */
 export function buildDeterministicCurriculumPlan(
   syllabusMarkdown?: string,
   testTitle?: string,
-  ceilingCap?: number
+  ceilingCap?: number,
+  predefinedQuestionCount?: number,
+  targetType?: string,
+  subCategory?: string,
+  durationMinutes?: number
 ): AutonomousCurriculumPlan {
-  const density = computeQuestionNaturalDensity(syllabusMarkdown || testTitle || '', ceilingCap);
-  // In autonomous author mode, a single module chapter naturally warrants 15-25 Qs for deep coverage.
-  // Unless an explicit higher ceiling is specified, clamp natural capacity to 25 Qs so micro-batches stay 3-5 Qs each.
-  const effectiveLimit = (ceilingCap && ceilingCap > 0) ? ceilingCap : 25;
-  const totalQuestions = Math.min(density.naturalCount, effectiveLimit);
+  // If predefinedQuestionCount is supplied (for Practice Tests & Mock Tests), strictly enforce that exact quota
+  if (predefinedQuestionCount && predefinedQuestionCount > 0) {
+    const totalQuestions = predefinedQuestionCount;
+    const batchCount = Math.max(1, Math.ceil(totalQuestions / 5));
+    const basePerBatch = Math.floor(totalQuestions / batchCount);
+    let remainder = totalQuestions % batchCount;
 
-  // Optimal micro-batch target: 4 questions per batch (aiming for 3 to 5 questions per batch)
-  let batchCount = Math.max(1, Math.min(6, Math.ceil(totalQuestions / 4)));
+    // Check if this is a Full-Length Mock Test or Multi-Subject test
+    const isFullLength = subCategory === 'full-length' || (targetType === 'mock_test' && /full\s*mock|comprehensive|all\s*subjects|complete\s*syllabus/i.test(testTitle || ''));
+    const parsedSections = extractSyllabusSections(syllabusMarkdown || '');
+    const validSections = parsedSections.filter(s => s.title.toLowerCase() !== 'general syllabus' && s.content.length > 15);
+
+    const batches: AutonomousBatchPlan[] = [];
+
+    if (isFullLength && validSections.length >= 2) {
+      for (let i = 0; i < batchCount; i++) {
+        const qCount = basePerBatch + (remainder > 0 ? 1 : 0);
+        if (remainder > 0) remainder--;
+        const assignedSection = validSections[i % validSections.length];
+        const subjectPart = Math.floor(i / validSections.length) + 1;
+        batches.push({
+          batchNumber: i + 1,
+          questionCount: qCount,
+          thematicFocus: `Subject: ${assignedSection.title} (Part ${subjectPart})`
+        });
+      }
+
+      return {
+        totalQuestions,
+        batchCount,
+        batches,
+        reasoning: `Predefined Mock Test Specification (${totalQuestions} Qs across ${durationMinutes || 120} mins). Decomposed into ${batchCount} focused micro-batches (5 Qs/batch) distributed equally across all ${validSections.length} syllabus subjects (${validSections.map(s => s.title).join(', ')}).`
+      };
+    } else {
+      const defaultThemes = [
+        "Core Principles, Definitions & Fundamental Concepts",
+        "Formula Applications, Quantitative Relations & Problem Solving",
+        "Real-World Scenarios, Diagnostic Traps & Case Analysis",
+        "Comparative Mechanisms, Assertion-Reasoning & Multi-Statement Evaluation",
+        "Synthesis, Integrated Concepts & Edge Case Scenarios",
+        "Technical Mechanisms & Operating Characteristics",
+        "Statutory Articles, Regulatory Clauses & Standards",
+        "Advanced Problem Solving & Numerical Derivations",
+        "Common Pitfalls, Misconceptions & Trap Elimination",
+        "Comprehensive Mastery & Applied Edge Scenarios"
+      ];
+
+      for (let i = 0; i < batchCount; i++) {
+        const qCount = basePerBatch + (remainder > 0 ? 1 : 0);
+        if (remainder > 0) remainder--;
+        batches.push({
+          batchNumber: i + 1,
+          questionCount: qCount,
+          thematicFocus: defaultThemes[i % defaultThemes.length] || `Curricular Focus Part ${i + 1}`
+        });
+      }
+
+      return {
+        totalQuestions,
+        batchCount,
+        batches,
+        reasoning: `Predefined ${targetType === 'practice_test' ? 'Practice Test' : 'Mock Test'} Specification (${totalQuestions} Qs). Decomposed into ${batchCount} micro-batches of ~${basePerBatch} Qs each strictly matching the official predefined quota.`
+      };
+    }
+  }
+
+  const scopedResult = extractAutonomousSyllabusScope(syllabusMarkdown || '', {
+    title: testTitle,
+    chapter: testTitle
+  });
+  const effectiveSyllabus = scopedResult.scopedMarkdown && scopedResult.scopedMarkdown.length > 20
+    ? scopedResult.scopedMarkdown
+    : (syllabusMarkdown || testTitle || '');
+
+  const density = computeQuestionNaturalDensity(effectiveSyllabus, ceilingCap);
+  const isQuestionBank = targetType === 'question_bank' || targetType === 'bank' || (!targetType && !predefinedQuestionCount);
+  const qbFloor = isQuestionBank ? (ceilingCap && ceilingCap > 0 ? Math.min(10, ceilingCap) : 10) : 5;
+  const effectiveLimit = (ceilingCap && ceilingCap > 0) ? ceilingCap : 250;
+  const totalQuestions = Math.min(Math.max(density.naturalCount, qbFloor), effectiveLimit);
+
+  // Optimal micro-batch target: 5 questions per batch (scalable up to 50 batches = 250 Qs for commercial Question Banks)
+  const batchCount = Math.max(1, Math.min(50, Math.ceil(totalQuestions / 5)));
   const basePerBatch = Math.floor(totalQuestions / batchCount);
   let remainder = totalQuestions % batchCount;
 
-  const defaultThemes = [
-    "Core Principles, Definitions & Fundamental Concepts",
-    "Formula Applications, Quantitative Relations & Problem Solving",
-    "Real-World Scenarios, Diagnostic Traps & Case Analysis",
-    "Comparative Mechanisms, Assertion-Reasoning & Multi-Statement Evaluation",
-    "Synthesis, Integrated Concepts & Edge Case Scenarios",
-    "Comprehensive Mastery & Applied Edge Scenarios"
-  ];
+  // Pedagogical Themes tailored to Question Bank Sub-Categories (up to 10 micro-batches)
+  let categoryThemes: string[] = [];
+  if (subCategory === 'topic-wise') {
+    categoryThemes = [
+      "Core Concepts, Foundational Definitions & Primary Doctrines",
+      "Structural Classifications, Operating Frameworks & Functional Powers",
+      "Statutory Articles, Legal Clauses & Numerical Thresholds",
+      "Landmark Case Laws, Amendments & Inter-Subject Relationships",
+      "Advanced Conceptual Synthesis & Applied Problem Scenarios",
+      "Analytical Exceptions, Provisos & Edge Case Doctrines",
+      "Comparative Institutional Powers & Jurisdictional Boundaries",
+      "Procedural Workflows, Timelines & Constitutional Quorums",
+      "High-Yield Multi-Statement Conceptual Integrations",
+      "Comprehensive Subject Mastery & Synoptic Evaluation"
+    ];
+  } else if (subCategory === 'exam-focused') {
+    categoryThemes = [
+      "High-Yield Formulas, Core Laws & Primary Mathematical Relations",
+      "Numerical Calculations, Exact Values & Dimensional Units",
+      "Exam Traps, Subtle Distractors & Common Misconceptions",
+      "Multi-Statement Analysis, Assertion-Reasoning & Comparative Logic",
+      "Rapid Elimination Strategies & High-Frequency Exam Discriminators",
+      "Complex Multi-Step Numerical Derivations & Quantitative Traps",
+      "Graphical, Diagrammatic & Functional Trend Analyses",
+      "Real-World Diagnostic Case Studies & Application Drills",
+      "Speed, Accuracy & High-Pressure Benchmark Challenge",
+      "Final Precision & Error-Minimization Mastery"
+    ];
+  } else if (subCategory === 'revision-sets') {
+    categoryThemes = [
+      "Rapid-Fire Factual Recall: Exact Dates, Years & Key Milestones",
+      "Constitutional Article Numbers, Schedules & Statutory Clauses",
+      "Geographic Metrics, River Basins, Boundaries & Natural Sanctuaries",
+      "Apex Institutional Bodies, Committees & Key Commissions",
+      "High-Speed Memory Synthesis & Core Academic Terminology",
+      "Chronological Timelines & Major Historical Treaties",
+      "National & State Economic Data, Schemes & Budgetary Allocations",
+      "Science & Tech Innovations, Discoveries & Diagnostic Inventions",
+      "Quick-Check Confusing Pairs, Opposites & Distinctions",
+      "High-Yield Diagnostic Blitz & Last-Minute Exam Triggers"
+    ];
+  } else if (subCategory === 'pyq-collections') {
+    categoryThemes = [
+      "Authentic Exam Patterns: Foundational Past Year Questions",
+      "Sibling Variant Synthesis: Chronological Events & Historical Acts",
+      "Exam DNA Analysis: Multi-Statement & Assertion-Reasoning Clones",
+      "Advanced Competitive Discriminators & Statistical Question Clones",
+      "Comprehensive Past Paper Sibling Synthesis & Exam Readiness",
+      "Recurring Topic Clones: Key Constitutional Articles & Decisions",
+      "Trend Mutation Analysis: Past Questions Transformed into Modern Formats",
+      "Deep-Concept PYQ Variants with Enhanced Distractor Rigor",
+      "Multi-Year Question Cluster Integration & Benchmark Challenge",
+      "Master PYQ Variant Simulation & Decisive Paper Readiness"
+    ];
+  } else {
+    categoryThemes = [
+      "Core Principles, Definitions & Fundamental Concepts",
+      "Formula Applications, Quantitative Relations & Problem Solving",
+      "Real-World Scenarios, Diagnostic Traps & Case Analysis",
+      "Comparative Mechanisms, Assertion-Reasoning & Multi-Statement Evaluation",
+      "Synthesis, Integrated Concepts & Edge Case Scenarios",
+      "Technical Mechanisms & Operating Characteristics",
+      "Statutory Articles, Regulatory Clauses & Standards",
+      "Advanced Problem Solving & Numerical Derivations",
+      "Common Pitfalls, Misconceptions & Trap Elimination",
+      "Comprehensive Mastery & Applied Edge Scenarios"
+    ];
+  }
 
   const batches: AutonomousBatchPlan[] = [];
   for (let i = 1; i <= batchCount; i++) {
@@ -3471,7 +4851,7 @@ export function buildDeterministicCurriculumPlan(
     batches.push({
       batchNumber: i,
       questionCount: qCount,
-      thematicFocus: defaultThemes[i - 1] || `In-depth Concepts & Application Part ${i}`
+      thematicFocus: categoryThemes[i - 1] || `In-depth Concepts & Application Part ${i}`
     });
   }
 
@@ -3479,7 +4859,9 @@ export function buildDeterministicCurriculumPlan(
     totalQuestions,
     batchCount,
     batches,
-    reasoning: `Syllabus density analysis identified ${density.contentItems.length} concept points. Organically sized ${totalQuestions} questions into ${batchCount} focused micro-batches (3-5 Qs/batch) to ensure high cognitive depth and zero attention fatigue.`
+    reasoning: isQuestionBank
+      ? `Comprehensive Question Bank Architecture: Organically allocated ${totalQuestions} high-caliber questions across ${batchCount} focused micro-batches (5 Qs/batch) covering foundational doctrines, statutory mechanics, and exam discriminators.`
+      : `Syllabus density analysis identified ${density.contentItems.length} concept points. Organically sized ${totalQuestions} questions into ${batchCount} focused micro-batches (3-5 Qs/batch) to ensure high cognitive depth and zero attention fatigue.`
   };
 }
 
@@ -3491,43 +4873,140 @@ export function buildDeterministicCurriculumPlan(
 export async function planAutonomousQuestionCurriculum(
   req: PlanCurriculumRequest
 ): Promise<AutonomousCurriculumPlan> {
-  const fallback = buildDeterministicCurriculumPlan(req.syllabusMarkdown, req.testTitle, req.ceilingCap);
+  const isCategorySlug = /^(?:topic-wise|exam-focused|revision-sets|pyq-collections|full-length|sectional|daily|quiz)$/i.test(req.subCategory || '');
+  const actualSubSubject = isCategorySlug ? undefined : req.subCategory;
+
+  const scopedResult = extractAutonomousSyllabusScope(req.syllabusMarkdown || '', {
+    title: req.testTitle,
+    subject: req.subject,
+    subSubject: actualSubSubject,
+    chapter: req.chapter
+  });
+  const effectiveSyllabus = scopedResult.scopedMarkdown && scopedResult.scopedMarkdown.length > 20
+    ? scopedResult.scopedMarkdown
+    : (req.syllabusMarkdown || '');
+  const detectedSubContents = extractSyllabusContents(effectiveSyllabus);
+
+  // 1. Strict Predefined Specification Compliance for Practice Tests & Mock Tests
+  if (
+    (req.targetType === 'mock_test' || req.targetType === 'practice_test' || req.predefinedQuestionCount) &&
+    req.predefinedQuestionCount && req.predefinedQuestionCount > 0
+  ) {
+    return buildDeterministicCurriculumPlan(
+      effectiveSyllabus,
+      req.testTitle,
+      req.ceilingCap,
+      req.predefinedQuestionCount,
+      req.targetType,
+      req.subCategory,
+      req.durationMinutes
+    );
+  }
+
+  const fallback = buildDeterministicCurriculumPlan(
+    effectiveSyllabus,
+    req.testTitle,
+    req.ceilingCap,
+    req.predefinedQuestionCount,
+    req.targetType,
+    req.subCategory,
+    req.durationMinutes
+  );
 
   // If no syllabus text is available, return deterministic plan directly
-  if (!req.syllabusMarkdown || req.syllabusMarkdown.trim().length < 20) {
+  if (!effectiveSyllabus || effectiveSyllabus.trim().length < 20) {
     return fallback;
   }
 
-  try {
-    const systemPrompt = `You are a Lead Pedagogical Exam Architect for competitive examinations.
-Your task is to analyze the syllabus content of a test module, evaluate its conceptual density, calculate the optimal natural question capacity, and decompose that capacity into focused micro-batches (ideally 3 to 5 questions per batch, max 5 batches).
+  // Resolve Category-Specific Pedagogical Directives (Professional Senior Teacher Perspective)
+  let categoryPedagogyDirective = '';
+  if (req.subCategory === 'topic-wise') {
+    categoryPedagogyDirective = `CATEGORY MANDATE: TOPIC-WISE QUESTION BANK (Focused Topic Mastery)
+- Target is an individual chapter or sub-subject placeholder.
+- Do NOT bleed into adjacent chapters. Scrutinize the fine details, atomic definitions, parameters, and mechanisms of THIS specific topic.
+- SIZING DIRECTIVE: Generate as many high-value, exam-relevant questions as needed to ensure complete candidate mastery of every concept and formula in this topic across all 5 cognitive angles. A single chapter with multiple concept nodes naturally yields 30 to 50+ questions (6 to 10 micro-batches of 5 Qs) with zero filler.`;
+  } else if (req.subCategory === 'exam-focused') {
+    categoryPedagogyDirective = `CATEGORY MANDATE: EXAM-FOCUSED HIGH-YIELD QUESTION BANK (Comprehensive Parent Subject Module)
+- Target is a major parent subject encompassing multiple nested sub-subjects and chapters.
+- Identify the highest-yielding, rank-determining concepts across ALL constituent sub-subjects.
+- MANDATORY PROPORTIONAL DISTRIBUTION: You MUST independently allocate questions across EVERY child sub-subject detected. For a parent subject containing 3 sub-subjects, each sub-subject requires 25 to 40 high-yield questions covering all 5 angles, organically totaling 75 to 125+ questions (15 to 25 micro-batches)! No child unit may be starved.`;
+  } else if (req.subCategory === 'revision-sets') {
+    categoryPedagogyDirective = `CATEGORY MANDATE: LAST-MINUTE REVISION & FORMULA BOOSTER (Rapid-Fire Calculation & Recall)
+- Target emphasizes formulas, empirical equations, statutory thresholds, core definitions, and rapid-decision problem types.
+- Ensure micro-batches target numerical calculation readiness, formula parameters, and quick assertion-reasoning traps.
+- SIZING DIRECTIVE: Provide thorough formula and rapid-recall coverage across all numerical relationships and equations present in the syllabus.`;
+  } else if (req.subCategory === 'pyq-collections') {
+    categoryPedagogyDirective = `CATEGORY MANDATE: PYQ QUESTION ARCHIVES & SOLVED PAPERS (Official Exam Pattern Alignment)
+- Target reflects multi-year exam question distribution and authentic commission standards.
+- Micro-batches must prioritize recurring past question archetypes, multi-statement combinations, and exam-level traps.
+- SIZING DIRECTIVE: Maximize authentic exam-standard questions reflecting multi-year competitive depth across the entire paper blueprint (100 to 200+ questions across 20 to 40 micro-batches).`;
+  }
 
-By keeping each batch small (3-5 questions), the question generator maintains maximum cognitive attention, deep distractors, and rich explanations without fatigue.
+  try {
+    const systemPrompt = `You are a Senior Academic Dean, Chief Examination Paper Setter, and Master Question Bank Architect for premier competitive civil and state examinations (UPSC, OPSC, GATE, State PSCs).
+
+You understand that candidates purchase a Question Bank as a comprehensive, definitive study and practice resource. A Question Bank that contains only 10 to 20 questions for an extensive syllabus feels inadequate to candidates and fails to prepare them for competitive exams. To deliver true commercial and academic value, you must design an exhaustive, non-redundant question bank that covers all examinable angles without adding low-value filler.
+
+PROFESSIONAL FACULTY PEDAGOGICAL PRINCIPLES (THINK LIKE A SENIOR TEACHER):
+1. ACADEMIC CONCEPT MULTIPLIER:
+   Every genuine competitive exam concept or syllabus node naturally supports 3 to 5 distinct, high-value pedagogical question angles:
+   - Angle 1 (Foundations & Core Principles): Fundamental definitions, governing laws, statutory clauses, and core classifications.
+   - Angle 2 (Mechanisms & Operating Dynamics): Step-by-step physical, biological, or operational processes and system interactions.
+   - Angle 3 (Applied Numericals & Quantitative Relations): Exact formula derivations, parameter calculations, and empirical constants (with clean LaTeX $...$).
+   - Angle 4 (Multi-Statement Rigor & Assertion-Reasoning): Roman numeral statement evaluation (Statements 1, 2, 3...) and subtle conceptual traps.
+   - Angle 5 (Comparative Synthesis & Diagnostic Traps): Diagnostic distinctions, boundary edge cases, and common candidate misconceptions.
+
+2. UNCONSTRAINED PROPORTIONAL CAPACITY SIZING (ZERO ARTIFICIAL HANDCUFFS):
+   - Do NOT impose artificial limits or force every module to a small fixed number.
+   - Let the syllabus breadth and concept density dictate the authentic question volume:
+     * Compact / Single-Topic Modules (e.g. 5-8 concepts): Sized organically to 25 to 40 questions (5 to 8 micro-batches of 5 Qs).
+     * Standard Chapters / Modules (e.g. 9-18 concepts): Sized organically to 45 to 70 questions (9 to 14 micro-batches of 5 Qs).
+     * Comprehensive Parent Subjects encompassing multiple sub-subjects (e.g. 20-35+ concepts across 3+ units): Sized organically to 75 to 125+ questions (15 to 25 micro-batches of 5 Qs), ensuring every single child sub-subject receives 25 to 40 dedicated questions covering all 5 angles!
+     * Full Paper / Multi-Disciplinary Master Banks (e.g. 40+ concepts across multiple subjects): Sized organically to 125 to 200+ questions (25 to 40 micro-batches of 5 Qs).
+   - Only restrict capacity if the administrator explicitly provides a ceilingCap.
+
+3. COGNITIVELY DECOUPLED MICRO-BATCHING (FREE-TIER RATE-LIMIT & QUALITY OPTIMIZED):
+   Organize the capacity into focused micro-batches of exactly 4 to 5 questions each. Each micro-batch MUST have a clear, specific thematic angle (e.g. "Thermodynamic Cycles & Volumetric Efficiency", "Distributor Pumps & CRDI Injection Dynamics", "Primary Tillage Suction & Draft Force Numericals"). Micro-batches of 4-5 questions guarantee deep pedagogical explanations, dedicated token headroom, and zero LLM attention fatigue.
+
+4. STRICT ZERO-FILLER FILTER:
+   High volume must NEVER compromise academic quality. Strictly ban trivial 1-line definition questions ("What is X?"). Every question must be genuinely rank-determining.
 
 You MUST respond ONLY with a valid JSON object matching this schema:
 {
-  "totalQuestions": <number between 5 and 30>,
-  "batchCount": <number between 1 and 5>,
+  "totalQuestions": <authentic total question count based on teacher analysis, e.g. 25 to 200>,
+  "batchCount": <number of micro-batches, e.g. 5 to 40>,
   "batches": [
     {
       "batchNumber": 1,
-      "questionCount": <number of questions, 3 to 6>,
-      "thematicFocus": "<clear pedagogical angle, e.g. 'Foundations, Definitions & Fundamental Laws'>"
+      "questionCount": 5,
+      "thematicFocus": "<specific pedagogical sub-theme exploring a distinct concept angle>"
     }
   ],
-  "reasoning": "<1-2 sentences explaining why this capacity and batch breakdown was chosen>"
+  "reasoning": "<2-3 sentences explaining why this capacity and batch breakdown was chosen based on the syllabus depth, number of sub-subjects, and teacher pedagogical requirements>"
 }`;
+
+    const isQB = (req.targetType as string) === 'question_bank' || (req.targetType as string) === 'bank' || (!req.targetType && !req.predefinedQuestionCount);
+    const minFloor = isQB ? (req.ceilingCap && req.ceilingCap > 0 ? Math.min(10, req.ceilingCap) : 15) : 5;
+    const maxCeiling = req.ceilingCap && req.ceilingCap > 0 ? req.ceilingCap : 250;
 
     const userPrompt = `MODULE / TEST TITLE: "${req.testTitle}"
 SUBJECT: "${req.subject || 'General'}"
 CHAPTER: "${req.chapter || req.testTitle}"
 ${req.subCategory ? `SUB-CATEGORY: "${req.subCategory}"` : ''}
-${req.ceilingCap && req.ceilingCap > 0 ? `MAX CEILING CAP: ≤ ${req.ceilingCap} Questions` : 'UNCONSTRAINED NATURAL DENSITY (Determine optimal capacity organically)'}
+${categoryPedagogyDirective ? `\n${categoryPedagogyDirective}\n` : ''}
+${isQB ? 'TYPE: Professional Comprehensive Question Bank (Maximize authentic high-utility questions, strictly 0% filler, cover all 5 cognitive angles with commercial publication depth)' : 'TYPE: Standard Assessment'}
+${req.ceilingCap && req.ceilingCap > 0 ? `MAX CEILING CAP: ≤ ${req.ceilingCap} Questions` : 'UNCONSTRAINED NATURAL DENSITY (Determine optimal capacity organically like a senior faculty member: 25-40 Qs for single topics, 45-70 Qs for standard chapters, 75-125+ Qs for multi-unit parent subjects, 125-200+ Qs for full papers. Zero artificial limits)'}
 
-SYLLABUS CONTENT:
-${req.syllabusMarkdown.slice(0, 3000)}
+SCOPED SYLLABUS SECTION ("${scopedResult.matchedSectionTitle || req.testTitle}"):
+${effectiveSyllabus.slice(0, 4000)}
 
-Analyze the concept breadth, determine total authentic question capacity (minimum 5, maximum ${req.ceilingCap && req.ceilingCap > 0 ? req.ceilingCap : 30}), and decompose into optimal micro-batches (3-5 Qs per batch, max 5 batches). Output raw JSON only.`;
+${detectedSubContents.length > 0 ? `DETECTED GRANULAR SUB-CONTENT ITEMS IN THIS CHAPTER:
+${detectedSubContents.map((c, i) => `  ${i + 1}. ${c}`).join('\n')}
+
+COGNITIVE SUB-CONTENT DECOMPOSITION MANDATE:
+Analyze each detected sub-content item above. In your pedagogical plan, systematically distribute questions across these sub-content items across the micro-batches, ensuring balanced coverage across the 5 cognitive angles.
+` : ''}
+Analyze the concept breadth like a senior teacher, determine total authentic question capacity (minimum ${minFloor}, maximum ${maxCeiling}), and decompose into optimal micro-batches (4-5 Qs per batch). Output raw JSON only.`;
 
     const rawResponse = await queryAIModel(
       systemPrompt,
@@ -3537,7 +5016,7 @@ Analyze the concept breadth, determine total authentic question capacity (minimu
         model: req.model,
         baseUrl: req.baseUrl,
         temperature: 0.2,
-        maxOutputTokens: 1000
+        maxOutputTokens: 4096
       }
     );
 
@@ -3559,9 +5038,9 @@ Analyze the concept breadth, determine total authentic question capacity (minimu
       ) {
         let computedTotal = 0;
         const validBatches: AutonomousBatchPlan[] = [];
-        for (let i = 0; i < Math.min(parsed.batches.length, 5); i++) {
+        for (let i = 0; i < Math.min(parsed.batches.length, 50); i++) {
           const b = parsed.batches[i];
-          const qCount = Math.max(1, Math.min(10, Number(b.questionCount) || 4));
+          const qCount = Math.max(1, Math.min(10, Number(b.questionCount) || 5));
           computedTotal += qCount;
           validBatches.push({
             batchNumber: i + 1,

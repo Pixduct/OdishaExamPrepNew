@@ -24,6 +24,7 @@ export interface FlashcardDeck {
   sub_subject?: string;
   chapter?: string;
   stage: string;
+  stream?: string;
   title: string;
   description: string;
   icon: string;

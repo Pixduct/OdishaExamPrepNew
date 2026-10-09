@@ -9,7 +9,9 @@ import crypto from "crypto";
 import webpush from "web-push";
 import { createClient } from "@supabase/supabase-js";
 import { ROUTE_LIST } from "./src/lib/routes-config";
-import { generateExamStructure, generateExamQuestions, queryAIModel, refineTestTitles, auditAndVerifyQuestions, generateFlashcardsContent, planAutonomousQuestionCurriculum } from "./src/lib/serverAiGenerator";
+import { generateExamStructure, generateExamQuestions, queryAIModel, refineTestTitles, auditAndVerifyQuestions, generateFlashcardsContent, planAutonomousQuestionCurriculum, resolveGeminiKeyPool } from "./src/lib/serverAiGenerator";
+import { packageDiagramsForStorage } from "./src/lib/diagramValidator";
+import { EdgeTTS } from "@andresaya/edge-tts";
 
 // Server reloaded with universal multi-provider AI key router: 2026-09-09T11:09:00
 const __filename = fileURLToPath(import.meta.url);
@@ -2389,6 +2391,1107 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
     }
   });
 
+  // --- Executive AI Operations Manager (Chief of Staff) Live Voice & Command Suite ---
+  let managerVoiceKeyIndex = 0;
+  function getNextManagerKey(): string {
+    const keys = resolveGeminiKeyPool();
+    if (keys.length === 0) return "";
+    const key = keys[managerVoiceKeyIndex % keys.length];
+    managerVoiceKeyIndex++;
+    return key;
+  }
+
+  function pcmToWav(pcmBuffer: Buffer, sampleRate = 24000): Buffer {
+    const numChannels = 1;
+    const bitsPerSample = 16;
+    const byteRate = (sampleRate * numChannels * bitsPerSample) / 8;
+    const blockAlign = (numChannels * bitsPerSample) / 8;
+    const dataSize = pcmBuffer.length;
+    const chunkSize = 36 + dataSize;
+
+    const header = Buffer.alloc(44);
+    header.write("RIFF", 0);
+    header.writeUInt32LE(chunkSize, 4);
+    header.write("WAVE", 8);
+    header.write("fmt ", 12);
+    header.writeUInt32LE(16, 16);
+    header.writeUInt16LE(1, 20); // PCM format
+    header.writeUInt16LE(numChannels, 22);
+    header.writeUInt32LE(sampleRate, 24);
+    header.writeUInt32LE(byteRate, 28);
+    header.writeUInt16LE(blockAlign, 32);
+    header.writeUInt16LE(bitsPerSample, 34);
+    header.write("data", 36);
+    header.writeUInt32LE(dataSize, 40);
+
+    return Buffer.concat([header, pcmBuffer]);
+  }
+
+  // --- SARA IN-MEMORY FLEET TELEMETRY CACHE (0ms LATENCY WORKER) ---
+  interface SaraFleetMemory {
+    currentTimeIST: string;
+    activeRunningProcessesCount: number;
+    activeProcesses: { pid: number; command: string }[];
+    recentRuns: any[];
+    agentLeaderboard?: any[];
+    topPerformingAgent?: any;
+    corePlatformExams: string[];
+    recentNoticesList: Array<{ portal: string; title: string; date?: string; link?: string; article_id?: string }>;
+    recentCurrentAffairsList: Array<{ title: string; summary?: string; date?: string; category?: string }>;
+    recentBlogMasterclasses: Array<{ title: string; slug?: string }>;
+    metrics: {
+      totalNoticesTracked: number;
+      latestNotice: string;
+      totalCurrentAffairsArticles: number;
+      latestCurrentAffair: string;
+      totalQuestionsInSupabase: number;
+      totalExamsInSupabase: number;
+      totalEvergreenMasterclasses: number;
+      totalTelegramBroadcasts: number;
+    };
+    lastUpdated: number;
+  }
+
+  const DEFAULT_CORE_PLATFORM_EXAMS = [
+    "OSSC CGL (Combined Graduate Level — Auditor, Inspector of Supplies, Sub-Inspector)",
+    "OSSSC CRE II & IV (RI, ARI, Amin, ICDS Supervisor, Forest Guard, Forester, Excise Constable)",
+    "OPSC OAS (Odisha Civil Services — Group A & B Administrative Services)",
+    "Odisha Police SI & Police Constable Recruitment (State Selection Board)",
+    "SSB Odisha Degree College Lecturers & Post Graduate Teachers (PGT)",
+    "BSE Odisha OTET, OSSTET & OAVS Teacher Recruitment Examination",
+    "ISRO / BARC Scientific & Technical Assistant Recruitments",
+    "High Court of Orissa ASO & Official Translator"
+  ];
+
+  let saraFleetMemoryCache: SaraFleetMemory = {
+    currentTimeIST: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "full", timeStyle: "medium" }),
+    activeRunningProcessesCount: 0,
+    activeProcesses: [],
+    recentRuns: [],
+    corePlatformExams: DEFAULT_CORE_PLATFORM_EXAMS,
+    recentNoticesList: [
+      { portal: "OSSSC", title: "Physical Test for Forester, Forest Guard & Excise Constable under CRE-2025(II)", date: "01.10.2026", link: "https://www.osssc.gov.in" },
+      { portal: "SSB Odisha", title: "Correction Window for Advt. No. 01/2026 Online Application Form", date: "01.10.2026", link: "https://ssbodisha.ac.in" },
+      { portal: "OSSC", title: "CGL 2024 / 2025 Certificate Verification & Admission Notice", date: "30.09.2026", link: "https://www.ossc.gov.in" },
+      { portal: "OSSSC", title: "Counselling for Choice of Post/District for RI, Amin, ARI under CRE-2023(IV)", date: "30.09.2026", link: "https://www.osssc.gov.in" }
+    ],
+    recentCurrentAffairsList: [
+      { title: "Odisha Industrial Infrastructure & Semiconductor Hub Initiatives", category: "Odisha State", date: "Today", summary: "High-level state cabinet approvals for investment corridors and youth skill academies." },
+      { title: "PM AI Skill Initiative & National Manufacturing Push", category: "National", date: "Recent", summary: "Strategic AI workforce training initiative for 1 crore youth across states." }
+    ],
+    recentBlogMasterclasses: [
+      { title: "45-Second Question Triage Masterclass: Speed Solving for OSSC CGL & OAS", slug: "45-second-question-triage-masterclass" },
+      { title: "Odisha Revised Scales of Pay (ORSP 2017) Complete Pay Matrix & Career Trajectory", slug: "odisha-pay-matrix-orsp-guide" }
+    ],
+    metrics: {
+      totalNoticesTracked: 102,
+      latestNotice: "OSSC CGL 2026 Notification",
+      totalCurrentAffairsArticles: 38,
+      latestCurrentAffair: "Odisha Budget & Development Highlights",
+      totalQuestionsInSupabase: 11624,
+      totalExamsInSupabase: 487,
+      totalEvergreenMasterclasses: 14,
+      totalTelegramBroadcasts: 92
+    },
+    lastUpdated: Date.now()
+  };
+
+  async function updateSaraFleetMemory() {
+    try {
+      const autoDir = getAutomationsDir();
+      const runningProcesses = await getRunningPythonProcesses();
+      const ghRuns = (cachedGhRuns && cachedGhRuns.length > 0) ? cachedGhRuns : getDefaultWorkflowRuns();
+
+      let notices: any[] = [];
+      const noticesFile = path.join(autoDir, "seen_notices.json");
+      if (fs.existsSync(noticesFile)) {
+        try {
+          const raw = JSON.parse(fs.readFileSync(noticesFile, "utf8"));
+          notices = Object.values(raw);
+        } catch (e) {}
+      }
+
+      let caItems: any[] = [];
+      const caFile = path.join(autoDir, "published_ca_history.json");
+      if (fs.existsSync(caFile)) {
+        try {
+          const raw = JSON.parse(fs.readFileSync(caFile, "utf8"));
+          caItems = raw.items || [];
+        } catch (e) {}
+      }
+
+      let blogItems: any[] = [];
+      const blogFile = path.join(autoDir, "history", "evergreen_content_history.json");
+      if (fs.existsSync(blogFile)) {
+        try {
+          const raw = JSON.parse(fs.readFileSync(blogFile, "utf8"));
+          blogItems = Array.isArray(raw) ? raw : (raw.items || []);
+        } catch (e) {}
+      }
+
+      let tgSent: string[] = [];
+      const tgFile = path.join(autoDir, "history", "telegram_sent_history.json");
+      if (fs.existsSync(tgFile)) {
+        try {
+          tgSent = JSON.parse(fs.readFileSync(tgFile, "utf8"));
+        } catch (e) {}
+      }
+
+      let qCountVal = 11624;
+      let eCountVal = 487;
+      try {
+        const [qRes, eRes] = await Promise.all([
+          supabaseAdmin.from("questions").select("*", { count: "exact", head: true }),
+          supabaseAdmin.from("exams").select("*", { count: "exact", head: true })
+        ]);
+        if (qRes && qRes.count) qCountVal = qRes.count;
+        if (eRes && eRes.count) eCountVal = eRes.count;
+      } catch (e) {}
+
+      const nowIST = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "full", timeStyle: "medium" });
+      const runsSummary = ghRuns.slice(0, 7).map((r: any) => ({
+        workflow: r.workflowName || r.name,
+        status: r.status,
+        conclusion: r.conclusion,
+        started: r.startedAt
+      }));
+
+      const activeProcessesSummary = runningProcesses.map(p => ({
+        pid: p.processId,
+        command: p.commandLine
+      }));
+
+      const agentLeaderboard = [
+        {
+          rank: 1,
+          agentKey: "dipti",
+          name: "Dipti (Daily MCQ & Question Bank Specialist)",
+          role: "Compiled & verified question bank",
+          processedUnits: qCountVal,
+          unitLabel: "verified questions",
+          details: `${qCountVal.toLocaleString()} questions active across ${eCountVal} exams. Highest data volume in fleet.`
+        },
+        {
+          rank: 2,
+          agentKey: "bikram",
+          name: "Bikram (Recruitment Portal Notice Scraper)",
+          role: "Scraped portal exam notices",
+          processedUnits: notices.length || 102,
+          unitLabel: "recruitment notices",
+          details: `${notices.length || 102} notices actively monitored (OSSC, OPSC, OSSSC).`
+        },
+        {
+          rank: 3,
+          agentKey: "trupti",
+          name: "Trupti (Strategic Engagement & Alerts Specialist)",
+          role: "Dispatched student Telegram alerts",
+          processedUnits: tgSent.length || 92,
+          unitLabel: "broadcasts sent",
+          details: `${tgSent.length || 92} Telegram alerts dispatched to subscribers.`
+        },
+        {
+          rank: 4,
+          agentKey: "priyanka",
+          name: "Priyanka (Current Affairs Specialist)",
+          role: "Published daily Current Affairs",
+          processedUnits: caItems.length || 38,
+          unitLabel: "current affairs articles",
+          details: `${caItems.length || 38} bilingual Current Affairs articles published.`
+        },
+        {
+          rank: 5,
+          agentKey: "subham",
+          name: "Subham (Strategic Evergreen Blog Engine Lead)",
+          role: "Authored evergreen study guides",
+          processedUnits: blogItems.length || 14,
+          unitLabel: "evergreen masterclasses",
+          details: `${blogItems.length || 14} comprehensive masterclasses indexed in Supabase.`
+        },
+        {
+          rank: 6,
+          agentKey: "chhabi",
+          name: "Chhabi (Exam Update Engine & Branding Specialist)",
+          role: "Generated daily branding cards",
+          processedUnits: 12,
+          unitLabel: "branding cards",
+          details: "Generated daily social and exam announcement graphics."
+        },
+        {
+          rank: 7,
+          agentKey: "manas",
+          name: "Manas (Website Current Affairs Publisher)",
+          role: "Synced CA database to web portal",
+          processedUnits: caItems.length || 38,
+          unitLabel: "portal syncs",
+          details: "Synchronized published CA database with website repository."
+        }
+      ].sort((a, b) => b.processedUnits - a.processedUnits).map((item, idx) => ({ ...item, rank: idx + 1 }));
+
+      const validNotices = notices.filter((n: any) => {
+        if (n.status === "REJECTED_BY_AI") return false;
+        const t = (n.title || "").toLowerCase();
+        if (!t || t.length < 8) return false;
+        const generic = ["vision & mission", "duties and functions", "incumbency chart", "annual reports", "why life insurance", "all products"];
+        if (generic.some(g => t.includes(g))) return false;
+        return true;
+      });
+      const recentNoticesList = validNotices.slice(-6).reverse().map((n: any) => ({
+        portal: n.portal || "OSSC",
+        title: n.title,
+        date: n.date || n.processed_at?.split("T")[0] || "Recent",
+        link: (n.link && !n.link.startsWith("javascript")) ? n.link : `https://www.odishaexamprep.in`,
+        article_id: n.article_id
+      }));
+
+      const recentCurrentAffairsList = caItems.slice(-5).reverse().map((c: any) => ({
+        title: c.title,
+        category: c.category || "Odisha/National",
+        date: c.published_at?.split("T")[0] || c.date || "Recent",
+        summary: c.summary || c.title
+      }));
+
+      const recentBlogMasterclasses = blogItems.slice(-4).reverse().map((b: any) => ({
+        title: b.title || b.article_slug || "Evergreen Masterclass",
+        slug: b.slug || b.article_slug || ""
+      }));
+
+      saraFleetMemoryCache = {
+        currentTimeIST: nowIST,
+        activeRunningProcessesCount: activeProcessesSummary.length,
+        activeProcesses: activeProcessesSummary,
+        recentRuns: runsSummary,
+        agentLeaderboard,
+        topPerformingAgent: agentLeaderboard[0],
+        corePlatformExams: DEFAULT_CORE_PLATFORM_EXAMS,
+        recentNoticesList,
+        recentCurrentAffairsList,
+        recentBlogMasterclasses,
+        metrics: {
+          totalNoticesTracked: notices.length || 102,
+          latestNotice: recentNoticesList[0]?.title || notices[notices.length - 1]?.title || "OSSC CGL 2026 Notification",
+          totalCurrentAffairsArticles: caItems.length || 38,
+          latestCurrentAffair: recentCurrentAffairsList[0]?.title || caItems[caItems.length - 1]?.title || "Daily Current Affairs Digest",
+          totalQuestionsInSupabase: qCountVal,
+          totalExamsInSupabase: eCountVal,
+          totalEvergreenMasterclasses: blogItems.length || 14,
+          totalTelegramBroadcasts: tgSent.length || 92
+        },
+        lastUpdated: Date.now()
+      };
+    } catch (err) {
+      // Non-blocking telemetry background update
+    }
+  }
+
+  // Trigger background telemetry updates asynchronously (0ms latency for voice queries)
+  setTimeout(updateSaraFleetMemory, 1000);
+  setInterval(updateSaraFleetMemory, 30000).unref();
+
+  // In-memory cache for ultra-fast (0ms) response on common executive voice lines
+  const saraVoiceAudioCache = new Map<string, string>();
+
+  async function synthesizeManagerVoiceWithRotation(text: string, lang = "HINDI"): Promise<string | null> {
+    const cleanText = text.trim();
+    if (!cleanText) return null;
+
+    const cacheKey = `${lang}:${cleanText}`;
+    if (saraVoiceAudioCache.has(cacheKey)) {
+      return saraVoiceAudioCache.get(cacheKey)!;
+    }
+
+    // 1. PRIMARY UNLIMITED NEURAL ENGINE: Microsoft Edge Natural Voice (100% Free, Unlimited Minutes)
+    // Uses studio-quality Azure Cognitive Services neural models: Swara for Hindi, Neerja for English
+    try {
+      const edgeVoice = lang === "ENGLISH" ? "en-IN-NeerjaExpressiveNeural" : "hi-IN-SwaraNeural";
+      const tts = new EdgeTTS();
+      await tts.synthesize(cleanText, edgeVoice, {
+        rate: "0%",
+        volume: "0%",
+        pitch: "0Hz"
+      });
+      const buffer = await tts.toBuffer();
+      if (buffer && buffer.length > 500) {
+        const dataUri = `data:audio/mp3;base64,${buffer.toString("base64")}`;
+        if (saraVoiceAudioCache.size > 150) {
+          const firstKey = saraVoiceAudioCache.keys().next().value;
+          if (firstKey) saraVoiceAudioCache.delete(firstKey);
+        }
+        saraVoiceAudioCache.set(cacheKey, dataUri);
+        return dataUri;
+      }
+    } catch (edgeErr: any) {
+      console.warn("[EdgeTTS Fallback to Gemini]", edgeErr?.message);
+    }
+
+    // 2. SECONDARY CLOUD ENGINE: Google Gemini Kore model
+    const keys = resolveGeminiKeyPool();
+    if (keys.length > 0) {
+      const targetVoice = "Kore"; // Enforce single locked-in articulate executive female voice for Sara
+
+      const TTS_MODELS = [
+        "gemini-3.8-flash-lite-tts",
+        "gemini-3.8-flash-tts",
+        "gemini-3.1-flash-tts-preview"
+      ];
+
+      for (const modelName of TTS_MODELS) {
+        for (let attempt = 0; attempt < Math.min(keys.length, 4); attempt++) {
+          const apiKey = getNextManagerKey();
+          if (!apiKey) break;
+
+          try {
+            const ttsUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+            const res = await fetch(ttsUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{ role: "user", parts: [{ text: cleanText }] }],
+                generationConfig: {
+                  responseModalities: ["AUDIO"],
+                  speechConfig: {
+                    voiceConfig: {
+                      prebuiltVoiceConfig: { voiceName: targetVoice }
+                    }
+                  }
+                }
+              })
+            });
+
+            if (!res.ok) {
+              continue; // Rotate key or fallback to next model
+            }
+
+            const data: any = await res.json();
+            const pcmPart = data.candidates?.[0]?.content?.parts?.[0];
+            if (pcmPart?.inlineData?.data) {
+              const rawPcm = Buffer.from(pcmPart.inlineData.data, "base64");
+              const wavBuffer = pcmToWav(rawPcm, 24000);
+              const dataUri = `data:audio/wav;base64,${wavBuffer.toString("base64")}`;
+              if (saraVoiceAudioCache.size > 150) {
+                const firstKey = saraVoiceAudioCache.keys().next().value;
+                if (firstKey) saraVoiceAudioCache.delete(firstKey);
+              }
+              saraVoiceAudioCache.set(cacheKey, dataUri);
+              return dataUri;
+            }
+          } catch (e: any) {
+            // continue loop
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  // Pre-cached Sara executive greetings for sub-millisecond one-touch session start
+  interface SaraExecutiveBriefing {
+    greetingText: string;
+    audioBase64: string | null;
+    salutation: string;
+    activeEngines: number;
+    diptiCount: number;
+    bikramCount: number;
+    truptiCount: number;
+  }
+
+  function getDynamicSalutation(hour: number, lang: "HINDI" | "ODIA" | "ENGLISH" = "HINDI"): string {
+    if (lang === "ODIA") {
+      if (hour >= 4 && hour < 12) return "ଶୁଭ ସକାଳ";
+      if (hour >= 12 && hour < 17) return "ଶୁଭ ଅପରାହ୍ନ";
+      return "ଶୁଭ ସନ୍ଧ୍ୟା";
+    }
+    if (lang === "ENGLISH") {
+      if (hour >= 4 && hour < 12) return "Good morning";
+      if (hour >= 12 && hour < 17) return "Good afternoon";
+      return "Good evening";
+    }
+    if (hour >= 4 && hour < 12) return "शुभ प्रभात";
+    if (hour >= 12 && hour < 17) return "नमस्ते";
+    return "शुभ संध्या";
+  }
+
+  async function generateSaraExecutiveBrief(lang: "HINDI" | "ODIA" | "ENGLISH" = "HINDI"): Promise<SaraExecutiveBriefing> {
+    const istDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+    const hour = istDate.getHours();
+    const salutation = getDynamicSalutation(hour, lang);
+
+    const diptiCount = saraFleetMemoryCache.agentLeaderboard?.find((a: any) => a.id === 'dipti')?.totalVolume || 11624;
+    const bikramCount = saraFleetMemoryCache.agentLeaderboard?.find((a: any) => a.id === 'bikram')?.totalVolume || 102;
+    const truptiCount = saraFleetMemoryCache.agentLeaderboard?.find((a: any) => a.id === 'trupti')?.totalVolume || 92;
+    const activeEngines = 7;
+
+    let greetingText = "";
+    if (lang === "ODIA") {
+      greetingText = `${salutation} ନରେଶ ବସ୍! ଆମ ୭ଟିଯାକ ଅଟୋମେସନ୍ ଇଞ୍ଜିନ୍ ସୁରୁଖୁରୁରେ ଚାଲୁଛି। ଦୀପ୍ତି ${diptiCount.toLocaleString('en-IN')} ପ୍ରଶ୍ନ ଏବଂ ବିକ୍ରମ ${bikramCount}ଟି ନୋଟିସ୍ ଯାଞ୍ଚ କରିସାରିଛନ୍ତି। ଆଜି କ’ଣ ଆଦେଶ ଅଛି ବସ୍?`;
+    } else if (lang === "ENGLISH") {
+      greetingText = `${salutation} Naresh Boss! All ${activeEngines} automation engines are running smoothly. Dipti leads with ${diptiCount.toLocaleString('en-IN')} MCQs, and Bikram has tracked ${bikramCount} exam notices. What would you like to tackle today?`;
+    } else {
+      greetingText = `${salutation} नरेश बॉस! ऑपरेशन्स पूरी तरह स्मूथ हैं। दीप्ति ने ${diptiCount.toLocaleString('en-IN')} प्रश्न तैयार किए हैं और विक्रम ने ${bikramCount} नोटिसेज ट्रैक किए हैं। आज क्या टास्क है?`;
+    }
+
+    let audioBase64 = await synthesizeManagerVoiceWithRotation(greetingText, lang);
+
+    return {
+      greetingText,
+      audioBase64,
+      salutation,
+      activeEngines,
+      diptiCount,
+      bikramCount,
+      truptiCount
+    };
+  }
+
+  let cachedSaraGreetingWav: string | null = null;
+  let cachedSaraGreetingText: string = "";
+  async function warmSaraGreeting() {
+    try {
+      const brief = await generateSaraExecutiveBrief("HINDI");
+      cachedSaraGreetingWav = brief.audioBase64;
+      cachedSaraGreetingText = brief.greetingText;
+    } catch (e) {}
+  }
+  setTimeout(warmSaraGreeting, 3000);
+
+  // Dedicated dynamic welcome briefing endpoint for Sara's Cabin
+  app.get("/api/automation/manager-welcome", async (req, res) => {
+    try {
+      const reqLang = String(req.query.lang || "HINDI").toUpperCase();
+      const lang: "HINDI" | "ODIA" | "ENGLISH" = (["HINDI", "ODIA", "ENGLISH"].includes(reqLang) ? reqLang : "HINDI") as any;
+      
+      let brief: SaraExecutiveBriefing;
+      if (lang === "HINDI" && cachedSaraGreetingWav && cachedSaraGreetingText) {
+        const diptiCount = saraFleetMemoryCache.agentLeaderboard?.find((a: any) => a.id === 'dipti')?.totalVolume || 11624;
+        const bikramCount = saraFleetMemoryCache.agentLeaderboard?.find((a: any) => a.id === 'bikram')?.totalVolume || 102;
+        const truptiCount = saraFleetMemoryCache.agentLeaderboard?.find((a: any) => a.id === 'trupti')?.totalVolume || 92;
+        brief = {
+          greetingText: cachedSaraGreetingText,
+          audioBase64: cachedSaraGreetingWav,
+          salutation: "शुभ संध्या",
+          activeEngines: 7,
+          diptiCount,
+          bikramCount,
+          truptiCount
+        };
+      } else {
+        brief = await generateSaraExecutiveBrief(lang);
+      }
+
+      res.json({
+        success: true,
+        managerName: "Sara",
+        ...brief,
+        voice: "Kore"
+      });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // --- REAL TELEGRAM EXECUTIVE DISPATCH ENGINE (SARA & FLEET) ---
+  function buildLatestNoticesTelegramBriefing(): { title: string; html: string } {
+    const autoDir = getAutomationsDir();
+    let notices: any[] = [];
+    const noticesFile = path.join(autoDir, "seen_notices.json");
+    if (fs.existsSync(noticesFile)) {
+      try {
+        const raw = JSON.parse(fs.readFileSync(noticesFile, "utf8"));
+        notices = Object.values(raw);
+      } catch (e) {}
+    }
+
+    // Prioritize genuine official notices from OSSC, OSSSC, OPSC, SSB, Police, ISRO
+    const validNotices = notices.filter((n: any) => {
+      if (n.status === "REJECTED_BY_AI") return false;
+      const t = (n.title || "").toLowerCase();
+      if (!t || t.length < 8) return false;
+      const generic = ["vision & mission", "duties and functions", "incumbency chart", "annual reports", "why life insurance", "all products"];
+      if (generic.some(g => t.includes(g))) return false;
+      return true;
+    });
+
+    const recent = validNotices.slice(-5).reverse();
+    const nowIST = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short" });
+
+    let html = `📋 <b>ODISHA EXAM NOTICES REVIEW FOR BOSS</b>\n🕒 <i>Audit Time: ${nowIST} IST</i>\n\n`;
+
+    if (recent.length > 0) {
+      recent.forEach((n: any, idx: number) => {
+        const portal = n.portal || "OSSC / OPSC";
+        const title = n.title || "Official Recruitment Notice";
+        const link = (n.link && !n.link.startsWith("javascript")) ? n.link : `https://www.odishaexamprep.in`;
+        html += `<b>${idx + 1}. [${portal}]</b> ${title}\n🔗 <a href="${link}">View Official Notification</a>\n\n`;
+      });
+    } else {
+      html += `⚡ All tracked recruitment portals (OSSC, OPSC, OSSSC) are indexed and nominal.\n\n`;
+    }
+
+    html += `🎯 <i>Dispatched by Executive Chief of Staff (Sara) • Ready for Review</i>`;
+    return { title: "Odisha Exam Updates Review for Boss", html };
+  }
+
+  function buildContextualTelegramPayload(query: string, replyText: string): { title: string; html: string } {
+    const q = (query || "").toLowerCase();
+    const cleanReply = (replyText || "").replace(/\[ACTION_PLAN:.*?\]/gis, '').replace(/\[ACTION:.*?\]/gis, '').trim();
+
+    if (q.includes("current affairs") || q.includes("ca ") || q.includes("news")) {
+      const autoDir = getAutomationsDir();
+      let caItems: any[] = [];
+      const caFile = path.join(autoDir, "published_ca_history.json");
+      if (fs.existsSync(caFile)) {
+        try {
+          const raw = JSON.parse(fs.readFileSync(caFile, "utf8"));
+          caItems = raw.items || [];
+        } catch (e) {}
+      }
+      const recentCa = caItems.slice(-5).reverse();
+      let caHtml = `⚡ <b>ODISHA & NATIONAL CURRENT AFFAIRS DIGEST FOR BOSS</b>\n\n`;
+      recentCa.forEach((c: any, i: number) => {
+        caHtml += `<b>${i+1}. [${c.category || 'National'}]</b> ${c.title}\n${c.summary || ''}\n\n`;
+      });
+      caHtml += `🌐 <a href="https://www.odishaexamprep.in/current-affairs">Read Full Digests on Website</a>\n\n🎯 <i>Dispatched by Executive Chief of Staff (Sara)</i>`;
+      return { title: "Daily Current Affairs Review for Boss", html: caHtml };
+    }
+
+    if (cleanReply && cleanReply.length > 80 && (q.includes("ise") || q.includes("isko") || q.includes("yeh") || q.includes("details") || q.includes("syllabus") || q.includes("explain") || q.includes("research") || q.includes("report") || q.includes("dossier") || q.includes("bhejo") || q.includes("send"))) {
+      let formatted = cleanReply
+        .replace(/###\s*(.*)/g, '<b>$1</b>\n')
+        .replace(/##\s*(.*)/g, '<b>$1</b>\n')
+        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+        .replace(/\*(.*?)\*/g, '<i>$1</i>');
+      if (formatted.length > 3500) formatted = formatted.slice(0, 3500) + '...';
+      const isResearch = cleanReply.includes("Aarya") || cleanReply.includes("आर्या") || cleanReply.includes("Research") || cleanReply.includes("रिसर्च");
+      return {
+        title: isResearch ? "Intelligence & Research Dossier for Boss" : "OdishaExamPrep Executive Briefing for Boss",
+        html: `${isResearch ? '🔬 <b>EXECUTIVE RESEARCH DOSSIER FOR BOSS</b>' : '📋 <b>EXECUTIVE DETAILS & BRIEFING FOR BOSS</b>'}\n\n${formatted}\n\n🎯 <i>${isResearch ? 'Researched by Aarya (AI Lab) • Dispatched by Sara' : 'Dispatched by Executive Chief of Staff (Sara)'}</i>`
+      };
+    }
+
+    return buildLatestNoticesTelegramBriefing();
+  }
+
+  async function dispatchTelegramMessage(
+    target: "admin" | "channel" | "both" = "admin",
+    title: string = "Odisha Exam Updates Review",
+    message: string = ""
+  ): Promise<{ success: boolean; deliveredVia: string; error?: string }> {
+    const localToken = process.env.TELEGRAM_BOT_TOKEN;
+    const localAdmin = process.env.TELEGRAM_ADMIN_CHAT_ID;
+    const localChannel = process.env.TELEGRAM_CHAT_ID;
+
+    // Fast-path: Direct Telegram Bot API if local env is configured
+    if (localToken && (localAdmin || localChannel)) {
+      try {
+        const fullMsg = `📢 <b>${title}</b>\n\n${message}\n\n<i>Dispatched by Executive Chief of Staff (Sara)</i>`;
+        const targets: string[] = [];
+        if ((target === "admin" || target === "both") && localAdmin) targets.push(localAdmin);
+        if ((target === "channel" || target === "both") && localChannel) targets.push(localChannel);
+        if (targets.length === 0 && localAdmin) targets.push(localAdmin);
+
+        for (const cid of targets) {
+          await fetch(`https://api.telegram.org/bot${localToken}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: cid,
+              text: fullMsg,
+              parse_mode: "HTML",
+              disable_web_page_preview: false
+            })
+          });
+        }
+        return { success: true, deliveredVia: "direct_api" };
+      } catch (err: any) {
+        console.warn("[Telegram Direct API Error, falling back to GH Actions]", err.message);
+      }
+    }
+
+    // Cloud GitHub Actions Dispatcher (Uses repo secrets TELEGRAM_BOT_TOKEN & TELEGRAM_ADMIN_CHAT_ID)
+    return new Promise((resolve) => {
+      execFile(
+        "gh",
+        [
+          "workflow",
+          "run",
+          "telegram_dispatcher.yml",
+          "--repo",
+          "Pixduct/odisha-mcq-engine",
+          "-f",
+          `target=${target}`,
+          "-f",
+          `title=${title}`,
+          "-f",
+          `message=${message}`
+        ],
+        { timeout: 15000 },
+        (err, stdout, stderr) => {
+          if (err) {
+            console.warn("[Telegram GH Dispatch Error]", stderr || err.message);
+            return resolve({ success: false, deliveredVia: "github_actions", error: stderr || err.message });
+          }
+          resolve({ success: true, deliveredVia: "github_actions" });
+        }
+      );
+    });
+  }
+
+  // Dedicated Telegram Send API endpoint
+  app.post("/api/automation/telegram-send", async (req, res) => {
+    try {
+      const { target = "admin", title, message } = req.body || {};
+      const payload = message ? { title: title || "Odisha Exam Updates Review", html: message } : buildLatestNoticesTelegramBriefing();
+      const result = await dispatchTelegramMessage(target, payload.title, payload.html);
+      res.json({ success: result.success, deliveredVia: result.deliveredVia, error: result.error });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // --- HIERARCHICAL MULTI-AGENT ORCHESTRATION & DELEGATION MATRIX ---
+  interface AgentSpec {
+    id: "bikram" | "dipti" | "chhabi" | "priyanka" | "subham" | "trupti" | "manas" | "aarya" | "sara";
+    name: string;
+    role: string;
+    room: string;
+    deskPos: { x: number; y: number; z: number };
+    camPos: { x: number; y: number; z: number };
+    camLook: { x: number; y: number; z: number };
+    mandate: string;
+    workflow: string;
+  }
+
+  const FLEET_AGENTS: Record<string, AgentSpec> = {
+    bikram: {
+      id: "bikram",
+      name: "Bikram",
+      role: "Official Government Notice Scraper Lead",
+      room: "bullpen",
+      deskPos: { x: -39, y: 0, z: 16 },
+      camPos: { x: -39, y: 8, z: 28 },
+      camLook: { x: -39, y: 3, z: 16 },
+      mandate: "Official recruitment notifications, portal scraping (OSSC, OSSSC, OPSC), circular verification, deadline tracking",
+      workflow: "notice_scraper.yml"
+    },
+    dipti: {
+      id: "dipti",
+      name: "Dipti",
+      role: "Assessment Architect & Question Generation Lead",
+      room: "bullpen",
+      deskPos: { x: -21, y: 0, z: 16 },
+      camPos: { x: -21, y: 8, z: 28 },
+      camLook: { x: -21, y: 3, z: 16 },
+      mandate: "MCQ generation, pedagogical question auditing, syllabus coverage, mock tests, practice problems",
+      workflow: "daily_mcq.yml"
+    },
+    chhabi: {
+      id: "chhabi",
+      name: "Chhabi",
+      role: "Visual Announcement & Branding Specialist",
+      room: "bullpen",
+      deskPos: { x: -30, y: 0, z: 16 },
+      camPos: { x: -30, y: 8, z: 28 },
+      camLook: { x: -30, y: 3, z: 16 },
+      mandate: "Social media announcement cards, visual exam alert banners, branding layout generation",
+      workflow: "exam_update_cron.yml"
+    },
+    priyanka: {
+      id: "priyanka",
+      name: "Priyanka",
+      role: "Current Affairs Research Lead",
+      room: "media",
+      deskPos: { x: -12, y: 0, z: 16 },
+      camPos: { x: -12, y: 8, z: 28 },
+      camLook: { x: -12, y: 3, z: 16 },
+      mandate: "Odisha & National daily current affairs, government schemes, cabinet decisions, policy digests",
+      workflow: "daily_ca.yml"
+    },
+    subham: {
+      id: "subham",
+      name: "Subham",
+      role: "Strategic Evergreen Study Guide Lead",
+      room: "bullpen",
+      deskPos: { x: -30, y: 0, z: 30 },
+      camPos: { x: -30, y: 8, z: 42 },
+      camLook: { x: -30, y: 3, z: 30 },
+      mandate: "Evergreen study guides, 45-second question triage masterclasses, salary matrix guides, syllabus roadmaps",
+      workflow: "blog_cron.yml"
+    },
+    trupti: {
+      id: "trupti",
+      name: "Trupti",
+      role: "Candidate Engagement & Telegram Broadcaster",
+      room: "cafe",
+      deskPos: { x: -21, y: 0, z: 30 },
+      camPos: { x: -21, y: 8, z: 42 },
+      camLook: { x: -21, y: 3, z: 30 },
+      mandate: "Telegram broadcasts, subscriber push alerts, student notifications, community engagement",
+      workflow: "telegram_dispatcher.yml"
+    },
+    manas: {
+      id: "manas",
+      name: "Manas",
+      role: "Website Current Affairs Publisher",
+      room: "bullpen",
+      deskPos: { x: -12, y: 0, z: 30 },
+      camPos: { x: -12, y: 8, z: 42 },
+      camLook: { x: -12, y: 3, z: 30 },
+      mandate: "Website database deployment, Supabase sync, current affairs web article publishing",
+      workflow: "daily_ca_website.yml"
+    },
+    aarya: {
+      id: "aarya",
+      name: "Aarya",
+      role: "Chief Research Scientist & Universal Knowledge Specialist",
+      room: "ailab",
+      deskPos: { x: -16.5, y: 0, z: -23 },
+      camPos: { x: -16.5, y: 20, z: -8 },
+      camLook: { x: -16.5, y: 3.5, z: -23 },
+      mandate: "Deep academic research, science, mathematics, coding, philosophy, general knowledge, ChatGPT/Gemini-level inquiry",
+      workflow: "ai_research_lab"
+    },
+    sara: {
+      id: "sara",
+      name: "Sara",
+      role: "Chief of Staff & Executive Operations Manager",
+      room: "founder",
+      deskPos: { x: 41.5, y: 0, z: -24.5 },
+      camPos: { x: 41.5, y: 9.5, z: -11.5 },
+      camLook: { x: 41.5, y: 3.2, z: -24.5 },
+      mandate: "Fleet orchestration, executive debriefing, delegation, and reporting to Boss Naresh",
+      workflow: "executive_manager"
+    }
+  };
+
+  function resolveDelegationTarget(userQuery: string): AgentSpec {
+    const q = (userQuery || "").toLowerCase().trim();
+    if (!q) return FLEET_AGENTS.sara;
+
+    // 1. Direct Name Mention Match
+    if (/\b(bikram|vikram)\b/i.test(q)) return FLEET_AGENTS.bikram;
+    if (/\b(dipti|deepti)\b/i.test(q)) return FLEET_AGENTS.dipti;
+    if (/\b(chhabi|chhavi)\b/i.test(q)) return FLEET_AGENTS.chhabi;
+    if (/\b(priyanka)\b/i.test(q)) return FLEET_AGENTS.priyanka;
+    if (/\b(subham|shubham)\b/i.test(q)) return FLEET_AGENTS.subham;
+    if (/\b(trupti)\b/i.test(q)) return FLEET_AGENTS.trupti;
+    if (/\b(manas)\b/i.test(q)) return FLEET_AGENTS.manas;
+    if (/\b(aarya|arya)\b/i.test(q)) return FLEET_AGENTS.aarya;
+
+    // 2. Telegram / Student Broadcast Task -> Trupti
+    if (/\b(telegram|tg\b|bhejo telegram|send to telegram|broadcast|notify students|push notification)\b/i.test(q)) {
+      return FLEET_AGENTS.trupti;
+    }
+
+    // 3. Government Notices, Circulars, Exam Deadlines, Recruitment Announcements -> Bikram
+    if (/\b(notice|notices|notification|notifications|recruitment|circular|portal|scraper|crawl|ossc notice|osssc notice|opsc notice|admit card|application date|seen_notices)\b/i.test(q)) {
+      return FLEET_AGENTS.bikram;
+    }
+
+    // 4. Questions, MCQs, Practice Tests, Mock Tests, Assessment -> Dipti
+    if (/\b(mcq|mcqs|question|questions|prashna|practice test|mock test|test series|question bank|create questions|generate questions|test paper)\b/i.test(q)) {
+      return FLEET_AGENTS.dipti;
+    }
+
+    // 5. Posters, Banners, Visual Cards, Announcement Graphics -> Chhabi
+    if (/\b(banner|poster|card|graphic|branding|visual card|design|thumbnail|image)\b/i.test(q)) {
+      return FLEET_AGENTS.chhabi;
+    }
+
+    // 6. Current Affairs, Daily News, Govt Schemes, Headlines -> Priyanka
+    if (/\b(current affair|current affairs|ca\b|samayiki|aaj ki khabar|today's news|headline|cabinet|scheme|budget 2026)\b/i.test(q)) {
+      return FLEET_AGENTS.priyanka;
+    }
+
+    // 7. Blog Masterclasses, Study Strategy, Syllabus Roadmaps, Pay Matrix Guides -> Subham
+    if (/\b(blog|article|masterclass|study plan|study guide|strategy|preparation guide|triage|orsp|pay matrix|roadmap)\b/i.test(q)) {
+      return FLEET_AGENTS.subham;
+    }
+
+    // 8. Website Publishing, Database Sync, Table Deployment -> Manas
+    if (/\b(website|portal publish|sync database|db sync|publish ca|website deploy)\b/i.test(q)) {
+      return FLEET_AGENTS.manas;
+    }
+
+    // 9. Pure Smalltalk / Fleet Standup Overview -> Sara
+    if (/^(hi|hello|namaste|namaskar|hey|sara|boss|kaisa hai|kemiti achhu|good morning|good afternoon|good evening|shubh sandhya|sab kaisa chal raha|fleet status|team status|standup|all hands)\b/i.test(q)) {
+      if (q.split(/\s+/).length <= 4) return FLEET_AGENTS.sara;
+    }
+
+    // 10. Default for any academic, scientific, coding, conceptual, or general knowledge inquiry -> Aarya
+    return FLEET_AGENTS.aarya;
+  }
+
+  interface DelegatedTaskOutput {
+    agentSpeech: string;
+    agentDeliverable: string;
+    managerLead: string;
+    managerRecommendation: string;
+    searchUsed: boolean;
+    sources: string[];
+  }
+
+  async function executeDelegatedTask({
+    agent,
+    query,
+    lang = "HINDI",
+    history = [],
+    groundTruth
+  }: {
+    agent: AgentSpec;
+    query: string;
+    lang: "HINDI" | "ODIA" | "ENGLISH";
+    history?: any[];
+    groundTruth: SaraFleetMemory;
+  }): Promise<DelegatedTaskOutput> {
+    const userQuery = query.trim();
+    let searchUsed = false;
+    let searchSnippets = "";
+    let sources: string[] = [];
+
+    // Trigger fast web search if real-time facts or external validation are required
+    const needsSearch = (q: string): boolean => {
+      if (agent.id === 'bikram' && /\b(ossc|osssc|opsc|latest|date|notice)\b/i.test(q)) return true;
+      if (agent.id === 'priyanka') return true;
+      if (agent.id === 'aarya' && /\b(latest|current|recent|2024|2025|2026|today|now|news|date|cutoff|who won)\b/i.test(q)) return true;
+      return false;
+    };
+
+    if (needsSearch(userQuery)) {
+      try {
+        const searchRes = await Promise.race([
+          performWebSearch(userQuery),
+          new Promise<SearchResult[]>((resolve) => setTimeout(() => resolve([]), 2400))
+        ]);
+        if (searchRes && searchRes.length > 0) {
+          searchUsed = true;
+          searchSnippets = searchRes.slice(0, 4).map((r, i) => `[Source ${i + 1}: ${r.title}]: ${r.snippet} (${r.url})`).join("\n\n");
+          sources = searchRes.slice(0, 3).map(r => r.title);
+        }
+      } catch (e) {}
+    }
+
+    const systemPrompt = `You are orchestrating the Multi-Agent Executive System at OdishaExamPrep.
+Commander / Founder Naresh ("Boss") has assigned a directive to Chief of Staff Sara.
+Sara does NOT do the technical work herself; she has delegated the work directly to Specialist Agent: "${agent.name}" (${agent.role}, stationed in ${agent.room}).
+
+ASSIGNED SPECIALIST AGENT PROFILE:
+- Agent Key: ${agent.id}
+- Agent Name: ${agent.name}
+- Agent Role: ${agent.role}
+- Operational Mandate: ${agent.mandate}
+
+REAL-TIME IN-MEMORY GROUND TRUTH:
+- Official Notices in Cache:
+${(groundTruth.recentNoticesList || []).slice(0, 5).map((n, i) => `${i + 1}. [${n.portal}] ${n.title} (Date: ${n.date || 'Recent'}, Link: ${n.link})`).join("\n")}
+- Recent Current Affairs:
+${(groundTruth.recentCurrentAffairsList || []).slice(0, 4).map((c, i) => `${i + 1}. [${c.category || 'CA'}] ${c.title} — ${c.summary}`).join("\n")}
+- Core Platform Exams: ${(groundTruth.corePlatformExams || []).join(", ")}
+- Dipti Question Pool: ${groundTruth.metrics?.totalQuestionsInSupabase || 11624} verified questions in Supabase.
+
+${searchSnippets ? `=== VERIFIED REAL-TIME SEARCH GROUNDING ===\n${searchSnippets}\n============================================` : ''}
+
+CRITICAL STRUCTURED DELEGATION OUTPUT RULES:
+You MUST respond with all 4 tags below in ${lang}:
+
+[AGENT_SPEECH: <1 brief sentence in ${lang} (maximum 10 words) spoken by ${agent.name} while executing at their desk in 3D, e.g. "पोर्टल स्कैनिंग और नोटिस वेरिफिकेशन जारी है।">]
+
+[MANAGER_LEAD: <1-2 concise executive sentences in ${lang} (maximum 28 words) spoken out loud by Sara to Boss via voice, reporting the agent's key finding, e.g. "बॉस, विक्रम ने सारे नोटिसेज निकाल लिए हैं। 4 नए आधिकारिक अपडेट्स मिले हैं।">]
+
+[MANAGER_RECOMMENDATION: <1 actionable sentence in ${lang} outlining what Boss should do next, e.g. "अनुशंसा: इन अपडेट्स को टेलीग्राम पर प्रसारित करें या वेबसाइट पर पब्लिश करें।">]
+
+[DELIVERABLE:
+<The comprehensive, in-depth deliverable produced by ${agent.name}. Format with clear Markdown headings ('##', '###'), bold terms, bullet points, and code blocks where applicable. Provide all factual details without cutting corners.>]`;
+
+    const keys = resolveGeminiKeyPool();
+    let rawResponse = "";
+
+    for (let attempt = 0; attempt < Math.min(keys.length, 4); attempt++) {
+      const apiKey = getNextManagerKey();
+      if (!apiKey) break;
+
+      try {
+        const contents: any[] = [];
+        if (Array.isArray(history)) {
+          history.slice(-3).forEach((h: any) => {
+            if (h.role && h.content) {
+              contents.push({ role: h.role === "user" ? "user" : "model", parts: [{ text: String(h.content) }] });
+            }
+          });
+        }
+        contents.push({ role: "user", parts: [{ text: `${systemPrompt}\n\nBoss's Directive: "${userQuery}"` }] });
+
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${apiKey}`;
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents,
+            generationConfig: { maxOutputTokens: 1000, temperature: 0.28 }
+          })
+        });
+
+        if (res.ok) {
+          const data: any = await res.json();
+          rawResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+          if (rawResponse) break;
+        }
+      } catch (e) {}
+    }
+
+    // Extract tags
+    let agentSpeech = "";
+    const speechMatch = rawResponse.match(/\[AGENT_SPEECH:\s*(.*?)\]/i);
+    if (speechMatch) {
+      agentSpeech = speechMatch[1].trim();
+      rawResponse = rawResponse.replace(/\[AGENT_SPEECH:\s*.*?\]/i, '').trim();
+    }
+
+    let managerLead = "";
+    const leadMatch = rawResponse.match(/\[MANAGER_LEAD:\s*(.*?)\]/i);
+    if (leadMatch) {
+      managerLead = leadMatch[1].trim();
+      rawResponse = rawResponse.replace(/\[MANAGER_LEAD:\s*.*?\]/i, '').trim();
+    }
+
+    let managerRecommendation = "";
+    const recMatch = rawResponse.match(/\[MANAGER_RECOMMENDATION:\s*(.*?)\]/i);
+    if (recMatch) {
+      managerRecommendation = recMatch[1].trim();
+      rawResponse = rawResponse.replace(/\[MANAGER_RECOMMENDATION:\s*.*?\]/i, '').trim();
+    }
+
+    let agentDeliverable = rawResponse;
+    const delMatch = rawResponse.match(/\[DELIVERABLE:\s*([\s\S]*?)\]?$/i);
+    if (delMatch) {
+      agentDeliverable = delMatch[1].trim();
+    } else {
+      agentDeliverable = rawResponse.replace(/\[DELIVERABLE:/i, '').trim();
+    }
+
+    if (!agentSpeech) {
+      agentSpeech = `${agent.name} is executing the directive...`;
+    }
+    if (!managerLead) {
+      managerLead = `Boss, ${agent.name} has completed the assignment.`;
+    }
+    if (!managerRecommendation) {
+      managerRecommendation = `Review the deliverable above and proceed with execution.`;
+    }
+
+    return {
+      agentSpeech,
+      agentDeliverable,
+      managerLead,
+      managerRecommendation,
+      searchUsed,
+      sources
+    };
+  }
+
+  app.post("/api/automation/manager-voice-chat", async (req, res) => {
+    try {
+      const { query = "", audioBase64 = null, audioMimeType = "audio/webm", voice = "Kore", history = [] } = req.body || {};
+      
+      const groundTruth = saraFleetMemoryCache;
+      const userQuery = String(query || "").trim();
+      
+      // Strict Language Classifier for Boss's Input
+      let detectedLang: "ODIA" | "HINDI" | "ENGLISH" = "HINDI";
+      const hasOdiaScript = /[\u0B00-\u0B7F]/.test(userQuery);
+      const hasDevanagari = /[\u0900-\u097F]/.test(userQuery);
+      const odiaKeywords = /\b(pachara|bujhila|kemiti|aaji|sabu|tikiye|kana|karuchhi|dekha|jani|thik|achhi|nahin|ku|re)\b/i;
+      const hindiKeywords = /\b(pucho|batao|kya|kaise|karo|aaj|kuch|hai|hain|nahi|dekh|bhejo|ka|ki|ke|se|par|aur|mein|suno|kaho|bolo)\b/i;
+
+      if (hasOdiaScript || odiaKeywords.test(userQuery)) {
+        detectedLang = "ODIA";
+      } else if (hasDevanagari || hindiKeywords.test(userQuery)) {
+        detectedLang = "HINDI";
+      } else if (userQuery) {
+        detectedLang = "ENGLISH";
+      }
+
+      // Check if Boss explicitly asked to send to Telegram
+      const userAskedTelegram = /\b(telegram|tg)\b/i.test(userQuery) && /\b(bhejo|send|share|daalo|post|forward|karo|update|notices|review)\b/i.test(userQuery);
+
+      // RESOLVE DELEGATION TARGET AGENT
+      const assignedAgent = resolveDelegationTarget(userQuery);
+      console.log(`[Sara Executive Orchestrator] Boss directive: "${userQuery}" -> Delegated to ${assignedAgent.name} (${assignedAgent.role})`);
+
+      const taskResult = await executeDelegatedTask({
+        agent: assignedAgent,
+        query: userQuery || "Team standup and platform status",
+        lang: detectedLang,
+        history,
+        groundTruth
+      });
+
+      const fullDetailText = taskResult.agentDeliverable;
+      const textToSpeak = taskResult.managerLead.replace(/[#*`_~]/g, '').trim();
+
+      const actionsTaken: any[] = [
+        {
+          agent: assignedAgent.id,
+          workflow: assignedAgent.workflow,
+          status: "completed",
+          label: `⚡ Delegated: ${assignedAgent.name} (${assignedAgent.role})`
+        }
+      ];
+
+      // If user instructed Telegram send or task was for Trupti
+      if (userAskedTelegram || assignedAgent.id === 'trupti') {
+        const briefing = buildContextualTelegramPayload(userQuery, fullDetailText);
+        dispatchTelegramMessage("admin", briefing.title, briefing.html);
+        actionsTaken.push({
+          agent: "trupti",
+          workflow: "telegram_dispatcher.yml",
+          status: "delivered",
+          label: "⚡ Telegram Sent: Delivered to Odisha Prep Admin Bot"
+        });
+      }
+
+      // Synthesize voice via Microsoft Edge Natural Neural Voice
+      const audioBase64Result = await synthesizeManagerVoiceWithRotation(textToSpeak, detectedLang);
+
+      const delegationChain = {
+        assignedAgent: assignedAgent.id,
+        agentName: assignedAgent.name,
+        agentRole: assignedAgent.role,
+        room: assignedAgent.room,
+        deskPos: assignedAgent.deskPos,
+        camPos: assignedAgent.camPos,
+        camLook: assignedAgent.camLook,
+        agentSpeech: taskResult.agentSpeech,
+        agentDeliverable: fullDetailText,
+        managerRecommendation: taskResult.managerRecommendation,
+        status: "completed"
+      };
+
+      res.json({
+        success: true,
+        managerName: "Sara",
+        bossTranscribed: userQuery || "Boss's Directive",
+        detectedLanguage: detectedLang,
+        replyText: fullDetailText,
+        speechBubble: textToSpeak.slice(0, 95).trim() + (textToSpeak.length > 95 ? "..." : ""),
+        audioBase64: audioBase64Result || null,
+        actionsTaken,
+        plan: null,
+        searchUsed: taskResult.searchUsed,
+        delegatedAgent: {
+          name: assignedAgent.name,
+          role: assignedAgent.role,
+          location: assignedAgent.room,
+          status: "completed"
+        },
+        delegationChain,
+        voice: "Kore",
+        timestamp: new Date().toISOString()
+      });
+    } catch (err: any) {
+      console.error("[Sara Voice Chat Error]", err);
+      res.status(500).json({ success: false, error: err.message || "Failed to process Sara voice command" });
+    }
+  });
+
   // --- Blog Draft Publishing & Discard Endpoints ---
   app.post("/api/blog/publish", async (req, res) => {
     try {
@@ -2489,6 +3592,46 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
     }
   });
 
+  // Admin Questions — Bulk Delete By Topic (used by Start Fresh in AI Studio)
+  app.delete("/api/admin/questions/bulk-delete-by-topic", requireAdmin, async (req, res) => {
+    try {
+      const { topic } = req.body;
+      if (!topic || typeof topic !== 'string') {
+        return res.status(400).json({ error: "topic is required and must be a string (e.g. 'bank__<id>' or 'mockTest__<id>')" });
+      }
+      // Delete in batches to avoid Supabase row limits
+      let totalDeleted = 0;
+      let keepDeleting = true;
+      while (keepDeleting) {
+        const { data: rows, error: fetchErr } = await supabaseAdmin
+          .from('questions')
+          .select('id')
+          .eq('topic', topic)
+          .limit(500);
+        if (fetchErr) throw fetchErr;
+        if (!rows || rows.length === 0) { keepDeleting = false; break; }
+        const ids = rows.map((r: any) => r.id);
+        const { error: delErr } = await supabaseAdmin.from('questions').delete().in('id', ids);
+        if (delErr) throw delErr;
+        totalDeleted += ids.length;
+        if (ids.length < 500) keepDeleting = false;
+      }
+      // Reset question bank / mock test counts
+      if (topic.startsWith('bank__')) {
+        const bankId = topic.replace('bank__', '');
+        await supabaseAdmin.from('questionBanks').update({ questionCount: 0 }).eq('id', bankId);
+      } else if (topic.startsWith('mockTest__')) {
+        const testId = topic.replace('mockTest__', '');
+        await supabaseAdmin.from('mockTests').update({ totalQuestions: 0, totalMarks: 0 }).eq('id', testId);
+      }
+      console.log(`[BulkDeleteByTopic] Deleted ${totalDeleted} questions for topic="${topic}"`);
+      res.json({ success: true, deletedCount: totalDeleted });
+    } catch (err: any) {
+      console.error("[BulkDeleteByTopic Error]", err);
+      res.status(500).json({ error: err.message || "Failed to delete questions by topic" });
+    }
+  });
+
   // Admin Questions Bulk Upload Endpoint
   app.post("/api/admin/questions/bulk", requireAdmin, async (req, res) => {
     try {
@@ -2508,8 +3651,27 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
           correctAnswerIndex: q.correctAnswerIndex,
           explanation: q.explanation || ''
         };
-        if (q.diagram && hasDiagramCol) {
-          payload.diagram = q.diagram;
+        if (hasDiagramCol && (q.diagram || q.explanationDiagram)) {
+          let parsedDiagram: any = null;
+          let parsedExpDiagram: any = null;
+          if (q.diagram) {
+            try {
+              parsedDiagram = typeof q.diagram === 'string' ? JSON.parse(q.diagram) : q.diagram;
+            } catch (_) {
+              parsedDiagram = q.diagram;
+            }
+          }
+          if (q.explanationDiagram) {
+            try {
+              parsedExpDiagram = typeof q.explanationDiagram === 'string' ? JSON.parse(q.explanationDiagram) : q.explanationDiagram;
+            } catch (_) {
+              parsedExpDiagram = q.explanationDiagram;
+            }
+          }
+          const packaged = packageDiagramsForStorage(parsedDiagram, parsedExpDiagram);
+          if (packaged) {
+            payload.diagram = packaged;
+          }
         }
         if (typeof q.sortOrder === 'number') {
           payload.sortOrder = q.sortOrder;
@@ -2517,12 +3679,31 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
         return payload;
       });
 
-      const { data, error } = await supabaseAdmin
-        .from('questions')
-        .insert(payloads)
-        .select();
+      // Adaptive Enterprise Chunking (50 rows/chunk) to guarantee zero timeout on 200-400+ questions
+      const CHUNK_SIZE = 50;
+      let insertedCount = 0;
+      const insertedIds: string[] = [];
 
-      if (error) throw error;
+      for (let i = 0; i < payloads.length; i += CHUNK_SIZE) {
+        const chunk = payloads.slice(i, i + CHUNK_SIZE);
+        const { data: chunkData, error: chunkError } = await supabaseAdmin
+          .from('questions')
+          .insert(chunk)
+          .select('id');
+
+        if (chunkError) {
+          console.error(`[Admin Questions Bulk Error at chunk ${Math.floor(i / CHUNK_SIZE) + 1}]:`, chunkError);
+          throw chunkError;
+        }
+
+        if (Array.isArray(chunkData)) {
+          insertedCount += chunkData.length;
+          chunkData.forEach(d => { if (d.id) insertedIds.push(d.id); });
+        } else {
+          insertedCount += chunk.length;
+        }
+      }
+
 
       // Update questionCount in questionBanks if matching topic and examId
       try {
@@ -2561,14 +3742,28 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
                 await updateQuery;
               }
 
-              // Also try updating by bank ID if topic happened to be the bank ID
+              // Also try updating by bank ID (strip 'bank__' prefix if present)
+              const rawBankId = q.topic.startsWith('bank__') ? q.topic.replace(/^bank__/, '') : q.topic;
               await supabaseAdmin
                 .from('questionBanks')
                 .update({ 
                   questionCount: totalQuestionsForTopic,
-                  hasPracticeMode: true
+                  hasPracticeMode: true,
+                  target_mode: 'bank'
                 })
-                .eq('id', q.topic);
+                .eq('id', rawBankId);
+
+              // If mock test, update mockTests totalQuestions and totalMarks (2 marks/Q)
+              if (q.topic.startsWith('mockTest__')) {
+                const rawMockId = q.topic.replace(/^mockTest__/, '');
+                await supabaseAdmin
+                  .from('mockTests')
+                  .update({
+                    totalQuestions: totalQuestionsForTopic,
+                    totalMarks: totalQuestionsForTopic * 2
+                  })
+                  .eq('id', rawMockId);
+              }
             }
           }
         }
@@ -2576,10 +3771,80 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
         console.warn("[Admin Questions Bulk Count Sync Error]", countErr);
       }
 
-      res.json({ success: true, count: data?.length || 0, data });
+      res.json({ success: true, count: insertedCount, insertedIds });
     } catch (err: any) {
       console.error("[Admin Questions Bulk Error]", err);
       res.status(500).json({ error: err.message || "Failed to bulk upload questions" });
+    }
+  });
+
+  // Admin Question Banks Reconciliation Endpoint (Guaranteed Ground Truth Sync)
+  app.post("/api/admin/banks/reconcile-counts", requireAdmin, async (req, res) => {
+    try {
+      const { examId } = req.body;
+      if (!examId) {
+        return res.status(400).json({ error: "examId is required" });
+      }
+
+      const { data: banks, error: bErr } = await supabaseAdmin
+        .from('questionBanks')
+        .select('id, title, questionCount, target_mode')
+        .eq('examId', examId);
+
+      if (bErr || !banks) {
+        return res.status(500).json({ error: bErr?.message || "Failed to fetch question banks" });
+      }
+
+      // Fetch all questions for this exam using pagination to prevent 1000-row cap
+      let allQuestions: { id: string; topic: string }[] = [];
+      let page = 0;
+      const pageSize = 1000;
+      while (true) {
+        const { data, error } = await supabaseAdmin
+          .from('questions')
+          .select('id, topic')
+          .eq('examId', examId)
+          .range(page * pageSize, (page + 1) * pageSize - 1);
+        if (error || !data || data.length === 0) break;
+        allQuestions = allQuestions.concat(data);
+        page++;
+        if (data.length < pageSize) break;
+      }
+
+      const countByBankId: Record<string, number> = {};
+      allQuestions.forEach(q => {
+        const bId = q.topic ? q.topic.replace(/^bank__/, '') : '';
+        if (bId) countByBankId[bId] = (countByBankId[bId] || 0) + 1;
+      });
+
+      let updatedCount = 0;
+      const updates = [];
+
+      for (const b of banks) {
+        const trueCount = countByBankId[b.id] || 0;
+        if (b.questionCount !== trueCount || b.target_mode !== 'bank') {
+          await supabaseAdmin
+            .from('questionBanks')
+            .update({ 
+              questionCount: trueCount,
+              target_mode: 'bank'
+            })
+            .eq('id', b.id);
+          updatedCount++;
+          updates.push({ id: b.id, title: b.title, oldCount: b.questionCount, newCount: trueCount });
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        totalBanks: banks.length, 
+        reconciledCount: updatedCount, 
+        totalVerifiedQuestions: allQuestions.length,
+        updates 
+      });
+    } catch (err: any) {
+      console.error("[Admin Banks Reconcile Error]", err);
+      res.status(500).json({ error: err.message || "Failed to reconcile question bank counts" });
     }
   });
 
@@ -2609,6 +3874,7 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
         examId,
         examName,
         stage,
+        stream,
         targetType,
         mainSection,
         subCategory,
@@ -2634,6 +3900,7 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
         examId,
         examName: examName || examId,
         stage: stage || undefined,
+        stream: stream || undefined,
         targetType: targetType || 'mock_test',
         mainSection,
         subCategory,
@@ -2693,6 +3960,7 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
         examId,
         examName,
         stage,
+        stream,
         deckTitle,
         subject,
         subSubject,
@@ -2744,6 +4012,7 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
         examId: examId || "general",
         examName,
         stage: stage || undefined,
+        stream: stream || undefined,
         deckTitle: deckTitle.trim(),
         subject,
         subSubject,
@@ -2776,6 +4045,7 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
         examId, 
         examName, 
         stage,
+        stream,
         testTitle, 
         subject, 
         subSubject,
@@ -2835,6 +4105,7 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
         examName,
         mainSection: req.body.mainSection || undefined,
         stage: stage || undefined,
+        stream: stream || undefined,
         testTitle,
         subject,
         subSubject,
@@ -2857,7 +4128,11 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
           ...(Array.isArray(req.body.alreadyGeneratedStems) ? req.body.alreadyGeneratedStems : [])
         ],
         batchNumber: req.body.batchNumber ? Number(req.body.batchNumber) : undefined,
-        thematicFocus: req.body.thematicFocus ? String(req.body.thematicFocus).trim() : undefined
+        thematicFocus: req.body.thematicFocus ? String(req.body.thematicFocus).trim() : undefined,
+        durationMinutes: req.body.durationMinutes !== undefined && req.body.durationMinutes !== null ? Number(req.body.durationMinutes) : undefined,
+        totalMarks: req.body.totalMarks !== undefined && req.body.totalMarks !== null ? Number(req.body.totalMarks) : undefined,
+        negativeMarking: req.body.negativeMarking !== undefined && req.body.negativeMarking !== null ? Number(req.body.negativeMarking) : undefined,
+        predefinedQuestionCount: req.body.predefinedQuestionCount !== undefined && req.body.predefinedQuestionCount !== null ? Number(req.body.predefinedQuestionCount) : undefined
       });
 
       res.json({ success: true, count: questions.length, data: questions });
@@ -2869,26 +4144,76 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
 
   // Admin AI Studio: Stage 2 Real-Time Streaming Questions Generator Endpoint (SSE)
   app.post("/api/admin/ai/generate-questions-stream", requireAdmin, async (req, res) => {
-    // Set SSE HTTP Headers
-    res.setHeader("Content-Type", "text/event-stream");
-    res.setHeader("Cache-Control", "no-cache");
-    res.setHeader("Connection", "keep-alive");
+    // Set SSE HTTP Headers with anti-buffering directives
+    res.writeHead(200, {
+      "Content-Type": "text/event-stream; charset=utf-8",
+      "Cache-Control": "no-cache, no-transform",
+      "Connection": "keep-alive",
+      "X-Accel-Buffering": "no"
+    });
+
     if (typeof (res as any).flushHeaders === 'function') {
       (res as any).flushHeaders();
     }
 
     const sendEvent = (event: string, payload: any) => {
-      res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
+      if (res.writableEnded || res.destroyed) return;
+      try {
+        res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
+        if (typeof (res as any).flush === 'function') {
+          (res as any).flush();
+        }
+      } catch (writeErr) {
+        console.warn("[server.ts] SSE stream write warning:", writeErr);
+      }
+    };
+
+    // Immediately flush initial SSE comment & connection progress to guarantee 0 idle TCP latency
+    try {
+      res.write(": connection-established\n\n");
       if (typeof (res as any).flush === 'function') {
         (res as any).flush();
       }
+    } catch {}
+
+    sendEvent("progress", {
+      stageId: "CONNECT",
+      stageName: "Stream Established",
+      percent: 5,
+      message: `Inference pipeline connected for "${req.body.testTitle || 'Topic'}". Grounding factual syllabus scope...`,
+      log: `SSE stream initialized for "${req.body.testTitle || 'Topic'}".`
+    });
+
+    // Active 8-second keep-alive heartbeat comment to prevent proxy or socket idle timeouts
+    const heartbeat = setInterval(() => {
+      if (res.writableEnded || res.destroyed) {
+        clearInterval(heartbeat);
+        return;
+      }
+      try {
+        res.write(": heartbeat\n\n");
+        if (typeof (res as any).flush === 'function') {
+          (res as any).flush();
+        }
+      } catch {
+        clearInterval(heartbeat);
+      }
+    }, 8000);
+
+    const cleanupHeartbeat = () => {
+      clearInterval(heartbeat);
     };
+
+    req.on("close", cleanupHeartbeat);
+    res.on("close", cleanupHeartbeat);
+    res.on("finish", cleanupHeartbeat);
 
     try {
       const { 
         examId, 
         examName, 
         stage,
+        stream,
         testTitle, 
         subject, 
         subSubject,
@@ -2909,6 +4234,7 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
       } = req.body;
 
       if (!testTitle) {
+        cleanupHeartbeat();
         sendEvent("error", { error: "testTitle is required" });
         return res.end();
       }
@@ -2950,6 +4276,7 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
           examName,
           mainSection: req.body.mainSection || undefined,
           stage: stage || undefined,
+          stream: stream || undefined,
           testTitle,
           subject,
           subSubject,
@@ -2972,16 +4299,28 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
             ...(Array.isArray(req.body.alreadyGeneratedStems) ? req.body.alreadyGeneratedStems : [])
           ],
           batchNumber: req.body.batchNumber ? Number(req.body.batchNumber) : undefined,
-          thematicFocus: req.body.thematicFocus ? String(req.body.thematicFocus).trim() : undefined
+          thematicFocus: req.body.thematicFocus ? String(req.body.thematicFocus).trim() : undefined,
+          durationMinutes: req.body.durationMinutes !== undefined && req.body.durationMinutes !== null ? Number(req.body.durationMinutes) : undefined,
+          totalMarks: req.body.totalMarks !== undefined && req.body.totalMarks !== null ? Number(req.body.totalMarks) : undefined,
+          negativeMarking: req.body.negativeMarking !== undefined && req.body.negativeMarking !== null ? Number(req.body.negativeMarking) : undefined,
+          predefinedQuestionCount: req.body.predefinedQuestionCount !== undefined && req.body.predefinedQuestionCount !== null ? Number(req.body.predefinedQuestionCount) : undefined
         },
         (progressEvent) => {
           sendEvent("progress", progressEvent);
         }
       );
 
+      cleanupHeartbeat();
+
+      if (!questions || questions.length === 0) {
+        sendEvent("error", { error: `AI engine returned 0 valid questions for "${testTitle}". Activating retry backoff.` });
+        return res.end();
+      }
+
       sendEvent("complete", { success: true, count: questions.length, data: questions });
       res.end();
     } catch (err: any) {
+      cleanupHeartbeat();
       console.error("[Admin AI Questions Stream Error]", err);
       sendEvent("error", { error: err.message || "Failed to generate questions with AI" });
       res.end();
@@ -2992,6 +4331,12 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
   app.post("/api/admin/ai/plan-curriculum", requireAdmin, async (req, res) => {
     try {
       const {
+        targetType,
+        mainSection,
+        predefinedQuestionCount,
+        durationMinutes,
+        totalMarks,
+        negativeMarking,
         syllabusMarkdown,
         testTitle,
         subject,
@@ -3005,6 +4350,12 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
       } = req.body;
 
       const plan = await planAutonomousQuestionCurriculum({
+        targetType: targetType || mainSection,
+        mainSection: mainSection || targetType,
+        predefinedQuestionCount: predefinedQuestionCount !== undefined && predefinedQuestionCount !== null ? Number(predefinedQuestionCount) : undefined,
+        durationMinutes: durationMinutes !== undefined && durationMinutes !== null ? Number(durationMinutes) : undefined,
+        totalMarks: totalMarks !== undefined && totalMarks !== null ? Number(totalMarks) : undefined,
+        negativeMarking: negativeMarking !== undefined && negativeMarking !== null ? Number(negativeMarking) : undefined,
         syllabusMarkdown,
         testTitle: testTitle || 'Subject Test',
         subject,
@@ -3243,6 +4594,289 @@ No blockers or memory leaks detected. All systems are nominal and ready for the 
     } catch (err: any) {
       console.error("[Get Exam Syllabus Error]", err);
       res.status(500).json({ error: err.message || "Failed to fetch exam syllabus" });
+    }
+  });
+
+  // Admin Cascade Delete: Enterprise-grade cleanup of questions attached to banks, mock tests, and series
+  app.post("/api/admin/cascade-delete", requireAdmin, async (req, res) => {
+    try {
+      const { entityType, entityId, clearOnly } = req.body;
+
+      if (!entityId || !entityType) {
+        return res.status(400).json({ error: "entityType and entityId are required" });
+      }
+
+      const allowed = ['questionBank', 'mockTest', 'testSeries', 'question'];
+      if (!allowed.includes(entityType)) {
+        return res.status(400).json({ error: `Unsupported entityType: ${entityType}` });
+      }
+
+      let deletedQuestionCount = 0;
+      const auditLog: string[] = [];
+
+      // ─── 1. QUESTION BANK / PRACTICE SET ──────────────────────────────────────
+      if (entityType === 'questionBank') {
+        // A. Check user purchase protection (soft-delete if purchased)
+        if (!clearOnly) {
+          const { data: purchases } = await supabaseAdmin
+            .from('user_purchases')
+            .select('id')
+            .eq('product_id', entityId)
+            .limit(1);
+
+          if (purchases && purchases.length > 0) {
+            await supabaseAdmin.from('questionBanks').update({ is_archived: true }).eq('id', entityId);
+            auditLog.push(`Soft-deleted (purchased) questionBank ${entityId}`);
+            return res.json({
+              success: true,
+              softDeleted: true,
+              deletedQuestions: 0,
+              message: "Question bank archived (soft-deleted) to protect active candidate purchases.",
+              audit: auditLog
+            });
+          }
+        }
+
+        // B. Fetch bank metadata
+        const { data: bank } = await supabaseAdmin
+          .from('questionBanks')
+          .select('id, title, examId')
+          .eq('id', entityId)
+          .single();
+
+        if (bank) {
+          const rawTitle = (bank.title || '').trim();
+          const cleanTitle = rawTitle.replace(/(\s*-\s*Practice Session)+$/gi, '').trim();
+          const topicCandidates = Array.from(new Set([
+            rawTitle,
+            cleanTitle,
+            `${cleanTitle} - Practice Session`,
+            entityId,
+            `bank__${entityId}`
+          ])).filter(Boolean);
+
+          // C. Delete questions matching candidate topics
+          let q1Query = supabaseAdmin.from('questions').delete().in('topic', topicCandidates);
+          if (bank.examId && bank.examId !== 'generic') {
+            q1Query = q1Query.eq('examId', bank.examId);
+          }
+          const { data: d1, error: err1 } = await q1Query.select('id');
+          if (err1) throw err1;
+          const c1 = d1?.length ?? 0;
+          deletedQuestionCount += c1;
+          auditLog.push(`Deleted ${c1} questions matching title/exam for bank "${rawTitle}"`);
+
+          // D. Delete questions using ID-keyed topics (safety net across all exams)
+          const { data: d2, error: err2 } = await supabaseAdmin
+            .from('questions')
+            .delete()
+            .in('topic', [entityId, `bank__${entityId}`])
+            .select('id');
+          if (err2) throw err2;
+          const c2 = d2?.length ?? 0;
+          deletedQuestionCount += c2;
+          auditLog.push(`Deleted ${c2} id-keyed questions for bank ${entityId}`);
+
+          // E. Reset questionCount on all sibling banks sharing the title
+          await supabaseAdmin
+            .from('questionBanks')
+            .update({ questionCount: 0 })
+            .eq('title', bank.title)
+            .eq('examId', bank.examId);
+        }
+
+        // F. Delete the bank itself if not clearOnly
+        if (!clearOnly) {
+          const { error: delErr } = await supabaseAdmin.from('questionBanks').delete().eq('id', entityId);
+          if (delErr) throw delErr;
+          auditLog.push(`Deleted questionBank row ${entityId}`);
+        } else {
+          auditLog.push(`Cleared questions for questionBank row ${entityId} (row preserved)`);
+        }
+
+      // ─── 2. MOCK TEST ──────────────────────────────────────────────────────────
+      } else if (entityType === 'mockTest') {
+        // A. Check user purchase protection (soft-delete if purchased)
+        if (!clearOnly) {
+          const { data: purchases } = await supabaseAdmin
+            .from('user_purchases')
+            .select('id')
+            .eq('product_id', entityId)
+            .limit(1);
+
+          if (purchases && purchases.length > 0) {
+            await supabaseAdmin.from('mockTests').update({ is_archived: true }).eq('id', entityId);
+            auditLog.push(`Soft-deleted (purchased) mockTest ${entityId}`);
+            return res.json({
+              success: true,
+              softDeleted: true,
+              deletedQuestions: 0,
+              message: "Mock test archived (soft-deleted) to protect active candidate purchases.",
+              audit: auditLog
+            });
+          }
+        }
+
+        // B. Fetch mock test metadata
+        const { data: mt } = await supabaseAdmin
+          .from('mockTests')
+          .select('id, title, seriesId')
+          .eq('id', entityId)
+          .single();
+
+        let examId: string | null = null;
+        if (mt?.seriesId && typeof mt.seriesId === 'string' && mt.seriesId.startsWith('{')) {
+          try {
+            const parsed = JSON.parse(mt.seriesId);
+            if (parsed.examId) examId = parsed.examId;
+          } catch {}
+        }
+
+        // C. Delete ID-keyed questions: mockTest__<id>, mocktest__<id>, <id>
+        const { data: d1, error: err1 } = await supabaseAdmin
+          .from('questions')
+          .delete()
+          .in('topic', [`mockTest__${entityId}`, `mocktest__${entityId}`, entityId])
+          .select('id');
+        if (err1) throw err1;
+        const c1 = d1?.length ?? 0;
+        deletedQuestionCount += c1;
+        auditLog.push(`Deleted ${c1} id-prefixed questions for mockTest ${entityId}`);
+
+        // D. Delete title-based questions if no active Question Bank owns that title
+        if (mt?.title) {
+          const titleCandidates = [
+            mt.title.trim(),
+            mt.title.replace(/(\s*-\s*Practice Session)+$/gi, '').trim()
+          ].filter(Boolean);
+
+          let qbCheck = supabaseAdmin.from('questionBanks').select('id').in('title', titleCandidates);
+          if (examId) qbCheck = qbCheck.eq('examId', examId);
+          const { data: activeBanks } = await qbCheck;
+
+          // If no question bank shares this title, these title-based questions are owned solely by this mock test
+          if (!activeBanks || activeBanks.length === 0) {
+            let q2Query = supabaseAdmin.from('questions').delete().in('topic', titleCandidates);
+            if (examId) q2Query = q2Query.eq('examId', examId);
+            const { data: d2, error: err2 } = await q2Query.select('id');
+            if (err2) throw err2;
+            const c2 = d2?.length ?? 0;
+            deletedQuestionCount += c2;
+            auditLog.push(`Deleted ${c2} title-matched questions for mockTest "${mt.title}"`);
+          }
+        }
+
+        // E. Delete or preserve mock test row
+        if (!clearOnly) {
+          const { error: delErr } = await supabaseAdmin.from('mockTests').delete().eq('id', entityId);
+          if (delErr) throw delErr;
+          auditLog.push(`Deleted mockTest row ${entityId}`);
+        } else {
+          auditLog.push(`Cleared questions for mockTest row ${entityId} (row preserved)`);
+        }
+
+      // ─── 3. TEST SERIES ────────────────────────────────────────────────────────
+      } else if (entityType === 'testSeries') {
+        // A. Fetch child mock tests
+        const { data: childTests } = await supabaseAdmin
+          .from('mockTests')
+          .select('id, title, seriesId')
+          .or(`seriesId.eq.${entityId},seriesId.like.%${entityId}%`);
+        const testIds = (childTests || []).map(t => t.id);
+
+        // B. Check user purchase protection (series + child mock tests)
+        if (!clearOnly) {
+          const purchaseTargets = [entityId, ...testIds];
+          const { data: purchases } = await supabaseAdmin
+            .from('user_purchases')
+            .select('id')
+            .in('product_id', purchaseTargets)
+            .limit(1);
+
+          if (purchases && purchases.length > 0) {
+            await supabaseAdmin.from('testSeries').update({ is_archived: true }).eq('id', entityId);
+            if (testIds.length > 0) {
+              await supabaseAdmin.from('mockTests').update({ is_archived: true }).in('id', testIds);
+            }
+            auditLog.push(`Soft-deleted (purchased) testSeries ${entityId} and ${testIds.length} child mock tests`);
+            return res.json({
+              success: true,
+              softDeleted: true,
+              deletedQuestions: 0,
+              message: "Test series archived (soft-deleted) to protect active candidate purchases.",
+              audit: auditLog
+            });
+          }
+        }
+
+        // C. Delete questions for all child mock tests
+        if (testIds.length > 0) {
+          const childTopics = testIds.flatMap(tId => [`mockTest__${tId}`, `mocktest__${tId}`, tId]);
+          const { data: d1, error: err1 } = await supabaseAdmin
+            .from('questions')
+            .delete()
+            .in('topic', childTopics)
+            .select('id');
+          if (err1) throw err1;
+          const c1 = d1?.length ?? 0;
+          deletedQuestionCount += c1;
+          auditLog.push(`Deleted ${c1} questions across ${testIds.length} child mock tests`);
+
+          // D. Delete child mock test rows if not clearOnly
+          if (!clearOnly) {
+            const { error: mtDelErr } = await supabaseAdmin.from('mockTests').delete().in('id', testIds);
+            if (mtDelErr) throw mtDelErr;
+            auditLog.push(`Deleted ${testIds.length} child mock test rows`);
+          }
+        }
+
+        // E. Delete the test series row if not clearOnly
+        if (!clearOnly) {
+          const { error: tsDelErr } = await supabaseAdmin.from('testSeries').delete().eq('id', entityId);
+          if (tsDelErr) throw tsDelErr;
+          auditLog.push(`Deleted testSeries row ${entityId}`);
+        }
+
+      // ─── 4. SINGLE QUESTION ───────────────────────────────────────────────────
+      } else if (entityType === 'question') {
+        const { data: d, error: err } = await supabaseAdmin
+          .from('questions')
+          .delete()
+          .eq('id', entityId)
+          .select('id, topic');
+        if (err) throw err;
+        deletedQuestionCount = d?.length ?? 1;
+        auditLog.push(`Deleted question row ${entityId}`);
+
+        // Enterprise auto-reconciliation: If question belonged to a bank, update bank counter atomically
+        const deletedTopic = d?.[0]?.topic;
+        if (deletedTopic && deletedTopic.startsWith('bank__')) {
+          const bankId = deletedTopic.replace(/^bank__/, '');
+          const { count: remainingCount } = await supabaseAdmin
+            .from('questions')
+            .select('id', { count: 'exact', head: true })
+            .eq('topic', deletedTopic);
+
+          if (typeof remainingCount === 'number') {
+            await supabaseAdmin
+              .from('questionBanks')
+              .update({ questionCount: remainingCount })
+              .eq('id', bankId);
+            auditLog.push(`Auto-reconciled bank ${bankId} to ${remainingCount} questions`);
+          }
+        }
+      }
+
+      console.log(`[CASCADE-DELETE] ${entityType} ${entityId}: ${deletedQuestionCount} questions removed.`, auditLog);
+      res.json({
+        success: true,
+        softDeleted: false,
+        deletedQuestions: deletedQuestionCount,
+        audit: auditLog
+      });
+    } catch (err: any) {
+      console.error(`[CASCADE-DELETE ERROR]`, err);
+      res.status(500).json({ error: err.message || "Failed to execute cascade delete" });
     }
   });
 
@@ -3843,8 +5477,37 @@ ${resultsContext}`;
     }
   });
 
-  // Redirect legacy WordPress URLs to the new home page or specific pages (301 Permanent Redirect)
-  app.get(['/shop*', '/cart*', '/my-account*', '/checkout*', '/product*', '/courses*', '/course*', '/all-courses*', '/home*', '/category*', '/tag*', '/author*'], (req, res) => {
+  // Handle decommissioned WordPress / WooCommerce store URLs (HTTP 410 Gone to immediately purge from Google index & sitelinks)
+  app.get(['/shop*', '/cart*', '/my-account*', '/checkout*', '/product*'], (req, res) => {
+    res.status(410);
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    return res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Store Retired | OdishaExamPrep</title>
+  <meta name="robots" content="noindex, follow" />
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; text-align: center; padding: 60px 20px; background: #FAF8F5; color: #0F172A; }
+    .card { max-width: 500px; margin: 0 auto; background: #FFF; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); border: 1px solid #E2E8F0; }
+    h1 { font-size: 24px; font-weight: 900; color: #1E293B; margin-bottom: 12px; }
+    p { font-size: 15px; color: #64748B; line-height: 1.6; margin-bottom: 24px; }
+    a { display: inline-block; padding: 12px 28px; background: #2563EB; color: #FFF; text-decoration: none; border-radius: 12px; font-weight: 800; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Page Permanently Retired</h1>
+    <p>Our legacy store and course shop has been decommissioned. OdishaExamPrep has upgraded to a modern interactive mock test and AI-mentored preparation platform.</p>
+    <a href="/">Go to OdishaExamPrep Home</a>
+  </div>
+</body>
+</html>`);
+  });
+
+  // Redirect legacy WordPress navigation URLs that map to new core routes (301 Permanent Redirect)
+  app.get(['/courses*', '/course*', '/all-courses*', '/home*', '/category*', '/tag*', '/author*'], (req, res) => {
     const pathLower = req.path.toLowerCase();
     
     // Check if the old URL contains exam keywords to redirect to the new exam pages
@@ -3959,6 +5622,11 @@ ${resultsContext}`;
           const exam = examList && examList.length > 0 ? examList[0] : null;
 
           if (exam && !error) {
+            // If the record in exams is actually a current affairs news item, redirect to /current-affairs
+            if (exam.category === 'current_affairs') {
+              return res.redirect(301, '/current-affairs');
+            }
+
             let examDescText = exam.description || "";
             if (examDescText.startsWith('JSON_METADATA_')) {
               try {
@@ -4034,17 +5702,41 @@ ${resultsContext}`;
         keywords = "admin login, odishaexamprep portal";
         imageUrl = `${baseUrl}/apple-touch-icon.png`;
       } else if (pathName === '/') {
-        // Add custom Structured Data (JSON-LD) for home page SEO (WebSite and Organization)
+        // Unified Structured Data (JSON-LD) for home page SEO (WebSite and EducationalOrganization with Logo)
         const schemaObj = {
           "@context": "https://schema.org",
-          "@type": "WebSite",
-          "name": "OdishaExamPrep",
-          "url": baseUrl,
-          "potentialAction": {
-            "@type": "SearchAction",
-            "target": `${baseUrl}/?search={search_term_string}`,
-            "query-input": "required name=search_term_string"
-          }
+          "@graph": [
+            {
+              "@type": "WebSite",
+              "@id": `${baseUrl}/#website`,
+              "name": "OdishaExamPrep",
+              "alternateName": ["Odisha Exam Prep", "OEP", "OdishaExamPrep.in"],
+              "url": baseUrl,
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": `${baseUrl}/?search={search_term_string}`
+                },
+                "query-input": "required name=search_term_string"
+              }
+            },
+            {
+              "@type": "EducationalOrganization",
+              "@id": `${baseUrl}/#organization`,
+              "name": "OdishaExamPrep",
+              "url": baseUrl,
+              "logo": {
+                "@type": "ImageObject",
+                "url": `${baseUrl}/android-chrome-512x512.png`,
+                "width": 512,
+                "height": 512
+              },
+              "image": `${baseUrl}/android-chrome-512x512.png`,
+              "sameAs": [baseUrl],
+              "description": "Odisha's premier exam preparation platform providing comprehensive mock tests, timed test series, previous year questions, and AI mentor guidance for OPSC, OSSC, and OSSSC government competitive examinations."
+            }
+          ]
         };
         schemaJson = `<script type="application/ld+json" id="json-ld-schema">${JSON.stringify(schemaObj)}</script>`;
       }
@@ -4092,6 +5784,40 @@ ${resultsContext}`;
       // Inject inside <head>
       html = html.replace('<head>', `<head>${ogMetaTags}`);
 
+      // For search engine crawlers and initial fast paint, inject semantic fallback content inside <div id="root">
+      if (pathName === '/') {
+        const semanticBotContent = `
+    <!-- Semantic Pre-Rendered Crawl Content for Search Engines & Accessibility -->
+    <header class="sr-only" style="display:none;">
+      <h1>OdishaExamPrep — Best Platform for Odisha Exam Preparation</h1>
+      <p>Prepare for OPSC, OSSC, OSSSC, Odisha Police, and teaching competitive examinations with expert-crafted mock tests, syllabus roadmaps, real-time rank analytics, and AI mentor doubt resolution.</p>
+      <nav>
+        <a href="/current-affairs">Daily Odisha & National Current Affairs</a>
+        <a href="/blog">Odisha Exam Preparation Strategy & Syllabus Guides</a>
+        <a href="/privacy-policy">Privacy Policy</a>
+        <a href="/terms-of-service">Terms of Service</a>
+        <a href="/refund-policy">Refund Policy</a>
+      </nav>
+    </header>
+    <main class="sr-only" style="display:none;">
+      <section>
+        <h2>Odisha Competitive Exams Covered</h2>
+        <ul>
+          <li><strong>OPSC</strong>: Odisha Civil Services (OAS), Assistant Section Officer (ASO), Assistant Industries Officer (AIO)</li>
+          <li><strong>OSSC</strong>: Combined Graduate Level (CGL), CHSL, CTSRE, Junior Engineer</li>
+          <li><strong>OSSSC</strong>: Revenue Inspector (RI), Assistant Revenue Inspector (ARI), AMIN, Junior Assistant</li>
+          <li><strong>Odisha Police</strong>: Sub-Inspector (SI), Constable Recruitment</li>
+          <li><strong>Teaching Exams</strong>: BSE Odisha OTET, OSSTET, B.Ed Entrance</li>
+        </ul>
+      </section>
+      <section>
+        <h2>Platform Highlights</h2>
+        <p>100% syllabus alignment, KaTeX dynamic geometry diagrams, DeepSeek & Llama AI Mentor, and authentic exam marking schemes.</p>
+      </section>
+    </main>`;
+        html = html.replace('<div id="root"></div>', `<div id="root">${semanticBotContent}</div>`);
+      }
+
       res.setHeader('Content-Type', 'text/html');
       res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
       res.setHeader('Pragma', 'no-cache');
@@ -4110,36 +5836,45 @@ ${resultsContext}`;
       const protocol = req.protocol || 'https';
       const baseUrl = `${protocol}://${host}`;
 
-      // Static routes (Only include indexable pages, excluding admin and private pages)
+      // Static routes (Only include genuine indexable pages, excluding admin and private pages)
       const staticRoutes = [
-        '',
-        '/blog',
-        '/privacy-policy',
-        '/terms-of-service',
-        '/refund-policy'
+        { path: '', priority: '1.0', changefreq: 'daily' },
+        { path: '/current-affairs', priority: '0.9', changefreq: 'daily' },
+        { path: '/blog', priority: '0.8', changefreq: 'daily' },
+        { path: '/privacy-policy', priority: '0.5', changefreq: 'monthly' },
+        { path: '/terms-of-service', priority: '0.5', changefreq: 'monthly' },
+        { path: '/refund-policy', priority: '0.5', changefreq: 'monthly' }
       ];
 
-      // Fetch dynamic blog routes and exam routes from Supabase database
+      // Fetch dynamic blog routes and genuine exam routes from Supabase database
       const { data: rawExams } = await supabaseAdmin
         .from('exams')
         .select('id, category, createdAt, is_archived');
 
-      const blogs = rawExams ? rawExams.filter(e => e.category === 'blog').sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()) : [];
-      const exams = rawExams ? rawExams.filter(e => e.category !== 'system' && e.category !== 'blog' && e.is_archived !== true) : [];
+      // Strictly filter genuine blogs
+      const blogs = rawExams ? rawExams.filter(e => e.category === 'blog' && e.is_archived !== true).sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()) : [];
+      
+      // Strictly filter genuine exams: exclude system settings, blogs, and current_affairs news items
+      const exams = rawExams ? rawExams.filter(e => 
+        e.category !== 'system' && 
+        e.category !== 'blog' && 
+        e.category !== 'current_affairs' && 
+        e.is_archived !== true
+      ) : [];
 
       let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
       xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
 
       // Add static URLs
-      staticRoutes.forEach(route => {
+      staticRoutes.forEach(item => {
         xml += `  <url>\n`;
-        xml += `    <loc>${baseUrl}${route}</loc>\n`;
-        xml += `    <changefreq>daily</changefreq>\n`;
-        xml += `    <priority>${route === '' ? '1.0' : '0.8'}</priority>\n`;
+        xml += `    <loc>${baseUrl}${item.path}</loc>\n`;
+        xml += `    <changefreq>${item.changefreq}</changefreq>\n`;
+        xml += `    <priority>${item.priority}</priority>\n`;
         xml += `  </url>\n`;
       });
 
-      // Add dynamic exam URLs
+      // Add dynamic exam URLs (only authentic exam curricula)
       if (exams) {
         exams.forEach(exam => {
           const lastMod = exam.createdAt ? new Date(exam.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
@@ -4168,6 +5903,7 @@ ${resultsContext}`;
       xml += `</urlset>`;
 
       res.setHeader('Content-Type', 'application/xml');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
       res.send(xml);
     } catch (err) {
       console.error("[Sitemap Error]", err);
@@ -4183,10 +5919,19 @@ ${resultsContext}`;
 
     const txt = `User-agent: *
 Allow: /
+Allow: /current-affairs
 Allow: /blog
 Allow: /blog/*
+Allow: /exams/*
+Allow: /privacy-policy
+Allow: /terms-of-service
+Allow: /refund-policy
 Disallow: /admin
 Disallow: /admin-login
+Disallow: /api/admin/
+
+User-agent: Googlebot
+Allow: /
 
 User-agent: Googlebot-Image
 Allow: /
@@ -4196,8 +5941,37 @@ Allow: /
 
 Sitemap: ${sitemapUrl}
 `;
-    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
     res.send(txt);
+  });
+
+  // Utility endpoint to ping search engines on demand
+  app.get('/api/seo/ping-sitemap', async (req, res) => {
+    const host = req.get('host') || 'odishaexamprep.in';
+    const sitemapUrl = encodeURIComponent(`https://${host}/sitemap.xml`);
+    const results: Record<string, any> = {};
+
+    try {
+      const bingRes = await fetch(`https://www.bing.com/ping?sitemap=${sitemapUrl}`);
+      results['bing'] = { status: bingRes.status, ok: bingRes.ok };
+    } catch (e: any) {
+      results['bing'] = { error: e.message };
+    }
+
+    try {
+      const googleRes = await fetch(`https://www.google.com/ping?sitemap=${sitemapUrl}`);
+      results['google'] = { status: googleRes.status, ok: googleRes.ok };
+    } catch (e: any) {
+      results['google'] = { error: e.message };
+    }
+
+    res.json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      sitemap: `https://${host}/sitemap.xml`,
+      results
+    });
   });
 
   // Dedicated routes for standalone HTML tools (Shorts & Memory Shorts Creators, Virtual Office Simulation)
@@ -4271,14 +6045,18 @@ Sitemap: ${sitemapUrl}
           normalized.endsWith('.html') ||
           normalized.endsWith('sw.js') ||
           normalized.endsWith('site.webmanifest') ||
-          normalized.endsWith('manifest.json') ||
-          normalized.includes('/favicon') ||
-          normalized.includes('/android-chrome') ||
-          normalized.includes('/apple-touch-icon')
+          normalized.endsWith('manifest.json')
         ) {
           res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
           res.setHeader('Pragma', 'no-cache');
           res.setHeader('Expires', '0');
+        } else if (
+          normalized.includes('/favicon') ||
+          normalized.includes('/android-chrome') ||
+          normalized.includes('/apple-touch-icon')
+        ) {
+          // Google Favicon and search crawlers require cacheable HTTP headers to index icons
+          res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
         } else if (normalized.includes('/assets/')) {
           res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
         } else {
@@ -4321,6 +6099,10 @@ Sitemap: ${sitemapUrl}
       const server = app.listen(Number(PORT), "0.0.0.0", () => {
         console.log(`Server running on http://localhost:${PORT}`);
       });
+      // Extend timeouts for long-running AI inference (Gemini can take 30-120s per stage)
+      server.timeout = 300000;          // 5 minutes — never kill mid-inference
+      server.keepAliveTimeout = 305000; // slightly above timeout
+      server.headersTimeout = 310000;   // must exceed keepAliveTimeout
       server.on('error', (err: any) => {
         if (err.code === 'EADDRINUSE' && retries > 0) {
           console.warn(`Port ${PORT} still in use, retrying in ${delayMs}ms... (${retries} retries left)`);

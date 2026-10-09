@@ -1494,6 +1494,544 @@
       cursor: not-allowed;
       transform: none;
     }
+
+    /* EXECUTIVE AI OPERATIONS MANAGER LIVE VOICE DECK STYLES */
+    .btn-manager-voice {
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.25), rgba(59, 130, 246, 0.35));
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      color: #E0F2FE;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+    }
+    .btn-manager-voice:hover {
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.45), rgba(59, 130, 246, 0.55));
+      border-color: rgba(56, 189, 248, 0.8);
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.6);
+      transform: translateY(-1px);
+    }
+    .btn-manager-voice.active {
+      background: linear-gradient(135deg, #0284C7, #2563EB);
+      border-color: #7DD3FC;
+      box-shadow: 0 0 22px rgba(56, 189, 248, 0.85);
+    }
+
+    #manager-voice-deck {
+      position: fixed;
+      top: 54px;
+      right: 16px;
+      bottom: 52px;
+      width: 480px;
+      max-width: calc(100vw - 32px);
+      background: rgba(11, 17, 32, 0.97);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 20px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.88), 0 0 35px rgba(56, 189, 248, 0.2);
+      z-index: 105;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(25px) scale(0.97);
+      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #manager-voice-deck.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0) scale(1);
+    }
+
+    .manager-header {
+      padding: 0.85rem 1.1rem;
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .manager-brand-cluster {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .manager-brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0284C7, #38BDF8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .manager-title-area h3 {
+      margin: 0;
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: #F8FAFC;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .manager-title-area p {
+      margin: 0;
+      font-size: 0.65rem;
+      color: #94A3B8;
+      font-weight: 600;
+    }
+
+    .manager-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .manager-btn-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #94A3B8;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .manager-btn-icon:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #F8FAFC;
+    }
+
+    /* AADI HIGH-TECH AI CORE STAGE */
+    .aadi-core-stage {
+      padding: 1.1rem 1rem 0.85rem;
+      background: radial-gradient(circle at center, rgba(14, 28, 55, 0.85) 0%, rgba(8, 14, 28, 0.98) 100%);
+      border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.65rem;
+      position: relative;
+    }
+
+    .aadi-canvas-wrapper {
+      position: relative;
+      width: 170px;
+      height: 170px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    #aadi-core-canvas {
+      width: 170px;
+      height: 170px;
+      display: block;
+      filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.45));
+      transition: filter 0.3s;
+    }
+
+    .aadi-canvas-wrapper:hover #aadi-core-canvas {
+      filter: drop-shadow(0 0 24px rgba(56, 189, 248, 0.75));
+    }
+
+    .aadi-core-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      font-weight: 800;
+      color: #38BDF8;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 999px;
+      padding: 2px 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .manager-status-indicator {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #BAE6FD;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      text-align: center;
+      width: 100%;
+    }
+
+    .aadi-mic-toggle-pill {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34D399;
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      transition: all 0.2s;
+    }
+    .aadi-mic-toggle-pill.muted {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #F87171;
+    }
+
+    /* ACTION PLAN CARD */
+    .aadi-plan-card {
+      margin-top: 0.65rem;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      border-radius: 12px;
+      padding: 0.75rem 0.85rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .aadi-plan-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.35rem;
+    }
+
+    .aadi-plan-title {
+      font-size: 0.74rem;
+      font-weight: 800;
+      color: #F8FAFC;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .aadi-plan-badge {
+      font-size: 0.58rem;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38BDF8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .aadi-plan-section {
+      font-size: 0.68rem;
+      line-height: 1.45;
+      color: #CBD5E1;
+    }
+    .aadi-plan-section strong {
+      color: #F8FAFC;
+    }
+
+    .aadi-plan-btn-execute {
+      background: linear-gradient(135deg, #059669, #10B981);
+      border: 1px solid rgba(52, 211, 153, 0.5);
+      color: #FFFFFF;
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 0.45rem 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+      transition: all 0.2s;
+      margin-top: 0.2rem;
+    }
+    .aadi-plan-btn-execute:hover {
+      background: linear-gradient(135deg, #047857, #059669);
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.6);
+      transform: translateY(-1px);
+    }
+
+    /* EXECUTIVE DELEGATION CHAIN CARD */
+    .executive-delegation-card {
+      margin-top: 0.65rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.95));
+      border: 1px solid rgba(139, 92, 246, 0.45);
+      border-radius: 12px;
+      padding: 0.75rem 0.85rem;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(139, 92, 246, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .delegation-chain-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.4rem;
+    }
+    .delegation-flow-track {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.70rem;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+    }
+    .delegation-flow-boss { color: #F8FAFC; }
+    .delegation-flow-arrow { color: #94A3B8; font-size: 0.65rem; }
+    .delegation-flow-sara { color: #38BDF8; }
+    .delegation-flow-agent { color: #C084FC; font-weight: 800; }
+    .delegation-role-badge {
+      font-size: 0.58rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 9999px;
+      background: rgba(168, 85, 247, 0.18);
+      color: #D8B4FE;
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .delegation-recommendation-box {
+      background: rgba(14, 165, 233, 0.12);
+      border-left: 3px solid #0EA5E9;
+      border-radius: 0 6px 6px 0;
+      padding: 0.45rem 0.65rem;
+      font-size: 0.69rem;
+      color: #BAE6FD;
+      line-height: 1.45;
+    }
+    .delegation-recommendation-box strong { color: #38BDF8; font-weight: 800; }
+    .manager-telegram-btn {
+      background: rgba(14, 165, 233, 0.18);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #38BDF8;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .manager-telegram-btn:hover {
+      background: rgba(14, 165, 233, 0.35);
+      border-color: #38BDF8;
+      transform: translateY(-1px);
+    }
+
+    .manager-voice-select-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0 0.5rem;
+      font-size: 0.68rem;
+    }
+
+    .manager-voice-select {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      color: #E2E8F0;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.2rem 0.4rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .manager-feed {
+      flex: 1;
+      padding: 0.9rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    }
+
+    .manager-msg {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .manager-msg.boss {
+      align-items: flex-end;
+    }
+
+    .manager-msg.manager {
+      align-items: flex-start;
+    }
+
+    .manager-bubble {
+      max-width: 88%;
+      padding: 0.65rem 0.85rem;
+      border-radius: 14px;
+      font-size: 0.75rem;
+      line-height: 1.45;
+      font-weight: 500;
+      position: relative;
+    }
+
+    .manager-msg.boss .manager-bubble {
+      background: linear-gradient(135deg, #1D4ED8, #2563EB);
+      color: #FFFFFF;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .manager-msg.manager .manager-bubble {
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #F8FAFC;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    }
+
+    .manager-action-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #6EE7B7;
+      border-radius: 999px;
+      padding: 0.2rem 0.55rem;
+      font-size: 0.63rem;
+      font-weight: 800;
+      margin-top: 0.3rem;
+    }
+
+    .manager-replay-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      color: #CBD5E1;
+      padding: 0.2rem 0.45rem;
+      font-size: 0.62rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      margin-top: 0.35rem;
+      transition: all 0.15s;
+    }
+    .manager-replay-btn:hover {
+      background: rgba(99, 102, 241, 0.25);
+      border-color: rgba(99, 102, 241, 0.5);
+      color: #EEF2FF;
+    }
+
+    .manager-quick-prompts {
+      padding: 0.5rem 0.85rem;
+      background: rgba(15, 23, 42, 0.6);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .manager-quick-prompts::-webkit-scrollbar { display: none; }
+
+    .manager-prompt-chip {
+      padding: 0.22rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.63rem;
+      font-weight: 700;
+      color: #A5B4FC;
+      background: rgba(79, 70, 229, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .manager-prompt-chip:hover {
+      color: #FFFFFF;
+      background: rgba(79, 70, 229, 0.35);
+      border-color: rgba(129, 140, 248, 0.6);
+      transform: translateY(-1px);
+    }
+
+    .manager-input-bar {
+      padding: 0.75rem 0.9rem;
+      background: rgba(15, 23, 42, 0.95);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .manager-text-input {
+      flex: 1;
+      background: rgba(2, 6, 23, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      color: #F8FAFC;
+      padding: 0.55rem 0.8rem;
+      font-size: 0.74rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .manager-text-input:focus {
+      border-color: #6366F1;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+    }
+
+    .manager-btn-send {
+      background: linear-gradient(135deg, #4F46E5, #2563EB);
+      border: none;
+      color: #FFFFFF;
+      padding: 0.6rem 0.9rem;
+      border-radius: 10px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s;
+    }
+    .manager-btn-send:hover {
+      background: linear-gradient(135deg, #4338CA, #1D4ED8);
+      box-shadow: 0 0 14px rgba(99, 102, 241, 0.4);
+      transform: translateY(-1px);
+    }
+    .manager-btn-send:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
   </style>
 </head>
 <body>
@@ -1532,6 +2070,10 @@
         💬 <span class="btn-text">Debrief</span>
       </button>
 
+      <button class="btn btn-manager-voice" id="manager-voice-btn" title="Enter Executive Cabin & Talk with Sara (Chief of Staff)">
+        👔 <span class="btn-text">Sara's Cabin</span>
+      </button>
+
       <button class="btn btn-coffee" id="coffee-btn" title="Send Staff to Espresso Lounge & Breakroom">
         ☕ <span class="btn-text">Coffee</span>
       </button>
@@ -1565,7 +2107,7 @@
       <button class="room-pill" data-room="warroom" title="War Room Conference Center">📊 War Room</button>
       <button class="room-pill" data-room="ailab" title="AI Research & Server Lab">🧠 AI Lab</button>
       <button class="room-pill" data-room="media" title="YouTube Live Media Broadcast Studio">🎥 Studio</button>
-      <button class="room-pill" data-room="founder" title="Founder & Executive Suite">👑 Executive</button>
+      <button class="room-pill" data-room="founder" title="Sara's Executive Operations Cabin">👔 Sara's Cabin</button>
       <button class="room-pill" data-room="zen" title="Biophilic Zen Garden Atrium">🌿 Zen</button>
     </div>
 
@@ -1795,6 +2337,85 @@
     <form class="warroom-input-box" id="warroom-form">
       <input type="text" id="warroom-input" placeholder="Address the team (e.g. 'What content was published today?')..." autocomplete="off" />
       <button type="submit" class="warroom-btn-send" id="warroom-send-btn">
+        <span>⚡ Send</span>
+      </button>
+    </form>
+  </div>
+
+  <!-- EXECUTIVE AI OPERATIONS MANAGER LIVE VOICE DECK -->
+  <div id="manager-voice-deck" class="notranslate" translate="no">
+    <div class="manager-header">
+      <div class="manager-brand-cluster">
+        <div class="manager-brand-icon">👔</div>
+        <div class="manager-title-area">
+          <h3>
+            Sara
+            <span class="warroom-live-pill"><span class="live-pulse"></span> Chief of Staff</span>
+          </h3>
+          <p>Executive AI Operations Manager • Reporting to Commander Naresh (Boss)</p>
+        </div>
+      </div>
+      <div class="manager-controls">
+        <button class="manager-btn-icon" id="manager-clear-btn" title="Clear Chat History">🗑️</button>
+        <button class="manager-btn-icon" id="manager-close-btn" title="Close Cabin">✕</button>
+      </div>
+    </div>
+
+    <!-- SARA HIGH-TECH AI CORE STAGE -->
+    <div class="aadi-core-stage">
+      <div class="aadi-canvas-wrapper" id="aadi-core-interactive" title="Sara AI Core — Click to Toggle Mic / State">
+        <canvas id="aadi-core-canvas" width="220" height="220"></canvas>
+      </div>
+      <div class="aadi-core-badge" id="aadi-core-mode">SARA // STANDBY</div>
+      <div class="manager-status-indicator">
+        <span id="manager-status-text">Sara is standing by for Boss...</span>
+        <button id="aadi-mic-toggle-btn" class="aadi-mic-toggle-pill" title="Toggle Hands-Free Continuous Voice Loop">
+          🎙️ Hands-Free ON
+        </button>
+      </div>
+      <div class="manager-voice-select-bar">
+        <span style="color:#94A3B8; font-weight:700; display:flex; align-items:center; gap:0.35rem;">
+          <span class="live-pulse" style="width:7px; height:7px; background:#38BDF8;"></span>
+          🗣️ Voice: Sara (Executive Neural)
+        </span>
+        <span style="color:#38BDF8; font-weight:700; font-size:0.62rem;">🌐 Strict Single-Lang Mirror</span>
+      </div>
+    </div>
+
+    <!-- QUICK PROMPTS -->
+    <div class="manager-quick-prompts">
+      <button class="manager-prompt-chip" data-prompt="ନମସ୍କାର ସାରା! ବିକ୍ରମ ଏବେ କଣ କରୁଛି? ସବୁ ନୋଟିସ ଚେକ୍ କର।">📊 Status Check (Odia)</button>
+      <button class="manager-prompt-chip" data-prompt="Sara, Bikram se pucho current affairs ka kya status hai?">⚡ Pucho Bikram Se (Hindi)</button>
+      <button class="manager-prompt-chip" data-prompt="Sara, Priyanka se pucho daily current affairs banaya kya?">📝 Pucho Priyanka Se</button>
+      <button class="manager-prompt-chip" data-prompt="Sara, give me the full fleet status and today's execution plan.">🚀 Full Fleet Briefing (Eng)</button>
+    </div>
+
+    <!-- CONVERSATION FEED -->
+    <div class="manager-feed" id="manager-feed">
+      <div class="manager-msg manager" id="manager-initial-brief">
+        <div class="manager-bubble">
+          <div style="font-weight: 800; color: #38BDF8; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span>⚡</span>
+              <span style="letter-spacing: 0.05em; font-size: 0.7rem; text-transform: uppercase;">Executive Status Briefing</span>
+            </div>
+            <span class="aadi-plan-badge" style="background: rgba(16, 185, 129, 0.2); color: #34D399; border-color: rgba(16, 185, 129, 0.4);">● 7 Engines Active</span>
+          </div>
+          <div id="manager-brief-text" style="color: #F8FAFC; line-height: 1.5; font-size: 0.76rem;">
+            Connecting live to Sara's Executive Operations Cabin...
+          </div>
+          <div style="display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
+            <span class="aadi-plan-badge" style="background: rgba(56, 189, 248, 0.15); color: #38BDF8; border-color: rgba(56, 189, 248, 0.3);">Dipti: 11,624 MCQs (#1)</span>
+            <span class="aadi-plan-badge" style="background: rgba(245, 158, 11, 0.15); color: #FBBF24; border-color: rgba(245, 158, 11, 0.3);">Bikram: 102 Notices</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FALLBACK INPUT -->
+    <form class="manager-input-bar" id="manager-form">
+      <input type="text" class="manager-text-input" id="manager-input" placeholder="Speak or type an order for Boss's fleet..." autocomplete="off" />
+      <button type="submit" class="manager-btn-send" id="manager-send-btn">
         <span>⚡ Send</span>
       </button>
     </form>
@@ -3471,6 +4092,7 @@
 
       this.preloadAgentModels(() => {
         this.buildAgentWorkstations();
+        this.buildSaraAvatar();
         this.onResize();
       });
 
@@ -5231,6 +5853,67 @@
         founderGroup.add(fleaf);
       }
 
+      // FLOATING 3D HOLOGRAPHIC AI CORE ON AADI'S DESK
+      const holoCoreGroup = new THREE.Group();
+      holoCoreGroup.position.set(41.5, 4.4, -22.4);
+
+      const coreOrb = new THREE.Mesh(
+        new THREE.SphereGeometry(0.55, 24, 24),
+        new THREE.MeshStandardMaterial({
+          color: '#38BDF8',
+          emissive: '#0284C7',
+          emissiveIntensity: 0.9,
+          roughness: 0.1,
+          metalness: 0.85,
+          transparent: true,
+          opacity: 0.85
+        })
+      );
+      const ringMat1 = new THREE.MeshBasicMaterial({ color: '#38BDF8', wireframe: true });
+      const ringMat2 = new THREE.MeshBasicMaterial({ color: '#F59E0B', wireframe: true });
+      const ring1 = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.035, 12, 48), ringMat1);
+      const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.035, 12, 48), ringMat2);
+      ring2.rotation.x = Math.PI / 3;
+      const ring3 = new THREE.Mesh(new THREE.TorusGeometry(1.4, 0.03, 12, 48), ringMat1);
+      ring3.rotation.y = Math.PI / 4;
+      holoCoreGroup.add(coreOrb, ring1, ring2, ring3);
+      founderGroup.add(holoCoreGroup);
+      this.aadiHoloCore = holoCoreGroup;
+
+      // Executive Leather Briefcase Beside Aadi's Desk
+      const aadiBriefcase = new THREE.Group();
+      aadiBriefcase.position.set(45.5, 0.75, -23.2);
+      aadiBriefcase.rotation.y = -0.15;
+      const aCaseBody = new THREE.Mesh(
+        new THREE.BoxGeometry(1.7, 1.35, 0.42),
+        new THREE.MeshStandardMaterial({ color: '#111827', roughness: 0.35 })
+      );
+      aCaseBody.castShadow = true;
+      const aCaseHandle = new THREE.Mesh(
+        new THREE.TorusGeometry(0.22, 0.04, 8, 16, Math.PI),
+        new THREE.MeshStandardMaterial({ color: '#030712', roughness: 0.3 })
+      );
+      aCaseHandle.position.set(0, 0.68, 0);
+      const aLock1 = new THREE.Mesh(
+        new THREE.BoxGeometry(0.12, 0.12, 0.05),
+        brassMat
+      );
+      aLock1.position.set(-0.48, 0.2, 0.22);
+      const aLock2 = aLock1.clone();
+      aLock2.position.set(0.48, 0.2, 0.22);
+      aadiBriefcase.add(aCaseBody, aCaseHandle, aLock1, aLock2);
+      founderGroup.add(aadiBriefcase);
+
+      // Elevated Header Sign for Aadi's Executive Operations Cabin
+      const cabinSign = new THREE.Mesh(
+        new THREE.PlaneGeometry(16, 2.5),
+        new THREE.MeshBasicMaterial({
+          map: TextureGen.createHeaderSign("SARA — EXECUTIVE OPERATIONS CABIN", "Chief of Staff • Living AI Operations Deck", '#38BDF8')
+        })
+      );
+      cabinSign.position.set(41.5, 10.8, -8.0);
+      this.scene.add(cabinSign);
+
       this.scene.add(founderGroup);
     }
 
@@ -5269,9 +5952,32 @@
       });
     }
 
+    buildSaraAvatar() {
+      const saraAgent = {
+        id: 'sara',
+        name: 'Sara',
+        role: 'Chief of Staff & Operations Manager',
+        clothesColor: '#0F172A',
+        skinColor: '#FED7AA',
+        hairColor: '#1E293B',
+        accentColor: '#38BDF8',
+        avatar: '👔'
+      };
+      const saraPreset = {
+        agentId: 'sara',
+        scale: 2.7,
+        desk: { x: 41.5, z: -23.0, rotY: 0, seatType: 'SEATED_DESK' }
+      };
+      const saraGroup = this.createAgentAvatar(saraAgent, saraPreset);
+      saraGroup.position.set(41.5, 0.55, -25.2);
+      saraGroup.rotation.y = 0; // facing North toward desk and Boss
+      this.scene.add(saraGroup);
+      this.agentMeshMap.set('sara', { group: saraGroup, avatar: saraGroup });
+    }
+
     createAgentAvatar(agent, preset) {
       const avatarGroup = new THREE.Group();
-      const gltf = this.agentGltfCache ? this.agentGltfCache.get(agent.id) : null;
+      const gltf = this.agentGltfCache ? (this.agentGltfCache.get(agent.id) || this.agentGltfCache.get('bikram')) : null;
       let model = null;
       let mixer = null;
       const actions = {};
@@ -5567,6 +6273,30 @@
         const chairPiston = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 1.8, 12), legMat);
         chairPiston.position.set(0, 0.9, 0);
         chairGroup.add(chairPiston);
+
+        // Executive Leather Briefcase (Office Look)
+        const briefcaseGroup = new THREE.Group();
+        briefcaseGroup.position.set(-3.7, 0.75, 0.2); // resting upright beside desk leg
+        briefcaseGroup.rotation.y = 0.12;
+        const caseBody = new THREE.Mesh(
+          new THREE.BoxGeometry(1.6, 1.25, 0.38),
+          new THREE.MeshStandardMaterial({ color: '#18181B', roughness: 0.35 })
+        );
+        caseBody.castShadow = true;
+        const caseHandle = new THREE.Mesh(
+          new THREE.TorusGeometry(0.2, 0.035, 8, 16, Math.PI),
+          new THREE.MeshStandardMaterial({ color: '#090D16', roughness: 0.3 })
+        );
+        caseHandle.position.set(0, 0.63, 0);
+        const caseLock1 = new THREE.Mesh(
+          new THREE.BoxGeometry(0.12, 0.12, 0.05),
+          new THREE.MeshStandardMaterial({ color: '#F59E0B', roughness: 0.2, metalness: 0.85 })
+        );
+        caseLock1.position.set(-0.45, 0.2, 0.2);
+        const caseLock2 = caseLock1.clone();
+        caseLock2.position.set(0.45, 0.2, 0.2);
+        briefcaseGroup.add(caseBody, caseHandle, caseLock1, caseLock2);
+        wsGroup.add(briefcaseGroup);
 
         wsGroup.add(chairGroup);
         this.scene.add(wsGroup);
@@ -6635,13 +7365,45 @@
         'warroom': { pos: new THREE.Vector3(27.5, 15.0, 42.0), look: new THREE.Vector3(27.5, 3.8, 25.0) },
         'ailab': { pos: new THREE.Vector3(-16.5, 20, -8), look: new THREE.Vector3(-16.5, 3.5, -23) },
         'media': { pos: new THREE.Vector3(0, 20, -14), look: new THREE.Vector3(0, 3.5, -28) },
-        'founder': { pos: new THREE.Vector3(41.5, 20, -9), look: new THREE.Vector3(41.5, 3.5, -23) },
+        'founder': { pos: new THREE.Vector3(41.5, 9.5, -11.5), look: new THREE.Vector3(41.5, 3.2, -24.5) },
+        'cabin': { pos: new THREE.Vector3(41.5, 9.5, -11.5), look: new THREE.Vector3(41.5, 3.2, -24.5) },
         'zen': { pos: new THREE.Vector3(0, 22, 16), look: new THREE.Vector3(0, 2.5, 0) },
         'reset': { pos: this.defaultCamPos, look: this.defaultLookTarget }
       };
 
       const target = targets[roomName.toLowerCase()] || targets['reset'];
       this.animateCameraTo(target.pos, target.look);
+    }
+
+    focusAgent(agentId, duration = 1050) {
+      const AGENT_CAMERAS = {
+        bikram: { pos: new THREE.Vector3(-39, 8, 28), look: new THREE.Vector3(-39, 3, 16) },
+        chhabi: { pos: new THREE.Vector3(-30, 8, 28), look: new THREE.Vector3(-30, 3, 16) },
+        dipti: { pos: new THREE.Vector3(-21, 8, 28), look: new THREE.Vector3(-21, 3, 16) },
+        priyanka: { pos: new THREE.Vector3(-12, 8, 28), look: new THREE.Vector3(-12, 3, 16) },
+        subham: { pos: new THREE.Vector3(-30, 8, 42), look: new THREE.Vector3(-30, 3, 30) },
+        trupti: { pos: new THREE.Vector3(-21, 8, 42), look: new THREE.Vector3(-21, 3, 30) },
+        manas: { pos: new THREE.Vector3(-12, 8, 42), look: new THREE.Vector3(-12, 3, 30) },
+        aarya: { pos: new THREE.Vector3(-16.5, 20, -8), look: new THREE.Vector3(-16.5, 3.5, -23) },
+        sara: { pos: new THREE.Vector3(41.5, 9.5, -11.5), look: new THREE.Vector3(41.5, 3.2, -24.5) }
+      };
+
+      const key = (agentId || '').toLowerCase().trim();
+      const target = AGENT_CAMERAS[key];
+      if (target) {
+        this.animateCameraTo(target.pos, target.look, duration);
+        return true;
+      }
+      const item = this.agentMeshMap && this.agentMeshMap.get(key);
+      if (item && item.avatar) {
+        const aPos = new THREE.Vector3();
+        item.avatar.getWorldPosition(aPos);
+        const camPos = new THREE.Vector3(aPos.x, aPos.y + 6, aPos.z + 12);
+        const camLook = new THREE.Vector3(aPos.x, aPos.y + 2.5, aPos.z);
+        this.animateCameraTo(camPos, camLook, duration);
+        return true;
+      }
+      return false;
     }
 
     animateCameraTo(destPos, destLook, duration = 850) {
@@ -6974,6 +7736,15 @@
         this.holoRing2.rotation.x = -time * 0.9;
       }
 
+      // 8. Animate Aadi's Executive Cabin Holographic AI Core & Gyro Rings
+      if (this.aadiHoloCore && this.aadiHoloCore.children.length >= 4) {
+        this.aadiHoloCore.children[1].rotation.x = time * 1.2;
+        this.aadiHoloCore.children[1].rotation.y = time * 0.8;
+        this.aadiHoloCore.children[2].rotation.y = -time * 1.5;
+        this.aadiHoloCore.children[3].rotation.z = time * 0.9;
+        this.aadiHoloCore.position.y = 4.4 + Math.sin(time * 2.2) * 0.12;
+      }
+
       if (this.controls) {
         this.controls.update();
       }
@@ -7055,6 +7826,7 @@
       }
     });
     window.office3D = office3D;
+    window.focusAgentDesk = (agentId, duration) => window.office3D && window.office3D.focusAgent(agentId, duration);
 
     // --- 6. ROOM JUMP BAR NAVIGATION ---
     const roomButtons = document.querySelectorAll('.room-pill');
@@ -7066,6 +7838,9 @@
         office3D.focusRoom(room);
         audio.playChime();
         document.getElementById('ticker-text').textContent = `🔭 CAMERA FOCUSED: ${btn.textContent.trim()} Suite.`;
+        if (room === 'founder' && typeof openManagerVoiceDeck === 'function') {
+          openManagerVoiceDeck();
+        }
       });
     });
 
@@ -7681,6 +8456,1149 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
     }
+
+    // --- 7B. AADI — EXECUTIVE AI OPERATIONS MANAGER CONTROLLER ---
+    const managerVoiceDeck = document.getElementById('manager-voice-deck');
+    const managerVoiceBtn = document.getElementById('manager-voice-btn');
+    const managerCloseBtn = document.getElementById('manager-close-btn');
+    const managerClearBtn = document.getElementById('manager-clear-btn');
+    const aadiCoreInteractive = document.getElementById('aadi-core-interactive');
+    const aadiCoreCanvas = document.getElementById('aadi-core-canvas');
+    const aadiCoreMode = document.getElementById('aadi-core-mode');
+    const aadiMicToggleBtn = document.getElementById('aadi-mic-toggle-btn');
+    const managerStatusText = document.getElementById('manager-status-text');
+    const managerVoiceModel = document.getElementById('manager-voice-model');
+    const managerFeed = document.getElementById('manager-feed');
+    const managerForm = document.getElementById('manager-form');
+    const managerInput = document.getElementById('manager-input');
+    const managerSendBtn = document.getElementById('manager-send-btn');
+
+    let managerHistory = [];
+    let isListening = false;
+    let isHandsFreeEnabled = true;
+    let speechRecognition = null;
+    let currentAudioPlayback = null;
+    let saraCoreState = 'STANDBY'; // 'STANDBY' | 'LISTENING' | 'INVESTIGATING' | 'SPEAKING'
+    let isSubmittingLock = false; // STRICT MUTEX: Prevents recursive loops & duplicate network calls
+    let activeTranscript = '';
+    let audioCtx = null;
+    let micAnalyser = null;
+    let micDataArray = null;
+    let micStream = null;
+    let micScriptProcessor = null;
+    let silentGainNode = null;
+    let pcmRecordedChunks = [];
+    let isSpeakingDetected = false;
+    let speechSilenceStartTime = 0;
+    let currentMicRms = 0;
+    let ambientNoiseRms = 0.006;
+
+    // --- HIGH-TECH BESPOKE SARA AI CORE CANVAS VISUALIZER (JARVIS INSPIRED) ---
+    function initAadiCoreCanvas() {
+      if (!aadiCoreCanvas) return;
+      const ctx = aadiCoreCanvas.getContext('2d');
+      const w = aadiCoreCanvas.width;
+      const h = aadiCoreCanvas.height;
+      const cx = w / 2;
+      const cy = h / 2;
+
+      // Particle swarm
+      const particles = [];
+      for (let i = 0; i < 28; i++) {
+        particles.push({
+          angle: (i / 28) * Math.PI * 2,
+          radius: 40 + Math.random() * 45,
+          speed: 0.015 + Math.random() * 0.02,
+          size: 1.2 + Math.random() * 1.8,
+          alpha: 0.3 + Math.random() * 0.7
+        });
+      }
+
+      function drawCore(now) {
+        requestAnimationFrame(drawCore);
+        const time = now * 0.001;
+        ctx.clearRect(0, 0, w, h);
+
+        // Real-Time Audio Reactivity level from true RMS
+        let audioVol = 0;
+        if (saraCoreState === 'LISTENING') {
+          audioVol = Math.min(1.0, currentMicRms * 14);
+        } else if (saraCoreState === 'SPEAKING') {
+          audioVol = 0.35 + 0.35 * Math.sin(time * 12) + 0.15 * Math.cos(time * 18);
+        } else if (saraCoreState === 'INVESTIGATING') {
+          audioVol = 0.5 + 0.25 * Math.sin(time * 24);
+        } else {
+          audioVol = 0.1 + 0.06 * Math.sin(time * 2.2);
+        }
+
+        // Color palettes per state
+        let primaryColor = '#38BDF8';
+        let glowColor = 'rgba(56, 189, 248, ';
+        let modeLabel = 'SARA // STANDBY';
+
+        if (saraCoreState === 'LISTENING') {
+          primaryColor = '#00F0FF';
+          glowColor = 'rgba(0, 240, 255, ';
+          modeLabel = 'SARA // LISTENING';
+        } else if (saraCoreState === 'INVESTIGATING') {
+          primaryColor = '#F59E0B';
+          glowColor = 'rgba(245, 158, 11, ';
+          modeLabel = 'SARA // INVESTIGATING';
+        } else if (saraCoreState === 'SPEAKING') {
+          primaryColor = '#10B981';
+          glowColor = 'rgba(16, 185, 129, ';
+          modeLabel = 'SARA // BRIEFING';
+        }
+
+        if (aadiCoreMode && aadiCoreMode.textContent !== modeLabel) {
+          aadiCoreMode.textContent = modeLabel;
+          aadiCoreMode.style.color = primaryColor;
+          aadiCoreMode.style.borderColor = glowColor + '0.4)';
+        }
+
+        // 1. Ambient Background Core Glow
+        const bgGlow = ctx.createRadialGradient(cx, cy, 10, cx, cy, 95);
+        bgGlow.addColorStop(0, glowColor + '0.22)');
+        bgGlow.addColorStop(0.6, glowColor + '0.06)');
+        bgGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = bgGlow;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 95, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2. Orbital Particle Swarm
+        particles.forEach(p => {
+          p.angle += p.speed * (saraCoreState === 'INVESTIGATING' ? 3.5 : 1);
+          const px = cx + Math.cos(p.angle) * (p.radius + audioVol * 12);
+          const py = cy + Math.sin(p.angle) * (p.radius + audioVol * 12);
+          ctx.fillStyle = glowColor + p.alpha + ')';
+          ctx.beginPath();
+          ctx.arc(px, py, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        // 3. Outer HUD Reticle Ring with Angle Ticks
+        const outerR = 84 + audioVol * 8;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(time * (saraCoreState === 'INVESTIGATING' ? 1.8 : 0.25));
+        ctx.strokeStyle = glowColor + '0.45)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([12, 18]);
+        ctx.beginPath();
+        ctx.arc(0, 0, outerR, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Outer corner bracket ticks
+        for (let t = 0; t < 4; t++) {
+          ctx.rotate(Math.PI / 2);
+          ctx.strokeStyle = primaryColor;
+          ctx.lineWidth = 2.5;
+          ctx.setLineDash([]);
+          ctx.beginPath();
+          ctx.arc(0, 0, outerR, -0.15, 0.15);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // 4. Middle Counter-Rotating Gyro Ring
+        const midR = 64;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(-time * (saraCoreState === 'INVESTIGATING' ? 2.5 : 0.6));
+        ctx.strokeStyle = primaryColor;
+        ctx.lineWidth = 1.8;
+        for (let s = 0; s < 3; s++) {
+          ctx.rotate((Math.PI * 2) / 3);
+          ctx.beginPath();
+          ctx.arc(0, 0, midR, 0, Math.PI * 0.42);
+          ctx.stroke();
+        }
+        // Small telemetry dots on gyro ring
+        for (let d = 0; d < 6; d++) {
+          const ang = (d / 6) * Math.PI * 2;
+          ctx.fillStyle = '#FFFFFF';
+          ctx.beginPath();
+          ctx.arc(Math.cos(ang) * midR, Math.sin(ang) * midR, 1.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+
+        // 5. Inner Concentric Acoustic Resonance Ring (Expands with Voice Volume)
+        const innerR = 42 + audioVol * 16;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(time * 0.9);
+        ctx.strokeStyle = glowColor + '0.85)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 6]);
+        ctx.beginPath();
+        ctx.arc(0, 0, innerR, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+
+        // 6. Central Arc Reactor Plasma Nucleus
+        const coreR = 24 + audioVol * 14;
+        const nucleus = ctx.createRadialGradient(cx, cy, 2, cx, cy, coreR);
+        nucleus.addColorStop(0, '#FFFFFF');
+        nucleus.addColorStop(0.35, primaryColor);
+        nucleus.addColorStop(0.85, glowColor + '0.8)');
+        nucleus.addColorStop(1, glowColor + '0)');
+
+        ctx.fillStyle = nucleus;
+        ctx.beginPath();
+        ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Triangular Core Inscription (High-Tech Emblem)
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(time * 1.5);
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let i = 0; i < 3; i++) {
+          const a = (i * Math.PI * 2) / 3 - Math.PI / 2;
+          const tr = 11 + audioVol * 4;
+          const tx = Math.cos(a) * tr;
+          const ty = Math.sin(a) * tr;
+          if (i === 0) ctx.moveTo(tx, ty);
+          else ctx.lineTo(tx, ty);
+        }
+        ctx.closePath();
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      requestAnimationFrame(drawCore);
+    }
+
+    initAadiCoreCanvas();
+
+    // Toggle Hands-Free Continuous Voice Loop
+    if (aadiMicToggleBtn) {
+      aadiMicToggleBtn.addEventListener('click', () => {
+        isHandsFreeEnabled = !isHandsFreeEnabled;
+        if (isHandsFreeEnabled) {
+          aadiMicToggleBtn.classList.remove('muted');
+          aadiMicToggleBtn.innerHTML = '🎙️ Hands-Free ON';
+          if (managerVoiceDeck && managerVoiceDeck.classList.contains('active')) {
+            startVoiceRecognition();
+          }
+        } else {
+          aadiMicToggleBtn.classList.add('muted');
+          aadiMicToggleBtn.innerHTML = '🔇 Hands-Free OFF';
+          stopVoiceRecognition(false);
+        }
+      });
+    }
+
+    if (aadiCoreInteractive) {
+      aadiCoreInteractive.addEventListener('click', () => {
+        if (isListening) {
+          stopVoiceRecognition(true);
+        } else {
+          startVoiceRecognition();
+        }
+      });
+    }
+
+    let hasPlayedWelcomeGreeting = false;
+
+    function openManagerVoiceDeck() {
+      if (!managerVoiceDeck) return;
+      managerVoiceDeck.classList.add('active');
+      if (managerVoiceBtn) managerVoiceBtn.classList.add('active');
+      if (typeof closeWarRoomConsole === 'function') closeWarRoomConsole();
+
+      // Zoom straight to Sara's Executive Cabin
+      if (window.office3D) {
+        window.office3D.focusRoom('founder');
+      }
+
+      setSaraState('STANDBY');
+      if (managerStatusText) managerStatusText.textContent = 'Sara is standing by for Boss...';
+
+      // Warm up microphone hardware & audio context under user gesture
+      ensureMicrophoneReady();
+
+      // One-Touch Activation: First time Boss enters, Sara welcomes Boss verbally!
+      if (!hasPlayedWelcomeGreeting && managerHistory.length === 0) {
+        hasPlayedWelcomeGreeting = true;
+        setSaraState('INVESTIGATING');
+        if (managerStatusText) managerStatusText.textContent = '⚡ Sara initializing live session...';
+
+        fetch('/api/automation/manager-welcome')
+          .then(r => r.json())
+          .then(data => {
+            if (data.success) {
+              const initialBriefEl = document.getElementById('manager-initial-brief');
+              const briefHtml = `
+                <div style="font-weight: 800; color: #38BDF8; margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between;">
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <span>⚡</span>
+                    <span style="letter-spacing: 0.05em; font-size: 0.7rem; text-transform: uppercase;">Executive Status Briefing</span>
+                  </div>
+                  <span class="aadi-plan-badge" style="background: rgba(16, 185, 129, 0.2); color: #34D399; border-color: rgba(16, 185, 129, 0.4);">● 7 Engines Active</span>
+                </div>
+                <div style="color: #F8FAFC; line-height: 1.5; font-size: 0.76rem;">
+                  ${escapeHtml(data.greetingText)}
+                </div>
+                <div style="display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
+                  <span class="aadi-plan-badge" style="background: rgba(56, 189, 248, 0.15); color: #38BDF8; border-color: rgba(56, 189, 248, 0.3);">Dipti: ${Number(data.diptiCount || 11624).toLocaleString('en-IN')} MCQs (#1)</span>
+                  <span class="aadi-plan-badge" style="background: rgba(245, 158, 11, 0.15); color: #FBBF24; border-color: rgba(245, 158, 11, 0.3);">Bikram: ${data.bikramCount || 102} Notices</span>
+                </div>
+                ${data.audioBase64 ? `
+                  <div style="margin-top: 6px;">
+                    <button class="manager-replay-btn" onclick="playManagerVoiceAudio('${data.audioBase64}', '${escapeHtml(data.greetingText).replace(/'/g, "\\'")}')">
+                      <span>🔊 Replay Brief</span>
+                    </button>
+                  </div>
+                ` : ''}
+              `;
+              if (initialBriefEl) {
+                const bubble = initialBriefEl.querySelector('.manager-bubble');
+                if (bubble) bubble.innerHTML = briefHtml;
+              } else {
+                appendManagerMessage({
+                  sender: 'manager',
+                  text: data.greetingText,
+                  audioBase64: data.audioBase64
+                });
+              }
+
+              if (data.audioBase64) {
+                playManagerVoiceAudio(data.audioBase64, data.greetingText);
+              } else {
+                speakTextWithBrowserFallback(data.greetingText);
+              }
+            }
+          })
+          .catch(() => {
+            speakTextWithBrowserFallback("Namaskar Naresh Boss! Sara live hai. Boliye, kya order hai?");
+          });
+      } else if (isHandsFreeEnabled) {
+        setTimeout(() => {
+          startVoiceRecognition();
+        }, 350);
+      }
+    }
+
+    function closeManagerVoiceDeck() {
+      if (!managerVoiceDeck) return;
+      managerVoiceDeck.classList.remove('active');
+      if (managerVoiceBtn) managerVoiceBtn.classList.remove('active');
+      stopVoiceRecognition(false);
+      if (currentAudioPlayback) {
+        currentAudioPlayback.pause();
+        currentAudioPlayback = null;
+      }
+      setSaraState('STANDBY');
+    }
+
+    function toggleManagerVoiceDeck() {
+      if (!managerVoiceDeck) return;
+      if (managerVoiceDeck.classList.contains('active')) {
+        closeManagerVoiceDeck();
+      } else {
+        openManagerVoiceDeck();
+        if (audio) audio.playChime();
+      }
+    }
+
+    if (managerVoiceBtn) {
+      managerVoiceBtn.addEventListener('click', toggleManagerVoiceDeck);
+    }
+
+    if (managerCloseBtn) {
+      managerCloseBtn.addEventListener('click', closeManagerVoiceDeck);
+    }
+
+    if (managerClearBtn) {
+      managerClearBtn.addEventListener('click', () => {
+        if (audio) audio.playChime();
+        managerHistory = [];
+        hasPlayedWelcomeGreeting = false;
+        if (managerFeed) {
+          managerFeed.innerHTML = `
+            <div class="manager-msg manager">
+              <div class="manager-bubble">
+                <div style="font-weight: 700; color: #38BDF8; margin-bottom: 2px;">⚡ Session Cleared</div>
+                History cleared Boss! All 7 fleet engines are nominal. Standing by for your directive!
+              </div>
+            </div>
+          `;
+        }
+      });
+    }
+
+    // Quick prompt chips
+    if (managerVoiceDeck) {
+      managerVoiceDeck.querySelectorAll('.manager-prompt-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const prompt = chip.getAttribute('data-prompt');
+          if (prompt) {
+            handleManagerSubmit(prompt);
+          }
+        });
+      });
+    }
+
+    function setSaraState(state) {
+      saraCoreState = state;
+    }
+
+    // Fast synchronous in-memory 16-bit Linear PCM WAV Encoder (<2ms)
+    function writeWavString(view, offset, string) {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    }
+
+    function exportWavFromFloat32(chunks, sampleRate) {
+      let totalSamples = 0;
+      for (let i = 0; i < chunks.length; i++) {
+        totalSamples += chunks[i].length;
+      }
+      const merged = new Float32Array(totalSamples);
+      let offset = 0;
+      for (let i = 0; i < chunks.length; i++) {
+        merged.set(chunks[i], offset);
+        offset += chunks[i].length;
+      }
+
+      const buffer = new ArrayBuffer(44 + merged.length * 2);
+      const view = new DataView(buffer);
+
+      // RIFF chunk descriptor
+      writeWavString(view, 0, 'RIFF');
+      view.setUint32(4, 36 + merged.length * 2, true);
+      writeWavString(view, 8, 'WAVE');
+
+      // fmt sub-chunk
+      writeWavString(view, 12, 'fmt ');
+      view.setUint32(16, 16, true); // SubChunk1Size (16 for PCM)
+      view.setUint16(20, 1, true);  // AudioFormat (1 for raw linear PCM)
+      view.setUint16(22, 1, true);  // NumChannels (1 = mono)
+      view.setUint32(24, sampleRate, true); // SampleRate
+      view.setUint32(28, sampleRate * 2, true); // ByteRate (SampleRate * 1 channel * 2 bytes/sample)
+      view.setUint16(32, 2, true);  // BlockAlign (1 channel * 2 bytes/sample)
+      view.setUint16(34, 16, true); // BitsPerSample (16 bits)
+
+      // data sub-chunk
+      writeWavString(view, 36, 'data');
+      view.setUint32(40, merged.length * 2, true);
+
+      // Linear Float32 to 16-bit PCM quantization
+      let pcmOffset = 44;
+      for (let i = 0; i < merged.length; i++, pcmOffset += 2) {
+        let s = Math.max(-1, Math.min(1, merged[i]));
+        view.setInt16(pcmOffset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      }
+
+      return new Blob([buffer], { type: 'audio/wav' });
+    }
+
+    // Initialize Web Audio Hardware Stream & Real-Time ScriptProcessor VAD
+    function ensureMicrophoneReady(callback) {
+      if (micStream && audioCtx) {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume().then(() => { if (callback) callback(); });
+        } else {
+          if (callback) callback();
+        }
+        return;
+      }
+
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          }
+        }).then(stream => {
+          micStream = stream;
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const source = audioCtx.createMediaStreamSource(stream);
+
+          // Fast frequency visualizer analyser
+          micAnalyser = audioCtx.createAnalyser();
+          micAnalyser.fftSize = 128;
+          micDataArray = new Uint8Array(micAnalyser.frequencyBinCount);
+          source.connect(micAnalyser);
+
+          // Silent GainNode to eliminate speaker acoustic feedback
+          silentGainNode = audioCtx.createGain();
+          silentGainNode.gain.value = 0;
+
+          // High-Performance Audio Worklet / ScriptProcessor for Sub-10ms RMS VAD & Linear PCM Streaming
+          micScriptProcessor = audioCtx.createScriptProcessor(4096, 1, 1);
+          source.connect(micScriptProcessor);
+          micScriptProcessor.connect(silentGainNode);
+          silentGainNode.connect(audioCtx.destination);
+
+          micScriptProcessor.onaudioprocess = (e) => {
+            const input = e.inputBuffer.getChannelData(0);
+            let sum = 0;
+            for (let i = 0; i < input.length; i++) {
+              sum += input[i] * input[i];
+            }
+            const rms = Math.sqrt(sum / input.length);
+            // Exponential Smoothing
+            currentMicRms = currentMicRms * 0.65 + rms * 0.35;
+
+            // Ambient background noise-floor tracking
+            if (!isSpeakingDetected && saraCoreState !== 'SPEAKING') {
+              ambientNoiseRms = ambientNoiseRms * 0.96 + currentMicRms * 0.04;
+            }
+            const speechThreshold = Math.max(0.012, ambientNoiseRms * 2.2);
+            const silenceThreshold = speechThreshold * 0.65;
+
+            // 1. INDUSTRY STANDARD BARGE-IN INTERRUPTION (Instantaneous Turn-Taking)
+            if (saraCoreState === 'SPEAKING' && currentMicRms > speechThreshold * 1.5) {
+              if (currentAudioPlayback) {
+                try { currentAudioPlayback.pause(); } catch (err) {}
+                currentAudioPlayback = null;
+              }
+              if ('speechSynthesis' in window) {
+                try { window.speechSynthesis.cancel(); } catch (err) {}
+              }
+              setSaraState('LISTENING');
+              isListening = true;
+              isSpeakingDetected = true;
+              pcmRecordedChunks = [new Float32Array(input)];
+              speechSilenceStartTime = 0;
+              if (managerStatusText) managerStatusText.textContent = '🎙️ Sara listening to Boss...';
+              return;
+            }
+
+            // 2. LIVE VOICE VAD & 750MS SILENCE AUTO-SUBMISSION
+            if (isListening && !isSubmittingLock) {
+              if (currentMicRms >= speechThreshold) {
+                if (!isSpeakingDetected) {
+                  isSpeakingDetected = true;
+                  speechSilenceStartTime = 0;
+                  pcmRecordedChunks = [];
+                  if (managerStatusText) managerStatusText.textContent = '🎙️ Sara listening to Boss...';
+                }
+                pcmRecordedChunks.push(new Float32Array(input));
+                speechSilenceStartTime = 0;
+              } else if (currentMicRms < silenceThreshold) {
+                if (isSpeakingDetected) {
+                  pcmRecordedChunks.push(new Float32Array(input));
+                  const now = Date.now();
+                  if (!speechSilenceStartTime) {
+                    speechSilenceStartTime = now;
+                  } else if (now - speechSilenceStartTime >= 700) {
+                    // Natural 700ms pause detected: Boss finished speaking! Auto-submit hands-free!
+                    isSpeakingDetected = false;
+                    speechSilenceStartTime = 0;
+                    autoSubmitRecordedPcm();
+                  }
+                }
+              }
+            }
+          };
+
+          if (callback) callback();
+        }).catch(err => {
+          console.warn('[Microphone Permission Denied or Failed]', err);
+          if (managerStatusText) managerStatusText.textContent = '⚠️ Microphone permission required';
+        });
+      }
+    }
+
+    // Hands-Free Auto Submission Helper
+    function autoSubmitRecordedPcm() {
+      if (isSubmittingLock) return;
+      if (!pcmRecordedChunks || pcmRecordedChunks.length < 3) {
+        pcmRecordedChunks = [];
+        return;
+      }
+      const sampleRate = (audioCtx && audioCtx.sampleRate) || 44100;
+      const wavBlob = exportWavFromFloat32(pcmRecordedChunks, sampleRate);
+      pcmRecordedChunks = [];
+      const text = (activeTranscript || (managerInput ? managerInput.value : '')).trim();
+      handleManagerSubmit(text, wavBlob);
+    }
+
+    // Initialize Web Speech Recognition for Real-Time On-Screen Transcript Preview
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (SpeechRec) {
+      speechRecognition = new SpeechRec();
+      speechRecognition.continuous = true;
+      speechRecognition.interimResults = true;
+      speechRecognition.maxAlternatives = 1;
+      speechRecognition.lang = 'en-IN';
+
+      speechRecognition.onstart = () => {
+        isListening = true;
+        setSaraState('LISTENING');
+        if (managerStatusText) managerStatusText.textContent = '🎙️ Sara listening to Boss...';
+      };
+
+      speechRecognition.onresult = (event) => {
+        let interim = '';
+        let finalStr = '';
+        for (let i = 0; i < event.results.length; i++) {
+          const res = event.results[i];
+          if (res.isFinal) {
+            finalStr += res[0].transcript + ' ';
+          } else {
+            interim += res[0].transcript;
+          }
+        }
+
+        const combined = (finalStr + interim).trim();
+        if (combined) {
+          activeTranscript = combined;
+          if (managerInput && document.activeElement !== managerInput) {
+            managerInput.value = combined;
+          }
+          if (managerStatusText) managerStatusText.textContent = `🎙️ "${combined}"`;
+        }
+      };
+
+      speechRecognition.onerror = (event) => {
+        if (event.error === 'no-speech' || event.error === 'network') {
+          return; // Ignore transient network/speech pauses
+        }
+        if (event.error === 'not-allowed') {
+          stopVoiceRecognition(false);
+          if (managerStatusText) managerStatusText.textContent = '⚠️ Microphone permission required';
+        }
+      };
+
+      speechRecognition.onend = () => {
+        if (isListening && isHandsFreeEnabled && !isSubmittingLock) {
+          setTimeout(() => {
+            if (isListening && !isSubmittingLock) {
+              try {
+                speechRecognition.start();
+              } catch (e) {}
+            }
+          }, 150);
+        } else {
+          isListening = false;
+          if (saraCoreState === 'LISTENING') setSaraState('STANDBY');
+        }
+      };
+    }
+
+    function startVoiceRecognition() {
+      if (isSubmittingLock) return;
+      activeTranscript = '';
+      isSpeakingDetected = false;
+      speechSilenceStartTime = 0;
+      pcmRecordedChunks = [];
+
+      if (currentAudioPlayback) {
+        try { currentAudioPlayback.pause(); } catch (e) {}
+        currentAudioPlayback = null;
+      }
+      if ('speechSynthesis' in window) {
+        try { window.speechSynthesis.cancel(); } catch (e) {}
+      }
+
+      ensureMicrophoneReady(() => {
+        isListening = true;
+        setSaraState('LISTENING');
+        if (managerStatusText) managerStatusText.textContent = '🎙️ Sara listening to Boss...';
+
+        if (speechRecognition) {
+          try {
+            speechRecognition.start();
+          } catch (err) {
+            try {
+              speechRecognition.stop();
+              setTimeout(() => {
+                if (!isSubmittingLock && isListening) {
+                  try { speechRecognition.start(); } catch (e) {}
+                }
+              }, 150);
+            } catch (e) {}
+          }
+        }
+      });
+    }
+
+    function stopVoiceRecognition(shouldSubmit = false) {
+      isListening = false;
+      isSpeakingDetected = false;
+      speechSilenceStartTime = 0;
+
+      if (speechRecognition) {
+        try {
+          speechRecognition.stop();
+        } catch (e) {}
+      }
+
+      if (shouldSubmit && !isSubmittingLock) {
+        if (pcmRecordedChunks && pcmRecordedChunks.length >= 3) {
+          const sampleRate = (audioCtx && audioCtx.sampleRate) || 44100;
+          const wavBlob = exportWavFromFloat32(pcmRecordedChunks, sampleRate);
+          pcmRecordedChunks = [];
+          const text = (activeTranscript || (managerInput ? managerInput.value : '')).trim();
+          handleManagerSubmit(text, wavBlob);
+        } else {
+          const text = (activeTranscript || (managerInput ? managerInput.value : '')).trim();
+          if (text) {
+            handleManagerSubmit(text, null);
+          } else {
+            resumeHandsFreeListening();
+          }
+        }
+      }
+    }
+
+    // Submit handler (Voice or Form)
+    if (managerForm) {
+      managerForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const text = managerInput ? managerInput.value.trim() : '';
+        if (text && !isSubmittingLock) {
+          handleManagerSubmit(text);
+        }
+      });
+    }
+
+    async function handleManagerSubmit(queryText = '', audioBlob = null) {
+      if (isSubmittingLock) return;
+      isSubmittingLock = true; // ACQUIRE STRICT MUTEX LOCK
+
+      stopVoiceRecognition(false);
+
+      if (managerInput) managerInput.value = '';
+      if (managerSendBtn) managerSendBtn.disabled = true;
+
+      setSaraState('INVESTIGATING');
+      if (managerStatusText) managerStatusText.textContent = '⚡ Sara analyzing & consulting fleet...';
+
+      // Visual: Shoot 3D data beam or focus room if agent specified
+      const lower = (queryText || '').toLowerCase();
+      if (window.office3D) {
+        if (lower.includes('bikram') || lower.includes('notice')) window.office3D.focusRoom('bullpen');
+        else if (lower.includes('chhabi') || lower.includes('exam')) window.office3D.focusRoom('bullpen');
+        else if (lower.includes('dipti') || lower.includes('mcq')) window.office3D.focusRoom('bullpen');
+        else if (lower.includes('priyanka') || lower.includes('affair')) window.office3D.focusRoom('media');
+        else if (lower.includes('subham') || lower.includes('blog')) window.office3D.focusRoom('bullpen');
+        else if (lower.includes('trupti') || lower.includes('telegram')) window.office3D.focusRoom('cafe');
+        else if (lower.includes('manas') || lower.includes('website')) window.office3D.focusRoom('bullpen');
+        else if (lower.includes('aarya') || lower.includes('research') || lower.includes('lab') || lower.includes('explain') || lower.includes('kya hai') || lower.includes('what is')) window.office3D.focusRoom('ailab');
+      }
+
+      // Convert audioBlob to base64 linear PCM WAV if present
+      let audioBase64 = null;
+      let audioMimeType = 'audio/wav';
+      if (audioBlob) {
+        try {
+          audioMimeType = audioBlob.type || 'audio/wav';
+          const buffer = await audioBlob.arrayBuffer();
+          const bytes = new Uint8Array(buffer);
+          let binary = '';
+          for (let i = 0; i < bytes.byteLength; i++) {
+            binary += String.fromCharCode(bytes[i]);
+          }
+          audioBase64 = window.btoa(binary);
+        } catch (e) {
+          console.warn('[Audio Blob Base64 Conversion Error]', e);
+        }
+      }
+
+      // Append Boss query placeholder
+      const bossMsgDiv = appendManagerMessage({
+        sender: 'boss',
+        text: queryText || (audioBase64 ? '🎙️ Spoken directive to Sara...' : 'Spoken directive')
+      });
+
+      try {
+        const res = await fetch('/api/automation/manager-voice-chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query: queryText,
+            audioBase64: audioBase64,
+            audioMimeType: audioMimeType,
+            voice: 'Kore',
+            history: managerHistory
+          })
+        });
+
+        const data = await res.json();
+        if (data.success && data.replyText) {
+          const userEntry = data.bossTranscribed || queryText || 'Spoken directive';
+          managerHistory.push({ role: 'user', content: userEntry });
+          managerHistory.push({ role: 'model', content: data.replyText });
+
+          // If Gemini transcribed Boss's voice, update boss message bubble in UI
+          if (bossMsgDiv && data.bossTranscribed) {
+            const bubble = bossMsgDiv.querySelector('.manager-bubble');
+            if (bubble) bubble.textContent = data.bossTranscribed;
+          }
+
+          const chain = data.delegationChain;
+          const targetAgent = (chain && chain.assignedAgent) || (data.delegatedAgent && data.delegatedAgent.name && data.delegatedAgent.name.toLowerCase()) || null;
+          const isDelegatedToSpecialist = targetAgent && targetAgent !== 'sara';
+
+          if (isDelegatedToSpecialist) {
+            // 1. Smoothly pan camera to specialist agent's workstation
+            if (window.office3D && typeof window.office3D.focusAgent === 'function') {
+              window.office3D.focusAgent(targetAgent, 950);
+            }
+            // 2. Spawn 3D billboarding speech bubble above the specialist agent's head
+            const agentSpeechText = (chain && chain.agentSpeech) || `${chain?.agentName || data.delegatedAgent.name} executing assigned directive...`;
+            if (typeof spawnSpeechBubble === 'function') {
+              spawnSpeechBubble(targetAgent, agentSpeechText);
+            }
+
+            if (managerStatusText) {
+              managerStatusText.textContent = `⚡ Delegated to ${chain?.agentName || data.delegatedAgent.name} — Processing deliverable...`;
+            }
+
+            // 3. Pause so Boss visually watches the agent execute at desk, then camera returns to Sara
+            await new Promise(resolve => setTimeout(resolve, 2200));
+
+            if (window.office3D && typeof window.office3D.focusRoom === 'function') {
+              window.office3D.focusRoom('founder', 950);
+            }
+            // Wait for camera to arrive back in Sara's executive suite
+            await new Promise(resolve => setTimeout(resolve, 600));
+          }
+
+          // 4. Sara briefs Boss
+          setSaraState('SPEAKING');
+          const saraSpokenText = data.speechBubble || (isDelegatedToSpecialist ? `Boss, ${chain?.agentName || 'Agent'} has prepared the deliverable. Briefing ready.` : data.replyText);
+          if (typeof spawnSpeechBubble === 'function') {
+            spawnSpeechBubble('sara', saraSpokenText);
+          }
+
+          if (managerStatusText) {
+            managerStatusText.textContent = `🎙️ Sara briefing Boss with recommendations`;
+          }
+
+          appendManagerMessage({
+            sender: 'manager',
+            text: data.replyText,
+            audioBase64: data.audioBase64,
+            actionsTaken: data.actionsTaken,
+            plan: data.plan,
+            searchUsed: !!data.searchUsed,
+            delegatedAgent: data.delegatedAgent,
+            delegationChain: chain
+          });
+
+          // Play Audio Voice Response (Gemini 24kHz Kore Audio / EdgeTTS with instant browser speech fallback)
+          if (data.audioBase64) {
+            playManagerVoiceAudio(data.audioBase64, saraSpokenText);
+          } else {
+            speakTextWithBrowserFallback(saraSpokenText);
+          }
+
+          const tickerEl = document.getElementById('ticker-text');
+          if (tickerEl) {
+            tickerEl.textContent = `🎙️ [SARA] ${saraSpokenText}`;
+          }
+        } else {
+          const failMsg = 'Arre Boss, server connect nahi ho paya. Ek baar dubara check karke bolo!';
+          appendManagerMessage({
+            sender: 'manager',
+            text: failMsg,
+            isError: true
+          });
+          speakTextWithBrowserFallback(failMsg);
+        }
+      } catch (err) {
+        const netMsg = 'Boss, network issue aaya hai. Server check karo ya dubara bolo.';
+        appendManagerMessage({
+          sender: 'manager',
+          text: netMsg,
+          isError: true
+        });
+        speakTextWithBrowserFallback(netMsg);
+      } finally {
+        isSubmittingLock = false; // RELEASE STRICT MUTEX LOCK
+        if (managerSendBtn) managerSendBtn.disabled = false;
+      }
+    }
+
+    // High-speed browser speech synthesis fallback
+    function speakTextWithBrowserFallback(text, onComplete) {
+      if ('speechSynthesis' in window && text) {
+        try {
+          window.speechSynthesis.cancel();
+          const cleanText = text.replace(/[*#`_~]/g, '').trim();
+          const utterance = new SpeechSynthesisUtterance(cleanText);
+          utterance.rate = 1.05;
+          utterance.pitch = 1.08;
+
+          const hasDevanagari = /[\u0900-\u097F]/.test(cleanText);
+          const hasOdia = /[\u0B00-\u0B7F]/.test(cleanText);
+
+          if (hasDevanagari) {
+            utterance.lang = 'hi-IN';
+          } else if (hasOdia) {
+            utterance.lang = 'or-IN';
+          } else {
+            utterance.lang = 'en-IN';
+          }
+          
+          const voices = window.speechSynthesis.getVoices();
+          let matchedVoice = null;
+
+          if (hasDevanagari) {
+            matchedVoice = voices.find(v => (v.lang && v.lang.startsWith('hi')) || v.name.includes('Hindi') || v.name.includes('हिन्दी'));
+          } else if (hasOdia) {
+            matchedVoice = voices.find(v => (v.lang && v.lang.startsWith('or')) || v.name.includes('Odia'));
+          }
+
+          if (!matchedVoice) {
+            matchedVoice = voices.find(v => (v.name.includes('India') || v.name.includes('Hindi') || (v.lang && v.lang.includes('IN'))) && (v.name.includes('Female') || v.name.includes('Zira') || v.name.includes('Kavya') || v.name.includes('Google') || v.name.includes('Neerja'))) || voices.find(v => v.lang && v.lang.startsWith('en')) || voices[0];
+          }
+
+          if (matchedVoice) utterance.voice = matchedVoice;
+
+          setSaraState('SPEAKING');
+          if (managerStatusText) managerStatusText.textContent = '🔊 Sara briefing Boss...';
+
+          utterance.onend = () => {
+            setSaraState('STANDBY');
+            if (managerStatusText) managerStatusText.textContent = '🎙️ Sara listening for Boss...';
+            if (onComplete) onComplete();
+            else resumeHandsFreeListening();
+          };
+          utterance.onerror = (e) => {
+            console.warn('[SpeechSynthesis Error]', e);
+            setSaraState('STANDBY');
+            if (onComplete) onComplete();
+            else resumeHandsFreeListening();
+          };
+          window.speechSynthesis.speak(utterance);
+          return;
+        } catch (e) {
+          console.warn('[SpeechSynthesis Exception]', e);
+        }
+      }
+      setSaraState('STANDBY');
+      if (onComplete) onComplete();
+      else resumeHandsFreeListening();
+    }
+
+    // Pre-warm browser voices on initialization
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        try { window.speechSynthesis.getVoices(); } catch (e) {}
+      };
+    }
+
+    function playManagerVoiceAudio(audioDataUri, fallbackText = '') {
+      if (!audioDataUri) {
+        if (fallbackText) {
+          speakTextWithBrowserFallback(fallbackText);
+        } else {
+          setSaraState('STANDBY');
+          resumeHandsFreeListening();
+        }
+        return;
+      }
+
+      if (currentAudioPlayback) {
+        currentAudioPlayback.pause();
+        currentAudioPlayback = null;
+      }
+
+      currentAudioPlayback = new Audio(audioDataUri);
+      setSaraState('SPEAKING');
+      if (managerStatusText) managerStatusText.textContent = '🔊 Sara briefing Boss...';
+
+      currentAudioPlayback.onended = () => {
+        setSaraState('STANDBY');
+        if (managerStatusText) managerStatusText.textContent = '🎙️ Sara listening for Boss...';
+        currentAudioPlayback = null;
+        resumeHandsFreeListening();
+      };
+
+      currentAudioPlayback.onerror = () => {
+        if (fallbackText) {
+          speakTextWithBrowserFallback(fallbackText);
+        } else {
+          setSaraState('STANDBY');
+          currentAudioPlayback = null;
+          resumeHandsFreeListening();
+        }
+      };
+
+      currentAudioPlayback.play().catch(e => {
+        console.warn('[Audio Playback Blocked or Interrupted]:', e);
+        if (fallbackText) {
+          speakTextWithBrowserFallback(fallbackText);
+        } else {
+          setSaraState('STANDBY');
+          resumeHandsFreeListening();
+        }
+      });
+    }
+
+    function resumeHandsFreeListening() {
+      if (isHandsFreeEnabled && managerVoiceDeck && managerVoiceDeck.classList.contains('active')) {
+        setTimeout(() => {
+          if (!isSubmittingLock) startVoiceRecognition();
+        }, 400);
+      }
+    }
+
+    function appendManagerMessage({ sender, text, audioBase64, actionsTaken, plan, searchUsed = false, delegatedAgent = null, delegationChain = null, isError = false }) {
+      if (!managerFeed) return;
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `manager-msg ${sender}`;
+
+      let delegationChainHtml = '';
+      if (delegationChain && delegationChain.assignedAgent && delegationChain.assignedAgent !== 'sara') {
+        const agName = escapeHtml(delegationChain.agentName || delegationChain.assignedAgent.toUpperCase());
+        const agRole = escapeHtml(delegationChain.agentRole || 'SPECIALIST ENGINE');
+        const recText = escapeHtml(delegationChain.managerRecommendation || '').trim();
+
+        delegationChainHtml = `
+          <div class="executive-delegation-card">
+            <div class="delegation-chain-header">
+              <div class="delegation-flow-track">
+                <span class="delegation-flow-boss">👑 BOSS</span>
+                <span class="delegation-flow-arrow">➔</span>
+                <span class="delegation-flow-sara">👔 SARA (ORCHESTRATOR)</span>
+                <span class="delegation-flow-arrow">➔</span>
+                <span class="delegation-flow-agent">🤖 ${agName}</span>
+              </div>
+              <span class="delegation-role-badge">${agRole}</span>
+            </div>
+            ${recText ? `
+              <div class="delegation-recommendation-box">
+                <strong>💡 Sara's Strategic Briefing & Next Step:</strong><br/>
+                ${recText}
+              </div>
+            ` : ''}
+            <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+              <button class="manager-telegram-btn" onclick="sendDeliverableToTelegram('${escapeHtml(delegationChain.agentName || 'Agent')}')">
+                <span>✈️ Send Report to Telegram</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      let delegatedHtml = '';
+      if (!delegationChainHtml && delegatedAgent && delegatedAgent.name) {
+        delegatedHtml = `
+          <div style="margin-bottom: 6px;">
+            <span class="aadi-plan-badge" style="background: rgba(147, 51, 234, 0.22); color: #C084FC; border: 1px solid rgba(168, 85, 247, 0.45); font-size: 0.65rem; display: inline-flex; align-items: center; gap: 5px; font-weight: 700; letter-spacing: 0.04em;">
+              <span>🔬</span> <span>${escapeHtml(delegatedAgent.name).toUpperCase()} // ${escapeHtml(delegatedAgent.role || 'RESEARCH LAB').toUpperCase()}</span>
+            </span>
+          </div>
+        `;
+      }
+
+      let searchHtml = '';
+      if (searchUsed) {
+        searchHtml = `
+          <div style="margin-bottom: 5px;">
+            <span class="aadi-plan-badge" style="background: rgba(14, 165, 233, 0.2); color: #38BDF8; border-color: rgba(14, 165, 233, 0.4); font-size: 0.62rem; display: inline-flex; align-items: center; gap: 4px;">
+              <span>🌐</span> Verified via Live Web Search
+            </span>
+          </div>
+        `;
+      }
+
+      let actionsHtml = '';
+      if (Array.isArray(actionsTaken) && actionsTaken.length > 0) {
+        actionsHtml = actionsTaken.map(a => `
+          <div class="manager-action-pill">
+            <span>${a.label ? a.label : `⚡ Dispatched: <strong>${(a.agent || '').toUpperCase()}</strong> (${a.workflow})`}</span>
+          </div>
+        `).join('');
+      }
+
+      let planHtml = '';
+      if (plan && plan.targetAgent) {
+        const agentName = plan.agentName || plan.targetAgent.toUpperCase();
+        planHtml = `
+          <div class="aadi-plan-card">
+            <div class="aadi-plan-header">
+              <div class="aadi-plan-title">
+                <span>📋</span>
+                <span>Action Plan: ${escapeHtml(agentName)}</span>
+              </div>
+              <span class="aadi-plan-badge">Ready for Boss</span>
+            </div>
+            <div class="aadi-plan-section">
+              <strong>🔍 Findings:</strong> ${escapeHtml(plan.findings || 'Telemetry audited')}
+            </div>
+            <div class="aadi-plan-section">
+              <strong>⚡ Recommended Plan:</strong> ${escapeHtml(plan.proposedPlan || 'Trigger pipeline execution')}
+            </div>
+            <button class="aadi-plan-btn-execute" onclick="executeAadiPlan('${plan.workflow || ''}', '${plan.targetAgent || ''}')">
+              <span>⚡ Approve & Execute Plan Now</span>
+            </button>
+          </div>
+        `;
+      }
+
+      let replayHtml = '';
+      if (audioBase64) {
+        replayHtml = `
+          <div>
+            <button class="manager-replay-btn" onclick="playManagerVoiceAudio('${audioBase64}')">
+              <span>🔊 Replay Voice</span>
+            </button>
+          </div>
+        `;
+      } else if (sender === 'manager' && text) {
+        replayHtml = `
+          <div>
+            <button class="manager-replay-btn" onclick="speakTextWithBrowserFallback('${escapeHtml(text).replace(/'/g, "\\'")}')">
+              <span>🔊 Speak Out Loud</span>
+            </button>
+          </div>
+        `;
+      }
+
+      let escapedContent = escapeHtml(text)
+        .replace(/###\s*(.*?)(?:\n|$)/g, '<div style="font-weight: 800; color: #38BDF8; margin-top: 8px; margin-bottom: 4px; font-size: 0.82rem;">$1</div>')
+        .replace(/##\s*(.*?)(?:\n|$)/g, '<div style="font-weight: 800; color: #38BDF8; margin-top: 10px; margin-bottom: 4px; font-size: 0.86rem;">$1</div>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #F8FAFC;">$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/```([a-z]*)\n([\s\S]*?)```/g, '<pre style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; padding: 8px; font-size: 0.72rem; overflow-x: auto; color: #38BDF8; margin: 4px 0;"><code>$2</code></pre>')
+        .replace(/`([^`]+)`/g, '<code style="background: rgba(15, 23, 42, 0.8); padding: 1px 4px; border-radius: 4px; color: #38BDF8; font-size: 0.74rem;">$1</code>')
+        .replace(/(?:^|\n)[-•]\s+(.*?)(?=\n|$)/g, '<div style="display: flex; gap: 6px; margin: 3px 0; padding-left: 4px;"><span style="color: #38BDF8;">•</span><span>$1</span></div>')
+        .replace(/\n\n+/g, '<div style="height: 6px;"></div>')
+        .replace(/\n/g, '<br/>');
+
+      msgDiv.innerHTML = `
+        <div class="manager-bubble">
+          ${delegationChainHtml}
+          ${delegatedHtml}
+          ${searchHtml}
+          ${escapedContent}
+          ${planHtml}
+          ${actionsHtml}
+          ${replayHtml}
+        </div>
+      `;
+
+      managerFeed.appendChild(msgDiv);
+      managerFeed.scrollTop = managerFeed.scrollHeight;
+      return msgDiv;
+    }
+
+    // Interactive Telegram Broadcast Trigger for Deliverables
+    window.sendDeliverableToTelegram = function(agentName) {
+      handleManagerSubmit(`Send this ${agentName || 'agent'} report to Odisha Prep Telegram channel immediately.`);
+    };
+
+    // Interactive Action Plan Execution Trigger
+    window.executeAadiPlan = function(workflow, agentKey) {
+      if (audio) audio.playBell();
+      handleManagerSubmit(`Execute plan for ${agentKey || 'fleet'} immediately.`);
+    };
 
     // --- 8. ACTION BUTTONS ---
     document.getElementById('bell-btn').addEventListener('click', () => {

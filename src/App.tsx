@@ -91,7 +91,7 @@ import { useActiveExamContext } from './lib/activeExamStore';
 import { ActiveExamContextBar } from './components/ActiveExamContextBar';
 import { useTheme } from './lib/themeStore';
 // instantQuestionCompiler loaded dynamically
-import { examService, isAuthenticExam } from './lib/examService';
+import { examService, isAuthenticExam, isContentVisibleForStageAndStream } from './lib/examService';
 import { ThemeToggle } from './components/ThemeToggle';
 import { LanguageToggle } from './components/LanguageToggle';
 import { useLanguage, toOdiaDigits } from './lib/LanguageContext';
@@ -5571,6 +5571,54 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     } catch (e) {}
   };
 
+  // Examination Academic Streams / Disciplines Hierarchy support
+  const [activeStream, setActiveStream] = useState<string>(() => {
+    try {
+      const sp = new URLSearchParams(window.location.search);
+      const urlStream = sp.get('stream');
+      return urlStream || '';
+    } catch (e) {
+      return '';
+    }
+  });
+
+  // Sync activeStream from currentExam.streams or URL
+  useEffect(() => {
+    if (!currentExam) {
+      setActiveStream('');
+      return;
+    }
+    const streams = currentExam.streams;
+    if (!streams || streams.length === 0) {
+      setActiveStream('');
+      return;
+    }
+    const sp = new URLSearchParams(window.location.search);
+    const urlStream = sp.get('stream');
+    if (urlStream) {
+      const match = streams.find((s: string) => s.toLowerCase() === urlStream.toLowerCase() || s.toLowerCase().replace(/\s+/g, '-') === urlStream.toLowerCase());
+      if (match) {
+        setActiveStream(match);
+        return;
+      }
+    }
+    setActiveStream(prev => (prev && streams.includes(prev)) ? prev : streams[0]);
+  }, [currentExam]);
+
+  const handleStreamSelect = (streamName: string) => {
+    setActiveStream(streamName);
+    try {
+      const sp = new URLSearchParams(window.location.search);
+      if (streamName) {
+        sp.set('stream', streamName.toLowerCase().replace(/\s+/g, '-'));
+      } else {
+        sp.delete('stream');
+      }
+      const newRelativePathQuery = window.location.pathname + (sp.toString() ? '?' + sp.toString() : '');
+      window.history.replaceState(null, '', newRelativePathQuery);
+    } catch (e) {}
+  };
+
   // Stage-Specific Syllabus View State for Student Portal
   const [showStageSyllabus, setShowStageSyllabus] = useState(false);
   const [stageSyllabusData, setStageSyllabusData] = useState<{ syllabus_markdown?: string } | null>(null);
@@ -5583,7 +5631,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     }
     let isSubscribed = true;
     setIsLoadingStageSyllabus(true);
-    examService.getExamSyllabus(selectedExam, activeStage).then(data => {
+    examService.getExamSyllabus(selectedExam, activeStage, activeStream).then(data => {
       if (isSubscribed) {
         setStageSyllabusData(data);
         setIsLoadingStageSyllabus(false);
@@ -5592,7 +5640,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       if (isSubscribed) setIsLoadingStageSyllabus(false);
     });
     return () => { isSubscribed = false; };
-  }, [selectedExam, activeStage]);
+  }, [selectedExam, activeStage, activeStream]);
 
   const setSelectedExam = (val: string | null) => {
     if (val === null) {
@@ -5602,6 +5650,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
       try {
         const sp = new URLSearchParams(window.location.search);
         sp.delete('stage');
+        sp.delete('stream');
         const newRel = window.location.pathname + (sp.toString() ? '?' + sp.toString() : '');
         window.history.replaceState(null, '', newRel);
       } catch (e) {}
@@ -7646,12 +7695,9 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
   const displayedFlashcardDecks = useMemo(() => {
     return examFlashcardDecks.filter(deck => {
-      if (activeStage && deck.stage && deck.stage !== 'All Stages' && deck.stage.toLowerCase() !== activeStage.toLowerCase()) {
-        return false;
-      }
-      return true;
+      return isContentVisibleForStageAndStream(deck, activeStage, activeStream);
     });
-  }, [examFlashcardDecks, activeStage]);
+  }, [examFlashcardDecks, activeStage, activeStream]);
 
   useEffect(() => {
     sessionStorage.setItem('oep_mobileExamTab', mobileExamTab);
@@ -7858,14 +7904,28 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
     }
     const fetchMaxQuestions = async () => {
       const topicBank = Object.values(dynamicQuestionBanks).flat().find((b: any) => b.id === practiceSettings.topic) as any;
+      const bankId = topicBank?.id || practiceSettings.topic;
       const bankTopicName = topicBank ? topicBank.title : practiceSettings.topic;
 
+      // 1. High-priority exact match by unique bank ID namespace
       let { data, error } = await supabase
         .from('questions')
         .select('topic')
-        .eq('examId', activeExamId)
-        .ilike('topic', bankTopicName)
+        .in('topic', [`bank__${bankId}`, bankId])
         .limit(500);
+
+      // 2. Fallback to title only if no ID-bound questions found
+      if (!error && (!data || data.length === 0) && bankTopicName) {
+        const titleRes = await supabase
+          .from('questions')
+          .select('topic')
+          .eq('examId', activeExamId)
+          .ilike('topic', bankTopicName)
+          .limit(500);
+        if (!titleRes.error && titleRes.data) {
+          data = titleRes.data;
+        }
+      }
         
       if (!error && (!data || data.length === 0)) {
         const fallbackRes = await supabase
@@ -8460,13 +8520,27 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
       const reqCount = Number(practiceSettings.questions) || 20;
       const fetchLimit = Math.max(reqCount * 5, 100);
+      const bankId = topicBank?.id || practiceSettings.topic;
 
+      // 1. High-priority exact match by unique bank ID namespace
       let { data, error } = await supabase
         .from('questions')
         .select('id, examId, topic, difficulty, questionText, options, correctAnswerIndex, explanation, diagram, sortOrder')
-        .eq('examId', effectiveExamId)
-        .ilike('topic', bankTopicName)
+        .in('topic', [`bank__${bankId}`, bankId])
         .limit(fetchLimit);
+
+      // 2. Fallback to title only if no ID-bound questions found
+      if (!error && (!data || data.length === 0) && bankTopicName) {
+        const titleRes = await supabase
+          .from('questions')
+          .select('id, examId, topic, difficulty, questionText, options, correctAnswerIndex, explanation, diagram, sortOrder')
+          .eq('examId', effectiveExamId)
+          .ilike('topic', bankTopicName)
+          .limit(fetchLimit);
+        if (!titleRes.error && titleRes.data && titleRes.data.length > 0) {
+          data = titleRes.data;
+        }
+      }
 
       if (!error && (!data || data.length === 0)) {
         const fallbackRes = await supabase
@@ -10259,26 +10333,26 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
               )}>
                 {currentExam.stages.map((st: string) => {
                   const isSelected = activeStage === st;
-                  // Compute total mock tests + question banks + flashcards matching this stage
+                  // Compute total mock tests + question banks + flashcards matching this stage and active stream
                   const stageMockCount = (mockTests || []).filter((mt: any) => {
                     if (mt.is_archived && !hasAccessTo(mt.id, selectedExam)) return false;
                     try {
                       const cfg = typeof mt.seriesId === 'string' ? JSON.parse(mt.seriesId) : (mt.seriesId || {});
                       if (cfg.examId !== selectedExam && mt.examId !== selectedExam) return false;
-                      return !mt.stage || mt.stage === 'All Stages' || mt.stage.toLowerCase() === st.toLowerCase();
+                      return isContentVisibleForStageAndStream(mt, st, activeStream);
                     } catch (e) {
-                      return mt.examId === selectedExam && (!mt.stage || mt.stage === 'All Stages' || mt.stage.toLowerCase() === st.toLowerCase());
+                      return mt.examId === selectedExam && isContentVisibleForStageAndStream(mt, st, activeStream);
                     }
                   }).length;
 
                   const stageBanksCount = Object.values(dynamicQuestionBanks || {}).flat().filter((b: any) => {
                     if (b.is_archived && !hasAccessTo(b.id, selectedExam)) return false;
                     if (b.examId !== selectedExam) return false;
-                    return !b.stage || b.stage === 'All Stages' || b.stage.toLowerCase() === st.toLowerCase();
+                    return isContentVisibleForStageAndStream(b, st, activeStream);
                   }).length;
 
                   const stageDecksCount = (examFlashcardDecks || []).filter((d: any) => {
-                    return !d.stage || d.stage === 'All Stages' || d.stage.toLowerCase() === st.toLowerCase();
+                    return isContentVisibleForStageAndStream(d, st, activeStream);
                   }).length;
 
                   const stageTestCount = stageMockCount + stageBanksCount + stageDecksCount;
@@ -10313,6 +10387,94 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                             : "bg-slate-200/80 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
                         )}>
                           {stageTestCount}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Executive Examination Academic Streams / Disciplines Segmented Bar */}
+        {currentExam?.streams && currentExam.streams.length > 0 && (
+          <div className="mb-6 sm:mb-8 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="p-2 sm:p-2.5 rounded-2xl bg-white/90 dark:bg-[#0B1528]/90 backdrop-blur-md border border-blue-200/80 dark:border-blue-900/40 shadow-sm">
+              <div className="flex items-center justify-between px-2 py-1.5 mb-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                  <span className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    Select Academic Stream / Branch
+                  </span>
+                </div>
+                <span className="text-[10px] font-bold text-blue-500 dark:text-blue-400 tracking-tight">
+                  {currentExam.streams.length} Streams Available
+                </span>
+              </div>
+
+              {/* Segmented Controller: Auto-scroll or grid */}
+              <div className={cn(
+                "p-1 rounded-xl bg-slate-100/90 dark:bg-[#060B16] border border-slate-200/60 dark:border-slate-800/80 relative",
+                currentExam.streams.length <= 3 
+                  ? "grid grid-flow-col auto-cols-fr gap-1.5" 
+                  : "flex items-center gap-1.5 overflow-x-auto no-scrollbar"
+              )}>
+                {currentExam.streams.map((str: string) => {
+                  const isSelected = activeStream === str;
+                  const streamMockCount = (mockTests || []).filter((mt: any) => {
+                    if (mt.is_archived && !hasAccessTo(mt.id, selectedExam)) return false;
+                    try {
+                      const cfg = typeof mt.seriesId === 'string' ? JSON.parse(mt.seriesId) : (mt.seriesId || {});
+                      if (cfg.examId !== selectedExam && mt.examId !== selectedExam) return false;
+                      return isContentVisibleForStageAndStream(mt, activeStage, str);
+                    } catch (e) {
+                      return mt.examId === selectedExam && isContentVisibleForStageAndStream(mt, activeStage, str);
+                    }
+                  }).length;
+
+                  const streamBanksCount = Object.values(dynamicQuestionBanks || {}).flat().filter((b: any) => {
+                    if (b.is_archived && !hasAccessTo(b.id, selectedExam)) return false;
+                    if (b.examId !== selectedExam) return false;
+                    return isContentVisibleForStageAndStream(b, activeStage, str);
+                  }).length;
+
+                  const streamDecksCount = (examFlashcardDecks || []).filter((d: any) => {
+                    return isContentVisibleForStageAndStream(d, activeStage, str);
+                  }).length;
+
+                  const streamTestCount = streamMockCount + streamBanksCount + streamDecksCount;
+
+                  return (
+                    <button
+                      key={str}
+                      type="button"
+                      onClick={() => handleStreamSelect(str)}
+                      className={cn(
+                        "relative flex-1 py-2 sm:py-2.5 px-3 rounded-lg text-xs sm:text-sm font-black transition-colors cursor-pointer flex items-center justify-center gap-2 z-10 select-none whitespace-nowrap",
+                        isSelected
+                          ? "text-blue-700 dark:text-white"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                      )}
+                    >
+                      {isSelected && (
+                        <motion.div
+                          layoutId="activeExamStreamSegment"
+                          className="absolute inset-0 bg-white dark:bg-blue-600 rounded-lg shadow-sm border border-blue-200/80 dark:border-blue-500/50 -z-10"
+                          transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                        />
+                      )}
+                      
+                      <span className="truncate">🎓 {str}</span>
+                      
+                      {streamTestCount > 0 && (
+                        <span className={cn(
+                          "text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full transition-colors shrink-0",
+                          isSelected
+                            ? "bg-blue-50 dark:bg-white/20 text-blue-700 dark:text-white border border-blue-200/60 dark:border-white/10"
+                            : "bg-slate-200/80 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                        )}>
+                          {streamTestCount}
                         </span>
                       )}
                     </button>
@@ -10470,13 +10632,11 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             const cfg = typeof mt.seriesId === 'string' ? JSON.parse(mt.seriesId) : (mt.seriesId || {});
             const matchesExam = cfg.examId === selectedExam || mt.examId === selectedExam;
             if (!matchesExam) return false;
-            if (activeStage && mt.stage && mt.stage !== 'All Stages' && mt.stage.toLowerCase() !== activeStage.toLowerCase()) return false;
-            return true;
+            return isContentVisibleForStageAndStream(mt, activeStage, activeStream);
           } catch(e) { 
             const matchesExam = mt.examId === selectedExam;
             if (!matchesExam) return false;
-            if (activeStage && mt.stage && mt.stage !== 'All Stages' && mt.stage.toLowerCase() !== activeStage.toLowerCase()) return false;
-            return true;
+            return isContentVisibleForStageAndStream(mt, activeStage, activeStream);
           }
         });
 
@@ -11101,7 +11261,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       if (b.examId !== selectedExam) return false;
                       const mode = b.target_mode || 'both';
                       if (mode === 'bank') return false;
-                      if (activeStage && b.stage && b.stage !== 'All Stages' && b.stage.toLowerCase() !== activeStage.toLowerCase()) return false;
+                      if (!isContentVisibleForStageAndStream(b, activeStage, activeStream)) return false;
                       return true;
                     }).length;
 
@@ -11262,7 +11422,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                       // target_mode filter: 'bank' items are ONLY for Step 1 PDF store, NOT Practice Mode
                       const mode = item.target_mode || 'both';
                       if (mode === 'bank') return false;
-                      if (activeStage && item.stage && item.stage !== 'All Stages' && item.stage.toLowerCase() !== activeStage.toLowerCase()) return false;
+                      if (!isContentVisibleForStageAndStream(item, activeStage, activeStream)) return false;
                       return true;
                     });
 
@@ -11420,7 +11580,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                     try {
                       const cfg = JSON.parse(mt.seriesId);
                       if (cfg.examId !== selectedExam || cfg.category !== test.id) return false;
-                      if (activeStage && mt.stage && mt.stage !== 'All Stages' && mt.stage.toLowerCase() !== activeStage.toLowerCase()) return false;
+                      if (!isContentVisibleForStageAndStream(mt, activeStage, activeStream)) return false;
                       return true;
                     } catch (e) {
                       return false;
@@ -11578,7 +11738,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                   try {
                     const cfg = JSON.parse(mt.seriesId);
                     if (cfg.examId !== selectedExam || cfg.category !== selectedMockCategory) return false;
-                    if (activeStage && mt.stage && mt.stage !== 'All Stages' && mt.stage.toLowerCase() !== activeStage.toLowerCase()) return false;
+                    if (!isContentVisibleForStageAndStream(mt, activeStage, activeStream)) return false;
                     return true;
                   } catch(e) { return false; }
                 });
@@ -11761,7 +11921,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
                 if (b.examId !== selectedExam) return false;
                 const mode = b.target_mode || 'both';
                 if (mode === 'practice') return false;
-                if (activeStage && b.stage && b.stage !== 'All Stages' && b.stage.toLowerCase() !== activeStage.toLowerCase()) return false;
+                if (!isContentVisibleForStageAndStream(b, activeStage, activeStream)) return false;
                 return true;
               }).length;
 
@@ -11871,7 +12031,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
             </div>
 
             <Link
-              to={`/flashcards?exam=${selectedExam}${activeStage ? `&stage=${encodeURIComponent(activeStage)}` : ''}`}
+              to={`/flashcards?exam=${selectedExam}${activeStage ? `&stage=${encodeURIComponent(activeStage)}` : ''}${activeStream ? `&stream=${encodeURIComponent(activeStream)}` : ''}`}
               className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800/80 hover:bg-purple-100 transition-all shrink-0"
             >
               View All Decks <ChevronRight className="w-3.5 h-3.5" />
@@ -11913,7 +12073,7 @@ const DashboardContent = ({ isGuest, onSignIn, mainTab = 'home', user, activitie
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto shrink-0">
                   <Link
-                    to={`/flashcards?exam=${selectedExam}${activeStage ? `&stage=${encodeURIComponent(activeStage)}` : ''}`}
+                    to={`/flashcards?exam=${selectedExam}${activeStage ? `&stage=${encodeURIComponent(activeStage)}` : ''}${activeStream ? `&stream=${encodeURIComponent(activeStream)}` : ''}`}
                     className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-xs font-black bg-purple-600 hover:bg-purple-700 text-white shadow-md shadow-purple-600/20 transition-all active:scale-95 cursor-pointer"
                   >
                     <Layers className="w-4 h-4" /> Explore Flashcards Hub <ChevronRight className="w-3.5 h-3.5" />
